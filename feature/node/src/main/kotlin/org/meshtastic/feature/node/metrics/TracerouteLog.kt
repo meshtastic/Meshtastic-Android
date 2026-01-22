@@ -42,7 +42,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -50,6 +49,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -97,6 +97,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshProtos
@@ -125,9 +126,7 @@ fun TracerouteLogScreen(
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(
-                        com.meshtastic.core.strings.getString(effect.resource, *effect.args.toTypedArray()),
-                    )
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
                 }
             }
         }
@@ -151,6 +150,7 @@ fun TracerouteLogScreen(
 
     Scaffold(
         topBar = {
+            val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsState()
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
                 ourNode = null,
@@ -159,7 +159,10 @@ fun TracerouteLogScreen(
                 onNavigateUp = onNavigateUp,
                 actions = {
                     if (!state.isLocal) {
-                        IconButton(onClick = { viewModel.requestTraceroute() }) {
+                        CooldownIconButton(
+                            onClick = { viewModel.requestTraceroute() },
+                            cooldownTimestamp = lastTracerouteTime,
+                        ) {
                             Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
                         }
                     }

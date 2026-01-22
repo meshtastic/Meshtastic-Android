@@ -17,8 +17,6 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,7 +31,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.StackedLineChart
-import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
@@ -48,14 +45,10 @@ import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.meshtastic.core.strings.getString
@@ -81,7 +74,7 @@ private data class TelemetricFeature(
     val logsType: LogsType? = null,
     val isVisible: (Node) -> Boolean = { true },
     val cooldownTimestamp: Long? = null,
-    val cooldownDuration: Long = 30_000L,
+    val cooldownDuration: Long = COOL_DOWN_TIME_MS,
 )
 
 @Composable
@@ -148,7 +141,7 @@ private fun rememberTelemetricFeatures(
             requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
             isVisible = { it.capabilities.canRequestNeighborInfo },
             cooldownTimestamp = lastRequestNeighborsTime,
-            cooldownDuration = 180_000L, // 3 minutes
+            cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
         ),
         TelemetricFeature(
             titleRes = LogsType.DEVICE.titleRes,
@@ -247,7 +240,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                 tooltip = { PlainTooltip { Text(requestDescription) } },
                 state = rememberTooltipState(),
             ) {
-                CooldownIconButton(
+                CooldownOutlinedIconButton(
                     onClick = {
                         val menuAction = feature.requestAction.invoke(node)
                         onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
@@ -262,56 +255,6 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                     )
                 }
             }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun CooldownIconButton(
-    onClick: () -> Unit,
-    cooldownTimestamp: Long?,
-    cooldownDuration: Long = 30_000L,
-    content: @Composable () -> Unit,
-) {
-    val progress = remember { Animatable(0f) }
-
-    LaunchedEffect(cooldownTimestamp) {
-        if (cooldownTimestamp == null) {
-            progress.snapTo(0f)
-            return@LaunchedEffect
-        }
-        val timeSinceLast = System.currentTimeMillis() - cooldownTimestamp
-        if (timeSinceLast < cooldownDuration) {
-            val remainingTime = cooldownDuration - timeSinceLast
-            progress.snapTo(remainingTime / cooldownDuration.toFloat())
-            progress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
-            )
-        } else {
-            progress.snapTo(0f)
-        }
-    }
-
-    val isCoolingDown = progress.value > 0f
-    val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
-
-    OutlinedIconButton(
-        onClick = { if (!isCoolingDown) onClick() },
-        enabled = !isCoolingDown,
-        shapes = IconButtonDefaults.shapes(),
-    ) {
-        if (isCoolingDown) {
-            CircularWavyProgressIndicator(
-                progress = { progress.value },
-                modifier = Modifier.size(24.dp),
-                stroke = stroke,
-                trackStroke = stroke,
-                wavelength = 8.dp,
-            )
-        } else {
-            content()
         }
     }
 }
