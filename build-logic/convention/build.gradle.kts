@@ -19,7 +19,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.android.lint)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
 }
