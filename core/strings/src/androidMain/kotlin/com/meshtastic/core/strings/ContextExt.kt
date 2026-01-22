@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.meshtastic.core.strings
 
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 
-fun getString(stringResource: StringResource): String = runBlocking {
-    org.jetbrains.compose.resources.getString(stringResource)
-}
+fun getString(stringResource: StringResource): String = runBlocking { getString(stringResource) }
 
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    org.jetbrains.compose.resources.getString(stringResource, *formatArgs)
+    val resolvedArgs =
+        formatArgs.map { arg ->
+            if (arg is StringResource) {
+                getString(arg)
+            } else {
+                arg
+            }
+        }
+    @Suppress("SpreadOperator")
+    getString(stringResource, *resolvedArgs.toTypedArray())
 }

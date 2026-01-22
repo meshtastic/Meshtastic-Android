@@ -42,12 +42,14 @@ import org.meshtastic.core.strings.request
 import org.meshtastic.core.strings.request_air_quality_metrics
 import org.meshtastic.core.strings.request_device_metrics
 import org.meshtastic.core.strings.request_environment_metrics
+import org.meshtastic.core.strings.request_host_metrics
 import org.meshtastic.core.strings.request_local_stats
+import org.meshtastic.core.strings.request_pax_metrics
 import org.meshtastic.core.strings.request_power_metrics
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 internal fun RemoteDeviceActions(
     node: Node,
     lastTracerouteTime: Long?,
@@ -69,32 +71,37 @@ internal fun RemoteDeviceActions(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             AssistChip(
-                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
+                onClick = {
+                    val action = NodeMenuAction.RequestUserInfo(node)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
+                },
                 label = { Text(stringResource(Res.string.exchange_userinfo)) },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             TracerouteChip(
                 lastTracerouteTime = lastTracerouteTime,
-                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
+                onClick = {
+                    val action = NodeMenuAction.TraceRoute(node)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
+                },
             )
 
             if (node.capabilities.canRequestNeighborInfo) {
                 RequestNeighborsChip(
                     lastRequestNeighborsTime = lastRequestNeighborsTime,
                     onClick = {
-                        onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestNeighborInfo(node)))
+                        val action = NodeMenuAction.RequestNeighborInfo(node)
+                        onAction(NodeDetailAction.HandleNodeMenuAction(action))
                     },
                 )
             }
 
             AssistChip(
                 onClick = {
-                    onAction(
-                        NodeDetailAction.HandleNodeMenuAction(
-                            NodeMenuAction.RequestTelemetry(node, TelemetryType.DEVICE),
-                        ),
-                    )
+                    val type = TelemetryType.DEVICE
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_device_metrics)) },
                 leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
@@ -102,11 +109,9 @@ internal fun RemoteDeviceActions(
 
             AssistChip(
                 onClick = {
-                    onAction(
-                        NodeDetailAction.HandleNodeMenuAction(
-                            NodeMenuAction.RequestTelemetry(node, TelemetryType.ENVIRONMENT),
-                        ),
-                    )
+                    val type = TelemetryType.ENVIRONMENT
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_environment_metrics)) },
                 leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
@@ -114,11 +119,9 @@ internal fun RemoteDeviceActions(
 
             AssistChip(
                 onClick = {
-                    onAction(
-                        NodeDetailAction.HandleNodeMenuAction(
-                            NodeMenuAction.RequestTelemetry(node, TelemetryType.AIR_QUALITY),
-                        ),
-                    )
+                    val type = TelemetryType.AIR_QUALITY
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_air_quality_metrics)) },
                 leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
@@ -126,11 +129,9 @@ internal fun RemoteDeviceActions(
 
             AssistChip(
                 onClick = {
-                    onAction(
-                        NodeDetailAction.HandleNodeMenuAction(
-                            NodeMenuAction.RequestTelemetry(node, TelemetryType.POWER),
-                        ),
-                    )
+                    val type = TelemetryType.POWER
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_power_metrics)) },
                 leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
@@ -138,13 +139,31 @@ internal fun RemoteDeviceActions(
 
             AssistChip(
                 onClick = {
-                    onAction(
-                        NodeDetailAction.HandleNodeMenuAction(
-                            NodeMenuAction.RequestTelemetry(node, TelemetryType.LOCAL_STATS),
-                        ),
-                    )
+                    val type = TelemetryType.LOCAL_STATS
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_local_stats)) },
+                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+            )
+
+            AssistChip(
+                onClick = {
+                    val type = TelemetryType.HOST
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
+                },
+                label = { Text(stringResource(Res.string.request_host_metrics)) },
+                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+            )
+
+            AssistChip(
+                onClick = {
+                    val type = TelemetryType.PAX
+                    val action = NodeMenuAction.RequestTelemetry(node, type)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(action))
+                },
+                label = { Text(stringResource(Res.string.request_pax_metrics)) },
                 leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
             )
         }

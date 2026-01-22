@@ -32,7 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import org.jetbrains.compose.resources.getString
+import com.meshtastic.core.strings.getString
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.Route

@@ -796,6 +796,8 @@
     <string name="request_air_quality_metrics">Air-Quality Metrics</string>
     <string name="request_power_metrics">Power Metrics</string>
     <string name="request_local_stats">Local Stats</string>
+    <string name="request_host_metrics">Host Metrics</string>
+    <string name="request_pax_metrics">Pax Metrics</string>
     <string name="request_metadata">Metadata</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>

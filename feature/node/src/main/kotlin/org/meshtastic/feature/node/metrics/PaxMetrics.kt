@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -34,10 +33,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,9 +59,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.ble_devices
@@ -66,6 +74,7 @@ import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
@@ -162,6 +171,19 @@ private fun PaxMetricsChart(
 @Suppress("MagicNumber", "LongMethod")
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        metricsViewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
+
     val dateFormat = DateFormat.getDateTimeInstance()
     var timeFrame by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
     // Only show logs that can be decoded as PaxcountProtos.Paxcount
@@ -204,10 +226,17 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
-                actions = {},
+                actions = {
+                    if (!state.isLocal) {
+                        IconButton(onClick = { metricsViewModel.requestTelemetry(TelemetryType.PAX) }) {
+                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                        }
+                    }
+                },
                 onClickChip = {},
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             // Time frame selector

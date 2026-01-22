@@ -36,7 +36,9 @@ import org.meshtastic.core.strings.position
 import org.meshtastic.core.strings.request_air_quality_metrics
 import org.meshtastic.core.strings.request_device_metrics
 import org.meshtastic.core.strings.request_environment_metrics
+import org.meshtastic.core.strings.request_host_metrics
 import org.meshtastic.core.strings.request_local_stats
+import org.meshtastic.core.strings.request_pax_metrics
 import org.meshtastic.core.strings.request_power_metrics
 import org.meshtastic.core.strings.requesting_from
 import org.meshtastic.core.strings.traceroute
@@ -126,6 +128,8 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
                         TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
                         TelemetryType.POWER -> Res.string.request_power_metrics
                         TelemetryType.LOCAL_STATS -> Res.string.request_local_stats
+                        TelemetryType.HOST -> Res.string.request_host_metrics
+                        TelemetryType.PAX -> Res.string.request_pax_metrics
                     }
 
                 _effects.emit(NodeRequestEffect.ShowFeedback(Res.string.requesting_from, listOf(typeRes, longName)))

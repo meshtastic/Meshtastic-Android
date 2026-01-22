@@ -26,6 +26,7 @@ import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
@@ -47,6 +48,7 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.navigation.NodesRoutes
@@ -55,7 +57,10 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
 import org.meshtastic.core.ui.util.toPosition
+import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.feature.node.detail.NodeRequestActions
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.ConfigProtos.Config
@@ -90,6 +95,7 @@ constructor(
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
+    private val nodeRequestActions: NodeRequestActions,
 ) : ViewModel() {
     private var destNum: Int? =
         runCatching { savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum }.getOrNull()
@@ -195,13 +201,39 @@ constructor(
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
+    val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
+
+    val lastTraceRouteTime: StateFlow<Long?> =
+        nodeRequestActions.lastTracerouteTimes.map { it[destNum] }.stateInWhileSubscribed(null)
+
+    val lastRequestNeighborsTime: StateFlow<Long?> =
+        nodeRequestActions.lastRequestNeighborTimes.map { it[destNum] }.stateInWhileSubscribed(null)
+
+    fun requestUserInfo() {
+        destNum?.let { nodeRequestActions.requestUserInfo(it, state.value.node?.user?.longName ?: "") }
+    }
+
+    fun requestPosition() {
+        destNum?.let { nodeRequestActions.requestPosition(it, state.value.node?.user?.longName ?: "") }
+    }
+
+    fun requestTelemetry(type: TelemetryType) {
+        destNum?.let { nodeRequestActions.requestTelemetry(it, state.value.node?.user?.longName ?: "", type) }
+    }
+
+    fun requestTraceroute() {
+        destNum?.let { nodeRequestActions.requestTraceroute(it, state.value.node?.user?.longName ?: "") }
+    }
+
     init {
+        nodeRequestActions.start(viewModelScope)
         initializeFlows()
     }
 
     fun setNodeId(id: Int) {
         if (destNum != id) {
             destNum = id
+            nodeRequestActions.start(viewModelScope)
             initializeFlows()
         }
     }
