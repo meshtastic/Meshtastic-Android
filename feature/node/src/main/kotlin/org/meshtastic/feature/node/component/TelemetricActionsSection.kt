@@ -28,11 +28,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -232,7 +232,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                     },
                 ) {
                     Icon(
-                        Icons.Filled.AreaChart,
+                        Icons.Default.StackedLineChart,
                         contentDescription = logsDescription,
                         modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
                         tint = MaterialTheme.colorScheme.primary,
