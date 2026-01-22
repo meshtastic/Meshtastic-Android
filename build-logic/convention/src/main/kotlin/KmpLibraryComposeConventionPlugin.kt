@@ -33,9 +33,9 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
 
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.getByName("commonMain").dependencies {
-                    implementation("org.jetbrains.compose.runtime:runtime:${libs.findVersion("compose-multiplatform").get()}")
+                    implementation(libs.findLibrary("compose-multiplatform-runtime").get())
                     // API because consuming modules will usually need the resource types
-                    api("org.jetbrains.compose.components:components-resources:${libs.findVersion("compose-multiplatform").get()}")
+                    api(libs.findLibrary("compose-multiplatform-resources").get())
                 }
             }
 
