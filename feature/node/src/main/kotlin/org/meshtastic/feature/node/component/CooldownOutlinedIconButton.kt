@@ -25,6 +25,7 @@ import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -71,7 +72,11 @@ fun CooldownIconButton(
     val isCoolingDown = progress.value > 0f
     val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
 
-    IconButton(onClick = { if (!isCoolingDown) onClick() }, enabled = !isCoolingDown) {
+    IconButton(
+        onClick = { if (!isCoolingDown) onClick() },
+        enabled = !isCoolingDown,
+        colors = IconButtonDefaults.iconButtonColors(),
+    ) {
         if (isCoolingDown) {
             CircularWavyProgressIndicator(
                 progress = { progress.value },
@@ -117,7 +122,12 @@ fun CooldownOutlinedIconButton(
     val isCoolingDown = progress.value > 0f
     val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
 
-    OutlinedIconButton(onClick = { if (!isCoolingDown) onClick() }, enabled = !isCoolingDown) {
+    OutlinedIconButton(
+        onClick = { if (!isCoolingDown) onClick() },
+        enabled = !isCoolingDown,
+        shapes = IconButtonDefaults.shapes(),
+        colors = IconButtonDefaults.outlinedIconButtonColors(),
+    ) {
         if (isCoolingDown) {
             CircularWavyProgressIndicator(
                 progress = { progress.value },

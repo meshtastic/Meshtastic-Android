@@ -33,11 +33,11 @@ import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipAnchorPosition
@@ -218,8 +218,9 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                 tooltip = { PlainTooltip { Text(logsDescription) } },
                 state = rememberTooltipState(),
             ) {
-                OutlinedIconButton(
+                FilledTonalIconButton(
                     shapes = IconButtonDefaults.shapes(),
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(),
                     onClick = {
                         feature.logsType?.let { onAction(NodeDetailAction.Navigate(it.routeFactory(node.num))) }
                     },
