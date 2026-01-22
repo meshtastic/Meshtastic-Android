@@ -37,7 +37,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.exchange_userinfo
 import org.meshtastic.core.strings.request
 import org.meshtastic.core.strings.request_air_quality_metrics
 import org.meshtastic.core.strings.request_device_metrics
@@ -46,6 +45,7 @@ import org.meshtastic.core.strings.request_host_metrics
 import org.meshtastic.core.strings.request_local_stats
 import org.meshtastic.core.strings.request_pax_metrics
 import org.meshtastic.core.strings.request_power_metrics
+import org.meshtastic.core.strings.userinfo
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 @Composable
@@ -75,7 +75,7 @@ internal fun RemoteDeviceActions(
                     val action = NodeMenuAction.RequestUserInfo(node)
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
-                label = { Text(stringResource(Res.string.exchange_userinfo)) },
+                label = { Text(stringResource(Res.string.userinfo)) },
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null, Modifier.size(18.dp)) },
             )
 
