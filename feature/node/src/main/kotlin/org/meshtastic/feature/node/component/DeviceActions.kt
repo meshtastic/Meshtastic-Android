@@ -66,6 +66,7 @@ import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
@@ -83,6 +84,7 @@ fun DeviceActions(
     lastRequestNeighborsTime: Long?,
     availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
+    metricsState: MetricsState,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
@@ -101,38 +103,48 @@ fun DeviceActions(
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
 
-    ElevatedCard(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MaterialTheme.shapes.extraLarge,
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Column(modifier = Modifier.padding(vertical = 12.dp)) {
-            ActionsHeader()
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            shape = MaterialTheme.shapes.extraLarge,
+        ) {
+            Column(modifier = Modifier.padding(vertical = 12.dp)) {
+                ActionsHeader()
 
-            PrimaryActionsRow(
-                node = node,
-                isLocal = isLocal,
-                onAction = onAction,
-                onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
-            )
+                PrimaryActionsRow(
+                    node = node,
+                    isLocal = isLocal,
+                    onAction = onAction,
+                    onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
+                )
+                ActionsDivider()
+                ManagementActions(
+                    node = node,
+                    onIgnoreClick = { displayedDialog = DialogType.IGNORE },
+                    onMuteClick = { displayedDialog = DialogType.MUTE },
+                    onRemoveClick = { displayedDialog = DialogType.REMOVE },
+                )
+            }
+        }
 
+        ElevatedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+            shape = MaterialTheme.shapes.extraLarge,
+        ) {
             TelemetricActionsSection(
                 node = node,
                 availableLogs = availableLogs,
                 lastTracerouteTime = lastTracerouteTime,
                 lastRequestNeighborsTime = lastRequestNeighborsTime,
+                metricsState = metricsState,
                 onAction = onAction,
             )
         }
-
-        ActionsDivider()
-
-        ManagementActions(
-            node = node,
-            onIgnoreClick = { displayedDialog = DialogType.IGNORE },
-            onMuteClick = { displayedDialog = DialogType.MUTE },
-            onRemoveClick = { displayedDialog = DialogType.REMOVE },
-        )
     }
 }
 

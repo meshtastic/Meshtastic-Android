@@ -58,7 +58,6 @@ import org.meshtastic.feature.node.component.CompassSheetContent
 import org.meshtastic.feature.node.component.DeviceActions
 import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
-import org.meshtastic.feature.node.component.MetricsSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
@@ -165,6 +164,7 @@ fun NodeDetailList(
             node = node,
             availableLogs = availableLogs,
             onAction = onAction,
+            metricsState = metricsState,
         )
 
         PositionSection(
@@ -188,8 +188,6 @@ fun NodeDetailList(
         if (metricsState.deviceHardware != null) {
             DeviceDetailsSection(metricsState)
         }
-
-        MetricsSection(node, metricsState)
 
         NotesSection(node = node, onSaveNotes = onSaveNotes)
 

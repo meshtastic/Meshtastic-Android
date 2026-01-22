@@ -65,6 +65,7 @@ import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.core.strings.userinfo
 import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 private data class TelemetricFeature(
@@ -75,6 +76,8 @@ private data class TelemetricFeature(
     val isVisible: (Node) -> Boolean = { true },
     val cooldownTimestamp: Long? = null,
     val cooldownDuration: Long = COOL_DOWN_TIME_MS,
+    val content: @Composable ((Node) -> Unit)? = null,
+    val hasContent: (Node) -> Boolean = { false },
 )
 
 @Composable
@@ -83,17 +86,19 @@ internal fun TelemetricActionsSection(
     availableLogs: Set<LogsType>,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
+    metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
 ) {
-    val features = rememberTelemetricFeatures(node, lastTracerouteTime, lastRequestNeighborsTime)
+    val features =
+        rememberTelemetricFeatures(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState)
 
-    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+    Column(modifier = Modifier.padding(vertical = 12.dp)) {
         Text(
             text = stringResource(Res.string.telemetry),
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.secondary,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
         )
 
         features
@@ -121,140 +126,173 @@ private fun rememberTelemetricFeatures(
     node: Node,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
-): List<TelemetricFeature> = remember(node, lastTracerouteTime, lastRequestNeighborsTime) {
-    listOf(
-        TelemetricFeature(
-            titleRes = Res.string.userinfo,
-            icon = Icons.Default.Person,
-            requestAction = { NodeMenuAction.RequestUserInfo(it) },
-        ),
-        TelemetricFeature(
-            titleRes = LogsType.TRACEROUTE.titleRes,
-            icon = LogsType.TRACEROUTE.icon,
-            requestAction = { NodeMenuAction.TraceRoute(it) },
-            logsType = LogsType.TRACEROUTE,
-            cooldownTimestamp = lastTracerouteTime,
-        ),
-        TelemetricFeature(
-            titleRes = Res.string.neighbor_info,
-            icon = Icons.Default.Groups,
-            requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
-            isVisible = { it.capabilities.canRequestNeighborInfo },
-            cooldownTimestamp = lastRequestNeighborsTime,
-            cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
-        ),
-        TelemetricFeature(
-            titleRes = LogsType.DEVICE.titleRes,
-            icon = LogsType.DEVICE.icon,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
-            logsType = LogsType.DEVICE,
-        ),
-        TelemetricFeature(
-            titleRes = LogsType.ENVIRONMENT.titleRes,
-            icon = LogsType.ENVIRONMENT.icon,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
-            logsType = LogsType.ENVIRONMENT,
-        ),
-        TelemetricFeature(
-            titleRes = Res.string.request_air_quality_metrics,
-            icon = Icons.Default.Air,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
-        ),
-        TelemetricFeature(
-            titleRes = LogsType.POWER.titleRes,
-            icon = LogsType.POWER.icon,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.POWER) },
-            logsType = LogsType.POWER,
-        ),
-        TelemetricFeature(
-            titleRes = Res.string.request_local_stats,
-            icon = Icons.Default.Speed,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
-        ),
-        TelemetricFeature(
-            titleRes = LogsType.HOST.titleRes,
-            icon = LogsType.HOST.icon,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.HOST) },
-            logsType = LogsType.HOST,
-        ),
-        TelemetricFeature(
-            titleRes = LogsType.PAX.titleRes,
-            icon = LogsType.PAX.icon,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
-            logsType = LogsType.PAX,
-        ),
-    )
-}
+    metricsState: MetricsState,
+): List<TelemetricFeature> =
+    remember(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState) {
+        listOf(
+            TelemetricFeature(
+                titleRes = Res.string.userinfo,
+                icon = Icons.Default.Person,
+                requestAction = { NodeMenuAction.RequestUserInfo(it) },
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.TRACEROUTE.titleRes,
+                icon = LogsType.TRACEROUTE.icon,
+                requestAction = { NodeMenuAction.TraceRoute(it) },
+                logsType = LogsType.TRACEROUTE,
+                cooldownTimestamp = lastTracerouteTime,
+            ),
+            TelemetricFeature(
+                titleRes = Res.string.neighbor_info,
+                icon = Icons.Default.Groups,
+                requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
+                isVisible = { it.capabilities.canRequestNeighborInfo },
+                cooldownTimestamp = lastRequestNeighborsTime,
+                cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.DEVICE.titleRes,
+                icon = LogsType.DEVICE.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
+                logsType = LogsType.DEVICE,
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.ENVIRONMENT.titleRes,
+                icon = LogsType.ENVIRONMENT.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
+                logsType = LogsType.ENVIRONMENT,
+                content = {
+                    EnvironmentMetrics(it, metricsState.displayUnits, metricsState.isFahrenheit)
+                },
+                hasContent = { it.hasEnvironmentMetrics },
+            ),
+            TelemetricFeature(
+                titleRes = Res.string.request_air_quality_metrics,
+                icon = Icons.Default.Air,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.POWER.titleRes,
+                icon = LogsType.POWER.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.POWER) },
+                logsType = LogsType.POWER,
+                content = { PowerMetrics(it) },
+                hasContent = { it.hasPowerMetrics },
+            ),
+            TelemetricFeature(
+                titleRes = Res.string.request_local_stats,
+                icon = Icons.Default.Speed,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.HOST.titleRes,
+                icon = LogsType.HOST.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.HOST) },
+                logsType = LogsType.HOST,
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.PAX.titleRes,
+                icon = LogsType.PAX.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
+                logsType = LogsType.PAX,
+            ),
+        )
+    }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
-private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean, onAction: (NodeDetailAction) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            imageVector = feature.icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(end = 16.dp),
-        )
+private fun FeatureRow(
+    node: Node,
+    feature: TelemetricFeature,
+    hasLogs: Boolean,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    val showContent = feature.content != null && feature.hasContent(node)
 
-        Text(
-            text = stringResource(feature.titleRes),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f),
-        )
+    Column {
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = feature.icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(end = 16.dp),
+            )
 
-        val description = getString(feature.titleRes)
-        val logsDescription = description + " " + getString(Res.string.logs)
-        val requestDescription = description + " " + getString(Res.string.request_telemetry)
+            Text(
+                text = stringResource(feature.titleRes),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+            )
 
-        AnimatedVisibility(visible = hasLogs) {
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                tooltip = { PlainTooltip { Text(logsDescription) } },
-                state = rememberTooltipState(),
-            ) {
-                FilledTonalIconButton(
-                    shapes = IconButtonDefaults.shapes(),
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(),
-                    onClick = {
-                        feature.logsType?.let { onAction(NodeDetailAction.Navigate(it.routeFactory(node.num))) }
-                    },
+            val description = getString(feature.titleRes)
+            val logsDescription = description + " " + getString(Res.string.logs)
+            val requestDescription = description + " " + getString(Res.string.request_telemetry)
+
+            AnimatedVisibility(visible = hasLogs) {
+                TooltipBox(
+                    positionProvider =
+                        TooltipDefaults.rememberTooltipPositionProvider(
+                            TooltipAnchorPosition.Above,
+                        ),
+                    tooltip = { PlainTooltip { Text(logsDescription) } },
+                    state = rememberTooltipState(),
                 ) {
-                    Icon(
-                        Icons.Default.StackedLineChart,
-                        contentDescription = logsDescription,
-                        modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
+                    FilledTonalIconButton(
+                        shapes = IconButtonDefaults.shapes(),
+                        colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                        onClick = {
+                            feature.logsType?.let {
+                                onAction(NodeDetailAction.Navigate(it.routeFactory(node.num)))
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Default.StackedLineChart,
+                            contentDescription = logsDescription,
+                            modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            if (feature.requestAction != null) {
+                TooltipBox(
+                    positionProvider =
+                        TooltipDefaults.rememberTooltipPositionProvider(
+                            TooltipAnchorPosition.Above,
+                        ),
+                    tooltip = { PlainTooltip { Text(requestDescription) } },
+                    state = rememberTooltipState(),
+                ) {
+                    CooldownOutlinedIconButton(
+                        onClick = {
+                            val menuAction = feature.requestAction.invoke(node)
+                            onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
+                        },
+                        cooldownTimestamp = feature.cooldownTimestamp,
+                        cooldownDuration = feature.cooldownDuration,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = requestDescription,
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
-            Spacer(modifier = Modifier.width(8.dp))
         }
-        if (feature.requestAction != null) {
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                tooltip = { PlainTooltip { Text(requestDescription) } },
-                state = rememberTooltipState(),
-            ) {
-                CooldownOutlinedIconButton(
-                    onClick = {
-                        val menuAction = feature.requestAction.invoke(node)
-                        onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
-                    },
-                    cooldownTimestamp = feature.cooldownTimestamp,
-                    cooldownDuration = feature.cooldownDuration,
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = requestDescription,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                }
+
+        if (showContent) {
+            Column(modifier = Modifier.padding(start = 56.dp, end = 20.dp, bottom = 8.dp)) {
+                feature.content?.invoke(node)
             }
         }
     }
