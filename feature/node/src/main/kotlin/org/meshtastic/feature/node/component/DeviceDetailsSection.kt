@@ -51,7 +51,6 @@ import org.meshtastic.core.strings.device
 import org.meshtastic.core.strings.hardware
 import org.meshtastic.core.strings.supported
 import org.meshtastic.core.strings.supported_by_community
-import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -73,7 +72,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InsetDivider()
+                SectionDivider()
                 val deviceText =
                     state.reportedTarget?.let { target -> "${deviceHardware.displayName} ($target)" }
                         ?: deviceHardware.displayName
@@ -85,7 +84,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
                     trailingIcon = null,
                 )
 
-                InsetDivider()
+                SectionDivider()
 
                 SupportStatusItem(deviceHardware.activelySupported)
             }

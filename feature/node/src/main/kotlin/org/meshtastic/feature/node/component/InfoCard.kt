@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,9 +46,13 @@ fun InfoCard(
     modifier: Modifier = Modifier,
     rotateIcon: Float = 0f,
 ) {
-    Card(modifier = modifier, shape = MaterialTheme.shapes.small) {
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
         Row(
-            modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -55,19 +60,29 @@ fun InfoCard(
                 Icon(
                     imageVector = icon,
                     contentDescription = text,
-                    modifier = Modifier.size(24.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
                 )
             }
             iconRes?.let {
                 Icon(
                     painter = painterResource(id = iconRes),
                     contentDescription = text,
-                    modifier = Modifier.size(24.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
                 )
             }
             Column {
-                Text(text = text, style = MaterialTheme.typography.labelSmall)
-                Text(text = value, style = MaterialTheme.typography.labelLargeEmphasized)
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.labelLargeEmphasized,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }

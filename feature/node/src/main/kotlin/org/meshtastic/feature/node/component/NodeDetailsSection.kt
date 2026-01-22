@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -106,7 +105,7 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 
 @Composable
 private fun MainNodeDetails(node: Node) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(modifier = Modifier.fillMaxWidth()) {
             InfoItem(
                 label = stringResource(Res.string.short_name),
@@ -122,10 +121,7 @@ private fun MainNodeDetails(node: Node) {
             )
         }
 
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        )
+        SectionDivider()
 
         Row(modifier = Modifier.fillMaxWidth()) {
             InfoItem(
@@ -142,10 +138,7 @@ private fun MainNodeDetails(node: Node) {
             )
         }
 
-        HorizontalDivider(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-        )
+        SectionDivider()
 
         Row(modifier = Modifier.fillMaxWidth()) {
             InfoItem(

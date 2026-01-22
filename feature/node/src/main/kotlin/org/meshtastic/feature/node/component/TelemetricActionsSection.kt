@@ -20,7 +20,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,9 +33,10 @@ import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -48,7 +48,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.StringResource
@@ -95,10 +97,7 @@ internal fun TelemetricActionsSection(
             .filter { it.isVisible(node) }
             .forEachIndexed { index, feature ->
                 if (index > 0) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-                    )
+                    SectionDivider()
                 }
                 FeatureRow(
                     node = node,
@@ -147,7 +146,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = LogsType.ENVIRONMENT.titleRes,
-            icon = LogsType.ENVIRONMENT.icon,
+            icon = Icons.Default.Air,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
             logsType = LogsType.ENVIRONMENT,
             content = { EnvironmentMetrics(it, metricsState.displayUnits, metricsState.isFahrenheit) },
@@ -191,79 +190,82 @@ private fun rememberTelemetricFeatures(
 @Composable
 private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean, onAction: (NodeDetailAction) -> Unit) {
     val showContent = feature.content != null && feature.hasContent(node)
+    val description = getString(feature.titleRes)
+    val logsDescription = description + " " + getString(Res.string.logs)
+    val requestDescription = description + " " + getString(Res.string.request_telemetry)
 
     Column {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = feature.icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 16.dp),
-            )
+        ListItem(
+            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+            leadingContent = {
+                Icon(imageVector = feature.icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            },
+            headlineContent = {
+                Text(
+                    text = stringResource(feature.titleRes),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            },
+            trailingContent = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AnimatedVisibility(visible = hasLogs) {
+                        TooltipBox(
+                            positionProvider =
+                            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                            tooltip = { PlainTooltip { Text(logsDescription) } },
+                            state = rememberTooltipState(),
+                        ) {
+                            FilledTonalIconButton(
+                                shapes = IconButtonDefaults.shapes(),
+                                colors = IconButtonDefaults.filledTonalIconButtonColors(),
+                                onClick = {
+                                    feature.logsType?.let {
+                                        onAction(NodeDetailAction.Navigate(it.routeFactory(node.num)))
+                                    }
+                                },
+                            ) {
+                                Icon(
+                                    Icons.Default.StackedLineChart,
+                                    contentDescription = logsDescription,
+                                    modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
 
-            Text(
-                text = stringResource(feature.titleRes),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.weight(1f),
-            )
-
-            val description = getString(feature.titleRes)
-            val logsDescription = description + " " + getString(Res.string.logs)
-            val requestDescription = description + " " + getString(Res.string.request_telemetry)
-
-            AnimatedVisibility(visible = hasLogs) {
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = { PlainTooltip { Text(logsDescription) } },
-                    state = rememberTooltipState(),
-                ) {
-                    FilledTonalIconButton(
-                        shapes = IconButtonDefaults.shapes(),
-                        colors = IconButtonDefaults.filledTonalIconButtonColors(),
-                        onClick = {
-                            feature.logsType?.let { onAction(NodeDetailAction.Navigate(it.routeFactory(node.num))) }
-                        },
-                    ) {
-                        Icon(
-                            Icons.Default.StackedLineChart,
-                            contentDescription = logsDescription,
-                            modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
+                    if (feature.requestAction != null) {
+                        if (hasLogs) Spacer(modifier = Modifier.width(8.dp))
+                        TooltipBox(
+                            positionProvider =
+                            TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                            tooltip = { PlainTooltip { Text(requestDescription) } },
+                            state = rememberTooltipState(),
+                        ) {
+                            CooldownOutlinedIconButton(
+                                onClick = {
+                                    val menuAction = feature.requestAction.invoke(node)
+                                    onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
+                                },
+                                cooldownTimestamp = feature.cooldownTimestamp,
+                                cooldownDuration = feature.cooldownDuration,
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = requestDescription,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            if (feature.requestAction != null) {
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
-                    tooltip = { PlainTooltip { Text(requestDescription) } },
-                    state = rememberTooltipState(),
-                ) {
-                    CooldownOutlinedIconButton(
-                        onClick = {
-                            val menuAction = feature.requestAction.invoke(node)
-                            onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
-                        },
-                        cooldownTimestamp = feature.cooldownTimestamp,
-                        cooldownDuration = feature.cooldownDuration,
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = requestDescription,
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-            }
-        }
+            },
+        )
 
         if (showContent) {
-            Column(modifier = Modifier.padding(start = 56.dp, end = 20.dp, bottom = 8.dp)) {
+            Column(modifier = Modifier.padding(start = 56.dp, end = 20.dp, bottom = 12.dp)) {
                 feature.content?.invoke(node)
             }
         }
