@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.node.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
@@ -27,18 +28,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.AreaChart
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -50,14 +58,17 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.request_air_quality_metrics
 import org.meshtastic.core.strings.request_local_stats
+import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.core.strings.userinfo
 import org.meshtastic.feature.node.model.LogsType
@@ -182,6 +193,8 @@ private fun rememberTelemetricFeatures(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@Suppress("LongMethod")
 @Composable
 private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean, onAction: (NodeDetailAction) -> Unit) {
     Row(
@@ -202,34 +215,53 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
             modifier = Modifier.weight(1f),
         )
 
-        if (feature.requestAction != null) {
-            CooldownIconButton(
-                onClick = {
-                    val menuAction = feature.requestAction.invoke(node)
-                    onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
-                },
-                cooldownTimestamp = feature.cooldownTimestamp,
-                cooldownDuration = feature.cooldownDuration,
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(feature.titleRes),
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-            }
-        } else {
-            Spacer(modifier = Modifier.width(48.dp))
-        }
+        val description = getString(feature.titleRes)
+        val logsDescription = description + " " + getString(Res.string.logs)
+        val requestDescription = description + " " + getString(Res.string.request_telemetry)
 
-        IconButton(
-            onClick = { feature.logsType?.let { onAction(NodeDetailAction.Navigate(it.routeFactory(node.num))) } },
-            enabled = hasLogs,
-        ) {
-            Icon(
-                imageVector = Icons.Default.History,
-                contentDescription = stringResource(feature.titleRes),
-                tint = if (hasLogs) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
-            )
+        AnimatedVisibility(visible = hasLogs) {
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { PlainTooltip { Text(logsDescription) } },
+                state = rememberTooltipState(),
+            ) {
+                OutlinedIconButton(
+                    shapes = IconButtonDefaults.shapes(),
+                    onClick = {
+                        feature.logsType?.let { onAction(NodeDetailAction.Navigate(it.routeFactory(node.num))) }
+                    },
+                ) {
+                    Icon(
+                        Icons.Filled.AreaChart,
+                        contentDescription = logsDescription,
+                        modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        if (feature.requestAction != null) {
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
+                tooltip = { PlainTooltip { Text(requestDescription) } },
+                state = rememberTooltipState(),
+            ) {
+                CooldownIconButton(
+                    onClick = {
+                        val menuAction = feature.requestAction.invoke(node)
+                        onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
+                    },
+                    cooldownTimestamp = feature.cooldownTimestamp,
+                    cooldownDuration = feature.cooldownDuration,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = requestDescription,
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
         }
     }
 }
@@ -265,7 +297,11 @@ private fun CooldownIconButton(
     val isCoolingDown = progress.value > 0f
     val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
 
-    IconButton(onClick = { if (!isCoolingDown) onClick() }, enabled = !isCoolingDown) {
+    OutlinedIconButton(
+        onClick = { if (!isCoolingDown) onClick() },
+        enabled = !isCoolingDown,
+        shapes = IconButtonDefaults.shapes(),
+    ) {
         if (isCoolingDown) {
             CircularWavyProgressIndicator(
                 progress = { progress.value },
