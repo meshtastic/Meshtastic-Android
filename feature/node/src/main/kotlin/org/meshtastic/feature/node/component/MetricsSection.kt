@@ -37,10 +37,7 @@ import org.meshtastic.core.strings.power
 import org.meshtastic.feature.node.model.MetricsState
 
 @Composable
-fun MetricsSection(
-    node: Node,
-    metricsState: MetricsState,
-) {
+fun MetricsSection(node: Node, metricsState: MetricsState) {
     if (node.hasEnvironmentMetrics) {
         EnvironmentCard(node, metricsState)
     }
