@@ -20,7 +20,9 @@ import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 
-fun getString(stringResource: StringResource): String = runBlocking { getString(stringResource) }
+fun getString(stringResource: StringResource): String = runBlocking {
+    org.jetbrains.compose.resources.getString(stringResource)
+}
 
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
     val resolvedArgs =
@@ -32,5 +34,5 @@ fun getString(stringResource: StringResource, vararg formatArgs: Any): String = 
             }
         }
     @Suppress("SpreadOperator")
-    getString(stringResource, *resolvedArgs.toTypedArray())
+    org.jetbrains.compose.resources.getString(stringResource, *resolvedArgs.toTypedArray())
 }
