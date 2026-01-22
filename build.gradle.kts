@@ -15,12 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.android.tools.build:gradle:8.1.2")
+        classpath("com.google.dagger:hilt-android-gradle-plugin:2.58")
+    }
+}
 
 plugins {
-    alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.android.kotlin.multiplatform.library) apply false
-    alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     alias(libs.plugins.datadog) apply false
     alias(libs.plugins.devtools.ksp) apply false
@@ -40,7 +46,8 @@ plugins {
     alias(libs.plugins.kover)
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
-    alias(libs.plugins.meshtastic.root)
+    // Meshtastic root plugin is a convention plugin from build-logic
+    id("meshtastic.root")
 }
 
 

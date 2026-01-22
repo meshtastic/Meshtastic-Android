@@ -19,7 +19,6 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     `kotlin-dsl`
-    alias(libs.plugins.android.lint)
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
 }
@@ -119,10 +118,6 @@ gradlePlugin {
         register("androidLibrary") {
             id = "meshtastic.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
-        }
-        register("androidLint") {
-            id = "meshtastic.android.lint"
-            implementationClass = "AndroidLintConventionPlugin"
         }
         register("androidLibraryCompose") {
             id = "meshtastic.android.library.compose"
