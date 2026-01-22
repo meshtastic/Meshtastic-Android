@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "8.1.2"
+agp = "9.0.0"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -16,8 +16,7 @@ paging = "3.3.6"
 room = "2.8.4"
 
 # Kotlin
-kotlin = "1.9.25"
-compose-compiler = "1.5.14"
+kotlin = "2.3.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
 ktlint = "1.7.1"
@@ -39,7 +38,7 @@ aboutlibraries = "13.2.1"
 coil = "3.3.0"
 dd-sdk-android = "3.5.0"
 detekt = "1.23.8"
-devtools-ksp = "1.9.25-1.0.20"
+devtools-ksp = "2.3.4"
 markdownRenderer = "0.39.1"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
@@ -183,8 +182,7 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
-# compose-gradlePlugin doesn't exist for Kotlin 1.9.x (only available in Kotlin 2.0+)
-# compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.22.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.3" }
@@ -203,10 +201,10 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
+android-lint = { id = "com.android.lint", version.ref = "agp" }
 
 # Jetbrains
-# compose-compiler plugin doesn't exist for Kotlin 1.9.x (only available in Kotlin 2.0+)
-# compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version = "1.10.0" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
@@ -242,6 +240,7 @@ meshtastic-android-application-compose = { id = "meshtastic.android.application.
 meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
 meshtastic-android-library = { id = "meshtastic.android.library" }
 meshtastic-android-library-compose = { id = "meshtastic.android.library.compose" }
+meshtastic-android-lint = { id = "meshtastic.android.lint" }
 meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
