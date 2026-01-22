@@ -23,8 +23,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AreaChart
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -104,7 +110,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_device_metrics)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Router, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             AssistChip(
@@ -114,7 +120,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_environment_metrics)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Thermostat, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             AssistChip(
@@ -124,7 +130,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_air_quality_metrics)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Air, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             AssistChip(
@@ -134,7 +140,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_power_metrics)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Bolt, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             AssistChip(
@@ -144,7 +150,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_local_stats)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Speed, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             AssistChip(
@@ -154,7 +160,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_host_metrics)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Memory, contentDescription = null, Modifier.size(18.dp)) },
             )
 
             AssistChip(
@@ -164,7 +170,7 @@ internal fun RemoteDeviceActions(
                     onAction(NodeDetailAction.HandleNodeMenuAction(action))
                 },
                 label = { Text(stringResource(Res.string.request_pax_metrics)) },
-                leadingIcon = { Icon(Icons.Default.AreaChart, contentDescription = null, Modifier.size(18.dp)) },
+                leadingIcon = { Icon(Icons.Default.Groups, contentDescription = null, Modifier.size(18.dp)) },
             )
         }
     }
