@@ -52,7 +52,6 @@ sealed class NodeRequestEffect {
 
 @Singleton
 class NodeRequestActions @Inject constructor(private val serviceRepository: ServiceRepository) {
-    private var scope: CoroutineScope? = null
 
     private val _effects = MutableSharedFlow<NodeRequestEffect>()
     val effects: SharedFlow<NodeRequestEffect> = _effects.asSharedFlow()
@@ -63,12 +62,8 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
     private val _lastRequestNeighborTimes = MutableStateFlow<Map<Int, Long>>(emptyMap())
     val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
 
-    fun start(coroutineScope: CoroutineScope) {
-        scope = coroutineScope
-    }
-
-    fun requestUserInfo(destNum: Int, longName: String) {
-        scope?.launch(Dispatchers.IO) {
+    fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
+        scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting UserInfo for '$destNum'" }
             try {
                 serviceRepository.meshService?.requestUserInfo(destNum)
@@ -81,8 +76,8 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
         }
     }
 
-    fun requestNeighborInfo(destNum: Int, longName: String) {
-        scope?.launch(Dispatchers.IO) {
+    fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String) {
+        scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting NeighborInfo for '$destNum'" }
             try {
                 val packetId = serviceRepository.meshService?.packetId ?: return@launch
@@ -100,8 +95,13 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
         }
     }
 
-    fun requestPosition(destNum: Int, longName: String, position: Position = Position(0.0, 0.0, 0)) {
-        scope?.launch(Dispatchers.IO) {
+    fun requestPosition(
+        scope: CoroutineScope,
+        destNum: Int,
+        longName: String,
+        position: Position = Position(0.0, 0.0, 0),
+    ) {
+        scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting position for '$destNum'" }
             try {
                 serviceRepository.meshService?.requestPosition(destNum, position)
@@ -114,8 +114,8 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
         }
     }
 
-    fun requestTelemetry(destNum: Int, longName: String, type: TelemetryType) {
-        scope?.launch(Dispatchers.IO) {
+    fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType) {
+        scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting telemetry for '$destNum'" }
             try {
                 val packetId = serviceRepository.meshService?.packetId ?: return@launch
@@ -139,8 +139,8 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
         }
     }
 
-    fun requestTraceroute(destNum: Int, longName: String) {
-        scope?.launch(Dispatchers.IO) {
+    fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String) {
+        scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting traceroute for '$destNum'" }
             try {
                 val packetId = serviceRepository.meshService?.packetId ?: return@launch

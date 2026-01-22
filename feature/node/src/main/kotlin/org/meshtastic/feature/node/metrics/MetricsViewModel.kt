@@ -210,30 +210,32 @@ constructor(
         nodeRequestActions.lastRequestNeighborTimes.map { it[destNum] }.stateInWhileSubscribed(null)
 
     fun requestUserInfo() {
-        destNum?.let { nodeRequestActions.requestUserInfo(it, state.value.node?.user?.longName ?: "") }
+        destNum?.let { nodeRequestActions.requestUserInfo(viewModelScope, it, state.value.node?.user?.longName ?: "") }
     }
 
     fun requestPosition() {
-        destNum?.let { nodeRequestActions.requestPosition(it, state.value.node?.user?.longName ?: "") }
+        destNum?.let { nodeRequestActions.requestPosition(viewModelScope, it, state.value.node?.user?.longName ?: "") }
     }
 
     fun requestTelemetry(type: TelemetryType) {
-        destNum?.let { nodeRequestActions.requestTelemetry(it, state.value.node?.user?.longName ?: "", type) }
+        destNum?.let {
+            nodeRequestActions.requestTelemetry(viewModelScope, it, state.value.node?.user?.longName ?: "", type)
+        }
     }
 
     fun requestTraceroute() {
-        destNum?.let { nodeRequestActions.requestTraceroute(it, state.value.node?.user?.longName ?: "") }
+        destNum?.let {
+            nodeRequestActions.requestTraceroute(viewModelScope, it, state.value.node?.user?.longName ?: "")
+        }
     }
 
     init {
-        nodeRequestActions.start(viewModelScope)
         initializeFlows()
     }
 
     fun setNodeId(id: Int) {
         if (destNum != id) {
             destNum = id
-            nodeRequestActions.start(viewModelScope)
             initializeFlows()
         }
     }

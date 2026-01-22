@@ -22,23 +22,33 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.database.entity.FirmwareRelease
+import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.fallback_node_name
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -46,8 +56,11 @@ import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
 import org.meshtastic.feature.node.metrics.safeNumber
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
 import org.meshtastic.proto.ConfigProtos.Config
+import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.TelemetryProtos.Telemetry
 import javax.inject.Inject
 
 data class NodeDetailUiState(
@@ -59,6 +72,8 @@ data class NodeDetailUiState(
     val lastTracerouteTime: Long? = null,
     val lastRequestNeighborsTime: Long? = null,
 )
+
+private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
@@ -80,190 +95,161 @@ constructor(
     private val nodeIdFromRoute: Int? =
         runCatching { savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum }.getOrNull()
 
-    private val _manualNodeId = MutableStateFlow<Int?>(null)
+    private val manualNodeId = MutableStateFlow<Int?>(null)
     private val activeNodeId =
-        combine(MutableStateFlow(nodeIdFromRoute), _manualNodeId) { fromRoute, manual ->
-            fromRoute ?: manual
+        combine(MutableStateFlow(nodeIdFromRoute), manualNodeId) { fromRoute, manual -> fromRoute ?: manual }
+            .distinctUntilChanged()
+
+    @Suppress("UNCHECKED_CAST", "MagicNumber")
+    private val metricsStateFlow: Flow<MetricsState> =
+        activeNodeId.filterNotNull().flatMapLatest { destNum ->
+            combine(
+                nodeRepository.nodeDBbyNum.map { it[destNum] }.distinctUntilChanged(),
+                nodeRepository.myNodeInfo,
+                radioConfigRepository.deviceProfileFlow,
+                meshLogRepository.getTelemetryFrom(destNum),
+                meshLogRepository.getMeshPacketsFrom(destNum),
+                meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE),
+                meshLogRepository.getLogsFrom(destNum, PortNum.PAXCOUNTER_APP_VALUE),
+                firmwareReleaseRepository.stableRelease,
+                firmwareReleaseRepository.alphaRelease,
+            ) { args ->
+                val node = args[0] as Node?
+                val myInfo = args[1] as MyNodeEntity?
+                val profile = args[2] as DeviceProfile
+                val telemetry = args[3] as List<Telemetry>
+                val packets = args[4] as List<MeshProtos.MeshPacket>
+                val positionPackets = args[5] as List<MeshProtos.MeshPacket>
+                val paxLogs = args[6] as List<MeshLog>
+                val stable = args[7] as FirmwareRelease?
+                val alpha = args[8] as FirmwareRelease?
+
+                val ourNodeNum = nodeRepository.nodeDBbyNum.value.keys.firstOrNull()
+                val actualNode = node ?: createFallbackNode(destNum)
+                val pioEnv = if (destNum == ourNodeNum) myInfo?.pioEnv else null
+                val deviceHardware =
+                    actualNode.user.hwModel.safeNumber().let {
+                        deviceHardwareRepository.getDeviceHardwareByModel(it, target = pioEnv)
+                    }
+
+                val moduleConfig = profile.moduleConfig
+                val displayUnits = profile.config.display.units
+
+                MetricsState(
+                    node = actualNode,
+                    isLocal = destNum == ourNodeNum,
+                    deviceHardware = deviceHardware.getOrNull(),
+                    reportedTarget = pioEnv,
+                    isManaged = profile.config.security.isManaged,
+                    isFahrenheit =
+                    moduleConfig.telemetry.environmentDisplayFahrenheit ||
+                        (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
+                    displayUnits = displayUnits,
+                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                    powerMetrics = telemetry.filter { it.hasPowerMetrics() },
+                    hostMetrics = telemetry.filter { it.hasHostMetrics() },
+                    signalMetrics = packets.filter { it.rxTime > 0 },
+                    positionLogs = positionPackets.mapNotNull { it.toPosition() },
+                    paxMetrics = paxLogs,
+                    latestStableFirmware = stable ?: FirmwareRelease(),
+                    latestAlphaFirmware = alpha ?: FirmwareRelease(),
+                )
+            }
         }
 
-    private val _metricsState = MutableStateFlow(MetricsState.Empty)
-    private val _environmentState = MutableStateFlow(EnvironmentMetricsState())
-
-    @Suppress("UNCHECKED_CAST")
-    val uiState: StateFlow<NodeDetailUiState> =
-        combine(
-                nodeRepository.ourNodeInfo,
-                _metricsState,
-                _environmentState,
-                nodeRequestActions.lastTracerouteTimes,
-                nodeRequestActions.lastRequestNeighborTimes,
-                activeNodeId,
-            ) { args ->
-                val ourNode = args[0] as Node?
-                val metrics = args[1] as MetricsState
-                val env = args[2] as EnvironmentMetricsState
-                val tracerouteTimes = args[3] as Map<Int, Long>
-                val neighborTimes = args[4] as Map<Int, Long>
-                val id = args[5] as Int?
-
-                NodeDetailUiState(
-                    node = metrics.node,
-                    ourNode = ourNode,
-                    metricsState = metrics,
-                    environmentState = env,
-                    availableLogs = getAvailableLogs(metrics, env),
-                    lastTracerouteTime = id?.let { tracerouteTimes[it] },
-                    lastRequestNeighborsTime = id?.let { neighborTimes[it] },
+    private val environmentStateFlow: Flow<EnvironmentMetricsState> =
+        activeNodeId.filterNotNull().flatMapLatest { id ->
+            meshLogRepository.getTelemetryFrom(id).map { telemetry ->
+                EnvironmentMetricsState(
+                    environmentMetrics =
+                    telemetry.filter {
+                        it.hasEnvironmentMetrics() &&
+                            it.environmentMetrics.hasRelativeHumidity() &&
+                            it.environmentMetrics.hasTemperature() &&
+                            !it.environmentMetrics.temperature.isNaN()
+                    },
                 )
+            }
+        }
+
+    val uiState: StateFlow<NodeDetailUiState> =
+        activeNodeId
+            .flatMapLatest { id ->
+                if (id == null) {
+                    flowOf(NodeDetailUiState())
+                } else {
+                    combine(
+                        nodeRepository.ourNodeInfo,
+                        metricsStateFlow,
+                        environmentStateFlow,
+                        nodeRequestActions.lastTracerouteTimes,
+                        nodeRequestActions.lastRequestNeighborTimes,
+                    ) { ourNode, metrics, env, tracerouteTimes, neighborTimes ->
+                        NodeDetailUiState(
+                            node = metrics.node,
+                            ourNode = ourNode,
+                            metricsState = metrics,
+                            environmentState = env,
+                            availableLogs = getAvailableLogs(metrics, env),
+                            lastTracerouteTime = tracerouteTimes[id],
+                            lastRequestNeighborsTime = neighborTimes[id],
+                        )
+                    }
+                }
             }
             .stateInWhileSubscribed(NodeDetailUiState())
 
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
     fun start(nodeId: Int) {
-        if (_manualNodeId.value != nodeId) {
-            _manualNodeId.value = nodeId
-            nodeManagementActions.start(viewModelScope, nodeId)
-            nodeRequestActions.start(viewModelScope)
-            initializeFlows(nodeId)
+        if (manualNodeId.value != nodeId) {
+            manualNodeId.value = nodeId
         }
     }
 
-    init {
-        nodeIdFromRoute?.let {
-            nodeManagementActions.start(viewModelScope, it)
-            initializeFlows(it)
-        }
-        nodeRequestActions.start(viewModelScope)
-    }
-
-    @Suppress("LongMethod")
-    private fun initializeFlows(destNum: Int) {
-        viewModelScope.launch {
-            launch {
-                combine(nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) { nodes, myInfo ->
-                        nodes[destNum] to (nodes.keys.firstOrNull() to myInfo)
-                    }
-                    .collect { (node, localData) ->
-                        val (ourNodeNum, myInfo) = localData
-                        val actualNode = node
-                        val pioEnv = if (destNum == ourNodeNum) myInfo?.pioEnv else null
-                        val deviceHardware =
-                            actualNode?.user?.hwModel?.safeNumber()?.let {
-                                deviceHardwareRepository.getDeviceHardwareByModel(it, target = pioEnv)
-                            }
-                        _metricsState.update { state ->
-                            state.copy(
-                                node = actualNode,
-                                isLocal = destNum == ourNodeNum,
-                                deviceHardware = deviceHardware?.getOrNull(),
-                                reportedTarget = pioEnv,
-                            )
-                        }
-                    }
-            }
-
-            launch {
-                radioConfigRepository.deviceProfileFlow.collect { profile ->
-                    val moduleConfig = profile.moduleConfig
-                    val displayUnits = profile.config.display.units
-                    _metricsState.update { state ->
-                        state.copy(
-                            isManaged = profile.config.security.isManaged,
-                            isFahrenheit =
-                                moduleConfig.telemetry.environmentDisplayFahrenheit ||
-                                    (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
-                            displayUnits = displayUnits,
-                        )
-                    }
-                }
-            }
-
-            launch {
-                meshLogRepository.getTelemetryFrom(destNum).collect { telemetry ->
-                    _metricsState.update { state ->
-                        state.copy(
-                            deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                            powerMetrics = telemetry.filter { it.hasPowerMetrics() },
-                            hostMetrics = telemetry.filter { it.hasHostMetrics() },
-                        )
-                    }
-                    _environmentState.update { state ->
-                        state.copy(
-                            environmentMetrics =
-                                telemetry.filter {
-                                    it.hasEnvironmentMetrics() &&
-                                        it.environmentMetrics.hasRelativeHumidity() &&
-                                        it.environmentMetrics.hasTemperature() &&
-                                        !it.environmentMetrics.temperature.isNaN()
-                                },
-                        )
-                    }
-                }
-            }
-
-            launch {
-                meshLogRepository.getMeshPacketsFrom(destNum).collect { meshPackets ->
-                    _metricsState.update { state ->
-                        state.copy(signalMetrics = meshPackets.filter { it.rxTime > 0 })
-                    }
-                }
-            }
-
-            launch {
-                meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE).collect { packets ->
-                    val distinctPositions = packets.mapNotNull { it.toPosition() }
-                    _metricsState.update { state -> state.copy(positionLogs = distinctPositions) }
-                }
-            }
-
-            launch {
-                meshLogRepository.getLogsFrom(destNum, PortNum.PAXCOUNTER_APP_VALUE).collect { logs ->
-                    _metricsState.update { state -> state.copy(paxMetrics = logs) }
-                }
-            }
-
-            launch {
-                firmwareReleaseRepository.stableRelease.filterNotNull().collect { latestStable ->
-                    _metricsState.update { state -> state.copy(latestStableFirmware = latestStable) }
-                }
-            }
-
-            launch {
-                firmwareReleaseRepository.alphaRelease.filterNotNull().collect { latestAlpha ->
-                    _metricsState.update { state -> state.copy(latestAlphaFirmware = latestAlpha) }
-                }
-            }
-        }
+    private suspend fun createFallbackNode(nodeNum: Int): Node {
+        val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+        val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
+        val longName = getString(Res.string.fallback_node_name) + "  $safeUserId"
+        val defaultUser =
+            MeshProtos.User.newBuilder()
+                .setId(userId)
+                .setLongName(longName)
+                .setShortName(safeUserId)
+                .setHwModel(MeshProtos.HardwareModel.UNSET)
+                .build()
+        return Node(num = nodeNum, user = defaultUser)
     }
 
     fun handleNodeMenuAction(action: NodeMenuAction) {
         when (action) {
-            is NodeMenuAction.Remove -> nodeManagementActions.removeNode(action.node.num)
-            is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(action.node)
-            is NodeMenuAction.Mute -> nodeManagementActions.muteNode(action.node)
-            is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(action.node)
+            is NodeMenuAction.Remove -> nodeManagementActions.removeNode(viewModelScope, action.node.num)
+            is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(viewModelScope, action.node)
+            is NodeMenuAction.Mute -> nodeManagementActions.muteNode(viewModelScope, action.node)
+            is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(viewModelScope, action.node)
             is NodeMenuAction.RequestUserInfo ->
-                nodeRequestActions.requestUserInfo(action.node.num, action.node.user.longName)
-            is NodeMenuAction.RequestNeighborInfo -> {
-                nodeRequestActions.requestNeighborInfo(action.node.num, action.node.user.longName)
-            }
+                nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestNeighborInfo ->
+                nodeRequestActions.requestNeighborInfo(viewModelScope, action.node.num, action.node.user.longName)
             is NodeMenuAction.RequestPosition ->
-                nodeRequestActions.requestPosition(action.node.num, action.node.user.longName)
+                nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.longName)
             is NodeMenuAction.RequestTelemetry ->
-                nodeRequestActions.requestTelemetry(action.node.num, action.node.user.longName, action.type)
-            is NodeMenuAction.TraceRoute -> {
-                nodeRequestActions.requestTraceroute(action.node.num, action.node.user.longName)
-            }
+                nodeRequestActions.requestTelemetry(
+                    viewModelScope,
+                    action.node.num,
+                    action.node.user.longName,
+                    action.type,
+                )
+            is NodeMenuAction.TraceRoute ->
+                nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.longName)
             else -> {}
         }
     }
 
-    fun onServiceAction(action: ServiceAction) =
-        viewModelScope.launch { serviceRepository.onServiceAction(action) }
+    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
 
     fun setNodeNotes(nodeNum: Int, notes: String) {
-        nodeManagementActions.setNodeNotes(nodeNum, notes)
+        nodeManagementActions.setNodeNotes(viewModelScope, nodeNum, notes)
     }
 
     fun getDirectMessageRoute(node: Node, ourNode: Node?): String {
