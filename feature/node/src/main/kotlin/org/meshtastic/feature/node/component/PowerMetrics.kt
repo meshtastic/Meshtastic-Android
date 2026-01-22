@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -65,15 +63,11 @@ internal fun PowerMetrics(node: Node) {
         }
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
-        metrics.chunked(2).forEach { rowMetrics ->
-            Column {
-                rowMetrics.forEach { metric ->
-                    InfoCard(icon = metric.icon, text = stringResource(metric.label), value = metric.value)
-                }
-            }
+        metrics.forEach { metric ->
+            InfoCard(icon = metric.icon, text = stringResource(metric.label), value = metric.value)
         }
     }
 }
