@@ -45,8 +45,7 @@ dependencies {
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.serialization.gradlePlugin)
     compileOnly(libs.android.tools.common)
-    // compose.gradlePlugin doesn't exist for Kotlin 1.9.x (only available in Kotlin 2.0+)
-    // compileOnly(libs.compose.gradlePlugin)
+    compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.compose.multiplatform.gradlePlugin)
     compileOnly(libs.datadog.gradlePlugin)
     compileOnly(libs.detekt.gradlePlugin)
@@ -119,6 +118,10 @@ gradlePlugin {
         register("androidLibrary") {
             id = "meshtastic.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
+        }
+        register("androidLint") {
+            id = "meshtastic.android.lint"
+            implementationClass = "AndroidLintConventionPlugin"
         }
         register("androidLibraryCompose") {
             id = "meshtastic.android.library.compose"
