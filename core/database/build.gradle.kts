@@ -28,7 +28,7 @@ configure<LibraryExtension> {
     sourceSets {
         // Adds exported schema location as test app assets.
         named("androidTest") { 
-            assets.srcDirs.add(file("$projectDir/schemas"))
+            assets.srcDir(file("$projectDir/schemas"))
         }
     }
 }
