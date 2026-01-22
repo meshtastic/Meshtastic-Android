@@ -1,0 +1,295 @@
+/*
+ * Copyright (c) 2025-2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.feature.node.component
+
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.neighbor_info
+import org.meshtastic.core.strings.request
+import org.meshtastic.core.strings.request_air_quality_metrics
+import org.meshtastic.core.strings.request_local_stats
+import org.meshtastic.core.strings.userinfo
+import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.NodeDetailAction
+
+private data class TelemetricFeature(
+    val titleRes: StringResource,
+    val icon: ImageVector,
+    val requestAction: ((Node) -> NodeMenuAction)?,
+    val logsType: LogsType? = null,
+    val isVisible: (Node) -> Boolean = { true },
+    val cooldownTimestamp: Long? = null,
+    val cooldownDuration: Long = 30_000L,
+)
+
+@Composable
+internal fun TelemetricActionsSection(
+    node: Node,
+    availableLogs: Set<LogsType>,
+    lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    val features = rememberTelemetricFeatures(node, lastTracerouteTime, lastRequestNeighborsTime)
+
+    Column(modifier = Modifier.padding(vertical = 4.dp)) {
+        Text(
+            text = stringResource(Res.string.request),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
+        )
+
+        features.filter { it.isVisible(node) }.forEachIndexed { index, feature ->
+            if (index > 0) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                )
+            }
+            FeatureRow(
+                node = node,
+                feature = feature,
+                hasLogs = feature.logsType != null && availableLogs.contains(feature.logsType),
+                onAction = onAction,
+            )
+        }
+    }
+}
+
+@Suppress("LongMethod")
+@Composable
+private fun rememberTelemetricFeatures(
+    node: Node,
+    lastTracerouteTime: Long?,
+    lastRequestNeighborsTime: Long?,
+): List<TelemetricFeature> {
+    return remember(node, lastTracerouteTime, lastRequestNeighborsTime) {
+        listOf(
+            TelemetricFeature(
+                titleRes = Res.string.userinfo,
+                icon = Icons.Default.Person,
+                requestAction = { NodeMenuAction.RequestUserInfo(it) },
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.TRACEROUTE.titleRes,
+                icon = LogsType.TRACEROUTE.icon,
+                requestAction = { NodeMenuAction.TraceRoute(it) },
+                logsType = LogsType.TRACEROUTE,
+                cooldownTimestamp = lastTracerouteTime,
+            ),
+            TelemetricFeature(
+                titleRes = Res.string.neighbor_info,
+                icon = Icons.Default.Groups,
+                requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
+                isVisible = { it.capabilities.canRequestNeighborInfo },
+                cooldownTimestamp = lastRequestNeighborsTime,
+                cooldownDuration = 180_000L, // 3 minutes
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.DEVICE.titleRes,
+                icon = LogsType.DEVICE.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
+                logsType = LogsType.DEVICE,
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.ENVIRONMENT.titleRes,
+                icon = LogsType.ENVIRONMENT.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
+                logsType = LogsType.ENVIRONMENT,
+            ),
+            TelemetricFeature(
+                titleRes = Res.string.request_air_quality_metrics,
+                icon = Icons.Default.Air,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.POWER.titleRes,
+                icon = LogsType.POWER.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.POWER) },
+                logsType = LogsType.POWER,
+            ),
+            TelemetricFeature(
+                titleRes = Res.string.request_local_stats,
+                icon = Icons.Default.Speed,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.HOST.titleRes,
+                icon = LogsType.HOST.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.HOST) },
+                logsType = LogsType.HOST,
+            ),
+            TelemetricFeature(
+                titleRes = LogsType.PAX.titleRes,
+                icon = LogsType.PAX.icon,
+                requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.PAX) },
+                logsType = LogsType.PAX,
+            ),
+        )
+    }
+}
+
+@Composable
+private fun FeatureRow(
+    node: Node,
+    feature: TelemetricFeature,
+    hasLogs: Boolean,
+    onAction: (NodeDetailAction) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = feature.icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(end = 16.dp),
+        )
+
+        Text(
+            text = stringResource(feature.titleRes),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+
+        if (feature.requestAction != null) {
+            CooldownIconButton(
+                onClick = {
+                    val menuAction = feature.requestAction.invoke(node)
+                    onAction(NodeDetailAction.HandleNodeMenuAction(menuAction))
+                },
+                cooldownTimestamp = feature.cooldownTimestamp,
+                cooldownDuration = feature.cooldownDuration,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(feature.titleRes),
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.width(48.dp))
+        }
+
+        IconButton(
+            onClick = {
+                feature.logsType?.let {
+                    onAction(NodeDetailAction.Navigate(it.routeFactory(node.num)))
+                }
+            },
+            enabled = hasLogs,
+        ) {
+            Icon(
+                imageVector = Icons.Default.History,
+                contentDescription = stringResource(feature.titleRes),
+                tint = if (hasLogs) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun CooldownIconButton(
+    onClick: () -> Unit,
+    cooldownTimestamp: Long?,
+    cooldownDuration: Long = 30_000L,
+    content: @Composable () -> Unit,
+) {
+    val progress = remember { Animatable(0f) }
+
+    LaunchedEffect(cooldownTimestamp) {
+        if (cooldownTimestamp == null) {
+            progress.snapTo(0f)
+            return@LaunchedEffect
+        }
+        val timeSinceLast = System.currentTimeMillis() - cooldownTimestamp
+        if (timeSinceLast < cooldownDuration) {
+            val remainingTime = cooldownDuration - timeSinceLast
+            progress.snapTo(remainingTime / cooldownDuration.toFloat())
+            progress.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
+            )
+        } else {
+            progress.snapTo(0f)
+        }
+    }
+
+    val isCoolingDown = progress.value > 0f
+    val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
+
+    IconButton(
+        onClick = { if (!isCoolingDown) onClick() },
+        enabled = !isCoolingDown,
+    ) {
+        if (isCoolingDown) {
+            CircularWavyProgressIndicator(
+                progress = { progress.value },
+                modifier = Modifier.size(24.dp),
+                stroke = stroke,
+                trackStroke = stroke,
+                wavelength = 8.dp,
+            )
+        } else {
+            content()
+        }
+    }
+}

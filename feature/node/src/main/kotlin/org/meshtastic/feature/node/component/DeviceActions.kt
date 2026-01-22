@@ -65,6 +65,7 @@ import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
@@ -80,6 +81,7 @@ fun DeviceActions(
     node: Node,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
+    availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
@@ -93,7 +95,15 @@ fun DeviceActions(
         displayMuteDialog = displayedDialog == DialogType.MUTE,
         displayRemoveDialog = displayedDialog == DialogType.REMOVE,
         onDismissMenuRequest = { displayedDialog = null },
-        onConfirmFavorite = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(it))) },
+        onConfirmFavorite = {
+            onAction(
+                NodeDetailAction.HandleNodeMenuAction(
+                    NodeMenuAction.Favorite(
+                        it
+                    )
+                )
+            )
+        },
         onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
         onConfirmMute = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(it))) },
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
@@ -114,28 +124,26 @@ fun DeviceActions(
                 onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
             )
 
-            if (!isLocal) {
-                ActionsDivider()
-
-                RemoteDeviceActions(
-                    node = node,
-                    lastTracerouteTime = lastTracerouteTime,
-                    lastRequestNeighborsTime = lastRequestNeighborsTime,
-                    onAction = onAction,
-                )
-            }
-
-            ActionsDivider()
-
-            ManagementActions(
+            TelemetricActionsSection(
                 node = node,
-                onIgnoreClick = { displayedDialog = DialogType.IGNORE },
-                onMuteClick = { displayedDialog = DialogType.MUTE },
-                onRemoveClick = { displayedDialog = DialogType.REMOVE },
+                availableLogs = availableLogs,
+                lastTracerouteTime = lastTracerouteTime,
+                lastRequestNeighborsTime = lastRequestNeighborsTime,
+                onAction = onAction,
             )
         }
+
+        ActionsDivider()
+
+        ManagementActions(
+            node = node,
+            onIgnoreClick = { displayedDialog = DialogType.IGNORE },
+            onMuteClick = { displayedDialog = DialogType.MUTE },
+            onRemoveClick = { displayedDialog = DialogType.REMOVE },
+        )
     }
 }
+
 
 @Composable
 private fun ActionsHeader() {
@@ -164,20 +172,30 @@ private fun PrimaryActionsRow(
     onFavoriteClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
+        modifier = Modifier
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (!node.isEffectivelyUnmessageable && !isLocal) {
             Button(
-                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
+                onClick = {
+                    onAction(
+                        NodeDetailAction.HandleNodeMenuAction(
+                            NodeMenuAction.DirectMessage(
+                                node
+                            )
+                        )
+                    )
+                },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.large,
                 colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                ),
+                    ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    ),
             ) {
                 Icon(Icons.AutoMirrored.Filled.Message, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -218,11 +236,11 @@ private fun ManagementActions(
         SwitchListItem(
             text = stringResource(Res.string.ignore),
             leadingIcon =
-            if (node.isIgnored) {
-                Icons.AutoMirrored.Outlined.VolumeMute
-            } else {
-                Icons.AutoMirrored.Default.VolumeUp
-            },
+                if (node.isIgnored) {
+                    Icons.AutoMirrored.Outlined.VolumeMute
+                } else {
+                    Icons.AutoMirrored.Default.VolumeUp
+                },
             checked = node.isIgnored,
             onClick = onIgnoreClick,
         )
@@ -231,11 +249,11 @@ private fun ManagementActions(
             SwitchListItem(
                 text = stringResource(Res.string.mute_notifications),
                 leadingIcon =
-                if (node.isMuted) {
-                    Icons.AutoMirrored.Filled.VolumeOff
-                } else {
-                    Icons.AutoMirrored.Default.VolumeUp
-                },
+                    if (node.isMuted) {
+                        Icons.AutoMirrored.Filled.VolumeOff
+                    } else {
+                        Icons.AutoMirrored.Default.VolumeUp
+                    },
                 checked = node.isMuted,
                 onClick = onMuteClick,
             )
