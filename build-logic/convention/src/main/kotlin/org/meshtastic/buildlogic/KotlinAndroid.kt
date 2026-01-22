@@ -67,6 +67,12 @@ internal fun Project.configureKotlinMultiplatform() {
                     val pkg = this@configureKotlinMultiplatform.path.removePrefix(":").replace(":", ".")
                     namespace = "org.meshtastic.$pkg"
                 }
+                
+                // Enable unit test compilation to use commonTest source set
+                // This prevents "unused Kotlin Source Sets" warnings
+                unitTest {
+                    // Ensure commonTest is properly linked to Android unit test compilation
+                }
             }
         }
     }

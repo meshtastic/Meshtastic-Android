@@ -27,7 +27,9 @@ configure<LibraryExtension> {
     namespace = "org.meshtastic.core.database"
     sourceSets {
         // Adds exported schema location as test app assets.
-        named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
+        named("androidTest") { 
+            assets.srcDirs.add(file("$projectDir/schemas"))
+        }
     }
 }
 

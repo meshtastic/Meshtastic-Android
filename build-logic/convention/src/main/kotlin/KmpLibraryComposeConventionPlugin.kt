@@ -20,7 +20,6 @@ import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.meshtastic.buildlogic.libs
@@ -32,12 +31,11 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
             apply(plugin = libs.plugin("compose-compiler").get().pluginId)
             apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
 
-            val compose = extensions.getByType(ComposeExtension::class.java)
             extensions.configure<KotlinMultiplatformExtension> {
                 sourceSets.getByName("commonMain").dependencies {
-                    implementation(compose.dependencies.runtime)
+                    implementation(libs.findLibrary("compose-multiplatform-runtime").get())
                     // API because consuming modules will usually need the resource types
-                    api(compose.dependencies.components.resources)
+                    api(libs.findLibrary("compose-multiplatform-resources").get())
                 }
             }
 
