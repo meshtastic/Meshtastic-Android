@@ -17,6 +17,7 @@ room = "2.8.4"
 
 # Kotlin
 kotlin = "1.9.25"
+compose-compiler = "1.5.14"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.9.0"
 ktlint = "1.7.1"
@@ -182,7 +183,8 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
 android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
-compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+# compose-gradlePlugin doesn't exist for Kotlin 1.9.x (only available in Kotlin 2.0+)
+# compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.22.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.3" }
@@ -203,7 +205,8 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 
 # Jetbrains
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# compose-compiler plugin doesn't exist for Kotlin 1.9.x (only available in Kotlin 2.0+)
+# compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version = "1.10.0" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

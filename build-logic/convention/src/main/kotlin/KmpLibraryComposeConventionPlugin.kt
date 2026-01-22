@@ -28,7 +28,8 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
-            apply(plugin = libs.plugin("compose-compiler").get().pluginId)
+            // Note: compose-compiler plugin doesn't exist for Kotlin 1.9.x (only in Kotlin 2.0+)
+            // The compose-multiplatform plugin handles compilation for Kotlin 1.9.x
 
             val compose = extensions.getByType(ComposeExtension::class.java)
             extensions.configure<KotlinMultiplatformExtension> {

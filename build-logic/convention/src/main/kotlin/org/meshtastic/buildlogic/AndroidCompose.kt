@@ -21,10 +21,7 @@ import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Project
-import org.gradle.api.provider.Provider
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
 
 /**
  * Configure Compose-specific options
@@ -34,6 +31,11 @@ internal fun Project.configureAndroidCompose(
 ) {
     (commonExtension as? ApplicationExtension)?.buildFeatures?.compose = true
     (commonExtension as? LibraryExtension)?.buildFeatures?.compose = true
+
+    // For Kotlin 1.9.x, use the old-style composeOptions with kotlinCompilerExtensionVersion
+    commonExtension.composeOptions {
+        kotlinCompilerExtensionVersion = libs.version("compose-compiler")
+    }
 
     dependencies {
         val bom = libs.library("androidx-compose-bom")
@@ -46,25 +48,5 @@ internal fun Project.configureAndroidCompose(
         
         // Add Espresso explicitly to avoid version mismatch issues on newer Android versions
         "androidTestImplementation"(libs.library("androidx-test-espresso-core"))
-    }
-
-    extensions.configure<ComposeCompilerGradlePluginExtension> {
-        fun Provider<String>.onlyIfTrue() = flatMap { provider { it.takeIf(String::toBoolean) } }
-        fun Provider<*>.relativeToRootProject(dir: String) = map {
-            isolated.rootProject.projectDirectory
-                .dir("build")
-                .dir(projectDir.toRelativeString(rootDir))
-        }.map { it.dir(dir) }
-
-        project.providers.gradleProperty("enableComposeCompilerMetrics").onlyIfTrue()
-            .relativeToRootProject("compose-metrics")
-            .let(metricsDestination::set)
-
-        project.providers.gradleProperty("enableComposeCompilerReports").onlyIfTrue()
-            .relativeToRootProject("compose-reports")
-            .let(reportsDestination::set)
-
-        stabilityConfigurationFiles
-            .add(isolated.rootProject.projectDirectory.file("compose_compiler_config.conf"))
     }
 }
