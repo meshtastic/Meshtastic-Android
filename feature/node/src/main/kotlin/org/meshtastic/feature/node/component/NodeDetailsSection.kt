@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -33,8 +32,6 @@ import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,8 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
@@ -64,27 +59,13 @@ import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
 fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
+    SectionCard(title = Res.string.details, modifier = modifier) {
         SelectionContainer {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(
-                    text = stringResource(Res.string.details),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                )
-
-                Spacer(Modifier.height(20.dp))
-
+            Column {
                 if (node.mismatchKey) {
-                    MismatchKeyWarning()
-                    Spacer(Modifier.height(20.dp))
+                    MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
+                    Spacer(Modifier.height(16.dp))
                 }
-
                 MainNodeDetails(node)
             }
         }
@@ -92,11 +73,11 @@ fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MismatchKeyWarning() {
+private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
         shape = MaterialTheme.shapes.large,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -126,7 +107,7 @@ private fun MismatchKeyWarning() {
 @Composable
 private fun MainNodeDetails(node: Node) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             InfoItem(
                 label = stringResource(Res.string.short_name),
                 value = node.user.shortName.ifEmpty { "???" },
@@ -141,9 +122,12 @@ private fun MainNodeDetails(node: Node) {
             )
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             InfoItem(
                 label = stringResource(Res.string.node_sort_last_heard),
                 value = formatAgo(node.lastHeard),
@@ -158,9 +142,12 @@ private fun MainNodeDetails(node: Node) {
             )
         }
 
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+        )
 
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(modifier = Modifier.fillMaxWidth()) {
             InfoItem(
                 label = stringResource(Res.string.user_id),
                 value = node.user.id,
@@ -178,33 +165,5 @@ private fun MainNodeDetails(node: Node) {
                 Spacer(Modifier.weight(1f))
             }
         }
-    }
-}
-
-@Composable
-private fun InfoItem(label: String, value: String, icon: ImageVector, modifier: Modifier = Modifier) {
-    Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-            )
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium,
-            )
-        }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
     }
 }

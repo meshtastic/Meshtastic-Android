@@ -49,7 +49,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.StringResource
@@ -91,15 +90,7 @@ internal fun TelemetricActionsSection(
 ) {
     val features = rememberTelemetricFeatures(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState)
 
-    Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        Text(
-            text = stringResource(Res.string.telemetry),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.primary,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-        )
-
+    SectionCard(title = Res.string.telemetry) {
         features
             .filter { it.isVisible(node) }
             .forEachIndexed { index, feature ->

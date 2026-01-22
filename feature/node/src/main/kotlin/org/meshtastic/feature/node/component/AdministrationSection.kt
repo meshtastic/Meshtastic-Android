@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,26 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ForkLeft
 import androidx.compose.material.icons.filled.Icecream
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
@@ -68,14 +60,8 @@ fun AdministrationSection(
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
-        Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            AdministrationHeader()
-
+    SectionCard(title = Res.string.administration, modifier = modifier) {
+        Column {
             ListItem(
                 text = stringResource(Res.string.request_metadata),
                 leadingIcon = Icons.Default.Memory,
@@ -105,37 +91,14 @@ fun AdministrationSection(
 }
 
 @Composable
-private fun AdministrationHeader() {
-    Text(
-        text = stringResource(Res.string.administration),
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-    )
-}
-
-@Composable
 private fun FirmwareSection(
     metricsState: MetricsState,
     firmwareEdition: MeshProtos.FirmwareEdition?,
     firmwareVersion: String?,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
 ) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
-        Column(modifier = Modifier.padding(vertical = 16.dp)) {
-            Text(
-                text = stringResource(Res.string.firmware),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            )
-
+    SectionCard(title = Res.string.firmware) {
+        Column {
             firmwareEdition?.let { edition ->
                 val icon =
                     when (edition) {
