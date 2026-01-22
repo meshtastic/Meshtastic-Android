@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.model.Position
@@ -82,7 +83,7 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
             try {
                 val packetId = serviceRepository.meshService?.packetId ?: return@launch
                 serviceRepository.meshService?.requestNeighborInfo(packetId, destNum)
-                _lastRequestNeighborTimes.value += (destNum to System.currentTimeMillis())
+                _lastRequestNeighborTimes.update { it + (destNum to System.currentTimeMillis()) }
                 _effects.emit(
                     NodeRequestEffect.ShowFeedback(
                         Res.string.requesting_from,
@@ -145,7 +146,7 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
             try {
                 val packetId = serviceRepository.meshService?.packetId ?: return@launch
                 serviceRepository.meshService?.requestTraceroute(packetId, destNum)
-                _lastTracerouteTimes.value += (destNum to System.currentTimeMillis())
+                _lastTracerouteTimes.update { it + (destNum to System.currentTimeMillis()) }
                 _effects.emit(
                     NodeRequestEffect.ShowFeedback(Res.string.requesting_from, listOf(Res.string.traceroute, longName)),
                 )
