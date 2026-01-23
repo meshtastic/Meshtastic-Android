@@ -99,14 +99,16 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     return if (regionInfo != null) {
         val bw = bandwidth(regionInfo)
         val channelSpacing = regionInfo.spacing + bw
-        // Match firmware: float freq = myRegion->freqStart + myRegion->spacing + (bw / 2000) + (channel_num *
+        // The frequency calculation attempts to match firmware behavior,
+        // where channel_num is 0-indexed in the calculation, but 1-indexed in the app's channelNum function.
+        // For amateur radio regions, regionInfo.spacing is not included in the frequency calculation.
+        // Firmware example: float freq = myRegion->freqStart + myRegion->spacing + (bw / 2000) + (channel_num *
         // channelSpacing);
-        // Note: firmware channel_num is 0-indexed in the calculation, but the app uses 1-indexed for some reason?
-        // Let's re-verify the firmware logic.
-        // Firmware: channel_num = hash(channelName) % numChannels;
-        // freq = myRegion->freqStart + myRegion->spacing + (bw / 2000) + (channel_num * channelSpacing);
-        // The app's channelNum function returns 1..numChannels if channelNum is 0.
-        (regionInfo.freqStart + regionInfo.spacing + bw / 2) + (channelNum - 1) * channelSpacing
+        if (regionInfo.description.contains("Amateur")) {
+            (regionInfo.freqStart + bw / 2) + (channelNum - 1) * channelSpacing
+        } else {
+            (regionInfo.freqStart + regionInfo.spacing + bw / 2) + (channelNum - 1) * channelSpacing
+        }
     } else {
         0f
     }
