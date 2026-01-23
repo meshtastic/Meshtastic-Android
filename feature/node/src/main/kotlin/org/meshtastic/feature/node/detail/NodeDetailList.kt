@@ -124,7 +124,7 @@ fun NodeDetailList(
     val compassViewModel = if (inspectionMode) null else hiltViewModel<CompassViewModel>()
     val compassUiState by
         compassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
-    var compassTargetNode by remember { mutableStateOf<Node?>(null) } // Cache target for sheet-side position requests
+    var compassTargetNode by remember { mutableStateOf<Node?>(null) }
 
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ -> }
@@ -229,7 +229,6 @@ private fun CompassSheetHost(
     onRequestPosition: () -> Unit,
 ) {
     if (showCompassSheet && compassViewModel != null) {
-        // Tie sensor lifecycle to the sheet so streams stop as soon as the sheet is dismissed.
         DisposableEffect(Unit) { onDispose { compassViewModel.stop() } }
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
