@@ -78,10 +78,9 @@ val LoRaConfig.numChannels: Int
         if (bw <= 0f) return 1 // Return 1 if bandwidth is zero or negative
 
         // Calculate number of channels: spacing = gap between channels (0 for continuous spectrum)
-        // Match firmware: uint32_t numChannels = round((myRegion->freqEnd - myRegion->freqStart + myRegion->spacing) /
-        // channelSpacing);
+        // Match firmware: uint32_t numChannels = round((myRegion->freqEnd - myRegion->freqStart) / channelSpacing);
         val channelSpacing = regionInfo.spacing + bw
-        val num = Math.round((regionInfo.freqEnd - regionInfo.freqStart + regionInfo.spacing) / channelSpacing).toInt()
+        val num = Math.round((regionInfo.freqEnd - regionInfo.freqStart) / channelSpacing).toInt()
 
         // If the regional frequency range is smaller than the bandwidth, the firmware would
         // fall back to a default preset. In the app, we return 1 to avoid a crash.
@@ -100,13 +99,14 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     return if (regionInfo != null) {
         val bw = bandwidth(regionInfo)
         val channelSpacing = regionInfo.spacing + bw
-        // Match firmware: float freq = myRegion->freqStart + (bw / 2000) + (channel_num * channelSpacing);
+        // Match firmware: float freq = myRegion->freqStart + myRegion->spacing + (bw / 2000) + (channel_num *
+        // channelSpacing);
         // Note: firmware channel_num is 0-indexed in the calculation, but the app uses 1-indexed for some reason?
         // Let's re-verify the firmware logic.
         // Firmware: channel_num = hash(channelName) % numChannels;
-        // freq = myRegion->freqStart + (bw / 2000) + (channel_num * channelSpacing);
+        // freq = myRegion->freqStart + myRegion->spacing + (bw / 2000) + (channel_num * channelSpacing);
         // The app's channelNum function returns 1..numChannels if channelNum is 0.
-        (regionInfo.freqStart + bw / 2) + (channelNum - 1) * channelSpacing
+        (regionInfo.freqStart + regionInfo.spacing + bw / 2) + (channelNum - 1) * channelSpacing
     } else {
         0f
     }
