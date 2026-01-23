@@ -30,9 +30,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DataArray
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -69,6 +66,9 @@ import org.meshtastic.core.strings.load_indexed
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_string
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.DataArray
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
@@ -106,7 +106,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
                     if (!state.isLocal) {
                         IconButton(onClick = { metricsViewModel.requestTelemetry(TelemetryType.HOST) }) {
                             Icon(
-                                imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
+                                imageVector = MeshtasticIcons.Refresh,
                                 contentDescription = null,
                             )
                         }
@@ -136,7 +136,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(modifier = Modifier.padding(16.dp)) {
-            Icon(imageVector = Icons.Default.DataArray, contentDescription = null, modifier = Modifier.width(24.dp))
+            Icon(imageVector = MeshtasticIcons.DataArray, contentDescription = null, modifier = Modifier.width(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
             SelectionContainer {
                 Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {

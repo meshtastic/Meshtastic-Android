@@ -28,8 +28,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -75,6 +73,8 @@ import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
@@ -134,7 +134,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.ENVIRONMENT) }) {
                             androidx.compose.material3.Icon(
-                                imageVector = Icons.Default.Refresh,
+                                imageVector = MeshtasticIcons.Refresh,
                                 contentDescription = null,
                             )
                         }
@@ -339,27 +339,6 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
             }
         }
     }
-    // These are in a differnt proto ...
-    // envMetrics.co2?.let { co2 ->
-    //         Spacer(modifier = Modifier.height(4.dp))
-    //         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-    //             Text(
-    //                 text = "%s %.0f ppm".format(stringResource(Res.string.co2), co2),
-    //                 color = MaterialTheme.colorScheme.onSurface,
-    //                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-    //             )
-    //         }
-    //     }
-    //     envMetrics.tvoc?.let { tvoc ->
-    //         Spacer(modifier = Modifier.height(4.dp))
-    //         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-    //             Text(
-    //                 text = "%s %.0f ppb".format(stringResource(Res.string.tvoc), tvoc),
-    //                 color = MaterialTheme.colorScheme.onSurface,
-    //                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
-    //             )
-    //         }
-    //     }
 }
 
 @Composable

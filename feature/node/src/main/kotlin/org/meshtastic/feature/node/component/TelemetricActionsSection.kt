@@ -23,13 +23,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
@@ -64,6 +57,13 @@ import org.meshtastic.core.strings.request_local_stats
 import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.core.strings.userinfo
+import org.meshtastic.core.ui.icon.AirQuality
+import org.meshtastic.core.ui.icon.Chart
+import org.meshtastic.core.ui.icon.Groups
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Person
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Speed
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -119,7 +119,7 @@ private fun rememberTelemetricFeatures(
     listOf(
         TelemetricFeature(
             titleRes = Res.string.userinfo,
-            icon = Icons.Default.Person,
+            icon = MeshtasticIcons.Person,
             requestAction = { NodeMenuAction.RequestUserInfo(it) },
         ),
         TelemetricFeature(
@@ -131,7 +131,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = Res.string.neighbor_info,
-            icon = Icons.Default.Groups,
+            icon = MeshtasticIcons.Groups,
             requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
             isVisible = { it.capabilities.canRequestNeighborInfo },
             cooldownTimestamp = lastRequestNeighborsTime,
@@ -145,7 +145,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = LogsType.ENVIRONMENT.titleRes,
-            icon = Icons.Default.Air,
+            icon = MeshtasticIcons.AirQuality,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
             logsType = LogsType.ENVIRONMENT,
             content = { EnvironmentMetrics(it, metricsState.displayUnits, metricsState.isFahrenheit) },
@@ -153,7 +153,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = Res.string.request_air_quality_metrics,
-            icon = Icons.Default.Air,
+            icon = MeshtasticIcons.AirQuality,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.AIR_QUALITY) },
         ),
         TelemetricFeature(
@@ -166,7 +166,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = Res.string.request_local_stats,
-            icon = Icons.Default.Speed,
+            icon = MeshtasticIcons.Speed,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
         ),
         TelemetricFeature(
@@ -226,7 +226,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                                 },
                             ) {
                                 Icon(
-                                    Icons.Default.StackedLineChart,
+                                    MeshtasticIcons.Chart,
                                     contentDescription = logsDescription,
                                     modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
                                     tint = MaterialTheme.colorScheme.primary,
@@ -252,7 +252,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                                 cooldownDuration = feature.cooldownDuration,
                             ) {
                                 Icon(
-                                    imageVector = Icons.Default.Refresh,
+                                    imageVector = MeshtasticIcons.Refresh,
                                     contentDescription = requestDescription,
                                     tint = MaterialTheme.colorScheme.primary,
                                 )

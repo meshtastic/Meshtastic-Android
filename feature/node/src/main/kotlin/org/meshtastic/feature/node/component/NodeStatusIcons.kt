@@ -19,14 +19,6 @@ package org.meshtastic.feature.node.component
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.rounded.NoCell
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.twotone.Cloud
-import androidx.compose.material.icons.twotone.CloudDone
-import androidx.compose.material.icons.twotone.CloudOff
-import androidx.compose.material.icons.twotone.CloudSync
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -55,6 +47,14 @@ import org.meshtastic.core.strings.favorite
 import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.unmessageable
 import org.meshtastic.core.strings.unmonitored_or_infrastructure
+import org.meshtastic.core.ui.icon.CloudDone
+import org.meshtastic.core.ui.icon.CloudOffTwoTone
+import org.meshtastic.core.ui.icon.CloudSync
+import org.meshtastic.core.ui.icon.CloudTwoTone
+import org.meshtastic.core.ui.icon.Favorite
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Unmessageable
+import org.meshtastic.core.ui.icon.VolumeOff
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -76,21 +76,21 @@ fun NodeStatusIcons(
 
         if (isUnmessageable) {
             StatusBadge(
-                imageVector = Icons.Rounded.NoCell,
+                imageVector = MeshtasticIcons.Unmessageable,
                 contentDescription = Res.string.unmessageable,
                 tooltipText = Res.string.unmonitored_or_infrastructure,
             )
         }
         if (isMuted && !isThisNode) {
             StatusBadge(
-                imageVector = Icons.AutoMirrored.Filled.VolumeOff,
+                imageVector = MeshtasticIcons.VolumeOff,
                 contentDescription = Res.string.mute_always,
                 tooltipText = Res.string.mute_always,
             )
         }
         if (isFavorite && !isThisNode) {
             StatusBadge(
-                imageVector = Icons.Rounded.Star,
+                imageVector = MeshtasticIcons.Favorite,
                 contentDescription = Res.string.favorite,
                 tooltipText = Res.string.favorite,
                 tint = MaterialTheme.colorScheme.StatusYellow,
@@ -132,7 +132,7 @@ private fun ThisNodeStatusBadge(connectionState: ConnectionState) {
 @Composable
 private fun ConnectedStatusIcon() {
     Icon(
-        imageVector = Icons.TwoTone.CloudDone,
+        imageVector = MeshtasticIcons.CloudDone,
         contentDescription = stringResource(Res.string.connected),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusGreen,
@@ -142,7 +142,7 @@ private fun ConnectedStatusIcon() {
 @Composable
 private fun ConnectingStatusIcon() {
     Icon(
-        imageVector = Icons.TwoTone.CloudSync,
+        imageVector = MeshtasticIcons.CloudSync,
         contentDescription = stringResource(Res.string.connecting),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusOrange,
@@ -152,7 +152,7 @@ private fun ConnectingStatusIcon() {
 @Composable
 private fun DisconnectedStatusIcon() {
     Icon(
-        imageVector = Icons.TwoTone.CloudOff,
+        imageVector = MeshtasticIcons.CloudOffTwoTone,
         contentDescription = stringResource(Res.string.disconnected),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusRed,
@@ -162,7 +162,7 @@ private fun DisconnectedStatusIcon() {
 @Composable
 private fun DeviceSleepStatusIcon() {
     Icon(
-        imageVector = Icons.TwoTone.Cloud,
+        imageVector = MeshtasticIcons.CloudTwoTone,
         contentDescription = stringResource(Res.string.device_sleeping),
         modifier = Modifier.size(24.dp),
         tint = MaterialTheme.colorScheme.StatusYellow,

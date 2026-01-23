@@ -33,8 +33,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -69,11 +67,16 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.ble_devices
 import org.meshtastic.core.strings.no_pax_metrics_logs
 import org.meshtastic.core.strings.pax
+import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.wifi_devices
+import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.OptionLabel
 import org.meshtastic.core.ui.component.SlidingSelector
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Paxcount
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
@@ -229,7 +232,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                 actions = {
                     if (!state.isLocal) {
                         IconButton(onClick = { metricsViewModel.requestTelemetry(TelemetryType.PAX) }) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
                 },
@@ -329,6 +332,21 @@ fun unescapeProtoString(escaped: String): ByteArray {
         }
     }
     return out.toByteArray()
+}
+
+@Composable
+fun PaxcountInfo(
+    pax: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    IconInfo(
+        modifier = modifier,
+        icon = MeshtasticIcons.Paxcount,
+        contentDescription = stringResource(Res.string.pax_metrics_log),
+        text = pax,
+        contentColor = contentColor,
+    )
 }
 
 @Composable

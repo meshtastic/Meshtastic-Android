@@ -19,9 +19,12 @@ package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.DataArray
 import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material.icons.filled.Grass
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.rounded.SocialDistance
@@ -36,3 +39,6 @@ val MeshtasticIcons.AirQuality: ImageVector get() = Icons.Default.Air
 val MeshtasticIcons.Power: ImageVector get() = Icons.Default.ElectricBolt
 val MeshtasticIcons.Distance: ImageVector get() = Icons.Rounded.SocialDistance
 val MeshtasticIcons.Satellites: ImageVector get() = Icons.TwoTone.SatelliteAlt
+val MeshtasticIcons.DataArray: ImageVector get() = Icons.Default.DataArray
+val MeshtasticIcons.Speed: ImageVector get() = Icons.Default.Speed
+val MeshtasticIcons.Chart: ImageVector get() = Icons.Default.StackedLineChart

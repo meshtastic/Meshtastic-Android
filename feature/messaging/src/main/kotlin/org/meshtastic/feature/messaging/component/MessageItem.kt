@@ -30,16 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.twotone.AddLink
-import androidx.compose.material.icons.twotone.Cloud
-import androidx.compose.material.icons.twotone.CloudDone
-import androidx.compose.material.icons.twotone.CloudOff
-import androidx.compose.material.icons.twotone.CloudUpload
-import androidx.compose.material.icons.twotone.HowToReg
-import androidx.compose.material.icons.twotone.Link
-import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -84,8 +75,14 @@ import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.emoji.EmojiPicker
+import org.meshtastic.core.ui.icon.Cloud
+import org.meshtastic.core.ui.icon.CloudDone
+import org.meshtastic.core.ui.icon.CloudOffTwoTone
+import org.meshtastic.core.ui.icon.CloudSync
+import org.meshtastic.core.ui.icon.CloudTwoTone
 import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
@@ -229,7 +226,7 @@ internal fun MessageItem(
             )
             if (message.viaMqtt) {
                 Icon(
-                    Icons.Default.Cloud,
+                    MeshtasticIcons.Cloud,
                     contentDescription = stringResource(Res.string.via_mqtt),
                     modifier = Modifier.size(16.dp),
                 )
@@ -359,14 +356,14 @@ private enum class ActiveSheet {
 private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val icon =
         when (status) {
-            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-            MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
-            MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
-            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-            else -> Icons.TwoTone.Warning
+            MessageStatus.RECEIVED -> MeshtasticIcons.CloudDone
+            MessageStatus.QUEUED -> MeshtasticIcons.CloudSync
+            MessageStatus.DELIVERED -> MeshtasticIcons.CloudDone
+            MessageStatus.SFPP_ROUTING -> MeshtasticIcons.CloudSync
+            MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.CloudDone
+            MessageStatus.ENROUTE -> MeshtasticIcons.CloudTwoTone
+            MessageStatus.ERROR -> MeshtasticIcons.CloudOffTwoTone
+            else -> MeshtasticIcons.Warning
         }
     Icon(
         imageVector = icon,

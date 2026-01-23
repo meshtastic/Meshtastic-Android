@@ -30,14 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.KeyOff
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -80,9 +73,16 @@ import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_id
 import org.meshtastic.core.strings.via_mqtt
 import org.meshtastic.core.ui.icon.ChannelUtilization
+import org.meshtastic.core.ui.icon.CheckCircle
+import org.meshtastic.core.ui.icon.Cloud
+import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.KeyOff
+import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Role
+import org.meshtastic.core.ui.icon.Verified
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
@@ -108,7 +108,7 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
         Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.KeyOff,
+                    imageVector = MeshtasticIcons.KeyOff,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -160,7 +160,7 @@ private fun NameAndRoleRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.short_name),
             value = node.user.shortName.ifEmpty { "???" },
-            icon = Icons.Default.Person,
+            icon = MeshtasticIcons.Person,
             modifier = Modifier.weight(1f),
         )
         InfoItem(
@@ -196,7 +196,7 @@ private fun HearsAndHopsRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.node_sort_last_heard),
             value = formatAgo(node.lastHeard),
-            icon = Icons.Default.History,
+            icon = MeshtasticIcons.History,
             modifier = Modifier.weight(1f),
         )
         if (node.hopsAway >= 0) {
@@ -218,14 +218,14 @@ private fun UserAndUptimeRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.user_id),
             value = node.user.id,
-            icon = Icons.Default.Person,
+            icon = MeshtasticIcons.Person,
             modifier = Modifier.weight(1f),
         )
         if (node.deviceMetrics.uptimeSeconds > 0) {
             InfoItem(
                 label = stringResource(Res.string.uptime),
                 value = formatUptime(node.deviceMetrics.uptimeSeconds),
-                icon = Icons.Default.CheckCircle,
+                icon = MeshtasticIcons.CheckCircle,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -267,7 +267,7 @@ private fun MqttAndVerificationRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.via_mqtt),
                 value = "Yes",
-                icon = Icons.Default.Cloud,
+                icon = MeshtasticIcons.Cloud,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -277,7 +277,7 @@ private fun MqttAndVerificationRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.supported),
                 value = "Verified",
-                icon = Icons.Default.Verified,
+                icon = MeshtasticIcons.Verified,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -314,7 +314,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Default.Lock,
+                imageVector = MeshtasticIcons.Lock,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),

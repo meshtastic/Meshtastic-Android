@@ -42,16 +42,6 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.Dangerous
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -146,6 +136,17 @@ import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.save
+import org.meshtastic.core.ui.icon.Bluetooth
+import org.meshtastic.core.ui.icon.CheckCircle
+import org.meshtastic.core.ui.icon.CloudDownload
+import org.meshtastic.core.ui.icon.Dangerous
+import org.meshtastic.core.ui.icon.Folder
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.SystemUpdate
+import org.meshtastic.core.ui.icon.Usb
+import org.meshtastic.core.ui.icon.Warning
+import org.meshtastic.core.ui.icon.Wifi
 
 private const val CYCLE_DELAY_MS = 4500L
 
@@ -413,7 +414,7 @@ private fun ReadyState(
             },
             modifier = Modifier.fillMaxWidth().height(56.dp),
         ) {
-            Icon(Icons.Default.Folder, contentDescription = null)
+            Icon(MeshtasticIcons.Folder, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(Res.string.firmware_update_select_file))
         }
@@ -428,10 +429,10 @@ private fun ReadyState(
             Icon(
                 imageVector =
                 when (state.updateMethod) {
-                    FirmwareUpdateMethod.Ble -> Icons.Rounded.Bluetooth
-                    FirmwareUpdateMethod.Usb -> Icons.Rounded.Usb
-                    FirmwareUpdateMethod.Wifi -> Icons.Rounded.Wifi
-                    else -> Icons.Default.SystemUpdate
+                    FirmwareUpdateMethod.Ble -> MeshtasticIcons.Bluetooth
+                    FirmwareUpdateMethod.Usb -> MeshtasticIcons.Usb
+                    FirmwareUpdateMethod.Wifi -> MeshtasticIcons.Wifi
+                    else -> MeshtasticIcons.SystemUpdate
                 },
                 contentDescription = null,
             )
@@ -459,7 +460,7 @@ private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissReques
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.Default.Warning,
+                        MeshtasticIcons.Warning,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.error,
                         modifier = Modifier.size(16.dp),
@@ -616,7 +617,7 @@ private fun BootloaderWarningCard(deviceHardware: DeviceHardware, onDismissForDe
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.Warning,
+                    imageVector = MeshtasticIcons.Warning,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -708,7 +709,7 @@ private fun ProgressContent(
     ) {
         if (isDownloading) {
             Icon(
-                Icons.Default.CloudDownload,
+                MeshtasticIcons.CloudDownload,
                 contentDescription = null,
                 modifier = Modifier.size(48.dp),
                 tint = MaterialTheme.colorScheme.primary,
@@ -818,7 +819,7 @@ private fun CyclingMessages() {
 @Composable
 private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
     Icon(
-        Icons.Default.Warning,
+        MeshtasticIcons.Warning,
         contentDescription = null,
         modifier = Modifier.size(64.dp),
         tint = MaterialTheme.colorScheme.error,
@@ -833,7 +834,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
     Spacer(Modifier.height(32.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         OutlinedButton(onClick = onRetry) {
-            Icon(Icons.Default.Refresh, contentDescription = null)
+            Icon(MeshtasticIcons.Refresh, contentDescription = null)
             Spacer(Modifier.width(8.dp))
             Text(stringResource(Res.string.firmware_update_retry))
         }
@@ -844,7 +845,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
 @Composable
 private fun ErrorState(error: String, onRetry: () -> Unit) {
     Icon(
-        Icons.Default.Dangerous,
+        MeshtasticIcons.Dangerous,
         contentDescription = null,
         modifier = Modifier.size(64.dp),
         tint = MaterialTheme.colorScheme.error,
@@ -858,7 +859,7 @@ private fun ErrorState(error: String, onRetry: () -> Unit) {
     )
     Spacer(Modifier.height(32.dp))
     OutlinedButton(onClick = onRetry) {
-        Icon(Icons.Default.Refresh, contentDescription = null)
+        Icon(MeshtasticIcons.Refresh, contentDescription = null)
         Spacer(Modifier.width(8.dp))
         Text(stringResource(Res.string.firmware_update_retry))
     }
@@ -871,7 +872,7 @@ private fun SuccessState(onDone: () -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Icon(
-            Icons.Default.CheckCircle,
+            MeshtasticIcons.CheckCircle,
             contentDescription = null,
             modifier = Modifier.size(100.dp),
             tint = MaterialTheme.colorScheme.primary,
