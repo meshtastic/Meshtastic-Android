@@ -22,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import com.meshtastic.core.strings.getString
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -90,6 +91,10 @@ fun NodeDetailPresenter(
         remember(nodeId) { meshLogRepository.getLogsFrom(nodeId, PortNum.TRACEROUTE_APP_VALUE) }
             .collectAsState(emptyList())
 
+    val firmwareEdition by
+        remember { meshLogRepository.getMyNodeInfo().map { it?.firmwareEdition }.distinctUntilChanged() }
+            .collectAsState(null)
+
     val stable by firmwareReleaseRepository.stableRelease.collectAsState(null)
     val alpha by firmwareReleaseRepository.alphaRelease.collectAsState(null)
 
@@ -110,6 +115,7 @@ fun NodeDetailPresenter(
             paxLogs,
             tracerouteRequests,
             tracerouteResults,
+            firmwareEdition,
             stable,
             alpha,
             nodeId,
@@ -143,6 +149,7 @@ fun NodeDetailPresenter(
             paxLogs,
             tracerouteRequests,
             tracerouteResults,
+            firmwareEdition,
             stable,
             alpha,
         ) {
@@ -164,6 +171,7 @@ fun NodeDetailPresenter(
                 paxMetrics = paxLogs,
                 tracerouteRequests = tracerouteRequests,
                 tracerouteResults = tracerouteResults,
+                firmwareEdition = firmwareEdition,
                 latestStableFirmware = stable ?: FirmwareRelease(),
                 latestAlphaFirmware = alpha ?: FirmwareRelease(),
             )

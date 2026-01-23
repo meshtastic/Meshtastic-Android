@@ -57,6 +57,9 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 
+private const val EXCHANGE_BUTTON_WEIGHT = 1.1f
+private const val COMPASS_BUTTON_WEIGHT = 0.9f
+
 /**
  * Displays node position details, last update time, distance, and related actions like requesting position and
  * accessing map/position logs.
@@ -152,7 +155,7 @@ private fun PositionActionButtons(
     ) {
         Button(
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(EXCHANGE_BUTTON_WEIGHT),
             shape = MaterialTheme.shapes.large,
             colors =
             ButtonDefaults.buttonColors(
@@ -160,20 +163,30 @@ private fun PositionActionButtons(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
         ) {
-            Icon(Icons.Default.LocationOn, null, Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(text = stringResource(Res.string.exchange_position), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Icon(Icons.Default.LocationOn, null, Modifier.size(18.dp))
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.exchange_position),
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Visible,
+            )
         }
 
         if (hasValidPosition) {
             FilledTonalButton(
                 onClick = { onAction(NodeDetailAction.OpenCompass(node, displayUnits)) },
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(COMPASS_BUTTON_WEIGHT),
                 shape = MaterialTheme.shapes.large,
             ) {
-                Icon(Icons.Default.Explore, null, Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text(text = stringResource(Res.string.open_compass), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Icon(Icons.Default.Explore, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = stringResource(Res.string.open_compass),
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }

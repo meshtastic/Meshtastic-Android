@@ -16,13 +16,15 @@
  */
 package org.meshtastic.feature.node.component
 
+import android.content.ClipData
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -30,14 +32,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun InfoCard(
     text: String,
@@ -47,9 +55,21 @@ fun InfoCard(
     modifier: Modifier = Modifier,
     rotateIcon: Float = 0f,
 ) {
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+    val shape = MaterialTheme.shapes.medium
+
     Card(
-        modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
+        modifier =
+        modifier
+            .clip(shape)
+            .combinedClickable(
+                onLongClick = {
+                    coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(text, value))) }
+                },
+                onClick = {},
+            ),
+        shape = shape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(
@@ -73,19 +93,17 @@ fun InfoCard(
                     modifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
                 )
             }
-            SelectionContainer {
-                Column {
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.labelLargeEmphasized,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    )
-                }
+            Column {
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.labelLargeEmphasized,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }

@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.foundation.layout.Arrangement
+import android.util.Base64
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,13 +24,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyOff
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.SignalCellularAlt
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,34 +42,41 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.details
 import org.meshtastic.core.strings.encryption_error
 import org.meshtastic.core.strings.encryption_error_text
+import org.meshtastic.core.strings.hops_away
+import org.meshtastic.core.strings.node_id
 import org.meshtastic.core.strings.node_number
 import org.meshtastic.core.strings.node_sort_last_heard
+import org.meshtastic.core.strings.public_key
 import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.short_name
+import org.meshtastic.core.strings.snr
+import org.meshtastic.core.strings.supported
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_id
+import org.meshtastic.core.strings.via_mqtt
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
 fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
     SectionCard(title = Res.string.details, modifier = modifier) {
-        SelectionContainer {
-            Column {
-                if (node.mismatchKey) {
-                    MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
-                    Spacer(Modifier.height(16.dp))
-                }
-                MainNodeDetails(node)
+        Column {
+            if (node.mismatchKey) {
+                MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
+                Spacer(Modifier.height(16.dp))
             }
+            MainNodeDetails(node)
         }
     }
 }
@@ -105,58 +115,161 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 
 @Composable
 private fun MainNodeDetails(node: Node) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+    Column {
+        NameAndRoleRow(node)
+        SectionDivider()
+        NodeIdentificationRow(node)
+        SectionDivider()
+        HearsAndHopsRow(node)
+        SectionDivider()
+        UserAndUptimeRow(node)
+        SectionDivider()
+        SignalRow(node)
+        if (node.viaMqtt || node.manuallyVerified) {
+            SectionDivider()
+            MqttAndVerificationRow(node)
+        }
+        val publicKey = node.publicKey ?: node.user.publicKey
+        if (!publicKey.isEmpty) {
+            SectionDivider()
             InfoItem(
-                label = stringResource(Res.string.short_name),
-                value = node.user.shortName.ifEmpty { "???" },
-                icon = Icons.Default.Person,
-                modifier = Modifier.weight(1f),
-            )
-            InfoItem(
-                label = stringResource(Res.string.role),
-                value = node.user.role.name,
-                icon = Icons.Default.Work,
-                modifier = Modifier.weight(1f),
+                label = stringResource(Res.string.public_key),
+                value = Base64.encodeToString(publicKey.toByteArray(), Base64.DEFAULT).trim(),
+                icon = Icons.Default.Lock,
+                valueStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             )
         }
+    }
+}
 
-        SectionDivider()
+@Composable
+private fun NameAndRoleRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        InfoItem(
+            label = stringResource(Res.string.short_name),
+            value = node.user.shortName.ifEmpty { "???" },
+            icon = Icons.Default.Person,
+            modifier = Modifier.weight(1f),
+        )
+        InfoItem(
+            label = stringResource(Res.string.role),
+            value = node.user.role.name,
+            icon = Icons.Default.Work,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
 
-        Row(modifier = Modifier.fillMaxWidth()) {
+@Composable
+private fun NodeIdentificationRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        InfoItem(
+            label = stringResource(Res.string.node_id),
+            value = DataPacket.nodeNumToDefaultId(node.num),
+            icon = Icons.Default.Numbers,
+            modifier = Modifier.weight(1f),
+        )
+        InfoItem(
+            label = stringResource(Res.string.node_number),
+            value = node.num.toUInt().toString(),
+            icon = Icons.Default.Numbers,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun HearsAndHopsRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        InfoItem(
+            label = stringResource(Res.string.node_sort_last_heard),
+            value = formatAgo(node.lastHeard),
+            icon = Icons.Default.History,
+            modifier = Modifier.weight(1f),
+        )
+        if (node.hopsAway >= 0) {
             InfoItem(
-                label = stringResource(Res.string.node_sort_last_heard),
-                value = formatAgo(node.lastHeard),
-                icon = Icons.Default.History,
+                label = stringResource(Res.string.hops_away),
+                value = node.hopsAway.toString(),
+                icon = Icons.Default.SignalCellularAlt,
                 modifier = Modifier.weight(1f),
             )
-            InfoItem(
-                label = stringResource(Res.string.node_number),
-                value = node.num.toUInt().toString(),
-                icon = Icons.Default.Numbers,
-                modifier = Modifier.weight(1f),
-            )
+        } else {
+            Spacer(Modifier.weight(1f))
         }
+    }
+}
 
-        SectionDivider()
-
-        Row(modifier = Modifier.fillMaxWidth()) {
+@Composable
+private fun UserAndUptimeRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        InfoItem(
+            label = stringResource(Res.string.user_id),
+            value = node.user.id,
+            icon = Icons.Default.Person,
+            modifier = Modifier.weight(1f),
+        )
+        if (node.deviceMetrics.uptimeSeconds > 0) {
             InfoItem(
-                label = stringResource(Res.string.user_id),
-                value = node.user.id,
-                icon = Icons.Default.Person,
+                label = stringResource(Res.string.uptime),
+                value = formatUptime(node.deviceMetrics.uptimeSeconds),
+                icon = Icons.Default.CheckCircle,
                 modifier = Modifier.weight(1f),
             )
-            if (node.deviceMetrics.uptimeSeconds > 0) {
-                InfoItem(
-                    label = stringResource(Res.string.uptime),
-                    value = formatUptime(node.deviceMetrics.uptimeSeconds),
-                    icon = Icons.Default.CheckCircle,
-                    modifier = Modifier.weight(1f),
-                )
-            } else {
-                Spacer(Modifier.weight(1f))
-            }
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun SignalRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        if (node.snr != Float.MAX_VALUE) {
+            InfoItem(
+                label = stringResource(Res.string.snr),
+                value = "%.1f dB".format(node.snr),
+                icon = Icons.Default.SignalCellularAlt,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+        if (node.rssi != Int.MAX_VALUE) {
+            InfoItem(
+                label = stringResource(Res.string.rssi),
+                value = "%d dBm".format(node.rssi),
+                icon = Icons.Default.SignalCellularAlt,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun MqttAndVerificationRow(node: Node) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        if (node.viaMqtt) {
+            InfoItem(
+                label = stringResource(Res.string.via_mqtt),
+                value = "Yes",
+                icon = Icons.Default.Cloud,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
+        }
+        if (node.manuallyVerified) {
+            InfoItem(
+                label = stringResource(Res.string.supported),
+                value = "Verified",
+                icon = Icons.Default.Verified,
+                modifier = Modifier.weight(1f),
+            )
+        } else {
+            Spacer(Modifier.weight(1f))
         }
     }
 }

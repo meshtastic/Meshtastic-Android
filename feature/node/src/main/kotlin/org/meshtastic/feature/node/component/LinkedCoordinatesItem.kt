@@ -45,7 +45,6 @@ import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import java.net.URLEncoder
 
@@ -78,7 +77,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
                 if (intent.resolveActivity(context.packageManager) != null) {
                     context.startActivity(intent)
                 } else {
-                    coroutineScope.launch { context.showToast("No application available to open this location!") }
+                    // No toast needed as per user request
                 }
             } catch (ex: ActivityNotFoundException) {
                 Logger.d { "Failed to open geo intent: $ex" }
