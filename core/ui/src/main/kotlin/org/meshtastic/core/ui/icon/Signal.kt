@@ -19,9 +19,9 @@ package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CrueltyFree
+import androidx.compose.material.icons.filled.Radio
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.SsidChart
-import androidx.compose.material.icons.filled.Tsunami
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 val MeshtasticIcons.Hops: ImageVector get() = Icons.Default.CrueltyFree
-val MeshtasticIcons.Channel: ImageVector get() = Icons.Default.Tsunami
+val MeshtasticIcons.Channel: ImageVector get() = Icons.Default.Radio
 val MeshtasticIcons.ChannelUtilization: ImageVector get() = Icons.Default.SignalCellularAlt
 val MeshtasticIcons.AirUtilization: ImageVector get() = Icons.Default.SsidChart
 
