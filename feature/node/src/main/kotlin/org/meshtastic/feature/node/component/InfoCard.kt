@@ -68,16 +68,19 @@ fun InfoCard(
     val copyLabel = stringResource(Res.string.copy)
 
     Card(
-        modifier = modifier.defaultMinSize(minHeight = 48.dp).clip(shape).combinedClickable(
-            onLongClick = {
-                coroutineScope.launch {
-                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(text, value)))
-                }
-            },
-            onLongClickLabel = copyLabel,
-            onClick = {},
-            role = Role.Button
-        ).semantics(mergeDescendants = true) { contentDescription = "$text: $value" },
+        modifier =
+        modifier
+            .defaultMinSize(minHeight = 48.dp)
+            .clip(shape)
+            .combinedClickable(
+                onLongClick = {
+                    coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(text, value))) }
+                },
+                onLongClickLabel = copyLabel,
+                onClick = {},
+                role = Role.Button,
+            )
+            .semantics(mergeDescendants = true) { contentDescription = "$text: $value" },
         shape = shape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
@@ -92,11 +95,24 @@ fun InfoCard(
                 Icon(imageVector = icon, contentDescription = null, modifier = iconModifier, tint = iconTint)
             }
             if (iconRes != null) {
-                Icon(painter = painterResource(iconRes), contentDescription = null, modifier = iconModifier, tint = iconTint)
+                Icon(
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = iconModifier,
+                    tint = iconTint,
+                )
             }
             Column {
-                Text(text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(value, style = MaterialTheme.typography.labelLargeEmphasized, color = MaterialTheme.colorScheme.onSurface)
+                Text(
+                    text,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    value,
+                    style = MaterialTheme.typography.labelLargeEmphasized,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
             }
         }
     }

@@ -73,16 +73,18 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
     val copyLabel = stringResource(Res.string.copy)
 
     BasicListItem(
-        modifier = Modifier.semantics {
+        modifier =
+        Modifier.semantics {
             role = Role.Button
-            customActions = listOf(
-                CustomAccessibilityAction(copyLabel) {
-                    coroutineScope.launch {
-                        clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates)))
-                    }
-                    true
-                }
-            )
+            customActions =
+                listOf(
+                    CustomAccessibilityAction(copyLabel) {
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates)))
+                        }
+                        true
+                    },
+                )
         },
         text = stringResource(Res.string.last_position_update),
         leadingIcon = Icons.Default.LocationOn,
@@ -102,9 +104,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
             }
         },
         onLongClick = {
-            coroutineScope.launch {
-                clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates)))
-            }
+            coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates))) }
         },
     )
 }

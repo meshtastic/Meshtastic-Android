@@ -294,8 +294,8 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
     val copyLabel = stringResource(Res.string.copy)
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier =
+        Modifier.fillMaxWidth()
             .defaultMinSize(minHeight = 48.dp)
             .combinedClickable(
                 onLongClick = {
@@ -305,12 +305,10 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
                 },
                 onLongClickLabel = copyLabel,
                 onClick = {},
-                role = Role.Button
+                role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)
-            .semantics(mergeDescendants = true) {
-                contentDescription = "$label: $publicKeyBase64"
-            }
+            .semantics(mergeDescendants = true) { contentDescription = "$label: $publicKeyBase64" },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(

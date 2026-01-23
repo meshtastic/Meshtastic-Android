@@ -215,9 +215,7 @@ private fun NodeDetailContent(
         } else {
             val loadingDescription = stringResource(Res.string.loading)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    modifier = Modifier.semantics { contentDescription = loadingDescription }
-                )
+                CircularProgressIndicator(modifier = Modifier.semantics { contentDescription = loadingDescription })
             }
         }
     }
@@ -291,11 +289,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp)
-            .focusable(),
+        modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(16.dp).focusable(),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         NodeDetailsSection(node)

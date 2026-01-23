@@ -73,9 +73,10 @@ internal fun SectionCard(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
-                    .semantics { heading() }, // Proper navigation for screen reader users
+                modifier =
+                Modifier.padding(horizontal = 20.dp, vertical = 8.dp).semantics {
+                    heading()
+                }, // Proper navigation for screen reader users
             )
             content()
         }
@@ -96,24 +97,23 @@ internal fun InfoItem(
     val copyLabel = stringResource(Res.string.copy)
 
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 48.dp) // Minimum touch target height
             .combinedClickable(
                 onLongClick = {
-                    coroutineScope.launch {
-                        clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, value)))
-                    }
+                    coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, value))) }
                 },
                 onLongClickLabel = copyLabel, // Clear intent for accessibility
                 onClick = {},
-                role = Role.Button
+                role = Role.Button,
             )
             .padding(horizontal = 20.dp, vertical = 8.dp)
             .semantics(mergeDescendants = true) {
                 // Screen readers read as a unified data unit
                 contentDescription = "$label: $value"
-            }
+            },
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -131,11 +131,7 @@ internal fun InfoItem(
             )
         }
         Spacer(Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = valueStyle,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
+        Text(text = value, style = valueStyle, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
