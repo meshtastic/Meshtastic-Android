@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
@@ -22,16 +21,23 @@ import androidx.compose.material.icons.filled.CrueltyFree
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.SsidChart
 import androidx.compose.material.icons.filled.WifiChannel
+import androidx.compose.material.icons.rounded.Route
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val MeshtasticIcons.Hops: ImageVector get() = Icons.Default.CrueltyFree
-val MeshtasticIcons.Channel: ImageVector get() = Icons.Default.WifiChannel
-val MeshtasticIcons.ChannelUtilization: ImageVector get() = Icons.Default.SignalCellularAlt
-val MeshtasticIcons.AirUtilization: ImageVector get() = Icons.Default.SsidChart
+val MeshtasticIcons.Hops: ImageVector
+    get() = Icons.Default.CrueltyFree
+val MeshtasticIcons.Route: ImageVector
+    get() = Icons.Rounded.Route
+val MeshtasticIcons.Channel: ImageVector
+    get() = Icons.Default.WifiChannel
+val MeshtasticIcons.ChannelUtilization: ImageVector
+    get() = Icons.Default.SignalCellularAlt
+val MeshtasticIcons.AirUtilization: ImageVector
+    get() = Icons.Default.SsidChart
 
 val MeshtasticIcons.SignalCellular0Bar: ImageVector
     get() {

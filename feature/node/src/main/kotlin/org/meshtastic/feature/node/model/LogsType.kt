@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.model
 
 import androidx.compose.material.icons.Icons
@@ -39,9 +38,9 @@ import org.meshtastic.core.strings.position_log
 import org.meshtastic.core.strings.power_metrics_log
 import org.meshtastic.core.strings.sig_metrics_log
 import org.meshtastic.core.strings.traceroute_log
-import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
+import org.meshtastic.core.ui.icon.Route
 
 enum class LogsType(val titleRes: StringResource, val icon: ImageVector, val routeFactory: (Int) -> Route) {
     DEVICE(Res.string.device_metrics_log, Icons.Default.ChargingStation, { NodeDetailRoutes.DeviceMetrics(it) }),
@@ -50,7 +49,7 @@ enum class LogsType(val titleRes: StringResource, val icon: ImageVector, val rou
     ENVIRONMENT(Res.string.env_metrics_log, Icons.Default.Thermostat, { NodeDetailRoutes.EnvironmentMetrics(it) }),
     SIGNAL(Res.string.sig_metrics_log, Icons.Default.SignalCellularAlt, { NodeDetailRoutes.SignalMetrics(it) }),
     POWER(Res.string.power_metrics_log, Icons.Default.Power, { NodeDetailRoutes.PowerMetrics(it) }),
-    TRACEROUTE(Res.string.traceroute_log, MeshtasticIcons.Hops, { NodeDetailRoutes.TracerouteLog(it) }),
+    TRACEROUTE(Res.string.traceroute_log, MeshtasticIcons.Route, { NodeDetailRoutes.TracerouteLog(it) }),
     HOST(Res.string.host_metrics_log, Icons.Default.Memory, { NodeDetailRoutes.HostMetricsLog(it) }),
     PAX(Res.string.pax_metrics_log, MeshtasticIcons.Paxcount, { NodeDetailRoutes.PaxMetrics(it) }),
 }

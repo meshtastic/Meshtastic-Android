@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.MaterialTheme
@@ -30,11 +29,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
-fun HopsInfo(
-    hops: Int,
-    modifier: Modifier = Modifier,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-) {
+fun HopsInfo(hops: Int, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Hops,

@@ -163,10 +163,7 @@ fun NodeItem(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
                     MaterialBatteryInfo(
                         level = thatNode.batteryLevel,

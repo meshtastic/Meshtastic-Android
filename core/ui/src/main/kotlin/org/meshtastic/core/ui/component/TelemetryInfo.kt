@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.MaterialTheme
@@ -129,11 +128,7 @@ fun AirQualityInfo(
 }
 
 @Composable
-fun PowerInfo(
-    value: String,
-    modifier: Modifier = Modifier,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-) {
+fun PowerInfo(value: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Power,
@@ -160,11 +155,7 @@ fun HardwareInfo(
 }
 
 @Composable
-fun RoleInfo(
-    role: String,
-    modifier: Modifier = Modifier,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-) {
+fun RoleInfo(role: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Role,
@@ -176,11 +167,7 @@ fun RoleInfo(
 }
 
 @Composable
-fun NodeIdInfo(
-    id: String,
-    modifier: Modifier = Modifier,
-    contentColor: Color = MaterialTheme.colorScheme.onSurface,
-) {
+fun NodeIdInfo(id: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.NodeId,

@@ -146,7 +146,9 @@ internal fun MessageItem(
                         onCopy = {
                             activeSheet = null
                             coroutineScope.launch {
-                                clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText("message", message.text)))
+                                clipboardManager.setClipEntry(
+                                    ClipEntry(ClipData.newPlainText("message", message.text)),
+                                )
                             }
                         },
                         onSelect = {

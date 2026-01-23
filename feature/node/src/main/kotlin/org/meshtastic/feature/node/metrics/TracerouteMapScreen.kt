@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.layout.Arrangement
@@ -50,8 +49,8 @@ import org.meshtastic.core.strings.traceroute_outgoing_route
 import org.meshtastic.core.strings.traceroute_return_route
 import org.meshtastic.core.strings.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.feature.map.MapView
 import org.meshtastic.feature.map.model.TracerouteOverlay
@@ -172,7 +171,7 @@ private fun TracerouteNodeCount(modifier: Modifier = Modifier, shown: Int, total
 private fun LegendRow(color: Color, label: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            imageVector = MeshtasticIcons.Hops,
+            imageVector = MeshtasticIcons.Route,
             contentDescription = null,
             tint = color,
             modifier = Modifier.padding(end = 8.dp).size(18.dp),

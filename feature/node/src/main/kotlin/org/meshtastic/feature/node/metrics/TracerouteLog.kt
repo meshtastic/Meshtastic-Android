@@ -88,10 +88,10 @@ import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.Group
-import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -366,14 +366,14 @@ private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVecto
 
     routeCount == routeBackCount -> {
         val hops = routeCount - 2
-        pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Hops
+        pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
 
     else -> {
         // Asymmetric route
         val towards = maxOf(0, routeCount - 2)
         val back = maxOf(0, routeBackCount - 2)
-        stringResource(Res.string.traceroute_diff, towards, back) to MeshtasticIcons.Hops
+        stringResource(Res.string.traceroute_diff, towards, back) to MeshtasticIcons.Route
     }
 }
 

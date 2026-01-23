@@ -64,6 +64,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Speed
+import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
@@ -145,7 +146,7 @@ private fun rememberTelemetricFeatures(
         ),
         TelemetricFeature(
             titleRes = LogsType.ENVIRONMENT.titleRes,
-            icon = MeshtasticIcons.AirQuality,
+            icon = MeshtasticIcons.Temperature,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.ENVIRONMENT) },
             logsType = LogsType.ENVIRONMENT,
             content = { EnvironmentMetrics(it, metricsState.displayUnits, metricsState.isFahrenheit) },

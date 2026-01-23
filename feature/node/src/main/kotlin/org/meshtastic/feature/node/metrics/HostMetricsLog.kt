@@ -105,10 +105,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
                 actions = {
                     if (!state.isLocal) {
                         IconButton(onClick = { metricsViewModel.requestTelemetry(TelemetryType.HOST) }) {
-                            Icon(
-                                imageVector = MeshtasticIcons.Refresh,
-                                contentDescription = null,
-                            )
+                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
                 },

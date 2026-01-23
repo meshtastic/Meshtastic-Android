@@ -159,10 +159,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 actions = {
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.DEVICE) }) {
-                            Icon(
-                                imageVector = MeshtasticIcons.Refresh,
-                                contentDescription = null,
-                            )
+                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
                 },
