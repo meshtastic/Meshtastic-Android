@@ -101,14 +101,9 @@ internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
         val channelSpacing = regionInfo.spacing + bw
         // The frequency calculation attempts to match firmware behavior,
         // where channel_num is 0-indexed in the calculation, but 1-indexed in the app's channelNum function.
-        // For amateur radio regions, regionInfo.spacing is not included in the frequency calculation.
         // Firmware example: float freq = myRegion->freqStart + myRegion->spacing + (bw / 2000) + (channel_num *
         // channelSpacing);
-        if (regionInfo.description.contains("Amateur")) {
-            (regionInfo.freqStart + bw / 2) + (channelNum - 1) * channelSpacing
-        } else {
-            (regionInfo.freqStart + regionInfo.spacing + bw / 2) + (channelNum - 1) * channelSpacing
-        }
+        (regionInfo.freqStart + regionInfo.spacing + bw / 2) + (channelNum - 1) * channelSpacing
     } else {
         0f
     }
@@ -343,16 +338,6 @@ enum class RegionInfo(
         wideLora = false,
         spacing = 0.015f,
         defaultPreset = ModemPreset.NARROW_FAST,
-    ),
-
-    /** US 433MHz Amateur Use band */
-    HAM_US433(
-        RegionCode.HAM_US433,
-        "United States 433MHz (Amateur)",
-        430.0f,
-        450.0f,
-        wideLora = false,
-        defaultPreset = ModemPreset.NARROW_SLOW,
     ),
     ;
 
