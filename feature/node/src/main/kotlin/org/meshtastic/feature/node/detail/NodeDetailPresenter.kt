@@ -21,8 +21,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.flow.map
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -47,7 +47,7 @@ import org.meshtastic.proto.Portnums.PortNum
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 @Composable
-@Suppress("LongMethod")
+@Suppress("LongMethod", "FunctionName")
 fun NodeDetailPresenter(
     nodeId: Int?,
     nodeRepository: NodeRepository,
@@ -60,26 +60,43 @@ fun NodeDetailPresenter(
     if (nodeId == null) return NodeDetailUiState()
 
     val ourNode by nodeRepository.ourNodeInfo.collectAsState(null)
-
-    val nodeDb by nodeRepository.nodeDBbyNum.collectAsState(emptyMap())
-    val ourNodeNum = nodeDb.keys.firstOrNull()
+    val ourNodeNum by remember { nodeRepository.nodeDBbyNum.map { it.keys.firstOrNull() } }.collectAsState(null)
 
     val specificNode by remember(nodeId) { nodeRepository.nodeDBbyNum.map { it[nodeId] } }.collectAsState(null)
 
     val myInfo by nodeRepository.myNodeInfo.collectAsState(null)
     val profile by radioConfigRepository.deviceProfileFlow.collectAsState(DeviceProfile.getDefaultInstance())
-    val telemetry by meshLogRepository.getTelemetryFrom(nodeId).collectAsState(emptyList())
-    val packets by meshLogRepository.getMeshPacketsFrom(nodeId).collectAsState(emptyList())
+
+    val telemetry by remember(nodeId) { meshLogRepository.getTelemetryFrom(nodeId) }.collectAsState(emptyList())
+    val packets by remember(nodeId) { meshLogRepository.getMeshPacketsFrom(nodeId) }.collectAsState(emptyList())
     val positionPackets by
-        meshLogRepository.getMeshPacketsFrom(nodeId, PortNum.POSITION_APP_VALUE).collectAsState(emptyList())
-    val paxLogs by meshLogRepository.getLogsFrom(nodeId, PortNum.PAXCOUNTER_APP_VALUE).collectAsState(emptyList())
+        remember(nodeId) { meshLogRepository.getMeshPacketsFrom(nodeId, PortNum.POSITION_APP_VALUE) }
+            .collectAsState(emptyList())
+    val paxLogs by
+        remember(nodeId) { meshLogRepository.getLogsFrom(nodeId, PortNum.PAXCOUNTER_APP_VALUE) }
+            .collectAsState(emptyList())
+
+    val tracerouteRequests by
+        remember(nodeId) {
+            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE).map { logs ->
+                logs.filter { log ->
+                    with(log.fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == nodeId }
+                }
+            }
+        }
+            .collectAsState(emptyList())
+
+    val tracerouteResults by
+        remember(nodeId) { meshLogRepository.getLogsFrom(nodeId, PortNum.TRACEROUTE_APP_VALUE) }
+            .collectAsState(emptyList())
+
     val stable by firmwareReleaseRepository.stableRelease.collectAsState(null)
     val alpha by firmwareReleaseRepository.alphaRelease.collectAsState(null)
 
     val lastTracerouteTime by nodeRequestActions.lastTracerouteTimes.collectAsState(emptyMap())
     val lastRequestNeighborsTime by nodeRequestActions.lastRequestNeighborTimes.collectAsState(emptyMap())
 
-    val fallbackNameString = stringResource(Res.string.fallback_node_name)
+    val fallbackNameString = remember { getString(Res.string.fallback_node_name) }
 
     val metricsState =
         remember(
@@ -91,6 +108,8 @@ fun NodeDetailPresenter(
             packets,
             positionPackets,
             paxLogs,
+            tracerouteRequests,
+            tracerouteResults,
             stable,
             alpha,
             nodeId,
@@ -122,6 +141,8 @@ fun NodeDetailPresenter(
             packets,
             positionPackets,
             paxLogs,
+            tracerouteRequests,
+            tracerouteResults,
             stable,
             alpha,
         ) {
@@ -141,6 +162,8 @@ fun NodeDetailPresenter(
                 signalMetrics = packets.filter { it.rxTime > 0 },
                 positionLogs = positionPackets.mapNotNull { it.toPosition() },
                 paxMetrics = paxLogs,
+                tracerouteRequests = tracerouteRequests,
+                tracerouteResults = tracerouteResults,
                 latestStableFirmware = stable ?: FirmwareRelease(),
                 latestAlphaFirmware = alpha ?: FirmwareRelease(),
             )
