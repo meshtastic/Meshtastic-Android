@@ -17,11 +17,19 @@
 
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fingerprint
+import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Work
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+
+val MeshtasticIcons.HardwareModel: ImageVector get() = Icons.Default.Router
+val MeshtasticIcons.Role: ImageVector get() = Icons.Default.Work
+val MeshtasticIcons.NodeId: ImageVector get() = Icons.Default.Fingerprint
 
 /**
  * This is from Material Symbols.

@@ -47,15 +47,30 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
+import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.strings.unknown_username
+import org.meshtastic.core.ui.component.AirQualityInfo
+import org.meshtastic.core.ui.component.DistanceInfo
+import org.meshtastic.core.ui.component.ElevationInfo
+import org.meshtastic.core.ui.component.HardwareInfo
+import org.meshtastic.core.ui.component.HumidityInfo
+import org.meshtastic.core.ui.component.LastHeardInfo
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.NodeIdInfo
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
+import org.meshtastic.core.ui.component.PaxcountInfo
+import org.meshtastic.core.ui.component.PowerInfo
+import org.meshtastic.core.ui.component.RoleInfo
+import org.meshtastic.core.ui.component.SatelliteCountInfo
 import org.meshtastic.core.ui.component.SignalInfo
+import org.meshtastic.core.ui.component.SoilMoistureInfo
+import org.meshtastic.core.ui.component.SoilTemperatureInfo
+import org.meshtastic.core.ui.component.TemperatureInfo
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
@@ -150,7 +165,6 @@ fun NodeItem(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
@@ -160,6 +174,7 @@ fun NodeItem(
                         contentColor = contentColor,
                     )
                 }
+                Spacer(modifier = Modifier.weight(1f))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -182,32 +197,57 @@ fun NodeItem(
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
-            }
-            val telemetryStrings = thatNode.getTelemetryStrings(tempInFahrenheit)
+            SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
 
-            if (telemetryStrings.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    telemetryStrings.forEach { telemetryString ->
-                        Text(text = telemetryString, style = MaterialTheme.typography.bodySmall, color = contentColor)
+            val env = thatNode.environmentMetrics
+            val pax = thatNode.paxcounter
+            if (thatNode.hasEnvironmentMetrics || pax.ble != 0 || pax.wifi != 0) {
+                Spacer(modifier = Modifier.height(4.dp))
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    itemVerticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (pax.ble != 0 || pax.wifi != 0) {
+                        PaxcountInfo(
+                            pax = "${pax.ble + pax.wifi} (B:${pax.ble}/W:${pax.wifi})",
+                            contentColor = contentColor,
+                        )
+                    }
+                    if (env.temperature != 0f) {
+                        val temp =
+                            if (tempInFahrenheit) {
+                                "%.1f°F".format(celsiusToFahrenheit(env.temperature))
+                            } else {
+                                "%.1f°C".format(env.temperature)
+                            }
+                        TemperatureInfo(temp = temp, contentColor = contentColor)
+                    }
+                    if (env.relativeHumidity != 0f) {
+                        HumidityInfo(humidity = "%.0f%%".format(env.relativeHumidity), contentColor = contentColor)
+                    }
+                    if (env.soilTemperature != 0f) {
+                        val temp =
+                            if (tempInFahrenheit) {
+                                "%.1f°F".format(celsiusToFahrenheit(env.soilTemperature))
+                            } else {
+                                "%.1f°C".format(env.soilTemperature)
+                            }
+                        SoilTemperatureInfo(temp = temp, contentColor = contentColor)
+                    }
+                    if (env.soilMoisture != 0 && env.soilTemperature != 0f) {
+                        SoilMoistureInfo(moisture = "${env.soilMoisture}%", contentColor = contentColor)
+                    }
+                    if (env.voltage != 0f) {
+                        PowerInfo(value = "%.2fV".format(env.voltage), contentColor = contentColor)
+                    }
+                    if (env.current != 0f) {
+                        PowerInfo(value = "%.1fmA".format(env.current), contentColor = contentColor)
+                    }
+                    if (env.iaq != 0) {
+                        AirQualityInfo(iaq = "${env.iaq}", contentColor = contentColor)
                     }
                 }
-            }
-
-            if (!thatNode.nodeStatus.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = thatNode.nodeStatus!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = contentColor,
-                    maxLines = 2,
-                )
             }
 
             Spacer(modifier = Modifier.height(2.dp))
@@ -216,15 +256,9 @@ fun NodeItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val labelStyle =
-                    if (thatNode.isUnknownUser) {
-                        MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic)
-                    } else {
-                        MaterialTheme.typography.labelSmall
-                    }
-                Text(text = thatNode.user.hwModel.name, style = labelStyle)
-                Text(text = thatNode.user.role.name, style = labelStyle)
-                Text(text = thatNode.user.id.ifEmpty { "???" }, style = labelStyle)
+                HardwareInfo(hwModel = thatNode.user.hwModel.name, contentColor = contentColor)
+                RoleInfo(role = thatNode.user.role.name, contentColor = contentColor)
+                NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
             }
         }
     }

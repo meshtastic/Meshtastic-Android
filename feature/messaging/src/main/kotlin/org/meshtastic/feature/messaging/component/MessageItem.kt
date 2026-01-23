@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -52,18 +53,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
@@ -71,7 +74,6 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.filter_message_label
-import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.sample_message
@@ -82,6 +84,8 @@ import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.emoji.EmojiPicker
+import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
@@ -123,7 +127,8 @@ internal fun MessageItem(
     ),
 ) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (activeSheet != null) {
@@ -143,7 +148,9 @@ internal fun MessageItem(
                         onMoreReactions = { activeSheet = ActiveSheet.Emoji },
                         onCopy = {
                             activeSheet = null
-                            clipboardManager.setText(AnnotatedString(message.text))
+                            coroutineScope.launch {
+                                clipboardManager.setClipEntry(ClipEntry(ClipData.newPlainText("message", message.text)))
+                            }
                         },
                         onSelect = {
                             activeSheet = null
@@ -278,10 +285,21 @@ internal fun MessageItem(
                                 Rssi(message.rssi)
                             }
                         } else {
-                            Text(
-                                text = stringResource(Res.string.hops_away_template, message.hopsAway),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.Hops,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = cardColors.contentColor.copy(alpha = 0.7f),
+                                )
+                                Text(
+                                    text = message.hopsAway.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
                         }
                     }
                     if (containsBel) {

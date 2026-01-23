@@ -37,10 +37,7 @@ import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material.icons.filled.Work
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -82,6 +79,10 @@ import org.meshtastic.core.strings.supported
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_id
 import org.meshtastic.core.strings.via_mqtt
+import org.meshtastic.core.ui.icon.ChannelUtilization
+import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
@@ -129,7 +130,6 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
     }
 }
 
-@Suppress("LongMethod")
 @Composable
 private fun MainNodeDetails(node: Node) {
     Column {
@@ -151,19 +151,6 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             PublicKeyItem(publicKey.toByteArray())
         }
-
-        if (!node.nodeStatus.isNullOrEmpty()) {
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                InfoItem(
-                    label = "Status",
-                    value = node.nodeStatus!!,
-                    icon = Icons.Default.CheckCircle,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-        }
     }
 }
 
@@ -179,7 +166,7 @@ private fun NameAndRoleRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.role),
             value = node.user.role.name,
-            icon = Icons.Default.Work,
+            icon = MeshtasticIcons.Role,
             modifier = Modifier.weight(1f),
         )
     }
@@ -216,7 +203,7 @@ private fun HearsAndHopsRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.hops_away),
                 value = node.hopsAway.toString(),
-                icon = Icons.Default.SignalCellularAlt,
+                icon = MeshtasticIcons.Hops,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -254,7 +241,7 @@ private fun SignalRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.snr),
                 value = "%.1f dB".format(node.snr),
-                icon = Icons.Default.SignalCellularAlt,
+                icon = MeshtasticIcons.ChannelUtilization,
                 modifier = Modifier.weight(1f),
             )
         } else {
@@ -264,7 +251,7 @@ private fun SignalRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.rssi),
                 value = "%d dBm".format(node.rssi),
-                icon = Icons.Default.SignalCellularAlt,
+                icon = MeshtasticIcons.ChannelUtilization,
                 modifier = Modifier.weight(1f),
             )
         } else {
