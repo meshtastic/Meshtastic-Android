@@ -51,13 +51,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.loading
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.feature.node.compass.CompassUiState
@@ -208,7 +213,12 @@ private fun NodeDetailContent(
                 onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },
             )
         } else {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+            val loadingDescription = stringResource(Res.string.loading)
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    modifier = Modifier.semantics { contentDescription = loadingDescription }
+                )
+            }
         }
     }
 }
@@ -281,7 +291,11 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(16.dp).focusable(),
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp)
+            .focusable(),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         NodeDetailsSection(node)

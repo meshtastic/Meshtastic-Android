@@ -16,13 +16,18 @@
  */
 package org.meshtastic.feature.node.component
 
+import android.content.ClipData
 import android.util.Base64
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
@@ -40,16 +45,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.details
 import org.meshtastic.core.strings.encryption_error
 import org.meshtastic.core.strings.encryption_error_text
@@ -92,7 +107,7 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.KeyOff,
-                    contentDescription = stringResource(Res.string.encryption_error),
+                    contentDescription = null,
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
                 Spacer(Modifier.width(12.dp))
@@ -132,12 +147,7 @@ private fun MainNodeDetails(node: Node) {
         val publicKey = node.publicKey ?: node.user.publicKey
         if (!publicKey.isEmpty) {
             SectionDivider()
-            InfoItem(
-                label = stringResource(Res.string.public_key),
-                value = Base64.encodeToString(publicKey.toByteArray(), Base64.DEFAULT).trim(),
-                icon = Icons.Default.Lock,
-                valueStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            )
+            PublicKeyItem(publicKey.toByteArray())
         }
     }
 }
@@ -271,5 +281,57 @@ private fun MqttAndVerificationRow(node: Node) {
         } else {
             Spacer(Modifier.weight(1f))
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun PublicKeyItem(publicKeyBytes: ByteArray) {
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+    val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.DEFAULT).trim()
+    val label = stringResource(Res.string.public_key)
+    val copyLabel = stringResource(Res.string.copy)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 48.dp)
+            .combinedClickable(
+                onLongClick = {
+                    coroutineScope.launch {
+                        clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, publicKeyBase64)))
+                    }
+                },
+                onLongClickLabel = copyLabel,
+                onClick = {},
+                role = Role.Button
+            )
+            .padding(horizontal = 20.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) {
+                contentDescription = "$label: $publicKeyBase64"
+            }
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = publicKeyBase64,
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }

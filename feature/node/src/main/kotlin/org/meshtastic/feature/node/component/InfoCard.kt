@@ -23,6 +23,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
@@ -42,8 +43,14 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.copy
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -58,17 +65,19 @@ fun InfoCard(
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val shape = MaterialTheme.shapes.medium
+    val copyLabel = stringResource(Res.string.copy)
 
     Card(
-        modifier =
-        modifier
-            .clip(shape)
-            .combinedClickable(
-                onLongClick = {
-                    coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(text, value))) }
-                },
-                onClick = {},
-            ),
+        modifier = modifier.defaultMinSize(minHeight = 48.dp).clip(shape).combinedClickable(
+            onLongClick = {
+                coroutineScope.launch {
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(text, value)))
+                }
+            },
+            onLongClickLabel = copyLabel,
+            onClick = {},
+            role = Role.Button
+        ).semantics(mergeDescendants = true) { contentDescription = "$text: $value" },
         shape = shape,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
@@ -77,33 +86,17 @@ fun InfoCard(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            icon?.let {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = text,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
-                )
+            val iconModifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) }
+            val iconTint = MaterialTheme.colorScheme.primary
+            if (icon != null) {
+                Icon(imageVector = icon, contentDescription = null, modifier = iconModifier, tint = iconTint)
             }
-            iconRes?.let {
-                Icon(
-                    painter = painterResource(id = iconRes),
-                    contentDescription = text,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
-                )
+            if (iconRes != null) {
+                Icon(painter = painterResource(iconRes), contentDescription = null, modifier = iconModifier, tint = iconTint)
             }
             Column {
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.labelLargeEmphasized,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
+                Text(text, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(value, style = MaterialTheme.typography.labelLargeEmphasized, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }

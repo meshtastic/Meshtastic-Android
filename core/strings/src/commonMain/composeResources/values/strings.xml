@@ -1147,4 +1147,5 @@
     <string name="add_channels_description">The following channels were found in the QR code. Select the once you would like to add to your device. Existing channels will be preserved.</string>
     <string name="replace_channels_and_settings_title">Replace Channels &amp; Settings</string>
     <string name="replace_channels_and_settings_description">This QR code contains a complete configuration. This will REPLACE your existing channels and radio settings. All existing channels will be removed.</string>
+    <string name="loading">Loading</string>
 </resources>
