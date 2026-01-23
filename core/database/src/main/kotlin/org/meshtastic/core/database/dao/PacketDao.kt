@@ -400,28 +400,32 @@ interface PacketDao {
     @Transaction
     suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) {
         // Pre-calculate mapping from old index to new index
-        val indexMap = oldSettings.mapIndexed { oldIndex, oldChannel ->
-            val pskMatches = newSettings.mapIndexedNotNull { index, channel ->
-                if (channel.psk == oldChannel.psk) index to channel else null
-            }
+        val indexMap =
+            oldSettings
+                .mapIndexed { oldIndex, oldChannel ->
+                    val pskMatches =
+                        newSettings.mapIndexedNotNull { index, channel ->
+                            if (channel.psk == oldChannel.psk) index to channel else null
+                        }
 
-            val newIndex = when {
-                pskMatches.isEmpty() -> null
-                pskMatches.size == 1 -> pskMatches.first().first
-                else -> {
-                    // Multiple matches with same PSK. Disambiguate by Name.
-                    val nameMatches = pskMatches.filter { it.second.name == oldChannel.name }
-                    if (nameMatches.size == 1) {
-                        nameMatches.first().first
-                    } else {
-                        // Still ambiguous. Prefer keeping same index.
-                        pskMatches.find { it.first == oldIndex }?.first
-                            ?: pskMatches.first().first
-                    }
+                    val newIndex =
+                        when {
+                            pskMatches.isEmpty() -> null
+                            pskMatches.size == 1 -> pskMatches.first().first
+                            else -> {
+                                // Multiple matches with same PSK. Disambiguate by Name.
+                                val nameMatches = pskMatches.filter { it.second.name == oldChannel.name }
+                                if (nameMatches.size == 1) {
+                                    nameMatches.first().first
+                                } else {
+                                    // Still ambiguous. Prefer keeping same index.
+                                    pskMatches.find { it.first == oldIndex }?.first ?: pskMatches.first().first
+                                }
+                            }
+                        }
+                    oldIndex to newIndex
                 }
-            }
-            oldIndex to newIndex
-        }.toMap()
+                .toMap()
 
         val allPackets = getAllUserPacketsForMigration()
         for (packet in allPackets) {
