@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("Wrapping", "SpacingAroundColon")
 
 package com.geeksville.mesh.navigation
@@ -35,6 +34,7 @@ import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.feature.settings.AboutScreen
 import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.debugging.DebugScreen
+import org.meshtastic.feature.settings.filter.FilterSettingsScreen
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
@@ -175,6 +175,8 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
         }
 
         composable<SettingsRoutes.About> { AboutScreen(onNavigateUp = navController::navigateUp) }
+
+        composable<SettingsRoutes.FilterSettings> { FilterSettingsScreen(onBack = navController::navigateUp) }
     }
 }
 

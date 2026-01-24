@@ -38,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
@@ -346,6 +347,14 @@ fun SettingsScreen(
                     trailingIcon = null,
                 ) {
                     showThemePickerDialog = true
+                }
+
+                ListItem(
+                    text = "Message Filter",
+                    leadingIcon = Icons.Rounded.FilterList,
+                    trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                ) {
+                    onNavigate(SettingsRoutes.FilterSettings)
                 }
 
                 // Node DB cache limit (App setting)

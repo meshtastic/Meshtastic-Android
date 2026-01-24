@@ -350,7 +350,7 @@ constructor(
         val history =
             packetRepository
                 .get()
-                .getMessagesFrom(contactKey) { nodeId ->
+                .getMessagesFrom(contactKey, includeFiltered = false) { nodeId ->
                     if (nodeId == DataPacket.ID_LOCAL) {
                         ourNode ?: nodeRepository.get().getNode(nodeId)
                     } else {

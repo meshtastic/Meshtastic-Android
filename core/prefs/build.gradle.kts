@@ -40,4 +40,9 @@ plugins {
 
 configure<LibraryExtension> { namespace = "org.meshtastic.core.prefs" }
 
-dependencies { googleImplementation(libs.maps.compose) }
+dependencies {
+    googleImplementation(libs.maps.compose)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+}
