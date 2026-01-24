@@ -190,4 +190,5 @@
     <string name="firmware_update_failed">التحديث فشل</string>
     <string name="interval_unset">إلغاء تعيين</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

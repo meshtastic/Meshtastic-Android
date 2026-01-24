@@ -1097,4 +1097,20 @@
     <string name="add_channels_description">QR-koodista löydettiin seuraavat kanavat. Valitse ne, jotka haluat lisätä laitteeseesi. Olemassa olevat kanavat säilytetään.</string>
     <string name="replace_channels_and_settings_title">Korvaa kanavan &amp; asetukset</string>
     <string name="replace_channels_and_settings_description">Tämä QR-koodi sisältää täydellisen määrityksen. Se KORVAA nykyiset kanava- ja radioasetuksesi. Kaikki olemassa olevat kanavat poistetaan.</string>
+    <!-- Message Filter -->
+    <string name="filter_settings">Viestien suodatin</string>
+    <string name="filter_enable">Ota suodatus käyttöön</string>
+    <string name="filter_enable_summary">Piilota suodatussanoja sisältävät viestit</string>
+    <string name="filter_words">Suodata sanoja</string>
+    <string name="filter_words_summary">Näitä sanoja sisältävät viestit piilotetaan</string>
+    <string name="filter_add_placeholder">Lisää sana tai regex-sääntö</string>
+    <string name="filter_no_words">Suodatussanoja ei ole asetettu</string>
+    <string name="filter_regex_pattern">Regex-sääntö</string>
+    <string name="filter_whole_word">Koko sanan täsmäys</string>
+    <string name="filter_filtered_count">%1$d suodatettu</string>
+    <string name="filter_show_count">Näytä %1$d suodatettu</string>
+    <string name="filter_hide_count">Piilota %1$d suodatettu</string>
+    <string name="filter_message_label">Suodatettu</string>
+    <string name="filter_enable_for_contact">Ota suodatus käyttöön</string>
+    <string name="filter_disable_for_contact">Poista suodatus käytöstä</string>
 </resources>

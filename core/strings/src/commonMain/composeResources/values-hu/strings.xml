@@ -948,4 +948,5 @@
     <string name="interval_unset">Nincs beállítva</string>
     <!-- Compass -->
     <string name="now">Most</string>
+    <!-- Message Filter -->
 </resources>

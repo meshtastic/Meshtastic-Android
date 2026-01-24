@@ -960,4 +960,5 @@
     <!-- Compass -->
     <string name="now">Adesso</string>
     <string name="add_channels_title">Aggiungi canali</string>
+    <!-- Message Filter -->
 </resources>

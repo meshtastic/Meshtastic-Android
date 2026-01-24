@@ -138,4 +138,5 @@
     <string name="firmware_update_failed">Actualizare eșuată</string>
     <string name="interval_unset">Nesetat</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

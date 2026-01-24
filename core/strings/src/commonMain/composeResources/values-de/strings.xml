@@ -1096,4 +1096,5 @@
     <string name="add_channels_description">Die folgenden Kanäle wurden im QR-Code gefunden. Wählen Sie, welche Sie Ihrem Gerät hinzufügen möchten. Vorhandene Kanäle werden beibehalten.</string>
     <string name="replace_channels_and_settings_title">Kanaleinstellungen für &amp; ersetzen</string>
     <string name="replace_channels_and_settings_description">Dieser QR-Code enthält eine komplette Konfiguration. Hierdurch werden Ihre bestehenden Kanäle und Funkeinstellungen ersetzt. Alle vorhandenen Kanäle werden entfernt.</string>
+    <!-- Message Filter -->
 </resources>

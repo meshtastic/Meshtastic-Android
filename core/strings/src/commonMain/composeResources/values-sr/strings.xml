@@ -457,4 +457,5 @@
     <string name="interval_always_on">Увек укључен</string>
     <!-- Compass -->
     <string name="add_channels_title">Додај канале</string>
+    <!-- Message Filter -->
 </resources>

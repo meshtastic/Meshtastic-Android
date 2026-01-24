@@ -259,4 +259,5 @@
     <string name="firmware_update_failed">Oppdatering feilet</string>
     <string name="interval_unset">Lås opp</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

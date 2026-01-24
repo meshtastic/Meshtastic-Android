@@ -236,4 +236,5 @@
     <string name="firmware_update_failed">Përditësimi dështoi</string>
     <string name="interval_unset">I pa konfiguruar</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>
