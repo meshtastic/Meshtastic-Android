@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
@@ -68,8 +68,10 @@ fun NodeStatusIcons(
     isFavorite: Boolean,
     isMuted: Boolean,
     connectionState: ConnectionState,
+    modifier: Modifier = Modifier,
+    contentColor: Color = LocalContentColor.current,
 ) {
-    Row(modifier = Modifier.padding(4.dp)) {
+    Row(modifier = modifier.padding(4.dp)) {
         if (isThisNode) {
             ThisNodeStatusBadge(connectionState)
         }
@@ -79,6 +81,7 @@ fun NodeStatusIcons(
                 imageVector = MeshtasticIcons.Unmessageable,
                 contentDescription = Res.string.unmessageable,
                 tooltipText = Res.string.unmonitored_or_infrastructure,
+                tint = contentColor,
             )
         }
         if (isMuted && !isThisNode) {
@@ -86,6 +89,7 @@ fun NodeStatusIcons(
                 imageVector = MeshtasticIcons.VolumeOff,
                 contentDescription = Res.string.mute_always,
                 tooltipText = Res.string.mute_always,
+                tint = contentColor,
             )
         }
         if (isFavorite && !isThisNode) {
@@ -175,21 +179,19 @@ private fun StatusBadge(
     imageVector: ImageVector,
     contentDescription: StringResource,
     tooltipText: StringResource,
-    tint: Color = Color.Unspecified,
+    tint: Color = LocalContentColor.current,
 ) {
     TooltipBox(
         positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
         tooltip = { PlainTooltip { Text(stringResource(tooltipText)) } },
         state = rememberTooltipState(),
     ) {
-        IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = stringResource(contentDescription),
-                modifier = Modifier.size(24.dp),
-                tint = tint,
-            )
-        }
+        Icon(
+            imageVector = imageVector,
+            contentDescription = stringResource(contentDescription),
+            modifier = Modifier.size(24.dp),
+            tint = tint,
+        )
     }
 }
 

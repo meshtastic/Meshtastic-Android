@@ -20,7 +20,6 @@ import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -95,11 +94,21 @@ fun NodeItem(
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val longName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+    val originalLongName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+    val longName =
+        remember(originalLongName) {
+            if (originalLongName.length > 20) {
+                "${originalLongName.take(20)}…"
+            } else {
+                originalLongName
+            }
+        }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
-        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
+        remember(thisNode, thatNode) {
+            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
+        }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -112,7 +121,8 @@ fun NodeItem(
                 val alpha = if (isActive) ACTIVE_ALPHA else INACTIVE_ALPHA
                 val containerColor = Color(it).copy(alpha = alpha)
                 contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
+                CardDefaults.cardColors()
+                    .copy(containerColor = containerColor, contentColor = contentColor)
             } ?: (CardDefaults.cardColors())
 
     val style =
@@ -130,12 +140,23 @@ fun NodeItem(
             }
         }
 
-    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 80.dp),
+        colors = cardColors
+    ) {
         Column(
             modifier =
-            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+                Modifier
+                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                    .fillMaxWidth()
+                    .padding(8.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 NodeChip(node = thatNode)
 
                 NodeKeyStatusIcon(
@@ -158,12 +179,17 @@ fun NodeItem(
                     isMuted = isMuted,
                     isUnmessageable = unmessageable,
                     connectionState = connectionState,
+                    contentColor = contentColor,
                 )
             }
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
                     MaterialBatteryInfo(
                         level = thatNode.batteryLevel,
@@ -171,39 +197,30 @@ fun NodeItem(
                         contentColor = contentColor,
                     )
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (distance != null) {
-                        DistanceInfo(distance = distance, contentColor = contentColor)
-                    }
-                    thatNode.validPosition?.let { position ->
-                        ElevationInfo(
-                            altitude = position.altitude,
-                            system = system,
-                            suffix = stringResource(Res.string.elevation_suffix),
-                            contentColor = contentColor,
-                        )
-                        val satCount = position.satsInView
-                        if (satCount > 0) {
-                            SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
-                        }
+                if (distance != null) {
+                    DistanceInfo(distance = distance, contentColor = contentColor)
+                }
+                thatNode.validPosition?.let { position ->
+                    ElevationInfo(
+                        altitude = position.altitude,
+                        system = system,
+                        suffix = stringResource(Res.string.elevation_suffix),
+                        contentColor = contentColor,
+                    )
+                    val satCount = position.satsInView
+                    if (satCount > 0) {
+                        SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
             SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
-
             val env = thatNode.environmentMetrics
             val pax = thatNode.paxcounter
             if (thatNode.hasEnvironmentMetrics || pax.ble != 0 || pax.wifi != 0) {
-                Spacer(modifier = Modifier.height(4.dp))
-                FlowRow(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    itemVerticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (pax.ble != 0 || pax.wifi != 0) {
                         PaxcountInfo(
@@ -221,7 +238,10 @@ fun NodeItem(
                         TemperatureInfo(temp = temp, contentColor = contentColor)
                     }
                     if (env.relativeHumidity != 0f) {
-                        HumidityInfo(humidity = "%.0f%%".format(env.relativeHumidity), contentColor = contentColor)
+                        HumidityInfo(
+                            humidity = "%.0f%%".format(env.relativeHumidity),
+                            contentColor = contentColor
+                        )
                     }
                     if (env.soilTemperature != 0f) {
                         val temp =
@@ -233,7 +253,10 @@ fun NodeItem(
                         SoilTemperatureInfo(temp = temp, contentColor = contentColor)
                     }
                     if (env.soilMoisture != 0 && env.soilTemperature != 0f) {
-                        SoilMoistureInfo(moisture = "${env.soilMoisture}%", contentColor = contentColor)
+                        SoilMoistureInfo(
+                            moisture = "${env.soilMoisture}%",
+                            contentColor = contentColor
+                        )
                     }
                     if (env.voltage != 0f) {
                         PowerInfo(value = "%.2fV".format(env.voltage), contentColor = contentColor)
@@ -267,7 +290,13 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, connectionState = ConnectionState.Connected)
+        NodeItem(
+            thisNode = thisNode,
+            thatNode = thatNode,
+            0,
+            true,
+            connectionState = ConnectionState.Connected
+        )
     }
 }
 
