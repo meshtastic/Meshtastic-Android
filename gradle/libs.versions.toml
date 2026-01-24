@@ -27,7 +27,7 @@ mockk = "1.14.7"
 compose-multiplatform = "1.10.0"
 
 # Google
-hilt = "2.58"
+hilt = "2.59"
 maps-compose = "7.0.0"
 
 # Networking
