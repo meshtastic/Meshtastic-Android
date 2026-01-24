@@ -731,6 +731,8 @@
     <string name="user_id">Kasutaja ID</string>
     <string name="uptime">Töötamise aeg</string>
     <string name="load_indexed">Lae %1$d</string>
+    <string name="fetching_channel_indexed">Kanali %1$d/%2$d laadimine</string>
+    <string name="fetching_config">Laen %1$s</string>
     <string name="disk_free_indexed">Vaba kettamaht %1$d</string>
     <string name="timestamp">Ajatempel</string>
     <string name="heading">Päis</string>
