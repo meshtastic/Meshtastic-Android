@@ -43,6 +43,9 @@
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
     <string name="message_retry_count">Повторни опити: %1$d / %2$d</string>
+    <string name="retry_dialog_title">Съобщението не е изпратено</string>
+    <string name="retry_dialog_message">Повторен опит след %1$d секунди… (Опит %2$d от %3$d)</string>
+    <string name="retry_dialog_reaction_message">Повторен опит за реакция след %1$d секунди… (Опит %2$d от %3$d)</string>
     <string name="retry_dialog_confirm">Опитайте отново сега</string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
