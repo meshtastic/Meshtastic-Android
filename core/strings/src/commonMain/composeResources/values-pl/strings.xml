@@ -333,7 +333,6 @@
     <string name="encryption_pkc_text">Bezpośrednie wiadomości wykorzystują nową infrastrukturę klucza publicznego do szyfrowania.</string>
     <string name="encryption_error">Niezgodność klucza publicznego</string>
     <string name="encryption_error_text">Klucz publiczny nie pasuje do otrzymanego wcześniej klucza. Możesz usunąć węzeł i pozwolić na ponowną wymianę kluczy, ale może również wskazywać to na poważniejszy problem z bezpieczeństwem. Skontaktuj się z użytkownikiem za pomocą innego zaufanego kanału, aby ustalić, czy zmiana klucza była spowodowana przywróceniem ustawień fabrycznych czy innym działaniem.</string>
-    <string name="exchange_userinfo">Poproś o informacje</string>
     <string name="meshtastic_new_nodes_notifications">Powiadomienia o nowych węzłach</string>
     <string name="more_details">Więcej…</string>
     <string name="snr">SNR:</string>
@@ -341,12 +340,9 @@
     <string name="rssi">RSSI:</string>
     <string name="rssi_definition">Received Signal Strength Indicator - miara używana do określenia poziomu mocy odbieranej przez antenę. Wyższa wartość RSSI zazwyczaj oznacza silniejsze i bardziej stabilne połączenie.</string>
     <string name="iaq_definition">Jakość powietrza w pomieszczeniach (Indoor Air Quality) - wartość względna w skali IAQ mierzona czujnikiem BME680. Zakres wartości: 0–500.</string>
-    <string name="device_metrics_log">Historia telemetrii</string>
     <string name="node_map">Ślad na mapie</string>
-    <string name="position_log">Historia pozycji</string>
+    <string name="position_log">Pozycjonowanie</string>
     <string name="last_position_update">Ostatnia aktualizacja lokalizacji</string>
-    <string name="env_metrics_log">Historia danych otoczenia</string>
-    <string name="sig_metrics_log">Historia danych sygnału</string>
     <string name="administration">Zarządzanie</string>
     <string name="remote_admin">Zdalne zarządzanie</string>
     <string name="bad">słaby</string>
@@ -356,7 +352,7 @@
     <string name="share_to">Udostępnij…</string>
     <string name="signal">Sygnał:</string>
     <string name="signal_quality">Jakość sygnału</string>
-    <string name="traceroute_log">Historia sprawdzania trasy</string>
+    <string name="traceroute_log">Pokaż trasę</string>
     <string name="traceroute_direct">Bezpośrednio</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
@@ -381,7 +377,6 @@
     <string name="remove_favorite">Usuń z ulubionych</string>
     <string name="favorite_add">Dodać węzeł '%1$s' do ulubionych?</string>
     <string name="favorite_remove">Usunąć węzeł '%1$s' z ulubionych?</string>
-    <string name="power_metrics_log">Historia zasilania</string>
     <string name="channel_1">Kanał 1</string>
     <string name="channel_2">Kanał 2</string>
     <string name="channel_3">Kanał 3</string>

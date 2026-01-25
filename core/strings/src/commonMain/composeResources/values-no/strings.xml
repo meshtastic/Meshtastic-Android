@@ -213,11 +213,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">\"Received Signal Strength Indicator\", en måling som brukes til å bestemme strømnivået som mottas av antennen. Høyere RSSI verdi indikerer generelt en sterkere og mer stabil forbindelse.</string>
     <string name="iaq_definition">(Innendørs luftkvalitet) relativ skala IAQ-verdi målt ved Bosch BME680. Verdi 0–500.</string>
-    <string name="device_metrics_log">Enhetens måltallslogg</string>
     <string name="node_map">Nodekart</string>
-    <string name="position_log">Posisjonslogg</string>
-    <string name="env_metrics_log">Logg for miljømåltall</string>
-    <string name="sig_metrics_log">Signale måltallslogg</string>
     <string name="administration">Administrasjon</string>
     <string name="remote_admin">Fjernadministrasjon</string>
     <string name="bad">Dårlig</string>
@@ -227,7 +223,7 @@
     <string name="share_to">Del med…</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalstyrke</string>
-    <string name="traceroute_log">Sporingslogg</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Direkte</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hopp</item>

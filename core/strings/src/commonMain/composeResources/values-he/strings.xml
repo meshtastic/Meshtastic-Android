@@ -138,6 +138,7 @@
     <string name="waypoint_new">נקודת ציון חדשה</string>
     <string name="waypoint_received">התקבל נקודת ציון: %1$s</string>
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
+    <string name="traceroute_log">בדיקת מסלול</string>
     <string name="messages">הודעות</string>
     <string name="region_frequency_plan">אזור</string>
     <string name="distance">מרחק</string>

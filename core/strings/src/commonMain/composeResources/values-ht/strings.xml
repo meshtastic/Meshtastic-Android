@@ -204,11 +204,7 @@
     <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
-    <string name="device_metrics_log">Jounal Metik Aparèy</string>
     <string name="node_map">Kat Nœud</string>
-    <string name="position_log">Jounal Pozisyon</string>
-    <string name="env_metrics_log">Jounal Metik Anviwònman</string>
-    <string name="sig_metrics_log">Jounal Metik Siynal</string>
     <string name="administration">Administrasyon</string>
     <string name="remote_admin">Administrasyon Remote</string>
     <string name="bad">Move</string>
@@ -217,7 +213,6 @@
     <string name="none_quality">Pa gen</string>
     <string name="signal">Siynal</string>
     <string name="signal_quality">Kalite Siynal</string>
-    <string name="traceroute_log">Jounal Traceroute</string>
     <string name="traceroute_direct">Direk</string>
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
     <string name="region_frequency_plan">Rejyon</string>

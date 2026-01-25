@@ -125,6 +125,7 @@
     <string name="waypoint_new">Nýr leiðarpunktur</string>
     <string name="waypoint_received">Móttekin leiðarpunktur: %1$s</string>
     <string name="error_duty_cycle">Hámarsksendingartíma náð. Ekki hægt að senda skilaboð, vinsamlegast reynið aftur síðar.</string>
+    <string name="traceroute_log">Ferilkönnun</string>
     <string name="region_frequency_plan">Svæði</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->

@@ -364,7 +364,6 @@
     <string name="encryption_pkc_text">A közvetlen üzenetek az új nyilvános kulcsú infrastruktúrát használják titkosításhoz.</string>
     <string name="encryption_error">Publikus kulcs nem egyezik</string>
     <string name="encryption_error_text">A nyilvános kulcs nem egyezik a rögzített kulccsal. Eltávolíthatod a csomópontot, hogy újra kulcsot cseréljen, de ez komolyabb biztonsági problémát jelezhet. Lépj kapcsolatba a felhasználóval egy megbízható csatornán, hogy kiderítsd, a kulcscsere gyári visszaállítás vagy más szándékos művelet miatt történt-e.</string>
-    <string name="exchange_userinfo">Felhasználói adatok cseréje</string>
     <string name="meshtastic_new_nodes_notifications">Új állomás értesítések</string>
     <string name="more_details">Több részlet</string>
     <string name="snr">SNR</string>
@@ -372,12 +371,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vett jelerősség-mutató (RSSI): az antenna által vett jel teljesítményszintjének mérése. A magasabb RSSI általában erősebb, stabilabb kapcsolatot jelez.</string>
     <string name="iaq_definition">(Beltéri levegőminőség) relatív IAQ érték a Bosch BME680 szenzor alapján. Értéktartomány: 0–500.</string>
-    <string name="device_metrics_log">Eszközmérő Napló</string>
+    <string name="device_metrics_log">Eszközmetrikák</string>
     <string name="node_map">Állomás Térkép</string>
-    <string name="position_log">Pozíciónapló</string>
+    <string name="position_log">Pozíció</string>
     <string name="last_position_update">Utolsó pozíciófrissítés</string>
-    <string name="env_metrics_log">Környezeti Mérés Napló</string>
-    <string name="sig_metrics_log">Jelminőség Napló</string>
+    <string name="env_metrics_log">Környezeti metrikák</string>
     <string name="administration">Adminisztráció</string>
     <string name="remote_admin">Távoli Adminisztráció</string>
     <string name="bad">Rossz</string>
@@ -387,7 +385,7 @@
     <string name="share_to">Megosztás…</string>
     <string name="signal">Jel</string>
     <string name="signal_quality">Jelminőség</string>
-    <string name="traceroute_log">Traceroute napló</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Közvetlen</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 ugrás</item>
@@ -415,7 +413,7 @@
     <string name="remove_favorite">Eltávolítás a kedvencek közül</string>
     <string name="favorite_add">Hozzáadod „%1$s”-t kedvenc csomópontként?</string>
     <string name="favorite_remove">Eltávolítod „%1$s”-t a kedvencek közül?</string>
-    <string name="power_metrics_log">Energia-mérési napló</string>
+    <string name="power_metrics_log">Tápellátási metrikák</string>
     <string name="channel_1">1. csatorna</string>
     <string name="channel_2">2. csatorna</string>
     <string name="channel_3">3. csatorna</string>
@@ -745,7 +743,6 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">12 órás időformátum használata</string>
     <string name="display_time_in_12h_format">Engedélyezéskor az eszköz 12 órás formátumban jeleníti meg az időt a kijelzőn.</string>
-    <string name="host_metrics_log">Gazdagép-metrika napló</string>
     <string name="host">Gazdagép</string>
     <string name="free_memory">Szabad memória</string>
     <string name="disk_free">Szabad lemezterület</string>
@@ -834,9 +831,7 @@
     <string name="clear_selection">Kijelölés törlése</string>
     <string name="message_input_label">Üzenet</string>
     <string name="type_a_message">Írj üzenetet</string>
-    <string name="pax_metrics_log">PAX metrika napló</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">Nem érhetők el PAX metrika naplók.</string>
     <string name="wifi_devices">WiFi eszközök</string>
     <string name="ble_devices">BLE eszközök</string>
     <string name="bluetooth_paired_devices">Párosított eszközök</string>

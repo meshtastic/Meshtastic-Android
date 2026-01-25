@@ -341,7 +341,6 @@
     <string name="encryption_pkc_text">私訊功能已改用新的公開金鑰基礎建設加密。</string>
     <string name="encryption_error">公鑰不相符</string>
     <string name="encryption_error_text">公鑰與記錄的公鑰不符。您可以移除節點並讓其重新交換金鑰，但這可能表示存在更嚴重的安全問題。請透過其他可信賴的管道聯繫使用者，以確定金鑰更改是否由於出廠重置或其他有意行動所致。</string>
-    <string name="exchange_userinfo">交換用戶信息</string>
     <string name="meshtastic_new_nodes_notifications">新節點通知</string>
     <string name="more_details">詳細資訊</string>
     <string name="snr">SNR</string>
@@ -349,12 +348,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="iaq_definition">(室內空氣品質) 相對尺度 IAQ 值，由 Bosch BME680 測量。值範圍 0–500。</string>
-    <string name="device_metrics_log">裝置指標日誌</string>
+    <string name="device_metrics_log">裝置指標</string>
     <string name="node_map">節點地圖</string>
-    <string name="position_log">定位日誌</string>
+    <string name="position_log">位置</string>
     <string name="last_position_update">最後位置更新</string>
-    <string name="env_metrics_log">環境監測讀數日誌</string>
-    <string name="sig_metrics_log">訊號指標日誌</string>
+    <string name="env_metrics_log">環境指標</string>
     <string name="administration">管理</string>
     <string name="remote_admin">遠端管理</string>
     <string name="bad">不良</string>
@@ -364,7 +362,7 @@
     <string name="share_to">分享至…</string>
     <string name="signal">信號</string>
     <string name="signal_quality">信號品質</string>
-    <string name="traceroute_log">路由追蹤（Traceroute）日誌</string>
+    <string name="traceroute_log">路由追蹤</string>
     <string name="traceroute_direct">直線</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d 跳數</item>
@@ -385,7 +383,7 @@
     <string name="remove_favorite">從我的最愛中移除</string>
     <string name="favorite_add">是否將“%1$s”添加為我的最愛節點？</string>
     <string name="favorite_remove">是否從我的最愛節點中删除“%1$s”？</string>
-    <string name="power_metrics_log">功率計量日誌</string>
+    <string name="power_metrics_log">電力指標</string>
     <string name="channel_1">頻道1</string>
     <string name="channel_2">頻道2</string>
     <string name="channel_3">頻道3</string>
@@ -696,11 +694,12 @@
     <string name="import_known_shared_contact_text">警告:聯絡人已存在，匯入將會覆蓋先前的聯絡人資訊。</string>
     <string name="public_key_changed">公鑰已變更</string>
     <string name="import_label">匯入</string>
+    <string name="request_host_metrics">主機資訊</string>
     <string name="actions">動作</string>
     <string name="firmware">韌體</string>
     <string name="use_12h_format">使用12小時制</string>
     <string name="display_time_in_12h_format">啟用後，裝置將在螢幕上以12小時制顯示時間。</string>
-    <string name="host_metrics_log">裝置效能紀錄</string>
+    <string name="host_metrics_log">主機資訊</string>
     <string name="host">裝置</string>
     <string name="free_memory">可用記憶體</string>
     <string name="disk_free">可用儲存空間</string>
@@ -787,9 +786,7 @@
     <string name="clear_selection">清除所選</string>
     <string name="message_input_label">訊息:</string>
     <string name="type_a_message">請輸入訊息</string>
-    <string name="pax_metrics_log">PAX 指標日誌</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">沒有可用的 PAX 指標日誌。</string>
     <string name="wifi_devices">WiFi 裝置</string>
     <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">已配對的裝置</string>

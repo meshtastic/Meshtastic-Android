@@ -384,7 +384,7 @@
     <string name="encryption_pkc_text">Yksityisviesteissä käytetään uutta julkisen avaimen infrastruktuuria salaukseen.</string>
     <string name="encryption_error">Julkinen avain ei täsmää</string>
     <string name="encryption_error_text">Julkinen avain ei vastaa kirjattua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimia uudelleen, mutta tämä saattaa merkitä vakavampaa turvallisuusongelmaa. Ota yhteyttä käyttäjään toisen luotetun kanavan kautta määrittääksesi, johtuiko avain tehtaan resetoinnista tai muusta tarkoituksellisesta toiminnosta.</string>
-    <string name="exchange_userinfo">Tarkastele käyttäjätietoja</string>
+    <string name="userinfo">Käyttäjätiedot</string>
     <string name="meshtastic_new_nodes_notifications">Uuden laitteen ilmoitukset</string>
     <string name="more_details">Lisätietoja</string>
     <string name="snr">SNR</string>
@@ -394,9 +394,9 @@
     <string name="iaq_definition">Sisäilman laatu (IAQ) on suhteellinen asteikko, jota voidaan mitata mm. Bosch BME680 anturilla ja sen arvoväli on 0–500.</string>
     <string name="device_metrics_log">Laitteen mittausloki</string>
     <string name="node_map">Laitekartta</string>
-    <string name="position_log">Sijainnin Loki</string>
+    <string name="position_log">Sijainti</string>
     <string name="last_position_update">Viimeisin sijainnin päivitys</string>
-    <string name="env_metrics_log">Ympäristöanturit</string>
+    <string name="env_metrics_log">Ympäristöarvot</string>
     <string name="sig_metrics_log">Signaalin voimakkuudet</string>
     <string name="administration">Ylläpito</string>
     <string name="remote_admin">Etähallinta</string>
@@ -407,7 +407,7 @@
     <string name="share_to">Jaa…</string>
     <string name="signal">Signaali </string>
     <string name="signal_quality">Signaalin laatu</string>
-    <string name="traceroute_log">Reitinselvitys loki</string>
+    <string name="traceroute_log">Reitinselvitys</string>
     <string name="traceroute_direct">Suora</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hyppy</item>
@@ -439,7 +439,7 @@
     <string name="remove_favorite">Poista suosikeista</string>
     <string name="favorite_add">Lisää '%1$s' radio suosikkeihin?</string>
     <string name="favorite_remove">Poista '%1$s' radio suosikeista?</string>
-    <string name="power_metrics_log">Tehomittausdata</string>
+    <string name="power_metrics_log">Virranhallinnan arvot</string>
     <string name="channel_1">Kanava 1</string>
     <string name="channel_2">Kanava 2</string>
     <string name="channel_3">Kanava 3</string>
@@ -760,6 +760,8 @@
     <string name="public_key_changed">Julkinen avain vaihdettu</string>
     <string name="import_label">Tuo</string>
     <string name="request">Pyyntö</string>
+    <string name="requesting_from">Pyydetään %1$s kohteelta %2$s</string>
+    <string name="user_info">Käyttäjätiedot</string>
     <string name="request_neighbor_info">Naapuritieto (2.7.15+)</string>
     <string name="request_telemetry">Pyydä telemetriatiedot</string>
     <string name="request_device_metrics">Laitteen mittausloki</string>
@@ -767,12 +769,14 @@
     <string name="request_air_quality_metrics">Ilmanlaatuarvot</string>
     <string name="request_power_metrics">Virranhallinnan arvot</string>
     <string name="request_local_stats">Paikalliset tilastot</string>
+    <string name="request_host_metrics">Isäntälaitteen mittausarvot</string>
+    <string name="request_pax_metrics">Pax mittarit</string>
     <string name="request_metadata">Metatiedot</string>
     <string name="actions">Toiminnot</string>
     <string name="firmware">Laiteohjelmisto</string>
     <string name="use_12h_format">Käytä 12 tunnin kelloa</string>
     <string name="display_time_in_12h_format">Kun asetus on käytössä, laite näyttää 12 tunnin ajan näytössä.</string>
-    <string name="host_metrics_log">Isäntälaitteen lokitiedot</string>
+    <string name="host_metrics_log">Isäntälaitteen mittausarvot</string>
     <string name="host">Isäntälaite</string>
     <string name="free_memory">Vapaa muisti</string>
     <string name="disk_free">Vapaa levytila</string>
@@ -862,9 +866,9 @@
     <string name="clear_selection">Tyhjennä valinta</string>
     <string name="message_input_label">Viesti</string>
     <string name="type_a_message">Kirjoita viesti</string>
-    <string name="pax_metrics_log">PAX-laskurien lokitiedot</string>
+    <string name="pax_metrics_log">Pax mittarit</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">PAX-laskurien lokitietoja ei ole saatavilla.</string>
+    <string name="no_pax_metrics_logs">PAX mittareita ei ole saatavilla.</string>
     <string name="wifi_devices">WiFi-laitteet</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="bluetooth_paired_devices">Paritetut laitteet</string>
@@ -1097,6 +1101,7 @@
     <string name="add_channels_description">QR-koodista löydettiin seuraavat kanavat. Valitse ne, jotka haluat lisätä laitteeseesi. Olemassa olevat kanavat säilytetään.</string>
     <string name="replace_channels_and_settings_title">Korvaa kanavan &amp; asetukset</string>
     <string name="replace_channels_and_settings_description">Tämä QR-koodi sisältää täydellisen määrityksen. Se KORVAA nykyiset kanava- ja radioasetuksesi. Kaikki olemassa olevat kanavat poistetaan.</string>
+    <string name="loading">Ladataan</string>
     <!-- Message Filter -->
     <string name="filter_settings">Viestien suodatin</string>
     <string name="filter_enable">Ota suodatus käyttöön</string>

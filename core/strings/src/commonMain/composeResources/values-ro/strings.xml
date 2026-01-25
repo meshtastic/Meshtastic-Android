@@ -128,6 +128,7 @@
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Waypoint recepționat: $1%1$s</string>
     <string name="error_duty_cycle">Limita Duty Cycle a fost atinsă. Nu se pot trimite mesaje acum, vă rugăm să încercați din nou mai târziu.</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="region_frequency_plan">Regiune</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
