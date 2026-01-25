@@ -452,13 +452,39 @@ interface PacketDao {
      */
     @Transaction
     suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) {
-        val pskToNewIndex = newSettings.mapIndexed { idx, ch -> ch.psk to idx }.toMap()
+        // Pre-calculate mapping from old index to new index
+        val indexMap =
+            oldSettings
+                .mapIndexed { oldIndex, oldChannel ->
+                    val pskMatches =
+                        newSettings.mapIndexedNotNull { index, channel ->
+                            if (channel.psk == oldChannel.psk) index to channel else null
+                        }
+
+                    val newIndex =
+                        when {
+                            pskMatches.isEmpty() -> null
+                            pskMatches.size == 1 -> pskMatches.first().first
+                            else -> {
+                                // Multiple matches with same PSK. Disambiguate by Name.
+                                val nameMatches = pskMatches.filter { it.second.name == oldChannel.name }
+                                if (nameMatches.size == 1) {
+                                    nameMatches.first().first
+                                } else {
+                                    // Still ambiguous. Prefer keeping same index.
+                                    pskMatches.find { it.first == oldIndex }?.first ?: pskMatches.first().first
+                                }
+                            }
+                        }
+                    oldIndex to newIndex
+                }
+                .toMap()
+
         val allPackets = getAllUserPacketsForMigration()
         for (packet in allPackets) {
             val oldIndex = packet.data.channel
-            val oldPSK = oldSettings.getOrNull(oldIndex)?.psk
-            val newIndex = if (oldPSK != null) pskToNewIndex[oldPSK] else null
-            if (oldPSK != null && newIndex != null && oldIndex != newIndex) {
+            val newIndex = indexMap[oldIndex]
+            if (newIndex != null && oldIndex != newIndex) {
                 // Rebuild contact_key with the new index, keeping the rest unchanged
                 val oldKeySuffix = packet.contact_key.dropWhile { it.isDigit() }
                 val newContactKey = "$newIndex$oldKeySuffix"
