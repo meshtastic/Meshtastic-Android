@@ -41,8 +41,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -150,6 +148,7 @@ import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.icon.Settings
+import org.meshtastic.core.ui.icon.Wifi
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
@@ -162,7 +161,7 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
     Nodes(Res.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
     Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map()),
     Settings(Res.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
-    Connections(Res.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
+    Connections(Res.string.connections, MeshtasticIcons.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;
 
     companion object {

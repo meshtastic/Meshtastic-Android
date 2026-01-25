@@ -17,8 +17,6 @@
 package org.meshtastic.feature.map.component
 
 import android.app.DatePickerDialog
-import android.app.TimePickerDialog
-import android.text.format.DateFormat
 import android.widget.DatePicker
 import android.widget.TimePicker
 import androidx.compose.foundation.Image
@@ -37,8 +35,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
@@ -179,7 +177,7 @@ fun EditWaypointDialog(
                         modifier = Modifier.fillMaxWidth().size(48.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Image(imageVector = Icons.Default.Lock, contentDescription = stringResource(Res.string.locked))
+                        Image(imageVector = Icons.Rounded.Lock, contentDescription = stringResource(Res.string.locked))
                         Text(stringResource(Res.string.locked))
                         Switch(
                             modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
@@ -221,7 +219,7 @@ fun EditWaypointDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
-                            imageVector = Icons.Default.CalendarMonth,
+                            imageVector = Icons.Rounded.CalendarMonth,
                             contentDescription = stringResource(Res.string.expires),
                         )
                         Text(stringResource(Res.string.expires))

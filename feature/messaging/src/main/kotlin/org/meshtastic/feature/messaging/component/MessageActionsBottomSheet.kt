@@ -27,11 +27,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddReaction
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Reply
-import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.rounded.AddReaction
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Reply
+import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -95,25 +95,25 @@ fun MessageActionsContent(
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
-            leadingContent = { Icon(Icons.Default.Reply, contentDescription = stringResource(Res.string.reply)) },
+            leadingContent = { Icon(Icons.Rounded.Reply, contentDescription = stringResource(Res.string.reply)) },
             modifier = Modifier.clickable(onClick = onReply),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.copy)) },
-            leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = stringResource(Res.string.copy)) },
+            leadingContent = { Icon(Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy)) },
             modifier = Modifier.clickable(onClick = onCopy),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.select)) },
-            leadingContent = { Icon(Icons.Default.SelectAll, contentDescription = stringResource(Res.string.select)) },
+            leadingContent = { Icon(Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select)) },
             modifier = Modifier.clickable(onClick = onSelect),
         )
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.delete)) },
-            leadingContent = { Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.delete)) },
+            leadingContent = { Icon(Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete)) },
             modifier = Modifier.clickable(onClick = onDelete),
         )
     }
@@ -146,7 +146,7 @@ private fun QuickEmojiRow(quickEmojis: List<String>, onReact: (String) -> Unit, 
             modifier = Modifier.size(40.dp).background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
         ) {
             Icon(
-                Icons.Default.AddReaction,
+                Icons.Rounded.AddReaction,
                 contentDescription = "More reactions",
                 modifier = Modifier.size(20.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,

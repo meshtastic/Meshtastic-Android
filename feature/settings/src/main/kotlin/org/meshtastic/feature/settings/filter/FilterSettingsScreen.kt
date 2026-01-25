@@ -26,8 +26,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -156,7 +156,7 @@ private fun FilterWordsInputCard(newWord: String, onNewWordChange: (String) -> U
                     keyboardActions = KeyboardActions(onDone = { onAddWord() }),
                 )
                 IconButton(onClick = onAddWord) {
-                    Icon(Icons.Default.Add, contentDescription = stringResource(Res.string.add))
+                    Icon(Icons.Rounded.Add, contentDescription = stringResource(Res.string.add))
                 }
             }
         }
@@ -184,7 +184,7 @@ private fun FilterWordItem(word: String, onRemove: () -> Unit) {
                 )
             }
             IconButton(onClick = onRemove) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.delete))
+                Icon(Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete))
             }
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.debugging
 
 import androidx.compose.foundation.background
@@ -29,10 +28,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -83,14 +82,14 @@ internal fun DebugSearchNavigation(
         )
         IconButton(onClick = onPreviousMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowUp,
+                imageVector = Icons.Rounded.KeyboardArrowUp,
                 contentDescription = stringResource(Res.string.debug_search_prev),
                 modifier = Modifier.size(16.dp),
             )
         }
         IconButton(onClick = onNextMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
+                imageVector = Icons.Rounded.KeyboardArrowDown,
                 contentDescription = stringResource(Res.string.debug_search_next),
                 modifier = Modifier.size(16.dp),
             )
@@ -136,7 +135,7 @@ internal fun DebugSearchBar(
                 if (searchState.searchText.isNotEmpty()) {
                     IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
+                            imageVector = Icons.Rounded.Clear,
                             contentDescription = stringResource(Res.string.debug_search_clear),
                             modifier = Modifier.size(16.dp),
                         )

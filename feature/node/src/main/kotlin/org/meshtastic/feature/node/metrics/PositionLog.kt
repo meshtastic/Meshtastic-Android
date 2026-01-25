@@ -34,10 +34,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,6 +76,10 @@ import org.meshtastic.core.strings.save
 import org.meshtastic.core.strings.speed
 import org.meshtastic.core.strings.timestamp
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Save
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.node.detail.NodeRequestEffect
@@ -157,13 +157,13 @@ private fun ActionButtons(
             enabled = clearButtonEnabled,
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
         ) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(Res.string.clear))
+            Icon(imageVector = MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.clear))
             Spacer(Modifier.width(8.dp))
             Text(text = stringResource(Res.string.clear))
         }
 
         OutlinedButton(modifier = Modifier.weight(1f), onClick = onSave, enabled = saveButtonEnabled) {
-            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(Res.string.save))
+            Icon(imageVector = MeshtasticIcons.Save, contentDescription = stringResource(Res.string.save))
             Spacer(Modifier.width(8.dp))
             Text(text = stringResource(Res.string.save))
         }
@@ -207,7 +207,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateU
                 actions = {
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestPosition() }) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
                 },

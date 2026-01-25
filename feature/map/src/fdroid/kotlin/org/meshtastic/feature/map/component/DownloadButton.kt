@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -23,7 +22,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,7 +50,7 @@ fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
     ) {
         FloatingActionButton(onClick = onClick, contentColor = MaterialTheme.colorScheme.primary) {
             Icon(
-                imageVector = Icons.Default.Download,
+                imageVector = Icons.Rounded.Download,
                 contentDescription = stringResource(Res.string.map_download_region),
                 modifier = Modifier.scale(1.25f),
             )

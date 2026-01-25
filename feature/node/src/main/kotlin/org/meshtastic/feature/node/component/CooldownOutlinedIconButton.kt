@@ -19,8 +19,6 @@ package org.meshtastic.feature.node.component
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -36,6 +34,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
 
 internal const val COOL_DOWN_TIME_MS = 30000L
@@ -147,7 +147,7 @@ fun CooldownOutlinedIconButton(
 private fun CooldownOutlinedIconButtonPreview() {
     AppTheme {
         CooldownOutlinedIconButton(onClick = {}, cooldownTimestamp = System.currentTimeMillis() - 15000L) {
-            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
         }
     }
 }

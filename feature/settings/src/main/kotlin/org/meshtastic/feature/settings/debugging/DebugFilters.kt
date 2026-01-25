@@ -29,9 +29,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.twotone.FilterAlt
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.DropdownMenu
@@ -103,7 +104,7 @@ fun DebugCustomFilterInput(
             },
             enabled = customFilterText.isNotBlank(),
         ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(Res.string.debug_filter_add))
+            Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(Res.string.debug_filter_add))
         }
     }
 }
@@ -266,7 +267,7 @@ internal fun DebugActiveFilters(
                 }
                 IconButton(onClick = { onFilterTextsChange(emptyList()) }) {
                     Icon(
-                        imageVector = Icons.Default.Clear,
+                        imageVector = Icons.Rounded.Clear,
                         contentDescription = stringResource(Res.string.debug_filter_clear),
                     )
                 }

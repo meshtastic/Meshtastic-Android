@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.background
@@ -31,9 +30,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -61,6 +57,9 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.air_quality_icon
 import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.indoor_air_quality_iaq
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.ThumbUp
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.IAQColors.IAQDangerouslyPolluted
 import org.meshtastic.core.ui.theme.IAQColors.IAQExcellent
 import org.meshtastic.core.ui.theme.IAQColors.IAQExtremelyPolluted
@@ -137,7 +136,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                             Text(text = "IAQ $iaq", color = Color.White, fontWeight = FontWeight.Bold)
                             Icon(
                                 imageVector =
-                                if (iaqEnum.range.first < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
+                                if (iaqEnum.range.first < 100) MeshtasticIcons.ThumbUp else MeshtasticIcons.Warning,
                                 contentDescription = stringResource(Res.string.air_quality_icon),
                                 tint = Color.White,
                             )

@@ -20,12 +20,11 @@ import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
@@ -47,15 +46,31 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
+import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.strings.unknown_username
+import org.meshtastic.core.ui.component.AirQualityInfo
+import org.meshtastic.core.ui.component.DistanceInfo
+import org.meshtastic.core.ui.component.ElevationInfo
+import org.meshtastic.core.ui.component.HardwareInfo
+import org.meshtastic.core.ui.component.HumidityInfo
+import org.meshtastic.core.ui.component.LastHeardInfo
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.NodeIdInfo
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
+import org.meshtastic.core.ui.component.PaxcountInfo
+import org.meshtastic.core.ui.component.PowerInfo
+import org.meshtastic.core.ui.component.PressureInfo
+import org.meshtastic.core.ui.component.RoleInfo
+import org.meshtastic.core.ui.component.SatelliteCountInfo
 import org.meshtastic.core.ui.component.SignalInfo
+import org.meshtastic.core.ui.component.SoilMoistureInfo
+import org.meshtastic.core.ui.component.SoilTemperatureInfo
+import org.meshtastic.core.ui.component.TemperatureInfo
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
@@ -80,7 +95,17 @@ fun NodeItem(
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val longName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+    val originalLongName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+
+    @Suppress("MagicNumber")
+    val longName =
+        remember(originalLongName) {
+            if (originalLongName.length > 20) {
+                "${originalLongName.take(20)}…"
+            } else {
+                originalLongName
+            }
+        }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
@@ -115,118 +140,180 @@ fun NodeItem(
             }
         }
 
-    Card(modifier = modifier.fillMaxWidth().defaultMinSize(minHeight = 80.dp), colors = cardColors) {
+    Card(modifier = modifier.fillMaxWidth(), colors = cardColors) {
         Column(
             modifier =
             Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                NodeChip(node = thatNode)
+            NodeItemHeader(
+                thatNode = thatNode,
+                isThisNode = isThisNode,
+                longName = longName,
+                style = style,
+                isIgnored = isIgnored,
+                isFavorite = isFavorite,
+                isMuted = isMuted,
+                isUnmessageable = unmessageable,
+                connectionState = connectionState,
+                contentColor = contentColor,
+            )
 
-                NodeKeyStatusIcon(
-                    hasPKC = thatNode.hasPKC,
-                    mismatchKey = thatNode.mismatchKey,
-                    publicKey = thatNode.user.publicKey,
-                    modifier = Modifier.size(32.dp),
+            NodeItemMetrics(thatNode = thatNode, distance = distance, system = system, contentColor = contentColor)
+
+            SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
+
+            NodeItemEnvironment(thatNode = thatNode, tempInFahrenheit = tempInFahrenheit, contentColor = contentColor)
+
+            NodeItemFooter(thatNode = thatNode, contentColor = contentColor)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun NodeItemHeader(
+    thatNode: Node,
+    isThisNode: Boolean,
+    longName: String,
+    style: FontStyle,
+    isIgnored: Boolean,
+    isFavorite: Boolean,
+    isMuted: Boolean,
+    isUnmessageable: Boolean,
+    connectionState: ConnectionState,
+    contentColor: Color,
+) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        NodeChip(node = thatNode)
+
+        NodeKeyStatusIcon(
+            hasPKC = thatNode.hasPKC,
+            mismatchKey = thatNode.mismatchKey,
+            publicKey = thatNode.user.publicKey,
+            modifier = Modifier.size(32.dp),
+        )
+        Text(
+            modifier = Modifier.weight(1f),
+            text = longName,
+            style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
+            textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+            softWrap = true,
+        )
+        LastHeardInfo(lastHeard = thatNode.lastHeard, contentColor = contentColor)
+        NodeStatusIcons(
+            isThisNode = isThisNode,
+            isFavorite = isFavorite,
+            isMuted = isMuted,
+            isUnmessageable = isUnmessageable,
+            connectionState = connectionState,
+            contentColor = contentColor,
+        )
+    }
+}
+
+@Composable
+private fun NodeItemMetrics(
+    thatNode: Node,
+    distance: String?,
+    system: DisplayConfig.DisplayUnits,
+    contentColor: Color,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
+            MaterialBatteryInfo(level = thatNode.batteryLevel, voltage = thatNode.voltage, contentColor = contentColor)
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (distance != null) {
+                DistanceInfo(distance = distance, contentColor = contentColor)
+            }
+            thatNode.validPosition?.let { position ->
+                ElevationInfo(
+                    altitude = position.altitude,
+                    system = system,
+                    suffix = stringResource(Res.string.elevation_suffix),
+                    contentColor = contentColor,
                 )
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = longName,
-                    style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
-                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                    softWrap = true,
-                )
-                LastHeardInfo(lastHeard = thatNode.lastHeard, contentColor = contentColor)
-                NodeStatusIcons(
-                    isThisNode = isThisNode,
-                    isFavorite = isFavorite,
-                    isMuted = isMuted,
-                    isUnmessageable = unmessageable,
-                    connectionState = connectionState,
-                )
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
-                    MaterialBatteryInfo(
-                        level = thatNode.batteryLevel,
-                        voltage = thatNode.voltage,
-                        contentColor = contentColor,
-                    )
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (distance != null) {
-                        DistanceInfo(distance = distance, contentColor = contentColor)
-                    }
-                    thatNode.validPosition?.let { position ->
-                        ElevationInfo(
-                            altitude = position.altitude,
-                            system = system,
-                            suffix = stringResource(Res.string.elevation_suffix),
-                            contentColor = contentColor,
-                        )
-                        val satCount = position.satsInView
-                        if (satCount > 0) {
-                            SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
-                        }
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                itemVerticalAlignment = Alignment.CenterVertically,
-            ) {
-                SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
-            }
-            val telemetryStrings = thatNode.getTelemetryStrings(tempInFahrenheit)
-
-            if (telemetryStrings.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    telemetryStrings.forEach { telemetryString ->
-                        Text(text = telemetryString, style = MaterialTheme.typography.bodySmall, color = contentColor)
-                    }
-                }
-            }
-
-            if (!thatNode.nodeStatus.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = thatNode.nodeStatus!!,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = contentColor,
-                    maxLines = 2,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(2.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val labelStyle =
-                    if (thatNode.isUnknownUser) {
-                        MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic)
-                    } else {
-                        MaterialTheme.typography.labelSmall
-                    }
-                Text(text = thatNode.user.hwModel.name, style = labelStyle)
-                Text(text = thatNode.user.role.name, style = labelStyle)
-                Text(text = thatNode.user.id.ifEmpty { "???" }, style = labelStyle)
+            val satCount = thatNode.validPosition?.satsInView ?: 0
+            if (satCount > 0) {
+                SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
             }
         }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+@Suppress("CyclomaticComplexMethod")
+private fun NodeItemEnvironment(thatNode: Node, tempInFahrenheit: Boolean, contentColor: Color) {
+    val env = thatNode.environmentMetrics
+    val pax = thatNode.paxcounter
+    if (thatNode.hasEnvironmentMetrics || pax.ble != 0 || pax.wifi != 0) {
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            if (pax.ble != 0 || pax.wifi != 0) {
+                PaxcountInfo(pax = "B:${pax.ble} W:${pax.wifi}", contentColor = contentColor)
+            }
+            if (env.temperature != 0f) {
+                val temp =
+                    if (tempInFahrenheit) {
+                        "%.1f°F".format(celsiusToFahrenheit(env.temperature))
+                    } else {
+                        "%.1f°C".format(env.temperature)
+                    }
+                TemperatureInfo(temp = temp, contentColor = contentColor)
+            }
+            if (env.relativeHumidity != 0f) {
+                HumidityInfo(humidity = "%.0f%%".format(env.relativeHumidity), contentColor = contentColor)
+            }
+            if (env.barometricPressure != 0f) {
+                PressureInfo(pressure = "%.1fhPa".format(env.barometricPressure), contentColor = contentColor)
+            }
+            if (env.soilTemperature != 0f) {
+                val temp =
+                    if (tempInFahrenheit) {
+                        "%.1f°F".format(celsiusToFahrenheit(env.soilTemperature))
+                    } else {
+                        "%.1f°C".format(env.soilTemperature)
+                    }
+                SoilTemperatureInfo(temp = temp, contentColor = contentColor)
+            }
+            if (env.soilMoisture != 0 && env.soilTemperature != 0f) {
+                SoilMoistureInfo(moisture = "${env.soilMoisture}%", contentColor = contentColor)
+            }
+            if (env.voltage != 0f) {
+                PowerInfo(value = "%.2fV".format(env.voltage), contentColor = contentColor)
+            }
+            if (env.current != 0f) {
+                PowerInfo(value = "%.1fmA".format(env.current), contentColor = contentColor)
+            }
+            if (env.iaq != 0) {
+                AirQualityInfo(iaq = "${env.iaq}", contentColor = contentColor)
+            }
+        }
+    }
+}
+
+@Composable
+private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        HardwareInfo(hwModel = thatNode.user.hwModel.name, contentColor = contentColor)
+        RoleInfo(role = thatNode.user.role.name, contentColor = contentColor)
+        NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
     }
 }
 

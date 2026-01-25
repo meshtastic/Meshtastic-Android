@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.messaging.component
 
+import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -29,16 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.twotone.AddLink
-import androidx.compose.material.icons.twotone.Cloud
-import androidx.compose.material.icons.twotone.CloudDone
-import androidx.compose.material.icons.twotone.CloudOff
-import androidx.compose.material.icons.twotone.CloudUpload
-import androidx.compose.material.icons.twotone.HowToReg
-import androidx.compose.material.icons.twotone.Link
-import androidx.compose.material.icons.twotone.Warning
+import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -52,18 +44,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
@@ -71,7 +65,6 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.filter_message_label
-import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.sample_message
@@ -82,6 +75,14 @@ import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.emoji.EmojiPicker
+import org.meshtastic.core.ui.icon.Cloud
+import org.meshtastic.core.ui.icon.CloudDone
+import org.meshtastic.core.ui.icon.CloudOffTwoTone
+import org.meshtastic.core.ui.icon.CloudSync
+import org.meshtastic.core.ui.icon.CloudTwoTone
+import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MessageItemColors
 
@@ -123,7 +124,8 @@ internal fun MessageItem(
     ),
 ) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     if (activeSheet != null) {
@@ -143,7 +145,11 @@ internal fun MessageItem(
                         onMoreReactions = { activeSheet = ActiveSheet.Emoji },
                         onCopy = {
                             activeSheet = null
-                            clipboardManager.setText(AnnotatedString(message.text))
+                            coroutineScope.launch {
+                                clipboardManager.setClipEntry(
+                                    ClipEntry(ClipData.newPlainText("message", message.text)),
+                                )
+                            }
                         },
                         onSelect = {
                             activeSheet = null
@@ -222,7 +228,7 @@ internal fun MessageItem(
             )
             if (message.viaMqtt) {
                 Icon(
-                    Icons.Default.Cloud,
+                    MeshtasticIcons.Cloud,
                     contentDescription = stringResource(Res.string.via_mqtt),
                     modifier = Modifier.size(16.dp),
                 )
@@ -278,10 +284,21 @@ internal fun MessageItem(
                                 Rssi(message.rssi)
                             }
                         } else {
-                            Text(
-                                text = stringResource(Res.string.hops_away_template, message.hopsAway),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.Hops,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = cardColors.contentColor.copy(alpha = 0.7f),
+                                )
+                                Text(
+                                    text = message.hopsAway.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
                         }
                     }
                     if (containsBel) {
@@ -341,14 +358,14 @@ private enum class ActiveSheet {
 private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit, modifier: Modifier = Modifier) {
     val icon =
         when (status) {
-            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-            MessageStatus.SFPP_ROUTING -> Icons.TwoTone.AddLink
-            MessageStatus.SFPP_CONFIRMED -> Icons.TwoTone.Link
-            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-            else -> Icons.TwoTone.Warning
+            MessageStatus.RECEIVED -> MeshtasticIcons.CloudDone
+            MessageStatus.QUEUED -> MeshtasticIcons.CloudSync
+            MessageStatus.DELIVERED -> MeshtasticIcons.CloudDone
+            MessageStatus.SFPP_ROUTING -> MeshtasticIcons.CloudSync
+            MessageStatus.SFPP_CONFIRMED -> MeshtasticIcons.CloudDone
+            MessageStatus.ENROUTE -> MeshtasticIcons.CloudTwoTone
+            MessageStatus.ERROR -> MeshtasticIcons.CloudOffTwoTone
+            else -> MeshtasticIcons.Warning
         }
     Icon(
         imageVector = icon,
@@ -392,7 +409,7 @@ private fun OriginalMessageSnippet(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    Icons.Default.FormatQuote,
+                    Icons.Rounded.FormatQuote,
                     contentDescription = stringResource(Res.string.reply),
                     modifier = Modifier.size(16.dp),
                 )

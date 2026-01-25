@@ -34,8 +34,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -180,7 +180,7 @@ fun EditWaypointDialog(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                imageVector = Icons.Default.Lock,
+                                imageVector = Icons.Rounded.Lock,
                                 contentDescription = stringResource(Res.string.locked),
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -199,7 +199,7 @@ fun EditWaypointDialog(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Image(
-                                imageVector = Icons.Default.CalendarMonth,
+                                imageVector = Icons.Rounded.CalendarMonth,
                                 contentDescription = stringResource(Res.string.expires),
                             )
                             Spacer(modifier = Modifier.width(8.dp))

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import android.util.Base64
@@ -28,10 +27,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyOff
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,7 +47,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -61,7 +55,6 @@ import com.google.protobuf.ByteString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.R
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.config_security_public_key
 import org.meshtastic.core.strings.encryption_error
@@ -74,6 +67,10 @@ import org.meshtastic.core.strings.security_icon_help_dismiss
 import org.meshtastic.core.strings.security_icon_help_show_all
 import org.meshtastic.core.strings.security_icon_help_show_less
 import org.meshtastic.core.strings.show_all_key_title
+import org.meshtastic.core.ui.icon.KeyOff
+import org.meshtastic.core.ui.icon.Lock
+import org.meshtastic.core.ui.icon.LockOpen
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -106,11 +103,9 @@ fun NodeKeyStatusIcon(
 
     val (icon, tint) =
         when {
-            mismatchKey -> Icons.Default.KeyOff to colorScheme.StatusRed
-            hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
-            else ->
-                ImageVector.vectorResource(org.meshtastic.core.ui.R.drawable.ic_lock_open_right_24) to
-                    colorScheme.StatusYellow
+            mismatchKey -> MeshtasticIcons.KeyOff to colorScheme.StatusRed
+            hasPKC -> MeshtasticIcons.Lock to colorScheme.StatusGreen
+            else -> MeshtasticIcons.LockOpen to colorScheme.StatusYellow
         }
 
     IconButton(onClick = { showEncryptionDialog = true }, modifier = modifier) {
@@ -149,7 +144,7 @@ enum class NodeKeySecurityState(
 ) {
     // State for public key mismatch
     PKM(
-        icon = Icons.Default.KeyOff,
+        icon = MeshtasticIcons.KeyOff,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.encryption_error,
         helpTextResId = Res.string.encryption_error_text,
@@ -158,7 +153,7 @@ enum class NodeKeySecurityState(
 
     // State for public key encryption
     PKC(
-        icon = Icons.Default.Lock,
+        icon = MeshtasticIcons.Lock,
         color = { colorScheme.StatusGreen },
         title = Res.string.encryption_pkc,
         helpTextResId = Res.string.encryption_pkc_text,
@@ -167,7 +162,7 @@ enum class NodeKeySecurityState(
 
     // State for shared key encryption
     PSK(
-        icon = Icons.Default.LockOpen,
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusYellow },
         title = Res.string.encryption_psk,
         helpTextResId = Res.string.encryption_psk_text,

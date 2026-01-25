@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -87,7 +86,7 @@ fun NotesSection(node: Node, onSaveNotes: (Int, String) -> Unit, modifier: Modif
                             },
                             enabled = edited,
                         ) {
-                            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(Res.string.save))
+                            Icon(imageVector = Icons.Rounded.Save, contentDescription = stringResource(Res.string.save))
                         }
                     },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,12 +30,16 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channel_air_util
-import org.meshtastic.core.strings.hops_away
+import org.meshtastic.core.strings.air_utilization
+import org.meshtastic.core.strings.channel_utilization
 import org.meshtastic.core.strings.signal
 import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.icon.AirUtilization
+import org.meshtastic.core.ui.icon.ChannelUtilization
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 const val MAX_VALID_SNR = 100F
@@ -53,66 +53,52 @@ fun SignalInfo(
     isThisNode: Boolean,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val text =
-        if (isThisNode) {
-            stringResource(Res.string.channel_air_util)
-                .format(node.deviceMetrics.channelUtilization, node.deviceMetrics.airUtilTx)
-        } else {
-            buildList {
-                val hopsString =
-                    "%s: %s"
-                        .format(
-                            stringResource(Res.string.hops_away),
-                            if (node.hopsAway == -1) {
-                                "?"
-                            } else {
-                                node.hopsAway.toString()
-                            },
-                        )
-                if (node.channel > 0) {
-                    add("ch:${node.channel}")
-                }
-                if (node.hopsAway != 0) add(hopsString)
-            }
-                .joinToString(" ")
-        }
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (text.isNotEmpty()) {
-            Text(text = text, color = contentColor, style = MaterialTheme.typography.labelSmall)
-        }
-        /* We only know the Signal Quality from direct nodes aka 0 hop. */
-        if (node.hopsAway <= 0) {
-            if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-                val quality = determineSignalQuality(node.snr, node.rssi)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Snr(node.snr)
-                    Rssi(node.rssi)
+        if (isThisNode) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                IconInfo(
+                    icon = MeshtasticIcons.ChannelUtilization,
+                    contentDescription = stringResource(Res.string.channel_utilization),
+                    text = "%.1f%%".format(node.deviceMetrics.channelUtilization),
+                    contentColor = contentColor,
+                )
+                IconInfo(
+                    icon = MeshtasticIcons.AirUtilization,
+                    contentDescription = stringResource(Res.string.air_utilization),
+                    text = "%.1f%%".format(node.deviceMetrics.airUtilTx),
+                    contentColor = contentColor,
+                )
+            }
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (node.channel > 0) {
+                    ChannelInfo(channel = node.channel, contentColor = contentColor)
                 }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = quality.imageVector,
-                        contentDescription = stringResource(Res.string.signal_quality),
-                        tint = quality.color.invoke(),
-                    )
-                    Text(
-                        text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = contentColor,
-                        maxLines = 1,
-                    )
+                if (node.hopsAway > 0) {
+                    HopsInfo(hops = node.hopsAway, contentColor = contentColor)
+                } else {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
+                            val quality = determineSignalQuality(node.snr, node.rssi)
+                            Snr(node.snr)
+                            Rssi(node.rssi)
+                            IconInfo(
+                                icon = quality.imageVector,
+                                contentDescription = stringResource(Res.string.signal_quality),
+                                contentColor = quality.color.invoke(),
+                                text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
+                            )
+                        }
+                    }
                 }
             }
+        }
+        if (node.deviceMetrics.uptimeSeconds > 0) {
+            UptimeInfo(uptime = formatUptime(node.deviceMetrics.uptimeSeconds), contentColor = contentColor)
         }
     }
 }

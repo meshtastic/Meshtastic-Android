@@ -35,7 +35,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.rounded.AddReaction
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -67,7 +67,6 @@ import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.delivery_confirmed
 import org.meshtastic.core.strings.error
-import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.message_status_enroute
 import org.meshtastic.core.strings.message_status_queued
@@ -77,6 +76,8 @@ import org.meshtastic.core.ui.component.BottomSheetDialog
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
+import org.meshtastic.core.ui.icon.Hops
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.proto.MeshProtos
@@ -186,7 +187,7 @@ private fun AddReactionButton(modifier: Modifier = Modifier, onSendReaction: (St
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
     ) {
         Icon(
-            imageVector = Icons.Default.AddReaction,
+            imageVector = Icons.Rounded.AddReaction,
             contentDescription = stringResource(Res.string.react),
             modifier = Modifier.padding(6.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -300,10 +301,21 @@ internal fun ReactionDialog(
                                 Rssi(reaction.rssi)
                             }
                         } else {
-                            Text(
-                                text = stringResource(Res.string.hops_away_template, reaction.hopsAway),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                Icon(
+                                    imageVector = MeshtasticIcons.Hops,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                )
+                                Text(
+                                    text = reaction.hopsAway.toString(),
+                                    style = MaterialTheme.typography.labelSmall,
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.weight(1f))

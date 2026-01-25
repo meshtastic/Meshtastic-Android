@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.Canvas
@@ -27,8 +26,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
-import androidx.compose.material.icons.filled.GpsFixed
+import androidx.compose.material.icons.rounded.ErrorOutline
+import androidx.compose.material.icons.rounded.GpsFixed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -153,7 +152,7 @@ fun CompassSheetContent(
             )
             // Quick way to re-request a fresh fix without leaving the compass sheet
             Button(onClick = onRequestPosition, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = Icons.Default.GpsFixed, contentDescription = null)
+                Icon(imageVector = Icons.Rounded.GpsFixed, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.exchange_position))
             }
@@ -190,7 +189,7 @@ private fun WarningList(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ErrorOutline,
+                        imageVector = Icons.Rounded.ErrorOutline,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onErrorContainer,
                     )
@@ -205,13 +204,13 @@ private fun WarningList(
 
         if (warnings.contains(CompassWarning.NO_LOCATION_PERMISSION)) {
             Button(onClick = onRequestPermission, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = Icons.Default.GpsFixed, contentDescription = null)
+                Icon(imageVector = Icons.Rounded.GpsFixed, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.compass_no_location_permission))
             }
         } else if (warnings.contains(CompassWarning.LOCATION_DISABLED)) {
             Button(onClick = onOpenLocationSettings, modifier = Modifier.fillMaxWidth()) {
-                Icon(imageVector = Icons.Default.GpsFixed, contentDescription = null)
+                Icon(imageVector = Icons.Rounded.GpsFixed, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.compass_location_disabled))
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.icon
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material.icons.rounded.Work
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+
+val MeshtasticIcons.HardwareModel: ImageVector
+    get() = Icons.Rounded.Router
+val MeshtasticIcons.Role: ImageVector
+    get() = Icons.Rounded.Work
+val MeshtasticIcons.NodeId: ImageVector
+    get() = Icons.Rounded.Fingerprint
 
 /**
  * This is from Material Symbols.

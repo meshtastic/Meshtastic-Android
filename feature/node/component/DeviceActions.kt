@@ -210,7 +210,7 @@ private fun PrimaryActionsRow(
 
         IconToggleButton(checked = node.isFavorite, onCheckedChange = { onFavoriteClick() }) {
             Icon(
-                imageVector = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                imageVector = if (node.isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
                 contentDescription = stringResource(Res.string.favorite),
                 tint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
             )

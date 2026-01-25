@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
@@ -35,10 +34,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DragHandle
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.DragHandle
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.FastForward
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -148,7 +147,7 @@ fun QuickChatScreen(
                 onClick = { showActionDialog = QuickChatAction(position = actions.size) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(Res.string.add))
+                Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(Res.string.add))
             }
         }
     }
@@ -231,9 +230,9 @@ private fun EditQuickChatDialog(
 
                 val (text, icon) =
                     if (isInstant) {
-                        Res.string.quick_chat_instant to Icons.Default.FastForward
+                        Res.string.quick_chat_instant to Icons.Rounded.FastForward
                     } else {
-                        Res.string.quick_chat_append to Icons.Default.Add
+                        Res.string.quick_chat_append to Icons.Rounded.Add
                     }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -338,7 +337,7 @@ private fun QuickChatItem(
             leadingContent = {
                 if (action.mode == QuickChatAction.Mode.Instant) {
                     Icon(
-                        imageVector = Icons.Default.FastForward,
+                        imageVector = Icons.Rounded.FastForward,
                         contentDescription = stringResource(Res.string.quick_chat_instant),
                     )
                 }
@@ -349,12 +348,12 @@ private fun QuickChatItem(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { onEdit(action) }, modifier = Modifier.size(48.dp)) {
                         Icon(
-                            imageVector = Icons.Default.Edit,
+                            imageVector = Icons.Rounded.Edit,
                             contentDescription = stringResource(Res.string.quick_chat_edit),
                         )
                     }
                     Icon(
-                        imageVector = Icons.Default.DragHandle,
+                        imageVector = Icons.Rounded.DragHandle,
                         contentDescription = stringResource(Res.string.quick_chat),
                     )
                 }

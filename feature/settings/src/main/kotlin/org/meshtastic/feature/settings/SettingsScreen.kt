@@ -38,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Info
@@ -283,7 +284,7 @@ fun SettingsScreen(
                         SwitchListItem(
                             text = stringResource(Res.string.analytics_okay),
                             checked = allowed,
-                            leadingIcon = Icons.Default.BugReport,
+                            leadingIcon = Icons.Rounded.BugReport,
                             onClick = { viewModel.toggleAnalyticsAllowed() },
                         )
                     }

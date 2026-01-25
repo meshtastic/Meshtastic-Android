@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import android.content.ActivityNotFoundException
@@ -29,8 +28,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -77,7 +76,7 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(imageVector = Icons.Default.Link, contentDescription = stringResource(Res.string.view_release))
+                Icon(imageVector = Icons.Rounded.Link, contentDescription = stringResource(Res.string.view_release))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.view_release))
             }
@@ -93,7 +92,7 @@ fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease, modifier: Modi
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(imageVector = Icons.Default.Download, contentDescription = stringResource(Res.string.download))
+                Icon(imageVector = Icons.Rounded.Download, contentDescription = stringResource(Res.string.download))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(Res.string.download))
             }

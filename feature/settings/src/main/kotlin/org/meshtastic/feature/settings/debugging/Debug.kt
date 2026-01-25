@@ -36,8 +36,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.FileDownload
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Card
@@ -416,7 +416,7 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(Res.string.debug_clear))
+        Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.debug_clear))
     }
     if (showDeleteLogsDialog) {
         SimpleAlertDialog(
@@ -664,7 +664,7 @@ private fun DebugMenuActionsPreview() {
                 )
             }
             IconButton(onClick = { /* Preview only */ }, modifier = Modifier.padding(4.dp)) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(Res.string.debug_clear))
+                Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.debug_clear))
             }
         }
     }

@@ -16,7 +16,7 @@
  */
 package org.meshtastic.feature.map
 
-import android.Manifest // Added for Accompanist
+import android.Manifest
 import android.graphics.Paint
 import android.text.format.DateUtils
 import androidx.appcompat.content.res.AppCompatResources
@@ -34,14 +34,14 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lens
-import androidx.compose.material.icons.filled.LocationDisabled
-import androidx.compose.material.icons.filled.PinDrop
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Lens
+import androidx.compose.material.icons.rounded.LocationDisabled
+import androidx.compose.material.icons.rounded.PinDrop
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
@@ -77,8 +77,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
-import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
-import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
@@ -758,7 +758,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Star,
+                                            imageVector = Icons.Rounded.Star,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -783,7 +783,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.PinDrop,
+                                            imageVector = Icons.Rounded.PinDrop,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -808,7 +808,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Lens,
+                                            imageVector = Icons.Rounded.Lens,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -834,7 +834,7 @@ fun MapView(
                             if (myLocationOverlay == null) {
                                 Icons.Outlined.MyLocation
                             } else {
-                                Icons.Default.LocationDisabled
+                                Icons.Rounded.LocationDisabled
                             },
                             contentDescription = stringResource(Res.string.toggle_my_position),
                         ) {

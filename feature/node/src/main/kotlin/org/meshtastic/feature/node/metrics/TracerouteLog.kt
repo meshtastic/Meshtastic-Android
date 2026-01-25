@@ -32,12 +32,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.PersonOff
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -92,6 +86,12 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
 import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
 import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.Group
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.PersonOff
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
@@ -163,7 +163,7 @@ fun TracerouteLogScreen(
                             onClick = { viewModel.requestTraceroute() },
                             cooldownTimestamp = lastTracerouteTime,
                         ) {
-                            Icon(imageVector = Icons.Default.Refresh, contentDescription = null)
+                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
                 },
@@ -329,7 +329,7 @@ private fun DeleteItem(onClick: () -> Unit) {
         text = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    imageVector = Icons.Default.Delete,
+                    imageVector = MeshtasticIcons.Delete,
                     contentDescription = stringResource(Res.string.delete),
                     tint = MaterialTheme.colorScheme.error,
                 )
@@ -357,23 +357,23 @@ private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier =
 @Composable
 private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
-        stringResource(Res.string.routing_error_no_response) to Icons.Default.PersonOff
+        stringResource(Res.string.routing_error_no_response) to MeshtasticIcons.PersonOff
     }
     // A direct route means the sender and receiver are the only two nodes in the route.
     routeCount <= 2 && routeBackCount <= 2 -> { // also check routeBackCount for direct to be more robust
-        stringResource(Res.string.traceroute_direct) to Icons.Default.Group
+        stringResource(Res.string.traceroute_direct) to MeshtasticIcons.Group
     }
 
     routeCount == routeBackCount -> {
         val hops = routeCount - 2
-        pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to Icons.Default.Groups
+        pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
 
     else -> {
         // Asymmetric route
         val towards = maxOf(0, routeCount - 2)
         val back = maxOf(0, routeBackCount - 2)
-        stringResource(Res.string.traceroute_diff, towards, back) to Icons.Default.Groups
+        stringResource(Res.string.traceroute_diff, towards, back) to MeshtasticIcons.Route
     }
 }
 
@@ -424,5 +424,5 @@ private fun TracerouteItemPreview() {
             System.currentTimeMillis(),
             DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
         )
-    AppTheme { TracerouteItem(icon = Icons.Default.Group, text = "$time - Direct") }
+    AppTheme { TracerouteItem(icon = MeshtasticIcons.Group, text = "$time - Direct") }
 }

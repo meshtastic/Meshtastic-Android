@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import android.media.MediaPlayer
@@ -25,8 +24,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FolderOpen
-import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.rounded.FolderOpen
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -289,7 +288,7 @@ fun ExternalNotificationConfigScreen(
                         Row {
                             IconButton(onClick = { launcher.launch("*/*") }, enabled = state.connected) {
                                 Icon(
-                                    Icons.Default.FolderOpen,
+                                    Icons.Rounded.FolderOpen,
                                     contentDescription = stringResource(Res.string.import_label),
                                 )
                             }
@@ -313,7 +312,7 @@ fun ExternalNotificationConfigScreen(
                                 },
                                 enabled = state.connected,
                             ) {
-                                Icon(Icons.Default.PlayArrow, contentDescription = stringResource(Res.string.play))
+                                Icon(Icons.Rounded.PlayArrow, contentDescription = stringResource(Res.string.play))
                             }
                         }
                     },

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("TooManyFunctions")
 
 package org.meshtastic.core.ui.component
@@ -30,10 +29,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -78,6 +73,10 @@ import org.meshtastic.core.strings.security_icon_insecure_no_precise
 import org.meshtastic.core.strings.security_icon_insecure_precise_only
 import org.meshtastic.core.strings.security_icon_secure
 import org.meshtastic.core.strings.security_icon_warning_precise_mqtt
+import org.meshtastic.core.ui.icon.Lock
+import org.meshtastic.core.ui.icon.LockOpen
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
@@ -109,7 +108,7 @@ enum class SecurityState(
 ) {
     /** State for a secure channel (green lock). */
     SECURE(
-        icon = Icons.Filled.Lock,
+        icon = MeshtasticIcons.Lock,
         color = { colorScheme.StatusGreen },
         descriptionResId = Res.string.security_icon_secure,
         helpTextResId = Res.string.security_icon_help_green_lock,
@@ -120,7 +119,7 @@ enum class SecurityState(
      * warning. (yellow open lock)
      */
     INSECURE_NO_PRECISE(
-        icon = Icons.Filled.LockOpen,
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusYellow },
         descriptionResId = Res.string.security_icon_insecure_no_precise,
         helpTextResId = Res.string.security_icon_help_yellow_open_lock,
@@ -131,7 +130,7 @@ enum class SecurityState(
      * lock)
      */
     INSECURE_PRECISE_ONLY(
-        icon = Icons.Filled.LockOpen,
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_insecure_precise_only,
         helpTextResId = Res.string.security_icon_help_red_open_lock,
@@ -142,11 +141,11 @@ enum class SecurityState(
      * badge).
      */
     INSECURE_PRECISE_MQTT_WARNING(
-        icon = Icons.Filled.LockOpen,
+        icon = MeshtasticIcons.LockOpen,
         color = { colorScheme.StatusRed },
         descriptionResId = Res.string.security_icon_warning_precise_mqtt,
         helpTextResId = Res.string.security_icon_help_warning_precise_mqtt,
-        badgeIcon = Icons.Filled.Warning,
+        badgeIcon = MeshtasticIcons.Warning,
         badgeIconColor = { colorScheme.StatusYellow },
     ),
 }

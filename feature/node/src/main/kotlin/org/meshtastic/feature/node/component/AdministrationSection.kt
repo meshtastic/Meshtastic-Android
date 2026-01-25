@@ -18,10 +18,10 @@ package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ForkLeft
-import androidx.compose.material.icons.filled.Icecream
-import androidx.compose.material.icons.filled.Memory
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.ForkLeft
+import androidx.compose.material.icons.rounded.Icecream
+import androidx.compose.material.icons.rounded.Memory
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -63,7 +63,7 @@ fun AdministrationSection(
         Column {
             ListItem(
                 text = stringResource(Res.string.request_metadata),
-                leadingIcon = Icons.Default.Memory,
+                leadingIcon = Icons.Rounded.Memory,
                 trailingIcon = null,
                 onClick = {
                     onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num)))
@@ -74,7 +74,7 @@ fun AdministrationSection(
 
             ListItem(
                 text = stringResource(Res.string.remote_admin),
-                leadingIcon = Icons.Default.Settings,
+                leadingIcon = Icons.Rounded.Settings,
                 enabled = metricsState.isLocal || node.metadata != null,
             ) {
                 onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
@@ -101,8 +101,8 @@ private fun FirmwareSection(
             firmwareEdition?.let { edition ->
                 val icon =
                     when (edition) {
-                        MeshProtos.FirmwareEdition.VANILLA -> Icons.Default.Icecream
-                        else -> Icons.Default.ForkLeft
+                        MeshProtos.FirmwareEdition.VANILLA -> Icons.Rounded.Icecream
+                        else -> Icons.Rounded.ForkLeft
                     }
 
                 ListItem(
@@ -138,7 +138,7 @@ private fun FirmwareVersionItems(
 
     ListItem(
         text = stringResource(Res.string.installed_firmware_version),
-        leadingIcon = Icons.Default.Memory,
+        leadingIcon = Icons.Rounded.Memory,
         supportingText = version.substringBeforeLast("."),
         copyable = true,
         leadingIconTint = statusColor,
@@ -149,7 +149,7 @@ private fun FirmwareVersionItems(
 
     ListItem(
         text = stringResource(Res.string.latest_stable_firmware),
-        leadingIcon = Icons.Default.Memory,
+        leadingIcon = Icons.Rounded.Memory,
         supportingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
         copyable = true,
         leadingIconTint = MaterialTheme.colorScheme.StatusGreen,
@@ -161,7 +161,7 @@ private fun FirmwareVersionItems(
 
     ListItem(
         text = stringResource(Res.string.latest_alpha_firmware),
-        leadingIcon = Icons.Default.Memory,
+        leadingIcon = Icons.Rounded.Memory,
         supportingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
         copyable = true,
         leadingIconTint = MaterialTheme.colorScheme.StatusYellow,

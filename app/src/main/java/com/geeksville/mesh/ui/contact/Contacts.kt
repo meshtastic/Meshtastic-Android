@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.contact
 
 import androidx.compose.foundation.layout.Box
@@ -28,13 +27,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.VolumeMute
-import androidx.compose.material.icons.automirrored.twotone.VolumeUp
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -100,6 +92,13 @@ import org.meshtastic.core.strings.unmute
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
+import org.meshtastic.core.ui.icon.Close
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.HardwareModel
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.SelectAll
+import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
+import org.meshtastic.core.ui.icon.VolumeUpTwoTone
 import org.meshtastic.proto.AppOnlyProtos
 import java.util.concurrent.TimeUnit
 
@@ -232,7 +231,7 @@ fun ContactsScreen(
                 ),
                 onClick = onNavigateToShare,
             ) {
-                Icon(Icons.Rounded.QrCode2, contentDescription = stringResource(Res.string.share_contact))
+                Icon(MeshtasticIcons.HardwareModel, contentDescription = stringResource(Res.string.share_contact))
             }
         },
     ) { paddingValues ->
@@ -445,7 +444,7 @@ private fun SelectionToolbar(
         title = { Text(text = "$selectedCount") },
         navigationIcon = {
             IconButton(onClick = onCloseSelection) {
-                Icon(Icons.Default.Close, contentDescription = stringResource(Res.string.close_selection))
+                Icon(MeshtasticIcons.Close, contentDescription = stringResource(Res.string.close_selection))
             }
         },
         actions = {
@@ -453,9 +452,9 @@ private fun SelectionToolbar(
                 Icon(
                     imageVector =
                     if (isAllMuted) {
-                        Icons.AutoMirrored.TwoTone.VolumeUp
+                        MeshtasticIcons.VolumeUpTwoTone
                     } else {
-                        Icons.AutoMirrored.TwoTone.VolumeMute
+                        MeshtasticIcons.VolumeMuteTwoTone
                     },
                     contentDescription =
                     if (isAllMuted) {
@@ -466,10 +465,10 @@ private fun SelectionToolbar(
                 )
             }
             IconButton(onClick = onDeleteSelected) {
-                Icon(Icons.Default.Delete, contentDescription = stringResource(Res.string.delete_selection))
+                Icon(MeshtasticIcons.Delete, contentDescription = stringResource(Res.string.delete_selection))
             }
             IconButton(onClick = onSelectAll) {
-                Icon(Icons.Default.SelectAll, contentDescription = stringResource(Res.string.select_all))
+                Icon(MeshtasticIcons.SelectAll, contentDescription = stringResource(Res.string.select_all))
             }
         },
     )

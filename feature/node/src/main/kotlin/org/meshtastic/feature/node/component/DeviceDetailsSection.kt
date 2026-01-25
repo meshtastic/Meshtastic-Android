@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
@@ -78,7 +78,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
                         ?: deviceHardware.displayName
                 ListItem(
                     text = stringResource(Res.string.hardware),
-                    leadingIcon = Icons.Default.Router,
+                    leadingIcon = Icons.Rounded.Router,
                     supportingText = deviceText,
                     copyable = true,
                     trailingIcon = null,
