@@ -151,6 +151,8 @@ object SettingsRoutes {
 
     @Serializable data object About : Route
 
+    @Serializable data object FilterSettings : Route
+
     // endregion
 }
 

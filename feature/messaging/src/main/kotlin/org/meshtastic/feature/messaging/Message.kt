@@ -57,6 +57,10 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.SpeakerNotes
 import androidx.compose.material.icons.filled.SpeakerNotesOff
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.FilterListOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -113,6 +117,10 @@ import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.delete
 import org.meshtastic.core.strings.delete_messages
 import org.meshtastic.core.strings.delete_messages_title
+import org.meshtastic.core.strings.filter_disable_for_contact
+import org.meshtastic.core.strings.filter_enable_for_contact
+import org.meshtastic.core.strings.filter_hide_count
+import org.meshtastic.core.strings.filter_show_count
 import org.meshtastic.core.strings.message_input_label
 import org.meshtastic.core.strings.navigate_back
 import org.meshtastic.core.strings.overflow_menu
@@ -178,6 +186,9 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
+    val filteredCount by viewModel.getFilteredCount(contactKey).collectAsStateWithLifecycle(initialValue = 0)
+    val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
+    val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
 
     // Retry dialog state
     var currentRetryEvent by remember { mutableStateOf<RetryEvent?>(null) }
@@ -381,6 +392,13 @@ fun MessageScreen(
                     showQuickChat = showQuickChat,
                     onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
+                    filteringDisabled = filteringDisabled,
+                    onToggleFilteringDisabled = {
+                        viewModel.setContactFilteringDisabled(contactKey, !filteringDisabled)
+                    },
+                    filteredCount = filteredCount,
+                    showFiltered = showFiltered,
+                    onToggleShowFiltered = viewModel::toggleShowFiltered,
                 )
             }
         },
@@ -399,6 +417,9 @@ fun MessageScreen(
                         contactKey = contactKey,
                         firstUnreadMessageUuid = firstUnreadMessageUuid,
                         hasUnreadMessages = hasUnreadMessages,
+                        filteredCount = filteredCount,
+                        showFiltered = showFiltered,
+                        filteringDisabled = filteringDisabled,
                     ),
                     handlers =
                     MessageListHandlers(
@@ -695,6 +716,11 @@ private fun MessageTopBar(
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
     onNavigateToQuickChatOptions: () -> Unit = {},
+    filteringDisabled: Boolean = false,
+    onToggleFilteringDisabled: () -> Unit = {},
+    filteredCount: Int = 0,
+    showFiltered: Boolean = false,
+    onToggleShowFiltered: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -716,11 +742,16 @@ private fun MessageTopBar(
     },
     actions = {
         MessageTopBarActions(
-            showQuickChat,
-            onToggleQuickChat,
-            onNavigateToQuickChatOptions,
-            channelIndex,
-            mismatchKey,
+            showQuickChat = showQuickChat,
+            onToggleQuickChat = onToggleQuickChat,
+            onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
+            channelIndex = channelIndex,
+            mismatchKey = mismatchKey,
+            filteringDisabled = filteringDisabled,
+            onToggleFilteringDisabled = onToggleFilteringDisabled,
+            filteredCount = filteredCount,
+            showFiltered = showFiltered,
+            onToggleShowFiltered = onToggleShowFiltered,
         )
     },
 )
@@ -732,6 +763,11 @@ private fun MessageTopBarActions(
     onNavigateToQuickChatOptions: () -> Unit,
     channelIndex: Int?,
     mismatchKey: Boolean,
+    filteringDisabled: Boolean,
+    onToggleFilteringDisabled: () -> Unit,
+    filteredCount: Int,
+    showFiltered: Boolean,
+    onToggleShowFiltered: () -> Unit,
 ) {
     if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
         NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
@@ -747,6 +783,11 @@ private fun MessageTopBarActions(
             showQuickChat = showQuickChat,
             onToggleQuickChat = onToggleQuickChat,
             onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
+            filteringDisabled = filteringDisabled,
+            onToggleFilteringDisabled = onToggleFilteringDisabled,
+            filteredCount = filteredCount,
+            showFiltered = showFiltered,
+            onToggleShowFiltered = onToggleShowFiltered,
         )
     }
 }
@@ -758,48 +799,92 @@ private fun OverFlowMenu(
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
     onNavigateToQuickChatOptions: () -> Unit,
+    filteringDisabled: Boolean,
+    onToggleFilteringDisabled: () -> Unit,
+    filteredCount: Int,
+    showFiltered: Boolean,
+    onToggleShowFiltered: () -> Unit,
 ) {
     if (expanded) {
         DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-            val quickChatToggleTitle =
-                if (showQuickChat) {
-                    stringResource(Res.string.quick_chat_hide)
-                } else {
-                    stringResource(Res.string.quick_chat_show)
-                }
-            DropdownMenuItem(
-                text = { Text(quickChatToggleTitle) },
-                onClick = {
-                    onDismiss()
-                    onToggleQuickChat()
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector =
-                        if (showQuickChat) {
-                            Icons.Default.SpeakerNotesOff
-                        } else {
-                            Icons.Default.SpeakerNotes
-                        },
-                        contentDescription = quickChatToggleTitle,
-                    )
-                },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(Res.string.quick_chat)) },
-                onClick = {
-                    onDismiss()
-                    onNavigateToQuickChatOptions()
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.ChatBubbleOutline,
-                        contentDescription = stringResource(Res.string.quick_chat),
-                    )
-                },
-            )
+            QuickChatToggleMenuItem(showQuickChat, onDismiss, onToggleQuickChat)
+            QuickChatOptionsMenuItem(onDismiss, onNavigateToQuickChatOptions)
+            if (filteredCount > 0 && !filteringDisabled) {
+                FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
+            }
+            FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
         }
     }
+}
+
+@Composable
+private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Unit, onToggle: () -> Unit) {
+    val title = stringResource(if (showQuickChat) Res.string.quick_chat_hide else Res.string.quick_chat_show)
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onToggle()
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = if (showQuickChat) Icons.Default.SpeakerNotesOff else Icons.Default.SpeakerNotes,
+                contentDescription = title,
+            )
+        },
+    )
+}
+
+@Composable
+private fun QuickChatOptionsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Unit) {
+    val title = stringResource(Res.string.quick_chat)
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onNavigate()
+        },
+        leadingIcon = { Icon(imageVector = Icons.Default.ChatBubbleOutline, contentDescription = title) },
+    )
+}
+
+@Composable
+private fun FilteredMessagesMenuItem(showFiltered: Boolean, count: Int, onDismiss: () -> Unit, onToggle: () -> Unit) {
+    val title = stringResource(if (showFiltered) Res.string.filter_hide_count else Res.string.filter_show_count, count)
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onToggle()
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = if (showFiltered) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                contentDescription = title,
+            )
+        },
+    )
+}
+
+@Composable
+private fun FilterToggleMenuItem(filteringDisabled: Boolean, onDismiss: () -> Unit, onToggle: () -> Unit) {
+    val title =
+        stringResource(
+            if (filteringDisabled) Res.string.filter_enable_for_contact else Res.string.filter_disable_for_contact,
+        )
+    DropdownMenuItem(
+        text = { Text(title) },
+        onClick = {
+            onDismiss()
+            onToggle()
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = if (filteringDisabled) Icons.Rounded.FilterList else Icons.Rounded.FilterListOff,
+                contentDescription = title,
+            )
+        },
+    )
 }
 
 /**

@@ -45,3 +45,6 @@ keystore.properties
 # Personal build scripts
 build-and-install-android.sh
 wireless-install.sh
+
+# Git worktrees
+.worktrees/

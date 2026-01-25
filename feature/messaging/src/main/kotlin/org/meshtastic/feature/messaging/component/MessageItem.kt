@@ -70,6 +70,7 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.filter_message_label
 import org.meshtastic.core.strings.hops_away_template
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
@@ -174,7 +175,9 @@ internal fun MessageItem(
     val containsBel = message.text.contains('\u0007')
 
     val alpha =
-        if (inSelectionMode) {
+        if (message.filtered) {
+            FILTERED_ALPHA
+        } else if (inSelectionMode) {
             if (selected) SELECTED_ALPHA else UNSELECTED_ALPHA
         } else {
             NORMAL_ALPHA
@@ -284,6 +287,14 @@ internal fun MessageItem(
                     if (containsBel) {
                         Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
                     }
+                    if (message.filtered) {
+                        Text(
+                            text = stringResource(Res.string.filter_message_label),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 8.dp, end = 4.dp),
+                        )
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
                         modifier = Modifier.padding(8.dp),
@@ -319,6 +330,7 @@ internal fun MessageItem(
 private const val SELECTED_ALPHA = 0.6f
 private const val UNSELECTED_ALPHA = 0.2f
 private const val NORMAL_ALPHA = 0.4f
+private const val FILTERED_ALPHA = 0.5f
 
 private enum class ActiveSheet {
     Actions,
@@ -464,6 +476,26 @@ private fun MessageItemPreview() {
             originalMessage = received,
             viaMqtt = true,
         )
+    val filteredMessage =
+        Message(
+            text = "This message was filtered",
+            time = "10:30",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 1.5f,
+            rssi = 70,
+            hopsAway = 1,
+            uuid = 3L,
+            receivedTime = System.currentTimeMillis(),
+            node = NodePreviewParameterProvider().minnieMouse,
+            read = false,
+            routingError = 0,
+            packetId = 4546,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+            filtered = true,
+        )
     AppTheme {
         Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
             MessageItem(
@@ -499,6 +531,21 @@ private fun MessageItemPreview() {
             MessageItem(
                 message = receivedWithOriginalMessage,
                 node = receivedWithOriginalMessage.node,
+                selected = false,
+                ourNode = sent.node,
+                onReply = {},
+                sendReaction = {},
+                onShowReactions = {},
+                onClick = {},
+                onLongClick = {},
+                onDoubleClick = {},
+                onClickChip = {},
+                onNavigateToOriginalMessage = {},
+            )
+
+            MessageItem(
+                message = filteredMessage,
+                node = filteredMessage.node,
                 selected = false,
                 ourNode = sent.node,
                 onReply = {},
