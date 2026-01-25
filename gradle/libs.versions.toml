@@ -18,7 +18,7 @@ room = "2.8.4"
 # Kotlin
 kotlin = "2.3.0"
 kotlinx-coroutines-android = "1.10.2"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
 kover = "0.9.4"
 mockk = "1.14.7"
@@ -31,7 +31,7 @@ hilt = "2.59"
 maps-compose = "7.0.0"
 
 # Networking
-ktor = "3.3.3"
+ktor = "3.4.0"
 
 # Other
 aboutlibraries = "13.2.1"
@@ -187,7 +187,7 @@ androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", vers
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.22.0" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.3" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.5" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }
@@ -197,7 +197,7 @@ kover-gradlePlugin = { module = "org.jetbrains.kotlinx.kover:org.jetbrains.kotli
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
 secrets-gradlePlugin = {module = "com.google.android.secrets-gradle-plugin:com.google.android.secrets-gradle-plugin.gradle.plugin", version = "1.1.0"}
 serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
-spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.1.0" }
+spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version = "8.2.0" }
 
 [plugins]
 # Android
@@ -233,7 +233,7 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
 protobuf = { id = "com.google.protobuf", version = "0.9.6" }
 room = { id = "androidx.room", version.ref = "room" }
-spotless = { id = "com.diffplug.spotless", version = "8.1.0" }
+spotless = { id = "com.diffplug.spotless", version = "8.2.0" }
 
 # Meshtastic
 meshtastic-analytics = { id = "meshtastic.analytics" }
