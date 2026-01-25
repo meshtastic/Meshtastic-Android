@@ -47,6 +47,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.navigation.common)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.molecule.runtime)
     implementation(libs.kermit)
     implementation(libs.coil)
     implementation(libs.markdown.renderer.android)

@@ -566,4 +566,5 @@
     <string name="firmware_update_failed">Atualização falhou</string>
     <string name="interval_unset">Não Definido</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

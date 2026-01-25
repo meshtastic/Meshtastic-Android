@@ -877,4 +877,5 @@
     <string name="mark_as_read">Маркиране като прочетено</string>
     <string name="now">Сега</string>
     <string name="add_channels_title">Добавяне на канали</string>
+    <!-- Message Filter -->
 </resources>

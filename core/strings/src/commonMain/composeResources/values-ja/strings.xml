@@ -550,4 +550,5 @@
     <string name="firmware_update_failed">更新失敗</string>
     <string name="interval_unset">削除</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

@@ -648,4 +648,5 @@
     <string name="mark_as_read">Oznacz jako przeczytane</string>
     <string name="now">Teraz</string>
     <string name="add_channels_title">Dodaj kanały</string>
+    <!-- Message Filter -->
 </resources>

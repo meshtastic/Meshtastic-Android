@@ -578,4 +578,5 @@
     <string name="interval_unset">해제</string>
     <!-- Compass -->
     <string name="now">지금</string>
+    <!-- Message Filter -->
 </resources>

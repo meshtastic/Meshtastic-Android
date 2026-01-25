@@ -30,50 +30,47 @@ constructor(
     private val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
 ) {
-    private var scope: CoroutineScope? = null
-
-    fun start(coroutineScope: CoroutineScope) {
-        scope = coroutineScope
-        nodeManagementActions.start(coroutineScope)
-        nodeRequestActions.start(coroutineScope)
-    }
-
-    fun handleNodeMenuAction(action: NodeMenuAction) {
+    fun handleNodeMenuAction(scope: CoroutineScope, action: NodeMenuAction) {
         when (action) {
-            is NodeMenuAction.Remove -> nodeManagementActions.removeNode(action.node.num)
-            is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(action.node)
-            is NodeMenuAction.Mute -> nodeManagementActions.muteNode(action.node)
-            is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(action.node)
-            is NodeMenuAction.RequestUserInfo -> nodeRequestActions.requestUserInfo(action.node.num)
-            is NodeMenuAction.RequestNeighborInfo -> nodeRequestActions.requestNeighborInfo(action.node.num)
-            is NodeMenuAction.RequestPosition -> nodeRequestActions.requestPosition(action.node.num)
-            is NodeMenuAction.RequestTelemetry -> nodeRequestActions.requestTelemetry(action.node.num, action.type)
-            is NodeMenuAction.TraceRoute -> nodeRequestActions.requestTraceroute(action.node.num)
+            is NodeMenuAction.Remove -> nodeManagementActions.removeNode(scope, action.node.num)
+            is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(scope, action.node)
+            is NodeMenuAction.Mute -> nodeManagementActions.muteNode(scope, action.node)
+            is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(scope, action.node)
+            is NodeMenuAction.RequestUserInfo ->
+                nodeRequestActions.requestUserInfo(scope, action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestNeighborInfo ->
+                nodeRequestActions.requestNeighborInfo(scope, action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestPosition ->
+                nodeRequestActions.requestPosition(scope, action.node.num, action.node.user.longName)
+            is NodeMenuAction.RequestTelemetry ->
+                nodeRequestActions.requestTelemetry(scope, action.node.num, action.node.user.longName, action.type)
+            is NodeMenuAction.TraceRoute ->
+                nodeRequestActions.requestTraceroute(scope, action.node.num, action.node.user.longName)
             else -> {}
         }
     }
 
-    fun setNodeNotes(nodeNum: Int, notes: String) {
-        nodeManagementActions.setNodeNotes(nodeNum, notes)
+    fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
+        nodeManagementActions.setNodeNotes(scope, nodeNum, notes)
     }
 
-    fun requestPosition(destNum: Int, position: Position) {
-        nodeRequestActions.requestPosition(destNum, position)
+    fun requestPosition(scope: CoroutineScope, destNum: Int, longName: String, position: Position) {
+        nodeRequestActions.requestPosition(scope, destNum, longName, position)
     }
 
-    fun requestUserInfo(destNum: Int) {
-        nodeRequestActions.requestUserInfo(destNum)
+    fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
+        nodeRequestActions.requestUserInfo(scope, destNum, longName)
     }
 
-    fun requestNeighborInfo(destNum: Int) {
-        nodeRequestActions.requestNeighborInfo(destNum)
+    fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String) {
+        nodeRequestActions.requestNeighborInfo(scope, destNum, longName)
     }
 
-    fun requestTelemetry(destNum: Int, type: TelemetryType) {
-        nodeRequestActions.requestTelemetry(destNum, type)
+    fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType) {
+        nodeRequestActions.requestTelemetry(scope, destNum, longName, type)
     }
 
-    fun requestTraceroute(destNum: Int) {
-        nodeRequestActions.requestTraceroute(destNum)
+    fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String) {
+        nodeRequestActions.requestTraceroute(scope, destNum, longName)
     }
 }

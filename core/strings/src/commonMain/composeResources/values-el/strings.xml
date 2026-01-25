@@ -207,4 +207,5 @@
     <string name="firmware_update_failed">Αποτυχία ενημέρωσης</string>
     <string name="interval_unset">Αναίρεση</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

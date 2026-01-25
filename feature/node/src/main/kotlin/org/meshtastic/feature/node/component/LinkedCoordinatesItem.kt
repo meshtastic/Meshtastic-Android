@@ -25,10 +25,16 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
@@ -39,13 +45,13 @@ import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.strings.last_position_update
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import java.net.URLEncoder
 
@@ -64,7 +70,22 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
             " • ${altitude.metersIn(displayUnits).toString(displayUnits)} $suffix"
         } ?: ""
 
+    val copyLabel = stringResource(Res.string.copy)
+
     BasicListItem(
+        modifier =
+        Modifier.semantics {
+            role = Role.Button
+            customActions =
+                listOf(
+                    CustomAccessibilityAction(copyLabel) {
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", coordinates)))
+                        }
+                        true
+                    },
+                )
+        },
         text = stringResource(Res.string.last_position_update),
         leadingIcon = Icons.Default.LocationOn,
         supportingText = "$ago • $coordinates$elevationText",
@@ -77,8 +98,6 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
             try {
                 if (intent.resolveActivity(context.packageManager) != null) {
                     context.startActivity(intent)
-                } else {
-                    coroutineScope.launch { context.showToast("No application available to open this location!") }
                 }
             } catch (ex: ActivityNotFoundException) {
                 Logger.d { "Failed to open geo intent: $ex" }

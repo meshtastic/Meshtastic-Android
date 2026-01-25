@@ -170,4 +170,5 @@
     <string name="firmware_update_failed">Ažuriranje neuspjelo</string>
     <string name="interval_unset">Nepostavljeno</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

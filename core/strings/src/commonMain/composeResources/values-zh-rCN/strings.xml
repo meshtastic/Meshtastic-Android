@@ -1029,4 +1029,5 @@
     <string name="compass_uncertainty_unknown">估计区域：精度未知</string>
     <string name="now">当前</string>
     <string name="add_channels_title">增加频道</string>
+    <!-- Message Filter -->
 </resources>

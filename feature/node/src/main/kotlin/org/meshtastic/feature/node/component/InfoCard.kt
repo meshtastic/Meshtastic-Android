@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,53 +14,104 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
+import android.content.ClipData
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.copy
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun InfoCard(icon: ImageVector, text: String, value: String, modifier: Modifier = Modifier, rotateIcon: Float = 0f) {
-    Card(modifier = modifier.padding(4.dp).width(100.dp).height(100.dp)) {
-        Box(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp), contentAlignment = Alignment.Center) {
-            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+fun InfoCard(
+    text: String,
+    value: String,
+    icon: ImageVector? = null,
+    @DrawableRes iconRes: Int? = null,
+    modifier: Modifier = Modifier,
+    rotateIcon: Float = 0f,
+) {
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
+    val shape = MaterialTheme.shapes.medium
+    val copyLabel = stringResource(Res.string.copy)
+
+    Card(
+        modifier =
+        modifier
+            .defaultMinSize(minHeight = 48.dp)
+            .clip(shape)
+            .combinedClickable(
+                onLongClick = {
+                    coroutineScope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(text, value))) }
+                },
+                onLongClickLabel = copyLabel,
+                onClick = {},
+                role = Role.Button,
+            )
+            .semantics(mergeDescendants = true) { contentDescription = "$text: $value" },
+        shape = shape,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    ) {
+        Row(
+            modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val iconModifier = Modifier.size(20.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) }
+            val iconTint = MaterialTheme.colorScheme.primary
+            if (icon != null) {
+                Icon(imageVector = icon, contentDescription = null, modifier = iconModifier, tint = iconTint)
+            }
+            if (iconRes != null) {
                 Icon(
-                    imageVector = icon,
-                    contentDescription = text,
-                    modifier = Modifier.size(24.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
+                    painter = painterResource(iconRes),
+                    contentDescription = null,
+                    modifier = iconModifier,
+                    tint = iconTint,
                 )
+            }
+            Column {
                 Text(
-                    textAlign = TextAlign.Center,
-                    text = text,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
+                    text,
                     style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = value,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
+                    value,
+                    style = MaterialTheme.typography.labelLargeEmphasized,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
         }
@@ -69,30 +120,7 @@ fun InfoCard(icon: ImageVector, text: String, value: String, modifier: Modifier 
 
 @Composable
 internal fun DrawableInfoCard(@DrawableRes iconRes: Int, text: String, value: String, rotateIcon: Float = 0f) {
-    Card(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp)) {
-        Box(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp), contentAlignment = Alignment.Center) {
-            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(
-                    painter = painterResource(id = iconRes),
-                    contentDescription = text,
-                    modifier = Modifier.size(24.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
-                )
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = text,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-                Text(
-                    text = value,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-        }
-    }
+    InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon)
 }
 
 inline fun Modifier.thenIf(precondition: Boolean, action: Modifier.() -> Modifier): Modifier =

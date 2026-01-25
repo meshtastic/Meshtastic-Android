@@ -257,7 +257,8 @@ constructor(
     /** Start our configured interface (if it isn't already running) */
     private fun startInterface() {
         if (radioIf !is NopInterface) {
-            Logger.w { "Can't start interface - $radioIf is already running" }
+            // Already running
+            return
         } else {
             val address = getBondedDeviceAddress()
             if (address == null) {

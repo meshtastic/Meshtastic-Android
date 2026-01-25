@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.service
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
 import android.os.Build
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.OutOfQuotaPolicy
+import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.worker.ServiceKeepAliveWorker
 
 // / Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
@@ -40,9 +43,19 @@ fun MeshService.Companion.startService(context: Context) {
         try {
             context.startForegroundService(intent)
         } catch (ex: ForegroundServiceStartNotAllowedException) {
-            Logger.e { "Unable to start service: ${ex.message}" }
+            Logger.w { "Unable to start service foreground: ${ex.message}. Scheduling fallback worker." }
+            scheduleKeepAliveWorker(context)
         }
     } else {
         context.startForegroundService(intent)
     }
+}
+
+private fun scheduleKeepAliveWorker(context: Context) {
+    val request =
+        OneTimeWorkRequestBuilder<ServiceKeepAliveWorker>()
+            .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+            .build()
+
+    WorkManager.getInstance(context).enqueue(request)
 }

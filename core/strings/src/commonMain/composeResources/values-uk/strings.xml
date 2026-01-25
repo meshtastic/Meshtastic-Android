@@ -520,4 +520,5 @@
     <!-- Compass -->
     <string name="now">Зараз</string>
     <string name="add_channels_title">Додайте канали</string>
+    <!-- Message Filter -->
 </resources>

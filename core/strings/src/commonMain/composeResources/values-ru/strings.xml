@@ -1112,4 +1112,5 @@
     <string name="add_channels_description">В QR-коде были найдены следующие каналы. Выберите тот, который вы хотели бы добавить на свое устройство. Существующие каналы будут сохранены.</string>
     <string name="replace_channels_and_settings_title">Заменить каналы и настройки</string>
     <string name="replace_channels_and_settings_description">Этот QR-код содержит полную конфигурацию. Это заменит ваши существующие каналы и настройки радио. Все существующие каналы будут удалены.</string>
+    <!-- Message Filter -->
 </resources>

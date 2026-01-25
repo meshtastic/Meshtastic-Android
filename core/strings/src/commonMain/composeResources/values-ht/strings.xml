@@ -235,4 +235,5 @@
     <string name="firmware_update_failed">Mizajou echwe</string>
     <string name="interval_unset">Pa konfigire</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>
