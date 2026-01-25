@@ -731,6 +731,8 @@
     <string name="user_id">Kasutaja ID</string>
     <string name="uptime">Töötamise aeg</string>
     <string name="load_indexed">Lae %1$d</string>
+    <string name="fetching_channel_indexed">Kanali %1$d/%2$d laadimine</string>
+    <string name="fetching_config">Laen %1$s</string>
     <string name="disk_free_indexed">Vaba kettamaht %1$d</string>
     <string name="timestamp">Ajatempel</string>
     <string name="heading">Päis</string>
@@ -1090,4 +1092,8 @@
     <string name="compass_uncertainty_unknown">Hinnanguline piirkond: täpsus teadmata</string>
     <string name="mark_as_read">Märgi loetuks</string>
     <string name="now">Kohe</string>
+    <string name="add_channels_title">Lisa kanaleid</string>
+    <string name="add_channels_description">QR-koodist leiti järgmised kanalid. Valige millised soovite oma seadmesse lisada. Olemasolevad kanalid säilivad.</string>
+    <string name="replace_channels_and_settings_title">Kanali &amp; sätete asendamine</string>
+    <string name="replace_channels_and_settings_description">See QR-kood sisaldab täielikku konfiguratsiooni. See ASENDAB olemasolevad kanalid ja raadioseaded. Kõik olemasolevad kanalid eemaldatakse.</string>
 </resources>

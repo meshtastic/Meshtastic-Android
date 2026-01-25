@@ -197,6 +197,10 @@ constructor(
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
+    fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
+        viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+    }
+
     /**
      * Get the total message count for a list of contact keys. This queries the repository directly, so it works even if
      * contacts aren't loaded in the paged list.

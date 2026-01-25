@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 33,
-    "identityHash": "e43a591b43c2f306c57f5ad09410313f",
+    "identityHash": "39cc6bc0cf1dfe244ed72537dde19464",
     "entities": [
       {
         "tableName": "my_node",
@@ -86,7 +86,7 @@
       },
       {
         "tableName": "nodes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `user` BLOB NOT NULL, `long_name` TEXT, `short_name` TEXT, `position` BLOB NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `last_heard` INTEGER NOT NULL, `device_metrics` BLOB NOT NULL, `channel` INTEGER NOT NULL, `via_mqtt` INTEGER NOT NULL, `hops_away` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `is_ignored` INTEGER NOT NULL DEFAULT 0, `is_muted` INTEGER NOT NULL DEFAULT 0, `environment_metrics` BLOB NOT NULL, `power_metrics` BLOB NOT NULL, `paxcounter` BLOB NOT NULL, `public_key` BLOB, `notes` TEXT NOT NULL DEFAULT '', `manually_verified` INTEGER NOT NULL DEFAULT 0, `node_status` TEXT, PRIMARY KEY(`num`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`num` INTEGER NOT NULL, `user` BLOB NOT NULL, `long_name` TEXT, `short_name` TEXT, `position` BLOB NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `snr` REAL NOT NULL, `rssi` INTEGER NOT NULL, `last_heard` INTEGER NOT NULL, `device_metrics` BLOB NOT NULL, `channel` INTEGER NOT NULL, `via_mqtt` INTEGER NOT NULL, `hops_away` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `is_ignored` INTEGER NOT NULL DEFAULT 0, `is_muted` INTEGER NOT NULL DEFAULT 0, `environment_metrics` BLOB NOT NULL, `power_metrics` BLOB NOT NULL, `paxcounter` BLOB NOT NULL, `public_key` BLOB, `notes` TEXT NOT NULL DEFAULT '', `manually_verified` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`num`))",
         "fields": [
           {
             "fieldPath": "num",
@@ -226,11 +226,6 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
-          },
-          {
-            "fieldPath": "nodeStatus",
-            "columnName": "node_status",
-            "affinity": "TEXT"
           }
         ],
         "primaryKey": {
@@ -299,7 +294,7 @@
       },
       {
         "tableName": "packet",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB, `filtered` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -384,6 +379,13 @@
             "fieldPath": "sfpp_hash",
             "columnName": "sfpp_hash",
             "affinity": "BLOB"
+          },
+          {
+            "fieldPath": "filtered",
+            "columnName": "filtered",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -444,7 +446,7 @@
       },
       {
         "tableName": "contact_settings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contact_key` TEXT NOT NULL, `muteUntil` INTEGER NOT NULL, `last_read_message_uuid` INTEGER, `last_read_message_timestamp` INTEGER, PRIMARY KEY(`contact_key`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`contact_key` TEXT NOT NULL, `muteUntil` INTEGER NOT NULL, `last_read_message_uuid` INTEGER, `last_read_message_timestamp` INTEGER, `filtering_disabled` INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(`contact_key`))",
         "fields": [
           {
             "fieldPath": "contact_key",
@@ -467,6 +469,13 @@
             "fieldPath": "lastReadMessageTimestamp",
             "columnName": "last_read_message_timestamp",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "filteringDisabled",
+            "columnName": "filtering_disabled",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           }
         ],
         "primaryKey": {
@@ -996,7 +1005,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e43a591b43c2f306c57f5ad09410313f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39cc6bc0cf1dfe244ed72537dde19464')"
     ]
   }
 }

@@ -108,6 +108,10 @@
         android:localeConfig="@xml/locales_config"
         android:networkSecurityConfig="@xml/network_security_config">
 
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false" />
+
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
             android:name="firebase_crashlytics_collection_enabled"

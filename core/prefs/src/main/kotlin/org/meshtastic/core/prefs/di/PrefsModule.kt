@@ -28,6 +28,8 @@ import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefsImpl
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
+import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.prefs.filter.FilterPrefsImpl
 import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefsImpl
 import org.meshtastic.core.prefs.map.MapPrefs
@@ -88,6 +90,10 @@ internal annotation class UiSharedPreferences
 @Retention(AnnotationRetention.BINARY)
 internal annotation class MeshLogSharedPreferences
 
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+internal annotation class FilterSharedPreferences
+
 @Suppress("TooManyFunctions")
 @InstallIn(SingletonComponent::class)
 @Module
@@ -110,6 +116,8 @@ interface PrefsModule {
     @Binds fun bindRadioPrefs(radioPrefsImpl: RadioPrefsImpl): RadioPrefs
 
     @Binds fun bindUiPrefs(uiPrefsImpl: UiPrefsImpl): UiPrefs
+
+    @Binds fun bindFilterPrefs(filterPrefsImpl: FilterPrefsImpl): FilterPrefs
 
     companion object {
 
@@ -172,5 +180,11 @@ interface PrefsModule {
         @MeshLogSharedPreferences
         fun provideMeshLogSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
             context.getSharedPreferences("meshlog-prefs", Context.MODE_PRIVATE)
+
+        @Provides
+        @Singleton
+        @FilterSharedPreferences
+        fun provideFilterSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences(FilterPrefs.FILTER_PREFS_NAME, Context.MODE_PRIVATE)
     }
 }

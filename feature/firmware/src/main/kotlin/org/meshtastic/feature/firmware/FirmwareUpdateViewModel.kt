@@ -147,6 +147,7 @@ constructor(
         checkForUpdates()
     }
 
+    @Suppress("LongMethod")
     fun checkForUpdates() {
         updateJob?.cancel()
         updateJob =
@@ -174,14 +175,18 @@ constructor(
                             _selectedRelease.value = release
                             val dismissed = bootloaderWarningDataSource.isDismissed(address)
                             val firmwareUpdateMethod =
-                                if (radioPrefs.isSerial()) {
-                                    FirmwareUpdateMethod.Usb
-                                } else if (radioPrefs.isBle()) {
-                                    FirmwareUpdateMethod.Ble
-                                } else if (radioPrefs.isTcp()) {
-                                    FirmwareUpdateMethod.Wifi
-                                } else {
-                                    FirmwareUpdateMethod.Unknown
+                                when {
+                                    radioPrefs.isSerial() -> {
+                                        // ESP32 Serial updates are not supported from the app yet.
+                                        if (deviceHardware.isEsp32Arc) {
+                                            FirmwareUpdateMethod.Unknown
+                                        } else {
+                                            FirmwareUpdateMethod.Usb
+                                        }
+                                    }
+                                    radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
+                                    radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
+                                    else -> FirmwareUpdateMethod.Unknown
                                 }
                             _state.value =
                                 FirmwareUpdateState.Ready(

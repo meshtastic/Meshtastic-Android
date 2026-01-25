@@ -731,6 +731,8 @@
     <string name="user_id">Käyttäjän ID</string>
     <string name="uptime">Käyttöaika</string>
     <string name="load_indexed">Lataa %1$d</string>
+    <string name="fetching_channel_indexed">Haetaan kanavaa %1$d/%2$d</string>
+    <string name="fetching_config">Haetaan %1$s</string>
     <string name="disk_free_indexed">Vapaa levytila %1$d</string>
     <string name="timestamp">Aikaleima</string>
     <string name="heading">Suunta</string>

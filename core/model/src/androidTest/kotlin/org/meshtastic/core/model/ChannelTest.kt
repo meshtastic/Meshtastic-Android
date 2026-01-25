@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -24,7 +23,9 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.model.util.URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
+import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.copy
 
 @RunWith(AndroidJUnit4::class)
 class ChannelTest {
@@ -66,5 +67,24 @@ class ChannelTest {
         val ch = Channel.default
 
         Assert.assertEquals(906.875f, ch.radioFreq)
+    }
+
+    @Test
+    fun allModemPresetsHaveValidNames() {
+        ConfigProtos.Config.LoRaConfig.ModemPreset.values().forEach { preset ->
+            // Skip UNRECOGNIZED if it exists (Wire generates it sometimes) or generic UNSET values if applicable
+            // In this specific enum, assuming all valid defined presets should map.
+            if (preset.name == "UNSET" || preset.name == "UNRECOGNIZED") return@forEach
+
+            val loraConfig =
+                Channel.default.loraConfig.copy {
+                    usePreset = true
+                    modemPreset = preset
+                }
+            val channel = Channel(loraConfig = loraConfig)
+
+            // We want to ensure it is NOT "Invalid"
+            Assert.assertNotEquals("Preset ${preset.name} should typically have a valid name", "Invalid", channel.name)
+        }
     }
 }

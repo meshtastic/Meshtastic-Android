@@ -55,7 +55,7 @@ constructor(
     private var backoffDelay = MIN_BACKOFF_MILLIS
 
     private var socket: Socket? = null
-    private lateinit var outStream: OutputStream
+    private var outStream: OutputStream? = null
 
     private var connectionStartTime: Long = 0
     private var packetsReceived: Int = 0
@@ -69,15 +69,32 @@ constructor(
     }
 
     override fun sendBytes(p: ByteArray) {
+        val stream = outStream
+        if (stream == null) {
+            Logger.w { "[$address] TCP cannot send ${p.size} bytes: outStream is null (connection not established)" }
+            return
+        }
+
         packetsSent++
         bytesSent += p.size
         Logger.d { "[$address] TCP sending packet #$packetsSent - ${p.size} bytes (Total TX: $bytesSent bytes)" }
-        outStream.write(p)
+        try {
+            stream.write(p)
+        } catch (ex: IOException) {
+            Logger.e(ex) { "[$address] TCP write error: ${ex.message}" }
+            onDeviceDisconnect(false)
+        }
     }
 
     override fun flushBytes() {
+        val stream = outStream ?: return
         Logger.d { "[$address] TCP flushing output stream" }
-        outStream.flush()
+        try {
+            stream.flush()
+        } catch (ex: IOException) {
+            Logger.e(ex) { "[$address] TCP flush error: ${ex.message}" }
+            onDeviceDisconnect(false)
+        }
     }
 
     override fun onDeviceDisconnect(waitForStopped: Boolean) {
@@ -98,6 +115,7 @@ constructor(
             }
             s.close()
             socket = null
+            outStream = null
         }
         super.onDeviceDisconnect(waitForStopped)
     }

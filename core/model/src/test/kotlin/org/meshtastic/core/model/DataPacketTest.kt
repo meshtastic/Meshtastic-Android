@@ -58,10 +58,12 @@ class DataPacketTest {
     fun `DataPacket equals and hashCode include sfppHash`() {
         val hash1 = byteArrayOf(1, 2, 3)
         val hash2 = byteArrayOf(4, 5, 6)
-        val p1 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash1)
-        val p2 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash1)
-        val p3 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash2)
-        val p4 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = null)
+        val fixedTime = 1000L
+        val base = DataPacket(to = "to", channel = 0, text = "text").copy(time = fixedTime)
+        val p1 = base.copy(sfppHash = hash1)
+        val p2 = base.copy(sfppHash = hash1.copyOf()) // same content, different array instance
+        val p3 = base.copy(sfppHash = hash2)
+        val p4 = base.copy(sfppHash = null)
 
         assertEquals(p1, p2)
         assertEquals(p1.hashCode(), p2.hashCode())

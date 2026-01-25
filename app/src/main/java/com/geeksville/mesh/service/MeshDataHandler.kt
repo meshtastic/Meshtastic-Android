@@ -41,6 +41,7 @@ import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.critical_alert
 import org.meshtastic.core.strings.error_duty_cycle
@@ -81,6 +82,7 @@ constructor(
     private val tracerouteHandler: MeshTracerouteHandler,
     private val neighborInfoHandler: MeshNeighborInfoHandler,
     private val radioConfigRepository: RadioConfigRepository,
+    private val messageFilterService: MessageFilterService,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -639,20 +641,6 @@ constructor(
         // contactKey: unique contact key filter (channel)+(nodeId)
         val contactKey = "${dataPacket.channel}$contactId"
 
-        val packetToSave =
-            Packet(
-                uuid = 0L,
-                myNodeNum = myNodeNum,
-                packetId = dataPacket.id,
-                port_num = dataPacket.dataType,
-                contact_key = contactKey,
-                received_time = System.currentTimeMillis(),
-                read = fromLocal,
-                data = dataPacket,
-                snr = dataPacket.snr,
-                rssi = dataPacket.rssi,
-                hopsAway = dataPacket.hopsAway,
-            )
         scope.handledLaunch {
             packetRepository.get().apply {
                 // Check for duplicates before inserting
@@ -666,20 +654,56 @@ constructor(
                     return@handledLaunch
                 }
 
-                insert(packetToSave)
-                val conversationMuted = getContactSettings(contactKey).isMuted
-                val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
-                val isSilent = conversationMuted || nodeMuted
-                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent) {
-                    serviceNotifications.showAlertNotification(
-                        contactKey,
-                        getSenderName(dataPacket),
-                        dataPacket.alert ?: getString(Res.string.critical_alert),
+                // Check if message should be filtered
+                val isFiltered = shouldFilterMessage(dataPacket, contactKey)
+
+                val packetToSave =
+                    Packet(
+                        uuid = 0L,
+                        myNodeNum = myNodeNum,
+                        packetId = dataPacket.id,
+                        port_num = dataPacket.dataType,
+                        contact_key = contactKey,
+                        received_time = System.currentTimeMillis(),
+                        read = fromLocal || isFiltered,
+                        data = dataPacket,
+                        snr = dataPacket.snr,
+                        rssi = dataPacket.rssi,
+                        hopsAway = dataPacket.hopsAway,
+                        filtered = isFiltered,
                     )
-                } else if (updateNotification) {
-                    scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
+
+                insert(packetToSave)
+                if (!isFiltered) {
+                    handlePacketNotification(packetToSave, dataPacket, contactKey, updateNotification)
                 }
             }
+        }
+    }
+
+    private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
+        if (dataPacket.dataType != Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) return false
+        val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
+        return messageFilterService.shouldFilter(dataPacket.text.orEmpty(), isFilteringDisabled)
+    }
+
+    private suspend fun handlePacketNotification(
+        packet: Packet,
+        dataPacket: DataPacket,
+        contactKey: String,
+        updateNotification: Boolean,
+    ) {
+        val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+        val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
+        val isSilent = conversationMuted || nodeMuted
+        if (packet.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isSilent) {
+            serviceNotifications.showAlertNotification(
+                contactKey,
+                getSenderName(dataPacket),
+                dataPacket.alert ?: getString(Res.string.critical_alert),
+            )
+        } else if (updateNotification) {
+            scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
         }
     }
 
@@ -766,6 +790,9 @@ constructor(
 
         // Find the original packet to get the contactKey
         packetRepository.get().getPacketByPacketId(packet.decoded.replyId)?.let { original ->
+            // Skip notification if the original message was filtered
+            if (original.packet.filtered) return@let
+
             val contactKey = original.packet.contact_key
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true

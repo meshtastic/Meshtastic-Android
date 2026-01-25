@@ -128,14 +128,18 @@ constructor(
                 } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
                     val hwModel = node.user.hwModel.number
                     val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                    // Support both Nordic DFU (requiresDfu) and ESP32 Unified OTA (supportsUnifiedOta)
                     val capabilities = Capabilities(node.metadata?.firmwareVersion)
+                    val isSerial = radioPrefs.isSerial()
 
                     // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
-                    val isEsp32OtaSupported =
-                        hw?.supportsUnifiedOta == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
+                    val isEsp32OtaSupported = hw?.isEsp32Arc == true && capabilities.supportsEsp32Ota && !isSerial
 
-                    flow { emit(hw?.requiresDfu == true || isEsp32OtaSupported) }
+                    // Nordic DFU/USB update is supported for NRF52/RP2040.
+                    // For ESP32, we do NOT support Serial updates from the app yet, even if requiresDfu is true
+                    // (which might be set for S3 native USB, but is currently unused by our handlers).
+                    val isDfuSupported = hw?.requiresDfu == true && hw.isEsp32Arc != true
+
+                    flow { emit(isDfuSupported || isEsp32OtaSupported) }
                 } else {
                     flowOf(false)
                 }

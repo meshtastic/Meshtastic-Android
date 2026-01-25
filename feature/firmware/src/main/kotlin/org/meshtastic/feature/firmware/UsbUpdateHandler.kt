@@ -62,7 +62,8 @@ constructor(
 
             if (firmwareUri != null) {
                 updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
-                serviceRepository.meshService?.rebootToDfu()
+                val myNodeNum = serviceRepository.meshService?.getMyNodeInfo()?.myNodeNum ?: 0
+                serviceRepository.meshService?.rebootToDfu(myNodeNum)
                 delay(REBOOT_DELAY)
 
                 updateState(FirmwareUpdateState.AwaitingFileSave(null, "firmware.uf2", firmwareUri))
@@ -84,7 +85,8 @@ constructor(
                     null
                 } else {
                     updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
-                    serviceRepository.meshService?.rebootToDfu()
+                    val myNodeNum = serviceRepository.meshService?.getMyNodeInfo()?.myNodeNum ?: 0
+                    serviceRepository.meshService?.rebootToDfu(myNodeNum)
                     delay(REBOOT_DELAY)
 
                     updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, firmwareFile.name))

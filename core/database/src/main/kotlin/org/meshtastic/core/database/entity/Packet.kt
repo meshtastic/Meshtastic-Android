@@ -57,6 +57,7 @@ data class PacketEntity(
             relayNode = data.relayNode,
             relays = data.relays,
             retryCount = data.retryCount,
+            filtered = filtered,
         )
     }
 }
@@ -87,6 +88,7 @@ data class Packet(
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
+    @ColumnInfo(name = "filtered", defaultValue = "0") val filtered: Boolean = false,
 ) {
     companion object {
         const val RELAY_NODE_SUFFIX_MASK = 0xFF
@@ -120,6 +122,7 @@ data class ContactSettings(
     val muteUntil: Long = 0L,
     @ColumnInfo(name = "last_read_message_uuid") val lastReadMessageUuid: Long? = null,
     @ColumnInfo(name = "last_read_message_timestamp") val lastReadMessageTimestamp: Long? = null,
+    @ColumnInfo(name = "filtering_disabled", defaultValue = "0") val filteringDisabled: Boolean = false,
 ) {
     val isMuted
         get() = System.currentTimeMillis() <= muteUntil
