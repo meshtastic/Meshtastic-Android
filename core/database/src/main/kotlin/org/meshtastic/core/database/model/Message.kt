@@ -92,6 +92,7 @@ data class Message(
     val relayNode: Int? = null,
     val relays: Int = 0,
     val retryCount: Int = 0,
+    val filtered: Boolean = false,
 ) {
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
         val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status

@@ -56,9 +56,9 @@ class FakeNodeInfoWriteDataSource : NodeInfoWriteDataSource {
 
     override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {}
 
-    override suspend fun clearNodeDB(preserveFavorites: Boolean) {}
-
     override suspend fun clearMyNodeInfo() {}
+
+    override suspend fun clearNodeDB(preserveFavorites: Boolean) {}
 
     override suspend fun deleteNode(num: Int) {}
 

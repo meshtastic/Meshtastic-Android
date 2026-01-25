@@ -21,14 +21,15 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.meshtastic.buildlogic.configureComposeCompiler
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
 class KmpLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
             apply(plugin = libs.plugin("compose-compiler").get().pluginId)
+            apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
 
             val compose = extensions.getByType(ComposeExtension::class.java)
             extensions.configure<KotlinMultiplatformExtension> {
@@ -38,6 +39,7 @@ class KmpLibraryComposeConventionPlugin : Plugin<Project> {
                     api(compose.dependencies.components.resources)
                 }
             }
+            configureComposeCompiler()
         }
     }
 }

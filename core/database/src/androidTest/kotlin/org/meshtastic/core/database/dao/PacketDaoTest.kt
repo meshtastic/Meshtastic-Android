@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -340,6 +341,129 @@ class PacketDaoTest {
         assertEquals(MessageStatus.SFPP_CONFIRMED, updated.data.status)
         assertTrue(updated.data.sfppHash?.contentEquals(hash) == true)
         assertTrue(updated.sfpp_hash?.contentEquals(hash) == true)
+    }
+
+    @Test
+    fun test_filteredMessages_excludedFromContactKeys(): Unit = runBlocking {
+        // Create a new contact with only filtered messages
+        val filteredContactKey = "0!filteredonly"
+
+        val filteredPacket =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                contact_key = filteredContactKey,
+                received_time = System.currentTimeMillis(),
+                read = false,
+                data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
+                filtered = true,
+            )
+        packetDao.insert(filteredPacket)
+
+        // getContactKeys should not include contacts with only filtered messages
+        val contactKeys = packetDao.getContactKeys().first()
+        assertFalse(contactKeys.containsKey(filteredContactKey))
+    }
+
+    @Test
+    fun test_getFilteredCount_returnsCorrectCount(): Unit = runBlocking {
+        val contactKey = "0${DataPacket.ID_BROADCAST}"
+
+        // Insert filtered messages
+        repeat(3) { i ->
+            val filteredPacket =
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    contact_key = contactKey,
+                    received_time = System.currentTimeMillis() + i,
+                    read = false,
+                    data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered $i"),
+                    filtered = true,
+                )
+            packetDao.insert(filteredPacket)
+        }
+
+        val filteredCount = packetDao.getFilteredCount(contactKey)
+        assertEquals(3, filteredCount)
+    }
+
+    @Test
+    fun test_contactFilteringDisabled_persistence(): Unit = runBlocking {
+        val contactKey = "0!testcontact"
+
+        // Initially should be null or false
+        val initial = packetDao.getContactFilteringDisabled(contactKey)
+        assertTrue(initial == null || initial == false)
+
+        // Set filtering disabled
+        packetDao.setContactFilteringDisabled(contactKey, true)
+
+        val disabled = packetDao.getContactFilteringDisabled(contactKey)
+        assertEquals(true, disabled)
+
+        // Re-enable filtering
+        packetDao.setContactFilteringDisabled(contactKey, false)
+
+        val enabled = packetDao.getContactFilteringDisabled(contactKey)
+        assertEquals(false, enabled)
+    }
+
+    @Test
+    fun test_getMessagesFrom_excludesFilteredMessages(): Unit = runBlocking {
+        val contactKey = "0!notificationtest"
+
+        // Insert mix of filtered and non-filtered messages
+        val normalMessages = listOf("Hello", "How are you?", "Good morning")
+        val filteredMessages = listOf("Filtered message 1", "Filtered message 2")
+
+        normalMessages.forEachIndexed { index, text ->
+            val packet =
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    contact_key = contactKey,
+                    received_time = System.currentTimeMillis() + index,
+                    read = false,
+                    data = DataPacket(DataPacket.ID_BROADCAST, 0, text),
+                    filtered = false,
+                )
+            packetDao.insert(packet)
+        }
+
+        filteredMessages.forEachIndexed { index, text ->
+            val packet =
+                Packet(
+                    uuid = 0L,
+                    myNodeNum = myNodeNum,
+                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    contact_key = contactKey,
+                    received_time = System.currentTimeMillis() + normalMessages.size + index,
+                    read = true, // Filtered messages are marked as read
+                    data = DataPacket(DataPacket.ID_BROADCAST, 0, text),
+                    filtered = true,
+                )
+            packetDao.insert(packet)
+        }
+
+        // Without filter - should return all messages
+        val allMessages = packetDao.getMessagesFrom(contactKey).first()
+        assertEquals(normalMessages.size + filteredMessages.size, allMessages.size)
+
+        // With includeFiltered = true - should return all messages
+        val includingFiltered = packetDao.getMessagesFrom(contactKey, includeFiltered = true).first()
+        assertEquals(normalMessages.size + filteredMessages.size, includingFiltered.size)
+
+        // With includeFiltered = false - should only return non-filtered messages
+        val excludingFiltered = packetDao.getMessagesFrom(contactKey, includeFiltered = false).first()
+        assertEquals(normalMessages.size, excludingFiltered.size)
+
+        // Verify none of the returned messages are filtered
+        val hasFilteredMessages = excludingFiltered.any { it.packet.filtered }
+        assertFalse(hasFilteredMessages)
     }
 
     companion object {
