@@ -98,12 +98,7 @@ class MeshService : Service() {
 
         fun changeDeviceAddress(context: Context, service: IMeshService, address: String?) {
             service.setDeviceAddress(address)
-            val intent = Intent(context, MeshService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            startService(context)
         }
 
         val minDeviceVersion = DeviceVersion(BuildConfig.MIN_FW_VERSION)
@@ -145,11 +140,13 @@ class MeshService : Service() {
                 SERVICE_NOTIFY_ID,
                 notification,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    var types =
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
+                            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
                     if (hasLocationPermission()) {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_MANIFEST
-                    } else {
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                        types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                     }
+                    types
                 } else {
                     0
                 },
@@ -300,7 +297,12 @@ class MeshService : Service() {
             }
 
             override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
-                router.actionHandler.handleRemoveByNodenum(nodeNum, requestId, myNodeNum)
+                val myNodeNum = nodeManager.myNodeNum
+                if (myNodeNum != null) {
+                    router.actionHandler.handleRemoveByNodenum(nodeNum, requestId, myNodeNum)
+                } else {
+                    nodeManager.removeByNodenum(nodeNum)
+                }
             }
 
             override fun requestUserInfo(destNum: Int) = toRemoteExceptions {

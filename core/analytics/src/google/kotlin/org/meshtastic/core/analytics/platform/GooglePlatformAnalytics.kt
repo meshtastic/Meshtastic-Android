@@ -57,6 +57,7 @@ import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import dagger.hilt.android.qualifiers.ApplicationContext
 import io.opentelemetry.api.GlobalOpenTelemetry
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.BuildConfig
@@ -233,16 +234,22 @@ constructor(
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
             if (!Firebase.crashlytics.isCrashlyticsCollectionEnabled) return
 
-            Firebase.crashlytics.setCustomKeys {
-                key(KEY_PRIORITY, severity.ordinal)
-                key(KEY_TAG, tag)
-                key(KEY_MESSAGE, message)
-            }
+            // Add the log to the Crashlytics log buffer so it appears in reports
+            Firebase.crashlytics.log("$severity/$tag: $message")
 
-            if (throwable == null) {
-                Firebase.crashlytics.recordException(Exception(message))
-            } else {
+            // Filter out normal coroutine cancellations
+            if (throwable is CancellationException) return
+
+            // Only record non-fatal exceptions for actual Errors (or if a throwable is provided)
+            if (throwable != null) {
                 Firebase.crashlytics.recordException(throwable)
+            } else if (severity >= Severity.Error) {
+                Firebase.crashlytics.setCustomKeys {
+                    key(KEY_PRIORITY, severity.ordinal)
+                    key(KEY_TAG, tag)
+                    key(KEY_MESSAGE, message)
+                }
+                Firebase.crashlytics.recordException(Exception(message))
             }
         }
     }
