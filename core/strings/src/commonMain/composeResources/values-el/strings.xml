@@ -141,9 +141,10 @@
     <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
     <string name="encryption_pkc">Κρυπτογράφηση Δημόσιου Κλειδιού</string>
     <string name="encryption_error">Ασυμφωνία δημόσιου κλειδιού</string>
-    <string name="position_log">Αρχείο Καταγραφής Τοποθεσίας</string>
+    <string name="position_log">Τοποθεσία</string>
     <string name="administration">Διαχείριση</string>
     <string name="remote_admin">Απομακρυσμένη Διαχείριση</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="copy">Αντιγραφή</string>
     <string name="favorite">Αγαπημένο</string>
     <string name="channel_1">Κανάλι 1</string>

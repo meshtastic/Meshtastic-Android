@@ -390,7 +390,6 @@
     <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру открытого ключа для шифрования.</string>
     <string name="encryption_error">Несоответствие публичного ключа</string>
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить узел и снова обменяться ключами, но это может повлечь за собой более серьезную проблему безопасности. Свяжитесь с пользователем через другой доверенный канал, чтобы определить, было ли изменение ключа из-за заводского сброса или другого преднамеренного действия.</string>
-    <string name="exchange_userinfo">Обменять информацию пользователя</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых узлах</string>
     <string name="more_details">Подробнее</string>
     <string name="snr">Сигнал/шум</string>
@@ -398,12 +397,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
-    <string name="device_metrics_log">Журнал метрик устройства</string>
+    <string name="device_metrics_log">Интервал передачи</string>
     <string name="node_map">Карта узла</string>
-    <string name="position_log">Журнал местоположения</string>
+    <string name="position_log">Местоположение</string>
     <string name="last_position_update">Обновление последнего местоположения</string>
-    <string name="env_metrics_log">Журнал параметров среды</string>
-    <string name="sig_metrics_log">Журнал показателей сигнала</string>
+    <string name="env_metrics_log">Метрики окружения</string>
     <string name="administration">Администрирование</string>
     <string name="remote_admin">Удаленное администрирование</string>
     <string name="bad">Плохой</string>
@@ -413,7 +411,7 @@
     <string name="share_to">Поделиться…</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
-    <string name="traceroute_log">Журнал трассировок</string>
+    <string name="traceroute_log">Трассировка маршрута</string>
     <string name="traceroute_direct">Прямой</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 Узел</item>
@@ -447,7 +445,7 @@
     <string name="remove_favorite">Убрать из избранных</string>
     <string name="favorite_add">Добавить '%1$s' как избранный узел?</string>
     <string name="favorite_remove">Удалить '%1$s' как избранный узел?</string>
-    <string name="power_metrics_log">Журнал энергопотребления</string>
+    <string name="power_metrics_log">Метрики мощности</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
@@ -775,12 +773,13 @@
     <string name="request_air_quality_metrics">Метрики качества воздуха</string>
     <string name="request_power_metrics">Метрики мощности</string>
     <string name="request_local_stats">Локальная статистика</string>
+    <string name="request_host_metrics">Метрики хоста</string>
     <string name="request_metadata">Метаданные</string>
     <string name="actions">Действия</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Использовать 12-часовой формат времени</string>
     <string name="display_time_in_12h_format">Если включено, устройство будет отображать время на экране в 12-часовом формате.</string>
-    <string name="host_metrics_log">Журнал метрик хоста</string>
+    <string name="host_metrics_log">Метрики хоста</string>
     <string name="host">Хост</string>
     <string name="free_memory">Свободная память</string>
     <string name="disk_free">Свободно памяти на диске</string>
@@ -870,9 +869,7 @@
     <string name="clear_selection">Очистить выбор</string>
     <string name="message_input_label">Сообщение</string>
     <string name="type_a_message">Написать сообщение</string>
-    <string name="pax_metrics_log">Журнал метрики пассажиров</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">Нет доступных журналов метрики пассажиров.</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">Устройства BLE</string>
     <string name="bluetooth_paired_devices">Сопряженные устройства</string>

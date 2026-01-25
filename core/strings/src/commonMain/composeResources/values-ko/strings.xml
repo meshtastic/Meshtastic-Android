@@ -228,7 +228,6 @@
     <string name="encryption_pkc">공개 키 암호화</string>
     <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_error_text">공개 키가 기록된 키와 일치하지 않습니다. 노드를 제거하고 키를 다시 교환할 수 있지만 이는 더 심각한 보안 문제를 나타낼 수 있습니다. 다른 신뢰할 수 있는 채널을 통해 사용자에게 연락하여 키 변경이 공장 초기화 또는 기타 의도적인 작업 때문인지 확인하세요.</string>
-    <string name="exchange_userinfo">유저 정보 교환</string>
     <string name="meshtastic_new_nodes_notifications">새로운 노드 알림</string>
     <string name="more_details">자세히 보기</string>
     <string name="snr">SNR</string>
@@ -236,12 +235,9 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">수신 신호 강도 지표 Received Signal Strength Indicator, RSSI는 안테나가 수신하는 신호의 전력 수준을 측정하는 데 사용되는 지표입니다. RSSI 값이 높을수록 일반적으로 더 강력하고 안정적인 연결을 나타냅니다.</string>
     <string name="iaq_definition">(실내공기질) Bosch BME680으로 측정한 상대적 척도 IAQ 값. 범위 0–500.</string>
-    <string name="device_metrics_log">장치 메트릭 로그</string>
     <string name="node_map">노드 지도</string>
-    <string name="position_log">위치 로그</string>
+    <string name="position_log">위치</string>
     <string name="last_position_update">최근 위치 업데이트</string>
-    <string name="env_metrics_log">환경 메트릭 로그</string>
-    <string name="sig_metrics_log">신호 메트릭 로그</string>
     <string name="administration">관리</string>
     <string name="remote_admin">원격 설정</string>
     <string name="bad">나쁨</string>
@@ -251,7 +247,7 @@
     <string name="share_to">…로 공유</string>
     <string name="signal">신호</string>
     <string name="signal_quality">신호 감도</string>
-    <string name="traceroute_log">추적 루트 로그</string>
+    <string name="traceroute_log">추적 루트</string>
     <string name="traceroute_direct">직접 연결</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d hops</item>
@@ -270,7 +266,6 @@
     <string name="favorite">즐겨찾기</string>
     <string name="favorite_add">'%1$s'를 즐겨찾기 하시겠습니까?</string>
     <string name="favorite_remove">'%1$s'를 즐겨찾기 취소하시겠습니까?</string>
-    <string name="power_metrics_log">전원 메트릭 로그</string>
     <string name="channel_1">채널 1</string>
     <string name="channel_2">채널 2</string>
     <string name="channel_3">채널 3</string>
@@ -527,7 +522,6 @@
     <string name="firmware">펌웨어</string>
     <string name="use_12h_format">12시간제 보기</string>
     <string name="display_time_in_12h_format">활성화 하면 장치의 디스플레이에서 시간이 12시간제로 표시됩니다.</string>
-    <string name="host_metrics_log">전원 메트릭 로그</string>
     <string name="connections">연결</string>
     <string name="nodes">노드</string>
     <string name="bottom_nav_settings">설정</string>

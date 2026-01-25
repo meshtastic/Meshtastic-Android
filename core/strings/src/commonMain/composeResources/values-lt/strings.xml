@@ -205,11 +205,7 @@
     <string name="more_details">Daugiau info</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
-    <string name="device_metrics_log">Įtaiso duomenų žurnalas</string>
     <string name="node_map">Įtaisų žemėlapis</string>
-    <string name="position_log">Pozicijos  duomenų žurnalas</string>
-    <string name="env_metrics_log">Aplinkos duomenų žurnalas</string>
-    <string name="sig_metrics_log">Signalo duomenų žurnalas</string>
     <string name="administration">Administravimas</string>
     <string name="remote_admin">Nuotolinis administravimas</string>
     <string name="bad">Silpnas</string>
@@ -219,7 +215,7 @@
     <string name="share_to">Dalintis su…</string>
     <string name="signal">Signalas</string>
     <string name="signal_quality">Signalo kokybė</string>
-    <string name="traceroute_log">Pristatymo kelio žurnalas</string>
+    <string name="traceroute_log">Žinutės kelias</string>
     <string name="traceroute_direct">Tiesiogiai</string>
     <plurals name="traceroute_hops">
         <item quantity="one">Vienas</item>

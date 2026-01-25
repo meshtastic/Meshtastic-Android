@@ -248,7 +248,6 @@
     <string name="encryption_pkc">Criptografia de Chave Pública</string>
     <string name="encryption_error">Chave pública não confere</string>
     <string name="encryption_error_text">A chave pública não corresponde à chave gravada. Você pode remover o nó e deixá-lo trocar as chaves novamente, mas isso pode indicar um problema de segurança mais sério. Contate o usuário através de outro canal confiável, para determinar se a chave mudou devido a uma restauração de fábrica ou outra ação intencional.</string>
-    <string name="exchange_userinfo">Trocar informações de usuário</string>
     <string name="meshtastic_new_nodes_notifications">Novas notificações de nó</string>
     <string name="more_details">Mais detalhes</string>
     <string name="snr">SNR</string>
@@ -256,12 +255,9 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de potência que está sendo recebida pela antena. Um valor maior de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="iaq_definition">(Qualidade do ar interior) valor relativo da escala IAQ medido pelo Bosch BME680. Intervalo de Valor de 0–500.</string>
-    <string name="device_metrics_log">Log de Métricas do Dispositivo</string>
     <string name="node_map">Mapa do nó</string>
-    <string name="position_log">Log de Posição</string>
+    <string name="position_log">Posição</string>
     <string name="last_position_update">Atualização da última posição</string>
-    <string name="env_metrics_log">Log de Métricas do Ambiente</string>
-    <string name="sig_metrics_log">Log de Métricas de Sinal</string>
     <string name="administration">Administração</string>
     <string name="remote_admin">Administração Remota</string>
     <string name="bad">Ruim</string>
@@ -271,7 +267,7 @@
     <string name="share_to">Compartilhar com…</string>
     <string name="signal">Sinal</string>
     <string name="signal_quality">Qualidade do sinal</string>
-    <string name="traceroute_log">Log de Rotas</string>
+    <string name="traceroute_log">Traçar rota</string>
     <string name="traceroute_direct">Direto</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 salto</item>
@@ -291,7 +287,6 @@
     <string name="favorite">Favorito</string>
     <string name="favorite_add">Adicionar '%1$s' como um nó favorito?</string>
     <string name="favorite_remove">Remover '%1$s' como um nó favorito?</string>
-    <string name="power_metrics_log">Log de Métricas de Energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
     <string name="channel_3">Canal 3</string>
@@ -550,11 +545,12 @@
     <string name="import_known_shared_contact_text">Aviso: Esse contato é conhecido, importar irá escrever por cima da informação anterior.</string>
     <string name="public_key_changed">Chave Pública Mudou</string>
     <string name="import_label">Importar</string>
+    <string name="request_host_metrics">Métricas do Host</string>
     <string name="actions">Ações</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usar formato de relógio 12h</string>
     <string name="display_time_in_12h_format">Quando ativado, o dispositivo exibirá o tempo em formato de 12 horas na tela.</string>
-    <string name="host_metrics_log">Log de métricas do Host</string>
+    <string name="host_metrics_log">Métricas do Host</string>
     <string name="host">Host</string>
     <string name="free_memory">Memória Livre</string>
     <string name="disk_free">Armazenamento Livre</string>
@@ -638,9 +634,7 @@
     <string name="clear_selection">Limpar seleção</string>
     <string name="message_input_label">Mensagem</string>
     <string name="type_a_message">Digite uma mensagem</string>
-    <string name="pax_metrics_log">Log de Métricas do Fluxo de Pessoas</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">Não há logs de métricas de PAX disponíveis.</string>
     <string name="wifi_devices">Dispositivos WiFi</string>
     <string name="ble_devices">Dispositivos BLE</string>
     <string name="connected_device">Dispositivo Conectado</string>

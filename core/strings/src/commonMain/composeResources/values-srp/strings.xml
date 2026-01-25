@@ -271,11 +271,10 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор јачине примљеног сигнала RSSI је мера која се користи за одређивање нивоа снаге која се прима преко антене. Виша вредност RSSI генерално указује на јачу и стабилнију везу.</string>
     <string name="iaq_definition">Индекс квалитета ваздуха (IAQ) као мера за одређивање квалитета ваздуха унутрашњости, мерен са Bosch BME680. Вредности се крећу у распону од 0 до 500.</string>
-    <string name="device_metrics_log">Дневник метрика уређаја</string>
+    <string name="device_metrics_log">Метрика уређаја</string>
     <string name="node_map">Мапа чворова</string>
-    <string name="position_log">Дневник локација</string>
-    <string name="env_metrics_log">Дневник метрика околине</string>
-    <string name="sig_metrics_log">Дневник метрика сигнала</string>
+    <string name="position_log">Позиција</string>
+    <string name="env_metrics_log">Метрике сензора</string>
     <string name="administration">Администрација</string>
     <string name="remote_admin">Удаљена администрација</string>
     <string name="bad">Лош</string>
@@ -285,7 +284,7 @@
     <string name="share_to">Подели на…</string>
     <string name="signal">Сингал</string>
     <string name="signal_quality">Квалитет сигнала</string>
-    <string name="traceroute_log">Дневник праћења руте</string>
+    <string name="traceroute_log">Праћење руте</string>
     <string name="traceroute_direct">Директно</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 скок</item>
@@ -308,7 +307,7 @@
     <string name="remove_favorite">Уклони из омиљених</string>
     <string name="favorite_add">Додај „%1$s” у омиљене чворове?</string>
     <string name="favorite_remove">Углони „%1$s” из листе омиљених чворова?</string>
-    <string name="power_metrics_log">Логови метрика снаге</string>
+    <string name="power_metrics_log">Мерни подаци о снази</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>

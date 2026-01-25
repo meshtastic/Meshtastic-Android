@@ -59,6 +59,7 @@ import org.meshtastic.feature.settings.radio.component.RangeTestConfigScreen
 import org.meshtastic.feature.settings.radio.component.RemoteHardwareConfigScreen
 import org.meshtastic.feature.settings.radio.component.SecurityConfigScreen
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
+import org.meshtastic.feature.settings.radio.component.StatusMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
@@ -163,6 +164,9 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                         DetectionSensorConfigScreen(viewModel, onBack = navController::popBackStack)
 
                     ModuleRoute.PAXCOUNTER -> PaxcounterConfigScreen(viewModel, onBack = navController::popBackStack)
+
+                    ModuleRoute.STATUS_MESSAGE ->
+                        StatusMessageConfigScreen(viewModel, onBack = navController::popBackStack)
                 }
             }
         }

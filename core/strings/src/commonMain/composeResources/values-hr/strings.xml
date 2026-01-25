@@ -150,6 +150,7 @@
     <string name="mute_8_hours">8 sati</string>
     <string name="mute_1_week">1 tjedan</string>
     <string name="mute_always">Uvijek</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="audio">Zvuk</string>
     <string name="audio_config">Postavke Zvuka</string>
     <string name="bluetooth_config">Postavke Bluetootha</string>

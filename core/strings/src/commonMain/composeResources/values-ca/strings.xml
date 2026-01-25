@@ -189,6 +189,7 @@
     <string name="mute_8_hours">8 hores</string>
     <string name="mute_1_week">1 setmana</string>
     <string name="mute_always">Sempre</string>
+    <string name="traceroute_log">Traçar ruta</string>
     <string name="region_frequency_plan">Regió</string>
     <string name="timeout">Temps esgotat</string>
     <string name="distance">Distància</string>

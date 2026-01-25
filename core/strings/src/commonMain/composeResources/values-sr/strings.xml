@@ -271,11 +271,10 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator jačine primljenog signala RSSI, merenje koje se koristi za određivanje nivoa snage koji antena prima. Viša vrednost RSSI generalno ukazuje na jaču i stabilniju vezu.</string>
     <string name="iaq_definition">(Kvalitet vazduha u zatvorenom prostoru) relativna skala vrednosti IAQ merena Bosch BME680. Raspon vrednosti 0–500.</string>
-    <string name="device_metrics_log">Dnevnik metrika uređaja</string>
+    <string name="device_metrics_log">Метрика уређаја</string>
     <string name="node_map">Mapa čvorova</string>
-    <string name="position_log">Dnevnik lokacija</string>
-    <string name="env_metrics_log">Dnevnik metrika okoline</string>
-    <string name="sig_metrics_log">Dnevnik metrika signala</string>
+    <string name="position_log">Позиција</string>
+    <string name="env_metrics_log">Метрике сензора</string>
     <string name="administration">Administracija</string>
     <string name="remote_admin">Udaljena administracija</string>
     <string name="bad">Loš</string>
@@ -285,7 +284,7 @@
     <string name="share_to">Podeli na…</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Kvalitet signala</string>
-    <string name="traceroute_log">Dnevnik praćenja rute</string>
+    <string name="traceroute_log">Праћење руте</string>
     <string name="traceroute_direct">Direktno</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
@@ -308,7 +307,7 @@
     <string name="remove_favorite">Уклони из омиљених</string>
     <string name="favorite_add">Додај „%1$s” у омиљене чворове?</string>
     <string name="favorite_remove">Углони „%1$s” из листе омиљених чворова?</string>
-    <string name="power_metrics_log">Логови метрика снаге</string>
+    <string name="power_metrics_log">Мерни подаци о снази</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>

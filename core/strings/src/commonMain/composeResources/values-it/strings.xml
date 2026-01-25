@@ -339,7 +339,6 @@
     <string name="encryption_pkc_text">I messaggi diretti stanno usando la crittografia basata sulla nuova infrastruttura a chiave pubblica.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
-    <string name="exchange_userinfo">Scambia informazioni utente</string>
     <string name="meshtastic_new_nodes_notifications">Notifiche di nuovi nodi</string>
     <string name="more_details">Ulteriori informazioni</string>
     <string name="snr">SNR</string>
@@ -347,12 +346,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
     <string name="iaq_definition">(Qualità dell'aria interna) scala relativa del valore della qualità dell'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
-    <string name="device_metrics_log">Registro Metriche Dispositivo</string>
+    <string name="device_metrics_log">Metriche Dispositivo</string>
     <string name="node_map">Mappa Dei Nodi</string>
-    <string name="position_log">Registro Posizione</string>
+    <string name="position_log">Posizione</string>
     <string name="last_position_update">Aggiornamento ultima posizione</string>
-    <string name="env_metrics_log">Registro Metriche Ambientali</string>
-    <string name="sig_metrics_log">Registro Metriche Segnale</string>
+    <string name="env_metrics_log">Metriche Ambientali</string>
     <string name="administration">Amministrazione</string>
     <string name="remote_admin">Amministrazione Remota</string>
     <string name="bad">Scarso</string>
@@ -362,7 +360,7 @@
     <string name="share_to">Condividi con…</string>
     <string name="signal">Segnale</string>
     <string name="signal_quality">Qualità Segnale</string>
-    <string name="traceroute_log">Registro Di Traceroute</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Diretto</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hop</item>
@@ -384,7 +382,6 @@
     <string name="remove_favorite">Rimuovi dai preferiti</string>
     <string name="favorite_add">Aggiungere '%1$s' ai nodi preferiti?</string>
     <string name="favorite_remove">Rimuovere '%1$s' dai nodi preferiti?</string>
-    <string name="power_metrics_log">Registro Metriche Alimentazione</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
     <string name="channel_3">Canale 3</string>
@@ -699,11 +696,12 @@
     <string name="import_label">Importa</string>
     <string name="request_device_metrics">Metriche Dispositivo</string>
     <string name="request_environment_metrics">Metriche Ambientali</string>
+    <string name="request_host_metrics">Metriche Host</string>
     <string name="actions">Azioni</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usa formato orologio 12h</string>
     <string name="display_time_in_12h_format">Se abilitato, il dispositivo visualizzerà il tempo in formato 12 ore sullo schermo.</string>
-    <string name="host_metrics_log">Registro Metriche Host</string>
+    <string name="host_metrics_log">Metriche Host</string>
     <string name="host">Host</string>
     <string name="free_memory">Memoria libera</string>
     <string name="disk_free">Spazio disco libero</string>
@@ -793,9 +791,7 @@
     <string name="clear_selection">Annulla selezione</string>
     <string name="message_input_label">Messaggio</string>
     <string name="type_a_message">Inserisci un messaggio</string>
-    <string name="pax_metrics_log">Registro metriche PAX</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">Nessun log delle metriche PAX disponibile.</string>
     <string name="wifi_devices">Dispositivi WiFi</string>
     <string name="ble_devices">Dispositivi BLE</string>
     <string name="bluetooth_paired_devices">Dispositivi associati</string>

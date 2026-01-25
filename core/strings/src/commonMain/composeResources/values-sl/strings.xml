@@ -215,11 +215,7 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator moči sprejetega signala je meritev, ki se uporablja za določanje ravni moči, ki jo sprejema antena. Višja vrednost RSSI na splošno pomeni močnejšo in stabilnejšo povezavo.</string>
     <string name="iaq_definition">(Kakovost zraka v zaprtih prostorih) relativna vrednost IAQ na lestvici, izmerjena z Bosch BME680. Razpon vrednosti 0–500.</string>
-    <string name="device_metrics_log">Dnevnik meritev naprave</string>
     <string name="node_map">Zemljevid vozlišč</string>
-    <string name="position_log">Dnevnik lokacije</string>
-    <string name="env_metrics_log">Dnevnik meritev okolja</string>
-    <string name="sig_metrics_log">Dnevnik meritev signala</string>
     <string name="administration">Administracija</string>
     <string name="remote_admin">Administracija na daljavo</string>
     <string name="bad">Slab</string>
@@ -229,7 +225,7 @@
     <string name="share_to">Delite z…</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Kakovost signala</string>
-    <string name="traceroute_log">Dnevnik poti</string>
+    <string name="traceroute_log">Pot</string>
     <string name="traceroute_direct">Neposreden</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>

@@ -154,7 +154,7 @@
     <string name="more_details">Больш звестак</string>
     <string name="snr">сігнал-шум</string>
     <string name="rssi">адносная магутнасць</string>
-    <string name="position_log">Гісторыя месцазнаходжання</string>
+    <string name="position_log">Месцазнаходжанне</string>
     <string name="none_quality">Нічога</string>
     <string name="signal_quality">Якасць сігнала</string>
     <string name="twenty_four_hours">24г</string>

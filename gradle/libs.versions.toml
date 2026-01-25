@@ -40,7 +40,7 @@ dd-sdk-android = "3.5.0"
 detekt = "1.23.8"
 devtools-ksp = "2.3.4"
 markdownRenderer = "0.39.1"
-molecule = "2.0.0"
+molecule = "2.2.0"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
 
@@ -143,7 +143,7 @@ androidx-test-runner = { module = "androidx.test:runner", version = "1.7.0" }
 androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core", version = "3.7.0" }
 junit = { module = "junit:junit", version = "4.13.2" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
-robolectric = { module = "org.robolectric:robolectric", version = "4.14.1" }
+robolectric = { module = "org.robolectric:robolectric", version = "4.16.1" }
 
 # Other
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
@@ -182,7 +182,7 @@ zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", ve
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "31.13.2" }
+android-tools-common = { module = "com.android.tools:common", version = "32.0.0" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

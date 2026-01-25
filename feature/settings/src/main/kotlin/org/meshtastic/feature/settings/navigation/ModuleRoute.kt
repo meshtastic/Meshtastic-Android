@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.material.icons.Icons
@@ -47,6 +46,7 @@ import org.meshtastic.core.strings.paxcounter
 import org.meshtastic.core.strings.range_test
 import org.meshtastic.core.strings.remote_hardware
 import org.meshtastic.core.strings.serial
+import org.meshtastic.core.strings.status_message
 import org.meshtastic.core.strings.store_forward
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.proto.AdminProtos
@@ -130,6 +130,12 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         SettingsRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
         AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
+    ),
+    STATUS_MESSAGE(
+        Res.string.status_message,
+        SettingsRoutes.StatusMessage,
+        Icons.AutoMirrored.Default.Message,
+        AdminProtos.AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG_VALUE,
     ),
     ;
 

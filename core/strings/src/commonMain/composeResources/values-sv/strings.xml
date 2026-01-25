@@ -365,7 +365,6 @@
     <string name="encryption_pkc_text">Direktmeddelanden använder den nya publika nyckelinfrastrukturen (PKI) för kryptering.</string>
     <string name="encryption_error">Publik nyckel matchar inte</string>
     <string name="encryption_error_text">Den publika nyckel matchar inte den insamlade. Du kan ta bort noden ur nod listan för att förhandla nycklar på nytt, men det här kan påvisa ett säkerhetsproblem. Kontakta nodens ägare igenom en annan betrodd kanal för att avgöra om nyckeländringen berodde på en fabriksåterställning eller annan avsiktlig åtgärd.</string>
-    <string name="exchange_userinfo">Utbyt användarinformation</string>
     <string name="meshtastic_new_nodes_notifications">Ny nod avisering</string>
     <string name="more_details">Mer detaljer</string>
     <string name="snr">SNR</string>
@@ -373,12 +372,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, ett mått som används för att avgöra effektnivån som togs emot av antennen. Ett högre RSSI-värde indikerar generellt en starkare och stabilare anslutning.</string>
     <string name="iaq_definition">(Indoor Air Quality) relativ skala IAQ värdet mätt med Bosch BME600. Värdeintervall 0-500.</string>
-    <string name="device_metrics_log">Enhetsstatistik Loggbok</string>
+    <string name="device_metrics_log">Enhetens mätvärden</string>
     <string name="node_map">Nod karta</string>
-    <string name="position_log">Position Loggbok</string>
+    <string name="position_log">Plats</string>
     <string name="last_position_update">Senaste positionsuppdatering</string>
-    <string name="env_metrics_log">Miljömätning Loggbok</string>
-    <string name="sig_metrics_log">Signalkvalité Loggbok</string>
+    <string name="env_metrics_log">Miljövärden</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Fjärradministration</string>
     <string name="bad">Dålig</string>
@@ -388,7 +386,7 @@
     <string name="share_to">Dela med…</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalkvalité</string>
-    <string name="traceroute_log">Traceroute (spåra rutt) Loggbok</string>
+    <string name="traceroute_log">Traceroute (spåra rutt)</string>
     <string name="traceroute_direct">Direkt</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hopp</item>
@@ -413,7 +411,7 @@
     <string name="remove_favorite">Ta bort från Favoriter</string>
     <string name="favorite_add">Lägg till '%1$s' som en favoritnod?</string>
     <string name="favorite_remove">Ta bort '%1$s' som en favoritnod?</string>
-    <string name="power_metrics_log">Logg över strömvärden</string>
+    <string name="power_metrics_log">Strömdata</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
     <string name="channel_3">Kanal 3</string>
@@ -714,7 +712,6 @@
     <string name="firmware">Fast programvara</string>
     <string name="use_12h_format">Använd 12-timmarsformat</string>
     <string name="display_time_in_12h_format">Visar tiden i 12-timmarsformat när denna är aktiverad.</string>
-    <string name="host_metrics_log">Logg för värdstatistik</string>
     <string name="host">Värd</string>
     <string name="free_memory">Ledigt minne</string>
     <string name="disk_free">Ledig lagring</string>
@@ -804,9 +801,7 @@
     <string name="clear_selection">Avmarkera</string>
     <string name="message_input_label">Meddelande</string>
     <string name="type_a_message">Skriv ett meddelande</string>
-    <string name="pax_metrics_log">Logg över PAX-värden</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">Det finns inga PAX-loggar.</string>
     <string name="wifi_devices">WiFi-enheter</string>
     <string name="ble_devices">BLE-enheter</string>
     <string name="bluetooth_paired_devices">Parkopplade enheter</string>
