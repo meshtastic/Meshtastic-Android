@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
