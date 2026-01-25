@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.foundation.background
@@ -32,8 +31,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -156,13 +155,13 @@ private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Un
             )
         },
         leadingIcon = {
-            Icon(Icons.Default.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
+            Icon(Icons.Rounded.Search, contentDescription = stringResource(Res.string.node_filter_placeholder))
         },
         onValueChange = onTextChange,
         trailingIcon = {
             if (filterText.isNotEmpty() || isFocused) {
                 Icon(
-                    Icons.Default.Clear,
+                    Icons.Rounded.Clear,
                     contentDescription = stringResource(Res.string.desc_node_filter_clear),
                     modifier =
                     Modifier.clickable {

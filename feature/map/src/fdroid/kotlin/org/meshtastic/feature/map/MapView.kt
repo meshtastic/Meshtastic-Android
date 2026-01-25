@@ -758,7 +758,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Star,
+                                            imageVector = Icons.Rounded.Star,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -783,7 +783,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.PinDrop,
+                                            imageVector = Icons.Rounded.PinDrop,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -808,7 +808,7 @@ fun MapView(
                                         verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
-                                            imageVector = Icons.Default.Lens,
+                                            imageVector = Icons.Rounded.Lens,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
                                             tint = MaterialTheme.colorScheme.onSurface,
@@ -834,7 +834,7 @@ fun MapView(
                             if (myLocationOverlay == null) {
                                 Icons.Outlined.MyLocation
                             } else {
-                                Icons.Default.LocationDisabled
+                                Icons.Rounded.LocationDisabled
                             },
                             contentDescription = stringResource(Res.string.toggle_my_position),
                         ) {

@@ -20,8 +20,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Power
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -47,16 +47,16 @@ internal fun PowerMetrics(node: Node) {
             buildList {
                 with(node.powerMetrics) {
                     if (ch1Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1Current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Rounded.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1Current), Icons.Rounded.Power))
                     }
                     if (ch2Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2Current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Rounded.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2Current), Icons.Rounded.Power))
                     }
                     if (ch3Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Default.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3Current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Rounded.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3Current), Icons.Rounded.Power))
                     }
                 }
             }

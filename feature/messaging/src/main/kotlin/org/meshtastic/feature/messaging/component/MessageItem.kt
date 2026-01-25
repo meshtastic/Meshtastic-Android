@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -409,7 +409,7 @@ private fun OriginalMessageSnippet(
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
-                    Icons.Default.FormatQuote,
+                    Icons.Rounded.FormatQuote,
                     contentDescription = stringResource(Res.string.reply),
                     modifier = Modifier.size(16.dp),
                 )

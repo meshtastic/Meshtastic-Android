@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.sharing
 
 import android.Manifest
@@ -38,7 +37,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
@@ -566,7 +565,7 @@ private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
         }
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
-            imageVector = Icons.Default.ChevronRight,
+            imageVector = Icons.Rounded.ChevronRight,
             contentDescription = stringResource(Res.string.navigate_into_label),
             modifier = Modifier.padding(end = 16.dp),
         )

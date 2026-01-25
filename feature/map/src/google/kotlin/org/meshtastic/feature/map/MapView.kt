@@ -35,7 +35,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.filled.TripOrigin
+import androidx.compose.material.icons.rounded.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -501,7 +501,7 @@ fun MapView(
                                         },
                                     ) {
                                         Icon(
-                                            imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
+                                            imageVector = androidx.compose.material.icons.Icons.Rounded.TripOrigin,
                                             contentDescription = stringResource(Res.string.track_point),
                                             tint = color,
                                         )

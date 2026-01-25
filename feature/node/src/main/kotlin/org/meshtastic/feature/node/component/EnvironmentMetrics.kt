@@ -20,17 +20,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.BlurOn
-import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Height
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Power
-import androidx.compose.material.icons.filled.Scale
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.BlurOn
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Height
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.Power
+import androidx.compose.material.icons.rounded.Scale
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.Thermostat
+import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -77,7 +77,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.temperature,
                                 temperature.toTempString(isFahrenheit),
-                                Icons.Default.Thermostat,
+                                Icons.Rounded.Thermostat,
                             ),
                         )
                     }
@@ -86,7 +86,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.humidity,
                                 "%.0f%%".format(relativeHumidity),
-                                Icons.Default.WaterDrop,
+                                Icons.Rounded.WaterDrop,
                             ),
                         )
                     }
@@ -95,7 +95,7 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.pressure,
                                 "%.0f hPa".format(barometricPressure),
-                                Icons.Default.Speed,
+                                Icons.Rounded.Speed,
                             ),
                         )
                     }
@@ -104,29 +104,29 @@ internal fun EnvironmentMetrics(
                             VectorMetricInfo(
                                 Res.string.gas_resistance,
                                 "%.0f MΩ".format(gasResistance),
-                                Icons.Default.BlurOn,
+                                Icons.Rounded.BlurOn,
                             ),
                         )
                     }
                     if (hasVoltage()) {
-                        add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(voltage), Icons.Rounded.Bolt))
                     }
                     if (hasCurrent()) {
-                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(current), Icons.Default.Power))
+                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(current), Icons.Rounded.Power))
                     }
-                    if (hasIaq()) add(VectorMetricInfo(Res.string.iaq, iaq.toString(), Icons.Default.Air))
+                    if (hasIaq()) add(VectorMetricInfo(Res.string.iaq, iaq.toString(), Icons.Rounded.Air))
                     if (hasDistance()) {
                         add(
                             VectorMetricInfo(
                                 Res.string.distance,
                                 distance.toSmallDistanceString(displayUnits),
-                                Icons.Default.Height,
+                                Icons.Rounded.Height,
                             ),
                         )
                     }
-                    if (hasLux()) add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(lux), Icons.Default.LightMode))
+                    if (hasLux()) add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(lux), Icons.Rounded.LightMode))
                     if (hasUvLux()) {
-                        add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uvLux), Icons.Default.LightMode))
+                        add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uvLux), Icons.Rounded.LightMode))
                     }
                     if (hasWindSpeed()) {
                         @Suppress("MagicNumber")
@@ -141,7 +141,7 @@ internal fun EnvironmentMetrics(
                         )
                     }
                     if (hasWeight()) {
-                        add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(weight), Icons.Default.Scale))
+                        add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(weight), Icons.Rounded.Scale))
                     }
                     if (hasTemperature() && hasRelativeHumidity()) {
                         val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)

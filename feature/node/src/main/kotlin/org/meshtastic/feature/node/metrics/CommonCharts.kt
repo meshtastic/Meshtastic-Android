@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
 import android.graphics.Paint
@@ -32,7 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -258,7 +257,7 @@ fun Legend(legendData: List<LegendData>, displayInfoIcon: Boolean = true, prompt
         if (displayInfoIcon) {
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
-                imageVector = Icons.Default.Info,
+                imageVector = Icons.Rounded.Info,
                 modifier = Modifier.clickable { promptInfoDialog() },
                 contentDescription = stringResource(Res.string.info),
             )

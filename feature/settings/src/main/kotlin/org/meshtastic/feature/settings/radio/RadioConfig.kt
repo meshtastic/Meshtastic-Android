@@ -26,11 +26,13 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
+import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Restore
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -143,13 +145,13 @@ fun RadioConfigItemList(
 
             ListItem(
                 text = stringResource(Res.string.import_configuration),
-                leadingIcon = Icons.Default.Download,
+                leadingIcon = Icons.Rounded.Download,
                 enabled = enabled,
                 onClick = onImport,
             )
             ListItem(
                 text = stringResource(Res.string.export_configuration),
-                leadingIcon = Icons.Default.Upload,
+                leadingIcon = Icons.Rounded.Upload,
                 enabled = enabled,
                 onClick = onExport,
             )

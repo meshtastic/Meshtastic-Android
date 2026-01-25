@@ -17,15 +17,15 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.Grass
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Router
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.Work
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.ElectricBolt
+import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.Grass
+import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material.icons.rounded.Thermostat
+import androidx.compose.material.icons.rounded.WaterDrop
+import androidx.compose.material.icons.rounded.Work
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -45,7 +45,7 @@ fun TemperatureInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Thermostat,
+        icon = Icons.Rounded.Thermostat,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = temp,
         contentColor = contentColor,
@@ -60,7 +60,7 @@ fun HumidityInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.WaterDrop,
+        icon = Icons.Rounded.WaterDrop,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = humidity,
         contentColor = contentColor,
@@ -75,7 +75,7 @@ fun SoilTemperatureInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Grass,
+        icon = Icons.Rounded.Grass,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = temp,
         contentColor = contentColor,
@@ -90,7 +90,7 @@ fun SoilMoistureInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Grass,
+        icon = Icons.Rounded.Grass,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = moisture,
         contentColor = contentColor,
@@ -105,7 +105,7 @@ fun PaxcountInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.People,
+        icon = Icons.Rounded.People,
         contentDescription = stringResource(Res.string.pax_metrics_log),
         text = pax,
         contentColor = contentColor,
@@ -120,7 +120,7 @@ fun AirQualityInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Air,
+        icon = Icons.Rounded.Air,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = iaq,
         contentColor = contentColor,
@@ -131,7 +131,7 @@ fun AirQualityInfo(
 fun PowerInfo(value: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.ElectricBolt,
+        icon = Icons.Rounded.ElectricBolt,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = value,
         contentColor = contentColor,
@@ -146,7 +146,7 @@ fun HardwareInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Router,
+        icon = Icons.Rounded.Router,
         contentDescription = "Hardware Model",
         text = hwModel,
         style = MaterialTheme.typography.labelSmall,
@@ -158,7 +158,7 @@ fun HardwareInfo(
 fun RoleInfo(role: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Work,
+        icon = Icons.Rounded.Work,
         contentDescription = stringResource(Res.string.role),
         text = role,
         style = MaterialTheme.typography.labelSmall,
@@ -170,7 +170,7 @@ fun RoleInfo(role: String, modifier: Modifier = Modifier, contentColor: Color = 
 fun NodeIdInfo(id: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Fingerprint,
+        icon = Icons.Rounded.Fingerprint,
         contentDescription = stringResource(Res.string.node_id),
         text = id,
         style = MaterialTheme.typography.labelSmall,

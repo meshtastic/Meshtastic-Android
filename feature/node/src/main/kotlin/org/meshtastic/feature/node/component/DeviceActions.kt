@@ -28,10 +28,10 @@ import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.VolumeMute
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -170,7 +170,7 @@ private fun PrimaryActionsRow(
 
         IconToggleButton(checked = node.isFavorite, onCheckedChange = { onFavoriteClick() }) {
             Icon(
-                imageVector = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                imageVector = if (node.isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
                 contentDescription = stringResource(Res.string.favorite),
                 tint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
             )

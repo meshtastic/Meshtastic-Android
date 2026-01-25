@@ -29,9 +29,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Explore
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.SocialDistance
+import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material.icons.rounded.LocationOn
+import androidx.compose.material.icons.rounded.SocialDistance
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -132,7 +132,7 @@ private fun PositionMap(node: Node, distance: String?) {
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Default.SocialDistance, null, Modifier.size(16.dp))
+                    Icon(Icons.Rounded.SocialDistance, null, Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(distance, style = MaterialTheme.typography.labelLarge)
                 }
@@ -163,7 +163,7 @@ private fun PositionActionButtons(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             ),
         ) {
-            Icon(Icons.Default.LocationOn, null, Modifier.size(18.dp))
+            Icon(Icons.Rounded.LocationOn, null, Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text(
                 text = stringResource(Res.string.exchange_position),
@@ -179,7 +179,7 @@ private fun PositionActionButtons(
                 modifier = Modifier.weight(COMPASS_BUTTON_WEIGHT),
                 shape = MaterialTheme.shapes.large,
             ) {
-                Icon(Icons.Default.Explore, null, Modifier.size(18.dp))
+                Icon(Icons.Rounded.Explore, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
                 Text(
                     text = stringResource(Res.string.open_compass),

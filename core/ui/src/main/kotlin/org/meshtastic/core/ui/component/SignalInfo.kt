@@ -81,9 +81,7 @@ fun SignalInfo(
                 if (node.hopsAway > 0) {
                     HopsInfo(hops = node.hopsAway, contentColor = contentColor)
                 } else {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
                             val quality = determineSignalQuality(node.snr, node.rssi)
                             Snr(node.snr)

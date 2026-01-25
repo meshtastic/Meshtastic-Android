@@ -22,7 +22,7 @@ import android.content.Intent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -87,7 +87,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
                 )
         },
         text = stringResource(Res.string.last_position_update),
-        leadingIcon = Icons.Default.LocationOn,
+        leadingIcon = Icons.Rounded.LocationOn,
         supportingText = "$ago • $coordinates$elevationText",
         trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),
         onClick = {

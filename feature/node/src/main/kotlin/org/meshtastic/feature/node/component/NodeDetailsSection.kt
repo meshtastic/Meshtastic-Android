@@ -30,7 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Numbers
+import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -178,13 +178,13 @@ private fun NodeIdentificationRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.node_id),
             value = DataPacket.nodeNumToDefaultId(node.num),
-            icon = Icons.Default.Numbers,
+            icon = Icons.Rounded.Numbers,
             modifier = Modifier.weight(1f),
         )
         InfoItem(
             label = stringResource(Res.string.node_number),
             value = node.num.toUInt().toString(),
-            icon = Icons.Default.Numbers,
+            icon = Icons.Rounded.Numbers,
             modifier = Modifier.weight(1f),
         )
     }

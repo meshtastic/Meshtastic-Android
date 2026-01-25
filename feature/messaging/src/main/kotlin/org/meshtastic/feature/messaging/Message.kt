@@ -48,19 +48,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.SpeakerNotes
-import androidx.compose.material.icons.filled.SpeakerNotesOff
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FilterListOff
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.SelectAll
+import androidx.compose.material.icons.rounded.SpeakerNotes
+import androidx.compose.material.icons.rounded.SpeakerNotesOff
+import androidx.compose.material.icons.rounded.Visibility
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -499,7 +499,7 @@ private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState
         },
     ) {
         Icon(
-            imageVector = Icons.Default.ArrowDownward,
+            imageVector = Icons.Rounded.ArrowDownward,
             contentDescription = stringResource(Res.string.scroll_to_bottom),
         )
     }
@@ -683,13 +683,13 @@ private fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -
     },
     actions = {
         IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(imageVector = Icons.Default.ContentCopy, contentDescription = stringResource(Res.string.copy))
+            Icon(imageVector = Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy))
         }
         IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(Res.string.delete))
+            Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete))
         }
         IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(imageVector = Icons.Default.SelectAll, contentDescription = stringResource(Res.string.select_all))
+            Icon(imageVector = Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select_all))
         }
     },
 )
@@ -775,7 +775,7 @@ private fun MessageTopBarActions(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }, enabled = true) {
-            Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(Res.string.overflow_menu))
+            Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.overflow_menu))
         }
         OverFlowMenu(
             expanded = expanded,
@@ -828,7 +828,7 @@ private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Uni
         },
         leadingIcon = {
             Icon(
-                imageVector = if (showQuickChat) Icons.Default.SpeakerNotesOff else Icons.Default.SpeakerNotes,
+                imageVector = if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.Rounded.SpeakerNotes,
                 contentDescription = title,
             )
         },
@@ -844,7 +844,7 @@ private fun QuickChatOptionsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Un
             onDismiss()
             onNavigate()
         },
-        leadingIcon = { Icon(imageVector = Icons.Default.ChatBubbleOutline, contentDescription = title) },
+        leadingIcon = { Icon(imageVector = Icons.Rounded.ChatBubbleOutline, contentDescription = title) },
     )
 }
 
@@ -859,7 +859,7 @@ private fun FilteredMessagesMenuItem(showFiltered: Boolean, count: Int, onDismis
         },
         leadingIcon = {
             Icon(
-                imageVector = if (showFiltered) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                imageVector = if (showFiltered) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
                 contentDescription = title,
             )
         },

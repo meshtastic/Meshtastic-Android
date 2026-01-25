@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.rounded.AddReaction
 import androidx.compose.material.icons.twotone.AddLink
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
@@ -61,7 +61,7 @@ internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
         )
     }
     IconButton(onClick = { showEmojiPickerDialog = true }) {
-        Icon(imageVector = Icons.Default.AddReaction, contentDescription = stringResource(Res.string.react))
+        Icon(imageVector = Icons.Rounded.AddReaction, contentDescription = stringResource(Res.string.react))
     }
 }
 

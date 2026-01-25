@@ -35,7 +35,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AddReaction
+import androidx.compose.material.icons.rounded.AddReaction
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -187,7 +187,7 @@ private fun AddReactionButton(modifier: Modifier = Modifier, onSendReaction: (St
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
     ) {
         Icon(
-            imageVector = Icons.Default.AddReaction,
+            imageVector = Icons.Rounded.AddReaction,
             contentDescription = stringResource(Res.string.react),
             modifier = Modifier.padding(6.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -179,7 +179,7 @@ fun EditWaypointDialog(
                         modifier = Modifier.fillMaxWidth().size(48.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Image(imageVector = Icons.Default.Lock, contentDescription = stringResource(Res.string.locked))
+                        Image(imageVector = Icons.Rounded.Lock, contentDescription = stringResource(Res.string.locked))
                         Text(stringResource(Res.string.locked))
                         Switch(
                             modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
@@ -221,7 +221,7 @@ fun EditWaypointDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
-                            imageVector = Icons.Default.CalendarMonth,
+                            imageVector = Icons.Rounded.CalendarMonth,
                             contentDescription = stringResource(Res.string.expires),
                         )
                         Text(stringResource(Res.string.expires))

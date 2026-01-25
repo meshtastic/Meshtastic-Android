@@ -17,7 +17,7 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Tsunami
+import androidx.compose.material.icons.rounded.Tsunami
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,7 +33,7 @@ fun ChannelInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.Tsunami,
+        icon = Icons.Rounded.Tsunami,
         contentDescription = "Channel",
         text = channel.toString(),
         contentColor = contentColor,

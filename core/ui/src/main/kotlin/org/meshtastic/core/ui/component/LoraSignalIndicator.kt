@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.core.ui.component
@@ -29,10 +28,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SignalCellular4Bar
-import androidx.compose.material.icons.filled.SignalCellularAlt
-import androidx.compose.material.icons.filled.SignalCellularAlt1Bar
-import androidx.compose.material.icons.filled.SignalCellularAlt2Bar
+import androidx.compose.material.icons.rounded.SignalCellular4Bar
+import androidx.compose.material.icons.rounded.SignalCellularAlt
+import androidx.compose.material.icons.rounded.SignalCellularAlt1Bar
+import androidx.compose.material.icons.rounded.SignalCellularAlt2Bar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -72,10 +71,10 @@ enum class Quality(
     @Stable val imageVector: ImageVector,
     @Stable val color: @Composable () -> Color,
 ) {
-    NONE(Res.string.none_quality, Icons.Default.SignalCellularAlt1Bar, { colorScheme.StatusRed }),
-    BAD(Res.string.bad, Icons.Default.SignalCellularAlt2Bar, { colorScheme.StatusOrange }),
-    FAIR(Res.string.fair, Icons.Default.SignalCellularAlt, { colorScheme.StatusYellow }),
-    GOOD(Res.string.good, Icons.Default.SignalCellular4Bar, { colorScheme.StatusGreen }),
+    NONE(Res.string.none_quality, Icons.Rounded.SignalCellularAlt1Bar, { colorScheme.StatusRed }),
+    BAD(Res.string.bad, Icons.Rounded.SignalCellularAlt2Bar, { colorScheme.StatusOrange }),
+    FAIR(Res.string.fair, Icons.Rounded.SignalCellularAlt, { colorScheme.StatusYellow }),
+    GOOD(Res.string.good, Icons.Rounded.SignalCellular4Bar, { colorScheme.StatusGreen }),
 }
 
 /**

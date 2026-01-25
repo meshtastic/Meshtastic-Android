@@ -17,7 +17,7 @@
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CrueltyFree
+import androidx.compose.material.icons.rounded.CrueltyFree
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,7 +32,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 fun HopsInfo(hops: Int, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
-        icon = Icons.Default.CrueltyFree,
+        icon = Icons.Rounded.CrueltyFree,
         contentDescription = stringResource(Res.string.hops_away),
         text = hops.toString(),
         contentColor = contentColor,
