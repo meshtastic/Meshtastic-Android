@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.detail
 
 import android.Manifest
@@ -59,7 +58,6 @@ import org.meshtastic.feature.node.component.CompassSheetContent
 import org.meshtastic.feature.node.component.DeviceActions
 import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
-import org.meshtastic.feature.node.component.MetricsSection
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
@@ -126,7 +124,7 @@ fun NodeDetailList(
     val compassViewModel = if (inspectionMode) null else hiltViewModel<CompassViewModel>()
     val compassUiState by
         compassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
-    var compassTargetNode by remember { mutableStateOf<Node?>(null) } // Cache target for sheet-side position requests
+    var compassTargetNode by remember { mutableStateOf<Node?>(null) }
 
     val permissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { _ -> }
@@ -164,7 +162,9 @@ fun NodeDetailList(
             lastTracerouteTime = lastTracerouteTime,
             lastRequestNeighborsTime = lastRequestNeighborsTime,
             node = node,
+            availableLogs = availableLogs,
             onAction = onAction,
+            metricsState = metricsState,
         )
 
         PositionSection(
@@ -188,8 +188,6 @@ fun NodeDetailList(
         if (metricsState.deviceHardware != null) {
             DeviceDetailsSection(metricsState)
         }
-
-        MetricsSection(node, metricsState, availableLogs, onAction)
 
         NotesSection(node = node, onSaveNotes = onSaveNotes)
 
@@ -231,7 +229,6 @@ private fun CompassSheetHost(
     onRequestPosition: () -> Unit,
 ) {
     if (showCompassSheet && compassViewModel != null) {
-        // Tie sensor lifecycle to the sheet so streams stop as soon as the sheet is dismissed.
         DisposableEffect(Unit) { onDispose { compassViewModel.stop() } }
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)

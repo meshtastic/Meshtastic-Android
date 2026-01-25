@@ -411,7 +411,7 @@
     <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption.</string>
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
-    <string name="exchange_userinfo">Exchange user info</string>
+    <string name="userinfo">User Info</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="more_details">More details</string>
     <string name="snr">SNR</string>
@@ -419,12 +419,12 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
-    <string name="device_metrics_log">Device Metrics Log</string>
+    <string name="device_metrics_log">Device Metrics</string>
     <string name="node_map">Node Map</string>
-    <string name="position_log">Position Log</string>
+    <string name="position_log">Position</string>
     <string name="last_position_update">Last position update</string>
-    <string name="env_metrics_log">Environment Metrics Log</string>
-    <string name="sig_metrics_log">Signal Metrics Log</string>
+    <string name="env_metrics_log">Environment Metrics</string>
+    <string name="sig_metrics_log">Signal Metrics</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Remote Administration</string>
     <string name="bad">Bad</string>
@@ -434,7 +434,7 @@
     <string name="share_to">Share to…</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signal Quality</string>
-    <string name="traceroute_log">Traceroute Log</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hop</item>
@@ -466,7 +466,7 @@
     <string name="remove_favorite">Remove from favorites</string>
     <string name="favorite_add">Add '%1$s' as a favorite node?</string>
     <string name="favorite_remove">Remove '%1$s' as a favorite node?</string>
-    <string name="power_metrics_log">Power Metrics Log</string>
+    <string name="power_metrics_log">Power Metrics</string>
     <string name="channel_1">Channel 1</string>
     <string name="channel_2">Channel 2</string>
     <string name="channel_3">Channel 3</string>
@@ -787,6 +787,8 @@
     <string name="public_key_changed">Public Key Changed</string>
     <string name="import_label">Import</string>
     <string name="request">Request</string>
+    <string name="requesting_from">Requesting %1$s from %2$s</string>
+    <string name="user_info">User info</string>
     <string name="request_neighbor_info">NeighborInfo (2.7.15+)</string>
     <string name="request_telemetry">Request Telemetry</string>
     <string name="request_device_metrics">Device Metrics</string>
@@ -794,12 +796,14 @@
     <string name="request_air_quality_metrics">Air-Quality Metrics</string>
     <string name="request_power_metrics">Power Metrics</string>
     <string name="request_local_stats">Local Stats</string>
+    <string name="request_host_metrics">Host Metrics</string>
+    <string name="request_pax_metrics">Pax Metrics</string>
     <string name="request_metadata">Metadata</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>
     <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
-    <string name="host_metrics_log">Host Metrics Log</string>
+    <string name="host_metrics_log">Host Metrics</string>
     <string name="host">Host</string>
     <string name="free_memory">Free Memory</string>
     <string name="disk_free">Disk Free</string>
@@ -897,9 +901,9 @@
     <string name="clear_selection">Clear selection</string>
     <string name="message_input_label">Message</string>
     <string name="type_a_message">Type a message</string>
-    <string name="pax_metrics_log">PAX Metrics Log</string>
+    <string name="pax_metrics_log">PAX Metrics</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
+    <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="wifi_devices">WiFi Devices</string>
     <string name="ble_devices">BLE Devices</string>
     <string name="bluetooth_paired_devices">Paired devices</string>
@@ -1143,6 +1147,7 @@
     <string name="add_channels_description">The following channels were found in the QR code. Select the once you would like to add to your device. Existing channels will be preserved.</string>
     <string name="replace_channels_and_settings_title">Replace Channels &amp; Settings</string>
     <string name="replace_channels_and_settings_description">This QR code contains a complete configuration. This will REPLACE your existing channels and radio settings. All existing channels will be removed.</string>
+    <string name="loading">Loading</string>
 
     <!-- Message Filter -->
     <string name="filter_settings">Message Filter</string>

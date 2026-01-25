@@ -34,9 +34,6 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LocalContentColor
@@ -51,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
@@ -65,6 +61,8 @@ import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.feature.node.model.LogsType
+import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
@@ -80,7 +78,9 @@ fun DeviceActions(
     node: Node,
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
+    availableLogs: Set<LogsType>,
     onAction: (NodeDetailAction) -> Unit,
+    metricsState: MetricsState,
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
@@ -99,34 +99,15 @@ fun DeviceActions(
         onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
     )
 
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
-        shape = MaterialTheme.shapes.extraLarge,
-    ) {
-        Column(modifier = Modifier.padding(vertical = 12.dp)) {
-            ActionsHeader()
-
+    Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        SectionCard(title = Res.string.actions) {
             PrimaryActionsRow(
                 node = node,
                 isLocal = isLocal,
                 onAction = onAction,
                 onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
             )
-
-            if (!isLocal) {
-                ActionsDivider()
-
-                RemoteDeviceActions(
-                    node = node,
-                    lastTracerouteTime = lastTracerouteTime,
-                    lastRequestNeighborsTime = lastRequestNeighborsTime,
-                    onAction = onAction,
-                )
-            }
-
-            ActionsDivider()
-
+            SectionDivider(Modifier.padding(vertical = 8.dp))
             ManagementActions(
                 node = node,
                 onIgnoreClick = { displayedDialog = DialogType.IGNORE },
@@ -134,26 +115,16 @@ fun DeviceActions(
                 onRemoveClick = { displayedDialog = DialogType.REMOVE },
             )
         }
+
+        TelemetricActionsSection(
+            node = node,
+            availableLogs = availableLogs,
+            lastTracerouteTime = lastTracerouteTime,
+            lastRequestNeighborsTime = lastRequestNeighborsTime,
+            metricsState = metricsState,
+            onAction = onAction,
+        )
     }
-}
-
-@Composable
-private fun ActionsHeader() {
-    Text(
-        text = stringResource(Res.string.actions),
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-    )
-}
-
-@Composable
-private fun ActionsDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-    )
 }
 
 @Composable

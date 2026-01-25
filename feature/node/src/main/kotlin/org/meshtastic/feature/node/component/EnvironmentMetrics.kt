@@ -143,13 +143,6 @@ internal fun EnvironmentMetrics(
                     if (hasWeight()) {
                         add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(weight), Icons.Default.Scale))
                     }
-                }
-            }
-        }
-    val drawableMetrics =
-        remember(node.environmentMetrics, isFahrenheit) {
-            buildList {
-                with(node.environmentMetrics) {
                     if (hasTemperature() && hasRelativeHumidity()) {
                         val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)
                         add(
@@ -196,20 +189,21 @@ internal fun EnvironmentMetrics(
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         vectorMetrics.forEach { metric ->
-            InfoCard(
-                icon = metric.icon,
-                text = stringResource(metric.label),
-                value = metric.value,
-                rotateIcon = metric.rotateIcon,
-            )
-        }
-        drawableMetrics.forEach { metric ->
-            DrawableInfoCard(
-                iconRes = metric.icon,
-                text = stringResource(metric.label),
-                value = metric.value,
-                rotateIcon = metric.rotateIcon,
-            )
+            if (metric is DrawableMetricInfo) {
+                DrawableInfoCard(
+                    iconRes = metric.icon,
+                    text = stringResource(metric.label),
+                    value = metric.value,
+                    rotateIcon = metric.rotateIcon,
+                )
+            } else if (metric is VectorMetricInfo) {
+                InfoCard(
+                    icon = metric.icon,
+                    text = stringResource(metric.label),
+                    value = metric.value,
+                    rotateIcon = metric.rotateIcon,
+                )
+            }
         }
     }
 }

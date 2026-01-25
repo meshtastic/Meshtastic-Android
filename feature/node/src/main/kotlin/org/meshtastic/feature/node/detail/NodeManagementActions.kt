@@ -35,14 +35,8 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
 ) {
-    private var scope: CoroutineScope? = null
-
-    fun start(coroutineScope: CoroutineScope) {
-        scope = coroutineScope
-    }
-
-    fun removeNode(nodeNum: Int) {
-        scope?.launch(Dispatchers.IO) {
+    fun removeNode(scope: CoroutineScope, nodeNum: Int) {
+        scope.launch(Dispatchers.IO) {
             Logger.i { "Removing node '$nodeNum'" }
             try {
                 val packetId = serviceRepository.meshService?.packetId ?: return@launch
@@ -54,8 +48,8 @@ constructor(
         }
     }
 
-    fun ignoreNode(node: Node) {
-        scope?.launch(Dispatchers.IO) {
+    fun ignoreNode(scope: CoroutineScope, node: Node) {
+        scope.launch(Dispatchers.IO) {
             try {
                 serviceRepository.onServiceAction(ServiceAction.Ignore(node))
             } catch (ex: RemoteException) {
@@ -64,8 +58,8 @@ constructor(
         }
     }
 
-    fun muteNode(node: Node) {
-        scope?.launch(Dispatchers.IO) {
+    fun muteNode(scope: CoroutineScope, node: Node) {
+        scope.launch(Dispatchers.IO) {
             try {
                 serviceRepository.onServiceAction(ServiceAction.Mute(node))
             } catch (ex: RemoteException) {
@@ -74,8 +68,8 @@ constructor(
         }
     }
 
-    fun favoriteNode(node: Node) {
-        scope?.launch(Dispatchers.IO) {
+    fun favoriteNode(scope: CoroutineScope, node: Node) {
+        scope.launch(Dispatchers.IO) {
             try {
                 serviceRepository.onServiceAction(ServiceAction.Favorite(node))
             } catch (ex: RemoteException) {
@@ -84,8 +78,8 @@ constructor(
         }
     }
 
-    fun setNodeNotes(nodeNum: Int, notes: String) {
-        scope?.launch(Dispatchers.IO) {
+    fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
+        scope.launch(Dispatchers.IO) {
             try {
                 nodeRepository.setNodeNotes(nodeNum, notes)
             } catch (ex: java.io.IOException) {
