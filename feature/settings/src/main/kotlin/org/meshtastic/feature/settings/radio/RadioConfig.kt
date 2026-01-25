@@ -206,33 +206,35 @@ fun RadioConfigItemList(
         }
     }
 
-    TitledCard(title = stringResource(Res.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
-        if (isManaged) {
-            ManagedMessage()
-        }
+    if (state.isLocal) {
+        TitledCard(title = stringResource(Res.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
+            if (isManaged) {
+                ManagedMessage()
+            }
 
-        if (isOtaCapable && state.isLocal) {
+            if (isOtaCapable) {
+                ListItem(
+                    text = stringResource(Res.string.firmware_update_title),
+                    leadingIcon = Icons.Rounded.SystemUpdate,
+                    enabled = enabled,
+                    onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+                )
+            }
+
             ListItem(
-                text = stringResource(Res.string.firmware_update_title),
-                leadingIcon = Icons.Rounded.SystemUpdate,
+                text = stringResource(Res.string.clean_node_database_title),
+                leadingIcon = Icons.Rounded.CleaningServices,
                 enabled = enabled,
-                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+                onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+            )
+
+            ListItem(
+                text = stringResource(Res.string.debug_panel),
+                leadingIcon = Icons.Rounded.BugReport,
+                enabled = enabled,
+                onClick = { onNavigate(SettingsRoutes.DebugPanel) },
             )
         }
-
-        ListItem(
-            text = stringResource(Res.string.clean_node_database_title),
-            leadingIcon = Icons.Rounded.CleaningServices,
-            enabled = enabled,
-            onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
-        )
-
-        ListItem(
-            text = stringResource(Res.string.debug_panel),
-            leadingIcon = Icons.Rounded.BugReport,
-            enabled = enabled,
-            onClick = { onNavigate(SettingsRoutes.DebugPanel) },
-        )
     }
 }
 
