@@ -207,7 +207,7 @@
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
     <string name="acknowledgements">Подтверждения</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
-    <string name="contact_invalid">Контакт недопустим и не может быть добавлен</string>
+    <string name="contact_invalid">Контакт неверный и не может быть добавлен</string>
     <string name="debug_panel">Панель отладки</string>
     <string name="debug_decoded_payload">Декодированная нагрузка:</string>
     <string name="debug_logs_export">Экспортировать логи</string>
@@ -217,13 +217,13 @@
     <string name="debug_export_no_logs">Нет журналов для экспорта</string>
     <plurals name="log_retention_hours">
         <item quantity="one">%1$d час</item>
-        <item quantity="few">%1$d часов</item>
+        <item quantity="few">%1$d часа</item>
         <item quantity="many">%1$d часов</item>
         <item quantity="other">%1$d часы</item>
     </plurals>
     <plurals name="log_retention_days_quantity">
         <item quantity="one">%1$d день</item>
-        <item quantity="few">%1$d дней</item>
+        <item quantity="few">%1$d дня</item>
         <item quantity="many">%1$d дней</item>
         <item quantity="other">%1$d дни</item>
     </plurals>
@@ -238,7 +238,7 @@
     <string name="debug_filter_clear">Очистить все фильтры</string>
     <string name="debug_filter_add_custom">Добавить пользовательский фильтр</string>
     <string name="debug_filter_preset_title">Предустановленные фильтры</string>
-    <string name="debug_store_logs_title">Хранить журналы сетки</string>
+    <string name="debug_store_logs_title">Хранить журналы mesh-сети</string>
     <string name="debug_store_logs_summary">Выключить запись сетевых журналов на диск</string>
     <string name="debug_clear">Очистить журнал</string>
     <string name="match_any">Совпадение любой | Все</string>
@@ -390,6 +390,7 @@
     <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру открытого ключа для шифрования.</string>
     <string name="encryption_error">Несоответствие публичного ключа</string>
     <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить узел и снова обменяться ключами, но это может повлечь за собой более серьезную проблему безопасности. Свяжитесь с пользователем через другой доверенный канал, чтобы определить, было ли изменение ключа из-за заводского сброса или другого преднамеренного действия.</string>
+    <string name="userinfo">Пользовательская информация</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых узлах</string>
     <string name="more_details">Подробнее</string>
     <string name="snr">Сигнал/шум</string>
@@ -402,6 +403,7 @@
     <string name="position_log">Местоположение</string>
     <string name="last_position_update">Обновление последнего местоположения</string>
     <string name="env_metrics_log">Метрики окружения</string>
+    <string name="sig_metrics_log">Показатели сигнала</string>
     <string name="administration">Администрирование</string>
     <string name="remote_admin">Удаленное администрирование</string>
     <string name="bad">Плохой</string>
@@ -529,7 +531,7 @@
     <string name="allow_input_source">Разрешить источник ввода</string>
     <string name="send_bell">Отправить колокольчик</string>
     <string name="messages">Сообщения</string>
-    <string name="device_db_cache_limit">Ограничение кеша БД устройства</string>
+    <string name="device_db_cache_limit">Ограничение кэша БД устройства</string>
     <string name="device_db_cache_limit_summary">Максимальное количество баз данных для этого устройства</string>
     <string name="log_retention_days">Период хранения сообщений в журнале сети</string>
     <string name="log_retention_days_summary">Выберите как долго будут храниться журналы. Выберите «Никогда» чтобы хранить все журналы.</string>
@@ -638,6 +640,9 @@
     <string name="subnet">Подсеть</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
+    <string name="status_message">Состояние сообщения</string>
+    <string name="status_message_config">Настройка состояния сообщений</string>
+    <string name="node_status_summary">Строка фактического состояния</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Порог WiFi RSSI (по умолчанию -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI порог (по умолчанию -80)</string>
     <string name="position_config">Местоположение</string>
@@ -766,6 +771,8 @@
     <string name="public_key_changed">Публичный ключ изменён</string>
     <string name="import_label">Импортировать</string>
     <string name="request">Запрос</string>
+    <string name="requesting_from">Запрашиваю %1$s у %2$s</string>
+    <string name="user_info">Пользовательская информация</string>
     <string name="request_neighbor_info">Информация о соседях (2.7.15+)</string>
     <string name="request_telemetry">Запрос телеметрии</string>
     <string name="request_device_metrics">Метрики устройства</string>
@@ -774,6 +781,7 @@
     <string name="request_power_metrics">Метрики мощности</string>
     <string name="request_local_stats">Локальная статистика</string>
     <string name="request_host_metrics">Метрики хоста</string>
+    <string name="request_pax_metrics">Метрика прохожих</string>
     <string name="request_metadata">Метаданные</string>
     <string name="actions">Действия</string>
     <string name="firmware">Прошивка</string>
@@ -869,7 +877,9 @@
     <string name="clear_selection">Очистить выбор</string>
     <string name="message_input_label">Сообщение</string>
     <string name="type_a_message">Написать сообщение</string>
+    <string name="pax_metrics_log">Метрика прохожих</string>
     <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">Устройства BLE</string>
     <string name="bluetooth_paired_devices">Сопряженные устройства</string>
@@ -1075,20 +1085,20 @@
     <string name="interval_always_on">Всегда включено</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 секунда</item>
-        <item quantity="few">%1$d секунд</item>
-        <item quantity="many">%1$d секунды</item>
+        <item quantity="few">%1$d секунды</item>
+        <item quantity="many">%1$d секунд</item>
         <item quantity="other">%1$d секунды</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 минута</item>
-        <item quantity="few">%1$d минут</item>
-        <item quantity="many">%1$d минуты</item>
+        <item quantity="few">%1$d минуты</item>
+        <item quantity="many">%1$d минут</item>
         <item quantity="other">%1$d минуты</item>
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 час</item>
-        <item quantity="few">%1$d часов</item>
-        <item quantity="many">%1$d часа</item>
+        <item quantity="few">%1$d часа</item>
+        <item quantity="many">%1$d часов</item>
         <item quantity="other">%1$d часы</item>
     </plurals>
     <!-- Compass -->
@@ -1109,5 +1119,21 @@
     <string name="add_channels_description">В QR-коде были найдены следующие каналы. Выберите тот, который вы хотели бы добавить на свое устройство. Существующие каналы будут сохранены.</string>
     <string name="replace_channels_and_settings_title">Заменить каналы и настройки</string>
     <string name="replace_channels_and_settings_description">Этот QR-код содержит полную конфигурацию. Это заменит ваши существующие каналы и настройки радио. Все существующие каналы будут удалены.</string>
+    <string name="loading">Загрузка</string>
     <!-- Message Filter -->
+    <string name="filter_settings">Фильтр сообщений</string>
+    <string name="filter_enable">Включить фильтрацию</string>
+    <string name="filter_enable_summary">Скрывать сообщения, содержащие слова-фильтры</string>
+    <string name="filter_words">Фильтруемые слова</string>
+    <string name="filter_words_summary">Сообщения, содержащие эти слова будут скрыты</string>
+    <string name="filter_add_placeholder">Добавьте слово или регулярное выражение:шаблон</string>
+    <string name="filter_no_words">Фильтр слов не настроен</string>
+    <string name="filter_regex_pattern">Шаблон регулярного выражения</string>
+    <string name="filter_whole_word">Совпадение всего слова</string>
+    <string name="filter_filtered_count">%1$d отфильтрованы</string>
+    <string name="filter_show_count">Показать %1$d отфильтрованных</string>
+    <string name="filter_hide_count">Скрыть %1$d отфильтрованных</string>
+    <string name="filter_message_label">Отфильтрованные</string>
+    <string name="filter_enable_for_contact">Включить фильтрацию</string>
+    <string name="filter_disable_for_contact">Отключить фильтрацию</string>
 </resources>
