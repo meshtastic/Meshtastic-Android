@@ -632,6 +632,9 @@
     <string name="subnet">Aliverkko</string>
     <string name="paxcounter_config">PAX-laskurin asetukset</string>
     <string name="paxcounter_enabled">PAX-laskuri käytössä</string>
+    <string name="status_message">Tilaviesti</string>
+    <string name="status_message_config">Tilaviestin asetukset</string>
+    <string name="node_status_summary">Käytössä oleva tilaviesti</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi-signaalin RSSI-kynnysarvo (oletus -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE-signaalin RSSI-kynnysarvo (oletus -80)</string>
     <string name="position_config">Sijainti</string>
