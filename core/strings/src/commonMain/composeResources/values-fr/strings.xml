@@ -1093,4 +1093,5 @@
     <string name="add_channels_description">Les canaux suivants ont été trouvés dans le QR code. Sélectionnez ceux que vous souhaitez ajouter à votre appareil. Les canaux existants seront préservés.</string>
     <string name="replace_channels_and_settings_title">Remplacer les canaux &amp; les paramètres</string>
     <string name="replace_channels_and_settings_description">Ce code QR contient une configuration complète. Cela remplacera vos canaux et paramètres radio existants. Tous les canaux existants seront supprimés.</string>
+    <!-- Message Filter -->
 </resources>

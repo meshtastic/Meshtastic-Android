@@ -930,4 +930,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="compass_no_magnetometer">Este dispositivo no tiene un sensor de brújula. El rumbo no está disponible.</string>
     <string name="mark_as_read">Marcar como leído</string>
     <string name="now">Ahora</string>
+    <!-- Message Filter -->
 </resources>

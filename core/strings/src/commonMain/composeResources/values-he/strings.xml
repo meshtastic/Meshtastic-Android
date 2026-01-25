@@ -152,4 +152,5 @@
     <string name="firmware_update_failed">העדכון נכשל</string>
     <string name="interval_unset">לא מוגדר</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

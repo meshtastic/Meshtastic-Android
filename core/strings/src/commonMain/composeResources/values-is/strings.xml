@@ -135,4 +135,5 @@
     <string name="firmware_update_failed">Uppfærsla misfórst</string>
     <string name="interval_unset">Óstillt</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

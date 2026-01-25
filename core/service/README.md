@@ -17,6 +17,7 @@ graph TB
     :core:database[database]:::android-library
     :core:di[di]:::android-library
     :core:model[model]:::android-library
+    :core:prefs[prefs]:::android-library
     :core:proto[proto]:::android-library
     :core:service[service]:::android-library
     :core:strings[strings]:::kmp-library
@@ -31,6 +32,7 @@ graph TB
   :core:model -.-> :core:strings
   :core:service -.-> :core:database
   :core:service -.-> :core:model
+  :core:service -.-> :core:prefs
   :core:service -.-> :core:proto
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

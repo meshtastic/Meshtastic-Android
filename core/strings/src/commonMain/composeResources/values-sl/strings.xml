@@ -263,4 +263,5 @@
     <string name="firmware_update_failed">Posodobitev neuspešna</string>
     <string name="interval_unset">Ni nastavljeno</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>

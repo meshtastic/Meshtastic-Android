@@ -921,4 +921,5 @@
     <string name="mark_as_read">Označit jako přečtené</string>
     <string name="now">Nyní</string>
     <string name="add_channels_title">Přidat kanály</string>
+    <!-- Message Filter -->
 </resources>

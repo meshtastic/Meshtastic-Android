@@ -55,6 +55,7 @@ graph TB
   :core:network -.-> :core:model
   :core:service -.-> :core:database
   :core:service -.-> :core:model
+  :core:service -.-> :core:prefs
   :core:service -.-> :core:proto
   :core:ui -.-> :core:data
   :core:ui -.-> :core:database

@@ -730,4 +730,5 @@
     <string name="back">Voltar</string>
     <string name="interval_unset">Não definido</string>
     <!-- Compass -->
+    <!-- Message Filter -->
 </resources>
