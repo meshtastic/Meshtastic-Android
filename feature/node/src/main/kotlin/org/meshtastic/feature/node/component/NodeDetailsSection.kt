@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.Work
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -128,6 +129,7 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun MainNodeDetails(node: Node) {
     Column {
@@ -148,6 +150,19 @@ private fun MainNodeDetails(node: Node) {
         if (!publicKey.isEmpty) {
             SectionDivider()
             PublicKeyItem(publicKey.toByteArray())
+        }
+
+        if (!node.nodeStatus.isNullOrEmpty()) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                InfoItem(
+                    label = "Status",
+                    value = node.nodeStatus!!,
+                    icon = Icons.Default.CheckCircle,
+                    modifier = Modifier.weight(1f),
+                )
+            }
         }
     }
 }

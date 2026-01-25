@@ -90,10 +90,11 @@ data class DataPacket(
     /** If this is a text message, return the string, otherwise null */
     val text: String?
         get() =
-            if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
-                bytes?.decodeToString()
-            } else {
-                null
+            when (dataType) {
+                Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> bytes?.decodeToString()
+                //                Portnums.PortNum.NODE_STATUS_APP_VALUE ->
+                // MeshProtos.StatusMessage.parseFrom(bytes).status
+                else -> null
             }
 
     val alert: String?

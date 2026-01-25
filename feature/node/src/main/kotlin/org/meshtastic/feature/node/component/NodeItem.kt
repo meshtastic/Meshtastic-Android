@@ -199,6 +199,17 @@ fun NodeItem(
                     }
                 }
             }
+
+            if (!thatNode.nodeStatus.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = thatNode.nodeStatus!!,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = contentColor,
+                    maxLines = 2,
+                )
+            }
+
             Spacer(modifier = Modifier.height(2.dp))
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -95,6 +95,7 @@ constructor(
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
             Portnums.PortNum.ALERT_APP_VALUE,
             Portnums.PortNum.WAYPOINT_APP_VALUE,
+            Portnums.PortNum.NODE_STATUS_APP_VALUE,
         )
 
     fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null) {
@@ -121,6 +122,7 @@ constructor(
         var shouldBroadcast = !fromUs
         when (packet.decoded.portnumValue) {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> handleTextMessage(packet, dataPacket, myNodeNum)
+            Portnums.PortNum.NODE_STATUS_APP_VALUE -> handleNodeStatus(packet, dataPacket, myNodeNum)
             Portnums.PortNum.ALERT_APP_VALUE -> rememberDataPacket(dataPacket, myNodeNum)
             Portnums.PortNum.WAYPOINT_APP_VALUE -> handleWaypoint(packet, dataPacket, myNodeNum)
             Portnums.PortNum.POSITION_APP_VALUE -> handlePosition(packet, dataPacket, myNodeNum)
@@ -329,6 +331,12 @@ constructor(
                 if (packet.viaMqtt) longName = "$longName (MQTT)"
             }
         nodeManager.handleReceivedUser(packet.from, u, packet.channel)
+    }
+
+    private fun handleNodeStatus(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
+        val s = MeshProtos.StatusMessage.parseFrom(packet.decoded.payload)
+        nodeManager.handleReceivedNodeStatus(packet.from, s)
+        rememberDataPacket(dataPacket, myNodeNum)
     }
 
     private fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
