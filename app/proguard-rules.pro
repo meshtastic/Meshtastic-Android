@@ -40,3 +40,6 @@
 # Our app is opensource no need to obsfucate
 -dontobfuscate
 -optimizations !code/simplification/arithmetic,!field/*,!class/merging/*,!code/allocation/variable
+
+# R8 optimization for Kotlin null checks (AGP 9.0+)
+-processkotlinnullchecks remove
