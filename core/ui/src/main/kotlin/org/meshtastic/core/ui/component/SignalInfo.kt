@@ -19,10 +19,7 @@ package org.meshtastic.core.ui.component
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +30,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.air_utilization
 import org.meshtastic.core.strings.channel_utilization
@@ -61,7 +59,7 @@ fun SignalInfo(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (isThisNode) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 IconInfo(
                     icon = MeshtasticIcons.ChannelUtilization,
                     contentDescription = stringResource(Res.string.channel_utilization),
@@ -76,40 +74,33 @@ fun SignalInfo(
                 )
             }
         } else {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 if (node.channel > 0) {
                     ChannelInfo(channel = node.channel, contentColor = contentColor)
                 }
                 if (node.hopsAway > 0) {
                     HopsInfo(hops = node.hopsAway, contentColor = contentColor)
-                }
-            }
-
-            /* We only know the Signal Quality from direct nodes aka 0 hop. */
-            if (node.hopsAway <= 0) {
-                if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-                    val quality = determineSignalQuality(node.snr, node.rssi)
+                } else {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        Snr(node.snr)
-                        Rssi(node.rssi)
-                        Icon(
-                            modifier = Modifier.size(20.dp),
-                            imageVector = quality.imageVector,
-                            contentDescription = stringResource(Res.string.signal_quality),
-                            tint = quality.color.invoke(),
-                        )
-                        Text(
-                            text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = contentColor,
-                            maxLines = 1,
-                        )
+                        if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
+                            val quality = determineSignalQuality(node.snr, node.rssi)
+                            Snr(node.snr)
+                            Rssi(node.rssi)
+                            IconInfo(
+                                icon = quality.imageVector,
+                                contentDescription = stringResource(Res.string.signal_quality),
+                                contentColor = quality.color.invoke(),
+                                text = "${stringResource(Res.string.signal)} ${stringResource(quality.nameRes)}",
+                            )
+                        }
                     }
                 }
             }
+        }
+        if (node.deviceMetrics.uptimeSeconds > 0) {
+            UptimeInfo(uptime = formatUptime(node.deviceMetrics.uptimeSeconds), contentColor = contentColor)
         }
     }
 }

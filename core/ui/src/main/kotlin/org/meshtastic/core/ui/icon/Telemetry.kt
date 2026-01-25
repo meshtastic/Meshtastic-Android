@@ -17,38 +17,40 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Air
-import androidx.compose.material.icons.filled.DataArray
-import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.Grass
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.StackedLineChart
-import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.rounded.Air
+import androidx.compose.material.icons.rounded.DataArray
+import androidx.compose.material.icons.rounded.ElectricBolt
+import androidx.compose.material.icons.rounded.Grass
+import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.SocialDistance
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.StackedLineChart
+import androidx.compose.material.icons.rounded.Thermostat
+import androidx.compose.material.icons.rounded.WaterDrop
 import androidx.compose.material.icons.twotone.SatelliteAlt
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val MeshtasticIcons.Temperature: ImageVector
-    get() = Icons.Default.Thermostat
+    get() = Icons.Rounded.Thermostat
 val MeshtasticIcons.Humidity: ImageVector
-    get() = Icons.Default.WaterDrop
+    get() = Icons.Rounded.WaterDrop
+val MeshtasticIcons.Pressure: ImageVector
+    get() = Icons.Rounded.Speed
 val MeshtasticIcons.Soil: ImageVector
-    get() = Icons.Default.Grass
+    get() = Icons.Rounded.Grass
 val MeshtasticIcons.Paxcount: ImageVector
-    get() = Icons.Default.People
+    get() = Icons.Rounded.People
 val MeshtasticIcons.AirQuality: ImageVector
-    get() = Icons.Default.Air
+    get() = Icons.Rounded.Air
 val MeshtasticIcons.Power: ImageVector
-    get() = Icons.Default.ElectricBolt
+    get() = Icons.Rounded.ElectricBolt
 val MeshtasticIcons.Distance: ImageVector
     get() = Icons.Rounded.SocialDistance
 val MeshtasticIcons.Satellites: ImageVector
     get() = Icons.TwoTone.SatelliteAlt
 val MeshtasticIcons.DataArray: ImageVector
-    get() = Icons.Default.DataArray
+    get() = Icons.Rounded.DataArray
 val MeshtasticIcons.Speed: ImageVector
-    get() = Icons.Default.Speed
+    get() = Icons.Rounded.Speed
 val MeshtasticIcons.Chart: ImageVector
-    get() = Icons.Default.StackedLineChart
+    get() = Icons.Rounded.StackedLineChart

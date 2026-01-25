@@ -17,11 +17,11 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CrueltyFree
-import androidx.compose.material.icons.filled.SignalCellularAlt
-import androidx.compose.material.icons.filled.SsidChart
-import androidx.compose.material.icons.filled.WifiChannel
+import androidx.compose.material.icons.rounded.CrueltyFree
 import androidx.compose.material.icons.rounded.Route
+import androidx.compose.material.icons.rounded.SignalCellularAlt
+import androidx.compose.material.icons.rounded.SsidChart
+import androidx.compose.material.icons.rounded.WifiChannel
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -29,15 +29,15 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 val MeshtasticIcons.Hops: ImageVector
-    get() = Icons.Default.CrueltyFree
+    get() = Icons.Rounded.CrueltyFree
 val MeshtasticIcons.Route: ImageVector
     get() = Icons.Rounded.Route
 val MeshtasticIcons.Channel: ImageVector
-    get() = Icons.Default.WifiChannel
+    get() = Icons.Rounded.WifiChannel
 val MeshtasticIcons.ChannelUtilization: ImageVector
-    get() = Icons.Default.SignalCellularAlt
+    get() = Icons.Rounded.SignalCellularAlt
 val MeshtasticIcons.AirUtilization: ImageVector
-    get() = Icons.Default.SsidChart
+    get() = Icons.Rounded.SsidChart
 
 val MeshtasticIcons.SignalCellular0Bar: ImageVector
     get() {

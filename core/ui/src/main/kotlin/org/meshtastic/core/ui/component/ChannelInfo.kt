@@ -38,6 +38,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable
+@Suppress("MagicNumber")
 fun ChannelInfo(
     channel: Int,
     modifier: Modifier = Modifier,

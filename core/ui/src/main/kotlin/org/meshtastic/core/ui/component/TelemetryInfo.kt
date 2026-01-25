@@ -14,28 +14,48 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.core.ui.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.env_metrics_log
 import org.meshtastic.core.strings.node_id
 import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.ui.icon.AirQuality
+import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.Humidity
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.NodeId
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Power
+import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Soil
 import org.meshtastic.core.ui.icon.Temperature
+
+private const val SIZE_ICON = 20
 
 @Composable
 fun TemperatureInfo(
@@ -68,14 +88,30 @@ fun HumidityInfo(
 }
 
 @Composable
-fun SoilTemperatureInfo(
-    temp: String,
+fun PressureInfo(
+    pressure: String,
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconInfo(
         modifier = modifier,
+        icon = MeshtasticIcons.Pressure,
+        contentDescription = stringResource(Res.string.env_metrics_log),
+        text = pressure,
+        contentColor = contentColor,
+    )
+}
+
+@Composable
+fun SoilTemperatureInfo(
+    temp: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    OverlayIconInfo(
+        modifier = modifier,
         icon = MeshtasticIcons.Soil,
+        overlayIcon = MeshtasticIcons.Temperature,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = temp,
         contentColor = contentColor,
@@ -88,9 +124,10 @@ fun SoilMoistureInfo(
     modifier: Modifier = Modifier,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    IconInfo(
+    OverlayIconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Soil,
+        overlayIcon = MeshtasticIcons.Humidity,
         contentDescription = stringResource(Res.string.env_metrics_log),
         text = moisture,
         contentColor = contentColor,
@@ -139,6 +176,21 @@ fun PowerInfo(value: String, modifier: Modifier = Modifier, contentColor: Color 
 }
 
 @Composable
+fun UptimeInfo(
+    uptime: String,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    IconInfo(
+        modifier = modifier,
+        icon = MeshtasticIcons.ArrowCircleUp,
+        contentDescription = stringResource(Res.string.uptime),
+        text = uptime,
+        contentColor = contentColor,
+    )
+}
+
+@Composable
 fun HardwareInfo(
     hwModel: String,
     modifier: Modifier = Modifier,
@@ -176,4 +228,38 @@ fun NodeIdInfo(id: String, modifier: Modifier = Modifier, contentColor: Color = 
         style = MaterialTheme.typography.labelSmall,
         contentColor = contentColor,
     )
+}
+
+@Composable
+@Suppress("MagicNumber")
+fun OverlayIconInfo(
+    icon: ImageVector,
+    overlayIcon: ImageVector,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    text: String? = null,
+    style: TextStyle = MaterialTheme.typography.labelMedium,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        val foregroundPainter = rememberVectorPainter(overlayIcon)
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = contentColor,
+            modifier =
+            Modifier.size(SIZE_ICON.dp).drawWithContent {
+                drawContent()
+                val badgeSize = size.width * .5f
+                with(foregroundPainter) {
+                    draw(size = Size(badgeSize, badgeSize), colorFilter = ColorFilter.tint(contentColor))
+                }
+            },
+        )
+        text?.let { Text(text = it, style = style, color = contentColor) }
+    }
 }

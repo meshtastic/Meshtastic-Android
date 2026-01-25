@@ -17,23 +17,23 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PersonOff
-import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.Group
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PersonOff
+import androidx.compose.material.icons.rounded.PersonSearch
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val MeshtasticIcons.Person: ImageVector
-    get() = Icons.Default.Person
+    get() = Icons.Rounded.Person
 val MeshtasticIcons.PersonOff: ImageVector
-    get() = Icons.Default.PersonOff
+    get() = Icons.Rounded.PersonOff
 val MeshtasticIcons.Groups: ImageVector
-    get() = Icons.Default.Groups
+    get() = Icons.Rounded.Groups
 val MeshtasticIcons.Group: ImageVector
-    get() = Icons.Default.Group
+    get() = Icons.Rounded.Group
 val MeshtasticIcons.AccountCircle: ImageVector
-    get() = Icons.Default.AccountCircle
+    get() = Icons.Rounded.AccountCircle
 val MeshtasticIcons.PersonSearch: ImageVector
-    get() = Icons.Default.PersonSearch
+    get() = Icons.Rounded.PersonSearch

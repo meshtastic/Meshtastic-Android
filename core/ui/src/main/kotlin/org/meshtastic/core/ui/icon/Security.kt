@@ -17,23 +17,23 @@
 package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fingerprint
-import androidx.compose.material.icons.filled.KeyOff
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material.icons.filled.Verified
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.KeyOff
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Verified
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val MeshtasticIcons.Lock: ImageVector
-    get() = Icons.Default.Lock
+    get() = Icons.Rounded.Lock
 val MeshtasticIcons.LockOpen: ImageVector
-    get() = Icons.Default.LockOpen
+    get() = Icons.Rounded.LockOpen
 val MeshtasticIcons.Warning: ImageVector
-    get() = Icons.Default.Warning
+    get() = Icons.Rounded.Warning
 val MeshtasticIcons.KeyOff: ImageVector
-    get() = Icons.Default.KeyOff
+    get() = Icons.Rounded.KeyOff
 val MeshtasticIcons.Verified: ImageVector
-    get() = Icons.Default.Verified
+    get() = Icons.Rounded.Verified
 val MeshtasticIcons.Fingerprint: ImageVector
-    get() = Icons.Default.Fingerprint
+    get() = Icons.Rounded.Fingerprint

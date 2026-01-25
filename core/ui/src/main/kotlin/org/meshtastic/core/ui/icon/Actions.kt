@@ -20,62 +20,62 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddReaction
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.CloudDownload
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.SelectAll
-import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.SystemUpdate
-import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.AddReaction
+import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.CloudDownload
+import androidx.compose.material.icons.rounded.ContentCopy
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.Folder
+import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.SelectAll
+import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.SystemUpdate
+import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val MeshtasticIcons.Add: ImageVector
-    get() = Icons.Default.Add
+    get() = Icons.Rounded.Add
 val MeshtasticIcons.AddReaction: ImageVector
-    get() = Icons.Default.AddReaction
+    get() = Icons.Rounded.AddReaction
 val MeshtasticIcons.Clear: ImageVector
-    get() = Icons.Default.Clear
+    get() = Icons.Rounded.Clear
 val MeshtasticIcons.Close: ImageVector
-    get() = Icons.Default.Close
+    get() = Icons.Rounded.Close
 val MeshtasticIcons.Copy: ImageVector
-    get() = Icons.Default.ContentCopy
+    get() = Icons.Rounded.ContentCopy
 val MeshtasticIcons.Delete: ImageVector
-    get() = Icons.Default.Delete
+    get() = Icons.Rounded.Delete
 val MeshtasticIcons.Edit: ImageVector
-    get() = Icons.Default.Edit
+    get() = Icons.Rounded.Edit
 val MeshtasticIcons.More: ImageVector
-    get() = Icons.Default.MoreVert
+    get() = Icons.Rounded.MoreVert
 val MeshtasticIcons.Refresh: ImageVector
-    get() = Icons.Default.Refresh
+    get() = Icons.Rounded.Refresh
 val MeshtasticIcons.Reply: ImageVector
     get() = Icons.AutoMirrored.Filled.Reply
 val MeshtasticIcons.Save: ImageVector
-    get() = Icons.Default.Save
+    get() = Icons.Rounded.Save
 val MeshtasticIcons.Search: ImageVector
-    get() = Icons.Default.Search
+    get() = Icons.Rounded.Search
 val MeshtasticIcons.Send: ImageVector
     get() = Icons.AutoMirrored.Filled.Send
 val MeshtasticIcons.Share: ImageVector
-    get() = Icons.Default.Share
+    get() = Icons.Rounded.Share
 val MeshtasticIcons.Sort: ImageVector
     get() = Icons.AutoMirrored.Filled.Sort
 val MeshtasticIcons.CloudDownload: ImageVector
-    get() = Icons.Default.CloudDownload
+    get() = Icons.Rounded.CloudDownload
 val MeshtasticIcons.Folder: ImageVector
-    get() = Icons.Default.Folder
+    get() = Icons.Rounded.Folder
 val MeshtasticIcons.SystemUpdate: ImageVector
-    get() = Icons.Default.SystemUpdate
+    get() = Icons.Rounded.SystemUpdate
 val MeshtasticIcons.SelectAll: ImageVector
-    get() = Icons.Default.SelectAll
+    get() = Icons.Rounded.SelectAll
 val MeshtasticIcons.ThumbUp: ImageVector
-    get() = Icons.Default.ThumbUp
+    get() = Icons.Rounded.ThumbUp

@@ -72,8 +72,8 @@ import org.meshtastic.core.strings.supported
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_id
 import org.meshtastic.core.strings.via_mqtt
+import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.ChannelUtilization
-import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.Cloud
 import org.meshtastic.core.ui.icon.History
 import org.meshtastic.core.ui.icon.Hops
@@ -225,7 +225,7 @@ private fun UserAndUptimeRow(node: Node) {
             InfoItem(
                 label = stringResource(Res.string.uptime),
                 value = formatUptime(node.deviceMetrics.uptimeSeconds),
-                icon = MeshtasticIcons.CheckCircle,
+                icon = MeshtasticIcons.ArrowCircleUp,
                 modifier = Modifier.weight(1f),
             )
         } else {

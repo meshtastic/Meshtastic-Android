@@ -20,11 +20,11 @@ import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Card
@@ -64,6 +64,7 @@ import org.meshtastic.core.ui.component.NodeIdInfo
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.PaxcountInfo
 import org.meshtastic.core.ui.component.PowerInfo
+import org.meshtastic.core.ui.component.PressureInfo
 import org.meshtastic.core.ui.component.RoleInfo
 import org.meshtastic.core.ui.component.SatelliteCountInfo
 import org.meshtastic.core.ui.component.SignalInfo
@@ -95,6 +96,8 @@ fun NodeItem(
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
     val originalLongName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+
+    @Suppress("MagicNumber")
     val longName =
         remember(originalLongName) {
             if (originalLongName.length > 20) {
@@ -106,9 +109,7 @@ fun NodeItem(
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance =
-        remember(thisNode, thatNode) {
-            thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
-        }
+        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
 
     var contentColor = MaterialTheme.colorScheme.onSurface
     val cardColors =
@@ -121,8 +122,7 @@ fun NodeItem(
                 val alpha = if (isActive) ACTIVE_ALPHA else INACTIVE_ALPHA
                 val containerColor = Color(it).copy(alpha = alpha)
                 contentColor = contentColorFor(containerColor)
-                CardDefaults.cardColors()
-                    .copy(containerColor = containerColor, contentColor = contentColor)
+                CardDefaults.cardColors().copy(containerColor = containerColor, contentColor = contentColor)
             } ?: (CardDefaults.cardColors())
 
     val style =
@@ -140,18 +140,11 @@ fun NodeItem(
             }
         }
 
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 80.dp),
-        colors = cardColors
-    ) {
+    Card(modifier = modifier.fillMaxWidth(), colors = cardColors) {
         Column(
             modifier =
-                Modifier
-                    .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-                    .fillMaxWidth()
-                    .padding(8.dp),
+            Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick).fillMaxWidth().padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             NodeItemHeader(
                 thatNode = thatNode,
@@ -163,32 +156,16 @@ fun NodeItem(
                 isMuted = isMuted,
                 isUnmessageable = unmessageable,
                 connectionState = connectionState,
-                contentColor = contentColor
+                contentColor = contentColor,
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
-            NodeItemMetrics(
-                thatNode = thatNode,
-                distance = distance,
-                system = system,
-                contentColor = contentColor
-            )
+            NodeItemMetrics(thatNode = thatNode, distance = distance, system = system, contentColor = contentColor)
 
             SignalInfo(node = thatNode, isThisNode = isThisNode, contentColor = contentColor)
 
-            NodeItemEnvironment(
-                thatNode = thatNode,
-                tempInFahrenheit = tempInFahrenheit,
-                contentColor = contentColor
-            )
+            NodeItemEnvironment(thatNode = thatNode, tempInFahrenheit = tempInFahrenheit, contentColor = contentColor)
 
-            Spacer(modifier = Modifier.height(2.dp))
-
-            NodeItemFooter(
-                thatNode = thatNode,
-                contentColor = contentColor
-            )
+            NodeItemFooter(thatNode = thatNode, contentColor = contentColor)
         }
     }
 }
@@ -205,12 +182,9 @@ private fun NodeItemHeader(
     isMuted: Boolean,
     isUnmessageable: Boolean,
     connectionState: ConnectionState,
-    contentColor: Color
+    contentColor: Color,
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         NodeChip(node = thatNode)
 
         NodeKeyStatusIcon(
@@ -243,31 +217,31 @@ private fun NodeItemMetrics(
     thatNode: Node,
     distance: String?,
     system: DisplayConfig.DisplayUnits,
-    contentColor: Color
+    contentColor: Color,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
-            MaterialBatteryInfo(
-                level = thatNode.batteryLevel,
-                voltage = thatNode.voltage,
-                contentColor = contentColor,
-            )
+            MaterialBatteryInfo(level = thatNode.batteryLevel, voltage = thatNode.voltage, contentColor = contentColor)
+        } else {
+            Spacer(modifier = Modifier.weight(1f))
         }
-        if (distance != null) {
-            DistanceInfo(distance = distance, contentColor = contentColor)
-        }
-        thatNode.validPosition?.let { position ->
-            ElevationInfo(
-                altitude = position.altitude,
-                system = system,
-                suffix = stringResource(Res.string.elevation_suffix),
-                contentColor = contentColor,
-            )
-            val satCount = position.satsInView
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (distance != null) {
+                DistanceInfo(distance = distance, contentColor = contentColor)
+            }
+            thatNode.validPosition?.let { position ->
+                ElevationInfo(
+                    altitude = position.altitude,
+                    system = system,
+                    suffix = stringResource(Res.string.elevation_suffix),
+                    contentColor = contentColor,
+                )
+            }
+            val satCount = thatNode.validPosition?.satsInView ?: 0
             if (satCount > 0) {
                 SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
             }
@@ -275,25 +249,20 @@ private fun NodeItemMetrics(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun NodeItemEnvironment(
-    thatNode: Node,
-    tempInFahrenheit: Boolean,
-    contentColor: Color
-) {
+@Suppress("CyclomaticComplexMethod")
+private fun NodeItemEnvironment(thatNode: Node, tempInFahrenheit: Boolean, contentColor: Color) {
     val env = thatNode.environmentMetrics
     val pax = thatNode.paxcounter
     if (thatNode.hasEnvironmentMetrics || pax.ble != 0 || pax.wifi != 0) {
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             if (pax.ble != 0 || pax.wifi != 0) {
-                PaxcountInfo(
-                    pax = "${pax.ble + pax.wifi} (B:${pax.ble}/W:${pax.wifi})",
-                    contentColor = contentColor,
-                )
+                PaxcountInfo(pax = "B:${pax.ble} W:${pax.wifi}", contentColor = contentColor)
             }
             if (env.temperature != 0f) {
                 val temp =
@@ -305,10 +274,10 @@ private fun NodeItemEnvironment(
                 TemperatureInfo(temp = temp, contentColor = contentColor)
             }
             if (env.relativeHumidity != 0f) {
-                HumidityInfo(
-                    humidity = "%.0f%%".format(env.relativeHumidity),
-                    contentColor = contentColor
-                )
+                HumidityInfo(humidity = "%.0f%%".format(env.relativeHumidity), contentColor = contentColor)
+            }
+            if (env.barometricPressure != 0f) {
+                PressureInfo(pressure = "%.1fhPa".format(env.barometricPressure), contentColor = contentColor)
             }
             if (env.soilTemperature != 0f) {
                 val temp =
@@ -320,10 +289,7 @@ private fun NodeItemEnvironment(
                 SoilTemperatureInfo(temp = temp, contentColor = contentColor)
             }
             if (env.soilMoisture != 0 && env.soilTemperature != 0f) {
-                SoilMoistureInfo(
-                    moisture = "${env.soilMoisture}%",
-                    contentColor = contentColor
-                )
+                SoilMoistureInfo(moisture = "${env.soilMoisture}%", contentColor = contentColor)
             }
             if (env.voltage != 0f) {
                 PowerInfo(value = "%.2fV".format(env.voltage), contentColor = contentColor)
@@ -339,10 +305,7 @@ private fun NodeItemEnvironment(
 }
 
 @Composable
-private fun NodeItemFooter(
-    thatNode: Node,
-    contentColor: Color
-) {
+private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -360,13 +323,7 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(
-            thisNode = thisNode,
-            thatNode = thatNode,
-            0,
-            true,
-            connectionState = ConnectionState.Connected
-        )
+        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, connectionState = ConnectionState.Connected)
     }
 }
 

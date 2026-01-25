@@ -22,15 +22,16 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.twotone.VolumeMute
 import androidx.compose.material.icons.automirrored.twotone.VolumeUp
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Dangerous
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.SpeakerNotesOff
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.material.icons.rounded.ArrowCircleUp
+import androidx.compose.material.icons.rounded.CheckCircleOutline
+import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.CloudOff
+import androidx.compose.material.icons.rounded.Dangerous
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.NoCell
+import androidx.compose.material.icons.rounded.SpeakerNotesOff
+import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
@@ -38,11 +39,11 @@ import androidx.compose.material.icons.twotone.CloudSync
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val MeshtasticIcons.Favorite: ImageVector
-    get() = Icons.Default.Star
+    get() = Icons.Rounded.Star
 val MeshtasticIcons.NotFavorite: ImageVector
-    get() = Icons.Default.StarBorder
+    get() = Icons.Rounded.StarBorder
 val MeshtasticIcons.Muted: ImageVector
-    get() = Icons.Default.SpeakerNotesOff
+    get() = Icons.Rounded.SpeakerNotesOff
 val MeshtasticIcons.Unmuted: ImageVector
     get() = Icons.AutoMirrored.Filled.SpeakerNotes
 val MeshtasticIcons.VolumeOff: ImageVector
@@ -50,11 +51,11 @@ val MeshtasticIcons.VolumeOff: ImageVector
 val MeshtasticIcons.VolumeUp: ImageVector
     get() = Icons.AutoMirrored.Filled.VolumeUp
 val MeshtasticIcons.History: ImageVector
-    get() = Icons.Default.History
+    get() = Icons.Rounded.History
 val MeshtasticIcons.Cloud: ImageVector
-    get() = Icons.Default.Cloud
+    get() = Icons.Rounded.Cloud
 val MeshtasticIcons.CloudOff: ImageVector
-    get() = Icons.Default.CloudOff
+    get() = Icons.Rounded.CloudOff
 val MeshtasticIcons.Unmessageable: ImageVector
     get() = Icons.Rounded.NoCell
 
@@ -67,12 +68,15 @@ val MeshtasticIcons.CloudOffTwoTone: ImageVector
 val MeshtasticIcons.CloudTwoTone: ImageVector
     get() = Icons.TwoTone.Cloud
 
-val MeshtasticIcons.CheckCircle: ImageVector
-    get() = Icons.Default.CheckCircle
+val MeshtasticIcons.ArrowCircleUp: ImageVector
+    get() = Icons.Rounded.ArrowCircleUp
 val MeshtasticIcons.Dangerous: ImageVector
-    get() = Icons.Default.Dangerous
+    get() = Icons.Rounded.Dangerous
 
 val MeshtasticIcons.VolumeUpTwoTone: ImageVector
     get() = Icons.AutoMirrored.TwoTone.VolumeUp
 val MeshtasticIcons.VolumeMuteTwoTone: ImageVector
     get() = Icons.AutoMirrored.TwoTone.VolumeMute
+
+val MeshtasticIcons.CheckCircle: ImageVector
+    get() = Icons.Rounded.CheckCircleOutline
