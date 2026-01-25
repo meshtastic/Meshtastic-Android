@@ -247,7 +247,6 @@
     <string name="encryption_pkc">Criptografia de chave pública</string>
     <string name="encryption_error">Incompatibilidade de chave pública</string>
     <string name="encryption_error_text">A chave pública não corresponde com a chave gravada. Pode remover o node e deixá-lo trocar chaves novamente, mas isso pode indicar um problema de segurança mais sério. Contate o utilizador através de outro canal confiável, para determinar se a chave mudou devido a uma restauração de fábrica ou outra ação intencional.</string>
-    <string name="exchange_userinfo">Trocar informação de utilizador</string>
     <string name="meshtastic_new_nodes_notifications">Notificações de novos nodes</string>
     <string name="more_details">Mais detalhes</string>
     <string name="snr">SNR</string>
@@ -255,11 +254,8 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indicador de Força de Sinal Recebido, uma medida usada para determinar o nível de energia que está a ser recebido pela antena. Um valor mais elevado de RSSI geralmente indica uma conexão mais forte e mais estável.</string>
     <string name="iaq_definition">(Qualidade do ar interior) valor relativo da escala IAQ conforme medida por Bosch BME680. Entre 0–500.</string>
-    <string name="device_metrics_log">Histórico de métricas do dispositivo</string>
     <string name="node_map">Mapa de nodes</string>
-    <string name="position_log">Histórico de posição</string>
-    <string name="env_metrics_log">Histórico de telemetria ambiental</string>
-    <string name="sig_metrics_log">Histórico de métricas de sinal</string>
+    <string name="position_log">Posição</string>
     <string name="administration">Administração</string>
     <string name="remote_admin">Administração Remota</string>
     <string name="bad">Mau</string>
@@ -269,7 +265,7 @@
     <string name="share_to">Partilhar para…</string>
     <string name="signal">Sinal</string>
     <string name="signal_quality">Qualidade do Sinal</string>
-    <string name="traceroute_log">Histórico de rotas</string>
+    <string name="traceroute_log">Traçar rota</string>
     <string name="traceroute_direct">Direto</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 salto</item>
@@ -289,7 +285,6 @@
     <string name="favorite">Favoritos</string>
     <string name="favorite_add">Adicione '%1$s' como um nó favorito?</string>
     <string name="favorite_remove">Remover '%1$s' como um nó favorito?</string>
-    <string name="power_metrics_log">Histórico de telemetria de energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
     <string name="channel_3">Canal 3</string>

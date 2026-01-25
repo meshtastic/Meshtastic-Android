@@ -215,7 +215,6 @@
     <string name="encryption_pkc">Publieke sleutel encryptie</string>
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
     <string name="encryption_error_text">De publieke sleutel komt niet overeen met de opgenomen sleutel. Je kan de node verwijderen en opnieuw een sleutel laten uitwisselen, maar dit kan duiden op een ernstiger beveiligingsprobleem. Neem contact op met de gebruiker via een ander vertrouwd kanaal, om te bepalen of de sleutel gewijzigd is door een reset naar de fabrieksinstellingen of andere opzettelijke actie.</string>
-    <string name="exchange_userinfo">Gebruikersinformatie uitwisselen</string>
     <string name="meshtastic_new_nodes_notifications">Nieuwe node meldingen</string>
     <string name="more_details">Meer details</string>
     <string name="snr">SNR</string>
@@ -223,11 +222,8 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Ontvangen Signal Sterkte Indicator, een meting gebruikt om het stroomniveau te bepalen dat de antenne ontvangt. Een hogere RSSI-waarde geeft een sterkere en stabielere verbinding aan.</string>
     <string name="iaq_definition">(Binnenluchtkwaliteit) relatieve schaal IAQ waarde gemeten door Bosch BME680. Waarde tussen 0 en 500.</string>
-    <string name="device_metrics_log">Apparaat Statistieken Log</string>
     <string name="node_map">Node Kaart</string>
-    <string name="position_log">Positie Logboek</string>
-    <string name="env_metrics_log">Omgevingsstatistieken logboek</string>
-    <string name="sig_metrics_log">Signaal Statistieken Logboek</string>
+    <string name="position_log">Positie</string>
     <string name="administration">Beheer</string>
     <string name="remote_admin">Extern beheer</string>
     <string name="bad">Slecht</string>
@@ -237,7 +233,7 @@
     <string name="share_to">Delen met…</string>
     <string name="signal">Signaal</string>
     <string name="signal_quality">Signaalkwaliteit</string>
-    <string name="traceroute_log">Traceroute log</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Direct</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hop</item>
@@ -257,7 +253,6 @@
     <string name="favorite">Favoriet</string>
     <string name="favorite_add">'%1$s' aan favorieten toevoegen?</string>
     <string name="favorite_remove">'%1$s' uit favorieten verwijderen?</string>
-    <string name="power_metrics_log">Energiegegevenslogboek</string>
     <string name="channel_1">Kanaal 1</string>
     <string name="channel_2">Kanaal 2</string>
     <string name="channel_3">Kanaal 3</string>

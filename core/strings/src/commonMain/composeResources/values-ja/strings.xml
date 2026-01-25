@@ -213,7 +213,6 @@
     <string name="encryption_pkc">公開キー暗号化</string>
     <string name="encryption_error">公開キーが一致しません</string>
     <string name="encryption_error_text">公開キーが記録されているキーと一致しません。ノードを削除して再度キーの交換を行うことも可能ですが、これはより深刻なセキュリティ問題を示している可能性があります。出荷時リセットやその他の意図的な操作によるキーの変更かどうかを確認するため、別の信頼できるチャンネルでユーザーに連絡を取ってください。</string>
-    <string name="exchange_userinfo">ユーザー情報を交換</string>
     <string name="meshtastic_new_nodes_notifications">新しいノードの通知</string>
     <string name="more_details">詳細を見る</string>
     <string name="snr">SN比</string>
@@ -221,11 +220,8 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">受信信号強度インジケーター（RSSI）は、アンテナで受信している電力レベルを測定するための指標です。一般的にRSSI値が高いほど、より強力で安定した接続を示します。</string>
     <string name="iaq_definition">(屋内空気品質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
-    <string name="device_metrics_log">デバイス・メトリックログ</string>
     <string name="node_map">ノードマップ</string>
-    <string name="position_log">位置ログ</string>
-    <string name="env_metrics_log">環境メトリックログ</string>
-    <string name="sig_metrics_log">信号メトリックログ</string>
+    <string name="position_log">位置</string>
     <string name="administration">管理</string>
     <string name="remote_admin">リモート管理</string>
     <string name="bad">不良</string>
@@ -235,7 +231,7 @@
     <string name="share_to">… に共有</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号品質</string>
-    <string name="traceroute_log">トレースルート・ログ</string>
+    <string name="traceroute_log">ルート追跡</string>
     <string name="traceroute_direct">直接</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d ホップ</item>
@@ -254,7 +250,6 @@
     <string name="favorite">お気に入り</string>
     <string name="favorite_add">%1$s' をお気に入りのノードとして追加しますか？</string>
     <string name="favorite_remove">お気に入りのノードとして「%1$s」を削除しますか？</string>
-    <string name="power_metrics_log">電力指標ログ</string>
     <string name="channel_1">チャンネル 1</string>
     <string name="channel_2">チャンネル 2</string>
     <string name="channel_3">チャンネル 3</string>
@@ -507,11 +502,12 @@
     <string name="import_known_shared_contact_text">警告: この連絡先は登録済です。インポートすると以前の連絡先情報が上書きされます。</string>
     <string name="public_key_changed">公開鍵が変更されました</string>
     <string name="import_label">インポート</string>
+    <string name="request_host_metrics">ホストのメトリック</string>
     <string name="actions">アクション</string>
     <string name="firmware">ファームウェア</string>
     <string name="use_12h_format">12時間の時計形式を使用</string>
     <string name="display_time_in_12h_format">有効にすると、デバイスは時刻を12時間形式で表示します。</string>
-    <string name="host_metrics_log">ホストのメトリックログ</string>
+    <string name="host_metrics_log">ホストのメトリック</string>
     <string name="host">ホスト</string>
     <string name="free_memory">空きメモリ</string>
     <string name="disk_free">ディスクフリー</string>

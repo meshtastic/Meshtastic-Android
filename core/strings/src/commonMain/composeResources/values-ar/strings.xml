@@ -122,11 +122,9 @@
     <string name="encryption_psk">مفتاح مشترك</string>
     <string name="encryption_pkc">تشفير المفتاح العام</string>
     <string name="encryption_error">المفتاح العام غير متطابق</string>
-    <string name="exchange_userinfo">تبادل معلومات المستخدم</string>
     <string name="meshtastic_new_nodes_notifications">إشعارات العقدة الجديدة</string>
     <string name="more_details">المزيد من المعلومات</string>
     <string name="rssi">مؤشر القوة النسبية</string>
-    <string name="position_log">سجل الموقع</string>
     <string name="administration">الإدارة</string>
     <string name="bad">سيئ</string>
     <string name="fair">مناسب</string>
@@ -135,7 +133,6 @@
     <string name="share_to">سجل تتبع المس…</string>
     <string name="signal">الإشارة</string>
     <string name="signal_quality">جودة الإشارة</string>
-    <string name="traceroute_log">سجل تتبع المسار</string>
     <string name="traceroute_direct">مباشره</string>
     <string name="twenty_four_hours">24 ساعة</string>
     <string name="forty_eight_hours">48 ساعة</string>

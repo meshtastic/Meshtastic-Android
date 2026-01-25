@@ -208,11 +208,7 @@
     <string name="snr_definition">Ráta Sigineal go Torann, tomhas a úsáidtear i gcomhfhreagras chun an leibhéal de shígnéil inmhianaithe agus torann cúlra a mheas. I Meshtastic agus i gcórais gan sreang eile, ciallaíonn SNR níos airde go bhfuil sígneál níos soiléire ann agus ábalta méadú ar chreideamh agus cáilíocht an tarchur sonraí.</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
-    <string name="device_metrics_log">Lógáil Táscairí Feiste</string>
     <string name="node_map">Léarscáil an Node</string>
-    <string name="position_log">Lógáil Seirbhís</string>
-    <string name="env_metrics_log">Lógáil Táscairí Comhshaoil</string>
-    <string name="sig_metrics_log">Lógáil Táscairí Sigineal</string>
     <string name="administration">Rialachas</string>
     <string name="remote_admin">Rialú iargúlta</string>
     <string name="bad">Go dona</string>
@@ -221,7 +217,7 @@
     <string name="none_quality">Ní dhéanfaidh sé</string>
     <string name="signal">Sígneal</string>
     <string name="signal_quality">Cáilíocht na Sígneal</string>
-    <string name="traceroute_log">Lógáil Traceroute</string>
+    <string name="traceroute_log">Céim rianadóireachta</string>
     <string name="traceroute_direct">Direach</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 céim</item>

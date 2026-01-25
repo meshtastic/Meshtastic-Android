@@ -344,7 +344,6 @@
     <string name="encryption_pkc_text">Los mensajes directos están utilizando la nueva infraestructura de clave pública para el cifrado.</string>
     <string name="encryption_error">Clave pública no coincide</string>
     <string name="encryption_error_text">La clave pública no coincide con la clave guardada. Puedes eliminar el nodo y dejar que intercambie claves otra vez, esto podría indicar un problema de seguridad más serio. Contacta al usuario a través de otro canal confiable para saber si el cambio la de clave es por un restablecimiento de fábrica u otra acción intencional.</string>
-    <string name="exchange_userinfo">Intercambiar información de usuario</string>
     <string name="meshtastic_new_nodes_notifications">Notificaciones de nuevo nodo</string>
     <string name="more_details">Más detalles</string>
     <string name="snr">SNR</string>
@@ -353,12 +352,11 @@
     <string name="rssi_definition">Indicador de Fuerza de Señal Recibida (RSSI en inglés), una medida utilizada para determinar el nivel de potencia que está siendo recibido por la antena. Un valor de RSSI más alto generalmente indica una conexión más fuerte y estable.</string>
     <string name="iaq_definition">(Calidad de Aire interior) escala relativa del valor IAQ como mediciones del sensor Bosch BME680.
 Rango de Valores 0 - 500.</string>
-    <string name="device_metrics_log">Registro de métricas del dispositivo</string>
+    <string name="device_metrics_log">Métricas de Dispositivo</string>
     <string name="node_map">Mapa de Nodos</string>
-    <string name="position_log">Registro de Posiciones</string>
+    <string name="position_log">Posición</string>
     <string name="last_position_update">Última actualización</string>
-    <string name="env_metrics_log">Registro de métricas ambientales</string>
-    <string name="sig_metrics_log">Registro de Señal Métrica</string>
+    <string name="env_metrics_log">Métricas de Entorno</string>
     <string name="administration">Administración</string>
     <string name="remote_admin">Administración remota</string>
     <string name="bad">Mal</string>
@@ -368,7 +366,7 @@ Rango de Valores 0 - 500.</string>
     <string name="share_to">Compartir con…</string>
     <string name="signal">Señal</string>
     <string name="signal_quality">Calidad de señal</string>
-    <string name="traceroute_log">Registro de Ruta</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Directo</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 salto</item>
@@ -394,7 +392,7 @@ Rango de Valores 0 - 500.</string>
     <string name="remove_favorite">Eliminar de favoritos</string>
     <string name="favorite_add">¿Añadir '%1$s' como un nodo favorito?</string>
     <string name="favorite_remove">¿Eliminar '%1$s' como un nodo favorito?</string>
-    <string name="power_metrics_log">Registro de métricas de energía</string>
+    <string name="power_metrics_log">Métricas de Energía</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
     <string name="channel_3">Canal 3</string>
@@ -709,12 +707,13 @@ Rango de Valores 0 - 500.</string>
     <string name="request_air_quality_metrics">Métricas de Calidad del Aire</string>
     <string name="request_power_metrics">Métricas de Energía</string>
     <string name="request_local_stats">Estadísticas Locales</string>
+    <string name="request_host_metrics">Métricas del anfitrión</string>
     <string name="request_metadata">Metadatos</string>
     <string name="actions">Acciones</string>
     <string name="firmware">Software</string>
     <string name="use_12h_format">Utilizar el formato de 12h para el reloj</string>
     <string name="display_time_in_12h_format">Si activado, el dispositivo mostrará la hora en la pantalla en el formato de 12h</string>
-    <string name="host_metrics_log">Historial de medidas del anfitrión</string>
+    <string name="host_metrics_log">Métricas del anfitrión</string>
     <string name="host">Anfitrión</string>
     <string name="free_memory">Memoria disponible</string>
     <string name="disk_free">Disco libre</string>

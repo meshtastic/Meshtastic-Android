@@ -384,7 +384,6 @@
     <string name="encryption_pkc_text">Direktnachrichten verwenden zur den öffentlichen Knotenschlüssel zur Verschlüsselung.</string>
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und ihn erneut Schlüssel austauschen lassen. Dies kann jedoch auf ein schwerwiegenderes Sicherheitsproblem hinweisen. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um festzustellen, ob die Schlüsseländerung durch Zurücksetzung auf die Werkseinstellungen oder eine andere absichtliche Aktion zurückzuführen ist.</string>
-    <string name="exchange_userinfo">Benutzer Informationen teilen</string>
     <string name="meshtastic_new_nodes_notifications">Benachrichtigung neue Knoten</string>
     <string name="more_details">Mehr Details</string>
     <string name="snr">SNR</string>
@@ -392,12 +391,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikator für die empfangene Signalstärke, eine Messung zur Bestimmung der von der Antenne empfangenen Leistungsstärke. Ein höherer RSSI-Wert weist im Allgemeinen auf eine stärkere und stabilere Verbindung hin.</string>
     <string name="iaq_definition">(Innenluftqualität) relativer IAQ-Wert gemessen von Bosch BME680.</string>
-    <string name="device_metrics_log">Funkauslastung</string>
+    <string name="device_metrics_log">Gerätedaten</string>
     <string name="node_map">Standortkarte Knoten</string>
-    <string name="position_log">Standortprotokoll</string>
+    <string name="position_log">Standort</string>
     <string name="last_position_update">Letzte Standortaktualisierung</string>
-    <string name="env_metrics_log">Sensorprotokoll</string>
-    <string name="sig_metrics_log">Signalprotokoll</string>
+    <string name="env_metrics_log">Umweltdaten</string>
     <string name="administration">Einstellung</string>
     <string name="remote_admin">Ferneinstellung</string>
     <string name="bad">Schlecht</string>
@@ -407,7 +405,7 @@
     <string name="share_to">Teile mit…</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signalqualität</string>
-    <string name="traceroute_log">Traceroute-Protokoll</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Direkt</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 Sprung</item>
@@ -439,7 +437,7 @@
     <string name="remove_favorite">Von Favoriten entfernen</string>
     <string name="favorite_add">'%1$s' als Favorit hinzufügen?</string>
     <string name="favorite_remove">'%1$s' als Favorit entfernen?</string>
-    <string name="power_metrics_log">Energiedatenprotokoll</string>
+    <string name="power_metrics_log">Energiedaten</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
     <string name="channel_3">Kanal 3</string>
@@ -767,12 +765,13 @@
     <string name="request_air_quality_metrics">Luftqualität</string>
     <string name="request_power_metrics">Energiedaten</string>
     <string name="request_local_stats">Lokale Statistik</string>
+    <string name="request_host_metrics">Host Kennzahlen</string>
     <string name="request_metadata">Metadaten</string>
     <string name="actions">Aktionen</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">12h Uhrformat verwenden</string>
     <string name="display_time_in_12h_format">Wenn aktiviert, zeigt das Gerät die Uhrzeit im 12-Stunden-Format auf dem Bildschirm an.</string>
-    <string name="host_metrics_log">Protokoll Host Kennzahlen</string>
+    <string name="host_metrics_log">Host Kennzahlen</string>
     <string name="host">Host</string>
     <string name="free_memory">Freier Speicher</string>
     <string name="disk_free">Freier Speicher</string>
@@ -862,9 +861,7 @@
     <string name="clear_selection">Auswahl löschen</string>
     <string name="message_input_label">Nachricht</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
-    <string name="pax_metrics_log">Protokoll Besucherzähler</string>
     <string name="pax">Besucher</string>
-    <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">BLE Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>

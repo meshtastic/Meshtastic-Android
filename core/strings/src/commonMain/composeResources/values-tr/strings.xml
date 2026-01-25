@@ -226,7 +226,6 @@
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="encryption_error_text">Genel anahtar, kayıtlı anahtarla eşleşmiyor. Düğümü kaldırabilir ve tekrar anahtar değişimi yapmasına izin verebilirsiniz, ancak bu daha ciddi bir güvenlik sorununa işaret edebilir. Anahtar değişikliğinin fabrika ayarlarına sıfırlamadan veya başka bir kasıtlı eylemden kaynaklanıp kaynaklanmadığını belirlemek için başka bir güvenilir kanal aracılığıyla kullanıcıyla iletişime geçiniz.</string>
-    <string name="exchange_userinfo">Kullanıcı bilgisi takas et</string>
     <string name="meshtastic_new_nodes_notifications">Yeni düğüm bildirimleri</string>
     <string name="more_details">Daha fazla detay</string>
     <string name="snr">SNR</string>
@@ -234,11 +233,8 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Alınan Sinyal Gücü Göstergesi, anten tarafından alınan güç seviyesini belirlemek için kullanılan bir ölçüdür. Daha yüksek bir RSSI değeri genellikle daha güçlü ve daha istikrarlı bir bağlantıya işaret eder.</string>
     <string name="iaq_definition">(İç Hava Kalitesi) Bosch BME680 tarafından ölçülen bağıl ölçekli IAQ değeri. Değer Aralığı 0–500.</string>
-    <string name="device_metrics_log">Cihaz Ölçüm Kayıtları</string>
     <string name="node_map">Düğüm Haritası</string>
-    <string name="position_log">Konum Kayıtları</string>
-    <string name="env_metrics_log">Çevre Ölçüm Kayıtları</string>
-    <string name="sig_metrics_log">Sinyal Seviyesi Kayıtları</string>
+    <string name="position_log">Konum</string>
     <string name="administration">Yönetim</string>
     <string name="remote_admin">Uzaktan Yönetim</string>
     <string name="bad">Kötü</string>
@@ -248,7 +244,7 @@
     <string name="share_to">Paylaş: …</string>
     <string name="signal">Sinyal</string>
     <string name="signal_quality">Sinyal Kalitesi</string>
-    <string name="traceroute_log">Yol İzleme Kayıtları</string>
+    <string name="traceroute_log">Yol izle</string>
     <string name="traceroute_direct">Doğrudan</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 atlama</item>
@@ -268,7 +264,6 @@
     <string name="favorite">Favori</string>
     <string name="favorite_add">'%1$s' düğümünü favorilere eklemek istiyor musunuz?</string>
     <string name="favorite_remove">'%1$s' düğümünü favorilerden silmek istiyor musunuz?</string>
-    <string name="power_metrics_log">Güç Ölçüm Kayıtları</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
     <string name="channel_3">Kanal 3</string>
@@ -528,11 +523,12 @@
     <string name="import_known_shared_contact_text">Uyarı: Bu kişi biliniyor, içe aktarma işlemi önceki kişi bilgilerini üzerine yazacaktır.</string>
     <string name="public_key_changed">Açık Anahtar Değiştirildi</string>
     <string name="import_label">İçeri aktar</string>
+    <string name="request_host_metrics">Sunucu Ölçümleri</string>
     <string name="actions">işlemler</string>
     <string name="firmware">Yazılım</string>
     <string name="use_12h_format">12h saat formatını kullan</string>
     <string name="display_time_in_12h_format">Aktif edildiğinde, cihaz ekranda saati 12 saat formatında gösterecek</string>
-    <string name="host_metrics_log">Sunucu Ölçüm Kayıtları</string>
+    <string name="host_metrics_log">Sunucu Ölçümleri</string>
     <string name="host">Sunucu</string>
     <string name="free_memory">Boş Hafıza</string>
     <string name="disk_free">Boş Disk</string>

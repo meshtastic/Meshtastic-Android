@@ -156,6 +156,7 @@
     <string name="mute_8_hours">8 horas</string>
     <string name="mute_1_week">1 semana</string>
     <string name="mute_always">Sempre</string>
+    <string name="traceroute_log">Traza-ruta</string>
     <string name="region_frequency_plan">Rexión</string>
     <string name="distance">Distancia</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->

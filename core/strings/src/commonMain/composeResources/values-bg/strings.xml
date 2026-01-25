@@ -327,19 +327,16 @@
     <string name="encryption_pkc_text">Директните съобщения използват новата инфраструктура с публичен ключ за криптиране.</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да означава по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
-    <string name="exchange_userinfo">Обмяна на потребителска информация</string>
     <string name="meshtastic_new_nodes_notifications">Известия за нови възли</string>
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор за силата на получения сигнал - измерване, използвано за определяне на нивото на получения сигнал, приемано от антената. По-високата стойност на RSSI обикновено показва по-силна и по-стабилна връзка.</string>
     <string name="iaq_definition">(Качество на въздуха в помещенията) относителна скала за IAQ, стойностите са измерени с Bosch BME680. Диапазон на стойностите 0–500.</string>
-    <string name="device_metrics_log">Журнал на показателите на устройството</string>
+    <string name="device_metrics_log">Метрики на устройството</string>
     <string name="node_map">Карта на възела</string>
-    <string name="position_log">Журнал на позициите</string>
+    <string name="position_log">Позиция</string>
     <string name="last_position_update">Последна актуализация на позицията</string>
-    <string name="env_metrics_log">Журнал на показателите на околната среда</string>
-    <string name="sig_metrics_log">Журнал на показателите на сигнала</string>
     <string name="administration">Администриране</string>
     <string name="remote_admin">Отдалечено администриране</string>
     <string name="bad">Лош</string>
@@ -349,6 +346,7 @@
     <string name="share_to">Сподели с…</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
+    <string name="traceroute_log">Трасиране на маршрут</string>
     <string name="traceroute_direct">Директно</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 отскок</item>
@@ -375,7 +373,6 @@
     <string name="remove_favorite">Премахване от любими</string>
     <string name="favorite_add">Добавяне на '%1$s' като любим възел?</string>
     <string name="favorite_remove">Премахване на '%1$s' като любим възел?</string>
-    <string name="power_metrics_log">Журнал на показателите на захранването</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>

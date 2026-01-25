@@ -301,7 +301,6 @@
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíči. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
-    <string name="exchange_userinfo">Vyžádat informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="more_details">Více detailů</string>
     <string name="snr">SNR</string>
@@ -309,12 +308,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikátor síly přijímaného signálu, měření, které se používá k určení hladiny výkonu přijímané anténou. Vyšší hodnota RSSI obvykle znamená silnější a stabilnější spojení.</string>
     <string name="iaq_definition">(Vnitřní kvalita ovzduší) relativní hodnota IAQ měřená Bosch BME680. Hodnota rozsahu 0–500.</string>
-    <string name="device_metrics_log">Protokol metrik zařízení</string>
+    <string name="device_metrics_log">Metriky zařízení</string>
     <string name="node_map">Mapa uzlu</string>
-    <string name="position_log">Protokol pozic</string>
+    <string name="position_log">Pozice</string>
     <string name="last_position_update">Poslední aktualizace pozice</string>
-    <string name="env_metrics_log">Protokol metrik prostředí</string>
-    <string name="sig_metrics_log">Protokol signálů</string>
+    <string name="env_metrics_log">Metriky prostředí</string>
     <string name="administration">Administrace</string>
     <string name="remote_admin">Vzdálená administrace</string>
     <string name="bad">Špatný</string>
@@ -324,7 +322,7 @@
     <string name="share_to">Sdílet do…</string>
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
-    <string name="traceroute_log">Traceroute protokol</string>
+    <string name="traceroute_log">Traceroute</string>
     <string name="traceroute_direct">Přímý</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
@@ -356,7 +354,7 @@
     <string name="remove_favorite">Odstranit z oblíbených</string>
     <string name="favorite_add">Přidat '%1$s' jako oblíbený uzel?</string>
     <string name="favorite_remove">Odstranit '%1$s' z oblíbených uzlů?</string>
-    <string name="power_metrics_log">Protokol metrik napájení</string>
+    <string name="power_metrics_log">Metriky napájení</string>
     <string name="channel_1">Kanál 1</string>
     <string name="channel_2">Kanál 2</string>
     <string name="channel_3">Kanál 3</string>

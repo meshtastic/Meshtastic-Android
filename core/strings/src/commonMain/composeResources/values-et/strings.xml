@@ -384,7 +384,6 @@
     <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme infrastruktuuri.</string>
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
     <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete taastamine või muu tahtlik tegevus.</string>
-    <string name="exchange_userinfo">Kasutajate teabe vahetamine</string>
     <string name="meshtastic_new_nodes_notifications">Uue sõlme teade</string>
     <string name="more_details">Rohkem üksikasju</string>
     <string name="snr">SNR</string>
@@ -392,12 +391,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastuvõetud signaali tugevuse indikaator (RSSI), mõõt mida kasutatakse antenni poolt vastuvõetava võimsustaseme määramiseks. Kõrgem RSSI väärtus näitab üldiselt tugevamat ja stabiilsemat ühendust.</string>
     <string name="iaq_definition">Siseõhu kvaliteet (IAQ) on suhtelise skaala väärtus, näiteks mõõtes Bosch BME680 abil. Väärtuste vahemik 0–500.</string>
-    <string name="device_metrics_log">Seadme andurite logi</string>
+    <string name="device_metrics_log">Seadme mõõdikud</string>
     <string name="node_map">Sõlmede kaart</string>
-    <string name="position_log">Asukoha logi</string>
+    <string name="position_log">Asukoht</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
-    <string name="env_metrics_log">Keskkonna andurite logi</string>
-    <string name="sig_metrics_log">Signaalitugevuse andurite logi</string>
+    <string name="env_metrics_log">Keskkonnamõõdikud</string>
     <string name="administration">Haldus</string>
     <string name="remote_admin">Kaughaldus</string>
     <string name="bad">Halb</string>
@@ -407,7 +405,7 @@
     <string name="share_to">Jaga…</string>
     <string name="signal">Levi</string>
     <string name="signal_quality">Levi Kvaliteet</string>
-    <string name="traceroute_log">Marsruutimise Logi</string>
+    <string name="traceroute_log">Marsruudi</string>
     <string name="traceroute_direct">Otsene</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hüpe</item>
@@ -439,7 +437,7 @@
     <string name="remove_favorite">Eemalda lemmikutest</string>
     <string name="favorite_add">Lisa '%1$s' lemmik sõlmede hulka?</string>
     <string name="favorite_remove">Eemalda '%1$s' lemmik sõlmede hulgast?</string>
-    <string name="power_metrics_log">Toitepinge andurite logi</string>
+    <string name="power_metrics_log">Võimsusnäitajad</string>
     <string name="channel_1">Kanal 1</string>
     <string name="channel_2">Kanal 2</string>
     <string name="channel_3">Kanal 3</string>
@@ -767,12 +765,13 @@
     <string name="request_air_quality_metrics">Õhukvaliteedi mõõdikud</string>
     <string name="request_power_metrics">Võimsusnäitajad</string>
     <string name="request_local_stats">Kohalik statistika</string>
+    <string name="request_host_metrics">Hosti mõõdik</string>
     <string name="request_metadata">Metaandmed</string>
     <string name="actions">Toimingud</string>
     <string name="firmware">Püsivara</string>
     <string name="use_12h_format">Kasuta 12 tunni formaati</string>
     <string name="display_time_in_12h_format">Kui see on lubatud, kuvab seade ekraanil aega 12 tunni formaadis.</string>
-    <string name="host_metrics_log">Hosti andurite logi</string>
+    <string name="host_metrics_log">Hosti mõõdik</string>
     <string name="host">Host</string>
     <string name="free_memory">Vaba mälumaht</string>
     <string name="disk_free">Vaba kettamaht</string>
@@ -862,9 +861,7 @@
     <string name="clear_selection">Ära vali midagi</string>
     <string name="message_input_label">Sõnum</string>
     <string name="type_a_message">Sisesta sõnum</string>
-    <string name="pax_metrics_log">PAX andurite logi</string>
     <string name="pax">PAX</string>
-    <string name="no_pax_metrics_logs">PAX andurite logi ei ole saadaval.</string>
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
     <string name="bluetooth_paired_devices">Seotud seadmed</string>
