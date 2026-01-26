@@ -36,10 +36,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.text.util.LinkifyCompat
-import org.meshtastic.core.ui.theme.HyperlinkBlue
 
 private val DefaultTextLinkStyles =
-    TextLinkStyles(style = SpanStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline))
+    TextLinkStyles(style = SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline))
 
 @Composable
 fun AutoLinkText(
