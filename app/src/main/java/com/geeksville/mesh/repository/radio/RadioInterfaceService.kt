@@ -109,8 +109,7 @@ constructor(
      */
     private var isStarted = false
 
-    @Volatile
-    private var listenersInitialized = false
+    @Volatile private var listenersInitialized = false
 
     private fun initStateListeners() {
         if (listenersInitialized) return

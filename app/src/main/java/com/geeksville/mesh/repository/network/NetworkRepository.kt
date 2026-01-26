@@ -43,7 +43,9 @@ constructor(
 ) {
 
     val networkAvailable: Flow<Boolean> by lazy {
-        connectivityManager.get().networkAvailable()
+        connectivityManager
+            .get()
+            .networkAvailable()
             .flowOn(dispatchers.io)
             .conflate()
             .shareIn(
@@ -55,7 +57,9 @@ constructor(
     }
 
     val resolvedList: Flow<List<NsdServiceInfo>> by lazy {
-        nsdManagerLazy.get().serviceList(SERVICE_TYPE)
+        nsdManagerLazy
+            .get()
+            .serviceList(SERVICE_TYPE)
             .flowOn(dispatchers.io)
             .conflate()
             .shareIn(
