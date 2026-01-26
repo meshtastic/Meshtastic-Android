@@ -81,7 +81,7 @@ import org.meshtastic.proto.copy
 import org.meshtastic.proto.waypoint
 import java.util.Calendar
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditWaypointDialog(
@@ -100,29 +100,52 @@ fun EditWaypointDialog(
 
     // Get current context for dialogs
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
-    val currentTime = System.currentTimeMillis()
-    calendar.timeInMillis = currentTime
-    @Suppress("MagicNumber")
-    calendar.add(Calendar.HOUR_OF_DAY, 8)
-
-    // Current time for initializing pickers
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val day = calendar.get(Calendar.DAY_OF_MONTH)
-    val hour = calendar.get(Calendar.HOUR_OF_DAY)
-    val minute = calendar.get(Calendar.MINUTE)
+    val calendar = remember {
+        Calendar.getInstance().apply {
+            if (waypoint.expire != 0 && waypoint.expire != Int.MAX_VALUE) {
+                timeInMillis = waypoint.expire * 1000L
+            } else {
+                timeInMillis = System.currentTimeMillis()
+                @Suppress("MagicNumber")
+                add(Calendar.HOUR_OF_DAY, 8)
+            }
+        }
+    }
 
     // Determine locale-specific date format
-    val dateFormat = android.text.format.DateFormat.getDateFormat(context)
+    val dateFormat = remember { android.text.format.DateFormat.getDateFormat(context) }
     // Check if 24-hour format is preferred
-    val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-    val timeFormat = android.text.format.DateFormat.getTimeFormat(context)
+    val is24Hour = remember { android.text.format.DateFormat.is24HourFormat(context) }
+    val timeFormat = remember { android.text.format.DateFormat.getTimeFormat(context) }
 
     // State to hold selected date and time
-    var selectedDate by remember { mutableStateOf(dateFormat.format(calendar.time)) }
-    var selectedTime by remember { mutableStateOf(timeFormat.format(calendar.time)) }
-    var epochTime by remember { mutableStateOf<Long?>(null) }
+    var selectedDate by remember {
+        mutableStateOf(
+            if (waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE) {
+                dateFormat.format(calendar.time)
+            } else {
+                ""
+            },
+        )
+    }
+    var selectedTime by remember {
+        mutableStateOf(
+            if (waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE) {
+                timeFormat.format(calendar.time)
+            } else {
+                ""
+            },
+        )
+    }
+    var epochTime by remember {
+        mutableStateOf<Long?>(
+            if (waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE) {
+                waypointInput.expire * 1000L
+            } else {
+                null
+            },
+        )
+    }
 
     if (!showEmojiPickerView) {
         AlertDialog(
@@ -193,9 +216,9 @@ fun EditWaypointDialog(
                                 epochTime = calendar.timeInMillis
                                 selectedDate = dateFormat.format(calendar.time)
                             },
-                            year,
-                            month,
-                            day,
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            calendar.get(Calendar.DAY_OF_MONTH),
                         )
 
                     val timePickerDialog =
@@ -206,11 +229,10 @@ fun EditWaypointDialog(
                                 calendar.set(Calendar.MINUTE, selectedMinute)
                                 epochTime = calendar.timeInMillis
                                 selectedTime = timeFormat.format(calendar.time)
-                                @Suppress("MagicNumber")
-                                waypointInput = waypointInput.copy { expire = (epochTime!! / 1000).toInt() }
+                                waypointInput = waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
                             },
-                            hour,
-                            minute,
+                            calendar.get(Calendar.HOUR_OF_DAY),
+                            calendar.get(Calendar.MINUTE),
                             is24Hour,
                         )
 
@@ -227,23 +249,18 @@ fun EditWaypointDialog(
                             modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
                             checked = waypointInput.expire != Int.MAX_VALUE && waypointInput.expire != 0,
                             onCheckedChange = { isChecked ->
-                                waypointInput =
-                                    waypointInput.copy {
-                                        expire =
-                                            if (isChecked) {
-                                                @Suppress("MagicNumber")
-                                                calendar.timeInMillis / 1000
-                                            } else {
-                                                Int.MAX_VALUE
-                                            }
-                                                .toInt()
-                                    }
                                 if (isChecked) {
+                                    // Default to now if not already set
+                                    if (epochTime == null) {
+                                        epochTime = calendar.timeInMillis
+                                    }
                                     selectedDate = dateFormat.format(calendar.time)
                                     selectedTime = timeFormat.format(calendar.time)
+                                    waypointInput = waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
                                 } else {
                                     selectedDate = ""
                                     selectedTime = ""
+                                    waypointInput = waypointInput.copy { expire = Int.MAX_VALUE }
                                 }
                             },
                         )
