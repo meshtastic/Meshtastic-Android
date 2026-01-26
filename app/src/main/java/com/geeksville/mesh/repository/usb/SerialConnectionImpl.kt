@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.usb
 
 import android.hardware.usb.UsbManager
@@ -23,6 +22,7 @@ import com.geeksville.mesh.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.util.SerialInputOutputManager
+import java.nio.BufferOverflowException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -38,10 +38,17 @@ internal class SerialConnectionImpl(
     private val closed = AtomicBoolean(false)
     private val ioRef = AtomicReference<SerialInputOutputManager>()
 
+    @Suppress("TooGenericExceptionCaught")
     override fun sendBytes(bytes: ByteArray) {
         ioRef.get()?.let {
             Logger.d { "writing ${bytes.size} byte(s }" }
-            it.writeAsync(bytes)
+            try {
+                it.writeAsync(bytes)
+            } catch (e: BufferOverflowException) {
+                Logger.e(e) { "Buffer overflow while writing to serial port" }
+            } catch (e: Exception) {
+                Logger.e(e) { "Failed to write to serial port" }
+            }
         }
     }
 
