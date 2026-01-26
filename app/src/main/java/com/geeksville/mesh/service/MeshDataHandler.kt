@@ -21,6 +21,7 @@ import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.InterfaceId
+import com.google.protobuf.InvalidProtocolBufferException
 import com.meshtastic.core.strings.getString
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -198,7 +199,12 @@ constructor(
 
     @Suppress("LongMethod")
     private fun handleStoreForwardPlusPlus(packet: MeshPacket) {
-        val sfpp = MeshProtos.StoreForwardPlusPlus.parseFrom(packet.decoded.payload)
+        val sfpp = try {
+            MeshProtos.StoreForwardPlusPlus.parseFrom(packet.decoded.payload)
+        } catch (e: InvalidProtocolBufferException) {
+            Logger.e(e) { "Failed to parse StoreForwardPlusPlus packet" }
+            return
+        }
         Logger.d { "Received StoreForwardPlusPlus packet: $sfpp" }
 
         when (sfpp.sfppMessageType) {
