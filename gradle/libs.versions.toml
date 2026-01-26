@@ -22,7 +22,7 @@ kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
 kover = "0.9.4"
-mockk = "1.14.7"
+mockk = "1.14.9"
 
 # Compose Multiplatform
 compose-multiplatform = "1.10.0"
