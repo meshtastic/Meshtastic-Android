@@ -56,6 +56,7 @@ class MeshCommandSenderHopLimitTest {
 
         commandSender = MeshCommandSender(packetHandler, nodeManager, connectionStateHolder, radioConfigRepository)
         commandSender.start(testScope)
+        nodeManager.myNodeNum = 123
     }
 
     @Test
@@ -81,6 +82,7 @@ class MeshCommandSenderHopLimitTest {
         val capturedHopLimit = meshPacketSlot.captured.hopLimit
         assertTrue("Hop limit should be greater than 0, but was $capturedHopLimit", capturedHopLimit > 0)
         assertEquals(3, capturedHopLimit)
+        assertEquals(3, meshPacketSlot.captured.hopStart)
     }
 
     @Test
@@ -97,5 +99,25 @@ class MeshCommandSenderHopLimitTest {
 
         verify { packetHandler.sendToRadio(any<MeshPacket>()) }
         assertEquals(7, meshPacketSlot.captured.hopLimit)
+        assertEquals(7, meshPacketSlot.captured.hopStart)
+    }
+
+    @Test
+    fun `requestUserInfo sets hopStart equal to hopLimit`() = runTest(testDispatcher) {
+        val destNum = 12345
+        val meshPacketSlot = slot<MeshPacket>()
+        every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
+
+        localConfigFlow.value =
+            LocalConfig.newBuilder().setLora(Config.LoRaConfig.newBuilder().setHopLimit(6)).build()
+
+        // Mock node manager interactions
+        nodeManager.nodeDBbyNodeNum.remove(destNum)
+
+        commandSender.requestUserInfo(destNum)
+
+        verify { packetHandler.sendToRadio(any<MeshPacket>()) }
+        assertEquals("Hop Limit should be 6", 6, meshPacketSlot.captured.hopLimit)
+        assertEquals("Hop Start should be 6", 6, meshPacketSlot.captured.hopStart)
     }
 }

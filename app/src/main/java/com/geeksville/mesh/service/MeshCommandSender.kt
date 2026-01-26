@@ -100,7 +100,7 @@ constructor(
         sessionPasskey.set(key)
     }
 
-    private fun getHopLimit(): Int = localConfig.value.lora.hopLimit.takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
+    private fun computeHopLimit(): Int = localConfig.value.lora.hopLimit.takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
     private fun getAdminChannelIndex(toNum: Int): Int {
         val myNum = nodeManager?.myNodeNum ?: return 0
@@ -147,7 +147,7 @@ constructor(
             newMeshPacketTo(p.to ?: DataPacket.ID_BROADCAST).buildMeshPacket(
                 id = p.id,
                 wantAck = p.wantAck,
-                hopLimit = if (p.hopLimit > 0) p.hopLimit else getHopLimit(),
+                hopLimit = if (p.hopLimit > 0) p.hopLimit else computeHopLimit(),
                 channel = p.channel,
             ) {
                 portnumValue = p.dataType
@@ -395,7 +395,9 @@ constructor(
     ): MeshPacket {
         this.id = id
         this.wantAck = wantAck
-        this.hopLimit = if (hopLimit > 0) hopLimit else getHopLimit()
+        val actualHopLimit = if (hopLimit > 0) hopLimit else computeHopLimit()
+        this.hopLimit = actualHopLimit
+        this.hopStart = actualHopLimit
         this.priority = priority
 
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
