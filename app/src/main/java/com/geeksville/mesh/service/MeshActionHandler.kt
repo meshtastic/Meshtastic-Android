@@ -168,8 +168,8 @@ constructor(
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p)
         dataHandler.rememberDataPacket(p, myNodeNum, false)
-        val bytes = p.bytes?.toByteArray() ?: ByteArray(0)
-        analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
+        val byteCount = p.bytes?.size ?: 0
+        analytics.track("data_send", DataPair("num_bytes", byteCount), DataPair("type", p.dataType))
     }
 
     fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {

@@ -123,9 +123,9 @@ constructor(
 
     fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
-        val bytes = p.bytes?.toByteArray() ?: ByteArray(0)
+        val payloadSize = p.bytes?.size ?: 0
         require(p.dataType != 0) { "Port numbers must be non-zero!" }
-        if (bytes.size >= Constants.DATA_PAYLOAD_LEN.value) {
+        if (payloadSize >= Constants.DATA_PAYLOAD_LEN.value) {
             p.status = MessageStatus.ERROR
             throw RemoteException("Message too long")
         } else {
