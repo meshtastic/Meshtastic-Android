@@ -23,6 +23,7 @@ import com.geeksville.mesh.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.util.SerialInputOutputManager
+import java.nio.BufferOverflowException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
@@ -41,7 +42,13 @@ internal class SerialConnectionImpl(
     override fun sendBytes(bytes: ByteArray) {
         ioRef.get()?.let {
             Logger.d { "writing ${bytes.size} byte(s }" }
-            it.writeAsync(bytes)
+            try {
+                it.writeAsync(bytes)
+            } catch (e: BufferOverflowException) {
+                Logger.e(e) { "Buffer overflow while writing to serial port" }
+            } catch (e: Exception) {
+                Logger.e(e) { "Failed to write to serial port" }
+            }
         }
     }
 
