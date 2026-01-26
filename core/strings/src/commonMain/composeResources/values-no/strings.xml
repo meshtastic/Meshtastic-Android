@@ -70,6 +70,7 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Kontrollerer blinking av LED på enheten. For de fleste enheter vil dette kontrollere en av de opp til 4 lysdiodene. Laderen og GPS-lysene er ikke kontrollerbare.</string>
     <string name="config_device_transmitOverLora_summary">Hvorvidt det i tillegg for å sende det til MQTT og til telefonen, skal vår Naboinfo overføres over LoRa. Ikke tilgjengelig på en kanal med standardnøkkel og standardnavn.</string>
     <!-- Position Config -->
+    <string name="channel">Kanal</string>
     <string name="channel_name">Kanal Navn</string>
     <string name="qr_code">QR kode</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
@@ -205,7 +206,6 @@
     <string name="encryption_psk">Delt nøkkel</string>
     <string name="encryption_pkc">Offentlig-nøkkel kryptering</string>
     <string name="encryption_error">Direktemeldinger bruker den nye offentlige nøkkelinfrastrukturen for kryptering. Krever firmware versjon 2.5 eller høyere.</string>
-    <string name="encryption_error_text">Den offentlige nøkkelen samsvarer ikke med den lagrede nøkkelen. Du kan fjerne noden og la den utveksle nøkler igjen, men dette kan indikere et mer alvorlig sikkerhetsproblem. Ta kontakt med brukeren gjennom en annen klarert kanal for å avgjøre om nøkkelen endres på grunn av en tilbakestilling til fabrikkstandard eller andre tilsiktede tiltak.</string>
     <string name="meshtastic_new_nodes_notifications">Varsel om nye noder</string>
     <string name="more_details">Flere detaljer</string>
     <string name="snr">SNR</string>

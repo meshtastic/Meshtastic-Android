@@ -121,6 +121,7 @@
     <string name="gps_transmit_gpio">GPIO за предаване от GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Отстраняване на грешки</string>
+    <string name="channel">Канал</string>
     <string name="channel_name">Име на канал</string>
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Неизвестен потребител</string>
@@ -326,7 +327,6 @@
     <string name="encryption_pkc">Криптиране с публичния ключ</string>
     <string name="encryption_pkc_text">Директните съобщения използват новата инфраструктура с публичен ключ за криптиране.</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
-    <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да означава по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
     <string name="meshtastic_new_nodes_notifications">Известия за нови възли</string>
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
@@ -436,6 +436,8 @@
     <string name="messages">Съобщения</string>
     <string name="device_db_cache_limit">Лимит на кеша на DB на устройството</string>
     <string name="device_db_cache_limit_summary">Максимален брой бази данни на устройства, които да се съхраняват на този телефон</string>
+    <string name="log_retention_days_summary">Изберете колко дълго да се съхраняват журналите. Изберете \"Никога\", за да се съхраняват всички журнали.</string>
+    <string name="log_retention_never">Никога да не се изтриват журналите</string>
     <string name="friendly_name">Приятелско име</string>
     <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
     <string name="device_config">Устройство</string>
@@ -874,5 +876,13 @@
     <string name="mark_as_read">Маркиране като прочетено</string>
     <string name="now">Сега</string>
     <string name="add_channels_title">Добавяне на канали</string>
+    <string name="loading">Зареждане</string>
     <!-- Message Filter -->
+    <string name="filter_enable">Активиране на филтрирането</string>
+    <string name="filter_filtered_count">%1$d филтрирани</string>
+    <string name="filter_show_count">Показване на %1$d филтрирани</string>
+    <string name="filter_hide_count">Скриване на %1$d филтрирани</string>
+    <string name="filter_message_label">Филтрирани</string>
+    <string name="filter_enable_for_contact">Активиране на филтрирането</string>
+    <string name="filter_disable_for_contact">Дезактивиране на филтрирането</string>
 </resources>

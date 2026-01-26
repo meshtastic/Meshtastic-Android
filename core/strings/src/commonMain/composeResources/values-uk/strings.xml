@@ -73,6 +73,7 @@
     <string name="altitude">Висота</string>
     <string name="update_interval">Частота оновлення</string>
     <string name="gpio">GPIO</string>
+    <string name="channel">Канал</string>
     <string name="channel_name">Ім'я каналу</string>
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Невідомий користувач</string>

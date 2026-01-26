@@ -139,6 +139,7 @@
     <string name="gps_en_gpio">GPIO de habilitación GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Depuración</string>
+    <string name="channel">Canal</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nombre de usuario desconocido</string>
@@ -343,7 +344,6 @@
     <string name="encryption_pkc">Cifrado de Clave Pública</string>
     <string name="encryption_pkc_text">Los mensajes directos están utilizando la nueva infraestructura de clave pública para el cifrado.</string>
     <string name="encryption_error">Clave pública no coincide</string>
-    <string name="encryption_error_text">La clave pública no coincide con la clave guardada. Puedes eliminar el nodo y dejar que intercambie claves otra vez, esto podría indicar un problema de seguridad más serio. Contacta al usuario a través de otro canal confiable para saber si el cambio la de clave es por un restablecimiento de fábrica u otra acción intencional.</string>
     <string name="meshtastic_new_nodes_notifications">Notificaciones de nuevo nodo</string>
     <string name="more_details">Más detalles</string>
     <string name="snr">SNR</string>

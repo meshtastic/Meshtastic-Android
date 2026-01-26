@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPIO EN GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
+    <string name="channel">Канал</string>
     <string name="channel_name">Имя канала</string>
     <string name="qr_code">QR-код</string>
     <string name="unknown_username">Неизвестное имя пользователя</string>
@@ -389,7 +390,7 @@
     <string name="encryption_pkc">Общий ключ шифрования</string>
     <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру открытого ключа для шифрования.</string>
     <string name="encryption_error">Несоответствие публичного ключа</string>
-    <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить узел и снова обменяться ключами, но это может повлечь за собой более серьезную проблему безопасности. Свяжитесь с пользователем через другой доверенный канал, чтобы определить, было ли изменение ключа из-за заводского сброса или другого преднамеренного действия.</string>
+    <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить узел и позволить ему снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
     <string name="userinfo">Пользовательская информация</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых узлах</string>
     <string name="more_details">Подробнее</string>

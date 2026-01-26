@@ -105,6 +105,7 @@
     <string name="altitude">Altitude</string>
     <string name="update_interval">Intervalo de Atualização</string>
     <string name="debug">Depuração</string>
+    <string name="channel">Canal</string>
     <string name="channel_name">Nome do Canal</string>
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nome de utilizador desconhecido</string>
@@ -246,7 +247,6 @@
     <string name="encryption_psk">Chave partilhada</string>
     <string name="encryption_pkc">Criptografia de chave pública</string>
     <string name="encryption_error">Incompatibilidade de chave pública</string>
-    <string name="encryption_error_text">A chave pública não corresponde com a chave gravada. Pode remover o node e deixá-lo trocar chaves novamente, mas isso pode indicar um problema de segurança mais sério. Contate o utilizador através de outro canal confiável, para determinar se a chave mudou devido a uma restauração de fábrica ou outra ação intencional.</string>
     <string name="meshtastic_new_nodes_notifications">Notificações de novos nodes</string>
     <string name="more_details">Mais detalhes</string>
     <string name="snr">SNR</string>

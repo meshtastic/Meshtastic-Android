@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPIO GPS aktiv</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
+    <string name="channel">Kanal</string>
     <string name="channel_name">Kanalname</string>
     <string name="qr_code">QR-Code</string>
     <string name="unknown_username">Unbekannter Nutzername</string>
@@ -383,7 +384,6 @@
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
     <string name="encryption_pkc_text">Direktnachrichten verwenden zur den öffentlichen Knotenschlüssel zur Verschlüsselung.</string>
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
-    <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und ihn erneut Schlüssel austauschen lassen. Dies kann jedoch auf ein schwerwiegenderes Sicherheitsproblem hinweisen. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um festzustellen, ob die Schlüsseländerung durch Zurücksetzung auf die Werkseinstellungen oder eine andere absichtliche Aktion zurückzuführen ist.</string>
     <string name="meshtastic_new_nodes_notifications">Benachrichtigung neue Knoten</string>
     <string name="more_details">Mehr Details</string>
     <string name="snr">SNR</string>

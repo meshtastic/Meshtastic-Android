@@ -122,6 +122,7 @@
     <string name="gps_receive_gpio">GPS пријем GPIO</string>
     <string name="gps_transmit_gpio">GPS предаја GPIO</string>
     <string name="debug">Дебагуј</string>
+    <string name="channel">Канал</string>
     <string name="channel_name">Назив канала</string>
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Непознато корисничко име</string>
@@ -263,7 +264,6 @@
     <string name="encryption_psk">Дељени кључ</string>
     <string name="encryption_pkc">Шифровање јавним кључем</string>
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
-    <string name="encryption_error_text">Јавни кључ се не поклапа са забележеним кључем. Можете уклонити чвор и омогућити му поновну размену кључева, али ово може указивати на озбиљнији безбедносни проблем. Контактирајте корисника путем другог поузданог канала да бисте утврдили да ли је промена кључа резултат фабричког ресетовања или друге намерне акције.</string>
     <string name="meshtastic_new_nodes_notifications">Обавештења о новим чворовима</string>
     <string name="more_details">Више детаља</string>
     <string name="snr">SNR</string>

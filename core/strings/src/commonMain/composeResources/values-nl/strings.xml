@@ -73,6 +73,7 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Regelt de knipperende LED op het apparaat. Voor de meeste apparaten betreft dit een van de maximaal 4 LEDs; de LED's van de lader en GPS zijn niet regelbaar.</string>
     <!-- Position Config -->
     <string name="debug">Debug</string>
+    <string name="channel">Kanaal</string>
     <string name="channel_name">Kanaalnaam</string>
     <string name="qr_code">QR-code</string>
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
@@ -214,7 +215,6 @@
     <string name="encryption_psk">Gedeelde Key</string>
     <string name="encryption_pkc">Publieke sleutel encryptie</string>
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
-    <string name="encryption_error_text">De publieke sleutel komt niet overeen met de opgenomen sleutel. Je kan de node verwijderen en opnieuw een sleutel laten uitwisselen, maar dit kan duiden op een ernstiger beveiligingsprobleem. Neem contact op met de gebruiker via een ander vertrouwd kanaal, om te bepalen of de sleutel gewijzigd is door een reset naar de fabrieksinstellingen of andere opzettelijke actie.</string>
     <string name="meshtastic_new_nodes_notifications">Nieuwe node meldingen</string>
     <string name="more_details">Meer details</string>
     <string name="snr">SNR</string>

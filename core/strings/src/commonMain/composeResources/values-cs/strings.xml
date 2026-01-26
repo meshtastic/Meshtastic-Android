@@ -123,6 +123,7 @@
     <string name="advanced_device_gps">Pokročilé nastavení GPS zařízení</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladění</string>
+    <string name="channel">Kanál</string>
     <string name="channel_name">Název kanálu</string>
     <string name="qr_code">QR kód</string>
     <string name="unknown_username">Neznámé uživatelské jméno</string>
@@ -300,7 +301,6 @@
     <string name="encryption_psk">Sdílený klíč</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
-    <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíči. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="more_details">Více detailů</string>
     <string name="snr">SNR</string>
