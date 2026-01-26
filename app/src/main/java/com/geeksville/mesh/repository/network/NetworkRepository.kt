@@ -19,10 +19,16 @@ package com.geeksville.mesh.repository.network
 import android.net.ConnectivityManager
 import android.net.nsd.NsdManager
 import android.net.nsd.NsdServiceInfo
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.shareIn
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.di.ProcessLifecycle
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,13 +39,31 @@ constructor(
     private val nsdManagerLazy: dagger.Lazy<NsdManager>,
     private val connectivityManager: dagger.Lazy<ConnectivityManager>,
     private val dispatchers: CoroutineDispatchers,
+    @ProcessLifecycle private val processLifecycle: Lifecycle,
 ) {
 
-    val networkAvailable: Flow<Boolean>
-        get() = connectivityManager.get().networkAvailable().flowOn(dispatchers.io).conflate()
+    val networkAvailable: Flow<Boolean> by lazy {
+        connectivityManager.get().networkAvailable()
+            .flowOn(dispatchers.io)
+            .conflate()
+            .shareIn(
+                scope = processLifecycle.coroutineScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                replay = 1,
+            )
+            .distinctUntilChanged()
+    }
 
-    val resolvedList: Flow<List<NsdServiceInfo>>
-        get() = nsdManagerLazy.get().serviceList(SERVICE_TYPE).flowOn(dispatchers.io).conflate()
+    val resolvedList: Flow<List<NsdServiceInfo>> by lazy {
+        nsdManagerLazy.get().serviceList(SERVICE_TYPE)
+            .flowOn(dispatchers.io)
+            .conflate()
+            .shareIn(
+                scope = processLifecycle.coroutineScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                replay = 1,
+            )
+    }
 
     companion object {
         internal const val SERVICE_PORT = 4403
