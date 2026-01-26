@@ -145,15 +145,17 @@ internal fun EnvironmentMetrics(
                     }
                     if (hasTemperature() && hasRelativeHumidity()) {
                         val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)
-                        add(
-                            DrawableMetricInfo(
-                                Res.string.dew_point,
-                                dewPoint.toTempString(isFahrenheit),
-                                org.meshtastic.feature.node.R.drawable.ic_outlined_dew_point_24,
-                            ),
-                        )
+                        if (!dewPoint.isNaN()) {
+                            add(
+                                DrawableMetricInfo(
+                                    Res.string.dew_point,
+                                    dewPoint.toTempString(isFahrenheit),
+                                    org.meshtastic.feature.node.R.drawable.ic_outlined_dew_point_24,
+                                ),
+                            )
+                        }
                     }
-                    if (hasSoilTemperature()) {
+                    if (hasSoilTemperature() && !soilTemperature.isNaN()) {
                         add(
                             DrawableMetricInfo(
                                 Res.string.soil_temperature,

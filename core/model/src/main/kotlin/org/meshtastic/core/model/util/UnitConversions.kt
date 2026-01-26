@@ -26,6 +26,8 @@ object UnitConversions {
 
     /** Formats temperature as a string with the unit suffix. */
     fun Float.toTempString(isFahrenheit: Boolean): String {
+        if (this.isNaN()) return "--"
+
         val temp = if (isFahrenheit) celsiusToFahrenheit(this) else this
         val unit = if (isFahrenheit) "F" else "C"
 
