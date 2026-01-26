@@ -256,7 +256,8 @@ fun EditWaypointDialog(
                                     }
                                     selectedDate = dateFormat.format(calendar.time)
                                     selectedTime = timeFormat.format(calendar.time)
-                                    waypointInput = waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
+                                    waypointInput =
+                                        waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
                                 } else {
                                     selectedDate = ""
                                     selectedTime = ""
