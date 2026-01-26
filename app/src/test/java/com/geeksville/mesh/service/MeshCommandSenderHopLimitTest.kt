@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -63,7 +64,7 @@ class MeshCommandSenderHopLimitTest {
         val packet =
             DataPacket(
                 to = DataPacket.ID_BROADCAST,
-                bytes = byteArrayOf(1, 2, 3),
+                bytes = byteArrayOf(1, 2, 3).toByteString(),
                 dataType = 1, // PortNum.TEXT_MESSAGE_APP
             )
 
@@ -88,7 +89,8 @@ class MeshCommandSenderHopLimitTest {
 
     @Test
     fun `sendData respects non-zero hop limit from config`() = runTest(testDispatcher) {
-        val packet = DataPacket(to = DataPacket.ID_BROADCAST, bytes = byteArrayOf(1, 2, 3), dataType = 1)
+        val packet =
+            DataPacket(to = DataPacket.ID_BROADCAST, bytes = byteArrayOf(1, 2, 3).toByteString(), dataType = 1)
 
         val meshPacketSlot = slot<MeshPacket>()
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit

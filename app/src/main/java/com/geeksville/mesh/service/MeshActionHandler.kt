@@ -120,7 +120,7 @@ constructor(
                 .DataPacket(
                     to = destId,
                     dataType = PortNum.TEXT_MESSAGE_APP.value,
-                    bytes = action.emoji.encodeToByteArray(),
+                    bytes = action.emoji.encodeToByteArray().toByteString(),
                     channel = channel,
                     replyId = action.replyId,
                     wantAck = true,
@@ -168,7 +168,7 @@ constructor(
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p)
         dataHandler.rememberDataPacket(p, myNodeNum, false)
-        val bytes = p.bytes ?: ByteArray(0)
+        val bytes = p.bytes?.toByteArray() ?: ByteArray(0)
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }
 

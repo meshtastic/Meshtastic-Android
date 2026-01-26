@@ -37,7 +37,7 @@ class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManage
             time = packet.rx_time * 1000L,
             id = packet.id,
             dataType = data.portnum.value,
-            bytes = data.payload.toByteArray(),
+            bytes = data.payload,
             hopLimit = packet.hop_limit,
             channel = if (packet.pki_encrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
             wantAck = packet.want_ack,

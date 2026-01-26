@@ -85,6 +85,6 @@ class MeshDataMapperTest {
         assertEquals(12345, dataPacket?.id)
         assertEquals(1600000000000L, dataPacket?.time)
         assertEquals(PortNum.TEXT_MESSAGE_APP.value, dataPacket?.dataType)
-        assertEquals("Hello", dataPacket?.bytes?.decodeToString())
+        assertEquals("Hello", dataPacket?.bytes?.utf8())
     }
 }

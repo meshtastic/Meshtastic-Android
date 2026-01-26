@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
@@ -74,7 +75,7 @@ class ReactionReceiver : BroadcastReceiver() {
                     DataPacket(
                         to = toId,
                         channel = channelIndex,
-                        bytes = emoji.toByteArray(Charsets.UTF_8),
+                        bytes = emoji.toByteArray(Charsets.UTF_8).toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                         replyId = packetId,
                         wantAck = true,

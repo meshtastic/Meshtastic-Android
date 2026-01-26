@@ -35,6 +35,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
@@ -69,7 +70,7 @@ class MainActivity : AppCompatActivity() {
                     it.send(
                         DataPacket(
                             to = DataPacket.ID_BROADCAST,
-                            bytes = "Hello from MeshServiceExample".toByteArray(),
+                            bytes = "Hello from MeshServiceExample".toByteArray().toByteString(),
                             dataType = PortNum.TEXT_MESSAGE_APP.value,
                             from = DataPacket.ID_LOCAL,
                             time = System.currentTimeMillis(),

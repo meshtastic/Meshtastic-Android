@@ -17,7 +17,7 @@
 package org.meshtastic.core.model
 
 import kotlinx.serialization.json.Json
-import org.junit.Assert.assertArrayEquals
+import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
@@ -25,9 +25,9 @@ import org.junit.Test
 class DataPacketTest {
     @Test
     fun `DataPacket sfppHash is nullable and correctly set`() {
-        val hash = byteArrayOf(1, 2, 3, 4)
+        val hash = byteArrayOf(1, 2, 3, 4).toByteString()
         val packet = DataPacket(to = "to", channel = 0, text = "hello").copy(sfppHash = hash)
-        assertArrayEquals(hash, packet.sfppHash)
+        assertEquals(hash, packet.sfppHash)
 
         val packetNoHash = DataPacket(to = "to", channel = 0, text = "hello")
         assertEquals(null, packetNoHash.sfppHash)
@@ -41,7 +41,7 @@ class DataPacketTest {
 
     @Test
     fun `DataPacket serialization preserves sfppHash`() {
-        val hash = byteArrayOf(5, 6, 7, 8)
+        val hash = byteArrayOf(5, 6, 7, 8).toByteString()
         val packet =
             DataPacket(to = "to", channel = 0, text = "test")
                 .copy(sfppHash = hash, status = MessageStatus.SFPP_CONFIRMED)
@@ -51,13 +51,13 @@ class DataPacketTest {
         val decoded = json.decodeFromString(DataPacket.serializer(), encoded)
 
         assertEquals(packet.status, decoded.status)
-        assertArrayEquals(hash, decoded.sfppHash)
+        assertEquals(hash, decoded.sfppHash)
     }
 
     @Test
     fun `DataPacket equals and hashCode include sfppHash`() {
-        val hash1 = byteArrayOf(1, 2, 3)
-        val hash2 = byteArrayOf(4, 5, 6)
+        val hash1 = byteArrayOf(1, 2, 3).toByteString()
+        val hash2 = byteArrayOf(4, 5, 6).toByteString()
         val p1 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash1)
         val p2 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash1)
         val p3 = DataPacket(to = "to", channel = 0, text = "text").copy(sfppHash = hash2)

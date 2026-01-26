@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.PacketRepository
@@ -501,7 +502,7 @@ constructor(
                         DataPacket(
                             to = reaction.to,
                             channel = reaction.channel,
-                            bytes = reaction.emoji.toByteArray(Charsets.UTF_8),
+                            bytes = reaction.emoji.toByteArray(Charsets.UTF_8).toByteString(),
                             dataType = PortNum.TEXT_MESSAGE_APP.value,
                             replyId = reaction.replyId,
                             wantAck = true,
@@ -571,7 +572,11 @@ constructor(
 
         if (s.stats != null) {
             val text = s.stats.toString()
-            val u = dataPacket.copy(bytes = text.encodeToByteArray(), dataType = PortNum.TEXT_MESSAGE_APP.value)
+            val u =
+                dataPacket.copy(
+                    bytes = text.encodeToByteArray().toByteString(),
+                    dataType = PortNum.TEXT_MESSAGE_APP.value,
+                )
             rememberDataPacket(u, myNodeNum)
         } else if (h != null) {
             @Suppress("MaxLineLength")
@@ -582,7 +587,11 @@ constructor(
                 "Total messages: ${h.history_messages}\n" +
                     "History window: ${h.window.toLong().milliseconds.inWholeMinutes} min\n" +
                     "Last request: ${h.last_request}"
-            val u = dataPacket.copy(bytes = text.encodeToByteArray(), dataType = PortNum.TEXT_MESSAGE_APP.value)
+            val u =
+                dataPacket.copy(
+                    bytes = text.encodeToByteArray().toByteString(),
+                    dataType = PortNum.TEXT_MESSAGE_APP.value,
+                )
             rememberDataPacket(u, myNodeNum)
             historyManager.updateStoreForwardLastRequest("router_history", h.last_request, transport)
         } else if (s.heartbeat != null) {
@@ -598,7 +607,7 @@ constructor(
             historyLog(Log.DEBUG) {
                 "rxText $baseContext id=${dataPacket.id} ts=${dataPacket.time} to=${dataPacket.to} decision=remember"
             }
-            val bytes = s.text?.toByteArray() ?: ByteArray(0)
+            val bytes = s.text?.toByteArray()?.toByteString() ?: okio.ByteString.EMPTY
             val u = dataPacket.copy(bytes = bytes, dataType = PortNum.TEXT_MESSAGE_APP.value)
             rememberDataPacket(u, myNodeNum)
         }

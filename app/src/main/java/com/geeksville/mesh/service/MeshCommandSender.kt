@@ -25,7 +25,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -124,7 +123,7 @@ constructor(
 
     fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
-        val bytes = p.bytes ?: ByteArray(0)
+        val bytes = p.bytes?.toByteArray() ?: ByteArray(0)
         require(p.dataType != 0) { "Port numbers must be non-zero!" }
         if (bytes.size >= Constants.DATA_PAYLOAD_LEN.value) {
             p.status = MessageStatus.ERROR
@@ -156,7 +155,7 @@ constructor(
             ) {
                 copy(
                     portnum = portNum,
-                    payload = p.bytes?.toByteString() ?: okio.ByteString.EMPTY,
+                    payload = p.bytes ?: okio.ByteString.EMPTY,
                     reply_id = p.replyId ?: 0,
                     emoji = p.emoji,
                 )

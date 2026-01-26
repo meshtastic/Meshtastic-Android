@@ -20,7 +20,12 @@ import android.os.Parcel
 import android.os.Parcelable
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.util.ByteStringParceler
+import org.meshtastic.core.model.util.ByteStringSerializer
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint
 
@@ -50,7 +55,9 @@ enum class MessageStatus : Parcelable {
 @Parcelize
 data class DataPacket(
     var to: String? = ID_BROADCAST, // a nodeID string, or ID_BROADCAST for broadcast
-    var bytes: ByteArray?,
+    @Serializable(with = ByteStringSerializer::class)
+    @TypeParceler<ByteString?, ByteStringParceler>
+    var bytes: ByteString?,
     // A port number for this packet (formerly called DataType, see portnums.proto for new usage instructions)
     var dataType: Int,
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
@@ -69,7 +76,9 @@ data class DataPacket(
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
     var retryCount: Int = 0, // Number of automatic retry attempts
     var emoji: Int = 0,
-    var sfppHash: ByteArray? = null,
+    @Serializable(with = ByteStringSerializer::class)
+    @TypeParceler<ByteString?, ByteStringParceler>
+    var sfppHash: ByteString? = null,
 ) : Parcelable {
 
     /** If there was an error with this message, this string describes what was wrong. */
@@ -83,7 +92,7 @@ data class DataPacket(
         replyId: Int? = null,
     ) : this(
         to = to,
-        bytes = text.encodeToByteArray(),
+        bytes = text.encodeToByteArray().toByteString(),
         dataType = PortNum.TEXT_MESSAGE_APP.value,
         channel = channel,
         replyId = replyId ?: 0,
@@ -93,7 +102,7 @@ data class DataPacket(
     val text: String?
         get() =
             if (dataType == PortNum.TEXT_MESSAGE_APP.value) {
-                bytes?.decodeToString()
+                bytes?.utf8()
             } else {
                 null
             }
@@ -101,7 +110,7 @@ data class DataPacket(
     val alert: String?
         get() =
             if (dataType == PortNum.ALERT_APP.value) {
-                bytes?.decodeToString()
+                bytes?.utf8()
             } else {
                 null
             }
@@ -110,12 +119,17 @@ data class DataPacket(
         to: String?,
         channel: Int,
         waypoint: Waypoint,
-    ) : this(to = to, bytes = waypoint.encode(), dataType = PortNum.WAYPOINT_APP.value, channel = channel)
+    ) : this(
+        to = to,
+        bytes = waypoint.encode().toByteString(),
+        dataType = PortNum.WAYPOINT_APP.value,
+        channel = channel,
+    )
 
     val waypoint: Waypoint?
         get() =
             if (dataType == PortNum.WAYPOINT_APP.value) {
-                Waypoint.ADAPTER.decode(bytes ?: ByteArray(0))
+                Waypoint.ADAPTER.decode(bytes?.toByteArray() ?: ByteArray(0))
             } else {
                 null
             }
@@ -123,65 +137,10 @@ data class DataPacket(
     val hopsAway: Int
         get() = if (hopStart == 0 || hopLimit > hopStart) -1 else hopStart - hopLimit
 
-    @Suppress("CyclomaticComplexMethod")
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as DataPacket
-
-        if (from != other.from) return false
-        if (to != other.to) return false
-        if (channel != other.channel) return false
-        if (time != other.time) return false
-        if (id != other.id) return false
-        if (dataType != other.dataType) return false
-        if (!bytes.contentEquals(other.bytes)) return false
-        if (status != other.status) return false
-        if (hopLimit != other.hopLimit) return false
-        if (wantAck != other.wantAck) return false
-        if (hopStart != other.hopStart) return false
-        if (snr != other.snr) return false
-        if (rssi != other.rssi) return false
-        if (replyId != other.replyId) return false
-        if (relayNode != other.relayNode) return false
-        if (relays != other.relays) return false
-        if (viaMqtt != other.viaMqtt) return false
-        if (retryCount != other.retryCount) return false
-        if (emoji != other.emoji) return false
-        if (!sfppHash.contentEquals(other.sfppHash)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = from?.hashCode() ?: 0
-        result = 31 * result + (to?.hashCode() ?: 0)
-        result = 31 * result + time.hashCode()
-        result = 31 * result + id
-        result = 31 * result + dataType
-        result = 31 * result + (bytes?.contentHashCode() ?: 0)
-        result = 31 * result + (status?.hashCode() ?: 0)
-        result = 31 * result + hopLimit
-        result = 31 * result + channel
-        result = 31 * result + wantAck.hashCode()
-        result = 31 * result + hopStart
-        result = 31 * result + snr.hashCode()
-        result = 31 * result + rssi
-        result = 31 * result + (replyId ?: 0)
-        result = 31 * result + (relayNode ?: -1)
-        result = 31 * result + relays
-        result = 31 * result + viaMqtt.hashCode()
-        result = 31 * result + retryCount
-        result = 31 * result + emoji
-        result = 31 * result + (sfppHash?.contentHashCode() ?: 0)
-        return result
-    }
-
-    // Update our object from our parcel (used for inout parameters
+    // Update our object from our parcel (used for inout parameters)
     fun readFromParcel(parcel: Parcel) {
         to = parcel.readString()
-        bytes = parcel.createByteArray()
+        bytes = parcel.createByteArray()?.toByteString()
         dataType = parcel.readInt()
         from = parcel.readString()
         time = parcel.readLong()
@@ -200,7 +159,7 @@ data class DataPacket(
         viaMqtt = parcel.readInt() != 0
         retryCount = parcel.readInt()
         emoji = parcel.readInt()
-        sfppHash = parcel.createByteArray()
+        sfppHash = parcel.createByteArray()?.toByteString()
     }
 
     companion object {

@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
@@ -174,6 +175,7 @@ constructor(
             } else {
                 DataPacket.nodeNumToDefaultId(to)
             }
+        val sfppHash = hash.toByteString()
 
         packets.forEach { packet ->
             // For sent messages, from is stored as ID_LOCAL, but SFPP packet has node number
@@ -190,7 +192,7 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-                val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
+                val updatedData = packet.data.copy(status = status, sfppHash = sfppHash, time = newTime)
                 dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
             }
         }
@@ -225,13 +227,14 @@ constructor(
         rxTime: Long = 0,
     ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
+        val sfppHash = hash.toByteString()
         dao.findPacketBySfppHash(hash)?.let { packet ->
             // If it's already confirmed, don't downgrade it
             if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-            val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
+            val updatedData = packet.data.copy(status = status, sfppHash = sfppHash, time = newTime)
             dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
         }
 
