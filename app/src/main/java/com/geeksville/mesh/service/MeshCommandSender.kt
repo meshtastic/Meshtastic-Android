@@ -395,7 +395,9 @@ constructor(
     ): MeshPacket {
         this.id = id
         this.wantAck = wantAck
-        this.hopLimit = if (hopLimit > 0) hopLimit else getHopLimit()
+        val actualHopLimit = if (hopLimit > 0) hopLimit else getHopLimit()
+        this.hopLimit = actualHopLimit
+        this.hopStart = actualHopLimit
         this.priority = priority
 
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
