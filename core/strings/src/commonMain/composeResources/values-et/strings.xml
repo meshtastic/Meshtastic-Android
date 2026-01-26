@@ -872,6 +872,7 @@
     <string name="type_a_message">Sisesta sõnum</string>
     <string name="pax_metrics_log">Pax mõõdiku logi</string>
     <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">Pax mõõdikut pole saadaval.</string>
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
     <string name="bluetooth_paired_devices">Seotud seadmed</string>
@@ -1105,4 +1106,19 @@
     <string name="replace_channels_and_settings_description">See QR-kood sisaldab täielikku konfiguratsiooni. See ASENDAB olemasolevad kanalid ja raadioseaded. Kõik olemasolevad kanalid eemaldatakse.</string>
     <string name="loading">Laen</string>
     <!-- Message Filter -->
+    <string name="filter_settings">Sõnumifilter</string>
+    <string name="filter_enable">Luba filtreerimine</string>
+    <string name="filter_enable_summary">Peida filtrisõnu sisaldavad sõnumid</string>
+    <string name="filter_words">Filtreeri sõnu</string>
+    <string name="filter_words_summary">Neid sõnu sisaldavad sõnumid peidetakse</string>
+    <string name="filter_add_placeholder">Lisa sõna või regulaaravaldise:muster</string>
+    <string name="filter_no_words">Filtrisõnu pole konfigureeritud</string>
+    <string name="filter_regex_pattern">Regulaaravaldise muster</string>
+    <string name="filter_whole_word">Terve sõna vaste</string>
+    <string name="filter_filtered_count">%1$d filtreeritud</string>
+    <string name="filter_show_count">Näita %1$d filtreeritud</string>
+    <string name="filter_hide_count">Peida %1$d filtreeritud</string>
+    <string name="filter_message_label">Filtreeritud</string>
+    <string name="filter_enable_for_contact">Luba filtreerimine</string>
+    <string name="filter_disable_for_contact">Keela filtreerimine</string>
 </resources>
