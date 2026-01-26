@@ -709,7 +709,7 @@ constructor(
                 getSenderName(dataPacket),
                 dataPacket.alert ?: getString(Res.string.critical_alert),
             )
-        } else if (updateNotification) {
+        } else if (updateNotification && !isSilent) {
             scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
         }
     }
@@ -757,6 +757,7 @@ constructor(
         }
     }
 
+    @Suppress("LongMethod")
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
         val emoji = packet.decoded.payload.toByteArray().decodeToString()
         val fromId = dataMapper.toNodeID(packet.from)
@@ -804,24 +805,27 @@ constructor(
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
             val isSilent = conversationMuted || nodeMuted
-            val channelName =
-                if (original.packet.data.to == DataPacket.ID_BROADCAST) {
-                    radioConfigRepository.channelSetFlow
-                        .first()
-                        .settingsList
-                        .getOrNull(original.packet.data.channel)
-                        ?.name
-                } else {
-                    null
-                }
-            serviceNotifications.updateReactionNotification(
-                contactKey,
-                getSenderName(dataMapper.toDataPacket(packet)!!),
-                emoji,
-                original.packet.data.to == DataPacket.ID_BROADCAST,
-                channelName,
-                isSilent,
-            )
+
+            if (!isSilent) {
+                val channelName =
+                    if (original.packet.data.to == DataPacket.ID_BROADCAST) {
+                        radioConfigRepository.channelSetFlow
+                            .first()
+                            .settingsList
+                            .getOrNull(original.packet.data.channel)
+                            ?.name
+                    } else {
+                        null
+                    }
+                serviceNotifications.updateReactionNotification(
+                    contactKey,
+                    getSenderName(dataMapper.toDataPacket(packet)!!),
+                    emoji,
+                    original.packet.data.to == DataPacket.ID_BROADCAST,
+                    channelName,
+                    isSilent,
+                )
+            }
         }
     }
 
