@@ -77,6 +77,7 @@
     <!-- Position Config -->
     <string name="altitude">Rakım</string>
     <string name="debug">Hata Ayıklama</string>
+    <string name="channel">Kanal</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="qr_code">Karekod</string>
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
@@ -225,7 +226,6 @@
     <string name="encryption_psk">Paylaşılan Anahtar</string>
     <string name="encryption_pkc">Genel Anahtar Şifrelemesi</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
-    <string name="encryption_error_text">Genel anahtar, kayıtlı anahtarla eşleşmiyor. Düğümü kaldırabilir ve tekrar anahtar değişimi yapmasına izin verebilirsiniz, ancak bu daha ciddi bir güvenlik sorununa işaret edebilir. Anahtar değişikliğinin fabrika ayarlarına sıfırlamadan veya başka bir kasıtlı eylemden kaynaklanıp kaynaklanmadığını belirlemek için başka bir güvenilir kanal aracılığıyla kullanıcıyla iletişime geçiniz.</string>
     <string name="meshtastic_new_nodes_notifications">Yeni düğüm bildirimleri</string>
     <string name="more_details">Daha fazla detay</string>
     <string name="snr">SNR</string>

@@ -27,6 +27,7 @@
     <string name="routing_error_bad_request">Εσφαλμένο Αίτημα</string>
     <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
     <!-- Position Config -->
+    <string name="channel">Κανάλι</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="qr_code">Κώδικας QR</string>
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>

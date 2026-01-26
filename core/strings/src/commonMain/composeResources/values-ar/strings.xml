@@ -51,6 +51,7 @@
     <string name="routing_error_admin_public_key_unauthorized">المفتاح العام غير مسموح</string>
     <string name="rebroadcast_mode_none">لا يوجد</string>
     <!-- Position Config -->
+    <string name="channel">عربي</string>
     <string name="channel_name">اسم القناة</string>
     <string name="qr_code">رمز الاستجابة السريع</string>
     <string name="unknown_username">اسم المستخدم غير معروف</string>

@@ -144,6 +144,7 @@
     <string name="gps_en_gpio">GPIO EN del GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
+    <string name="channel">Canale</string>
     <string name="channel_name">Nome del canale</string>
     <string name="qr_code">Codice QR</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
@@ -338,7 +339,6 @@
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
     <string name="encryption_pkc_text">I messaggi diretti stanno usando la crittografia basata sulla nuova infrastruttura a chiave pubblica.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
-    <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
     <string name="meshtastic_new_nodes_notifications">Notifiche di nuovi nodi</string>
     <string name="more_details">Ulteriori informazioni</string>
     <string name="snr">SNR</string>

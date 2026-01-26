@@ -65,6 +65,7 @@
     <string name="rebroadcast_mode_none_desc">Lejohet vetëm për rolet SENSOR, TRACKER dhe TAK_TRACKER, kjo do të pengojë të gjitha ritransmetimet, jo ndryshe nga roli CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Injoron paketat nga portnumra jo standardë si: TAK, RangeTest, PaxCounter, etj. Vetëm ritransmeton paketat me portnumra standard: NodeInfo, Text, Position, Telemetry, dhe Routing.</string>
     <!-- Position Config -->
+    <string name="channel">Kanal</string>
     <string name="channel_name">Emri i kanalit radio</string>
     <string name="qr_code">Kodi QR</string>
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
@@ -198,7 +199,6 @@
     <string name="encryption_psk">Çelësi i Përbashkët</string>
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
-    <string name="encryption_error_text">Çelësi publik nuk përputhet me çelësin e regjistruar. Mund të hiqni nyjën dhe të lejoni që ajo të shkëmbejë përsëri çelësat, por kjo mund të tregojë një problem më serioz të sigurisë. Kontaktoni përdoruesin përmes një kanali tjetër të besuar për të përcaktuar nëse ndryshimi i çelësit ishte si pasojë e një rikthimi në fabrikë ose një veprim tjetër të qëllimshëm.</string>
     <string name="meshtastic_new_nodes_notifications">Njoftimet për nyje të reja</string>
     <string name="more_details">Më shumë detaje</string>
     <string name="snr_definition">Raporti i Sinjalit në Zhurmë, një masë e përdorur në komunikime për të kuantifikuar nivelin e një sinjali të dëshiruar ndaj nivelit të zhurmës në background. Në Meshtastic dhe sisteme të tjera pa tel, një SNR më i lartë tregon një sinjal më të pastër që mund të rrisë besueshmërinë dhe cilësinë e transmetimit të të dhënave.</string>

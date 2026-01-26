@@ -134,6 +134,7 @@
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debugowanie</string>
+    <string name="channel">Kanał</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="qr_code">Kod QR</string>
     <string name="unknown_username">Nieznana nazwa użytkownika</string>
@@ -332,7 +333,6 @@
     <string name="encryption_pkc">Szyfrowanie klucza publicznego</string>
     <string name="encryption_pkc_text">Bezpośrednie wiadomości wykorzystują nową infrastrukturę klucza publicznego do szyfrowania.</string>
     <string name="encryption_error">Niezgodność klucza publicznego</string>
-    <string name="encryption_error_text">Klucz publiczny nie pasuje do otrzymanego wcześniej klucza. Możesz usunąć węzeł i pozwolić na ponowną wymianę kluczy, ale może również wskazywać to na poważniejszy problem z bezpieczeństwem. Skontaktuj się z użytkownikiem za pomocą innego zaufanego kanału, aby ustalić, czy zmiana klucza była spowodowana przywróceniem ustawień fabrycznych czy innym działaniem.</string>
     <string name="meshtastic_new_nodes_notifications">Powiadomienia o nowych węzłach</string>
     <string name="more_details">Więcej…</string>
     <string name="snr">SNR:</string>

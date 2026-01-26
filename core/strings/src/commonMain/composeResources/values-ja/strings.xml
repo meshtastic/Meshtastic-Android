@@ -74,6 +74,7 @@
     <string name="config_device_ledHeartbeatEnabled_summary">デバイスの点滅するLEDを制御します。ほとんどのデバイスでは、最大4つあるLEDのうちの1つを制御します。充電用LEDとGPS用LEDは制御できません。</string>
     <string name="config_device_transmitOverLora_summary">近隣ノード情報(NeighborInfo)をMQTTやPhoneAPIへ送信することに加えて、LoRa無線経由でも送信すべきかどうかを設定します。デフォルトの名前とキーが設定されたチャンネルでは利用できません。</string>
     <!-- Position Config -->
+    <string name="channel">チャンネル</string>
     <string name="channel_name">チャンネル名</string>
     <string name="qr_code">QRコード</string>
     <string name="unknown_username">ユーザー名不明</string>
@@ -212,7 +213,6 @@
     <string name="encryption_psk">共有キー</string>
     <string name="encryption_pkc">公開キー暗号化</string>
     <string name="encryption_error">公開キーが一致しません</string>
-    <string name="encryption_error_text">公開キーが記録されているキーと一致しません。ノードを削除して再度キーの交換を行うことも可能ですが、これはより深刻なセキュリティ問題を示している可能性があります。出荷時リセットやその他の意図的な操作によるキーの変更かどうかを確認するため、別の信頼できるチャンネルでユーザーに連絡を取ってください。</string>
     <string name="meshtastic_new_nodes_notifications">新しいノードの通知</string>
     <string name="more_details">詳細を見る</string>
     <string name="snr">SN比</string>

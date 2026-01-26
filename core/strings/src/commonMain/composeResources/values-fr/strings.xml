@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPIO EN du GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
+    <string name="channel">Canal</string>
     <string name="channel_name">Nom du canal</string>
     <string name="qr_code">Code QR</string>
     <string name="unknown_username">Nom d'Utilisateur inconnu</string>
@@ -383,7 +384,6 @@
     <string name="encryption_pkc">Chiffrement de clé publique</string>
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="encryption_error">Non-concordance de clé publique</string>
-    <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
     <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>

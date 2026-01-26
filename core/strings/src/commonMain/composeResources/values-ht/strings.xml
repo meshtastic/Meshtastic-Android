@@ -65,6 +65,7 @@
     <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
     <!-- Position Config -->
+    <string name="channel">kanal</string>
     <string name="channel_name">Non kanal</string>
     <string name="qr_code">Kòd QR</string>
     <string name="unknown_username">Non itilizatè enkoni</string>
@@ -198,7 +199,6 @@
     <string name="encryption_psk">Kle Pataje</string>
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
     <string name="encryption_error">Pa matche kle piblik</string>
-    <string name="encryption_error_text">Kle piblik la pa matche ak kle anrejistre a. Ou ka retire nœud la e kite li echanje kle ankò, men sa ka endike yon pwoblèm sekirite pi grav. Kontakte itilizatè a atravè yon lòt chanèl ki fè konfyans, pou detèmine si chanjman kle a te fèt akòz yon reyajisteman faktori oswa lòt aksyon entansyonèl.</string>
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="more_details">Plis detay</string>
     <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>

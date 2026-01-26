@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPS EN GPIO-pinni</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Vianetsintä</string>
+    <string name="channel">Kanava</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="qr_code">QR-koodi</string>
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
@@ -383,7 +384,7 @@
     <string name="encryption_pkc">Julkisen avaimen salaus</string>
     <string name="encryption_pkc_text">Yksityisviesteissä käytetään uutta julkisen avaimen infrastruktuuria salaukseen.</string>
     <string name="encryption_error">Julkinen avain ei täsmää</string>
-    <string name="encryption_error_text">Julkinen avain ei vastaa kirjattua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimia uudelleen, mutta tämä saattaa merkitä vakavampaa turvallisuusongelmaa. Ota yhteyttä käyttäjään toisen luotetun kanavan kautta määrittääksesi, johtuiko avain tehtaan resetoinnista tai muusta tarkoituksellisesta toiminnosta.</string>
+    <string name="encryption_error_text">Julkinen avain ei vastaa tallennettua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimet uudelleen, mutta tämä saattaa viitata vakavampaan tietoturvaongelmaan. Ota yhteyttä käyttäjään toista luotettua kanavaa pitkin selvittääksesi, johtuuko avaimen vaihtuminen tehdasasetusten palautuksesta tai muusta tarkoituksellisesta toimenpiteestä.</string>
     <string name="userinfo">Käyttäjätiedot</string>
     <string name="meshtastic_new_nodes_notifications">Uuden laitteen ilmoitukset</string>
     <string name="more_details">Lisätietoja</string>

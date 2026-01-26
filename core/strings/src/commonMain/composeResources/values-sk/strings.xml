@@ -109,6 +109,7 @@
     <string name="label_short_fast">Krátky Dosah -  Rýchlo</string>
     <string name="label_short_slow">Krátky Dosah - Pomali</string>
     <!-- Position Config -->
+    <string name="channel">Kanál</string>
     <string name="channel_name">Názov kanála</string>
     <string name="qr_code">QR kód</string>
     <string name="unknown_username">Neznáme užívateľské meno</string>
@@ -249,7 +250,6 @@
     <string name="encryption_psk">Zdieľaný kľúč</string>
     <string name="encryption_pkc">Šifrovanie verejného kľúča</string>
     <string name="encryption_error">Nezhoda verejného kľúča</string>
-    <string name="encryption_error_text">Verejný kľúč sa nezhoduje so zaznamenaným kľúčom. Môžete odstrániť uzol a nechať ho znova vymeniť kľúče, ale to môže naznačovať vážnejší bezpečnostný problém. Kontaktujte používateľa prostredníctvom iného dôveryhodného kanála a zistite, či bola zmena kľúča spôsobená obnovením továrenských nastavení alebo inou úmyselnou akciou.</string>
     <string name="meshtastic_new_nodes_notifications">Notifikácie nových uzlov</string>
     <string name="more_details">Viac detailov</string>
     <string name="snr">SNR</string>

@@ -64,6 +64,7 @@
     <string name="rebroadcast_mode_none_desc">Ceadaítear é seo ach amháin do na róil SENSOR, TRACKER agus TAK_TRACKER, agus cuirfidh sé bac ar gach athdháileadh, cosúil leis an róil CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Cuireann sé bac ar phacáistí ó phortníomhaíochtaí neamhchaighdeánacha mar: TAK, RangeTest, PaxCounter, srl. Ní athdháileann ach pacáistí le portníomhaíochtaí caighdeánacha: NodeInfo, Text, Position, Telemetry, agus Routing.</string>
     <!-- Position Config -->
+    <string name="channel">Cainéal</string>
     <string name="channel_name">Ainm Cainéal</string>
     <string name="qr_code">Cód QR</string>
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
@@ -202,7 +203,6 @@
     <string name="encryption_psk">Eochair roinnte</string>
     <string name="encryption_pkc">Cóid Poiblí Eochair</string>
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
-    <string name="encryption_error_text">Ní chomhoireann an eochair phoiblí leis an eochair atá cláraithe. Féachfaidh tú le hiarraidh na nod agus athmhaoin na heochrach ach seo féadfaidh a léiriú fadhb níos tromchúisí i gcúrsaí slándála. Téigh i dteagmháil leis an úsáideoir tríd an gcainéal eile atá ar fáil chun a fháil amach an bhfuil athrú eochrach de réir athshocrú monarcha nó aidhm eile ar do chuid.</string>
     <string name="meshtastic_new_nodes_notifications">Fógartha faoi na nodes nua</string>
     <string name="more_details">Tuilleadh sonraí</string>
     <string name="snr_definition">Ráta Sigineal go Torann, tomhas a úsáidtear i gcomhfhreagras chun an leibhéal de shígnéil inmhianaithe agus torann cúlra a mheas. I Meshtastic agus i gcórais gan sreang eile, ciallaíonn SNR níos airde go bhfuil sígneál níos soiléire ann agus ábalta méadú ar chreideamh agus cáilíocht an tarchur sonraí.</string>

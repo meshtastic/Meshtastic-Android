@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Silumine</string>
+    <string name="channel">Kanal</string>
     <string name="channel_name">Kanali nimi</string>
     <string name="qr_code">QR kood</string>
     <string name="unknown_username">Tundmatu kasutajanimi</string>
@@ -383,7 +384,8 @@
     <string name="encryption_pkc">Avaliku võtme krüpteerimine</string>
     <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme infrastruktuuri.</string>
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
-    <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete taastamine või muu tahtlik tegevus.</string>
+    <string name="encryption_error_text">Avalikvõti ei ühti salvestatud võtmele. Võid sõlme eemaldada ja lasta uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtmevahetus oli tingitud tehaseseadete taastamisest või muust tahtlikust toimingust.</string>
+    <string name="userinfo">Kasutaja teave</string>
     <string name="meshtastic_new_nodes_notifications">Uue sõlme teade</string>
     <string name="more_details">Rohkem üksikasju</string>
     <string name="snr">SNR</string>
@@ -396,6 +398,7 @@
     <string name="position_log">Asukoht</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
     <string name="env_metrics_log">Keskkonnamõõdikud</string>
+    <string name="sig_metrics_log">Signaali mõõdikud</string>
     <string name="administration">Haldus</string>
     <string name="remote_admin">Kaughaldus</string>
     <string name="bad">Halb</string>
@@ -630,6 +633,9 @@
     <string name="subnet">Alamvõrk</string>
     <string name="paxcounter_config">Paxcounter sätted</string>
     <string name="paxcounter_enabled">Paxcounter lubatud</string>
+    <string name="status_message">Oleku teavitus</string>
+    <string name="status_message_config">Olekuteate sätted</string>
+    <string name="node_status_summary">Tegeliku oleku string</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI lävi (vaikeväärtus -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI lävi (vaikeväärtus -80)</string>
     <string name="position_config">Asukoht</string>
@@ -758,6 +764,8 @@
     <string name="public_key_changed">Avalik võti muudetud</string>
     <string name="import_label">Lae</string>
     <string name="request">Taotlus</string>
+    <string name="requesting_from">%1$s taotlemine kasutajalt %2$s</string>
+    <string name="user_info">Kasutaja teave</string>
     <string name="request_neighbor_info">Naabriinfo (2.7.15+)</string>
     <string name="request_telemetry">Taotle telemeetriat</string>
     <string name="request_device_metrics">Seadme mõõdikud</string>
@@ -766,6 +774,7 @@
     <string name="request_power_metrics">Võimsusnäitajad</string>
     <string name="request_local_stats">Kohalik statistika</string>
     <string name="request_host_metrics">Hosti mõõdik</string>
+    <string name="request_pax_metrics">Pax mõõdiku küsimine</string>
     <string name="request_metadata">Metaandmed</string>
     <string name="actions">Toimingud</string>
     <string name="firmware">Püsivara</string>
@@ -861,6 +870,7 @@
     <string name="clear_selection">Ära vali midagi</string>
     <string name="message_input_label">Sõnum</string>
     <string name="type_a_message">Sisesta sõnum</string>
+    <string name="pax_metrics_log">Pax mõõdiku logi</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
@@ -1093,5 +1103,6 @@
     <string name="add_channels_description">QR-koodist leiti järgmised kanalid. Valige millised soovite oma seadmesse lisada. Olemasolevad kanalid säilivad.</string>
     <string name="replace_channels_and_settings_title">Kanali &amp; sätete asendamine</string>
     <string name="replace_channels_and_settings_description">See QR-kood sisaldab täielikku konfiguratsiooni. See ASENDAB olemasolevad kanalid ja raadioseaded. Kõik olemasolevad kanalid eemaldatakse.</string>
+    <string name="loading">Laen</string>
     <!-- Message Filter -->
 </resources>

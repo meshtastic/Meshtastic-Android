@@ -152,6 +152,7 @@
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Felsökning</string>
+    <string name="channel">Kanal</string>
     <string name="channel_name">Kanalnamn</string>
     <string name="qr_code">QR-kod</string>
     <string name="unknown_username">Okänt användarnamn</string>
@@ -364,7 +365,6 @@
     <string name="encryption_pkc">Kryptering med Publik nyckel</string>
     <string name="encryption_pkc_text">Direktmeddelanden använder den nya publika nyckelinfrastrukturen (PKI) för kryptering.</string>
     <string name="encryption_error">Publik nyckel matchar inte</string>
-    <string name="encryption_error_text">Den publika nyckel matchar inte den insamlade. Du kan ta bort noden ur nod listan för att förhandla nycklar på nytt, men det här kan påvisa ett säkerhetsproblem. Kontakta nodens ägare igenom en annan betrodd kanal för att avgöra om nyckeländringen berodde på en fabriksåterställning eller annan avsiktlig åtgärd.</string>
     <string name="meshtastic_new_nodes_notifications">Ny nod avisering</string>
     <string name="more_details">Mer detaljer</string>
     <string name="snr">SNR</string>
