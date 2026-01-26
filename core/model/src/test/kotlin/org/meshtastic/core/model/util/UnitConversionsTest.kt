@@ -78,6 +78,12 @@ class UnitConversionsTest {
     }
 
     @Test
+    fun `toTempString handles NaN`() {
+        assertEquals("--", Float.NaN.toTempString(false))
+        assertEquals("--", Float.NaN.toTempString(true))
+    }
+
+    @Test
     fun `celsiusToFahrenheit converts correctly`() {
         mapOf(
             0.0f to 32.0f,
