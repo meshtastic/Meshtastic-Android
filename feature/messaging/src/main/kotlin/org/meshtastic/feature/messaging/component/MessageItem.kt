@@ -326,18 +326,18 @@ internal fun MessageItem(
                             modifier = Modifier.padding(start = 8.dp, end = 4.dp),
                         )
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier.padding(start = 8.dp),
-                        text = message.time,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
                     if (message.fromLocal) {
                         MessageStatusIcon(
                             status = message.status ?: MessageStatus.UNKNOWN,
-                            modifier = Modifier.size(24.dp).padding(horizontal = 4.dp),
+                            modifier = Modifier.size(18.dp),
                         )
                     }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        modifier = Modifier.padding(start = 16.dp),
+                        text = message.time,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
                 }
             }
         }
