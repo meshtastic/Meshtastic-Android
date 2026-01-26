@@ -147,6 +147,7 @@ jobs:
         run: bundle exec fastlane internal
 
       - name: Upload Google AAB artifact
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: google-aab
@@ -154,6 +155,7 @@ jobs:
           retention-days: 1
 
       - name: Upload Google APK artifact
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: google-apk
@@ -161,6 +163,7 @@ jobs:
           retention-days: 1
 
       - name: Attest Google artifacts provenance
+        if: always()
         uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
