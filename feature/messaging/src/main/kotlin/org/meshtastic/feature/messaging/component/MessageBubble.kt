@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/**
+ * Returns a [CornerBasedShape] for a message bubble based on its position in a sequence.
+ *
+ * @param cornerRadius The base corner radius for the bubble.
+ * @param isSender Whether the message was sent by the local user.
+ * @param hasSamePrev Whether the previous message in the list is from the same sender.
+ * @param hasSameNext Whether the next message in the list is from the same sender.
+ */
 internal fun getMessageBubbleShape(
     cornerRadius: Dp,
     isSender: Boolean,
@@ -31,18 +39,20 @@ internal fun getMessageBubbleShape(
     val round = cornerRadius
 
     return if (isSender) {
+        // Sent messages are on the right.
         RoundedCornerShape(
-            topStart = if (hasSamePrev) square else round,
+            topStart = round,
             topEnd = if (hasSamePrev) square else round,
-            bottomStart = if (hasSameNext) square else round,
+            bottomStart = round,
             bottomEnd = square,
         )
     } else {
+        // Received messages are on the left.
         RoundedCornerShape(
             topStart = square,
-            topEnd = if (hasSamePrev) square else round,
+            topEnd = round,
             bottomStart = if (hasSameNext) square else round,
-            bottomEnd = if (hasSameNext) square else round,
+            bottomEnd = round,
         )
     }
 }

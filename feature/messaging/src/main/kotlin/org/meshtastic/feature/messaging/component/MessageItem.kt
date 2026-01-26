@@ -24,11 +24,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.FormatQuote
 import androidx.compose.material3.CardDefaults
@@ -114,20 +117,22 @@ internal fun MessageItem(
     hasSameNext: Boolean = false,
 ) = Column(
     modifier =
-    modifier.padding(
-        top =
-        if (showUserName) {
-            16.dp
-        } else {
-            4.dp
-        },
-    ),
+    modifier
+        .fillMaxWidth()
+        .padding(
+            top =
+            if (showUserName) {
+                6.dp
+            } else {
+                1.dp
+            },
+        ),
 ) {
     var activeSheet by remember { mutableStateOf<ActiveSheet?>(null) }
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
+    val isLocal = node.num == ourNode.num
     if (activeSheet != null) {
         ModalBottomSheet(onDismissRequest = { activeSheet = null }, sheetState = sheetState) {
             when (activeSheet) {
@@ -159,6 +164,14 @@ internal fun MessageItem(
                             activeSheet = null
                             onDelete()
                         },
+                        statusString = message.getStatusStringRes(),
+                        status =
+                        if (isLocal) {
+                            message.status
+                        } else {
+                            null
+                        },
+                        onStatus = onStatusClick,
                     )
                 }
 
@@ -199,7 +212,7 @@ internal fun MessageItem(
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
     val messageShape =
         getMessageBubbleShape(
-            cornerRadius = 16.dp,
+            cornerRadius = 8.dp,
             isSender = message.fromLocal,
             hasSamePrev = hasSamePrev,
             hasSameNext = hasSameNext,
@@ -219,7 +232,7 @@ internal fun MessageItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            NodeChip(node = node, onClick = onClickChip)
+            NodeChip(node = node, onClick = onClickChip, modifier = Modifier.height(28.dp))
             Text(
                 text = node.user.longName,
                 overflow = TextOverflow.Ellipsis,
@@ -237,10 +250,11 @@ internal fun MessageItem(
     }
     Surface(
         modifier =
-        Modifier.padding(
-            start = if (!message.fromLocal) 0.dp else 24.dp,
-            end = if (message.fromLocal) 0.dp else 24.dp,
-        )
+        Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
+            .padding(
+                start = if (!message.fromLocal) 0.dp else 24.dp,
+                end = if (message.fromLocal) 0.dp else 24.dp,
+            )
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = {
@@ -260,7 +274,7 @@ internal fun MessageItem(
         contentColor = contentColorFor(containerColor),
         shape = messageShape,
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.width(IntrinsicSize.Max)) {
             OriginalMessageSnippet(
                 modifier = Modifier.fillMaxWidth(),
                 message = message,
@@ -269,10 +283,10 @@ internal fun MessageItem(
                 onNavigateToOriginalMessage = onNavigateToOriginalMessage,
             )
 
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)) {
                 AutoLinkText(
                     text = message.text,
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = cardColors.contentColor,
                 )
 
@@ -314,15 +328,14 @@ internal fun MessageItem(
                     }
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(start = 8.dp),
                         text = message.time,
                         style = MaterialTheme.typography.labelSmall,
                     )
                     if (message.fromLocal) {
                         MessageStatusIcon(
                             status = message.status ?: MessageStatus.UNKNOWN,
-                            onClick = onStatusClick,
-                            modifier = modifier.size(24.dp).padding(horizontal = 4.dp),
+                            modifier = Modifier.size(24.dp).padding(horizontal = 4.dp),
                         )
                     }
                 }
@@ -332,10 +345,11 @@ internal fun MessageItem(
     AnimatedVisibility(emojis.isNotEmpty()) {
         ReactionRow(
             modifier =
-            Modifier.padding(
-                start = if (!message.fromLocal) 0.dp else 24.dp,
-                end = if (message.fromLocal) 0.dp else 24.dp,
-            ),
+            Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
+                .padding(
+                    start = if (!message.fromLocal) 0.dp else 24.dp,
+                    end = if (message.fromLocal) 0.dp else 24.dp,
+                ),
             reactions = if (message.fromLocal) emojis.reversed() else emojis,
             myId = ourNode.user.id,
             onSendReaction = sendReaction,
@@ -355,7 +369,7 @@ private enum class ActiveSheet {
 }
 
 @Composable
-private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun MessageStatusIcon(status: MessageStatus, modifier: Modifier = Modifier) {
     val icon =
         when (status) {
             MessageStatus.RECEIVED -> MeshtasticIcons.CloudDone
@@ -368,9 +382,9 @@ private fun MessageStatusIcon(status: MessageStatus, onClick: () -> Unit, modifi
             else -> MeshtasticIcons.Warning
         }
     Icon(
+        modifier = modifier,
         imageVector = icon,
         contentDescription = stringResource(Res.string.message_delivery_status),
-        modifier = modifier.clickable(onClick = onClick),
     )
 }
 
@@ -404,7 +418,7 @@ private fun OriginalMessageSnippet(
             ),
         ) {
             Row(
-                modifier = Modifier.padding(8.dp),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
@@ -425,7 +439,6 @@ private fun OriginalMessageSnippet(
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(start = 20.dp),
                 )
             }
         }
@@ -514,7 +527,10 @@ private fun MessageItemPreview() {
             filtered = true,
         )
     AppTheme {
-        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
+        Column(
+            modifier =
+            Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp),
+        ) {
             MessageItem(
                 message = sent,
                 node = sent.node,
