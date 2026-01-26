@@ -30,7 +30,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.air_utilization
 import org.meshtastic.core.strings.channel_utilization
@@ -96,9 +95,6 @@ fun SignalInfo(
                     }
                 }
             }
-        }
-        if (node.deviceMetrics.uptimeSeconds > 0) {
-            UptimeInfo(uptime = formatUptime(node.deviceMetrics.uptimeSeconds), contentColor = contentColor)
         }
     }
 }
