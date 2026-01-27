@@ -139,6 +139,12 @@ private fun rememberTelemetricFeatures(
             cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
         ),
         TelemetricFeature(
+            titleRes = LogsType.SIGNAL.titleRes,
+            icon = LogsType.SIGNAL.icon,
+            requestAction = null,
+            logsType = LogsType.SIGNAL,
+        ),
+        TelemetricFeature(
             titleRes = LogsType.DEVICE.titleRes,
             icon = LogsType.DEVICE.icon,
             requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.DEVICE) },
