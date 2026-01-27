@@ -29,7 +29,7 @@ compose-multiplatform = "1.10.0"
 
 # Google
 hilt = "2.59"
-maps-compose = "7.0.0"
+maps-compose = "8.0.0"
 
 # Networking
 ktor = "3.4.0"
@@ -37,11 +37,10 @@ ktor = "3.4.0"
 # Other
 aboutlibraries = "13.2.1"
 coil = "3.3.0"
-dd-sdk-android = "3.5.0"
+dd-sdk-android = "3.6.0"
 detekt = "1.23.8"
 devtools-ksp = "2.3.4"
 markdownRenderer = "0.39.1"
-molecule = "2.2.0"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
 
@@ -114,7 +113,6 @@ location-services = { module = "com.google.android.gms:play-services-location", 
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
-molecule-runtime = { module = "app.cash.molecule:molecule-runtime", version.ref = "molecule" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
@@ -191,7 +189,7 @@ androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", vers
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.22.0" }
-detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.5" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.6" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }

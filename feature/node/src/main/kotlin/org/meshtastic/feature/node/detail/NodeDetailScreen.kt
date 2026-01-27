@@ -25,15 +25,14 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
@@ -138,7 +137,7 @@ private fun NodeDetailScaffold(
         compassViewModel?.uiState?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(CompassUiState()) }
 
     val node = uiState.node
-    val scrollState = rememberScrollState()
+    val listState = rememberLazyListState()
 
     Scaffold(
         modifier = modifier,
@@ -158,7 +157,7 @@ private fun NodeDetailScaffold(
         NodeDetailContent(
             uiState = uiState,
             viewModel = viewModel,
-            scrollState = scrollState,
+            listState = listState,
             onAction = { action ->
                 when (action) {
                     is NodeDetailAction.ShareContact -> activeOverlay = NodeDetailOverlay.SharedContact
@@ -191,7 +190,7 @@ private fun NodeDetailScaffold(
 private fun NodeDetailContent(
     uiState: NodeDetailUiState,
     viewModel: NodeDetailViewModel,
-    scrollState: ScrollState,
+    listState: LazyListState,
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     modifier: Modifier = Modifier,
@@ -207,7 +206,7 @@ private fun NodeDetailContent(
                 node = uiState.node,
                 ourNode = uiState.ourNode,
                 uiState = uiState,
-                scrollState = scrollState,
+                listState = listState,
                 onAction = onAction,
                 onFirmwareSelect = onFirmwareSelect,
                 onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },
@@ -282,31 +281,37 @@ private fun NodeDetailList(
     node: Node,
     ourNode: Node?,
     uiState: NodeDetailUiState,
-    scrollState: ScrollState,
+    listState: LazyListState,
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     onSaveNotes: (Int, String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(16.dp).focusable(),
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        NodeDetailsSection(node)
-        DeviceActions(
-            node = node,
-            lastTracerouteTime = uiState.lastTracerouteTime,
-            lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
-            availableLogs = uiState.availableLogs,
-            onAction = onAction,
-            metricsState = uiState.metricsState,
-            isLocal = uiState.metricsState.isLocal,
-        )
-        PositionSection(node, ourNode, uiState.metricsState, uiState.availableLogs, onAction)
-        if (uiState.metricsState.deviceHardware != null) DeviceDetailsSection(uiState.metricsState)
-        NotesSection(node = node, onSaveNotes = onSaveNotes)
+        item { NodeDetailsSection(node) }
+        item {
+            DeviceActions(
+                node = node,
+                lastTracerouteTime = uiState.lastTracerouteTime,
+                lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
+                availableLogs = uiState.availableLogs,
+                onAction = onAction,
+                metricsState = uiState.metricsState,
+                isLocal = uiState.metricsState.isLocal,
+            )
+        }
+        item { PositionSection(node, ourNode, uiState.metricsState, uiState.availableLogs, onAction) }
+        if (uiState.metricsState.deviceHardware != null) {
+            item { DeviceDetailsSection(uiState.metricsState) }
+        }
+        item { NotesSection(node = node, onSaveNotes = onSaveNotes) }
         if (!uiState.metricsState.isManaged) {
-            AdministrationSection(node, uiState.metricsState, onAction, onFirmwareSelect)
+            item { AdministrationSection(node, uiState.metricsState, onAction, onFirmwareSelect) }
         }
     }
 }

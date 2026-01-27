@@ -384,6 +384,8 @@
     <string name="encryption_pkc">Chiffrement de clé publique</string>
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement.</string>
     <string name="encryption_error">Non-concordance de clé publique</string>
+    <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
+    <string name="userinfo">Infos utilisateur</string>
     <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
@@ -396,6 +398,7 @@
     <string name="position_log">Position</string>
     <string name="last_position_update">Dernière mise à jour de position</string>
     <string name="env_metrics_log">Métriques d'environnement</string>
+    <string name="sig_metrics_log">Métriques de Signal</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Administration à distance</string>
     <string name="bad">Mauvais</string>
@@ -630,6 +633,9 @@
     <string name="subnet">Sous-réseau</string>
     <string name="paxcounter_config">Configuration du Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activé</string>
+    <string name="status_message">Statut du message</string>
+    <string name="status_message_config">Configuration du statut du message</string>
+    <string name="node_status_summary">La chaîne de statut actuelle</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Seuil RSSI WiFi (par défaut -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">Seuil BLE RSSI (par défaut -80)</string>
     <string name="position_config">Position</string>
@@ -758,6 +764,8 @@
     <string name="public_key_changed">Clé publique modifiée</string>
     <string name="import_label">Importer</string>
     <string name="request">Demander :</string>
+    <string name="requesting_from">Requête %1$s de %2$s</string>
+    <string name="user_info">Infos utilisateur</string>
     <string name="request_neighbor_info">Informations de voisinage (2.7.15+)</string>
     <string name="request_telemetry">Demander la télémétrie</string>
     <string name="request_device_metrics">Métriques de l’appareil</string>
@@ -766,6 +774,7 @@
     <string name="request_power_metrics">Métriques d'alimentation</string>
     <string name="request_local_stats">Statistiques locales</string>
     <string name="request_host_metrics">Métriques de l’hôte</string>
+    <string name="request_pax_metrics">Métriques de Pax</string>
     <string name="request_metadata">Métadonnées</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
@@ -861,7 +870,9 @@
     <string name="clear_selection">Effacer la sélection</string>
     <string name="message_input_label">Message</string>
     <string name="type_a_message">Composer un message</string>
+    <string name="pax_metrics_log">Métriques de PAX</string>
     <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">Aucune métrique PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
     <string name="ble_devices">Appareils BLE</string>
     <string name="bluetooth_paired_devices">Périphériques appairés</string>
@@ -1090,5 +1101,21 @@
     <string name="add_channels_description">Les canaux suivants ont été trouvés dans le QR code. Sélectionnez ceux que vous souhaitez ajouter à votre appareil. Les canaux existants seront préservés.</string>
     <string name="replace_channels_and_settings_title">Remplacer les canaux &amp; les paramètres</string>
     <string name="replace_channels_and_settings_description">Ce code QR contient une configuration complète. Cela remplacera vos canaux et paramètres radio existants. Tous les canaux existants seront supprimés.</string>
+    <string name="loading">Chargement</string>
     <!-- Message Filter -->
+    <string name="filter_settings">Filtre de message</string>
+    <string name="filter_enable">Activer le filtrage</string>
+    <string name="filter_enable_summary">Cacher les messages contenant les mots du filtre</string>
+    <string name="filter_words">Filtrer des Mots</string>
+    <string name="filter_words_summary">Les messages contenant ces mots seront masqués</string>
+    <string name="filter_add_placeholder">Ajouter un mot ou une expression régulière : modèle</string>
+    <string name="filter_no_words">Aucun filtre de mots configuré</string>
+    <string name="filter_regex_pattern">Modèle d'expression régulière</string>
+    <string name="filter_whole_word">Correspondance de mot entier</string>
+    <string name="filter_filtered_count">%1$d filtré</string>
+    <string name="filter_show_count">Afficher %1$d filtré</string>
+    <string name="filter_hide_count">Masquer %1$d filtré</string>
+    <string name="filter_message_label">Filtré</string>
+    <string name="filter_enable_for_contact">Activer le filtrage</string>
+    <string name="filter_disable_for_contact">Désactiver le filtrage</string>
 </resources>

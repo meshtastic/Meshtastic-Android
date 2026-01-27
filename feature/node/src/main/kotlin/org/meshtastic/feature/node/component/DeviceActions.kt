@@ -107,13 +107,16 @@ fun DeviceActions(
                 onAction = onAction,
                 onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
             )
-            SectionDivider(Modifier.padding(vertical = 8.dp))
-            ManagementActions(
-                node = node,
-                onIgnoreClick = { displayedDialog = DialogType.IGNORE },
-                onMuteClick = { displayedDialog = DialogType.MUTE },
-                onRemoveClick = { displayedDialog = DialogType.REMOVE },
-            )
+
+            if (!isLocal) {
+                SectionDivider(Modifier.padding(vertical = 8.dp))
+                ManagementActions(
+                    node = node,
+                    onIgnoreClick = { displayedDialog = DialogType.IGNORE },
+                    onMuteClick = { displayedDialog = DialogType.MUTE },
+                    onRemoveClick = { displayedDialog = DialogType.REMOVE },
+                )
+            }
         }
 
         TelemetricActionsSection(
@@ -123,6 +126,7 @@ fun DeviceActions(
             lastRequestNeighborsTime = lastRequestNeighborsTime,
             metricsState = metricsState,
             onAction = onAction,
+            isLocal = isLocal,
         )
     }
 }
@@ -168,12 +172,14 @@ private fun PrimaryActionsRow(
             }
         }
 
-        IconToggleButton(checked = node.isFavorite, onCheckedChange = { onFavoriteClick() }) {
-            Icon(
-                imageVector = if (node.isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                contentDescription = stringResource(Res.string.favorite),
-                tint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
-            )
+        if (!isLocal) {
+            IconToggleButton(checked = node.isFavorite, onCheckedChange = { onFavoriteClick() }) {
+                Icon(
+                    imageVector = if (node.isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
+                    contentDescription = stringResource(Res.string.favorite),
+                    tint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
+                )
+            }
         }
     }
 }

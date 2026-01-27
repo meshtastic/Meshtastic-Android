@@ -1237,6 +1237,22 @@
     ]
   },
   {
+    "hwModel": 113,
+    "hwModelSlug": "HELTEC_WIRELESS_TRACKER_V2",
+    "platformioTarget": "heltec-wireless-tracker-v2",
+    "architecture": "esp32s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Heltec Wireless Tracker V2",
+    "tags": [
+      "Heltec"
+    ],
+    "images": [
+      "heltec_wireless_tracker_v2.svg"
+    ],
+    "partitionScheme": "8MB"
+  },
+  {
     "hwModel": 115,
     "hwModelSlug": "THINKNODE_M3",
     "platformioTarget": "thinknode_m3",

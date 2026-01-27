@@ -94,8 +94,8 @@ import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Delete
-import org.meshtastic.core.ui.icon.HardwareModel
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
 import org.meshtastic.core.ui.icon.VolumeUpTwoTone
@@ -231,7 +231,7 @@ fun ContactsScreen(
                 ),
                 onClick = onNavigateToShare,
             ) {
-                Icon(MeshtasticIcons.HardwareModel, contentDescription = stringResource(Res.string.share_contact))
+                Icon(MeshtasticIcons.QrCode2, contentDescription = stringResource(Res.string.share_contact))
             }
         },
     ) { paddingValues ->
