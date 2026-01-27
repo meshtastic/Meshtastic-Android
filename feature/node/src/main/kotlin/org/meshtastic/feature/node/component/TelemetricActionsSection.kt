@@ -94,7 +94,9 @@ internal fun TelemetricActionsSection(
 
     SectionCard(title = Res.string.telemetry) {
         features
-            .filter { it.isVisible(node) }
+            .filter { feature ->
+                feature.isVisible(node) || (feature.logsType != null && availableLogs.contains(feature.logsType))
+            }
             .forEachIndexed { index, feature ->
                 if (index > 0) {
                     SectionDivider()
