@@ -32,13 +32,11 @@ import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Reply
 import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -46,37 +44,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.delete
+import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.select
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MessageActionsBottomSheet(
-    quickEmojis: List<String>,
-    onDismiss: () -> Unit,
-    onReply: () -> Unit,
-    onReact: (String) -> Unit,
-    onMoreReactions: () -> Unit,
-    onCopy: () -> Unit,
-    onSelect: () -> Unit,
-    onDelete: () -> Unit,
-) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        MessageActionsContent(
-            quickEmojis = quickEmojis,
-            onReply = onReply,
-            onReact = onReact,
-            onMoreReactions = onMoreReactions,
-            onCopy = onCopy,
-            onSelect = onSelect,
-            onDelete = onDelete,
-        )
-    }
-}
 
 @Composable
 fun MessageActionsContent(
@@ -87,11 +63,26 @@ fun MessageActionsContent(
     onCopy: () -> Unit,
     onSelect: () -> Unit,
     onDelete: () -> Unit,
+    statusString: Pair<StringResource, StringResource>? = null,
+    status: MessageStatus? = null,
+    onStatus: (() -> Unit),
 ) {
     Column {
         QuickEmojiRow(quickEmojis = quickEmojis, onReact = onReact, onMoreReactions = onMoreReactions)
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        if (status != null) {
+            val title =
+                statusString?.first?.let { stringResource(it) } ?: stringResource(Res.string.message_delivery_status)
+            val statusText = statusString?.second?.let { stringResource(it) }
+
+            ListItem(
+                headlineContent = { Text("$title : $statusText") },
+                leadingContent = { MessageStatusIcon(status = status) },
+                modifier = Modifier.clickable(onClick = onStatus),
+            )
+        }
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
