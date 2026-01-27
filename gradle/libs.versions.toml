@@ -29,7 +29,7 @@ compose-multiplatform = "1.10.0"
 
 # Google
 hilt = "2.59"
-maps-compose = "7.0.0"
+maps-compose = "8.0.0"
 
 # Networking
 ktor = "3.4.0"
