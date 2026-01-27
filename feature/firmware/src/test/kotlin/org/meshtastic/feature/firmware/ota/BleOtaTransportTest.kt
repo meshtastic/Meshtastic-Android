@@ -23,6 +23,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
@@ -44,10 +45,11 @@ class BleOtaTransportTest {
 
     private val centralManager: CentralManager = mockk()
     private val address = "00:11:22:33:44:55"
-    private val transport = BleOtaTransport(centralManager, address)
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
     @Test
-    fun `race condition check - response before waitForResponse`() = runTest {
+    fun `race condition check - response before waitForResponse`() = runTest(testDispatcher) {
         val peripheral: Peripheral = mockk(relaxed = true)
         val otaChar: RemoteCharacteristic = mockk(relaxed = true)
         val txChar: RemoteCharacteristic = mockk(relaxed = true)
@@ -70,7 +72,7 @@ class BleOtaTransportTest {
 
         coEvery { centralManager.connect(any(), any()) } returns Unit
 
-        val notificationFlow = MutableSharedFlow<ByteArray>()
+        val notificationFlow = MutableSharedFlow<ByteArray>(extraBufferCapacity = 1)
         every { txChar.subscribe() } returns notificationFlow
 
         // Connect

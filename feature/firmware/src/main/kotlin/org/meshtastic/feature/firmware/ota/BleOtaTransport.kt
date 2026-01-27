@@ -17,7 +17,9 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.filterNotNull
@@ -47,9 +49,13 @@ import kotlin.uuid.toKotlinUuid
  * - OTA Characteristic (Write): 62ec0272-3ec5-11eb-b378-0242ac130005
  * - TX Characteristic (Notify): 62ec0272-3ec5-11eb-b378-0242ac130003
  */
-class BleOtaTransport(private val centralManager: CentralManager, private val address: String) : UnifiedOtaProtocol {
+class BleOtaTransport(
+    private val centralManager: CentralManager,
+    private val address: String,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
+) : UnifiedOtaProtocol {
 
-    private val transportScope = CoroutineScope(SupervisorJob())
+    private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private var peripheral: Peripheral? = null
     private var otaCharacteristic: RemoteCharacteristic? = null
 
