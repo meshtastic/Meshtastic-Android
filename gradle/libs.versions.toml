@@ -41,7 +41,6 @@ dd-sdk-android = "3.5.0"
 detekt = "1.23.8"
 devtools-ksp = "2.3.4"
 markdownRenderer = "0.39.1"
-molecule = "2.2.0"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
 
@@ -114,7 +113,6 @@ location-services = { module = "com.google.android.gms:play-services-location", 
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
-molecule-runtime = { module = "app.cash.molecule:molecule-runtime", version.ref = "molecule" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
 protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }

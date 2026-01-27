@@ -140,8 +140,10 @@ private fun MainNodeDetails(node: Node) {
         HearsAndHopsRow(node)
         SectionDivider()
         UserAndUptimeRow(node)
-        SectionDivider()
-        SignalRow(node)
+        if (node.hopsAway == 0) {
+            SectionDivider()
+            SignalRow(node)
+        }
         if (node.viaMqtt || node.manuallyVerified) {
             SectionDivider()
             MqttAndVerificationRow(node)

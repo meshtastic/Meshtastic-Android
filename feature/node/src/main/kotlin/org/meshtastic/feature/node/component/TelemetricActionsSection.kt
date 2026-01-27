@@ -89,12 +89,15 @@ internal fun TelemetricActionsSection(
     lastRequestNeighborsTime: Long?,
     metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
+    isLocal: Boolean = false,
 ) {
-    val features = rememberTelemetricFeatures(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState)
+    val features = rememberTelemetricFeatures(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState, isLocal)
 
     SectionCard(title = Res.string.telemetry) {
         features
-            .filter { it.isVisible(node) }
+            .filter { feature ->
+                feature.isVisible(node) || (feature.logsType != null && availableLogs.contains(feature.logsType))
+            }
             .forEachIndexed { index, feature ->
                 if (index > 0) {
                     SectionDivider()
@@ -116,12 +119,14 @@ private fun rememberTelemetricFeatures(
     lastTracerouteTime: Long?,
     lastRequestNeighborsTime: Long?,
     metricsState: MetricsState,
-): List<TelemetricFeature> = remember(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState) {
+    isLocal: Boolean,
+): List<TelemetricFeature> = remember(node, lastTracerouteTime, lastRequestNeighborsTime, metricsState, isLocal) {
     listOf(
         TelemetricFeature(
             titleRes = Res.string.userinfo,
             icon = MeshtasticIcons.Person,
             requestAction = { NodeMenuAction.RequestUserInfo(it) },
+            isVisible = { !isLocal },
         ),
         TelemetricFeature(
             titleRes = LogsType.TRACEROUTE.titleRes,
@@ -129,6 +134,7 @@ private fun rememberTelemetricFeatures(
             requestAction = { NodeMenuAction.TraceRoute(it) },
             logsType = LogsType.TRACEROUTE,
             cooldownTimestamp = lastTracerouteTime,
+            isVisible = { !isLocal },
         ),
         TelemetricFeature(
             titleRes = Res.string.neighbor_info,
@@ -137,6 +143,13 @@ private fun rememberTelemetricFeatures(
             isVisible = { it.capabilities.canRequestNeighborInfo },
             cooldownTimestamp = lastRequestNeighborsTime,
             cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
+        ),
+        TelemetricFeature(
+            titleRes = LogsType.SIGNAL.titleRes,
+            icon = LogsType.SIGNAL.icon,
+            requestAction = null,
+            logsType = LogsType.SIGNAL,
+            isVisible = { it.hopsAway == 0 && !isLocal },
         ),
         TelemetricFeature(
             titleRes = LogsType.DEVICE.titleRes,

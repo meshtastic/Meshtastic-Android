@@ -75,6 +75,7 @@ fun PositionSection(
 ) {
     val distance = ourNode?.distance(node)?.takeIf { it > 0 }?.toDistanceString(metricsState.displayUnits)
     val hasValidPosition = node.latitude != 0.0 || node.longitude != 0.0
+    val isLocal = metricsState.isLocal
 
     SectionCard(title = Res.string.position, modifier = modifier) {
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -84,7 +85,9 @@ fun PositionSection(
                 Spacer(Modifier.height(8.dp))
             }
 
-            PositionActionButtons(node, hasValidPosition, metricsState.displayUnits, onAction)
+            if (!isLocal) {
+                PositionActionButtons(node, hasValidPosition, metricsState.displayUnits, onAction)
+            }
 
             if (availableLogs.contains(LogsType.NODE_MAP) || availableLogs.contains(LogsType.POSITIONS)) {
                 Spacer(Modifier.height(12.dp))
