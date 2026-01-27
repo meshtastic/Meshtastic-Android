@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9443",
+      "title": "Fix StoreForwardModule retry_delay multiplier always evaluating to 2x",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9443",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9432",
       "title": "Turn off Radio prior to doDeepSleep",
       "page_url": "https://github.com/meshtastic/firmware/pull/9432",
@@ -222,18 +228,6 @@
       "id": "9238",
       "title": "Change I2C pins to NFC pads for XIAO nRF52840",
       "page_url": "https://github.com/meshtastic/firmware/pull/9238",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9227",
-      "title": "Change canned message recipient's previous page to send page",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9227",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9213",
-      "title": "Feature T-Deck Pro and T-Deck: add Chinese IME and built-in GB2312 pinyin table",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9213",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
