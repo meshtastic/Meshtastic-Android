@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.meshtastic.proto.ConfigKt.loRaConfig
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
 
 class ChannelOptionTest {
 
@@ -77,5 +78,25 @@ class ChannelOptionTest {
             protoPresets.size,
             ChannelOption.entries.size,
         )
+    }
+
+    @Test
+    fun `test radioFreq and numChannels for NARROW_868`() {
+        val loraConfig = loRaConfig {
+            region = RegionCode.NARROW_868
+            usePreset = true
+            modemPreset = ModemPreset.NARROW_FAST
+        }
+
+        // bw = 0.0625, spacing = 0.015, channelSpacing = 0.0775
+        // Range = 869.65 - 869.4 = 0.25
+        // numChannels = round(0.25 / 0.0775) = 3
+        assertEquals(3, loraConfig.numChannels)
+
+        // Slot 1: freqStart + spacing + bw/2 = 869.4 + 0.015 + 0.03125 = 869.44625
+        assertEquals(869.44625f, loraConfig.radioFreq(1), 0.0001f)
+
+        // Slot 3: 869.44625 + 2 * 0.0775 = 869.44625 + 0.155 = 869.60125
+        assertEquals(869.60125f, loraConfig.radioFreq(3), 0.0001f)
     }
 }
