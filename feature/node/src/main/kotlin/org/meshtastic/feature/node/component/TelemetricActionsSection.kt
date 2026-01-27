@@ -143,6 +143,7 @@ private fun rememberTelemetricFeatures(
             icon = LogsType.SIGNAL.icon,
             requestAction = null,
             logsType = LogsType.SIGNAL,
+            isVisible = { it.hopsAway == 0 },
         ),
         TelemetricFeature(
             titleRes = LogsType.DEVICE.titleRes,
