@@ -22,7 +22,7 @@ plugins {
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    androidLibrary { androidResources.enable = true }
+    android { androidResources.enable = true }
 }
 
 compose.resources {

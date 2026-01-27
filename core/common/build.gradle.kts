@@ -19,7 +19,7 @@ plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    androidLibrary {}
+    android { androidResources.enable = false }
 
     sourceSets { androidMain.dependencies { implementation(libs.androidx.core.ktx) } }
 }
