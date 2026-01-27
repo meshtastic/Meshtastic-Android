@@ -96,7 +96,7 @@ detekt {
     config.setFrom(rootProject.file("../config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
     allRules = false
-    baseline = layout.projectDirectory.file("detekt-baseline.xml")
+    baseline = layout.projectDirectory.file("detekt-baseline.xml").asFile
     source.setFrom(
         files(
             "src/main/java",
