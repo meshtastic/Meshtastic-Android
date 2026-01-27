@@ -25,9 +25,9 @@ class CapabilitiesTest {
     private fun caps(version: String?) = Capabilities(version, forceEnableAll = false)
 
     @Test
-    fun `canMuteNode requires v2 8 0`() {
+    fun `canMuteNode requires v2 7 18`() {
         assertFalse(caps("2.7.15").canMuteNode)
-        assertFalse(caps("2.7.99").canMuteNode)
+        assertTrue(caps("2.7.18").canMuteNode)
         assertTrue(caps("2.8.0").canMuteNode)
         assertTrue(caps("2.8.1").canMuteNode)
     }

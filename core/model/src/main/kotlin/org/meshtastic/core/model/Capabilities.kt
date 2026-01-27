@@ -34,7 +34,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
      * Note: This is currently not available in firmware but defined here for future support.
      */
     val canMuteNode: Boolean
-        get() = isSupported("2.8.0")
+        get() = isSupported("2.7.18")
 
     /** Ability to request neighbor information from other nodes. Supported since firmware v2.7.15. */
     val canRequestNeighborInfo: Boolean
