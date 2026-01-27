@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Folder
 import androidx.compose.material.icons.rounded.MoreVert
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material.icons.rounded.Search
@@ -79,3 +80,6 @@ val MeshtasticIcons.SelectAll: ImageVector
     get() = Icons.Rounded.SelectAll
 val MeshtasticIcons.ThumbUp: ImageVector
     get() = Icons.Rounded.ThumbUp
+
+val MeshtasticIcons.QrCode2: ImageVector
+    get() = Icons.Rounded.QrCode2
