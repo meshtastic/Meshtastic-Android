@@ -6,10 +6,8 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it under the terms of
+ * the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -65,6 +63,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.env_metrics_log
 import org.meshtastic.core.strings.gas_resistance
 import org.meshtastic.core.strings.humidity
 import org.meshtastic.core.strings.iaq
@@ -137,6 +136,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.env_metrics_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,

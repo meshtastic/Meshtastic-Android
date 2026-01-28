@@ -6,10 +6,8 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it under the terms of
+ * the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -68,6 +66,7 @@ import org.meshtastic.core.strings.traceroute_diff
 import org.meshtastic.core.strings.traceroute_direct
 import org.meshtastic.core.strings.traceroute_duration
 import org.meshtastic.core.strings.traceroute_hops
+import org.meshtastic.core.strings.traceroute_log
 import org.meshtastic.core.strings.traceroute_route_back_to_us
 import org.meshtastic.core.strings.traceroute_route_towards_dest
 import org.meshtastic.core.strings.traceroute_time_and_text
@@ -142,6 +141,7 @@ fun TracerouteLogScreen(
             val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsState()
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.traceroute_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,

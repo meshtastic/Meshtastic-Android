@@ -6,10 +6,8 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * This program is distributed in the hope that it under the terms of
+ * the GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
@@ -79,6 +77,7 @@ import org.meshtastic.core.strings.channel_1
 import org.meshtastic.core.strings.channel_2
 import org.meshtastic.core.strings.channel_3
 import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.power_metrics_log
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
@@ -143,6 +142,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.power_metrics_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -271,7 +271,7 @@ private fun PowerMetricsChart(
         ),
         bottomAxis =
         HorizontalAxis.rememberBottom(
-            label = axisLabel,
+            label = ChartStyling.rememberAxisLabel(),
             valueFormatter = CommonCharts.dynamicTimeFormatter,
             itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
             labelRotationDegrees = 45f,

@@ -77,6 +77,7 @@ import org.meshtastic.core.strings.battery
 import org.meshtastic.core.strings.ch_util_definition
 import org.meshtastic.core.strings.channel_air_util
 import org.meshtastic.core.strings.channel_utilization
+import org.meshtastic.core.strings.device_metrics_log
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -150,6 +151,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.device_metrics_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,

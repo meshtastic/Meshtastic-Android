@@ -226,6 +226,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.pax_metrics_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,

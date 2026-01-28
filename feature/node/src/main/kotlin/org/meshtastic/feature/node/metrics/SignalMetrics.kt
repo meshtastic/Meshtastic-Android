@@ -126,6 +126,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.signal_quality),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
