@@ -62,7 +62,6 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.ConfigProtos.Config
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
@@ -197,9 +196,6 @@ constructor(
 
     private val _environmentState = MutableStateFlow(EnvironmentMetricsState())
     val environmentState: StateFlow<EnvironmentMetricsState> = _environmentState
-
-    private val _timeFrame = MutableStateFlow(TimeFrame.MAX)
-    val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
@@ -393,10 +389,6 @@ constructor(
     override fun onCleared() {
         super.onCleared()
         Logger.d { "MetricsViewModel cleared" }
-    }
-
-    fun setTimeFrame(timeFrame: TimeFrame) {
-        _timeFrame.value = timeFrame
     }
 
     /** Write the persisted Position data out to a CSV file in the specified location. */

@@ -85,7 +85,6 @@ import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import org.meshtastic.proto.copy
@@ -96,8 +95,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    // Always use all available data since we have pinch-to-zoom
-    val graphData = environmentState.environmentMetricsFiltered(TimeFrame.MAX, state.isFahrenheit)
+    val graphData = environmentState.environmentMetricsForGraphing(state.isFahrenheit)
     val data = graphData.metrics
 
     val lazyListState = rememberLazyListState()

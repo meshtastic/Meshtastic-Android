@@ -27,7 +27,6 @@ import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.core.ui.theme.GraphColors.Yellow
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 
 @Suppress("MagicNumber")
@@ -65,7 +64,7 @@ enum class Environment(val color: Color) {
 }
 
 /**
- * @param metrics the filtered [List]
+ * @param metrics the [List] of [TelemetryProtos.Telemetry]
  * @param shouldPlot a [List] the size of [Environment] used to determine if a metric should be plotted
  * @param leftMinMax [Pair] with the min and max of the barometric pressure
  * @param rightMinMax [Pair] with the combined min and max of: the temperature, humidity, and IAQ
@@ -83,15 +82,13 @@ data class EnvironmentMetricsState(val environmentMetrics: List<TelemetryProtos.
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
 
     /**
-     * Filters [environmentMetrics] based on a [org.meshtastic.feature.node.model.TimeFrame].
+     * Prepares [environmentMetrics] for graphing.
      *
-     * @param timeFrame used to filter
      * @return [EnvironmentGraphingData]
      */
     @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
-    fun environmentMetricsFiltered(timeFrame: TimeFrame, useFahrenheit: Boolean = false): EnvironmentGraphingData {
-        val oldestTime = timeFrame.calculateOldestTime()
-        val telemetries = environmentMetrics.filter { it.time >= oldestTime }
+    fun environmentMetricsForGraphing(useFahrenheit: Boolean = false): EnvironmentGraphingData {
+        val telemetries = environmentMetrics
         val shouldPlot = BooleanArray(Environment.entries.size) { false }
         if (telemetries.isEmpty()) {
             return EnvironmentGraphingData(metrics = telemetries, shouldPlot = shouldPlot.toList())

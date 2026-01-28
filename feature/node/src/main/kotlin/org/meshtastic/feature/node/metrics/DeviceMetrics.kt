@@ -96,7 +96,6 @@ import org.meshtastic.core.ui.theme.GraphColors.Magenta
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 
@@ -137,8 +136,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var displayInfoDialog by remember { mutableStateOf(false) }
-    // Always use all available data since we have pinch-to-zoom
-    val data = state.deviceMetricsFiltered(TimeFrame.MAX)
+    val data = state.deviceMetrics
 
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()

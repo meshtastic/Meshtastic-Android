@@ -87,7 +87,6 @@ import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 
 private enum class PowerMetric(val color: Color) {
@@ -122,8 +121,7 @@ private val LEGEND_DATA =
 fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    // Always use all available data since we have pinch-to-zoom
-    val data = state.powerMetricsFiltered(TimeFrame.MAX)
+    val data = state.powerMetrics
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
 
     val lazyListState = rememberLazyListState()

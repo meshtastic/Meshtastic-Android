@@ -93,7 +93,6 @@ import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
@@ -113,8 +112,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var displayInfoDialog by remember { mutableStateOf(false) }
-    // Always use all available data since we have pinch-to-zoom
-    val data = state.signalMetricsFiltered(TimeFrame.MAX)
+    val data = state.signalMetrics
 
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()

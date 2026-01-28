@@ -87,7 +87,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
 import java.text.DateFormat
@@ -212,8 +211,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     }
 
     val dateFormat = DateFormat.getDateTimeInstance()
-    // Always use all available data since we have pinch-to-zoom
-    val timeFrame = TimeFrame.MAX
     // Only show logs that can be decoded as PaxcountProtos.Paxcount
     val paxMetrics =
         state.paxMetrics.mapNotNull { log ->
@@ -225,10 +222,8 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             }
         }
     // Prepare data for graph
-    val oldestTime = timeFrame.calculateOldestTime()
     val graphData =
         paxMetrics
-            .filter { it.first.received_date / 1000 >= oldestTime }
             .map {
                 val t = (it.first.received_date / 1000).toInt()
                 Triple(t, it.second.ble, it.second.wifi)
