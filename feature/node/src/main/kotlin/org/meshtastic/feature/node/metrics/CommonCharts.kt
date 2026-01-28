@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
@@ -47,6 +49,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
@@ -57,11 +61,14 @@ import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.snr
 import org.meshtastic.feature.node.model.TimeFrame
 import java.text.DateFormat
+import java.util.Date
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     val TIME_MINUTE_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+    val TIME_SECONDS_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
     val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+    val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
 
@@ -122,6 +129,23 @@ object CommonCharts {
         TimeFrame.FOUR_WEEKS,
         -> DATE_TIME_MINUTE_FORMAT
         TimeFrame.MAX -> DateFormat.getDateInstance(DateFormat.SHORT)
+    }
+
+    /** A dynamic [CartesianValueFormatter] that adjusts the time format based on the visible X range. */
+    val dynamicTimeFormatter = CartesianValueFormatter { context, value, _ ->
+        val date = Date((value * MS_PER_SEC.toDouble()).toLong())
+        val xLength = context.ranges.xLength
+        val zoom = if (context is CartesianDrawingContext) context.zoom else 1f
+        val visibleSpan = xLength / zoom
+
+        val formatter =
+            when {
+                visibleSpan <= 3600 -> TIME_SECONDS_FORMAT // < 1 hour visible
+                visibleSpan <= 86400 * 2 -> TIME_MINUTE_FORMAT // < 2 days visible
+                visibleSpan <= 86400 * 14 -> DATE_TIME_MINUTE_FORMAT // < 2 weeks visible
+                else -> DATE_FORMAT
+            }
+        formatter.format(date)
     }
 }
 

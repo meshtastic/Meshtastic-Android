@@ -23,10 +23,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.Insets
@@ -165,25 +168,46 @@ object ChartStyling {
      * @return A configured [CartesianMarker]
      */
     @Composable
-    fun rememberMarker(): CartesianMarker {
-        val labelBackground = rememberShapeComponent(
-            fill = Fill(MaterialTheme.colorScheme.surface),
-            shape = RoundedCornerShape(4.dp),
-            strokeFill = Fill(MaterialTheme.colorScheme.outline),
-            strokeThickness = 1.dp,
-        )
-        val label = rememberTextComponent(
-            style = TextStyle(color = MaterialTheme.colorScheme.onSurface),
-            background = labelBackground,
-            padding = Insets(horizontal = 8.dp, vertical = 4.dp),
-        )
-        val guideline = rememberLineComponent(
-            fill = Fill(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)),
-            thickness = 2.dp,
-        )
-        return rememberDefaultCartesianMarker(
-            label = label,
-            guideline = guideline,
-        )
+    fun rememberMarker(
+        valueFormatter: DefaultCartesianMarker.ValueFormatter = DefaultCartesianMarker.ValueFormatter.default(),
+    ): CartesianMarker {
+        val labelBackground =
+            rememberShapeComponent(
+                fill = Fill(MaterialTheme.colorScheme.surfaceContainer),
+                shape = RoundedCornerShape(4.dp),
+                strokeFill = Fill(MaterialTheme.colorScheme.outlineVariant),
+                strokeThickness = 1.dp,
+            )
+        val label =
+            rememberTextComponent(
+                style =
+                TextStyle(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                ),
+                background = labelBackground,
+                padding = Insets(horizontal = 8.dp, vertical = 4.dp),
+            )
+        val guideline =
+            rememberLineComponent(
+                fill = Fill(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)),
+                thickness = 1.dp,
+            )
+        return rememberDefaultCartesianMarker(label = label, valueFormatter = valueFormatter, guideline = guideline)
     }
+
+    /**
+     * Creates and remembers a [com.patrykandpatrick.vico.compose.common.component.TextComponent] styled for axis
+     * labels.
+     */
+    @Composable
+    fun rememberAxisLabel(): com.patrykandpatrick.vico.compose.common.component.TextComponent = rememberTextComponent(
+        style =
+        TextStyle(
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Medium,
+        ),
+    )
 }

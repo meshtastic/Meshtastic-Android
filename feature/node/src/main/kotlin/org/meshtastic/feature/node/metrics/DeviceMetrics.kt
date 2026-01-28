@@ -12,13 +12,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.clickable
@@ -32,7 +29,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -47,7 +43,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -74,6 +69,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
@@ -89,8 +85,6 @@ import org.meshtastic.core.strings.channel_air_util
 import org.meshtastic.core.strings.channel_utilization
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
@@ -103,7 +97,6 @@ import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
-import java.util.Date
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
@@ -142,8 +135,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var displayInfoDialog by remember { mutableStateOf(false) }
-    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val data = state.deviceMetricsFiltered(selectedTimeFrame)
+    // Always use all available data since we have pinch-to-zoom
+    val data = state.deviceMetricsFiltered(TimeFrame.MAX)
 
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()
@@ -205,14 +198,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 },
             )
 
-            SlidingSelector(
-                TimeFrame.entries.toList(),
-                selectedTimeFrame,
-                onOptionSelected = { viewModel.setTimeFrame(it) },
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
-
             /* Device Metric Cards */
             LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(data) { _, telemetry ->
@@ -254,17 +239,20 @@ private fun DeviceMetricsChart(
         }
     }
 
-    val markerVisibilityListener = remember(onPointSelected) {
-        object : CartesianMarkerVisibilityListener {
-            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
-            }
+    val markerVisibilityListener =
+        remember(onPointSelected) {
+            object : CartesianMarkerVisibilityListener {
+                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
 
-            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
+                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
             }
         }
-    }
+
+    val axisLabel = ChartStyling.rememberAxisLabel()
 
     CartesianChartHost(
         chart =
@@ -286,16 +274,29 @@ private fun DeviceMetricsChart(
                     ),
                 ),
             ),
-            startAxis = VerticalAxis.rememberStart(),
+            startAxis =
+            VerticalAxis.rememberStart(
+                label = axisLabel,
+                valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
+            ),
             bottomAxis =
             HorizontalAxis.rememberBottom(
-                valueFormatter = { _, value, _ ->
-                    CommonCharts.TIME_MINUTE_FORMAT.format(
-                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
-                    )
+                label = axisLabel,
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+            ),
+            marker =
+            ChartStyling.rememberMarker(
+                valueFormatter = { _, targets ->
+                    targets.joinToString { target ->
+                        when (target) {
+                            is LineCartesianLayerMarkerTarget -> {
+                                target.points.joinToString { point -> "%.1f%%".format(point.entry.y) }
+                            }
+                            else -> ""
+                        }
+                    }
                 },
             ),
-            marker = ChartStyling.rememberMarker(),
             markerVisibilityListener = markerVisibilityListener,
         ),
         modelProducer = modelProducer,
@@ -341,12 +342,7 @@ private fun DeviceMetricsChartPreview() {
 private fun DeviceMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
     val deviceMetrics = telemetry.deviceMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable { onClick() }
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
         Surface {
             SelectionContainer {
                 Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
@@ -444,17 +440,9 @@ private fun DeviceMetricsScreenPreview() {
                     onPointSelected = {},
                 )
 
-                SlidingSelector(
-                    TimeFrame.entries.toList(),
-                    TimeFrame.TWENTY_FOUR_HOURS,
-                    onOptionSelected = { /* Preview only */ },
-                ) {
-                    OptionLabel(stringResource(it.strRes))
-                }
-
                 /* Device Metric Cards */
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(telemetries) { telemetry -> DeviceMetricsCard(telemetry = telemetry, onClick = {}) }
+                    itemsIndexed(telemetries) { _, telemetry -> DeviceMetricsCard(telemetry = telemetry, onClick = {}) }
                 }
             }
         }

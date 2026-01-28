@@ -12,10 +12,6 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
@@ -31,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
@@ -39,6 +36,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import org.meshtastic.core.strings.Res
@@ -50,9 +48,7 @@ import org.meshtastic.core.strings.soil_moisture
 import org.meshtastic.core.strings.soil_temperature
 import org.meshtastic.core.strings.temperature
 import org.meshtastic.core.strings.uv_lux
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
-import java.util.Date
 
 @Suppress("MagicNumber")
 private val LEGEND_DATA_1 =
@@ -114,13 +110,12 @@ private val LEGEND_DATA_3 =
         ),
     )
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
-    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
     onPointSelected: (Double) -> Unit,
@@ -132,93 +127,117 @@ fun EnvironmentMetricsChart(
 
     val modelProducer = remember { CartesianChartModelProducer() }
     val shouldPlot = graphData.shouldPlot
-    val (pressureMin, pressureMax) = graphData.leftMinMax
-    val pressureDiff = if ((pressureMax - pressureMin) == 0f) 1f else pressureMax - pressureMin
-    val (rightMin, rightMax) = graphData.rightMinMax
-    val rightDiff = if ((rightMax - rightMin) == 0f) 1f else rightMax - rightMin
 
     LaunchedEffect(telemetries, graphData) {
         modelProducer.runTransaction {
-            lineSeries {
-                Environment.entries.forEach { metric ->
-                    if (shouldPlot[metric.ordinal]) {
-                        val isPressure = metric == Environment.BAROMETRIC_PRESSURE
-                        val min = if (isPressure) pressureMin else rightMin
-                        val diff = if (isPressure) pressureDiff else rightDiff
-
-                        val xValues = mutableListOf<Number>()
-                        val yValues = mutableListOf<Number>()
-
-                        telemetries.forEach { telemetry ->
-                            val rawValue = metric.getValue(telemetry)
-                            if (rawValue != null && !rawValue.isNaN()) {
-                                xValues.add(telemetry.time)
-                                yValues.add((rawValue - min) / diff)
-                            }
-                        }
-
-                        if (xValues.isNotEmpty()) {
-                            series(x = xValues, y = yValues)
-                        } else {
-                            // Ensure series count matches lines count by adding empty series if needed
-                            series(x = emptyList(), y = emptyList())
-                        }
+            /* Pressure on its own layer/axis */
+            if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+                lineSeries {
+                    series(
+                        x = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t)?.let { t.time } },
+                        y = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t) },
+                    )
+                }
+            }
+            /* Everything else on the default axis */
+            Environment.entries.forEach { metric ->
+                if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+                    lineSeries {
+                        series(
+                            x = telemetries.mapNotNull { t -> metric.getValue(t)?.let { t.time } },
+                            y = telemetries.mapNotNull { t -> metric.getValue(t) },
+                        )
                     }
                 }
             }
         }
     }
 
-    val lines =
-        Environment.entries
-            .filter { shouldPlot[it.ordinal] }
-            .map { metric ->
-                ChartStyling.createGradientLine(lineColor = metric.color, pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP)
-            }
+    val markerVisibilityListener =
+        remember(onPointSelected) {
+            object : CartesianMarkerVisibilityListener {
+                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
 
-    val markerVisibilityListener = remember(onPointSelected) {
-        object : CartesianMarkerVisibilityListener {
-            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
+                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
             }
+        }
 
-            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
-            }
+    val axisLabel = ChartStyling.rememberAxisLabel()
+
+    val layers = mutableListOf<LineCartesianLayer>()
+    if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+        layers.add(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createGradientLine(
+                        Environment.BAROMETRIC_PRESSURE.color,
+                        ChartStyling.MEDIUM_POINT_SIZE_DP,
+                    ),
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            ),
+        )
+    }
+    Environment.entries.forEach { metric ->
+        if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+            layers.add(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.End,
+                ),
+            )
         }
     }
 
-    if (lines.isNotEmpty()) {
+    if (layers.isNotEmpty()) {
         CartesianChartHost(
             chart =
+            @Suppress("SpreadOperator")
             rememberCartesianChart(
-                rememberLineCartesianLayer(lineProvider = LineCartesianLayer.LineProvider.series(lines)),
+                *layers.toTypedArray(),
                 startAxis =
                 if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
                     VerticalAxis.rememberStart(
-                        valueFormatter = { _, value, _ ->
-                            val actualValue = value * pressureDiff.toDouble() + pressureMin
-                            "%.0f".format(actualValue)
-                        },
+                        label = axisLabel,
+                        valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },
                     )
                 } else {
                     null
                 },
                 endAxis =
                 VerticalAxis.rememberEnd(
-                    valueFormatter = { _, value, _ ->
-                        val actualValue = value * rightDiff.toDouble() + rightMin
-                        "%.0f".format(actualValue)
-                    },
+                    label = axisLabel,
+                    valueFormatter = { _, value, _ -> "%.0f".format(value) },
                 ),
                 bottomAxis =
                 HorizontalAxis.rememberBottom(
-                    valueFormatter = { _, value, _ ->
-                        val timeFormatter = CommonCharts.getTimeFormatterForTimeFrame(selectedTime)
-                        timeFormatter.format(Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()))
+                    label = axisLabel,
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                ),
+                marker =
+                ChartStyling.rememberMarker(
+                    valueFormatter = { _, targets ->
+                        targets.joinToString { target ->
+                            when (target) {
+                                is LineCartesianLayerMarkerTarget -> {
+                                    target.points.joinToString { point ->
+                                        // We don't have unit info easily here, but we can format the raw value
+                                        "%.1f".format(point.entry.y)
+                                    }
+                                }
+                                else -> ""
+                            }
+                        }
                     },
                 ),
-                marker = ChartStyling.rememberMarker(),
                 markerVisibilityListener = markerVisibilityListener,
             ),
             modelProducer = modelProducer,

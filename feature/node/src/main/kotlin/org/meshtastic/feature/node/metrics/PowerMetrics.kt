@@ -12,23 +12,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -46,7 +42,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +59,7 @@ import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
@@ -86,8 +82,6 @@ import org.meshtastic.core.strings.channel_3
 import org.meshtastic.core.strings.current
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.feature.node.detail.NodeRequestEffect
@@ -95,17 +89,10 @@ import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
-import java.util.Date
-import kotlin.math.ceil
-import kotlin.math.floor
 
-@Suppress("MagicNumber")
-private enum class Power(val color: Color, val min: Float, val max: Float) {
-    CURRENT(InfantryBlue, -500f, 500f),
-    ;
-
-    /** Difference between the metrics `max` and `min` values. */
-    fun difference() = max - min
+private enum class PowerMetric(val color: Color) {
+    CURRENT(InfantryBlue),
+    VOLTAGE(Red),
 }
 
 private enum class PowerChannel(val strRes: StringResource) {
@@ -114,27 +101,20 @@ private enum class PowerChannel(val strRes: StringResource) {
     THREE(Res.string.channel_3),
 }
 
-private const val VOLTAGE_STICK_TO_ZERO_RANGE = 2f
-
-private val VOLTAGE_COLOR = Red
-
-fun minMaxGraphVoltage(valueMin: Float, valueMax: Float): Pair<Float, Float> {
-    val valueMin = floor(valueMin)
-    val min =
-        if (valueMin == 0f || (valueMin >= 0f && valueMin - VOLTAGE_STICK_TO_ZERO_RANGE <= 0f)) {
-            0f
-        } else {
-            valueMin - VOLTAGE_STICK_TO_ZERO_RANGE
-        }
-    val max = ceil(valueMax)
-
-    return Pair(min, max)
-}
-
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = Res.string.current, color = Power.CURRENT.color, isLine = true, environmentMetric = null),
-        LegendData(nameRes = Res.string.voltage, color = VOLTAGE_COLOR, isLine = true, environmentMetric = null),
+        LegendData(
+            nameRes = Res.string.current,
+            color = PowerMetric.CURRENT.color,
+            isLine = true,
+            environmentMetric = null,
+        ),
+        LegendData(
+            nameRes = Res.string.voltage,
+            color = PowerMetric.VOLTAGE.color,
+            isLine = true,
+            environmentMetric = null,
+        ),
     )
 
 @Suppress("LongMethod")
@@ -142,8 +122,8 @@ private val LEGEND_DATA =
 fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val data = state.powerMetricsFiltered(selectedTimeFrame)
+    // Always use all available data since we have pinch-to-zoom
+    val data = state.powerMetricsFiltered(TimeFrame.MAX)
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
 
     val lazyListState = rememberLazyListState()
@@ -198,22 +178,6 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 },
             )
 
-            SlidingSelector(
-                PowerChannel.entries.toList(),
-                selectedChannel,
-                onOptionSelected = { selectedChannel = it },
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
-            Spacer(modifier = Modifier.height(2.dp))
-            SlidingSelector(
-                TimeFrame.entries.toList(),
-                selectedTimeFrame,
-                onOptionSelected = { viewModel.setTimeFrame(it) },
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
-
             LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(data) { _, telemetry ->
                     PowerMetricsCard(
@@ -245,42 +209,32 @@ private fun PowerMetricsChart(
     }
 
     val modelProducer = remember { CartesianChartModelProducer() }
-    val currentDiff = Power.CURRENT.difference()
-    val (voltageMin, voltageMax) =
-        remember(telemetries, selectedChannel) {
-            minMaxGraphVoltage(
-                retrieveVoltage(selectedChannel, telemetries.minBy { retrieveVoltage(selectedChannel, it) }),
-                retrieveVoltage(selectedChannel, telemetries.maxBy { retrieveVoltage(selectedChannel, it) }),
-            )
-        }
-    val voltageDiff = voltageMax - voltageMin
 
     LaunchedEffect(telemetries, selectedChannel) {
         modelProducer.runTransaction {
             lineSeries {
-                series(
-                    x = telemetries.map { it.time },
-                    y = telemetries.map { (retrieveCurrent(selectedChannel, it) - Power.CURRENT.min) / currentDiff },
-                )
-                series(
-                    x = telemetries.map { it.time },
-                    y = telemetries.map { (retrieveVoltage(selectedChannel, it) - voltageMin) / voltageDiff },
-                )
+                series(x = telemetries.map { it.time }, y = telemetries.map { retrieveCurrent(selectedChannel, it) })
+            }
+            lineSeries {
+                series(x = telemetries.map { it.time }, y = telemetries.map { retrieveVoltage(selectedChannel, it) })
             }
         }
     }
 
-    val markerVisibilityListener = remember(onPointSelected) {
-        object : CartesianMarkerVisibilityListener {
-            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
-            }
+    val markerVisibilityListener =
+        remember(onPointSelected) {
+            object : CartesianMarkerVisibilityListener {
+                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
 
-            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
+                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
             }
         }
-    }
+
+    val axisLabel = ChartStyling.rememberAxisLabel()
 
     CartesianChartHost(
         chart =
@@ -288,37 +242,34 @@ private fun PowerMetricsChart(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createBoldLine(
-                        lineColor = Power.CURRENT.color,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
+                    ChartStyling.createBoldLine(PowerMetric.CURRENT.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            ),
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
                     ChartStyling.createGradientLine(
-                        lineColor = VOLTAGE_COLOR,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        PowerMetric.VOLTAGE.color,
+                        ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                 ),
+                verticalAxisPosition = Axis.Position.Vertical.End,
             ),
             startAxis =
             VerticalAxis.rememberStart(
-                valueFormatter = { _, value, _ ->
-                    val actualValue = value * currentDiff.toDouble() + Power.CURRENT.min
-                    "%.0f".format(actualValue)
-                },
+                label = axisLabel,
+                valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
             ),
             endAxis =
             VerticalAxis.rememberEnd(
-                valueFormatter = { _, value, _ ->
-                    val actualValue = value * voltageDiff.toDouble() + voltageMin
-                    "%.1f".format(actualValue)
-                },
+                label = axisLabel,
+                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
             ),
             bottomAxis =
             HorizontalAxis.rememberBottom(
-                valueFormatter = { _, value, _ ->
-                    CommonCharts.TIME_MINUTE_FORMAT.format(
-                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
-                    )
-                },
+                label = axisLabel,
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
             ),
             marker = ChartStyling.rememberMarker(),
             markerVisibilityListener = markerVisibilityListener,
@@ -335,12 +286,7 @@ private fun PowerMetricsChart(
 @Composable
 private fun PowerMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
     val time = telemetry.time * MS_PER_SEC
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable { onClick() }
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
         Surface {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {

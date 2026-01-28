@@ -12,10 +12,6 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
@@ -41,10 +37,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -83,8 +77,6 @@ import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
@@ -125,17 +117,20 @@ private fun PaxMetricsChart(
         }
     }
 
-    val markerVisibilityListener = remember(onPointSelected) {
-        object : CartesianMarkerVisibilityListener {
-            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
-            }
+    val markerVisibilityListener =
+        remember(onPointSelected) {
+            object : CartesianMarkerVisibilityListener {
+                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
 
-            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                targets.firstOrNull()?.let { onPointSelected(it.x) }
+                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                    targets.firstOrNull()?.let { onPointSelected(it.x) }
+                }
             }
         }
-    }
+
+    val axisLabel = ChartStyling.rememberAxisLabel()
 
     CartesianChartHost(
         chart =
@@ -157,14 +152,15 @@ private fun PaxMetricsChart(
                     ),
                 ),
             ),
-            startAxis = VerticalAxis.rememberStart(),
+            startAxis =
+            VerticalAxis.rememberStart(
+                label = axisLabel,
+                valueFormatter = { _, value, _ -> "%.0f".format(value) },
+            ),
             bottomAxis =
             HorizontalAxis.rememberBottom(
-                valueFormatter = { _, value, _ ->
-                    CommonCharts.TIME_MINUTE_FORMAT.format(
-                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
-                    )
-                },
+                label = axisLabel,
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
             ),
             marker = ChartStyling.rememberMarker(),
             markerVisibilityListener = markerVisibilityListener,
@@ -198,7 +194,8 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     }
 
     val dateFormat = DateFormat.getDateTimeInstance()
-    var timeFrame by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
+    // Always use all available data since we have pinch-to-zoom
+    val timeFrame = TimeFrame.MAX
     // Only show logs that can be decoded as PaxcountProtos.Paxcount
     val paxMetrics =
         state.paxMetrics.mapNotNull { log ->
@@ -250,14 +247,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            // Time frame selector
-            SlidingSelector(
-                options = TimeFrame.entries.toList(),
-                selectedOption = timeFrame,
-                onOptionSelected = { timeFrame = it },
-            ) { tf: TimeFrame ->
-                OptionLabel(stringResource(tf.strRes))
-            }
             // Graph
             if (graphData.isNotEmpty()) {
                 ChartHeader(graphData.size)
@@ -295,7 +284,9 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                             dateFormat = dateFormat,
                             onClick = {
                                 coroutineScope.launch {
-                                    vicoScrollState.animateScroll(Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f))
+                                    vicoScrollState.animateScroll(
+                                        Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
+                                    )
                                 }
                             },
                         )
@@ -377,18 +368,8 @@ fun PaxcountInfo(
 }
 
 @Composable
-fun PaxMetricsItem(
-    log: MeshLog,
-    pax: PaxcountProtos.Paxcount,
-    dateFormat: DateFormat,
-    onClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-            .clickable { onClick() }
-    ) {
+fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateFormat, onClick: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clickable { onClick() }) {
         Text(
             text = dateFormat.format(Date(log.received_date)),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),

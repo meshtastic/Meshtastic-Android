@@ -12,13 +12,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  See the
- * GNU General Public License for more details.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.clickable
@@ -45,7 +42,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,8 +78,6 @@ import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
@@ -100,8 +94,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame, state.isFahrenheit)
+    // Always use all available data since we have pinch-to-zoom
+    val graphData = environmentState.environmentMetricsFiltered(TimeFrame.MAX, state.isFahrenheit)
     val data = graphData.metrics
 
     val lazyListState = rememberLazyListState()
@@ -173,7 +167,6 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = processedTelemetries.reversed(),
                 graphData = graphData,
-                selectedTime = selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
                 vicoScrollState = vicoScrollState,
                 onPointSelected = { x ->
@@ -183,14 +176,6 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                     }
                 },
             )
-
-            SlidingSelector(
-                TimeFrame.entries.toList(),
-                selectedTimeFrame,
-                onOptionSelected = { viewModel.setTimeFrame(it) },
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
 
             LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(processedTelemetries) { _, telemetry ->
@@ -390,19 +375,10 @@ private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
 }
 
 @Composable
-private fun EnvironmentMetricsCard(
-    telemetry: Telemetry,
-    environmentDisplayFahrenheit: Boolean,
-    onClick: () -> Unit,
-) {
+private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean, onClick: () -> Unit) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable { onClick() }
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
         Surface { SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) } }
     }
 }

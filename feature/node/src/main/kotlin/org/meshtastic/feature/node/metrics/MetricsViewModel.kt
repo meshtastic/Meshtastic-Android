@@ -198,7 +198,7 @@ constructor(
     private val _environmentState = MutableStateFlow(EnvironmentMetricsState())
     val environmentState: StateFlow<EnvironmentMetricsState> = _environmentState
 
-    private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+    private val _timeFrame = MutableStateFlow(TimeFrame.MAX)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
