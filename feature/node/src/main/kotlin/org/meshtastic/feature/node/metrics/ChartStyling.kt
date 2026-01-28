@@ -96,7 +96,10 @@ object ChartStyling {
     @Composable
     fun createPointOnlyLine(pointColor: Color, pointSize: Float = MEDIUM_POINT_SIZE_DP): LineCartesianLayer.Line =
         LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
+            // we still need to give the line a color, the Marker derives the label color from the line
+            fill = LineCartesianLayer.LineFill.single(Fill(pointColor)),
+            // magic sauce to make the line disappear
+            stroke = LineCartesianLayer.LineStroke.Dashed(thickness = 0.dp, dashLength = 0.dp),
             pointProvider =
             LineCartesianLayer.PointProvider.single(
                 LineCartesianLayer.Point(
@@ -123,7 +126,8 @@ object ChartStyling {
         val gradientBrush =
             Brush.verticalGradient(colors = listOf(lineColor.copy(alpha = 0.3f), lineColor.copy(alpha = 0.1f)))
         return LineCartesianLayer.rememberLine(
-            fill = LineCartesianLayer.LineFill.single(Fill(gradientBrush)),
+            fill = LineCartesianLayer.LineFill.single(Fill(lineColor)),
+            areaFill = LineCartesianLayer.AreaFill.single(Fill(gradientBrush)),
             pointProvider =
             pointSize?.let {
                 LineCartesianLayer.PointProvider.single(
@@ -209,7 +213,8 @@ object ChartStyling {
 
         val indicator =
             if (showIndicator) {
-                { color: Color -> ShapeComponent(fill = Fill(color), shape = CircleShape) }
+                // Force alpha to 1f so the indicator is visible even for "invisible" lines
+                { color: Color -> ShapeComponent(fill = Fill(color.copy(alpha = 1f)), shape = CircleShape) }
             } else {
                 null
             }
@@ -236,7 +241,8 @@ object ChartStyling {
                 if (target is LineCartesianLayerMarkerTarget) {
                     target.points.forEachIndexed { pointIndex, point ->
                         if (pointIndex > 0) append(", ")
-                        val color = point.color
+                        // Force alpha to 1f so text is readable even if the line is transparent/subtle
+                        val color = point.color.copy(alpha = .8f)
                         val text = format(point.entry.y, color)
                         withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(text) }
                     }
