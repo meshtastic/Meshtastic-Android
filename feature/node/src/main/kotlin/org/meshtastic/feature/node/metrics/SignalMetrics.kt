@@ -187,7 +187,9 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                         onClick = {
                             selectedX = meshPacket.rxTime.toDouble()
                             coroutineScope.launch {
-                                vicoScrollState.animateScroll(Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS))
+                                vicoScrollState.animateScroll(
+                                    Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS),
+                                )
                             }
                         },
                     )

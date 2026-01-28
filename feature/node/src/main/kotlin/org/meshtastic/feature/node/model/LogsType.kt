@@ -36,7 +36,7 @@ import org.meshtastic.core.strings.node_map
 import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.position_log
 import org.meshtastic.core.strings.power_metrics_log
-import org.meshtastic.core.strings.sig_metrics_log
+import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.strings.traceroute_log
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
@@ -47,7 +47,7 @@ enum class LogsType(val titleRes: StringResource, val icon: ImageVector, val rou
     NODE_MAP(Res.string.node_map, Icons.Rounded.Map, { NodeDetailRoutes.NodeMap(it) }),
     POSITIONS(Res.string.position_log, Icons.Rounded.LocationOn, { NodeDetailRoutes.PositionLog(it) }),
     ENVIRONMENT(Res.string.env_metrics_log, Icons.Rounded.Thermostat, { NodeDetailRoutes.EnvironmentMetrics(it) }),
-    SIGNAL(Res.string.sig_metrics_log, Icons.Rounded.SignalCellularAlt, { NodeDetailRoutes.SignalMetrics(it) }),
+    SIGNAL(Res.string.signal_quality, Icons.Rounded.SignalCellularAlt, { NodeDetailRoutes.SignalMetrics(it) }),
     POWER(Res.string.power_metrics_log, Icons.Rounded.Power, { NodeDetailRoutes.PowerMetrics(it) }),
     TRACEROUTE(Res.string.traceroute_log, MeshtasticIcons.Route, { NodeDetailRoutes.TracerouteLog(it) }),
     HOST(Res.string.host_metrics_log, Icons.Rounded.Memory, { NodeDetailRoutes.HostMetricsLog(it) }),
