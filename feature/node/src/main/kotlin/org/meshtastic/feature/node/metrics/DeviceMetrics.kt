@@ -16,10 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,10 +25,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -49,14 +45,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -64,6 +54,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
@@ -85,17 +86,11 @@ import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Magenta
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
-import org.meshtastic.feature.node.metrics.CommonCharts.MAX_PERCENT_VALUE
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.metrics.GraphUtil.createPath
-import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
+import java.util.Date
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
@@ -183,7 +178,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             DeviceMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = data.reversed(),
-                selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
             )
 
@@ -206,121 +200,75 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
-    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
 ) {
-    val graphColor = MaterialTheme.colorScheme.onSurface
-
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
 
-    val (oldest, newest) =
-        remember(key1 = telemetries) { Pair(telemetries.minBy { it.time }, telemetries.maxBy { it.time }) }
-    val timeDiff = newest.time - oldest.time
+    val modelProducer = remember { CartesianChartModelProducer() }
 
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong())) }
-
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        // Calculate visible width based on actual weight distribution
-        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest.time + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest.time + (timeDiff * (1f - leftRatio)).toInt()
-        visibleOldest to visibleNewest
-    }
-
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    Row {
-        Box(
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(weight = 1f),
-        ) {
-            /*
-             * The order of the colors are with respect to the ChUtil.
-             * 25 - 49  Orange
-             * 50 - 100 Red
-             */
-            HorizontalLinesOverlay(
-                modifier.width(dp),
-                lineColors = listOf(graphColor, Color.Yellow, Color.Red, graphColor, graphColor),
-            )
-
-            TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())
-
-            /* Plot Battery Line, ChUtil, and AirUtilTx */
-            Canvas(modifier = modifier.width(dp)) {
-                val height = size.height
-                val width = size.width
-                for (i in telemetries.indices) {
-                    val telemetry = telemetries[i]
-
-                    /* x-value time */
-                    val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff
-                    val x = xRatio * width
-
-                    /* Channel Utilization */
-                    plotPoint(
-                        drawContext = drawContext,
-                        color = Device.CH_UTIL.color,
-                        x = x,
-                        value = telemetry.deviceMetrics.channelUtilization,
-                        divisor = MAX_PERCENT_VALUE,
-                    )
-
-                    /* Air Utilization Transmit */
-                    plotPoint(
-                        drawContext = drawContext,
-                        color = Device.AIR_UTIL.color,
-                        x = x,
-                        value = telemetry.deviceMetrics.airUtilTx,
-                        divisor = MAX_PERCENT_VALUE,
-                    )
-                }
-
-                /* Battery Line */
-                var index = 0
-                while (index < telemetries.size) {
-                    val path = Path()
-                    index =
-                        createPath(
-                            telemetries = telemetries,
-                            index = index,
-                            path = path,
-                            oldestTime = oldest.time,
-                            timeRange = timeDiff,
-                            width = width,
-                            timeThreshold = selectedTime.timeThreshold(),
-                        ) { i ->
-                            val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                            val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                            val y = height - (ratio * height)
-                            return@createPath y
-                        }
-                    drawPath(
-                        path = path,
-                        color = Device.BATTERY.color,
-                        style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round),
-                    )
-                }
+    LaunchedEffect(telemetries) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.batteryLevel })
+                series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.channelUtilization })
+                series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.airUtilTx })
             }
         }
-        YAxisLabels(modifier = modifier.weight(weight = Y_AXIS_WEIGHT), graphColor, minValue = 0f, maxValue = 100f)
     }
-    Spacer(modifier = Modifier.height(16.dp))
+
+    CartesianChartHost(
+        chart =
+        rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(Device.BATTERY.color)),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
+                        pointProvider =
+                        LineCartesianLayer.PointProvider.single(
+                            LineCartesianLayer.Point(
+                                rememberShapeComponent(
+                                    fill = Fill(Device.CH_UTIL.color),
+                                    shape = CircleShape,
+                                ),
+                                size = 10.dp,
+                            ),
+                        ),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
+                        pointProvider =
+                        LineCartesianLayer.PointProvider.single(
+                            LineCartesianLayer.Point(
+                                rememberShapeComponent(
+                                    fill = Fill(Device.AIR_UTIL.color),
+                                    shape = CircleShape,
+                                ),
+                                size = 10.dp,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            startAxis = VerticalAxis.rememberStart(),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                valueFormatter = { _, value, _ ->
+                    CommonCharts.TIME_MINUTE_FORMAT.format(
+                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
+                    )
+                },
+            ),
+        ),
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+    )
 
     Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
-
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Suppress("detekt:MagicNumber") // fake data
@@ -343,12 +291,7 @@ private fun DeviceMetricsChartPreview() {
                 .build()
         }
     AppTheme {
-        DeviceMetricsChart(
-            modifier = Modifier.height(400.dp),
-            telemetries = telemetries,
-            selectedTime = TimeFrame.TWENTY_FOUR_HOURS,
-            promptInfoDialog = {},
-        )
+        DeviceMetricsChart(modifier = Modifier.height(400.dp), telemetries = telemetries, promptInfoDialog = {})
     }
 }
 
@@ -448,8 +391,7 @@ private fun DeviceMetricsScreenPreview() {
 
                 DeviceMetricsChart(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-                    telemetries.reversed(),
-                    TimeFrame.TWENTY_FOUR_HOURS,
+                    telemetries = telemetries.reversed(),
                     promptInfoDialog = { displayInfoDialog = true },
                 )
 

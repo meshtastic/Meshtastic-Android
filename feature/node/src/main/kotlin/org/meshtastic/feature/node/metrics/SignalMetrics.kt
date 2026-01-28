@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,10 +27,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
@@ -49,17 +46,25 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
@@ -77,9 +82,9 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos.MeshPacket
+import java.util.Date
 
 @Suppress("MagicNumber")
 private enum class Metric(val color: Color, val min: Float, val max: Float) {
@@ -90,10 +95,6 @@ private enum class Metric(val color: Color, val min: Float, val max: Float) {
     /** Difference between the metrics `max` and `min` values. */
     fun difference() = max - min
 }
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private val LEGEND_DATA =
     listOf(
@@ -159,7 +160,6 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             SignalMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 meshPackets = data.reversed(),
-                selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
             )
 
@@ -183,7 +183,6 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
-    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
 ) {
     ChartHeader(amount = meshPackets.size)
@@ -191,100 +190,78 @@ private fun SignalMetricsChart(
         return
     }
 
-    val (oldest, newest) =
-        remember(key1 = meshPackets) { Pair(meshPackets.minBy { it.rxTime }, meshPackets.maxBy { it.rxTime }) }
-    val timeDiff = newest.rxTime - oldest.rxTime
-
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by
-        remember(key1 = selectedTime) {
-            mutableStateOf(selectedTime.dp(screenWidth, time = (newest.rxTime - oldest.rxTime).toLong()))
-        }
-
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        // Calculate visible width based on actual weight distribution
-        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest.rxTime + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest.rxTime + (timeDiff * (1f - leftRatio)).toInt()
-        visibleOldest to visibleNewest
-    }
-
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    val graphColor = MaterialTheme.colorScheme.onSurface
-    val snrDiff = Metric.SNR.difference()
+    val modelProducer = remember { CartesianChartModelProducer() }
     val rssiDiff = Metric.RSSI.difference()
+    val snrDiff = Metric.SNR.difference()
 
-    Row {
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            Metric.RSSI.color,
-            minValue = Metric.RSSI.min,
-            maxValue = Metric.RSSI.max,
-        )
-        Box(
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(1f),
-        ) {
-            HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })
-
-            TimeAxisOverlay(
-                modifier.width(dp),
-                oldest = oldest.rxTime,
-                newest = newest.rxTime,
-                selectedTime.lineInterval(),
-            )
-
-            /* Plot SNR and RSSI */
-            Canvas(modifier = modifier.width(dp)) {
-                val width = size.width
-                /* Plot */
-                for (packet in meshPackets) {
-                    val xRatio = (packet.rxTime - oldest.rxTime).toFloat() / timeDiff
-                    val x = xRatio * width
-
-                    /* SNR */
-                    plotPoint(
-                        drawContext = drawContext,
-                        color = Metric.SNR.color,
-                        x = x,
-                        value = packet.rxSnr - Metric.SNR.min,
-                        divisor = snrDiff,
-                    )
-
-                    /* RSSI */
-                    plotPoint(
-                        drawContext = drawContext,
-                        color = Metric.RSSI.color,
-                        x = x,
-                        value = packet.rxRssi - Metric.RSSI.min,
-                        divisor = rssiDiff,
-                    )
-                }
+    LaunchedEffect(meshPackets) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(
+                    x = meshPackets.map { it.rxTime },
+                    y = meshPackets.map { (it.rxRssi - Metric.RSSI.min) / rssiDiff },
+                )
+                series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { (it.rxSnr - Metric.SNR.min) / snrDiff })
             }
         }
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            Metric.SNR.color,
-            minValue = Metric.SNR.min,
-            maxValue = Metric.SNR.max,
-        )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    CartesianChartHost(
+        chart =
+        rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
+                        pointProvider =
+                        LineCartesianLayer.PointProvider.single(
+                            LineCartesianLayer.Point(
+                                rememberShapeComponent(fill = Fill(Metric.RSSI.color), shape = CircleShape),
+                                size = 10.dp,
+                            ),
+                        ),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
+                        pointProvider =
+                        LineCartesianLayer.PointProvider.single(
+                            LineCartesianLayer.Point(
+                                rememberShapeComponent(fill = Fill(Metric.SNR.color), shape = CircleShape),
+                                size = 10.dp,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            startAxis =
+            VerticalAxis.rememberStart(
+                valueFormatter = { _, value, _ ->
+                    val actualValue = value * rssiDiff.toDouble() + Metric.RSSI.min
+                    "%.0f".format(actualValue)
+                },
+            ),
+            endAxis =
+            VerticalAxis.rememberEnd(
+                valueFormatter = { _, value, _ ->
+                    val actualValue = value * snrDiff.toDouble() + Metric.SNR.min
+                    "%.0f".format(actualValue)
+                },
+            ),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                valueFormatter = { _, value, _ ->
+                    CommonCharts.TIME_MINUTE_FORMAT.format(
+                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
+                    )
+                },
+            ),
+        ),
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+    )
 
     Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
-
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable

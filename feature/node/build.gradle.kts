@@ -53,6 +53,10 @@ dependencies {
     implementation(libs.markdown.renderer.android)
     implementation(libs.markdown.renderer.m3)
     implementation(libs.markdown.renderer)
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m2)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.views)
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.maps.compose)

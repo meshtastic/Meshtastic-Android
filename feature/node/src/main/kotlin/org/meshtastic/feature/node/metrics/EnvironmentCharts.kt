@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,32 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.Fill
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.baro_pressure
 import org.meshtastic.core.strings.humidity
@@ -49,10 +45,10 @@ import org.meshtastic.core.strings.soil_moisture
 import org.meshtastic.core.strings.soil_temperature
 import org.meshtastic.core.strings.temperature
 import org.meshtastic.core.strings.uv_lux
-import org.meshtastic.feature.node.metrics.GraphUtil.createPath
-import org.meshtastic.feature.node.metrics.GraphUtil.drawPathWithGradient
+import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
+import java.util.Date
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
@@ -130,58 +126,86 @@ fun EnvironmentMetricsChart(
         return
     }
 
-    val (oldest, newest) = graphData.times
-    val timeDiff = newest - oldest
-
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong())) }
-
+    val modelProducer = remember { CartesianChartModelProducer() }
     val shouldPlot = graphData.shouldPlot
+    val (pressureMin, pressureMax) = graphData.leftMinMax
+    val pressureDiff = if ((pressureMax - pressureMin) == 0f) 1f else pressureMax - pressureMin
+    val (rightMin, rightMax) = graphData.rightMinMax
+    val rightDiff = if ((rightMax - rightMin) == 0f) 1f else rightMax - rightMin
 
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        // Calculate chart width ratio dynamically based on whether barometric pressure is plotted
-        val yAxisCount = if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) 2 else 1
-        val chartWidthRatio = CHART_WEIGHT / (CHART_WEIGHT + (Y_AXIS_WEIGHT * yAxisCount))
-        val visibleWidthPx = screenWidth * chartWidthRatio
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest + (timeDiff * (1f - leftRatio)).toInt()
-        visibleOldest to visibleNewest
+    LaunchedEffect(telemetries, graphData) {
+        modelProducer.runTransaction {
+            lineSeries {
+                Environment.entries.forEach { metric ->
+                    if (shouldPlot[metric.ordinal]) {
+                        val isPressure = metric == Environment.BAROMETRIC_PRESSURE
+                        val min = if (isPressure) pressureMin else rightMin
+                        val diff = if (isPressure) pressureDiff else rightDiff
+
+                        val xValues = mutableListOf<Number>()
+                        val yValues = mutableListOf<Number>()
+
+                        telemetries.forEach { telemetry ->
+                            val rawValue = metric.getValue(telemetry)
+                            if (rawValue != null && !rawValue.isNaN()) {
+                                xValues.add(telemetry.time)
+                                yValues.add((rawValue - min) / diff)
+                            }
+                        }
+
+                        if (xValues.isNotEmpty()) {
+                            series(x = xValues, y = yValues)
+                        } else {
+                            // Ensure series count matches lines count by adding empty series if needed
+                            series(x = emptyList(), y = emptyList())
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
+    val lines =
+        Environment.entries
+            .filter { shouldPlot[it.ordinal] }
+            .map { metric ->
+                LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(metric.color)))
+            }
 
-    Row(modifier = modifier.fillMaxWidth().fillMaxHeight()) {
-        BarometricPressureYAxisLabel(
-            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight(),
-            shouldPlotBarometricPressure = shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal],
-            minValue = graphData.leftMinMax.first,
-            maxValue = graphData.leftMinMax.second,
-        )
-        ChartContent(
-            modifier = Modifier.weight(CHART_WEIGHT).fillMaxHeight(),
-            scrollState = scrollState,
-            dp = dp,
-            oldest = oldest,
-            newest = newest,
-            selectedTime = selectedTime,
-            telemetries = telemetries,
-            graphData = graphData,
-            rightMin = graphData.rightMinMax.first,
-            rightMax = graphData.rightMinMax.second,
-            timeDiff = timeDiff,
-        )
-        YAxisLabels(
-            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight(),
-            MaterialTheme.colorScheme.onSurface,
-            minValue = graphData.rightMinMax.first,
-            maxValue = graphData.rightMinMax.second,
+    if (lines.isNotEmpty()) {
+        CartesianChartHost(
+            chart =
+            rememberCartesianChart(
+                rememberLineCartesianLayer(lineProvider = LineCartesianLayer.LineProvider.series(lines)),
+                startAxis =
+                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+                    VerticalAxis.rememberStart(
+                        valueFormatter = { _, value, _ ->
+                            val actualValue = value * pressureDiff.toDouble() + pressureMin
+                            "%.0f".format(actualValue)
+                        },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                VerticalAxis.rememberEnd(
+                    valueFormatter = { _, value, _ ->
+                        val actualValue = value * rightDiff.toDouble() + rightMin
+                        "%.0f".format(actualValue)
+                    },
+                ),
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    valueFormatter = { _, value, _ ->
+                        CommonCharts.TIME_MINUTE_FORMAT.format(
+                            Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
+                        )
+                    },
+                ),
+            ),
+            modelProducer = modelProducer,
+            modifier = modifier.padding(8.dp),
         )
     }
 
@@ -190,151 +214,6 @@ fun EnvironmentMetricsChart(
     MetricLegends(graphData = graphData, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
-}
-
-@Suppress("detekt:LongMethod")
-@Composable
-private fun MetricPlottingCanvas(
-    modifier: Modifier = Modifier,
-    telemetries: List<Telemetry>,
-    graphData: EnvironmentGraphingData,
-    selectedTime: TimeFrame,
-    oldest: Int,
-    timeDiff: Int,
-    rightMin: Float,
-    rightMax: Float,
-) {
-    val (pressureMin, pressureMax) = graphData.leftMinMax
-    val shouldPlot = graphData.shouldPlot
-    val graphColor = MaterialTheme.colorScheme.onSurface
-
-    Canvas(modifier = modifier) {
-        val height = size.height
-        val width = size.width
-
-        var min: Float
-        var diff: Float
-        var index: Int
-        var first: Int
-        for (metric in Environment.entries) {
-            if (!shouldPlot[metric.ordinal]) {
-                continue
-            }
-            if (metric == Environment.BAROMETRIC_PRESSURE) {
-                diff = pressureMax - pressureMin
-                min = pressureMin
-            } else { // Reset for other metrics to use rightMin/rightMax
-                min = rightMin
-                diff = rightMax - rightMin
-            }
-            index = 0
-            while (index < telemetries.size) {
-                first = index
-                val path = Path()
-                index =
-                    createPath(
-                        telemetries = telemetries,
-                        index = index,
-                        path = path,
-                        oldestTime = oldest,
-                        timeRange = timeDiff,
-                        width = width,
-                        timeThreshold = selectedTime.timeThreshold(),
-                    ) { i ->
-                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val rawValue = metric.getValue(telemetry) // This is Float?
-
-                        // Default to 0f if the actual value is null or NaN. This is a reasonable default for
-                        // lux.
-                        val pointValue =
-                            if (rawValue != null && !rawValue.isNaN()) {
-                                rawValue
-                            } else {
-                                0f
-                            }
-
-                        // Use 'min' and 'diff' from the outer scope, which are specific to the current metric's
-                        // scale group.
-                        val currentMin = min
-                        // Avoid division by zero if all values in the current y-axis range are the same.
-                        val currentDiff = if (diff == 0f) 1f else diff
-
-                        val ratio = (pointValue - currentMin) / currentDiff
-                        var y = height - (ratio * height)
-
-                        // Final check to ensure y is a valid, plottable coordinate.
-                        if (y.isNaN() || y.isInfinite()) {
-                            y = height // Default to the bottom of the chart if calculation still results in an
-                            // invalid number.
-                        } else {
-                            y = y.coerceIn(0f, height) // Clamp to chart bounds to be safe.
-                        }
-                        return@createPath y
-                    }
-                drawPathWithGradient(
-                    path = path,
-                    color = metric.color,
-                    height = height,
-                    x1 = ((telemetries[index - 1].time - oldest).toFloat() / timeDiff) * width,
-                    x2 = ((telemetries[first].time - oldest).toFloat() / timeDiff) * width,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun BarometricPressureYAxisLabel(
-    modifier: Modifier,
-    shouldPlotBarometricPressure: Boolean,
-    minValue: Float,
-    maxValue: Float,
-) {
-    if (shouldPlotBarometricPressure) {
-        YAxisLabels(
-            modifier = modifier,
-            Environment.BAROMETRIC_PRESSURE.color,
-            minValue = minValue,
-            maxValue = maxValue,
-        )
-    }
-}
-
-@Composable
-private fun ChartContent(
-    modifier: Modifier = Modifier,
-    scrollState: ScrollState,
-    dp: Dp,
-    oldest: Int,
-    newest: Int,
-    selectedTime: TimeFrame,
-    telemetries: List<Telemetry>,
-    graphData: EnvironmentGraphingData,
-    rightMin: Float,
-    rightMax: Float,
-    timeDiff: Int,
-) {
-    val graphColor = MaterialTheme.colorScheme.onSurface
-
-    Box(
-        contentAlignment = Alignment.TopStart,
-        modifier = modifier.horizontalScroll(state = scrollState, reverseScrolling = true),
-    ) {
-        HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })
-
-        TimeAxisOverlay(modifier = modifier.width(dp), oldest = oldest, newest = newest, selectedTime.lineInterval())
-
-        MetricPlottingCanvas(
-            modifier = modifier.width(dp),
-            telemetries = telemetries,
-            graphData = graphData,
-            selectedTime = selectedTime,
-            oldest = oldest,
-            timeDiff = timeDiff,
-            rightMin = rightMin,
-            rightMax = rightMax,
-        )
-    }
 }
 
 @Composable
@@ -346,11 +225,3 @@ private fun MetricLegends(graphData: EnvironmentGraphingData, promptInfoDialog: 
         promptInfoDialog = promptInfoDialog,
     )
 }
-
-// private const val LINE_ON = 10f
-// private const val LINE_OFF = 20f
-// private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
-// private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
-// private const val DATE_Y = 32f
-// private const val LINE_LIMIT = 4
-// private const val TEXT_PAINT_ALPHA = 192

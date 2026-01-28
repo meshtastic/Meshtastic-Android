@@ -16,10 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,10 +25,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
@@ -50,20 +45,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.Fill
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
@@ -81,9 +80,9 @@ import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.metrics.GraphUtil.createPath
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
+import java.util.Date
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -101,10 +100,6 @@ private enum class PowerChannel(val strRes: StringResource) {
     TWO(Res.string.channel_2),
     THREE(Res.string.channel_3),
 }
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private const val VOLTAGE_STICK_TO_ZERO_RANGE = 2f
 
@@ -176,7 +171,6 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
             PowerMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = data.reversed(),
-                selectedTimeFrame,
                 selectedChannel,
             )
 
@@ -206,7 +200,6 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
 private fun PowerMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
-    selectedTime: TimeFrame,
     selectedChannel: PowerChannel,
 ) {
     ChartHeader(amount = telemetries.size)
@@ -214,129 +207,74 @@ private fun PowerMetricsChart(
         return
     }
 
-    val (oldest, newest) =
-        remember(key1 = telemetries) { Pair(telemetries.minBy { it.time }, telemetries.maxBy { it.time }) }
-    val timeDiff = newest.time - oldest.time
-
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by
-        remember(key1 = selectedTime) {
-            mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
-        }
-
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        // Calculate visible width based on actual weight distribution
-        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest.time + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest.time + (timeDiff * (1f - leftRatio)).toInt()
-        visibleOldest to visibleNewest
-    }
-
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    val graphColor = MaterialTheme.colorScheme.onSurface
+    val modelProducer = remember { CartesianChartModelProducer() }
     val currentDiff = Power.CURRENT.difference()
-
     val (voltageMin, voltageMax) =
-        minMaxGraphVoltage(
-            retrieveVoltage(selectedChannel, telemetries.minBy { retrieveVoltage(selectedChannel, it) }),
-            retrieveVoltage(selectedChannel, telemetries.maxBy { retrieveVoltage(selectedChannel, it) }),
-        )
+        remember(telemetries, selectedChannel) {
+            minMaxGraphVoltage(
+                retrieveVoltage(selectedChannel, telemetries.minBy { retrieveVoltage(selectedChannel, it) }),
+                retrieveVoltage(selectedChannel, telemetries.maxBy { retrieveVoltage(selectedChannel, it) }),
+            )
+        }
     val voltageDiff = voltageMax - voltageMin
 
-    Row {
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            Power.CURRENT.color,
-            minValue = Power.CURRENT.min,
-            maxValue = Power.CURRENT.max,
-        )
-        Box(
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(1f),
-        ) {
-            HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })
-
-            TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())
-
-            /* Plot */
-            Canvas(modifier = modifier.width(dp)) {
-                val width = size.width
-                val height = size.height
-                /* Voltage */
-                var index = 0
-                while (index < telemetries.size) {
-                    val path = Path()
-                    index =
-                        createPath(
-                            telemetries = telemetries,
-                            index = index,
-                            path = path,
-                            oldestTime = oldest.time,
-                            timeRange = timeDiff,
-                            width = width,
-                            timeThreshold = selectedTime.timeThreshold(),
-                        ) { i ->
-                            val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                            val ratio = (retrieveVoltage(selectedChannel, telemetry) - voltageMin) / voltageDiff
-                            val y = height - (ratio * height)
-                            return@createPath y
-                        }
-                    drawPath(
-                        path = path,
-                        color = VOLTAGE_COLOR,
-                        style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round),
-                    )
-                }
-                /* Current */
-                index = 0
-                while (index < telemetries.size) {
-                    val path = Path()
-                    index =
-                        createPath(
-                            telemetries = telemetries,
-                            index = index,
-                            path = path,
-                            oldestTime = oldest.time,
-                            timeRange = timeDiff,
-                            width = width,
-                            timeThreshold = selectedTime.timeThreshold(),
-                        ) { i ->
-                            val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                            val ratio = (retrieveCurrent(selectedChannel, telemetry) - Power.CURRENT.min) / currentDiff
-                            val y = height - (ratio * height)
-                            return@createPath y
-                        }
-                    drawPath(
-                        path = path,
-                        color = Power.CURRENT.color,
-                        style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round),
-                    )
-                }
+    LaunchedEffect(telemetries, selectedChannel) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(
+                    x = telemetries.map { it.time },
+                    y = telemetries.map { (retrieveCurrent(selectedChannel, it) - Power.CURRENT.min) / currentDiff },
+                )
+                series(
+                    x = telemetries.map { it.time },
+                    y = telemetries.map { (retrieveVoltage(selectedChannel, it) - voltageMin) / voltageDiff },
+                )
             }
         }
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            VOLTAGE_COLOR,
-            minValue = voltageMin,
-            maxValue = voltageMax,
-        )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    CartesianChartHost(
+        chart =
+        rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(Power.CURRENT.color)),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(VOLTAGE_COLOR)),
+                    ),
+                ),
+            ),
+            startAxis =
+            VerticalAxis.rememberStart(
+                valueFormatter = { _, value, _ ->
+                    val actualValue = value * currentDiff.toDouble() + Power.CURRENT.min
+                    "%.0f".format(actualValue)
+                },
+            ),
+            endAxis =
+            VerticalAxis.rememberEnd(
+                valueFormatter = { _, value, _ ->
+                    val actualValue = value * voltageDiff.toDouble() + voltageMin
+                    "%.1f".format(actualValue)
+                },
+            ),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                valueFormatter = { _, value, _ ->
+                    CommonCharts.TIME_MINUTE_FORMAT.format(
+                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
+                    )
+                },
+            ),
+        ),
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+    )
 
     Legend(legendData = LEGEND_DATA, displayInfoIcon = false)
-
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
 @Composable

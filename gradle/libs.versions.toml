@@ -43,6 +43,7 @@ devtools-ksp = "2.3.4"
 markdownRenderer = "0.39.1"
 osmdroid-android = "6.1.20"
 protobuf = "4.33.4"
+vico = "3.0.0-beta.3"
 
 
 [libraries]
@@ -181,6 +182,10 @@ streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsuppo
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version = "4.3.0" }
+vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
+vico-compose-m2 = { group = "com.patrykandpatrick.vico", name = "compose-m2", version.ref = "vico" }
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref = "vico" }
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }

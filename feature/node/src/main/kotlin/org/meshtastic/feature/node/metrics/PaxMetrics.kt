@@ -16,23 +16,15 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,18 +38,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.Fill
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
@@ -78,15 +76,12 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
+import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
 import java.text.DateFormat
 import java.util.Date
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     PAX(Color.Black, Res.string.pax),
@@ -101,73 +96,52 @@ private fun PaxMetricsChart(
     totalSeries: List<Pair<Int, Int>>,
     bleSeries: List<Pair<Int, Int>>,
     wifiSeries: List<Pair<Int, Int>>,
-    minValue: Float,
-    maxValue: Float,
     timeFrame: TimeFrame,
 ) {
     if (totalSeries.isEmpty()) return
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val times = totalSeries.map { it.first }
-    val minTime = times.minOrNull() ?: 0
-    val maxTime = times.maxOrNull() ?: 1
-    val timeDiff = maxTime - minTime
-    val dp = remember(timeFrame, screenWidth, timeDiff) { timeFrame.dp(screenWidth, time = timeDiff.toLong()) }
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        val visibleOldest = minTime + (timeDiff * leftRatio).toInt()
-        val visibleNewest = minTime + (timeDiff * rightRatio).toInt()
-        visibleOldest to visibleNewest
-    }
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
-    Spacer(modifier = Modifier.height(16.dp))
-    Row(modifier = modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f)) {
-        YAxisLabels(
-            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(start = 8.dp),
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            minValue = minValue,
-            maxValue = maxValue,
-        )
-        Box(
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(CHART_WEIGHT),
-        ) {
-            HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { Color.LightGray })
-            TimeAxisOverlay(modifier.width(dp), oldest = minTime, newest = maxTime, timeFrame.lineInterval())
-            Canvas(modifier = Modifier.width(dp).fillMaxHeight()) {
-                val width = size.width
-                val height = size.height
-                fun xForTime(t: Int): Float =
-                    if (maxTime == minTime) width / 2 else (t - minTime).toFloat() / (maxTime - minTime) * width
-                fun yForValue(v: Int): Float = height - (v - minValue) / (maxValue - minValue) * height
-                fun drawLine(series: List<Pair<Int, Int>>, color: Color) {
-                    for (i in 1 until series.size) {
-                        drawLine(
-                            color = color,
-                            start = Offset(xForTime(series[i - 1].first), yForValue(series[i - 1].second)),
-                            end = Offset(xForTime(series[i].first), yForValue(series[i].second)),
-                            strokeWidth = 2.dp.toPx(),
-                        )
-                    }
-                }
-                drawLine(bleSeries, PaxSeries.BLE.color)
-                drawLine(wifiSeries, PaxSeries.WIFI.color)
-                drawLine(totalSeries, PaxSeries.PAX.color)
+
+    val modelProducer = remember { CartesianChartModelProducer() }
+
+    LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
+                series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
+                series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
             }
         }
-        YAxisLabels(
-            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(end = 8.dp),
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            minValue = minValue,
-            maxValue = maxValue,
-        )
     }
-    Spacer(modifier = Modifier.height(16.dp))
+
+    CartesianChartHost(
+        chart =
+        rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(PaxSeries.BLE.color)),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(PaxSeries.WIFI.color)),
+                    ),
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(Fill(PaxSeries.PAX.color)),
+                    ),
+                ),
+            ),
+            startAxis = VerticalAxis.rememberStart(),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                valueFormatter = { _, value, _ ->
+                    CommonCharts.TIME_MINUTE_FORMAT.format(
+                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
+                    )
+                },
+            ),
+        ),
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+    )
 }
 
 @Composable
@@ -258,8 +232,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                     totalSeries = totalSeries,
                     bleSeries = bleSeries,
                     wifiSeries = wifiSeries,
-                    minValue = minValue,
-                    maxValue = maxValue,
                     timeFrame = timeFrame,
                 )
             }
