@@ -12,10 +12,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  See the
+ * GNU General Public License for more details.
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +32,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
@@ -42,6 +49,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
@@ -83,6 +94,7 @@ import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import org.meshtastic.proto.copy
 
+@Suppress("LongMethod")
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -91,6 +103,10 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame, state.isFahrenheit)
     val data = graphData.metrics
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -159,6 +175,13 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 graphData = graphData,
                 selectedTime = selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
+                vicoScrollState = vicoScrollState,
+                onPointSelected = { x ->
+                    val index = processedTelemetries.indexOfFirst { it.time.toDouble() == x }
+                    if (index != -1) {
+                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                    }
+                },
             )
 
             SlidingSelector(
@@ -169,8 +192,18 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 OptionLabel(stringResource(it.strRes))
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(processedTelemetries) { telemetry -> EnvironmentMetricsCard(telemetry, state.isFahrenheit) }
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(processedTelemetries) { _, telemetry ->
+                    EnvironmentMetricsCard(
+                        telemetry = telemetry,
+                        environmentDisplayFahrenheit = state.isFahrenheit,
+                        onClick = {
+                            coroutineScope.launch {
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
+                            }
+                        },
+                    )
+                }
             }
         }
     }
@@ -357,10 +390,19 @@ private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
 }
 
 @Composable
-private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
+private fun EnvironmentMetricsCard(
+    telemetry: Telemetry,
+    environmentDisplayFahrenheit: Boolean,
+    onClick: () -> Unit,
+) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { onClick() }
+    ) {
         Surface { SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) } }
     }
 }

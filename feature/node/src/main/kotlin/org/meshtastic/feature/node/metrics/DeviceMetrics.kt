@@ -12,10 +12,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  See the
+ * GNU General Public License for more details.
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,6 +33,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
@@ -43,6 +51,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +63,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -61,8 +72,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
@@ -130,6 +145,10 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val data = state.deviceMetricsFiltered(selectedTimeFrame)
 
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -177,6 +196,13 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = data.reversed(),
                 promptInfoDialog = { displayInfoDialog = true },
+                vicoScrollState = vicoScrollState,
+                onPointSelected = { x ->
+                    val index = data.indexOfFirst { it.time.toDouble() == x }
+                    if (index != -1) {
+                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                    }
+                },
             )
 
             SlidingSelector(
@@ -188,7 +214,18 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             }
 
             /* Device Metric Cards */
-            LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> DeviceMetricsCard(telemetry) } }
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(data) { _, telemetry ->
+                    DeviceMetricsCard(
+                        telemetry = telemetry,
+                        onClick = {
+                            coroutineScope.launch {
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -199,6 +236,8 @@ private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     promptInfoDialog: () -> Unit,
+    vicoScrollState: VicoScrollState,
+    onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
@@ -211,6 +250,18 @@ private fun DeviceMetricsChart(
                 series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.batteryLevel })
                 series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.channelUtilization })
                 series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.airUtilTx })
+            }
+        }
+    }
+
+    val markerVisibilityListener = remember(onPointSelected) {
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
             }
         }
     }
@@ -245,9 +296,11 @@ private fun DeviceMetricsChart(
                 },
             ),
             marker = ChartStyling.rememberMarker(),
+            markerVisibilityListener = markerVisibilityListener,
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
+        scrollState = vicoScrollState,
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
     )
 
@@ -274,15 +327,26 @@ private fun DeviceMetricsChartPreview() {
                 .build()
         }
     AppTheme {
-        DeviceMetricsChart(modifier = Modifier.height(400.dp), telemetries = telemetries, promptInfoDialog = {})
+        DeviceMetricsChart(
+            modifier = Modifier.height(400.dp),
+            telemetries = telemetries,
+            promptInfoDialog = {},
+            vicoScrollState = rememberVicoScrollState(),
+            onPointSelected = {},
+        )
     }
 }
 
 @Composable
-private fun DeviceMetricsCard(telemetry: Telemetry) {
+private fun DeviceMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
     val deviceMetrics = telemetry.deviceMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { onClick() }
+    ) {
         Surface {
             SelectionContainer {
                 Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
@@ -333,7 +397,7 @@ private fun DeviceMetricsCardPreview() {
                     .setUptimeSeconds(7200),
             )
             .build()
-    AppTheme { DeviceMetricsCard(telemetry = telemetry) }
+    AppTheme { DeviceMetricsCard(telemetry = telemetry, onClick = {}) }
 }
 
 @Suppress("detekt:MagicNumber") // fake data
@@ -376,6 +440,8 @@ private fun DeviceMetricsScreenPreview() {
                     modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                     telemetries = telemetries.reversed(),
                     promptInfoDialog = { displayInfoDialog = true },
+                    vicoScrollState = rememberVicoScrollState(),
+                    onPointSelected = {},
                 )
 
                 SlidingSelector(
@@ -388,7 +454,7 @@ private fun DeviceMetricsScreenPreview() {
 
                 /* Device Metric Cards */
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(telemetries) { telemetry -> DeviceMetricsCard(telemetry) }
+                    items(telemetries) { telemetry -> DeviceMetricsCard(telemetry = telemetry, onClick = {}) }
                 }
             }
         }

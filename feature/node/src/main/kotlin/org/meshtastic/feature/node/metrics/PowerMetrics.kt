@@ -12,10 +12,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
+ * along with this program.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +31,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
@@ -44,6 +50,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +61,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -61,8 +70,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
@@ -133,6 +146,10 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
     val data = state.powerMetricsFiltered(selectedTimeFrame)
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
 
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
@@ -171,7 +188,14 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
             PowerMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = data.reversed(),
-                selectedChannel,
+                selectedChannel = selectedChannel,
+                vicoScrollState = vicoScrollState,
+                onPointSelected = { x ->
+                    val index = data.indexOfFirst { it.time.toDouble() == x }
+                    if (index != -1) {
+                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                    }
+                },
             )
 
             SlidingSelector(
@@ -190,7 +214,18 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 OptionLabel(stringResource(it.strRes))
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> PowerMetricsCard(telemetry) } }
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(data) { _, telemetry ->
+                    PowerMetricsCard(
+                        telemetry = telemetry,
+                        onClick = {
+                            coroutineScope.launch {
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
+                            }
+                        },
+                    )
+                }
+            }
         }
     }
 }
@@ -201,6 +236,8 @@ private fun PowerMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     selectedChannel: PowerChannel,
+    vicoScrollState: VicoScrollState,
+    onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) {
@@ -229,6 +266,18 @@ private fun PowerMetricsChart(
                     x = telemetries.map { it.time },
                     y = telemetries.map { (retrieveVoltage(selectedChannel, it) - voltageMin) / voltageDiff },
                 )
+            }
+        }
+    }
+
+    val markerVisibilityListener = remember(onPointSelected) {
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
             }
         }
     }
@@ -272,9 +321,11 @@ private fun PowerMetricsChart(
                 },
             ),
             marker = ChartStyling.rememberMarker(),
+            markerVisibilityListener = markerVisibilityListener,
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
+        scrollState = vicoScrollState,
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
     )
 
@@ -282,9 +333,14 @@ private fun PowerMetricsChart(
 }
 
 @Composable
-private fun PowerMetricsCard(telemetry: Telemetry) {
+private fun PowerMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { onClick() }
+    ) {
         Surface {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {

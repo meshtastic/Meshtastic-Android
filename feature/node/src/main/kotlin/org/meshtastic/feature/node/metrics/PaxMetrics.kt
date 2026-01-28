@@ -12,10 +12,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
+ * along with this program.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,7 +29,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +43,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,6 +54,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -54,8 +63,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
@@ -95,6 +108,8 @@ private fun PaxMetricsChart(
     totalSeries: List<Pair<Int, Int>>,
     bleSeries: List<Pair<Int, Int>>,
     wifiSeries: List<Pair<Int, Int>>,
+    vicoScrollState: VicoScrollState,
+    onPointSelected: (Double) -> Unit,
 ) {
     if (totalSeries.isEmpty()) return
 
@@ -106,6 +121,18 @@ private fun PaxMetricsChart(
                 series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
                 series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
                 series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
+            }
+        }
+    }
+
+    val markerVisibilityListener = remember(onPointSelected) {
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
             }
         }
     }
@@ -140,9 +167,11 @@ private fun PaxMetricsChart(
                 },
             ),
             marker = ChartStyling.rememberMarker(),
+            markerVisibilityListener = markerVisibilityListener,
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
+        scrollState = vicoScrollState,
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
     )
 }
@@ -152,6 +181,10 @@ private fun PaxMetricsChart(
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         metricsViewModel.effects.collect { effect ->
@@ -229,7 +262,18 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             if (graphData.isNotEmpty()) {
                 ChartHeader(graphData.size)
                 Legend(legendData = legendData)
-                PaxMetricsChart(totalSeries = totalSeries, bleSeries = bleSeries, wifiSeries = wifiSeries)
+                PaxMetricsChart(
+                    totalSeries = totalSeries,
+                    bleSeries = bleSeries,
+                    wifiSeries = wifiSeries,
+                    vicoScrollState = vicoScrollState,
+                    onPointSelected = { x ->
+                        val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
+                        if (index != -1) {
+                            coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                        }
+                    },
+                )
             }
             // List
             if (paxMetrics.isEmpty()) {
@@ -239,8 +283,23 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                     textAlign = TextAlign.Center,
                 )
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
-                    items(paxMetrics) { (log, pax) -> PaxMetricsItem(log, pax, dateFormat) }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    state = lazyListState,
+                ) {
+                    itemsIndexed(paxMetrics) { _, (log, pax) ->
+                        PaxMetricsItem(
+                            log = log,
+                            pax = pax,
+                            dateFormat = dateFormat,
+                            onClick = {
+                                coroutineScope.launch {
+                                    vicoScrollState.animateScroll(Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f))
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -318,8 +377,18 @@ fun PaxcountInfo(
 }
 
 @Composable
-fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateFormat) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+fun PaxMetricsItem(
+    log: MeshLog,
+    pax: PaxcountProtos.Paxcount,
+    dateFormat: DateFormat,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { onClick() }
+    ) {
         Text(
             text = dateFormat.format(Date(log.received_date)),
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),

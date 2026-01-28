@@ -12,6 +12,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
+ * along with this program.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
@@ -25,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -32,6 +37,8 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import org.meshtastic.core.strings.Res
@@ -115,6 +122,8 @@ fun EnvironmentMetricsChart(
     graphData: EnvironmentGraphingData,
     selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
+    vicoScrollState: VicoScrollState,
+    onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) {
@@ -167,6 +176,18 @@ fun EnvironmentMetricsChart(
                 ChartStyling.createGradientLine(lineColor = metric.color, pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP)
             }
 
+    val markerVisibilityListener = remember(onPointSelected) {
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
+            }
+        }
+    }
+
     if (lines.isNotEmpty()) {
         CartesianChartHost(
             chart =
@@ -198,9 +219,11 @@ fun EnvironmentMetricsChart(
                     },
                 ),
                 marker = ChartStyling.rememberMarker(),
+                markerVisibilityListener = markerVisibilityListener,
             ),
             modelProducer = modelProducer,
             modifier = modifier.padding(8.dp),
+            scrollState = vicoScrollState,
             zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
         )
     }

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +29,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
@@ -44,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,6 +57,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -61,8 +66,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
@@ -108,6 +117,10 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     var displayInfoDialog by remember { mutableStateOf(false) }
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val data = state.signalMetricsFiltered(selectedTimeFrame)
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -160,6 +173,13 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 meshPackets = data.reversed(),
                 selectedTime = selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
+                vicoScrollState = vicoScrollState,
+                onPointSelected = { x ->
+                    val index = data.indexOfFirst { it.rxTime.toDouble() == x }
+                    if (index != -1) {
+                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                    }
+                },
             )
 
             SlidingSelector(
@@ -170,8 +190,17 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 OptionLabel(stringResource(it.strRes))
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(data) { meshPacket -> SignalMetricsCard(meshPacket) }
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(data) { _, meshPacket ->
+                    SignalMetricsCard(
+                        meshPacket = meshPacket,
+                        onClick = {
+                            coroutineScope.launch {
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(meshPacket.rxTime.toDouble(), 0.5f))
+                            }
+                        },
+                    )
+                }
             }
         }
     }
@@ -184,6 +213,8 @@ private fun SignalMetricsChart(
     meshPackets: List<MeshPacket>,
     selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
+    vicoScrollState: VicoScrollState,
+    onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = meshPackets.size)
     if (meshPackets.isEmpty()) {
@@ -202,6 +233,18 @@ private fun SignalMetricsChart(
                     y = meshPackets.map { (it.rxRssi - Metric.RSSI.min) / rssiDiff },
                 )
                 series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { (it.rxSnr - Metric.SNR.min) / snrDiff })
+            }
+        }
+    }
+
+    val markerVisibilityListener = remember(onPointSelected) {
+        object : CartesianMarkerVisibilityListener {
+            override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
+            }
+
+            override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
+                targets.firstOrNull()?.let { onPointSelected(it.x) }
             }
         }
     }
@@ -244,9 +287,11 @@ private fun SignalMetricsChart(
                 },
             ),
             marker = ChartStyling.rememberMarker(),
+            markerVisibilityListener = markerVisibilityListener,
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
+        scrollState = vicoScrollState,
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
     )
 
@@ -254,9 +299,14 @@ private fun SignalMetricsChart(
 }
 
 @Composable
-private fun SignalMetricsCard(meshPacket: MeshPacket) {
+private fun SignalMetricsCard(meshPacket: MeshPacket, onClick: () -> Unit) {
     val time = meshPacket.rxTime * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { onClick() }
+    ) {
         Surface {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {
