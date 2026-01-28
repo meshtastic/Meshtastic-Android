@@ -70,11 +70,13 @@ constructor(
             val neighbors =
                 ni.neighborsList.joinToString("\n") { n ->
                     val node = nodeManager.nodeDBbyNodeNum[n.nodeId]
-                    val name = node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
+                    val name =
+                        node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
                     "• $name (SNR: ${n.snr})"
                 }
 
-            val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[packet.from]?.longName ?: "Unknown"}:\n$neighbors"
+            val formatted =
+                "Neighbors of ${nodeManager.nodeDBbyNodeNum[packet.from]?.longName ?: "Unknown"}:\n$neighbors"
 
             val responseText =
                 if (start != null) {
@@ -96,6 +98,7 @@ constructor(
 
     companion object {
         private const val MILLIS_PER_SECOND = 1000.0
+
         // Only show neighbor info responses for requests sent in the last 3 minutes
         private const val NEIGHBOR_RQ_COOLDOWN = 3 * 60 * 1000L // 3 minutes in milliseconds
     }
