@@ -27,6 +27,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.forty_eight_hours
 import org.meshtastic.core.strings.four_weeks
 import org.meshtastic.core.strings.max
+import org.meshtastic.core.strings.one_hour
 import org.meshtastic.core.strings.one_week
 import org.meshtastic.core.strings.twenty_four_hours
 import org.meshtastic.core.strings.two_weeks
@@ -95,6 +96,7 @@ data class MetricsState(
 /** Supported time frames used to display data. */
 @Suppress("MagicNumber")
 enum class TimeFrame(val seconds: Long, val strRes: StringResource) {
+    ONE_HOUR(TimeUnit.HOURS.toSeconds(1), Res.string.one_hour),
     TWENTY_FOUR_HOURS(TimeUnit.DAYS.toSeconds(1), Res.string.twenty_four_hours),
     FORTY_EIGHT_HOURS(TimeUnit.DAYS.toSeconds(2), Res.string.forty_eight_hours),
     ONE_WEEK(TimeUnit.DAYS.toSeconds(7), Res.string.one_week),

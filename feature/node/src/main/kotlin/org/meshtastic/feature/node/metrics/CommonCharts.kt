@@ -55,6 +55,7 @@ import org.meshtastic.core.strings.info
 import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.snr
+import org.meshtastic.feature.node.model.TimeFrame
 import java.text.DateFormat
 
 object CommonCharts {
@@ -99,6 +100,29 @@ object CommonCharts {
      */
     @Composable
     fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
+
+    /**
+     * Gets the appropriate time formatter based on the selected TimeFrame for better chart readability.
+     * - 1 Hour: Just time (HH:MM)
+     * - 24 Hours: Time (HH:MM)
+     * - 1 Week: Date + Time
+     * - 1 Month: Date only
+     * - All: Date only
+     *
+     * @param timeFrame The selected TimeFrame
+     * @return DateFormat appropriate for the timeframe
+     */
+    fun getTimeFormatterForTimeFrame(timeFrame: TimeFrame): DateFormat = when (timeFrame) {
+        TimeFrame.ONE_HOUR,
+        TimeFrame.TWENTY_FOUR_HOURS,
+        -> TIME_MINUTE_FORMAT
+        TimeFrame.FORTY_EIGHT_HOURS,
+        TimeFrame.ONE_WEEK,
+        TimeFrame.TWO_WEEKS,
+        TimeFrame.FOUR_WEEKS,
+        -> DATE_TIME_MINUTE_FORMAT
+        TimeFrame.MAX -> DateFormat.getDateInstance(DateFormat.SHORT)
+    }
 }
 
 data class LegendData(

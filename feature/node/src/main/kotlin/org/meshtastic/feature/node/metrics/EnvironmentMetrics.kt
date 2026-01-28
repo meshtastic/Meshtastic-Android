@@ -157,6 +157,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = processedTelemetries.reversed(),
                 graphData = graphData,
+                selectedTime = selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
             )
 

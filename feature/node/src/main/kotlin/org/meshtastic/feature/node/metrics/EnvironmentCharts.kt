@@ -41,6 +41,7 @@ import org.meshtastic.core.strings.soil_moisture
 import org.meshtastic.core.strings.soil_temperature
 import org.meshtastic.core.strings.temperature
 import org.meshtastic.core.strings.uv_lux
+import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import java.util.Date
 
@@ -110,6 +111,7 @@ fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
+    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
@@ -189,9 +191,8 @@ fun EnvironmentMetricsChart(
                 bottomAxis =
                 HorizontalAxis.rememberBottom(
                     valueFormatter = { _, value, _ ->
-                        CommonCharts.TIME_MINUTE_FORMAT.format(
-                            Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
-                        )
+                        val timeFormatter = CommonCharts.getTimeFormatterForTimeFrame(selectedTime)
+                        timeFormatter.format(Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()))
                     },
                 ),
             ),

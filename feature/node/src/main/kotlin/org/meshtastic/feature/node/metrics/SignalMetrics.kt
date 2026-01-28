@@ -156,6 +156,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             SignalMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 meshPackets = data.reversed(),
+                selectedTime = selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
             )
 
@@ -179,6 +180,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
+    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
 ) {
     ChartHeader(amount = meshPackets.size)
@@ -235,9 +237,8 @@ private fun SignalMetricsChart(
             bottomAxis =
             HorizontalAxis.rememberBottom(
                 valueFormatter = { _, value, _ ->
-                    CommonCharts.TIME_MINUTE_FORMAT.format(
-                        Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()),
-                    )
+                    val timeFormatter = CommonCharts.getTimeFormatterForTimeFrame(selectedTime)
+                    timeFormatter.format(Date((value * CommonCharts.MS_PER_SEC.toDouble()).toLong()))
                 },
             ),
         ),
