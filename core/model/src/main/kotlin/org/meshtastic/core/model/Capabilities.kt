@@ -38,7 +38,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
 
     /** FIXME: Ability to request neighbor information from other nodes. Disabled until working better. */
     val canRequestNeighborInfo: Boolean
-        get() = false
+        get() = isSupported("9.9.9")
 
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
     val canSendVerifiedContacts: Boolean
