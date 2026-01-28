@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,19 +54,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -72,12 +69,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
-import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -134,6 +126,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()
     val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -175,7 +168,9 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 telemetries = data.reversed(),
                 selectedChannel = selectedChannel,
                 vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
                 onPointSelected = { x ->
+                    selectedX = x
                     val index = data.indexOfFirst { it.time.toDouble() == x }
                     if (index != -1) {
                         coroutineScope.launch { lazyListState.animateScrollToItem(index) }
@@ -187,7 +182,9 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 itemsIndexed(data) { _, telemetry ->
                     PowerMetricsCard(
                         telemetry = telemetry,
+                        isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = {
+                            selectedX = telemetry.time.toDouble()
                             coroutineScope.launch {
                                 vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
                             }
@@ -206,6 +203,7 @@ private fun PowerMetricsChart(
     telemetries: List<Telemetry>,
     selectedChannel: PowerChannel,
     vicoScrollState: VicoScrollState,
+    selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
@@ -216,29 +214,14 @@ private fun PowerMetricsChart(
     val modelProducer = remember { CartesianChartModelProducer() }
     val currentColor = PowerMetric.CURRENT.color
     val voltageColor = PowerMetric.VOLTAGE.color
-    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
     val marker =
         ChartStyling.rememberMarker(
-            valueFormatter = { _, targets ->
-                buildAnnotatedString {
-                    targets.forEachIndexed { index, target ->
-                        if (index > 0) append(", ")
-                        when (target) {
-                            is LineCartesianLayerMarkerTarget -> {
-                                target.points.forEachIndexed { pointIndex, point ->
-                                    if (pointIndex > 0) append(", ")
-                                    // Identify metric by color
-                                    val (label, color) =
-                                        when (point.color) {
-                                            currentColor -> "Current: %.0f mA".format(point.entry.y) to currentColor
-                                            voltageColor -> "Voltage: %.1f V".format(point.entry.y) to voltageColor
-                                            else -> "%.1f".format(point.entry.y) to onSurfaceColor
-                                        }
-                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
-                                }
-                            }
-                        }
-                    }
+            valueFormatter =
+            ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                when (color) {
+                    currentColor -> "Current: %.0f mA".format(value)
+                    voltageColor -> "Voltage: %.1f V".format(value)
+                    else -> "%.1f".format(value)
                 }
             },
         )
@@ -254,24 +237,13 @@ private fun PowerMetricsChart(
         }
     }
 
-    val markerVisibilityListener =
-        remember(onPointSelected) {
-            object : CartesianMarkerVisibilityListener {
-                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-
-                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-            }
-        }
-
     val axisLabel = ChartStyling.rememberAxisLabel()
 
-    CartesianChartHost(
-        chart =
-        rememberCartesianChart(
+    GenericMetricChart(
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+        layers =
+        listOf(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
@@ -286,29 +258,28 @@ private fun PowerMetricsChart(
                 ),
                 verticalAxisPosition = Axis.Position.Vertical.End,
             ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = currentColor),
-                valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = axisLabel,
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 50 }, addExtremeLabelPadding = true),
-            ),
-            marker = marker,
-            markerVisibilityListener = markerVisibilityListener,
         ),
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        scrollState = vicoScrollState,
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
+        startAxis =
+        VerticalAxis.rememberStart(
+            label = ChartStyling.rememberAxisLabel(color = currentColor),
+            valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
+        ),
+        endAxis =
+        VerticalAxis.rememberEnd(
+            label = ChartStyling.rememberAxisLabel(color = voltageColor),
+            valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+        ),
+        bottomAxis =
+        HorizontalAxis.rememberBottom(
+            label = axisLabel,
+            valueFormatter = CommonCharts.dynamicTimeFormatter,
+            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+            labelRotationDegrees = 45f,
+        ),
+        marker = marker,
+        selectedX = selectedX,
+        onPointSelected = onPointSelected,
+        vicoScrollState = vicoScrollState,
     )
 
     Legend(legendData = LEGEND_DATA, displayInfoIcon = false)
@@ -316,9 +287,21 @@ private fun PowerMetricsChart(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun PowerMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
+private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
         Surface {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {

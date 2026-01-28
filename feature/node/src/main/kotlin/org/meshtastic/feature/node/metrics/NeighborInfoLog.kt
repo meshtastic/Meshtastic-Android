@@ -220,7 +220,8 @@ fun annotateNeighborInfo(
                             snrValue >= SNR_FAIR_THRESHOLD -> statusYellow
                             else -> statusOrange
                         }
-                    append(line.substring(0, line.indexOf("(SNR: ") + 6))
+                    val snrPrefix = "(SNR: "
+                    append(line.substring(0, line.indexOf(snrPrefix) + snrPrefix.length))
                     withStyle(style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold)) { append("$snrValue") }
                     append(")")
                 } else {

@@ -17,22 +17,28 @@
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.common.Fill
 import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.MarkerCornerBasedShape
+import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
@@ -166,16 +172,20 @@ object ChartStyling {
     /**
      * Creates and remembers a default [CartesianMarker] styled for the Meshtastic theme.
      *
+     * @param valueFormatter The formatter for the marker label content.
+     * @param showIndicator Whether to show the point indicator on the line/column.
      * @return A configured [CartesianMarker]
      */
     @Composable
     fun rememberMarker(
-        valueFormatter: DefaultCartesianMarker.ValueFormatter = DefaultCartesianMarker.ValueFormatter.default(),
+        valueFormatter: DefaultCartesianMarker.ValueFormatter =
+            DefaultCartesianMarker.ValueFormatter.default(colorCode = true),
+        showIndicator: Boolean = true,
     ): CartesianMarker {
         val labelBackground =
             rememberShapeComponent(
-                fill = Fill(MaterialTheme.colorScheme.surfaceContainer),
-                shape = RoundedCornerShape(4.dp),
+                fill = Fill(MaterialTheme.colorScheme.surfaceContainerHigh),
+                shape = MarkerCornerBasedShape(MaterialTheme.shapes.extraSmall),
                 strokeFill = Fill(MaterialTheme.colorScheme.outlineVariant),
                 strokeThickness = 1.dp,
             )
@@ -189,14 +199,59 @@ object ChartStyling {
                 ),
                 background = labelBackground,
                 padding = Insets(horizontal = 8.dp, vertical = 4.dp),
+                margins = Insets(bottom = 4.dp),
             )
         val guideline =
             rememberLineComponent(
                 fill = Fill(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)),
                 thickness = 1.dp,
             )
-        return rememberDefaultCartesianMarker(label = label, valueFormatter = valueFormatter, guideline = guideline)
+
+        val indicator =
+            if (showIndicator) {
+                { color: Color -> ShapeComponent(fill = Fill(color), shape = CircleShape) }
+            } else {
+                null
+            }
+
+        return rememberDefaultCartesianMarker(
+            label = label,
+            valueFormatter = valueFormatter,
+            guideline = guideline,
+            indicator = indicator,
+        )
     }
+
+    /**
+     * Creates a [DefaultCartesianMarker.ValueFormatter] that colors the text to match the series color.
+     *
+     * @param format A lambda that provides the string content for a given Y value and its series color.
+     */
+    fun createColoredMarkerValueFormatter(
+        format: (value: Double, color: Color) -> String,
+    ): DefaultCartesianMarker.ValueFormatter = DefaultCartesianMarker.ValueFormatter { _, targets ->
+        buildAnnotatedString {
+            targets.forEachIndexed { index, target ->
+                if (index > 0) append(", ")
+                if (target is LineCartesianLayerMarkerTarget) {
+                    target.points.forEachIndexed { pointIndex, point ->
+                        if (pointIndex > 0) append(", ")
+                        val color = point.color
+                        val text = format(point.entry.y, color)
+                        withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(text) }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Creates a standard [HorizontalAxis.ItemPlacer] with optimized spacing.
+     *
+     * @param spacing The number of data points to skip between labels.
+     */
+    fun rememberItemPlacer(spacing: Int = 50): HorizontalAxis.ItemPlacer =
+        HorizontalAxis.ItemPlacer.aligned(spacing = { spacing }, addExtremeLabelPadding = true)
 
     /**
      * Creates and remembers a [com.patrykandpatrick.vico.compose.common.component.TextComponent] styled for axis

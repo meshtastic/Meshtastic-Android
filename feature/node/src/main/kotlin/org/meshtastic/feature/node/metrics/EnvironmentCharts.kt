@@ -24,14 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -39,11 +33,6 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
-import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.baro_pressure
@@ -164,39 +153,12 @@ fun EnvironmentMetricsChart(
         }
     }
 
-    val markerVisibilityListener =
-        remember(onPointSelected) {
-            object : CartesianMarkerVisibilityListener {
-                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-
-                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-            }
-        }
-
     val marker =
         ChartStyling.rememberMarker(
-            valueFormatter = { _, targets ->
-                buildAnnotatedString {
-                    targets.forEachIndexed { index, target ->
-                        if (index > 0) append(", ")
-                        when (target) {
-                            is LineCartesianLayerMarkerTarget -> {
-                                target.points.forEachIndexed { pointIndex, point ->
-                                    if (pointIndex > 0) append(", ")
-                                    // Identify metric by color
-                                    val label = colorToLabel[point.color] ?: ""
-                                    withStyle(SpanStyle(color = point.color, fontWeight = FontWeight.Bold)) {
-                                        append("%s: %.1f".format(label, point.entry.y))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            valueFormatter =
+            ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                val label = colorToLabel[color] ?: ""
+                "%s: %.1f".format(label, value)
             },
         )
 
@@ -234,40 +196,35 @@ fun EnvironmentMetricsChart(
             Environment.entries.filter { it != Environment.BAROMETRIC_PRESSURE && shouldPlot[it.ordinal] }
         val endAxisColor = if (otherMetricsPlotted.size == 1) otherMetricsPlotted.first().color else onSurfaceColor
 
-        CartesianChartHost(
-            chart =
-            @Suppress("SpreadOperator")
-            rememberCartesianChart(
-                *layers.toTypedArray(),
-                startAxis =
-                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
-                    VerticalAxis.rememberStart(
-                        label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
-                        valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },
-                    )
-                } else {
-                    null
-                },
-                endAxis =
-                VerticalAxis.rememberEnd(
-                    label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                    valueFormatter = { _, value, _ -> "%.0f".format(value) },
-                ),
-                bottomAxis =
-                HorizontalAxis.rememberBottom(
-                    label = ChartStyling.rememberAxisLabel(),
-                    valueFormatter = CommonCharts.dynamicTimeFormatter,
-                    itemPlacer =
-                    HorizontalAxis.ItemPlacer.aligned(spacing = { 50 }, addExtremeLabelPadding = true),
-                ),
-                marker = marker,
-                markerVisibilityListener = markerVisibilityListener,
-                persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
-            ),
+        GenericMetricChart(
             modelProducer = modelProducer,
             modifier = modifier.padding(8.dp),
-            scrollState = vicoScrollState,
-            zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
+            layers = layers,
+            startAxis =
+            if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+                VerticalAxis.rememberStart(
+                    label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
+                    valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },
+                )
+            } else {
+                null
+            },
+            endAxis =
+            VerticalAxis.rememberEnd(
+                label = ChartStyling.rememberAxisLabel(color = endAxisColor),
+                valueFormatter = { _, value, _ -> "%.0f".format(value) },
+            ),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                label = ChartStyling.rememberAxisLabel(),
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                labelRotationDegrees = 45f,
+            ),
+            marker = marker,
+            selectedX = selectedX,
+            onPointSelected = onPointSelected,
+            vicoScrollState = vicoScrollState,
         )
     }
 

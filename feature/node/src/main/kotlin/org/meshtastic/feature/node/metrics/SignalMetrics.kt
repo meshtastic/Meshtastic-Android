@@ -52,18 +52,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -71,12 +65,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
-import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
@@ -231,50 +220,26 @@ private fun SignalMetricsChart(
         }
     }
 
-    val markerVisibilityListener =
-        remember(onPointSelected) {
-            object : CartesianMarkerVisibilityListener {
-                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-
-                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-            }
-        }
-
     val rssiColor = SignalMetric.RSSI.color
     val snrColor = SignalMetric.SNR.color
+
     val marker =
         ChartStyling.rememberMarker(
-            valueFormatter = { _, targets ->
-                buildAnnotatedString {
-                    targets.forEachIndexed { index, target ->
-                        if (index > 0) append(", ")
-                        when (target) {
-                            is LineCartesianLayerMarkerTarget -> {
-                                target.points.forEachIndexed { pointIndex, point ->
-                                    if (pointIndex > 0) append(", ")
-                                    // Use point color to identify metric precisely
-                                    val (label, color) =
-                                        if (point.color == rssiColor) {
-                                            "RSSI: %.0f dBm".format(point.entry.y) to rssiColor
-                                        } else {
-                                            "SNR: %.1f dB".format(point.entry.y) to snrColor
-                                        }
-                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
-                                }
-                            }
-                        }
-                    }
+            valueFormatter =
+            ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                if (color == rssiColor) {
+                    "RSSI: %.0f dBm".format(value)
+                } else {
+                    "SNR: %.1f dB".format(value)
                 }
             },
         )
 
-    CartesianChartHost(
-        chart =
-        rememberCartesianChart(
+    GenericMetricChart(
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+        layers =
+        listOf(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
@@ -289,30 +254,28 @@ private fun SignalMetricsChart(
                 ),
                 verticalAxisPosition = Axis.Position.Vertical.End,
             ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = rssiColor),
-                valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = snrColor),
-                valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 50 }, addExtremeLabelPadding = true),
-            ),
-            marker = marker,
-            markerVisibilityListener = markerVisibilityListener,
-            persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
         ),
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        scrollState = vicoScrollState,
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
+        startAxis =
+        VerticalAxis.rememberStart(
+            label = ChartStyling.rememberAxisLabel(color = rssiColor),
+            valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
+        ),
+        endAxis =
+        VerticalAxis.rememberEnd(
+            label = ChartStyling.rememberAxisLabel(color = snrColor),
+            valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
+        ),
+        bottomAxis =
+        HorizontalAxis.rememberBottom(
+            label = ChartStyling.rememberAxisLabel(),
+            valueFormatter = CommonCharts.dynamicTimeFormatter,
+            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+            labelRotationDegrees = 45f,
+        ),
+        marker = marker,
+        selectedX = selectedX,
+        onPointSelected = onPointSelected,
+        vicoScrollState = vicoScrollState,
     )
 
     Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)

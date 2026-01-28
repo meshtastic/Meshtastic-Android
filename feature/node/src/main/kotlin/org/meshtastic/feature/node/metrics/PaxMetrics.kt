@@ -47,31 +47,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
-import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -119,7 +108,6 @@ private fun PaxMetricsChart(
     val paxColor = PaxSeries.PAX.color
     val bleColor = PaxSeries.BLE.color
     val wifiColor = PaxSeries.WIFI.color
-    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
         modelProducer.runTransaction {
@@ -131,50 +119,25 @@ private fun PaxMetricsChart(
         }
     }
 
-    val markerVisibilityListener =
-        remember(onPointSelected) {
-            object : CartesianMarkerVisibilityListener {
-                override fun onShown(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-
-                override fun onUpdated(marker: CartesianMarker, targets: List<CartesianMarker.Target>) {
-                    targets.firstOrNull()?.let { onPointSelected(it.x) }
-                }
-            }
-        }
-
     val axisLabel = ChartStyling.rememberAxisLabel()
     val marker =
         ChartStyling.rememberMarker(
-            valueFormatter = { _, targets ->
-                buildAnnotatedString {
-                    targets.forEachIndexed { index, target ->
-                        if (index > 0) append(", ")
-                        when (target) {
-                            is LineCartesianLayerMarkerTarget -> {
-                                target.points.forEachIndexed { pointIndex, point ->
-                                    if (pointIndex > 0) append(", ")
-                                    // Identify metric by color
-                                    val (label, color) =
-                                        when (point.color) {
-                                            bleColor -> "BLE: %.0f".format(point.entry.y) to bleColor
-                                            wifiColor -> "WiFi: %.0f".format(point.entry.y) to wifiColor
-                                            paxColor -> "PAX: %.0f".format(point.entry.y) to paxColor
-                                            else -> "%.0f".format(point.entry.y) to onSurfaceColor
-                                        }
-                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
-                                }
-                            }
-                        }
-                    }
+            valueFormatter =
+            ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                when (color) {
+                    bleColor -> "BLE: %.0f".format(value)
+                    wifiColor -> "WiFi: %.0f".format(value)
+                    paxColor -> "PAX: %.0f".format(value)
+                    else -> "%.0f".format(value)
                 }
             },
         )
 
-    CartesianChartHost(
-        chart =
-        rememberCartesianChart(
+    GenericMetricChart(
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+        layers =
+        listOf(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
@@ -192,21 +155,19 @@ private fun PaxMetricsChart(
                     ),
                 ),
             ),
-            startAxis = VerticalAxis.rememberStart(label = axisLabel),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = axisLabel,
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 20 }, addExtremeLabelPadding = true),
-            ),
-            marker = marker,
-            markerVisibilityListener = markerVisibilityListener,
-            persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
         ),
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        scrollState = vicoScrollState,
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
+        startAxis = VerticalAxis.rememberStart(label = axisLabel),
+        bottomAxis =
+        HorizontalAxis.rememberBottom(
+            label = axisLabel,
+            valueFormatter = CommonCharts.dynamicTimeFormatter,
+            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+            labelRotationDegrees = 45f,
+        ),
+        marker = marker,
+        selectedX = selectedX,
+        onPointSelected = onPointSelected,
+        vicoScrollState = vicoScrollState,
     )
 }
 
