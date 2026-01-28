@@ -71,6 +71,7 @@ object CommonCharts {
     val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
+    const val SCROLL_BIAS = 0.5f
 
     /**
      * Gets the Material 3 primary color with optional opacity adjustment.

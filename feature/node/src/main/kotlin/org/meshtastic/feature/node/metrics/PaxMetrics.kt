@@ -16,6 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,8 +40,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -59,6 +64,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
@@ -101,6 +107,7 @@ private fun PaxMetricsChart(
     bleSeries: List<Pair<Int, Int>>,
     wifiSeries: List<Pair<Int, Int>>,
     vicoScrollState: VicoScrollState,
+    selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     if (totalSeries.isEmpty()) return
@@ -131,6 +138,19 @@ private fun PaxMetricsChart(
         }
 
     val axisLabel = ChartStyling.rememberAxisLabel()
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter = { _, targets ->
+                targets.joinToString { target ->
+                    when (target) {
+                        is LineCartesianLayerMarkerTarget -> {
+                            target.points.joinToString { point -> "%.0f".format(point.entry.y) }
+                        }
+                        else -> ""
+                    }
+                }
+            },
+        )
 
     CartesianChartHost(
         chart =
@@ -152,18 +172,15 @@ private fun PaxMetricsChart(
                     ),
                 ),
             ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = axisLabel,
-                valueFormatter = { _, value, _ -> "%.0f".format(value) },
-            ),
+            startAxis = VerticalAxis.rememberStart(label = axisLabel),
             bottomAxis =
             HorizontalAxis.rememberBottom(
                 label = axisLabel,
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
             ),
-            marker = ChartStyling.rememberMarker(),
+            marker = marker,
             markerVisibilityListener = markerVisibilityListener,
+            persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
@@ -181,6 +198,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()
     val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         metricsViewModel.effects.collect { effect ->
@@ -256,7 +274,9 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                     bleSeries = bleSeries,
                     wifiSeries = wifiSeries,
                     vicoScrollState = vicoScrollState,
+                    selectedX = selectedX,
                     onPointSelected = { x ->
+                        selectedX = x
                         val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
                         if (index != -1) {
                             coroutineScope.launch { lazyListState.animateScrollToItem(index) }
@@ -282,7 +302,9 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                             log = log,
                             pax = pax,
                             dateFormat = dateFormat,
+                            isSelected = (log.received_date / 1000).toDouble() == selectedX,
                             onClick = {
+                                selectedX = (log.received_date / 1000).toDouble()
                                 coroutineScope.launch {
                                     vicoScrollState.animateScroll(
                                         Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
@@ -368,28 +390,51 @@ fun PaxcountInfo(
 }
 
 @Composable
-fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateFormat, onClick: () -> Unit) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clickable { onClick() }) {
-        Text(
-            text = dateFormat.format(Date(log.received_date)),
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.End,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        val total = pax.ble + pax.wifi
-        val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+fun PaxMetricsItem(
+    log: MeshLog,
+    pax: PaxcountProtos.Paxcount,
+    dateFormat: DateFormat,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
             Text(
-                text = summary,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f, fill = true),
-            )
-            Text(
-                text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
-                style = MaterialTheme.typography.bodyMedium,
+                text = dateFormat.format(Date(log.received_date)),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
                 textAlign = TextAlign.End,
-                modifier = Modifier.alignByBaseline(),
+                modifier = Modifier.fillMaxWidth(),
             )
+            val total = pax.ble + pax.wifi
+            val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f, fill = true),
+                )
+                Text(
+                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.alignByBaseline(),
+                )
+            }
         }
     }
 }

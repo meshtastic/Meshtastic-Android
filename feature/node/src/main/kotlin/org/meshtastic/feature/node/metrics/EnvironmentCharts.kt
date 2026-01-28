@@ -118,6 +118,7 @@ fun EnvironmentMetricsChart(
     graphData: EnvironmentGraphingData,
     promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
+    selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
@@ -167,6 +168,22 @@ fun EnvironmentMetricsChart(
         }
 
     val axisLabel = ChartStyling.rememberAxisLabel()
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter = { _, targets ->
+                targets.joinToString { target ->
+                    when (target) {
+                        is LineCartesianLayerMarkerTarget -> {
+                            target.points.joinToString { point ->
+                                // We don't have unit info easily here, but we can format the raw value
+                                "%.1f".format(point.entry.y)
+                            }
+                        }
+                        else -> ""
+                    }
+                }
+            },
+        )
 
     val layers = mutableListOf<LineCartesianLayer>()
     if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
@@ -222,23 +239,9 @@ fun EnvironmentMetricsChart(
                     label = axisLabel,
                     valueFormatter = CommonCharts.dynamicTimeFormatter,
                 ),
-                marker =
-                ChartStyling.rememberMarker(
-                    valueFormatter = { _, targets ->
-                        targets.joinToString { target ->
-                            when (target) {
-                                is LineCartesianLayerMarkerTarget -> {
-                                    target.points.joinToString { point ->
-                                        // We don't have unit info easily here, but we can format the raw value
-                                        "%.1f".format(point.entry.y)
-                                    }
-                                }
-                                else -> ""
-                            }
-                        }
-                    },
-                ),
+                marker = marker,
                 markerVisibilityListener = markerVisibilityListener,
+                persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
             ),
             modelProducer = modelProducer,
             modifier = modifier.padding(8.dp),

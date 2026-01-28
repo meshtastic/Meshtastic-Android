@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +34,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -70,6 +70,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
@@ -88,6 +89,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshProtos.MeshPacket
 
@@ -114,6 +116,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()
     val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -166,7 +169,9 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 meshPackets = data.reversed(),
                 promptInfoDialog = { displayInfoDialog = true },
                 vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
                 onPointSelected = { x ->
+                    selectedX = x
                     val index = data.indexOfFirst { it.rxTime.toDouble() == x }
                     if (index != -1) {
                         coroutineScope.launch { lazyListState.animateScrollToItem(index) }
@@ -178,9 +183,11 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 itemsIndexed(data) { _, meshPacket ->
                     SignalMetricsCard(
                         meshPacket = meshPacket,
+                        isSelected = meshPacket.rxTime.toDouble() == selectedX,
                         onClick = {
+                            selectedX = meshPacket.rxTime.toDouble()
                             coroutineScope.launch {
-                                vicoScrollState.animateScroll(Scroll.Absolute.x(meshPacket.rxTime.toDouble(), 0.5f))
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS))
                             }
                         },
                     )
@@ -197,6 +204,7 @@ private fun SignalMetricsChart(
     meshPackets: List<MeshPacket>,
     promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
+    selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = meshPackets.size)
@@ -228,6 +236,27 @@ private fun SignalMetricsChart(
         }
 
     val axisLabel = ChartStyling.rememberAxisLabel()
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter = { _, targets ->
+                targets.joinToString { target ->
+                    @Suppress("MagicNumber")
+                    when (target) {
+                        is LineCartesianLayerMarkerTarget -> {
+                            target.points.joinToString { point ->
+                                // Vico 3.x stores real Y values if not normalized
+                                if (point.entry.y < -20) { // Probable RSSI
+                                    "RSSI: %.0f dBm".format(point.entry.y)
+                                } else { // Probable SNR
+                                    "SNR: %.1f dB".format(point.entry.y)
+                                }
+                            }
+                        }
+                        else -> ""
+                    }
+                }
+            },
+        )
 
     CartesianChartHost(
         chart =
@@ -261,8 +290,9 @@ private fun SignalMetricsChart(
                 label = axisLabel,
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
             ),
-            marker = ChartStyling.rememberMarker(),
+            marker = marker,
             markerVisibilityListener = markerVisibilityListener,
+            persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
@@ -274,10 +304,22 @@ private fun SignalMetricsChart(
 }
 
 @Composable
-private fun SignalMetricsCard(meshPacket: MeshPacket, onClick: () -> Unit) {
+private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = meshPacket.rxTime * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
-        Surface {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Surface(color = Color.Transparent) {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     /* Data */

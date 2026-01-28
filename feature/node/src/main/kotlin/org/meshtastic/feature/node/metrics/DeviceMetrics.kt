@@ -18,6 +18,7 @@
 
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +34,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -141,6 +143,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()
     val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -190,7 +193,9 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 telemetries = data.reversed(),
                 promptInfoDialog = { displayInfoDialog = true },
                 vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
                 onPointSelected = { x ->
+                    selectedX = x
                     val index = data.indexOfFirst { it.time.toDouble() == x }
                     if (index != -1) {
                         coroutineScope.launch { lazyListState.animateScrollToItem(index) }
@@ -203,7 +208,9 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 itemsIndexed(data) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,
+                        isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = {
+                            selectedX = telemetry.time.toDouble()
                             coroutineScope.launch {
                                 vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
                             }
@@ -222,12 +229,26 @@ private fun DeviceMetricsChart(
     telemetries: List<Telemetry>,
     promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
+    selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
 
     val modelProducer = remember { CartesianChartModelProducer() }
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter = { _, targets ->
+                targets.joinToString { target ->
+                    when (target) {
+                        is LineCartesianLayerMarkerTarget -> {
+                            target.points.joinToString { point -> "%.1f%%".format(point.entry.y) }
+                        }
+                        else -> ""
+                    }
+                }
+            },
+        )
 
     LaunchedEffect(telemetries) {
         modelProducer.runTransaction {
@@ -284,20 +305,9 @@ private fun DeviceMetricsChart(
                 label = axisLabel,
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
             ),
-            marker =
-            ChartStyling.rememberMarker(
-                valueFormatter = { _, targets ->
-                    targets.joinToString { target ->
-                        when (target) {
-                            is LineCartesianLayerMarkerTarget -> {
-                                target.points.joinToString { point -> "%.1f%%".format(point.entry.y) }
-                            }
-                            else -> ""
-                        }
-                    }
-                },
-            ),
+            marker = marker,
             markerVisibilityListener = markerVisibilityListener,
+            persistentMarkers = { _ -> selectedX?.let { x -> marker at x } },
         ),
         modelProducer = modelProducer,
         modifier = modifier.padding(8.dp),
@@ -333,17 +343,30 @@ private fun DeviceMetricsChartPreview() {
             telemetries = telemetries,
             promptInfoDialog = {},
             vicoScrollState = rememberVicoScrollState(),
+            selectedX = null,
             onPointSelected = {},
         )
     }
 }
 
 @Composable
-private fun DeviceMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
+private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.deviceMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
-        Surface {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Surface(color = Color.Transparent) {
             SelectionContainer {
                 Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     /* Time, Battery, and Voltage */
@@ -393,7 +416,7 @@ private fun DeviceMetricsCardPreview() {
                     .setUptimeSeconds(7200),
             )
             .build()
-    AppTheme { DeviceMetricsCard(telemetry = telemetry, onClick = {}) }
+    AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
 }
 
 @Suppress("detekt:MagicNumber") // fake data
@@ -437,12 +460,15 @@ private fun DeviceMetricsScreenPreview() {
                     telemetries = telemetries.reversed(),
                     promptInfoDialog = { displayInfoDialog = true },
                     vicoScrollState = rememberVicoScrollState(),
+                    selectedX = null,
                     onPointSelected = {},
                 )
 
                 /* Device Metric Cards */
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    itemsIndexed(telemetries) { _, telemetry -> DeviceMetricsCard(telemetry = telemetry, onClick = {}) }
+                    itemsIndexed(telemetries) { _, telemetry ->
+                        DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {})
+                    }
                 }
             }
         }

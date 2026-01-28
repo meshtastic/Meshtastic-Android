@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("MagicNumber")
-
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +32,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -49,6 +49,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,6 +84,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
@@ -101,6 +103,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val lazyListState = rememberLazyListState()
     val vicoScrollState = rememberVicoScrollState()
     val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -169,7 +172,9 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 graphData = graphData,
                 promptInfoDialog = { displayInfoDialog = true },
                 vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
                 onPointSelected = { x ->
+                    selectedX = x
                     val index = processedTelemetries.indexOfFirst { it.time.toDouble() == x }
                     if (index != -1) {
                         coroutineScope.launch { lazyListState.animateScrollToItem(index) }
@@ -182,9 +187,11 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
+                        isSelected = telemetry.time.toDouble() == selectedX,
                         onClick = {
+                            selectedX = telemetry.time.toDouble()
                             coroutineScope.launch {
-                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS))
                             }
                         },
                     )
@@ -375,11 +382,30 @@ private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
 }
 
 @Composable
-private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean, onClick: () -> Unit) {
+private fun EnvironmentMetricsCard(
+    telemetry: Telemetry,
+    environmentDisplayFahrenheit: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() }) {
-        Surface { SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) } }
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Surface(color = Color.Transparent) {
+            SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) }
+        }
     }
 }
 
