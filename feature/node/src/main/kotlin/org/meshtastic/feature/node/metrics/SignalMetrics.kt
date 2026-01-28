@@ -52,6 +52,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -240,24 +244,29 @@ private fun SignalMetricsChart(
             }
         }
 
-    val axisLabel = ChartStyling.rememberAxisLabel()
+    val rssiColor = SignalMetric.RSSI.color
+    val snrColor = SignalMetric.SNR.color
     val marker =
         ChartStyling.rememberMarker(
             valueFormatter = { _, targets ->
-                targets.joinToString { target ->
-                    @Suppress("MagicNumber")
-                    when (target) {
-                        is LineCartesianLayerMarkerTarget -> {
-                            target.points.joinToString { point ->
-                                // Vico 3.x stores real Y values if not normalized
-                                if (point.entry.y < -20) { // Probable RSSI
-                                    "RSSI: %.0f dBm".format(point.entry.y)
-                                } else { // Probable SNR
-                                    "SNR: %.1f dB".format(point.entry.y)
+                buildAnnotatedString {
+                    targets.forEachIndexed { index, target ->
+                        if (index > 0) append(", ")
+                        when (target) {
+                            is LineCartesianLayerMarkerTarget -> {
+                                target.points.forEachIndexed { pointIndex, point ->
+                                    if (pointIndex > 0) append(", ")
+                                    // Use point color to identify metric precisely
+                                    val (label, color) =
+                                        if (point.color == rssiColor) {
+                                            "RSSI: %.0f dBm".format(point.entry.y) to rssiColor
+                                        } else {
+                                            "SNR: %.1f dB".format(point.entry.y) to snrColor
+                                        }
+                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
                                 }
                             }
                         }
-                        else -> ""
                     }
                 }
             },
@@ -269,31 +278,32 @@ private fun SignalMetricsChart(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createPointOnlyLine(SignalMetric.RSSI.color, ChartStyling.LARGE_POINT_SIZE_DP),
+                    ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
                 ),
                 verticalAxisPosition = Axis.Position.Vertical.Start,
             ),
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createPointOnlyLine(SignalMetric.SNR.color, ChartStyling.LARGE_POINT_SIZE_DP),
+                    ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
                 ),
                 verticalAxisPosition = Axis.Position.Vertical.End,
             ),
             startAxis =
             VerticalAxis.rememberStart(
-                label = axisLabel,
+                label = ChartStyling.rememberAxisLabel(color = rssiColor),
                 valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
             ),
             endAxis =
             VerticalAxis.rememberEnd(
-                label = axisLabel,
+                label = ChartStyling.rememberAxisLabel(color = snrColor),
                 valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
             ),
             bottomAxis =
             HorizontalAxis.rememberBottom(
-                label = axisLabel,
+                label = ChartStyling.rememberAxisLabel(),
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 50 }, addExtremeLabelPadding = true),
             ),
             marker = marker,
             markerVisibilityListener = markerVisibilityListener,

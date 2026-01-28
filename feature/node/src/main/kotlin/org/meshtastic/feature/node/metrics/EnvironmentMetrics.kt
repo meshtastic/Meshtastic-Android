@@ -416,10 +416,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                text = DATE_TIME_FORMAT.format(time),
-                style = MaterialTheme.typography.titleMediumEmphasized,
-            )
+            Text(text = DATE_TIME_FORMAT.format(time), style = MaterialTheme.typography.titleMediumEmphasized)
             TemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
         }
 

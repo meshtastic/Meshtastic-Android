@@ -53,6 +53,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -233,15 +237,32 @@ private fun DeviceMetricsChart(
     if (telemetries.isEmpty()) return
 
     val modelProducer = remember { CartesianChartModelProducer() }
+    val batteryColor = Device.BATTERY.color
+    val chUtilColor = Device.CH_UTIL.color
+    val airUtilColor = Device.AIR_UTIL.color
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
     val marker =
         ChartStyling.rememberMarker(
             valueFormatter = { _, targets ->
-                targets.joinToString { target ->
-                    when (target) {
-                        is LineCartesianLayerMarkerTarget -> {
-                            target.points.joinToString { point -> "%.1f%%".format(point.entry.y) }
+                buildAnnotatedString {
+                    targets.forEachIndexed { index, target ->
+                        if (index > 0) append(", ")
+                        when (target) {
+                            is LineCartesianLayerMarkerTarget -> {
+                                target.points.forEachIndexed { pointIndex, point ->
+                                    if (pointIndex > 0) append(", ")
+                                    // Identify metric by color to be robust
+                                    val (label, color) =
+                                        when (point.color) {
+                                            batteryColor -> "Battery: %.1f%%".format(point.entry.y) to batteryColor
+                                            chUtilColor -> "ChUtil: %.1f%%".format(point.entry.y) to chUtilColor
+                                            airUtilColor -> "AirUtil: %.1f%%".format(point.entry.y) to airUtilColor
+                                            else -> "%.1f%%".format(point.entry.y) to onSurfaceColor
+                                        }
+                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
+                                }
+                            }
                         }
-                        else -> ""
                     }
                 }
             },
@@ -279,15 +300,15 @@ private fun DeviceMetricsChart(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
                     ChartStyling.createBoldLine(
-                        lineColor = Device.BATTERY.color,
+                        lineColor = batteryColor,
                         pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                     ChartStyling.createPointOnlyLine(
-                        pointColor = Device.CH_UTIL.color,
+                        pointColor = chUtilColor,
                         pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
                     ),
                     ChartStyling.createPointOnlyLine(
-                        pointColor = Device.AIR_UTIL.color,
+                        pointColor = airUtilColor,
                         pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
                     ),
                 ),
@@ -301,6 +322,7 @@ private fun DeviceMetricsChart(
             HorizontalAxis.rememberBottom(
                 label = axisLabel,
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 20 }, addExtremeLabelPadding = true),
             ),
             marker = marker,
             markerVisibilityListener = markerVisibilityListener,

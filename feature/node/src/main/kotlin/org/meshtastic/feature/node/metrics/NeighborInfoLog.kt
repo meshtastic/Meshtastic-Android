@@ -167,7 +167,10 @@ fun NeighborInfoLogScreen(
                             result
                                 ?.fromRadio
                                 ?.packet
-                                ?.getNeighborInfoResponse(::getUsername, header = getString(Res.string.neighbor_info))
+                                ?.getNeighborInfoResponse(
+                                    ::getUsername,
+                                    header = getString(Res.string.neighbor_info),
+                                )
                                 ?.let {
                                     showDialog =
                                         annotateNeighborInfo(

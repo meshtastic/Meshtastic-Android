@@ -47,7 +47,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -112,6 +116,10 @@ private fun PaxMetricsChart(
     if (totalSeries.isEmpty()) return
 
     val modelProducer = remember { CartesianChartModelProducer() }
+    val paxColor = PaxSeries.PAX.color
+    val bleColor = PaxSeries.BLE.color
+    val wifiColor = PaxSeries.WIFI.color
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
     LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
         modelProducer.runTransaction {
@@ -140,12 +148,25 @@ private fun PaxMetricsChart(
     val marker =
         ChartStyling.rememberMarker(
             valueFormatter = { _, targets ->
-                targets.joinToString { target ->
-                    when (target) {
-                        is LineCartesianLayerMarkerTarget -> {
-                            target.points.joinToString { point -> "%.0f".format(point.entry.y) }
+                buildAnnotatedString {
+                    targets.forEachIndexed { index, target ->
+                        if (index > 0) append(", ")
+                        when (target) {
+                            is LineCartesianLayerMarkerTarget -> {
+                                target.points.forEachIndexed { pointIndex, point ->
+                                    if (pointIndex > 0) append(", ")
+                                    // Identify metric by color
+                                    val (label, color) =
+                                        when (point.color) {
+                                            bleColor -> "BLE: %.0f".format(point.entry.y) to bleColor
+                                            wifiColor -> "WiFi: %.0f".format(point.entry.y) to wifiColor
+                                            paxColor -> "PAX: %.0f".format(point.entry.y) to paxColor
+                                            else -> "%.0f".format(point.entry.y) to onSurfaceColor
+                                        }
+                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
+                                }
+                            }
                         }
-                        else -> ""
                     }
                 }
             },
@@ -158,15 +179,15 @@ private fun PaxMetricsChart(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
                     ChartStyling.createGradientLine(
-                        lineColor = PaxSeries.BLE.color,
+                        lineColor = bleColor,
                         pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                     ChartStyling.createGradientLine(
-                        lineColor = PaxSeries.WIFI.color,
+                        lineColor = wifiColor,
                         pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                     ChartStyling.createBoldLine(
-                        lineColor = PaxSeries.PAX.color,
+                        lineColor = paxColor,
                         pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                 ),
@@ -176,6 +197,7 @@ private fun PaxMetricsChart(
             HorizontalAxis.rememberBottom(
                 label = axisLabel,
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 20 }, addExtremeLabelPadding = true),
             ),
             marker = marker,
             markerVisibilityListener = markerVisibilityListener,

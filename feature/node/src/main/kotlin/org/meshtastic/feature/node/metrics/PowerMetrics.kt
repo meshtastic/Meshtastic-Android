@@ -22,9 +22,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -33,6 +35,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -49,8 +52,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,6 +74,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibilityListener
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
@@ -207,6 +214,34 @@ private fun PowerMetricsChart(
     }
 
     val modelProducer = remember { CartesianChartModelProducer() }
+    val currentColor = PowerMetric.CURRENT.color
+    val voltageColor = PowerMetric.VOLTAGE.color
+    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter = { _, targets ->
+                buildAnnotatedString {
+                    targets.forEachIndexed { index, target ->
+                        if (index > 0) append(", ")
+                        when (target) {
+                            is LineCartesianLayerMarkerTarget -> {
+                                target.points.forEachIndexed { pointIndex, point ->
+                                    if (pointIndex > 0) append(", ")
+                                    // Identify metric by color
+                                    val (label, color) =
+                                        when (point.color) {
+                                            currentColor -> "Current: %.0f mA".format(point.entry.y) to currentColor
+                                            voltageColor -> "Voltage: %.1f V".format(point.entry.y) to voltageColor
+                                            else -> "%.1f".format(point.entry.y) to onSurfaceColor
+                                        }
+                                    withStyle(SpanStyle(color = color, fontWeight = FontWeight.Bold)) { append(label) }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+        )
 
     LaunchedEffect(telemetries, selectedChannel) {
         modelProducer.runTransaction {
@@ -240,36 +275,34 @@ private fun PowerMetricsChart(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createBoldLine(PowerMetric.CURRENT.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                    ChartStyling.createBoldLine(currentColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
                 ),
                 verticalAxisPosition = Axis.Position.Vertical.Start,
             ),
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createGradientLine(
-                        PowerMetric.VOLTAGE.color,
-                        ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
+                    ChartStyling.createGradientLine(voltageColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
                 ),
                 verticalAxisPosition = Axis.Position.Vertical.End,
             ),
             startAxis =
             VerticalAxis.rememberStart(
-                label = axisLabel,
+                label = ChartStyling.rememberAxisLabel(color = currentColor),
                 valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
             ),
             endAxis =
             VerticalAxis.rememberEnd(
-                label = axisLabel,
+                label = ChartStyling.rememberAxisLabel(color = voltageColor),
                 valueFormatter = { _, value, _ -> "%.1f V".format(value) },
             ),
             bottomAxis =
             HorizontalAxis.rememberBottom(
                 label = axisLabel,
                 valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = HorizontalAxis.ItemPlacer.aligned(spacing = { 50 }, addExtremeLabelPadding = true),
             ),
-            marker = ChartStyling.rememberMarker(),
+            marker = marker,
             markerVisibilityListener = markerVisibilityListener,
         ),
         modelProducer = modelProducer,
@@ -281,6 +314,7 @@ private fun PowerMetricsChart(
     Legend(legendData = LEGEND_DATA, displayInfoIcon = false)
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PowerMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
     val time = telemetry.time * MS_PER_SEC
@@ -288,15 +322,17 @@ private fun PowerMetricsCard(telemetry: Telemetry, onClick: () -> Unit) {
         Surface {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(8.dp)) {
+                    Column(modifier = Modifier.padding(12.dp)) {
                         /* Time */
                         Row {
                             Text(
                                 text = DATE_TIME_FORMAT.format(time),
-                                style = TextStyle(fontWeight = FontWeight.Bold),
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                style = MaterialTheme.typography.titleMediumEmphasized,
                             )
                         }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
                         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                             if (telemetry.powerMetrics.hasCh1Current() || telemetry.powerMetrics.hasCh1Voltage()) {
                                 PowerChannelColumn(
