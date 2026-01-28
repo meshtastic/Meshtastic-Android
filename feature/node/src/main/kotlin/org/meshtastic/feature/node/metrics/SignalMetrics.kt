@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -51,8 +52,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -309,6 +308,7 @@ private fun SignalMetricsChart(
     Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = meshPacket.rxTime * MS_PER_SEC
@@ -330,13 +330,12 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                 Row(modifier = Modifier.fillMaxWidth()) {
                     /* Data */
                     Box(modifier = Modifier.weight(weight = 5f).height(IntrinsicSize.Min)) {
-                        Column(modifier = Modifier.padding(8.dp)) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             /* Time */
                             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
                                     text = DATE_TIME_FORMAT.format(time),
-                                    style = TextStyle(fontWeight = FontWeight.Bold),
-                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                    style = MaterialTheme.typography.titleMediumEmphasized,
                                 )
                             }
 
