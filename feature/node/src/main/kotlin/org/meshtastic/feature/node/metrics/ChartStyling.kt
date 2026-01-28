@@ -17,14 +17,22 @@
 package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 
 /**
  * Utility object for chart styling and component creation. Provides reusable styled lines, points, and axes for Vico
@@ -150,4 +158,32 @@ object ChartStyling {
      * @return Color with adjusted alpha
      */
     fun createThemedColor(baseColor: Color, alpha: Float = 1f): Color = baseColor.copy(alpha = alpha)
+
+    /**
+     * Creates and remembers a default [CartesianMarker] styled for the Meshtastic theme.
+     *
+     * @return A configured [CartesianMarker]
+     */
+    @Composable
+    fun rememberMarker(): CartesianMarker {
+        val labelBackground = rememberShapeComponent(
+            fill = Fill(MaterialTheme.colorScheme.surface),
+            shape = RoundedCornerShape(4.dp),
+            strokeFill = Fill(MaterialTheme.colorScheme.outline),
+            strokeThickness = 1.dp,
+        )
+        val label = rememberTextComponent(
+            style = TextStyle(color = MaterialTheme.colorScheme.onSurface),
+            background = labelBackground,
+            padding = Insets(horizontal = 8.dp, vertical = 4.dp),
+        )
+        val guideline = rememberLineComponent(
+            fill = Fill(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)),
+            thickness = 2.dp,
+        )
+        return rememberDefaultCartesianMarker(
+            label = label,
+            guideline = guideline,
+        )
+    }
 }
