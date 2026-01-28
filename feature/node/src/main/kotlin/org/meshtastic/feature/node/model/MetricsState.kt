@@ -37,6 +37,8 @@ data class MetricsState(
     val hostMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshLog> = emptyList(),
+    val neighborInfoRequests: List<MeshLog> = emptyList(),
+    val neighborInfoResults: List<MeshLog> = emptyList(),
     val positionLogs: List<MeshProtos.Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     val firmwareEdition: MeshProtos.FirmwareEdition? = null,
@@ -53,6 +55,8 @@ data class MetricsState(
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
 
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
+
+    fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty()
 
     fun hasPositionLogs() = positionLogs.isNotEmpty()
 

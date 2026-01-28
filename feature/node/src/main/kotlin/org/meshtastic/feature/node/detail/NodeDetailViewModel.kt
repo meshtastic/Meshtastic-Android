@@ -126,6 +126,19 @@ constructor(
                         .distinctUntilChanged()
                 val trResFlow =
                     meshLogRepository.getLogsFrom(nodeId, PortNum.TRACEROUTE_APP_VALUE).distinctUntilChanged()
+                val niReqsFlow =
+                    meshLogRepository
+                        .getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP_VALUE)
+                        .map { logs ->
+                            logs.filter { log ->
+                                with(log.fromRadio.packet) {
+                                    hasDecoded() && decoded.wantResponse && from == 0 && to == nodeId
+                                }
+                            }
+                        }
+                        .distinctUntilChanged()
+                val niResFlow =
+                    meshLogRepository.getLogsFrom(nodeId, PortNum.NEIGHBORINFO_APP_VALUE).distinctUntilChanged()
 
                 combine(
                     nodeRepository.ourNodeInfo,
@@ -139,6 +152,8 @@ constructor(
                     paxLogsFlow,
                     trReqsFlow,
                     trResFlow,
+                    niReqsFlow,
+                    niResFlow,
                     meshLogRepository.getMyNodeInfo().map { it?.firmwareEdition }.distinctUntilChanged(),
                     firmwareReleaseRepository.stableRelease,
                     firmwareReleaseRepository.alphaRelease,
@@ -159,11 +174,13 @@ constructor(
                         paxLogs = args[8] as List<MeshLog>,
                         tracerouteRequests = args[9] as List<MeshLog>,
                         tracerouteResults = args[10] as List<MeshLog>,
-                        firmwareEdition = args[11] as MeshProtos.FirmwareEdition?,
-                        stable = args[12] as FirmwareRelease?,
-                        alpha = args[13] as FirmwareRelease?,
-                        lastTracerouteTime = (args[14] as Map<Int, Long>)[nodeId],
-                        lastRequestNeighborsTime = (args[15] as Map<Int, Long>)[nodeId],
+                        neighborInfoRequests = args[11] as List<MeshLog>,
+                        neighborInfoResults = args[12] as List<MeshLog>,
+                        firmwareEdition = args[13] as MeshProtos.FirmwareEdition?,
+                        stable = args[14] as FirmwareRelease?,
+                        alpha = args[15] as FirmwareRelease?,
+                        lastTracerouteTime = (args[16] as Map<Int, Long>)[nodeId],
+                        lastRequestNeighborsTime = (args[17] as Map<Int, Long>)[nodeId],
                     )
                 }
                     .flatMapLatest { data ->
@@ -194,6 +211,8 @@ constructor(
                                     paxMetrics = data.paxLogs,
                                     tracerouteRequests = data.tracerouteRequests,
                                     tracerouteResults = data.tracerouteResults,
+                                    neighborInfoRequests = data.neighborInfoRequests,
+                                    neighborInfoResults = data.neighborInfoResults,
                                     firmwareEdition = data.firmwareEdition,
                                     latestStableFirmware = data.stable ?: FirmwareRelease(),
                                     latestAlphaFirmware = data.alpha ?: FirmwareRelease(),
@@ -220,6 +239,7 @@ constructor(
                                 if (metricsState.hasSignalMetrics()) add(LogsType.SIGNAL)
                                 if (metricsState.hasPowerMetrics()) add(LogsType.POWER)
                                 if (metricsState.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
+                                if (metricsState.hasNeighborInfoLogs()) add(LogsType.NEIGHBOR_INFO)
                                 if (metricsState.hasHostMetrics()) add(LogsType.HOST)
                                 if (metricsState.hasPaxMetrics()) add(LogsType.PAX)
                             }
@@ -314,6 +334,8 @@ private data class NodeDetailUiStateData(
     val paxLogs: List<MeshLog>,
     val tracerouteRequests: List<MeshLog>,
     val tracerouteResults: List<MeshLog>,
+    val neighborInfoRequests: List<MeshLog>,
+    val neighborInfoResults: List<MeshLog>,
     val firmwareEdition: MeshProtos.FirmwareEdition?,
     val stable: FirmwareRelease?,
     val alpha: FirmwareRelease?,

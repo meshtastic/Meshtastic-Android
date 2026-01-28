@@ -106,6 +106,9 @@ constructor(
     private fun MeshLog.hasValidTraceroute(): Boolean =
         with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
 
+    private fun MeshLog.hasValidNeighborInfo(): Boolean =
+        with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
+
     /**
      * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
      * freezing when viewing unknown nodes.
@@ -225,6 +228,12 @@ constructor(
         }
     }
 
+    fun requestNeighborInfo() {
+        destNum?.let {
+            nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.longName ?: "")
+        }
+    }
+
     init {
         initializeFlows()
     }
@@ -324,6 +333,21 @@ constructor(
                                 state.copy(
                                     tracerouteRequests = request.filter { it.hasValidTraceroute() },
                                     tracerouteResults = response,
+                                )
+                            }
+                        }
+                            .collect {}
+                    }
+
+                    launch {
+                        combine(
+                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP_VALUE),
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP_VALUE),
+                        ) { request, response ->
+                            _state.update { state ->
+                                state.copy(
+                                    neighborInfoRequests = request.filter { it.hasValidNeighborInfo() },
+                                    neighborInfoResults = response,
                                 )
                             }
                         }

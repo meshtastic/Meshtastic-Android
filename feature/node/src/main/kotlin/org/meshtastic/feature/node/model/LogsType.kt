@@ -18,6 +18,7 @@ package org.meshtastic.feature.node.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChargingStation
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Memory
@@ -32,6 +33,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.device_metrics_log
 import org.meshtastic.core.strings.env_metrics_log
 import org.meshtastic.core.strings.host_metrics_log
+import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.node_map
 import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.position_log
@@ -50,6 +52,7 @@ enum class LogsType(val titleRes: StringResource, val icon: ImageVector, val rou
     SIGNAL(Res.string.signal_quality, Icons.Rounded.SignalCellularAlt, { NodeDetailRoutes.SignalMetrics(it) }),
     POWER(Res.string.power_metrics_log, Icons.Rounded.Power, { NodeDetailRoutes.PowerMetrics(it) }),
     TRACEROUTE(Res.string.traceroute_log, MeshtasticIcons.Route, { NodeDetailRoutes.TracerouteLog(it) }),
+    NEIGHBOR_INFO(Res.string.neighbor_info, Icons.Rounded.Groups, { NodeDetailRoutes.NeighborInfoLog(it) }),
     HOST(Res.string.host_metrics_log, Icons.Rounded.Memory, { NodeDetailRoutes.HostMetricsLog(it) }),
     PAX(Res.string.pax_metrics_log, MeshtasticIcons.Paxcount, { NodeDetailRoutes.PaxMetrics(it) }),
 }

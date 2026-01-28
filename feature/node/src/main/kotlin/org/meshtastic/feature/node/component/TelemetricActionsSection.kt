@@ -51,14 +51,12 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.logs
-import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.request_air_quality_metrics
 import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.core.strings.userinfo
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.Chart
-import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Refresh
@@ -135,9 +133,10 @@ private fun rememberTelemetricFeatures(
             isVisible = { !isLocal },
         ),
         TelemetricFeature(
-            titleRes = Res.string.neighbor_info,
-            icon = MeshtasticIcons.Groups,
+            titleRes = LogsType.NEIGHBOR_INFO.titleRes,
+            icon = LogsType.NEIGHBOR_INFO.icon,
             requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
+            logsType = LogsType.NEIGHBOR_INFO,
             isVisible = { it.capabilities.canRequestNeighborInfo },
             cooldownTimestamp = lastRequestNeighborsTime,
             cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,

@@ -82,6 +82,8 @@ object NodeDetailRoutes {
     @Serializable data class HostMetricsLog(val destNum: Int) : Route
 
     @Serializable data class PaxMetrics(val destNum: Int) : Route
+
+    @Serializable data class NeighborInfoLog(val destNum: Int) : Route
 }
 
 object SettingsRoutes {

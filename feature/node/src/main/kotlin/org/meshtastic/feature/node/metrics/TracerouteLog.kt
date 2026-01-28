@@ -20,21 +20,13 @@ import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -48,7 +40,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -71,7 +62,6 @@ import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.toMessageRes
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.delete
 import org.meshtastic.core.strings.routing_error_no_response
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.traceroute_diff
@@ -86,7 +76,6 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
 import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
 import org.meshtastic.core.ui.component.SimpleAlertDialog
-import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
@@ -233,9 +222,10 @@ fun TracerouteLogScreen(
                     }
 
                 Box {
-                    TracerouteItem(
+                    MetricLogItem(
                         icon = icon,
                         text = stringResource(Res.string.traceroute_time_and_text, time, text),
+                        contentDescription = stringResource(Res.string.traceroute),
                         modifier =
                         Modifier.combinedClickable(onLongClick = { expanded = true }) {
                             val dialogMessage =
@@ -322,37 +312,6 @@ private fun TracerouteLogDialogs(
     }
 }
 
-@Composable
-private fun DeleteItem(onClick: () -> Unit) {
-    DropdownMenuItem(
-        onClick = onClick,
-        text = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = MeshtasticIcons.Delete,
-                    contentDescription = stringResource(Res.string.delete),
-                    tint = MaterialTheme.colorScheme.error,
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(text = stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
-            }
-        },
-    )
-}
-
-@Composable
-private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
-    Card(modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 2.dp)) {
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(imageVector = icon, contentDescription = stringResource(Res.string.traceroute))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = text, style = MaterialTheme.typography.bodyLarge)
-            }
-        }
-    }
-}
-
 /** Generates a display string and icon based on the route discovery information. */
 @Composable
 private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
@@ -424,5 +383,11 @@ private fun TracerouteItemPreview() {
             System.currentTimeMillis(),
             DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
         )
-    AppTheme { TracerouteItem(icon = MeshtasticIcons.Group, text = "$time - Direct") }
+    AppTheme {
+        MetricLogItem(
+            icon = MeshtasticIcons.Group,
+            text = "$time - Direct",
+            contentDescription = stringResource(Res.string.traceroute),
+        )
+    }
 }

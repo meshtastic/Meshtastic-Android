@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -33,6 +35,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,10 +60,13 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
+import org.meshtastic.core.strings.delete
 import org.meshtastic.core.strings.info
 import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.snr
+import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MeshtasticIcons
 import java.text.DateFormat
 import java.util.Date
 
@@ -236,6 +244,37 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
         color = MaterialTheme.colorScheme.onSurface,
         fontSize = MaterialTheme.typography.labelLarge.fontSize,
     )
+}
+
+@Composable
+fun DeleteItem(onClick: () -> Unit) {
+    DropdownMenuItem(
+        onClick = onClick,
+        text = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = MeshtasticIcons.Delete,
+                    contentDescription = stringResource(Res.string.delete),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(text = stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
+            }
+        },
+    )
+}
+
+@Composable
+fun MetricLogItem(icon: ImageVector, text: String, contentDescription: String, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 2.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(imageVector = icon, contentDescription = contentDescription)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = text, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+    }
 }
 
 @Preview
