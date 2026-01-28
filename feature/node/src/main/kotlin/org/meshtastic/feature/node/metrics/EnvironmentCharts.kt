@@ -157,7 +157,7 @@ fun EnvironmentMetricsChart(
         ChartStyling.rememberMarker(
             valueFormatter =
             ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                val label = colorToLabel[color] ?: ""
+                val label = colorToLabel[color.copy(alpha = 1f)] ?: ""
                 "%s: %.1f".format(label, value)
             },
         )
