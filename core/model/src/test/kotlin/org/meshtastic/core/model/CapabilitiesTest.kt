@@ -32,11 +32,12 @@ class CapabilitiesTest {
         assertTrue(caps("2.8.1").canMuteNode)
     }
 
+    // FIXME: needs updating when NeighborInfo is working properly
     @Test
-    fun `canRequestNeighborInfo requires v2 7 15`() {
+    fun `canRequestNeighborInfo disabled`() {
         assertFalse(caps("2.7.14").canRequestNeighborInfo)
-        assertTrue(caps("2.7.15").canRequestNeighborInfo)
-        assertTrue(caps("2.8.0").canRequestNeighborInfo)
+        assertFalse(caps("2.7.15").canRequestNeighborInfo)
+        assertFalse(caps("2.8.0").canRequestNeighborInfo)
     }
 
     @Test

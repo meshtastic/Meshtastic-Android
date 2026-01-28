@@ -36,9 +36,9 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val canMuteNode: Boolean
         get() = isSupported("2.7.18")
 
-    /** Ability to request neighbor information from other nodes. Supported since firmware v2.7.15. */
+    /** FIXME: Ability to request neighbor information from other nodes. Disabled until working better. */
     val canRequestNeighborInfo: Boolean
-        get() = isSupported("2.7.15")
+        get() = false
 
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
     val canSendVerifiedContacts: Boolean
