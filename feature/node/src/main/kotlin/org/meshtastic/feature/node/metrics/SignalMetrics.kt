@@ -75,10 +75,13 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.rssi_definition
+import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.strings.snr
 import org.meshtastic.core.strings.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
@@ -142,7 +145,10 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) }) {
                             androidx.compose.material3.Icon(
                                 imageVector = MeshtasticIcons.Refresh,
-                                contentDescription = null,
+                                contentDescription =
+                                stringResource(Res.string.signal_quality) +
+                                    " " +
+                                    stringResource(Res.string.request_telemetry),
                             )
                         }
                     }
