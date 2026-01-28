@@ -52,10 +52,8 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.Fill
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
@@ -76,7 +74,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
@@ -96,7 +93,6 @@ private fun PaxMetricsChart(
     totalSeries: List<Pair<Int, Int>>,
     bleSeries: List<Pair<Int, Int>>,
     wifiSeries: List<Pair<Int, Int>>,
-    timeFrame: TimeFrame,
 ) {
     if (totalSeries.isEmpty()) return
 
@@ -118,14 +114,17 @@ private fun PaxMetricsChart(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(PaxSeries.BLE.color)),
+                    ChartStyling.createGradientLine(
+                        lineColor = PaxSeries.BLE.color,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(PaxSeries.WIFI.color)),
+                    ChartStyling.createGradientLine(
+                        lineColor = PaxSeries.WIFI.color,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(PaxSeries.PAX.color)),
+                    ChartStyling.createBoldLine(
+                        lineColor = PaxSeries.PAX.color,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                 ),
             ),
@@ -186,8 +185,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val totalSeries = graphData.map { it.first to (it.second + it.third) }
     val bleSeries = graphData.map { it.first to it.second }
     val wifiSeries = graphData.map { it.first to it.third }
-    val maxValue = (totalSeries.maxOfOrNull { it.second } ?: 1).toFloat().coerceAtLeast(1f)
-    val minValue = 0f
     val legendData =
         listOf(
             LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
@@ -228,12 +225,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             if (graphData.isNotEmpty()) {
                 ChartHeader(graphData.size)
                 Legend(legendData = legendData)
-                PaxMetricsChart(
-                    totalSeries = totalSeries,
-                    bleSeries = bleSeries,
-                    wifiSeries = wifiSeries,
-                    timeFrame = timeFrame,
-                )
+                PaxMetricsChart(totalSeries = totalSeries, bleSeries = bleSeries, wifiSeries = wifiSeries)
             }
             // List
             if (paxMetrics.isEmpty()) {

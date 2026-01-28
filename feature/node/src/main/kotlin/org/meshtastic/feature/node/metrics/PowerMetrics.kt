@@ -59,10 +59,8 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.Fill
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
@@ -239,11 +237,13 @@ private fun PowerMetricsChart(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(Power.CURRENT.color)),
+                    ChartStyling.createBoldLine(
+                        lineColor = Power.CURRENT.color,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(VOLTAGE_COLOR)),
+                    ChartStyling.createGradientLine(
+                        lineColor = VOLTAGE_COLOR,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
                     ),
                 ),
             ),

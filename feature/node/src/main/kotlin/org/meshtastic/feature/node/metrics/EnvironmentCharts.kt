@@ -21,9 +21,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -32,10 +30,8 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.Fill
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.baro_pressure
 import org.meshtastic.core.strings.humidity
@@ -45,13 +41,8 @@ import org.meshtastic.core.strings.soil_moisture
 import org.meshtastic.core.strings.soil_temperature
 import org.meshtastic.core.strings.temperature
 import org.meshtastic.core.strings.uv_lux
-import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import java.util.Date
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
 
 @Suppress("MagicNumber")
 private val LEGEND_DATA_1 =
@@ -113,12 +104,12 @@ private val LEGEND_DATA_3 =
         ),
     )
 
+@Suppress("LongMethod")
 @Composable
 fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
-    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
@@ -169,7 +160,7 @@ fun EnvironmentMetricsChart(
         Environment.entries
             .filter { shouldPlot[it.ordinal] }
             .map { metric ->
-                LineCartesianLayer.rememberLine(fill = LineCartesianLayer.LineFill.single(Fill(metric.color)))
+                ChartStyling.createGradientLine(lineColor = metric.color, pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP)
             }
 
     if (lines.isNotEmpty()) {

@@ -63,6 +63,42 @@ object CommonCharts {
     val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
+
+    /**
+     * Gets the Material 3 primary color with optional opacity adjustment.
+     *
+     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
+     * @return Color based on current theme's primary color.
+     */
+    @Composable
+    fun getMaterial3PrimaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
+
+    /**
+     * Gets the Material 3 secondary color with optional opacity adjustment.
+     *
+     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
+     * @return Color based on current theme's secondary color.
+     */
+    @Composable
+    fun getMaterial3SecondaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
+
+    /**
+     * Gets the Material 3 tertiary color with optional opacity adjustment.
+     *
+     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
+     * @return Color based on current theme's tertiary color.
+     */
+    @Composable
+    fun getMaterial3TertiaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.tertiary.copy(alpha = alpha)
+
+    /**
+     * Gets the Material 3 error color with optional opacity adjustment.
+     *
+     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
+     * @return Color based on current theme's error color.
+     */
+    @Composable
+    fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
 }
 
 data class LegendData(

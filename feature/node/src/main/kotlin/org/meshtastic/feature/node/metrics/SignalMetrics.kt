@@ -29,7 +29,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.IconButton
@@ -60,11 +59,8 @@ import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.common.Fill
-import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
@@ -212,25 +208,13 @@ private fun SignalMetricsChart(
             rememberLineCartesianLayer(
                 lineProvider =
                 LineCartesianLayer.LineProvider.series(
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
-                        pointProvider =
-                        LineCartesianLayer.PointProvider.single(
-                            LineCartesianLayer.Point(
-                                rememberShapeComponent(fill = Fill(Metric.RSSI.color), shape = CircleShape),
-                                size = 10.dp,
-                            ),
-                        ),
+                    ChartStyling.createPointOnlyLine(
+                        pointColor = Metric.RSSI.color,
+                        pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
                     ),
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(Fill(Color.Transparent)),
-                        pointProvider =
-                        LineCartesianLayer.PointProvider.single(
-                            LineCartesianLayer.Point(
-                                rememberShapeComponent(fill = Fill(Metric.SNR.color), shape = CircleShape),
-                                size = 10.dp,
-                            ),
-                        ),
+                    ChartStyling.createPointOnlyLine(
+                        pointColor = Metric.SNR.color,
+                        pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
                     ),
                 ),
             ),
