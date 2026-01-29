@@ -16,22 +16,6 @@
  */
 import com.android.build.api.dsl.LibraryExtension
 
-/*
- * Copyright (c) 2025 Meshtastic LLC
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.protobuf)
@@ -53,6 +37,12 @@ afterEvaluate {
 
 configure<LibraryExtension> {
     namespace = "org.meshtastic.core.proto"
+    
+    defaultConfig {
+        // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
+        minSdk = 21
+    }
+
     publishing { singleVariant("googleRelease") { withSourcesJar() } }
 }
 

@@ -86,7 +86,9 @@ internal fun Project.configureKotlinJvm() {
  */
 private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     extensions.configure<T> {
-        jvmToolchain(21)
+        // Using Java 17 for better compatibility with consumers (e.g. plugins, older environments)
+        // while still supporting modern Kotlin features.
+        jvmToolchain(17)
     }
 
     tasks.withType<KotlinCompile>().configureEach {

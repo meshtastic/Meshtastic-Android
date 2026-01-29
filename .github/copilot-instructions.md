@@ -18,7 +18,7 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 **ALWAYS run these commands in the exact order specified to avoid build failures:**
 
 ### Prerequisites Setup
-1. **JDK Requirement:** JDK 21 is required (will fail with other versions)
+1. **JDK Requirement:** JDK 17 is required (compatible with most developer environments)
 2. **Secrets Configuration:** Copy `secrets.defaults.properties` to `local.properties` and update:
    ```properties
    MAPS_API_KEY=your_google_maps_api_key_here
@@ -74,7 +74,7 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 ### Environment Setup
 **Required Tools:**
 - Android SDK API 36 (compile target)
-- JDK 21 (NOT JDK 17 or 11 - build will fail)
+- JDK 17 (Preferred for consistency across project and plugins)
 - Gradle 9.0+ (downloaded automatically by wrapper)
 
 **Optional but Recommended:**
@@ -90,16 +90,17 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 │   ├── src/androidTest/          # Instrumented tests
 │   ├── src/fdroid/              # F-Droid specific code
 │   └── src/google/              # Google Play specific code
+├── core/                         # Core library modules
 ├── network/                      # HTTP API networking library
 ├── mesh_service_example/         # AIDL service usage example
-├── buildSrc/                     # Build configuration (Configs.kt)
+├── build-logic/                  # Build configuration convention plugins
 └── config/                       # Linting and formatting configs
     ├── detekt/                   # Detekt static analysis rules
     └── spotless/                 # Code formatting configuration
 ```
 
 ### Key Configuration Files
-- `buildSrc/src/main/kotlin/Configs.kt` - Version constants and build config
+- `config.properties` - Version constants and build config
 - `app/build.gradle.kts` - Main app build configuration
 - `config/detekt/detekt.yml` - Static analysis rules
 - `config/spotless/.editorconfig` - Code formatting rules
@@ -140,7 +141,7 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 ## Common Issues & Solutions
 
 ### Build Failures
-- **Gradle version error:** Ensure JDK 21 (NOT 17 or 11)
+- **Gradle version error:** Ensure JDK 17 (Compatible version)
 - **Missing secrets:** Copy `secrets.defaults.properties` → `local.properties`
 - **Configuration cache:** Add `--no-configuration-cache` flag if issues persist
 - **Clean state:** Always run `./gradlew clean` before debugging build issues
@@ -153,17 +154,17 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 ### Code Style Issues
 - **Formatting:** Run `./gradlew spotlessApply` to auto-fix
 - **Detekt warnings:** Check `config/detekt/detekt.yml` for rules
-- **Localization:** Use `stringResource(R.string.key)` instead of hardcoded strings
+- **Localization:** Use `stringResource(Res.string.key)` instead of hardcoded strings
 
 ## File Organization
 
 ### Source Code Locations
-- **Main Activity:** `app/src/main/java/com/geeksville/mesh/ui/MainActivity.kt`
-- **Service Interface:** `app/src/main/aidl/com/geeksville/mesh/IMeshService.aidl`
-- **UI Screens:** `app/src/main/java/com/geeksville/mesh/ui/`
-- **Data Layer:** `app/src/main/java/com/geeksville/mesh/repository/`
-- **Database:** `app/src/main/java/com/geeksville/mesh/database/`
-- **Models:** `app/src/main/java/com/geeksville/mesh/model/`
+- **Main Activity:** `app/src/main/java/com/geeksville/mesh/MainActivity.kt`
+- **Service Interface:** `core/api/src/main/aidl/org/meshtastic/core/service/IMeshService.aidl`
+- **UI Screens:** `feature/*/src/main/kotlin/org/meshtastic/feature/*/`
+- **Data Layer:** `core/data/src/main/kotlin/org/meshtastic/core/data/`
+- **Database:** `core/database/src/main/kotlin/org/meshtastic/core/database/`
+- **Models:** `core/model/src/main/kotlin/org/meshtastic/core/model/`
 
 ### Dependencies
 - **Non-obvious deps:** Protobuf for device communication, DataDog for analytics (Google flavor)
