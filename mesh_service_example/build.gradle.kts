@@ -37,10 +37,9 @@ configure<ApplicationExtension> {
 }
 
 dependencies {
+    implementation(projects.core.api)
     implementation(projects.core.model)
     implementation(projects.core.proto)
-    implementation(projects.core.service)
-    implementation(projects.core.ui)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

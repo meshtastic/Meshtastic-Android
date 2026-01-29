@@ -60,6 +60,12 @@ You can generate the documentation locally to preview your changes.
 
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
 
+## API & Integration
+
+Developers can integrate with the Meshtastic Android app using our published API library via **JitPack**. This allows third-party applications (like the ATAK plugin) to communicate with the mesh service via AIDL.
+
+For detailed integration instructions, see [core/api/README.md](core/api/README.md).
+
 ## Building the Android App
 > [!WARNING]
 > Debug and release builds can be installed concurrently. This is solely to enable smoother development, and you should avoid running both apps simultaneously. To ensure proper function, force quit the app not in use.

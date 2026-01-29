@@ -17,8 +17,8 @@
 package org.meshtastic.core.model
 
 import com.google.protobuf.ByteString
-import org.meshtastic.core.common.byteArrayOfInts
-import org.meshtastic.core.common.xorHash
+import org.meshtastic.core.model.util.byteArrayOfInts
+import org.meshtastic.core.model.util.xorHash
 import org.meshtastic.proto.ChannelProtos
 import org.meshtastic.proto.ConfigKt.loRaConfig
 import org.meshtastic.proto.ConfigProtos

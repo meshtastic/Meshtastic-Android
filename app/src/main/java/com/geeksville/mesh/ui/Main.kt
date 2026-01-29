@@ -105,7 +105,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.model.toMessageRes
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes
@@ -149,6 +148,7 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.feature.node.metrics.annotateTraceroute
 import org.meshtastic.proto.MeshProtos
 

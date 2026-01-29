@@ -75,14 +75,43 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.NodeInfo
-import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+
+@Composable
+fun ListItem(
+    text: String,
+    supportingText: String? = null,
+    leadingIcon: ImageVector? = null,
+    trailingIcon: ImageVector? = null,
+) {
+    androidx.compose.material3.ListItem(
+        headlineContent = { Text(text) },
+        supportingContent = supportingText?.let { { Text(it) } },
+        leadingContent = leadingIcon?.let { { Icon(it, contentDescription = null) } },
+        trailingContent = trailingIcon?.let { { Icon(it, contentDescription = null) } },
+    )
+}
+
+@Composable
+fun TitledCard(title: String, content: @Composable () -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 12.dp),
+            )
+            content()
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,7 +161,7 @@ private fun TopBarTitle(isConnected: Boolean, connectionState: String) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             val statusColor =
                 if (isConnected) {
-                    MaterialTheme.colorScheme.StatusGreen
+                    Color.Green
                 } else {
                     MaterialTheme.colorScheme.error
                 }
@@ -331,7 +360,7 @@ private fun NodeItemHeader(node: NodeInfo) {
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(2.dp)
                         .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.StatusGreen),
+                        .background(Color.Green),
                 )
             }
         }
@@ -393,7 +422,7 @@ private fun NodeItemActions(isOnline: Boolean, onAction: (String) -> Unit) {
             Icon(
                 imageVector = Icons.Rounded.Router,
                 contentDescription = "Online",
-                tint = MaterialTheme.colorScheme.StatusGreen.copy(alpha = 0.5f),
+                tint = androidx.compose.ui.graphics.Color.Green.copy(alpha = 0.5f),
                 modifier = Modifier.padding(start = 8.dp).size(20.dp),
             )
         }

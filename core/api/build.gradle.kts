@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
-
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.kotlin.parcelize)
     `maven-publish`
 }
 
@@ -30,33 +26,16 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["googleRelease"])
-                artifactId = "core-model"
+                artifactId = "core-api"
             }
         }
     }
 }
 
-configure<LibraryExtension> {
-    buildFeatures {
-        buildConfig = true
-        aidl = true
-    }
-    namespace = "org.meshtastic.core.model"
+configure<com.android.build.api.dsl.LibraryExtension> {
+    namespace = "org.meshtastic.core.api"
+    buildFeatures { aidl = true }
     publishing { singleVariant("googleRelease") { withSourcesJar() } }
 }
 
-dependencies {
-    implementation(projects.core.proto)
-
-    implementation(libs.androidx.annotation)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kermit)
-    implementation(libs.zxing.android.embedded) { isTransitive = false }
-    implementation(libs.zxing.core)
-
-    testImplementation(libs.androidx.core.ktx)
-    testImplementation(libs.junit)
-
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.runner)
-}
+dependencies { api(projects.core.model) }

@@ -16,10 +16,6 @@
  */
 package org.meshtastic.core.model
 
-import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.traceroute_endpoint_missing
-import org.meshtastic.core.strings.traceroute_map_no_data
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.RouteDiscovery
 import org.meshtastic.proto.Portnums
@@ -128,10 +124,4 @@ fun evaluateTracerouteMapAvailability(
     val relatedNodeNums = (forwardRoute + returnRoute).toSet()
     val hasAnyMappable = relatedNodeNums.any { positionedNodeNums.contains(it) }
     return if (hasAnyMappable) TracerouteMapAvailability.Ok else TracerouteMapAvailability.NoMappableNodes
-}
-
-fun TracerouteMapAvailability.toMessageRes(): StringResource? = when (this) {
-    TracerouteMapAvailability.Ok -> null
-    TracerouteMapAvailability.MissingEndpoints -> Res.string.traceroute_endpoint_missing
-    TracerouteMapAvailability.NoMappableNodes -> Res.string.traceroute_map_no_data
 }

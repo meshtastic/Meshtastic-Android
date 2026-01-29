@@ -59,7 +59,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
-import org.meshtastic.core.model.toMessageRes
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.routing_error_no_response
@@ -86,6 +85,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
