@@ -398,7 +398,6 @@
     <string name="position_log">Sijainti</string>
     <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="env_metrics_log">Ympäristöarvot</string>
-    <string name="sig_metrics_log">Signaalin voimakkuudet</string>
     <string name="administration">Ylläpito</string>
     <string name="remote_admin">Etähallinta</string>
     <string name="bad">Huono</string>
