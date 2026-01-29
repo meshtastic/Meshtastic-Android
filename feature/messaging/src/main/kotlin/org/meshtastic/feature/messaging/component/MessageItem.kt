@@ -17,7 +17,6 @@
 package org.meshtastic.feature.messaging.component
 
 import android.content.ClipData
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -342,20 +341,19 @@ internal fun MessageItem(
             }
         }
     }
-    AnimatedVisibility(emojis.isNotEmpty()) {
-        ReactionRow(
-            modifier =
-            Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
-                .padding(
-                    start = if (!message.fromLocal) 0.dp else 24.dp,
-                    end = if (message.fromLocal) 0.dp else 24.dp,
-                ),
-            reactions = if (message.fromLocal) emojis.reversed() else emojis,
-            myId = ourNode.user.id,
-            onSendReaction = sendReaction,
-            onShowReactions = onShowReactions,
-        )
-    }
+
+    ReactionRow(
+        modifier =
+        Modifier.align(if (message.fromLocal) Alignment.End else Alignment.Start)
+            .padding(
+                start = if (!message.fromLocal) 0.dp else 24.dp,
+                end = if (message.fromLocal) 0.dp else 24.dp,
+            ),
+        reactions = if (message.fromLocal) emojis.reversed() else emojis,
+        myId = ourNode.user.id,
+        onSendReaction = sendReaction,
+        onShowReactions = onShowReactions,
+    )
 }
 
 private const val SELECTED_ALPHA = 0.6f

@@ -146,12 +146,8 @@ internal fun ReactionRow(
 ) {
     val emojiGroups = reactions.groupBy { it.emoji }
 
-    AnimatedVisibility(emojiGroups.isNotEmpty()) {
-        LazyRow(
-            modifier = modifier,
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
+    AnimatedVisibility(emojiGroups.isNotEmpty(), modifier = modifier) {
+        LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             items(emojiGroups.entries.toList()) { (emoji, reactions) ->
                 val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
                 ReactionItem(
