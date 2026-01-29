@@ -70,6 +70,26 @@ plugins {
     id("com.gradle.common-custom-user-data-gradle-plugin") version "2.4.0"
 }
 
+fun Settings.getMeshProperty(key: String): String? {
+    val env = System.getenv(key)
+    if (!env.isNullOrBlank()) return env
+
+    val localFile = file("local.properties")
+    if (localFile.exists()) {
+        val props = java.util.Properties()
+        localFile.inputStream().use { props.load(it) }
+        if (props.containsKey(key)) return props.getProperty(key)
+    }
+
+    val configFile = file("config.properties")
+    if (configFile.exists()) {
+        val props = java.util.Properties()
+        configFile.inputStream().use { props.load(it) }
+        if (props.containsKey(key)) return props.getProperty(key)
+    }
+    return null
+}
+
 develocity {
     buildScan {
         capture {
@@ -81,16 +101,27 @@ develocity {
         local {
             isEnabled = true
         }
-//        remote(HttpBuildCache::class.java) {
-//            isAllowInsecureProtocol = true
-//            // Replace with your selfhosted instance address
-//            // see: https://docs.gradle.org/current/userguide/build_cache.html#sec:build_cache_setup_http_backend
-//            url = uri("http://<your-build-cache-ip-here>:5071/cache/")
-//
-//            // Allow this machine to upload results to the cache
-//            isPush = true
-//
-//        }
+        remote(HttpBuildCache::class.java) {
+            val cacheUrl = getMeshProperty("GRADLE_CACHE_URL")
+            val cacheUsername = getMeshProperty("GRADLE_CACHE_USERNAME")
+            val cachePassword = getMeshProperty("GRADLE_CACHE_PASSWORD")
+
+            if (!cacheUrl.isNullOrBlank()) {
+                url = uri(cacheUrl)
+                isAllowInsecureProtocol = cacheUrl.startsWith("http:")
+                if (!cacheUsername.isNullOrBlank() && !cachePassword.isNullOrBlank()) {
+                    credentials {
+                        username = cacheUsername
+                        password = cachePassword
+                    }
+                }
+                // Allow this machine to upload results to the cache
+                isPush = true
+            } else {
+                isEnabled = false
+            }
+
+        }
     }
 }
 
