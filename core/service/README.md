@@ -13,7 +13,7 @@ config:
 graph TB
   subgraph :core
     direction TB
-    :core:common[common]:::kmp-library
+    :core:api[api]:::android-library
     :core:database[database]:::android-library
     :core:di[di]:::android-library
     :core:model[model]:::android-library
@@ -23,13 +23,13 @@ graph TB
     :core:strings[strings]:::kmp-library
   end
 
+  :core:api --> :core:model
   :core:database -.-> :core:di
   :core:database -.-> :core:model
   :core:database -.-> :core:proto
   :core:database -.-> :core:strings
-  :core:model -.-> :core:common
-  :core:model -.-> :core:proto
-  :core:model -.-> :core:strings
+  :core:model --> :core:proto
+  :core:service --> :core:api
   :core:service -.-> :core:database
   :core:service -.-> :core:model
   :core:service -.-> :core:prefs
