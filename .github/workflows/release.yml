@@ -217,8 +217,6 @@ jobs:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
           GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-          GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-          GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
         run: bundle exec fastlane fdroid_build
 
       - name: Upload F-Droid APK artifact

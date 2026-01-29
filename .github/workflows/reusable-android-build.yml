@@ -13,10 +13,6 @@ on:
         required: false
       GRADLE_CACHE_URL:
         required: false
-      GRADLE_CACHE_USERNAME:
-        required: false
-      GRADLE_CACHE_PASSWORD:
-        required: false
     inputs:
       upload_artifacts:
         description: 'Whether to upload build and Detekt artifacts'
