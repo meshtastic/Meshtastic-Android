@@ -103,30 +103,16 @@ develocity {
         }
         remote(HttpBuildCache::class.java) {
             val cacheUrl = getMeshProperty("GRADLE_CACHE_URL")?.trim()
-            val cacheUsername = getMeshProperty("GRADLE_CACHE_USERNAME")?.trim()
-            val cachePassword = getMeshProperty("GRADLE_CACHE_PASSWORD")?.trim()
-
             if (!cacheUrl.isNullOrBlank()) {
+                println("Meshtastic Build: Remote cache URL found. Using remote build cache.")
                 url = uri(cacheUrl)
-                isAllowInsecureProtocol = cacheUrl.startsWith("http:")
-                
-                if (!cacheUsername.isNullOrBlank() && !cachePassword.isNullOrBlank()) {
-                    credentials {
-                        username = cacheUsername
-                        password = cachePassword
-                    }
-                    isPush = true
-                    println("Meshtastic Build: Remote cache credentials found. Enabling remote cache write.")
-
-                } else {
-                    println("Meshtastic Build: Remote cache URL found but credentials missing. Disabling remote cache write.")
-                }
-                    isEnabled = true
+                isAllowInsecureProtocol = true
+                isPush = true
+                isEnabled = true
             } else {
                 println("Meshtastic Build: Remote cache URL not found. Disabling remote cache write.")
                 isEnabled = false
             }
-
         }
     }
 }

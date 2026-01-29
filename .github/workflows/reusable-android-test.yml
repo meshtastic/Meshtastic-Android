@@ -25,10 +25,6 @@ on:
         required: true
       GRADLE_CACHE_URL:
         required: false
-      GRADLE_CACHE_USERNAME:
-        required: false
-      GRADLE_CACHE_PASSWORD:
-        required: false
 
 jobs:
   androidTest:
@@ -36,8 +32,6 @@ jobs:
     timeout-minutes: 45
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     strategy:
       matrix:
         api-level: ${{ fromJson(inputs.api_levels) }} # Use the input to define the matrix
