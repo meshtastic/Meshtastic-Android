@@ -62,7 +62,7 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 ## API & Integration
 
-Developers can integrate with the Meshtastic Android app using our published API library. This allows third-party applications (like the ATAK plugin) to communicate with the mesh service via AIDL.
+Developers can integrate with the Meshtastic Android app using our published API library via **JitPack**. This allows third-party applications (like the ATAK plugin) to communicate with the mesh service via AIDL.
 
 For detailed integration instructions, see [core/api/README.md](core/api/README.md).
 

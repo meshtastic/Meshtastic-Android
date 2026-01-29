@@ -4,31 +4,35 @@ This module contains the stable AIDL interface and dependencies required to inte
 
 ## Integration
 
-To communicate with the Meshtastic Android service from your own application, add the following dependencies to your `build.gradle.kts`:
+To communicate with the Meshtastic Android service from your own application, we recommend using **JitPack**.
+
+Add the JitPack repository to your root `build.gradle.kts` (or `settings.gradle.kts`):
 
 ```kotlin
-repositories {
-    mavenCentral()
-    // If using GitHub Packages (until published to Maven Central)
-    maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/meshtastic/Meshtastic-Android")
-        credentials {
-            username = System.getenv("GITHUB_ACTOR")
-            password = System.getenv("GITHUB_TOKEN")
-        }
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 }
+```
 
+Add the dependencies to your module's `build.gradle.kts`:
+
+```kotlin
 dependencies {
+    // Replace 'v2.7.12' with the specific version you need
+    val meshtasticVersion = "v2.7.12" 
+
     // The core AIDL interface
-    implementation("org.meshtastic:core-api:2.7.12") // Match the Meshtastic app version
+    implementation("com.github.meshtastic.Meshtastic-Android:core-api:$meshtasticVersion")
     
     // Data models (DataPacket, MeshUser, NodeInfo, etc.)
-    implementation("org.meshtastic:core-model:2.7.12")
+    implementation("com.github.meshtastic.Meshtastic-Android:core-model:$meshtasticVersion")
     
     // Protobuf definitions (Portnums, Telemetry, etc.)
-    implementation("org.meshtastic:core-proto:2.7.12")
+    implementation("com.github.meshtastic.Meshtastic-Android:core-proto:$meshtasticVersion")
 }
 ```
 
