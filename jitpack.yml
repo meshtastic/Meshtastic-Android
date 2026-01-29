@@ -3,4 +3,5 @@ jdk:
 before_install:
   - ./gradlew :core:proto:generateGoogleReleaseProto
 install:
-  - ./gradlew publishToMavenLocal -Pgoogle
+  - ./gradlew :core:api:publishToMavenLocal :core:model:publishToMavenLocal :core:proto:publishToMavenLocal -Pgoogle
+group: org.meshtastic
