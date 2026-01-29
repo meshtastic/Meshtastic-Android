@@ -1083,7 +1083,7 @@
     </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">1 tund</item>
-        <item quantity="other">%d tundi</item>
+        <item quantity="other">%1$d tundi</item>
     </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
