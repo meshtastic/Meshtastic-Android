@@ -13,15 +13,11 @@ config:
 graph TB
   subgraph :core
     direction TB
-    :core:common[common]:::kmp-library
     :core:model[model]:::android-library
     :core:proto[proto]:::android-library
-    :core:strings[strings]:::kmp-library
   end
 
-  :core:model -.-> :core:common
-  :core:model -.-> :core:proto
-  :core:model -.-> :core:strings
+  :core:model --> :core:proto
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

@@ -18,7 +18,7 @@ graph TB
   subgraph :core
     direction TB
     :core:analytics[analytics]:::android-library
-    :core:common[common]:::kmp-library
+    :core:api[api]:::android-library
     :core:data[data]:::android-library
     :core:database[database]:::android-library
     :core:datastore[datastore]:::android-library
@@ -33,6 +33,7 @@ graph TB
   end
 
   :core:analytics -.-> :core:prefs
+  :core:api --> :core:model
   :core:data -.-> :core:analytics
   :core:data -.-> :core:database
   :core:data -.-> :core:datastore
@@ -46,11 +47,10 @@ graph TB
   :core:database -.-> :core:proto
   :core:database -.-> :core:strings
   :core:datastore -.-> :core:proto
-  :core:model -.-> :core:common
-  :core:model -.-> :core:proto
-  :core:model -.-> :core:strings
+  :core:model --> :core:proto
   :core:network -.-> :core:di
   :core:network -.-> :core:model
+  :core:service --> :core:api
   :core:service -.-> :core:database
   :core:service -.-> :core:model
   :core:service -.-> :core:prefs
