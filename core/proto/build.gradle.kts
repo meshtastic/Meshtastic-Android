@@ -34,7 +34,6 @@ import com.android.build.api.dsl.LibraryExtension
  */
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.protobuf)
     `maven-publish`
 }

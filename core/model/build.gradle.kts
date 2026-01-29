@@ -46,10 +46,10 @@ configure<LibraryExtension> {
 }
 
 dependencies {
-    implementation(projects.core.proto)
+    api(projects.core.proto)
 
-    implementation(libs.androidx.annotation)
-    implementation(libs.kotlinx.serialization.json)
+    api(libs.androidx.annotation)
+    api(libs.kotlinx.serialization.json)
     implementation(libs.kermit)
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
