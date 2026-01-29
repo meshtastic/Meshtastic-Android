@@ -229,12 +229,6 @@
       "title": "Change I2C pins to NFC pads for XIAO nRF52840",
       "page_url": "https://github.com/meshtastic/firmware/pull/9238",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9227",
-      "title": "Change canned message recipient's previous page to send page",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9227",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
