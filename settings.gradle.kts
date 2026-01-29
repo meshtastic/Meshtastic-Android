@@ -109,14 +109,18 @@ develocity {
             if (!cacheUrl.isNullOrBlank()) {
                 url = uri(cacheUrl)
                 isAllowInsecureProtocol = cacheUrl.startsWith("http:")
+                
                 if (!cacheUsername.isNullOrBlank() && !cachePassword.isNullOrBlank()) {
                     credentials {
                         username = cacheUsername
                         password = cachePassword
                     }
+                    isPush = true
+                    isEnabled = true
+                } else {
+                    println("Meshtastic Build: Remote cache URL found but credentials missing. Disabling remote cache to prevent 403 errors.")
+                    isEnabled = false
                 }
-                // Allow this machine to upload results to the cache
-                isPush = true
             } else {
                 isEnabled = false
             }
