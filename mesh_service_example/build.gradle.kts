@@ -36,10 +36,12 @@ configure<ApplicationExtension> {
     testOptions { unitTests.isReturnDefaultValues = true }
 }
 
+val meshtasticVersion = "main-SNAPSHOT"
+
 dependencies {
-    implementation(projects.core.api)
-    implementation(projects.core.model)
-    implementation(projects.core.proto)
+    implementation("com.github.meshtastic.Meshtastic-Android:core-api:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:core-model:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:core-proto:$meshtasticVersion")
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
