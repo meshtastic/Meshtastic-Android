@@ -1,5 +1,7 @@
-import java.util.Properties
 import java.io.FileInputStream
+import java.util.Properties
+
+project.pluginManager.apply("maven-publish")
 
 val configProperties = Properties()
 val configFile = rootProject.file("config.properties")
