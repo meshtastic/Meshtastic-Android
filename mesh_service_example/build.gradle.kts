@@ -18,6 +18,7 @@
 import com.android.build.api.dsl.ApplicationExtension
 import org.meshtastic.buildlogic.FlavorDimension
 import org.meshtastic.buildlogic.MeshtasticFlavor
+import org.meshtastic.buildlogic.configProperties
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
@@ -25,6 +26,8 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
 }
+
+val meshtasticVersion = configProperties.getProperty("VERSION_NAME_BASE")
 
 configure<ApplicationExtension> {
     namespace = "com.meshtastic.android.meshserviceexample"
@@ -37,10 +40,9 @@ configure<ApplicationExtension> {
 }
 
 dependencies {
-    implementation(projects.core.model)
-    implementation(projects.core.proto)
-    implementation(projects.core.service)
-    implementation(projects.core.ui)
+    implementation("org.meshtastic:core-api:$meshtasticVersion")
+    implementation("org.meshtastic:core-model:$meshtasticVersion")
+    implementation("org.meshtastic:core-proto:$meshtasticVersion")
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)

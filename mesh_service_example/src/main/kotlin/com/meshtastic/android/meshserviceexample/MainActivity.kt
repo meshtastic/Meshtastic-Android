@@ -30,8 +30,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.material3.MaterialTheme
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.core.ui.theme.AppTheme
 
 private const val TAG: String = "MeshServiceExample"
 
@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
             registerReceiver(meshtasticReceiver, intentFilter)
         }
 
-        setContent { AppTheme { MainScreen(viewModel) } }
+        setContent { MaterialTheme { MainScreen(viewModel) } }
     }
 
     override fun onDestroy() {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,9 +36,26 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.protobuf)
+    `maven-publish`
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.proto" }
+apply(from = rootProject.file("gradle/publishing.gradle.kts"))
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["googleRelease"])
+                artifactId = "core-proto"
+            }
+        }
+    }
+}
+
+configure<LibraryExtension> {
+    namespace = "org.meshtastic.core.proto"
+    publishing { singleVariant("googleRelease") { withSourcesJar() } }
+}
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {

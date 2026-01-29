@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.core.model
 
-import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.label_long_fast
-import org.meshtastic.core.strings.label_long_moderate
-import org.meshtastic.core.strings.label_long_slow
-import org.meshtastic.core.strings.label_long_turbo
-import org.meshtastic.core.strings.label_medium_fast
-import org.meshtastic.core.strings.label_medium_slow
-import org.meshtastic.core.strings.label_short_fast
-import org.meshtastic.core.strings.label_short_slow
-import org.meshtastic.core.strings.label_short_turbo
-import org.meshtastic.core.strings.label_very_long_slow
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
@@ -308,18 +295,18 @@ enum class RegionInfo(
     }
 }
 
-enum class ChannelOption(val modemPreset: ModemPreset, val labelRes: StringResource, val bandwidth: Float) {
+enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
     // Grouped by range and speed for better readability
-    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, Res.string.label_very_long_slow, 0.0625f),
-    LONG_TURBO(ModemPreset.LONG_TURBO, Res.string.label_long_turbo, 0.500f),
-    LONG_FAST(ModemPreset.LONG_FAST, Res.string.label_long_fast, 0.250f),
-    LONG_MODERATE(ModemPreset.LONG_MODERATE, Res.string.label_long_moderate, 0.125f),
-    LONG_SLOW(ModemPreset.LONG_SLOW, Res.string.label_long_slow, 0.125f),
-    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, Res.string.label_medium_fast, 0.250f),
-    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, Res.string.label_medium_slow, 0.250f),
-    SHORT_FAST(ModemPreset.SHORT_FAST, Res.string.label_short_fast, 0.250f),
-    SHORT_SLOW(ModemPreset.SHORT_SLOW, Res.string.label_short_slow, 0.250f),
-    SHORT_TURBO(ModemPreset.SHORT_TURBO, Res.string.label_short_turbo, 0.500f),
+    VERY_LONG_SLOW(ModemPreset.VERY_LONG_SLOW, 0.0625f),
+    LONG_TURBO(ModemPreset.LONG_TURBO, 0.500f),
+    LONG_FAST(ModemPreset.LONG_FAST, 0.250f),
+    LONG_MODERATE(ModemPreset.LONG_MODERATE, 0.125f),
+    LONG_SLOW(ModemPreset.LONG_SLOW, 0.125f),
+    MEDIUM_FAST(ModemPreset.MEDIUM_FAST, 0.250f),
+    MEDIUM_SLOW(ModemPreset.MEDIUM_SLOW, 0.250f),
+    SHORT_FAST(ModemPreset.SHORT_FAST, 0.250f),
+    SHORT_SLOW(ModemPreset.SHORT_SLOW, 0.250f),
+    SHORT_TURBO(ModemPreset.SHORT_TURBO, 0.500f),
     ;
 
     companion object {
