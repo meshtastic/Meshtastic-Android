@@ -1,0 +1,6 @@
+jdk:
+  - openjdk21
+before_install:
+  - ./gradlew :core:proto:generateGoogleReleaseProto
+install:
+  - ./gradlew publishToMavenLocal -Pgoogle
