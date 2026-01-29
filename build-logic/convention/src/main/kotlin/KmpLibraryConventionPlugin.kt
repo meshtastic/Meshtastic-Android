@@ -32,6 +32,7 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.spotless")
             apply(plugin = "meshtastic.dokka")
             apply(plugin = "meshtastic.kover")
+            apply(plugin = "maven-publish")
 
             configureKotlinMultiplatform()
         }
