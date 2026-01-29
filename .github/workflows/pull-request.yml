@@ -54,9 +54,7 @@ jobs:
     with:
       api_levels: '[35]' # Run only on API 35 for PRs
       test_flavors: 'google' # Run only Google flavor for PRs (faster)
-    secrets:
-      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    secrets: inherit
 
   # This job handles the case when no code changes are detected (docs-only PRs)
   skip-notice:
