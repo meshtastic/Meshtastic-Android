@@ -34,6 +34,8 @@ on:
         required: true
       GRADLE_ENCRYPTION_KEY:
         required: true
+      GRADLE_CACHE_URL:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -144,6 +146,7 @@ jobs:
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
         run: bundle exec fastlane internal
 
       - name: Upload Google AAB artifact
@@ -213,6 +216,7 @@ jobs:
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+          GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
         run: bundle exec fastlane fdroid_build
 
       - name: Upload F-Droid APK artifact

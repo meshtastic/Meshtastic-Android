@@ -70,6 +70,26 @@ plugins {
     id("com.gradle.common-custom-user-data-gradle-plugin") version "2.4.0"
 }
 
+fun Settings.getMeshProperty(key: String): String? {
+    val env = System.getenv(key)
+    if (!env.isNullOrBlank()) return env
+
+    val localFile = file("local.properties")
+    if (localFile.exists()) {
+        val props = java.util.Properties()
+        localFile.inputStream().use { props.load(it) }
+        if (props.containsKey(key)) return props.getProperty(key)
+    }
+
+    val configFile = file("config.properties")
+    if (configFile.exists()) {
+        val props = java.util.Properties()
+        configFile.inputStream().use { props.load(it) }
+        if (props.containsKey(key)) return props.getProperty(key)
+    }
+    return null
+}
+
 develocity {
     buildScan {
         capture {
@@ -82,14 +102,17 @@ develocity {
             isEnabled = true
         }
         remote(HttpBuildCache::class.java) {
-            isAllowInsecureProtocol = true
-            // Replace with your selfhosted instance address
-            // see: https://docs.gradle.org/current/userguide/build_cache.html#sec:build_cache_setup_http_backend
-            url = uri("http://192.168.1.3:5071/cache/")
-
-            // Allow this machine to upload results to the cache
-            isPush = true
-
+            val cacheUrl = getMeshProperty("GRADLE_CACHE_URL")?.trim()
+            if (!cacheUrl.isNullOrBlank()) {
+                println("Meshtastic Build: Remote cache URL found. Using remote build cache.")
+                url = uri(cacheUrl)
+                isAllowInsecureProtocol = true
+                isPush = true
+                isEnabled = true
+            } else {
+                println("Meshtastic Build: Remote cache URL not found. Disabling remote cache write.")
+                isEnabled = false
+            }
         }
     }
 }

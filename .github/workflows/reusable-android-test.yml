@@ -23,11 +23,15 @@ on:
         required: false
       CODECOV_TOKEN:
         required: true
+      GRADLE_CACHE_URL:
+        required: false
 
 jobs:
   androidTest:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
     strategy:
       matrix:
         api-level: ${{ fromJson(inputs.api_levels) }} # Use the input to define the matrix
