@@ -5,6 +5,8 @@
     <uses-permission android:name="com.geeksville.mesh.permission.BIND_MESH_SERVICE" />
     <queries>
         <package android:name="com.geeksville.mesh" />
+        <package android:name="com.geeksville.mesh.google.debug" />
+        <package android:name="com.geeksville.mesh.fdroid.debug" />
     </queries>
 
     <application

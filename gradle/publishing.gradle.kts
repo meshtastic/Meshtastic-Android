@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import java.io.FileInputStream
 import java.util.Properties
 
 project.pluginManager.apply("maven-publish")
 
-val configProperties = Properties()
-val configFile = rootProject.file("config.properties")
-if (configFile.exists()) {
-    FileInputStream(configFile).use { configProperties.load(it) }
-}
-
-val versionBase = configProperties.getProperty("VERSION_NAME_BASE") ?: "0.0.0-SNAPSHOT"
-val appVersion = System.getenv("VERSION_NAME") ?: versionBase
-
-project.version = appVersion
 project.group = "org.meshtastic"
+
+if (project.version == "unspecified") {
+    val props = Properties().apply {
+        rootProject.file("config.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+    }
+    
+    project.version = System.getenv("VERSION")
+        ?: System.getenv("VERSION_NAME")
+        ?: props.getProperty("VERSION_NAME_BASE")
+        ?: "0.0.0-SNAPSHOT"
+}

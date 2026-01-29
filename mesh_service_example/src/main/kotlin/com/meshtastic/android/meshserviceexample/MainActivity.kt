@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -102,13 +103,32 @@ class MainActivity : ComponentActivity() {
         try {
             Log.i(TAG, "Attempting to bind to Mesh Service...")
             val intent = Intent("com.geeksville.mesh.Service")
-            intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
+
+            // Query the package manager to find an app that handles this service action.
+            // This is more resilient than hardcoding a package name, which might change with flavors.
+            val resolveInfo =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
+                } else {
+                    @Suppress("DEPRECATION")
+                    packageManager.queryIntentServices(intent, 0)
+                }
+
+            if (resolveInfo.isNotEmpty()) {
+                val serviceInfo = resolveInfo[0].serviceInfo
+                intent.setClassName(serviceInfo.packageName, serviceInfo.name)
+                Log.i(TAG, "Found service in package: ${serviceInfo.packageName}")
+            } else {
+                Log.w(TAG, "No service found for action com.geeksville.mesh.Service. Falling back to default.")
+                intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
+            }
+
             val success = bindService(intent, serviceConnection, BIND_AUTO_CREATE)
             if (!success) {
                 Log.e(TAG, "bindService returned false")
             }
         } catch (e: SecurityException) {
-            Log.e(TAG, "SecurityException while binding", e)
+            Log.e(TAG, "SecurityException while binding: ${e.message}")
         }
     }
 
