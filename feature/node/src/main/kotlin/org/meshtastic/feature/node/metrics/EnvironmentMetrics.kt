@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,12 +25,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -38,25 +44,28 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.env_metrics_log
 import org.meshtastic.core.strings.gas_resistance
 import org.meshtastic.core.strings.humidity
 import org.meshtastic.core.strings.iaq
@@ -71,26 +80,29 @@ import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.proto.TelemetryProtos
 import org.meshtastic.proto.TelemetryProtos.Telemetry
 import org.meshtastic.proto.copy
 
+@Suppress("LongMethod")
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame, state.isFahrenheit)
+    val graphData = environmentState.environmentMetricsForGraphing(state.isFahrenheit)
     val data = graphData.metrics
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -126,6 +138,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.env_metrics_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -157,20 +170,32 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = processedTelemetries.reversed(),
                 graphData = graphData,
-                selectedTime = selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
+                vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
+                onPointSelected = { x ->
+                    selectedX = x
+                    val index = processedTelemetries.indexOfFirst { it.time.toDouble() == x }
+                    if (index != -1) {
+                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                    }
+                },
             )
 
-            SlidingSelector(
-                TimeFrame.entries.toList(),
-                selectedTimeFrame,
-                onOptionSelected = { viewModel.setTimeFrame(it) },
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(processedTelemetries) { telemetry -> EnvironmentMetricsCard(telemetry, state.isFahrenheit) }
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(processedTelemetries) { _, telemetry ->
+                    EnvironmentMetricsCard(
+                        telemetry = telemetry,
+                        environmentDisplayFahrenheit = state.isFahrenheit,
+                        isSelected = telemetry.time.toDouble() == selectedX,
+                        onClick = {
+                            selectedX = telemetry.time.toDouble()
+                            coroutineScope.launch {
+                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS))
+                            }
+                        },
+                    )
+                }
             }
         }
     }
@@ -356,29 +381,48 @@ private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
+private fun EnvironmentMetricsCard(
+    telemetry: Telemetry,
+    environmentDisplayFahrenheit: Boolean,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
-        Surface { SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) } }
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Surface(color = Color.Transparent) {
+            SelectionContainer { EnvironmentMetricsContent(telemetry, environmentDisplayFahrenheit) }
+        }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp, vertical = 2.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(
-                text = DATE_TIME_FORMAT.format(time),
-                style = TextStyle(fontWeight = FontWeight.Bold),
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            )
+            Text(text = DATE_TIME_FORMAT.format(time), style = MaterialTheme.typography.titleMediumEmphasized)
             TemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         HumidityAndBarometricPressureDisplay(envMetrics)
 

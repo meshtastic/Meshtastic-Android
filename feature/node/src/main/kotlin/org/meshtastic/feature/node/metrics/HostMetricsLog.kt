@@ -32,6 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -123,6 +123,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "MagicNumber")
 @Composable
 fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Telemetry) {
@@ -141,8 +142,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.End,
                         text = DATE_TIME_FORMAT.format(time),
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = MaterialTheme.typography.titleMediumEmphasized,
                     )
                     LogLine(
                         label = stringResource(Res.string.uptime),

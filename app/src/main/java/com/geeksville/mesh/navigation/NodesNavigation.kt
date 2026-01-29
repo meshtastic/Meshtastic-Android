@@ -18,6 +18,7 @@ package com.geeksville.mesh.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CellTower
+import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.LightMode
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
@@ -49,6 +50,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.device
 import org.meshtastic.core.strings.environment
 import org.meshtastic.core.strings.host
+import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.pax
 import org.meshtastic.core.strings.position_log
 import org.meshtastic.core.strings.power
@@ -61,6 +63,7 @@ import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
 import org.meshtastic.feature.node.metrics.MetricsViewModel
+import org.meshtastic.feature.node.metrics.NeighborInfoLogScreen
 import org.meshtastic.feature.node.metrics.PaxMetricsScreen
 import org.meshtastic.feature.node.metrics.PositionLogScreen
 import org.meshtastic.feature.node.metrics.PowerMetricsScreen
@@ -234,6 +237,14 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
                     ) {
                         it.destNum
                     }
+                NodeDetailRoutes.NeighborInfoLog::class ->
+                    addNodeDetailScreenComposable<NodeDetailRoutes.NeighborInfoLog>(
+                        navController,
+                        entry,
+                        entry.screenComposable,
+                    ) {
+                        it.destNum
+                    }
                 else -> Unit
             }
         }
@@ -311,6 +322,12 @@ enum class NodeDetailRoute(
         NodeDetailRoutes.TracerouteLog::class,
         Icons.Rounded.PermScanWifi,
         { metricsVM, onNavigateUp -> TracerouteLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
+    ),
+    NEIGHBOR_INFO(
+        Res.string.neighbor_info,
+        NodeDetailRoutes.NeighborInfoLog::class,
+        Icons.Rounded.Groups,
+        { metricsVM, onNavigateUp -> NeighborInfoLogScreen(viewModel = metricsVM, onNavigateUp = onNavigateUp) },
     ),
     POWER(
         Res.string.power,

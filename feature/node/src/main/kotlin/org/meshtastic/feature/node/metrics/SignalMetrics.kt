@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,12 +29,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,61 +45,57 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.rssi_definition
+import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.strings.snr
 import org.meshtastic.core.strings.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.component.SnrAndRssi
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.metrics.GraphUtil.plotPoint
-import org.meshtastic.feature.node.model.TimeFrame
+import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.proto.MeshProtos.MeshPacket
 
-@Suppress("MagicNumber")
-private enum class Metric(val color: Color, val min: Float, val max: Float) {
-    SNR(Color.Green, -20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
-    RSSI(Color.Blue, -140f, -20f),
-    ;
-
-    /** Difference between the metrics `max` and `min` values. */
-    fun difference() = max - min
+private enum class SignalMetric(val color: Color) {
+    SNR(Color.Green),
+    RSSI(Color.Blue),
 }
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = Res.string.rssi, color = Metric.RSSI.color, environmentMetric = null),
-        LegendData(nameRes = Res.string.snr, color = Metric.SNR.color, environmentMetric = null),
+        LegendData(nameRes = Res.string.rssi, color = SignalMetric.RSSI.color, environmentMetric = null),
+        LegendData(nameRes = Res.string.snr, color = SignalMetric.SNR.color, environmentMetric = null),
     )
 
 @Suppress("LongMethod")
@@ -107,8 +104,12 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var displayInfoDialog by remember { mutableStateOf(false) }
-    val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val data = state.signalMetricsFiltered(selectedTimeFrame)
+    val data = state.signalMetrics
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
@@ -125,6 +126,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.signal_quality),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -134,7 +136,10 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) }) {
                             androidx.compose.material3.Icon(
                                 imageVector = MeshtasticIcons.Refresh,
-                                contentDescription = null,
+                                contentDescription =
+                                stringResource(Res.string.signal_quality) +
+                                    " " +
+                                    stringResource(Res.string.request_telemetry),
                             )
                         }
                     }
@@ -159,20 +164,33 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             SignalMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 meshPackets = data.reversed(),
-                selectedTimeFrame,
                 promptInfoDialog = { displayInfoDialog = true },
+                vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
+                onPointSelected = { x ->
+                    selectedX = x
+                    val index = data.indexOfFirst { it.rxTime.toDouble() == x }
+                    if (index != -1) {
+                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                    }
+                },
             )
 
-            SlidingSelector(
-                TimeFrame.entries.toList(),
-                selectedTimeFrame,
-                onOptionSelected = { viewModel.setTimeFrame(it) },
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(data) { meshPacket -> SignalMetricsCard(meshPacket) }
+            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
+                itemsIndexed(data) { _, meshPacket ->
+                    SignalMetricsCard(
+                        meshPacket = meshPacket,
+                        isSelected = meshPacket.rxTime.toDouble() == selectedX,
+                        onClick = {
+                            selectedX = meshPacket.rxTime.toDouble()
+                            coroutineScope.launch {
+                                vicoScrollState.animateScroll(
+                                    Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS),
+                                )
+                            }
+                        },
+                    )
+                }
             }
         }
     }
@@ -183,126 +201,115 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
-    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit,
+    vicoScrollState: VicoScrollState,
+    selectedX: Double?,
+    onPointSelected: (Double) -> Unit,
 ) {
     ChartHeader(amount = meshPackets.size)
     if (meshPackets.isEmpty()) {
         return
     }
 
-    val (oldest, newest) =
-        remember(key1 = meshPackets) { Pair(meshPackets.minBy { it.rxTime }, meshPackets.maxBy { it.rxTime }) }
-    val timeDiff = newest.rxTime - oldest.rxTime
+    val modelProducer = remember { CartesianChartModelProducer() }
 
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by
-        remember(key1 = selectedTime) {
-            mutableStateOf(selectedTime.dp(screenWidth, time = (newest.rxTime - oldest.rxTime).toLong()))
+    LaunchedEffect(meshPackets) {
+        modelProducer.runTransaction {
+            /* Use separate lineSeries calls to associate them with different vertical axes */
+            lineSeries { series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { it.rxRssi }) }
+            lineSeries { series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { it.rxSnr }) }
         }
-
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        // Calculate visible width based on actual weight distribution
-        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
-        val visibleOldest = oldest.rxTime + (timeDiff * (1f - rightRatio)).toInt()
-        val visibleNewest = oldest.rxTime + (timeDiff * (1f - leftRatio)).toInt()
-        visibleOldest to visibleNewest
     }
 
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
+    val rssiColor = SignalMetric.RSSI.color
+    val snrColor = SignalMetric.SNR.color
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    val graphColor = MaterialTheme.colorScheme.onSurface
-    val snrDiff = Metric.SNR.difference()
-    val rssiDiff = Metric.RSSI.difference()
-
-    Row {
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            Metric.RSSI.color,
-            minValue = Metric.RSSI.min,
-            maxValue = Metric.RSSI.max,
-        )
-        Box(
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(1f),
-        ) {
-            HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })
-
-            TimeAxisOverlay(
-                modifier.width(dp),
-                oldest = oldest.rxTime,
-                newest = newest.rxTime,
-                selectedTime.lineInterval(),
-            )
-
-            /* Plot SNR and RSSI */
-            Canvas(modifier = modifier.width(dp)) {
-                val width = size.width
-                /* Plot */
-                for (packet in meshPackets) {
-                    val xRatio = (packet.rxTime - oldest.rxTime).toFloat() / timeDiff
-                    val x = xRatio * width
-
-                    /* SNR */
-                    plotPoint(
-                        drawContext = drawContext,
-                        color = Metric.SNR.color,
-                        x = x,
-                        value = packet.rxSnr - Metric.SNR.min,
-                        divisor = snrDiff,
-                    )
-
-                    /* RSSI */
-                    plotPoint(
-                        drawContext = drawContext,
-                        color = Metric.RSSI.color,
-                        x = x,
-                        value = packet.rxRssi - Metric.RSSI.min,
-                        divisor = rssiDiff,
-                    )
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter =
+            ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                if (color.copy(alpha = 1f) == rssiColor) {
+                    "RSSI: %.0f dBm".format(value)
+                } else {
+                    "SNR: %.1f dB".format(value)
                 }
-            }
-        }
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            Metric.SNR.color,
-            minValue = Metric.SNR.min,
-            maxValue = Metric.SNR.max,
+            },
         )
-    }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    GenericMetricChart(
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+        layers =
+        listOf(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            ),
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.End,
+            ),
+        ),
+        startAxis =
+        VerticalAxis.rememberStart(
+            label = ChartStyling.rememberAxisLabel(color = rssiColor),
+            valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
+        ),
+        endAxis =
+        VerticalAxis.rememberEnd(
+            label = ChartStyling.rememberAxisLabel(color = snrColor),
+            valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
+        ),
+        bottomAxis =
+        HorizontalAxis.rememberBottom(
+            label = ChartStyling.rememberAxisLabel(),
+            valueFormatter = CommonCharts.dynamicTimeFormatter,
+            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+            labelRotationDegrees = 45f,
+        ),
+        marker = marker,
+        selectedX = selectedX,
+        onPointSelected = onPointSelected,
+        vicoScrollState = vicoScrollState,
+    )
 
     Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
-
-    Spacer(modifier = Modifier.height(16.dp))
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun SignalMetricsCard(meshPacket: MeshPacket) {
+private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = meshPacket.rxTime * MS_PER_SEC
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
-        Surface {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Surface(color = Color.Transparent) {
             SelectionContainer {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     /* Data */
                     Box(modifier = Modifier.weight(weight = 5f).height(IntrinsicSize.Min)) {
-                        Column(modifier = Modifier.padding(8.dp)) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             /* Time */
                             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
                                     text = DATE_TIME_FORMAT.format(time),
-                                    style = TextStyle(fontWeight = FontWeight.Bold),
-                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                    style = MaterialTheme.typography.titleMediumEmphasized,
                                 )
                             }
 

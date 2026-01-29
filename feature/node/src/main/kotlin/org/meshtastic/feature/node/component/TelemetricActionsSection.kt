@@ -51,19 +51,15 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.logs
-import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.request_air_quality_metrics
-import org.meshtastic.core.strings.request_local_stats
 import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.core.strings.userinfo
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.Chart
-import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.core.ui.icon.Speed
 import org.meshtastic.core.ui.icon.Temperature
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
@@ -137,9 +133,10 @@ private fun rememberTelemetricFeatures(
             isVisible = { !isLocal },
         ),
         TelemetricFeature(
-            titleRes = Res.string.neighbor_info,
-            icon = MeshtasticIcons.Groups,
+            titleRes = LogsType.NEIGHBOR_INFO.titleRes,
+            icon = LogsType.NEIGHBOR_INFO.icon,
             requestAction = { NodeMenuAction.RequestNeighborInfo(it) },
+            logsType = LogsType.NEIGHBOR_INFO,
             isVisible = { it.capabilities.canRequestNeighborInfo },
             cooldownTimestamp = lastRequestNeighborsTime,
             cooldownDuration = REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS,
@@ -147,9 +144,9 @@ private fun rememberTelemetricFeatures(
         TelemetricFeature(
             titleRes = LogsType.SIGNAL.titleRes,
             icon = LogsType.SIGNAL.icon,
-            requestAction = null,
+            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
             logsType = LogsType.SIGNAL,
-            isVisible = { it.hopsAway == 0 && !isLocal },
+            isVisible = { !isLocal },
         ),
         TelemetricFeature(
             titleRes = LogsType.DEVICE.titleRes,
@@ -177,11 +174,6 @@ private fun rememberTelemetricFeatures(
             logsType = LogsType.POWER,
             content = { PowerMetrics(it) },
             hasContent = { it.hasPowerMetrics },
-        ),
-        TelemetricFeature(
-            titleRes = Res.string.request_local_stats,
-            icon = MeshtasticIcons.Speed,
-            requestAction = { NodeMenuAction.RequestTelemetry(it, TelemetryType.LOCAL_STATS) },
         ),
         TelemetricFeature(
             titleRes = LogsType.HOST.titleRes,

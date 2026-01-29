@@ -16,23 +16,21 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,19 +43,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
+import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
@@ -72,21 +76,14 @@ import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
 import java.text.DateFormat
 import java.util.Date
-
-private const val CHART_WEIGHT = 1f
-private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     PAX(Color.Black, Res.string.pax),
@@ -101,73 +98,77 @@ private fun PaxMetricsChart(
     totalSeries: List<Pair<Int, Int>>,
     bleSeries: List<Pair<Int, Int>>,
     wifiSeries: List<Pair<Int, Int>>,
-    minValue: Float,
-    maxValue: Float,
-    timeFrame: TimeFrame,
+    vicoScrollState: VicoScrollState,
+    selectedX: Double?,
+    onPointSelected: (Double) -> Unit,
 ) {
     if (totalSeries.isEmpty()) return
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val times = totalSeries.map { it.first }
-    val minTime = times.minOrNull() ?: 0
-    val maxTime = times.maxOrNull() ?: 1
-    val timeDiff = maxTime - minTime
-    val dp = remember(timeFrame, screenWidth, timeDiff) { timeFrame.dp(screenWidth, time = timeDiff.toLong()) }
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        val visibleOldest = minTime + (timeDiff * leftRatio).toInt()
-        val visibleNewest = minTime + (timeDiff * rightRatio).toInt()
-        visibleOldest to visibleNewest
-    }
-    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
-    Spacer(modifier = Modifier.height(16.dp))
-    Row(modifier = modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f)) {
-        YAxisLabels(
-            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(start = 8.dp),
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            minValue = minValue,
-            maxValue = maxValue,
-        )
-        Box(
-            contentAlignment = Alignment.TopStart,
-            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(CHART_WEIGHT),
-        ) {
-            HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { Color.LightGray })
-            TimeAxisOverlay(modifier.width(dp), oldest = minTime, newest = maxTime, timeFrame.lineInterval())
-            Canvas(modifier = Modifier.width(dp).fillMaxHeight()) {
-                val width = size.width
-                val height = size.height
-                fun xForTime(t: Int): Float =
-                    if (maxTime == minTime) width / 2 else (t - minTime).toFloat() / (maxTime - minTime) * width
-                fun yForValue(v: Int): Float = height - (v - minValue) / (maxValue - minValue) * height
-                fun drawLine(series: List<Pair<Int, Int>>, color: Color) {
-                    for (i in 1 until series.size) {
-                        drawLine(
-                            color = color,
-                            start = Offset(xForTime(series[i - 1].first), yForValue(series[i - 1].second)),
-                            end = Offset(xForTime(series[i].first), yForValue(series[i].second)),
-                            strokeWidth = 2.dp.toPx(),
-                        )
-                    }
-                }
-                drawLine(bleSeries, PaxSeries.BLE.color)
-                drawLine(wifiSeries, PaxSeries.WIFI.color)
-                drawLine(totalSeries, PaxSeries.PAX.color)
+
+    val modelProducer = remember { CartesianChartModelProducer() }
+    val paxColor = PaxSeries.PAX.color
+    val bleColor = PaxSeries.BLE.color
+    val wifiColor = PaxSeries.WIFI.color
+
+    LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
+                series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
+                series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
             }
         }
-        YAxisLabels(
-            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight().padding(end = 8.dp),
-            labelColor = MaterialTheme.colorScheme.onSurface,
-            minValue = minValue,
-            maxValue = maxValue,
-        )
     }
-    Spacer(modifier = Modifier.height(16.dp))
+
+    val axisLabel = ChartStyling.rememberAxisLabel()
+    val marker =
+        ChartStyling.rememberMarker(
+            valueFormatter =
+            ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                when (color.copy(1f)) {
+                    bleColor -> "BLE: %.0f".format(value)
+                    wifiColor -> "WiFi: %.0f".format(value)
+                    paxColor -> "PAX: %.0f".format(value)
+                    else -> "%.0f".format(value)
+                }
+            },
+        )
+
+    GenericMetricChart(
+        modelProducer = modelProducer,
+        modifier = modifier.padding(8.dp),
+        layers =
+        listOf(
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createGradientLine(
+                        lineColor = bleColor,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                    ),
+                    ChartStyling.createGradientLine(
+                        lineColor = wifiColor,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                    ),
+                    ChartStyling.createBoldLine(
+                        lineColor = paxColor,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                    ),
+                ),
+            ),
+        ),
+        startAxis = VerticalAxis.rememberStart(label = axisLabel),
+        bottomAxis =
+        HorizontalAxis.rememberBottom(
+            label = axisLabel,
+            valueFormatter = CommonCharts.dynamicTimeFormatter,
+            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+            labelRotationDegrees = 45f,
+        ),
+        marker = marker,
+        selectedX = selectedX,
+        onPointSelected = onPointSelected,
+        vicoScrollState = vicoScrollState,
+    )
 }
 
 @Composable
@@ -175,6 +176,11 @@ private fun PaxMetricsChart(
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
 
     LaunchedEffect(Unit) {
         metricsViewModel.effects.collect { effect ->
@@ -188,7 +194,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     }
 
     val dateFormat = DateFormat.getDateTimeInstance()
-    var timeFrame by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
     // Only show logs that can be decoded as PaxcountProtos.Paxcount
     val paxMetrics =
         state.paxMetrics.mapNotNull { log ->
@@ -200,10 +205,8 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             }
         }
     // Prepare data for graph
-    val oldestTime = timeFrame.calculateOldestTime()
     val graphData =
         paxMetrics
-            .filter { it.first.received_date / 1000 >= oldestTime }
             .map {
                 val t = (it.first.received_date / 1000).toInt()
                 Triple(t, it.second.ble, it.second.wifi)
@@ -212,8 +215,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val totalSeries = graphData.map { it.first to (it.second + it.third) }
     val bleSeries = graphData.map { it.first to it.second }
     val wifiSeries = graphData.map { it.first to it.third }
-    val maxValue = (totalSeries.maxOfOrNull { it.second } ?: 1).toFloat().coerceAtLeast(1f)
-    val minValue = 0f
     val legendData =
         listOf(
             LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
@@ -225,6 +226,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(Res.string.pax_metrics_log),
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -242,14 +244,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            // Time frame selector
-            SlidingSelector(
-                options = TimeFrame.entries.toList(),
-                selectedOption = timeFrame,
-                onOptionSelected = { timeFrame = it },
-            ) { tf: TimeFrame ->
-                OptionLabel(stringResource(tf.strRes))
-            }
             // Graph
             if (graphData.isNotEmpty()) {
                 ChartHeader(graphData.size)
@@ -258,9 +252,15 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                     totalSeries = totalSeries,
                     bleSeries = bleSeries,
                     wifiSeries = wifiSeries,
-                    minValue = minValue,
-                    maxValue = maxValue,
-                    timeFrame = timeFrame,
+                    vicoScrollState = vicoScrollState,
+                    selectedX = selectedX,
+                    onPointSelected = { x ->
+                        selectedX = x
+                        val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
+                        if (index != -1) {
+                            coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                        }
+                    },
                 )
             }
             // List
@@ -271,8 +271,27 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                     textAlign = TextAlign.Center,
                 )
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
-                    items(paxMetrics) { (log, pax) -> PaxMetricsItem(log, pax, dateFormat) }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    state = lazyListState,
+                ) {
+                    itemsIndexed(paxMetrics) { _, (log, pax) ->
+                        PaxMetricsItem(
+                            log = log,
+                            pax = pax,
+                            dateFormat = dateFormat,
+                            isSelected = (log.received_date / 1000).toDouble() == selectedX,
+                            onClick = {
+                                selectedX = (log.received_date / 1000).toDouble()
+                                coroutineScope.launch {
+                                    vicoScrollState.animateScroll(
+                                        Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
+                                    )
+                                }
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -349,29 +368,53 @@ fun PaxcountInfo(
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PaxMetricsItem(log: MeshLog, pax: PaxcountProtos.Paxcount, dateFormat: DateFormat) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        Text(
-            text = dateFormat.format(Date(log.received_date)),
-            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.End,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        val total = pax.ble + pax.wifi
-        val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
-        Row(modifier = Modifier.fillMaxWidth().padding(top = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+fun PaxMetricsItem(
+    log: MeshLog,
+    pax: PaxcountProtos.Paxcount,
+    dateFormat: DateFormat,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onClick() },
+        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+        colors =
+        CardDefaults.cardColors(
+            containerColor =
+            if (isSelected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+        ),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
-                text = summary,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f, fill = true),
-            )
-            Text(
-                text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
-                style = MaterialTheme.typography.bodyMedium,
+                text = dateFormat.format(Date(log.received_date)),
+                style = MaterialTheme.typography.titleMediumEmphasized,
                 textAlign = TextAlign.End,
-                modifier = Modifier.alignByBaseline(),
+                modifier = Modifier.fillMaxWidth(),
             )
+            val total = pax.ble + pax.wifi
+            val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = summary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.weight(1f, fill = true),
+                )
+                Text(
+                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.alignByBaseline(),
+                )
+            }
         }
     }
 }

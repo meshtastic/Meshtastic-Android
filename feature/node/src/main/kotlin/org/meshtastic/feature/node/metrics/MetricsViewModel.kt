@@ -62,7 +62,6 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.ConfigProtos.Config
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.MeshProtos.MeshPacket
@@ -105,6 +104,9 @@ constructor(
     private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
 
     private fun MeshLog.hasValidTraceroute(): Boolean =
+        with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
+
+    private fun MeshLog.hasValidNeighborInfo(): Boolean =
         with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
 
     /**
@@ -198,9 +200,6 @@ constructor(
     private val _environmentState = MutableStateFlow(EnvironmentMetricsState())
     val environmentState: StateFlow<EnvironmentMetricsState> = _environmentState
 
-    private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
-    val timeFrame: StateFlow<TimeFrame> = _timeFrame
-
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
     val lastTraceRouteTime: StateFlow<Long?> =
@@ -226,6 +225,12 @@ constructor(
     fun requestTraceroute() {
         destNum?.let {
             nodeRequestActions.requestTraceroute(viewModelScope, it, state.value.node?.user?.longName ?: "")
+        }
+    }
+
+    fun requestNeighborInfo() {
+        destNum?.let {
+            nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.longName ?: "")
         }
     }
 
@@ -335,6 +340,21 @@ constructor(
                     }
 
                     launch {
+                        combine(
+                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP_VALUE),
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP_VALUE),
+                        ) { request, response ->
+                            _state.update { state ->
+                                state.copy(
+                                    neighborInfoRequests = request.filter { it.hasValidNeighborInfo() },
+                                    neighborInfoResults = response,
+                                )
+                            }
+                        }
+                            .collect {}
+                    }
+
+                    launch {
                         meshLogRepository.getMeshPacketsFrom(
                             currentDestNum,
                             PortNum.POSITION_APP_VALUE,
@@ -393,10 +413,6 @@ constructor(
     override fun onCleared() {
         super.onCleared()
         Logger.d { "MetricsViewModel cleared" }
-    }
-
-    fun setTimeFrame(timeFrame: TimeFrame) {
-        _timeFrame.value = timeFrame
     }
 
     /** Write the persisted Position data out to a CSV file in the specified location. */

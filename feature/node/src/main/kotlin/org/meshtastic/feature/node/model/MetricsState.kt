@@ -16,24 +16,13 @@
  */
 package org.meshtastic.feature.node.model
 
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.forty_eight_hours
-import org.meshtastic.core.strings.four_weeks
-import org.meshtastic.core.strings.max
-import org.meshtastic.core.strings.one_week
-import org.meshtastic.core.strings.twenty_four_hours
-import org.meshtastic.core.strings.two_weeks
 import org.meshtastic.proto.ConfigProtos
 import org.meshtastic.proto.MeshProtos
 import org.meshtastic.proto.TelemetryProtos
-import java.util.concurrent.TimeUnit
 
 data class MetricsState(
     val isLocal: Boolean = false,
@@ -48,9 +37,10 @@ data class MetricsState(
     val hostMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshLog> = emptyList(),
+    val neighborInfoRequests: List<MeshLog> = emptyList(),
+    val neighborInfoResults: List<MeshLog> = emptyList(),
     val positionLogs: List<MeshProtos.Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
-    val isLocalDevice: Boolean = false,
     val firmwareEdition: MeshProtos.FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
@@ -66,84 +56,15 @@ data class MetricsState(
 
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
 
+    fun hasNeighborInfoLogs() = neighborInfoRequests.isNotEmpty()
+
     fun hasPositionLogs() = positionLogs.isNotEmpty()
 
     fun hasHostMetrics() = hostMetrics.isNotEmpty()
 
     fun hasPaxMetrics() = paxMetrics.isNotEmpty()
 
-    fun deviceMetricsFiltered(timeFrame: TimeFrame): List<TelemetryProtos.Telemetry> {
-        val oldestTime = timeFrame.calculateOldestTime()
-        return deviceMetrics.filter { it.time >= oldestTime }
-    }
-
-    fun signalMetricsFiltered(timeFrame: TimeFrame): List<MeshProtos.MeshPacket> {
-        val oldestTime = timeFrame.calculateOldestTime()
-        return signalMetrics.filter { it.rxTime >= oldestTime }
-    }
-
-    fun powerMetricsFiltered(timeFrame: TimeFrame): List<TelemetryProtos.Telemetry> {
-        val oldestTime = timeFrame.calculateOldestTime()
-        return powerMetrics.filter { it.time >= oldestTime }
-    }
-
     companion object {
         val Empty = MetricsState()
-    }
-}
-
-/** Supported time frames used to display data. */
-@Suppress("MagicNumber")
-enum class TimeFrame(val seconds: Long, val strRes: StringResource) {
-    TWENTY_FOUR_HOURS(TimeUnit.DAYS.toSeconds(1), Res.string.twenty_four_hours),
-    FORTY_EIGHT_HOURS(TimeUnit.DAYS.toSeconds(2), Res.string.forty_eight_hours),
-    ONE_WEEK(TimeUnit.DAYS.toSeconds(7), Res.string.one_week),
-    TWO_WEEKS(TimeUnit.DAYS.toSeconds(14), Res.string.two_weeks),
-    FOUR_WEEKS(TimeUnit.DAYS.toSeconds(28), Res.string.four_weeks),
-    MAX(0L, Res.string.max),
-    ;
-
-    fun calculateOldestTime(): Long = if (this == MAX) {
-        MAX.seconds
-    } else {
-        System.currentTimeMillis() / 1000 - this.seconds
-    }
-
-    /**
-     * The time interval to draw the vertical lines representing time on the x-axis.
-     *
-     * @return seconds epoch seconds
-     */
-    fun lineInterval(): Long = when (this.ordinal) {
-        TWENTY_FOUR_HOURS.ordinal -> TimeUnit.HOURS.toSeconds(6)
-
-        FORTY_EIGHT_HOURS.ordinal -> TimeUnit.HOURS.toSeconds(12)
-
-        ONE_WEEK.ordinal,
-        TWO_WEEKS.ordinal,
-        -> TimeUnit.DAYS.toSeconds(1)
-
-        else -> TimeUnit.DAYS.toSeconds(7)
-    }
-
-    /** Used to detect a significant time separation between [TelemetryProtos.Telemetry]s. */
-    fun timeThreshold(): Long = when (this.ordinal) {
-        TWENTY_FOUR_HOURS.ordinal -> TimeUnit.HOURS.toSeconds(6)
-
-        FORTY_EIGHT_HOURS.ordinal -> TimeUnit.HOURS.toSeconds(12)
-
-        else -> TimeUnit.DAYS.toSeconds(1)
-    }
-
-    /**
-     * Calculates the needed [androidx.compose.ui.unit.Dp] depending on the amount of time being plotted.
-     *
-     * @param time in seconds
-     */
-    fun dp(screenWidth: Int, time: Long): Dp {
-        val timePerScreen = this.lineInterval()
-        val multiplier = time / timePerScreen
-        val dp = (screenWidth * multiplier).toInt().dp
-        return dp.takeIf { it != 0.dp } ?: screenWidth.dp
     }
 }

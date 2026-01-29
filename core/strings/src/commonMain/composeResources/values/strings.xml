@@ -425,7 +425,6 @@
     <string name="position_log">Position</string>
     <string name="last_position_update">Last position update</string>
     <string name="env_metrics_log">Environment Metrics</string>
-    <string name="sig_metrics_log">Signal Metrics</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Remote Administration</string>
     <string name="bad">Bad</string>
