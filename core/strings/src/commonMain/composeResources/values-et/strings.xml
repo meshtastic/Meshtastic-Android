@@ -398,7 +398,6 @@
     <string name="position_log">Asukoht</string>
     <string name="last_position_update">Viimase asukoha värskendus</string>
     <string name="env_metrics_log">Keskkonnamõõdikud</string>
-    <string name="sig_metrics_log">Signaali mõõdikud</string>
     <string name="administration">Haldus</string>
     <string name="remote_admin">Kaughaldus</string>
     <string name="bad">Halb</string>

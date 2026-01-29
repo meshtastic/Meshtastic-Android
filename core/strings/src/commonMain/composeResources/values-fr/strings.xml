@@ -398,7 +398,6 @@
     <string name="position_log">Position</string>
     <string name="last_position_update">Dernière mise à jour de position</string>
     <string name="env_metrics_log">Métriques d'environnement</string>
-    <string name="sig_metrics_log">Métriques de Signal</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Administration à distance</string>
     <string name="bad">Mauvais</string>

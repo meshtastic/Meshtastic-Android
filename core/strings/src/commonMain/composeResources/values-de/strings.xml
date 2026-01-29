@@ -384,6 +384,8 @@
     <string name="encryption_pkc">Verschlüsselung mit öffentlichen Schlüssel</string>
     <string name="encryption_pkc_text">Direktnachrichten verwenden zur den öffentlichen Knotenschlüssel zur Verschlüsselung.</string>
     <string name="encryption_error">Öffentlicher Schlüssel stimmt nicht überein</string>
+    <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem gespeicherten Schlüssel überein. Sie können den Knoten entfernen und den Schlüsselaustausch erneut durchführen lassen. Dies könnte jedoch auf ein schwerwiegenderes Sicherheitsproblem hindeuten. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um zu klären, ob die Schlüsseländerung auf ein Zurücksetzen auf Werkseinstellungen oder eine andere absichtliche Handlung zurückzuführen ist.</string>
+    <string name="userinfo">Benutzerinfo</string>
     <string name="meshtastic_new_nodes_notifications">Benachrichtigung neue Knoten</string>
     <string name="more_details">Mehr Details</string>
     <string name="snr">SNR</string>
@@ -630,6 +632,9 @@
     <string name="subnet">Subnetz</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
+    <string name="status_message">Statusmeldung</string>
+    <string name="status_message_config">Konfiguration der Statusmeldung</string>
+    <string name="node_status_summary">Die aktuelle Statuszeichenkette</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI Schwellenwert (Standard -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI Schwellenwert (Standard -80)</string>
     <string name="position_config">Standort</string>
@@ -758,6 +763,8 @@
     <string name="public_key_changed">Öffentlicher Schlüssel geändert</string>
     <string name="import_label">Importieren</string>
     <string name="request">Anfordern</string>
+    <string name="requesting_from">Anfordern %1$s von %2$s</string>
+    <string name="user_info">Benutzerinfo</string>
     <string name="request_neighbor_info">Nachbarinfo (2.7.15+)</string>
     <string name="request_telemetry">Telemetrie anfordern</string>
     <string name="request_device_metrics">Gerätedaten</string>
@@ -766,6 +773,7 @@
     <string name="request_power_metrics">Energiedaten</string>
     <string name="request_local_stats">Lokale Statistik</string>
     <string name="request_host_metrics">Host Kennzahlen</string>
+    <string name="request_pax_metrics">Benutzerzählerdaten</string>
     <string name="request_metadata">Metadaten</string>
     <string name="actions">Aktionen</string>
     <string name="firmware">Firmware</string>
@@ -861,7 +869,9 @@
     <string name="clear_selection">Auswahl löschen</string>
     <string name="message_input_label">Nachricht</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
+    <string name="pax_metrics_log">Benutzerzählerdaten</string>
     <string name="pax">Besucher</string>
+    <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">BLE Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
@@ -1093,5 +1103,21 @@
     <string name="add_channels_description">Die folgenden Kanäle wurden im QR-Code gefunden. Wählen Sie, welche Sie Ihrem Gerät hinzufügen möchten. Vorhandene Kanäle werden beibehalten.</string>
     <string name="replace_channels_and_settings_title">Kanaleinstellungen für &amp; ersetzen</string>
     <string name="replace_channels_and_settings_description">Dieser QR-Code enthält eine komplette Konfiguration. Hierdurch werden Ihre bestehenden Kanäle und Funkeinstellungen ersetzt. Alle vorhandenen Kanäle werden entfernt.</string>
+    <string name="loading">Wird geladen</string>
     <!-- Message Filter -->
+    <string name="filter_settings">Nachrichtenfilter</string>
+    <string name="filter_enable">Filter aktivieren</string>
+    <string name="filter_enable_summary">Nachrichten ausblenden, die Filterwörter enthalten</string>
+    <string name="filter_words">Wörter filtern</string>
+    <string name="filter_words_summary">Nachrichten, die diese Wörter enthalten, werden ausgeblendet</string>
+    <string name="filter_add_placeholder">Wort oder Regex Muster hinzufügen</string>
+    <string name="filter_no_words">Keine Filterwörter konfiguriert</string>
+    <string name="filter_regex_pattern">Regex Muster</string>
+    <string name="filter_whole_word">Übereinstimmung ganzes Wort</string>
+    <string name="filter_filtered_count">%1$d gefiltert</string>
+    <string name="filter_show_count">%1$d gefilterte anzeigen</string>
+    <string name="filter_hide_count">%1$d gefilterte ausblenden</string>
+    <string name="filter_message_label">Gefiltert</string>
+    <string name="filter_enable_for_contact">Filter aktivieren</string>
+    <string name="filter_disable_for_contact">Filter deaktivieren</string>
 </resources>

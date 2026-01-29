@@ -396,7 +396,6 @@
     <string name="position_log">定位</string>
     <string name="last_position_update">最后位置更新</string>
     <string name="env_metrics_log">传感器指标</string>
-    <string name="sig_metrics_log">信号强度</string>
     <string name="administration">管理</string>
     <string name="remote_admin">远程管理</string>
     <string name="bad">差</string>
