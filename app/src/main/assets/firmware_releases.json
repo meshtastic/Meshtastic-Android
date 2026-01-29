@@ -189,15 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "9456",
-      "title": "Add reply bot module with DM-only responses and rate limiting",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9456",
+      "id": "9476",
+      "title": "Deprecate/block packets with a missing/invalid hop_start value (pre-hop firmware) (related to issue #7369)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9476",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9432",
-      "title": "Turn off Radio prior to doDeepSleep",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9432",
+      "id": "9456",
+      "title": "Add reply bot module with DM-only responses and rate limiting",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9456",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
@@ -240,6 +240,12 @@
       "id": "9213",
       "title": "Feature T-Deck Pro and T-Deck: add Chinese IME and built-in GB2312 pinyin table",
       "page_url": "https://github.com/meshtastic/firmware/pull/9213",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9196",
+      "title": "Morse Code Input for Single-Button Devices",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9196",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
