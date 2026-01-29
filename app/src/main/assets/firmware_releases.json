@@ -241,12 +241,6 @@
       "title": "Feature T-Deck Pro and T-Deck: add Chinese IME and built-in GB2312 pinyin table",
       "page_url": "https://github.com/meshtastic/firmware/pull/9213",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9196",
-      "title": "Morse Code Input for Single-Button Devices",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9196",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
