@@ -228,7 +228,7 @@ private fun SignalMetricsChart(
         ChartStyling.rememberMarker(
             valueFormatter =
             ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                if (color == rssiColor) {
+                if (color.copy(alpha = 1f) == rssiColor) {
                     "RSSI: %.0f dBm".format(value)
                 } else {
                     "SNR: %.1f dB".format(value)

@@ -235,7 +235,7 @@ private fun DeviceMetricsChart(
         ChartStyling.rememberMarker(
             valueFormatter =
             ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                when (color) {
+                when (color.copy(alpha = 1f)) {
                     batteryColor -> "Battery: %.1f%%".format(value)
                     chUtilColor -> "ChUtil: %.1f%%".format(value)
                     airUtilColor -> "AirUtil: %.1f%%".format(value)

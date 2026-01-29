@@ -124,7 +124,7 @@ private fun PaxMetricsChart(
         ChartStyling.rememberMarker(
             valueFormatter =
             ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                when (color) {
+                when (color.copy(1f)) {
                     bleColor -> "BLE: %.0f".format(value)
                     wifiColor -> "WiFi: %.0f".format(value)
                     paxColor -> "PAX: %.0f".format(value)
