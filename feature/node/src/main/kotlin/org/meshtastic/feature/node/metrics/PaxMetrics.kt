@@ -79,6 +79,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.theme.GraphColors.Orange
+import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
@@ -86,9 +88,9 @@ import java.text.DateFormat
 import java.util.Date
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
-    PAX(Color.Black, Res.string.pax),
-    BLE(Color.Cyan, Res.string.ble_devices),
-    WIFI(Color.Green, Res.string.wifi_devices),
+    PAX(Color.Gray, Res.string.pax),
+    BLE(Purple, Res.string.ble_devices),
+    WIFI(Orange, Res.string.wifi_devices),
 }
 
 @Suppress("LongMethod")

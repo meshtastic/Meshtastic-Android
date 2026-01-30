@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,13 +51,11 @@ object GraphColors {
     val Purple = Color(0xFF9C27B0)
     val Pink = Color(red = 255, green = 102, blue = 204)
     val Orange = Color(0xFFFF8800)
-
-    val Green = Color.Green
-    val Red = Color.Red
-    val Blue = Color.Blue
-    val Yellow = Color.Yellow
-    val Magenta = Color.Magenta
-    val Cyan = Color.Cyan
+    val Gold = Color(0xFFFFD700)
+    val Cyan = Color(0xFF00BCD4)
+    val Red = Color(0xFFE91E63)
+    val Blue = Color(0xFF2196F3)
+    val Green = Color(0xFF4CAF50)
 }
 
 object StatusColors {

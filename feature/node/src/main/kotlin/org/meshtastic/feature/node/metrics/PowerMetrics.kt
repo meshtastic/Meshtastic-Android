@@ -84,8 +84,8 @@ import org.meshtastic.core.strings.current
 import org.meshtastic.core.strings.power_metrics_log
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
-import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
@@ -93,7 +93,7 @@ import org.meshtastic.proto.TelemetryProtos.Telemetry
 
 private enum class PowerMetric(val color: Color) {
     CURRENT(InfantryBlue),
-    VOLTAGE(Red),
+    VOLTAGE(Gold),
 }
 
 private enum class PowerChannel(val strRes: StringResource) {

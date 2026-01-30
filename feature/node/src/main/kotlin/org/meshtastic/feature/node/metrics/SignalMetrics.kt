@@ -81,6 +81,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SnrAndRssi
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.theme.GraphColors.Blue
+import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
@@ -88,8 +90,8 @@ import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.proto.MeshProtos.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
-    SNR(Color.Green),
-    RSSI(Color.Blue),
+    SNR(Green),
+    RSSI(Blue),
 }
 
 private val LEGEND_DATA =

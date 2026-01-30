@@ -87,10 +87,10 @@ import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.theme.GraphColors.Cyan
+import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.core.ui.theme.GraphColors.Magenta
-import org.meshtastic.core.ui.theme.GraphColors.Red
+import org.meshtastic.core.ui.theme.GraphColors.Pink
+import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
@@ -101,13 +101,13 @@ private enum class Device(val color: Color) {
     BATTERY(Green) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel.toFloat()
     },
-    VOLTAGE(Red) {
+    VOLTAGE(Gold) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.voltage
     },
-    CH_UTIL(Magenta) {
+    CH_UTIL(Purple) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
     },
-    AIR_UTIL(Cyan) {
+    AIR_UTIL(Pink) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.airUtilTx
     }, ;
 
