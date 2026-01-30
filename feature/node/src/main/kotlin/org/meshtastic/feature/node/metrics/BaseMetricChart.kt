@@ -193,7 +193,7 @@ fun <T> BaseMetricScreen(
                             Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
                         }
                     }
-                    if (!state.isLocal && telemetryType != null) {
+                    if (telemetryType != null) {
                         IconButton(onClick = { viewModel.requestTelemetry(telemetryType) }) {
                             Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
