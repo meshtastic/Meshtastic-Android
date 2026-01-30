@@ -24,6 +24,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
@@ -93,6 +94,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
 
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
             allWarningsAsErrors.set(false)
             freeCompilerArgs.addAll(
                 // Enable experimental coroutines APIs, including Flow
