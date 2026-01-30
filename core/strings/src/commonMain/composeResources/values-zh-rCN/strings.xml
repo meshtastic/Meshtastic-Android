@@ -383,6 +383,7 @@
     <string name="encryption_pkc">公钥加密</string>
     <string name="encryption_pkc_text">私信消息正在使用新的公用钥匙加密。</string>
     <string name="encryption_error">公钥不匹配</string>
+    <string name="encryption_error_text">公钥与输入的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会出现密钥泄露问题。 请通过另一个受信任的频道来联系用户，以确定密钥更改是否由于出厂重置或其他故意操作。</string>
     <string name="userinfo">用户信息</string>
     <string name="meshtastic_new_nodes_notifications">新节点通知</string>
     <string name="more_details">查看更多</string>
@@ -629,6 +630,9 @@
     <string name="subnet">子网</string>
     <string name="paxcounter_config">Paxcount 配置</string>
     <string name="paxcounter_enabled">启用 Paxcount</string>
+    <string name="status_message">状态消息</string>
+    <string name="status_message_config">状态消息配置</string>
+    <string name="node_status_summary">当前状态字符串</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 阈值(默认为-80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">BLE RSSI 阈值(默认为-80)</string>
     <string name="position_config">定位</string>
@@ -958,7 +962,7 @@
     <string name="icon_meanings">图标含义</string>
     <string name="secondary_channel_position_feature">来自公共互联网网关的消息会被转发到本地 mesh 网络。由于采用零跳策略，来自默认 MQTT 服务器的流量不会传播到该设备之外。</string>
     <string name="device_configuration">设备配置</string>
-    <string name="remotely_administrating">"[Remote] %1$s"</string>
+    <string name="remotely_administrating">"[远端] %1$s"</string>
     <string name="device_telemetry_enabled">发送设备远程数据</string>
     <string name="device_telemetry_enabled_summary">启用/禁用设备遥测模块，以将指标发送至网络。这些是标称值。拥堵的网络会根据在线节点的数量自动调整为更长的间隔。节点少于个的网络会调整为更快的间隔。</string>
     <string name="any">任意内容</string>
