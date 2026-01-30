@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
@@ -70,6 +71,7 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.air_util_definition
 import org.meshtastic.core.strings.air_utilization
@@ -78,6 +80,8 @@ import org.meshtastic.core.strings.ch_util_definition
 import org.meshtastic.core.strings.channel_air_util
 import org.meshtastic.core.strings.channel_utilization
 import org.meshtastic.core.strings.device_metrics_log
+import org.meshtastic.core.strings.uptime
+import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -86,6 +90,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Magenta
+import org.meshtastic.core.ui.theme.GraphColors.Red
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
@@ -95,6 +100,9 @@ import org.meshtastic.proto.TelemetryProtos.Telemetry
 private enum class Device(val color: Color) {
     BATTERY(Green) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel.toFloat()
+    },
+    VOLTAGE(Red) {
+        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.voltage
     },
     CH_UTIL(Magenta) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
@@ -109,6 +117,7 @@ private enum class Device(val color: Color) {
 private val LEGEND_DATA =
     listOf(
         LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
+        LegendData(nameRes = Res.string.voltage, color = Device.VOLTAGE.color, isLine = true, environmentMetric = null),
         LegendData(
             nameRes = Res.string.channel_utilization,
             color = Device.CH_UTIL.color,
@@ -229,6 +238,7 @@ private fun DeviceMetricsChart(
 
     val modelProducer = remember { CartesianChartModelProducer() }
     val batteryColor = Device.BATTERY.color
+    val voltageColor = Device.VOLTAGE.color
     val chUtilColor = Device.CH_UTIL.color
     val airUtilColor = Device.AIR_UTIL.color
     val marker =
@@ -237,20 +247,24 @@ private fun DeviceMetricsChart(
             ChartStyling.createColoredMarkerValueFormatter { value, color ->
                 when (color.copy(alpha = 1f)) {
                     batteryColor -> "Battery: %.1f%%".format(value)
+                    voltageColor -> "Voltage: %.1f V".format(value)
                     chUtilColor -> "ChUtil: %.1f%%".format(value)
                     airUtilColor -> "AirUtil: %.1f%%".format(value)
-                    else -> "%.1f%%".format(value)
+                    else -> "%.1f".format(value)
                 }
             },
         )
 
     LaunchedEffect(telemetries) {
         modelProducer.runTransaction {
+            /* Series for Left Axis (0-100%) */
             lineSeries {
                 series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.batteryLevel })
                 series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.channelUtilization })
                 series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.airUtilTx })
             }
+            /* Series for Right Axis (Voltage) */
+            lineSeries { series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.voltage }) }
         }
     }
 
@@ -277,10 +291,26 @@ private fun DeviceMetricsChart(
                         pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
                     ),
                 ),
+                verticalAxisPosition = Axis.Position.Vertical.Start,
+            ),
+            rememberLineCartesianLayer(
+                lineProvider =
+                LineCartesianLayer.LineProvider.series(
+                    ChartStyling.createGradientLine(
+                        lineColor = voltageColor,
+                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                    ),
+                ),
+                verticalAxisPosition = Axis.Position.Vertical.End,
             ),
         ),
         startAxis =
         VerticalAxis.rememberStart(label = axisLabel, valueFormatter = { _, value, _ -> "%.0f%%".format(value) }),
+        endAxis =
+        VerticalAxis.rememberEnd(
+            label = ChartStyling.rememberAxisLabel(color = voltageColor),
+            valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+        ),
         bottomAxis =
         HorizontalAxis.rememberBottom(
             label = axisLabel,
@@ -368,6 +398,11 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                                 .format(deviceMetrics.channelUtilization, deviceMetrics.airUtilTx)
                         Text(
                             text = text,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        )
+                        Text(
+                            text = stringResource(Res.string.uptime) + ": " + formatUptime(deviceMetrics.uptimeSeconds),
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
