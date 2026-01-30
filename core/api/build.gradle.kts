@@ -35,7 +35,7 @@ afterEvaluate {
 configure<com.android.build.api.dsl.LibraryExtension> {
     namespace = "org.meshtastic.core.api"
     buildFeatures { aidl = true }
-    
+
     defaultConfig {
         // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
         minSdk = 21

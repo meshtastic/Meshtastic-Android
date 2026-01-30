@@ -42,7 +42,7 @@ configure<LibraryExtension> {
         aidl = true
     }
     namespace = "org.meshtastic.core.model"
-    
+
     defaultConfig {
         // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
         minSdk = 21

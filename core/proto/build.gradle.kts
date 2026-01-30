@@ -37,7 +37,7 @@ afterEvaluate {
 
 configure<LibraryExtension> {
     namespace = "org.meshtastic.core.proto"
-    
+
     defaultConfig {
         // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
         minSdk = 21
