@@ -12,8 +12,7 @@ jobs:
   lint:
     if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-lint.yml
-    secrets:
-      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+    secrets: inherit
 
   build:
     needs: lint
@@ -21,11 +20,7 @@ jobs:
     uses: ./.github/workflows/reusable-android-build.yml
     with:
       upload_artifacts: false
-    secrets:
-      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    secrets: inherit
 
   androidTest:
     needs: lint
@@ -35,9 +30,7 @@ jobs:
       api_levels: '[26, 35]' # Run on both API 26 and 35 for merge queue
       test_flavors: 'both' # Run both flavors for merge queue (comprehensive)
       upload_artifacts: false
-    secrets:
-      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+    secrets: inherit
 
   check-workflow-status:
     name: Check Workflow Status  # Matches another in pull-request, and is required for merge to main.

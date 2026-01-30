@@ -5,11 +5,15 @@ on:
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
+      GRADLE_CACHE_URL:
+        required: false
 
 jobs:
   lint:
     runs-on: ubuntu-latest  # Lint is fast, doesn't need large runner
     timeout-minutes: 10
+    env:
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
