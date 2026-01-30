@@ -49,7 +49,7 @@ vico = "3.0.0-beta.3"
 [libraries]
 # AndroidX
 androidx-activity = { module = "androidx.activity:activity" }
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.2" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.3" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version = "2.2.1" }
