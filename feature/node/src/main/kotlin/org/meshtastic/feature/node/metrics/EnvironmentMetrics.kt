@@ -31,9 +31,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -69,6 +72,8 @@ import org.meshtastic.core.strings.gas_resistance
 import org.meshtastic.core.strings.humidity
 import org.meshtastic.core.strings.iaq
 import org.meshtastic.core.strings.iaq_definition
+import org.meshtastic.core.strings.info
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.lux
 import org.meshtastic.core.strings.radiation
 import org.meshtastic.core.strings.soil_moisture
@@ -137,12 +142,17 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.env_metrics_log),
+                subtitle =
+                stringResource(Res.string.env_metrics_log) +
+                    " (${processedTelemetries.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    IconButton(onClick = { displayInfoDialog = true }) {
+                        Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
+                    }
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.ENVIRONMENT) }) {
                             androidx.compose.material3.Icon(
@@ -171,7 +181,6 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                         modifier = modifier,
                         telemetries = processedTelemetries.reversed(),
                         graphData = graphData,
-                        promptInfoDialog = { displayInfoDialog = true },
                         vicoScrollState = vicoScrollState,
                         selectedX = selectedX,
                         onPointSelected = { x ->

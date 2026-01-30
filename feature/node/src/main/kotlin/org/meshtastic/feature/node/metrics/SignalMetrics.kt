@@ -33,9 +33,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -71,6 +74,8 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.info
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.rssi_definition
@@ -128,12 +133,16 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.signal_quality),
+                subtitle =
+                stringResource(Res.string.signal_quality) + " (${data.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    IconButton(onClick = { displayInfoDialog = true }) {
+                        Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
+                    }
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) }) {
                             androidx.compose.material3.Icon(
@@ -168,7 +177,6 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                     SignalMetricsChart(
                         modifier = modifier,
                         meshPackets = data.reversed(),
-                        promptInfoDialog = { displayInfoDialog = true },
                         vicoScrollState = vicoScrollState,
                         selectedX = selectedX,
                         onPointSelected = { x ->
@@ -208,13 +216,11 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
-    promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     Column(modifier = modifier) {
-        ChartHeader(amount = meshPackets.size, promptInfoDialog = promptInfoDialog)
         if (meshPackets.isEmpty()) return@Column
 
         val modelProducer = remember { CartesianChartModelProducer() }

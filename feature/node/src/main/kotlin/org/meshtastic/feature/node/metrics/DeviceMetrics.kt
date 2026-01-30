@@ -34,6 +34,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -81,6 +83,8 @@ import org.meshtastic.core.strings.battery
 import org.meshtastic.core.strings.ch_util_definition
 import org.meshtastic.core.strings.channel_utilization
 import org.meshtastic.core.strings.device_metrics_log
+import org.meshtastic.core.strings.info
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
@@ -161,12 +165,17 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.device_metrics_log),
+                subtitle =
+                stringResource(Res.string.device_metrics_log) +
+                    " (${data.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
                 onNavigateUp = onNavigateUp,
                 actions = {
+                    IconButton(onClick = { displayInfoDialog = true }) {
+                        Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
+                    }
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.DEVICE) }) {
                             Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
@@ -195,7 +204,6 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                     DeviceMetricsChart(
                         modifier = modifier,
                         telemetries = data.reversed(),
-                        promptInfoDialog = { displayInfoDialog = true },
                         vicoScrollState = vicoScrollState,
                         selectedX = selectedX,
                         onPointSelected = { x ->
@@ -235,13 +243,11 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
-    promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     Column(modifier = modifier) {
-        ChartHeader(amount = telemetries.size, promptInfoDialog = promptInfoDialog)
         if (telemetries.isEmpty()) return@Column
 
         val modelProducer = remember { CartesianChartModelProducer() }
@@ -360,7 +366,6 @@ private fun DeviceMetricsChartPreview() {
         DeviceMetricsChart(
             modifier = Modifier.height(400.dp),
             telemetries = telemetries,
-            promptInfoDialog = {},
             vicoScrollState = rememberVicoScrollState(),
             selectedX = null,
             onPointSelected = {},
@@ -498,7 +503,6 @@ private fun DeviceMetricsScreenPreview() {
                 DeviceMetricsChart(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                     telemetries = telemetries.reversed(),
-                    promptInfoDialog = { displayInfoDialog = true },
                     vicoScrollState = rememberVicoScrollState(),
                     selectedX = null,
                     onPointSelected = {},

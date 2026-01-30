@@ -110,13 +110,11 @@ fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
-    promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
     Column(modifier = modifier) {
-        ChartHeader(amount = telemetries.size, promptInfoDialog = promptInfoDialog)
         if (telemetries.isEmpty()) {
             return@Column
         }

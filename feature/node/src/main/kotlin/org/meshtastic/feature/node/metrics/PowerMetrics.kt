@@ -40,6 +40,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -82,6 +83,7 @@ import org.meshtastic.core.strings.channel_1
 import org.meshtastic.core.strings.channel_2
 import org.meshtastic.core.strings.channel_3
 import org.meshtastic.core.strings.current
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.power_metrics_log
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
@@ -148,7 +150,8 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.power_metrics_log),
+                subtitle =
+                stringResource(Res.string.power_metrics_log) + " (${data.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -156,10 +159,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 actions = {
                     if (!state.isLocal) {
                         IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.POWER) }) {
-                            androidx.compose.material3.Icon(
-                                imageVector = Icons.Rounded.Refresh,
-                                contentDescription = null,
-                            )
+                            Icon(imageVector = Icons.Rounded.Refresh, contentDescription = null)
                         }
                     }
                 },
@@ -233,7 +233,6 @@ private fun PowerMetricsChart(
     onPointSelected: (Double) -> Unit,
 ) {
     Column(modifier = modifier) {
-        ChartHeader(amount = telemetries.size)
         if (telemetries.isEmpty()) return@Column
 
         val modelProducer = remember { CartesianChartModelProducer() }

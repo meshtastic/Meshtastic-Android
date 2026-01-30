@@ -35,15 +35,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -69,7 +66,6 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.delete
 import org.meshtastic.core.strings.info
-import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.snr
 import org.meshtastic.core.ui.icon.Delete
@@ -147,29 +143,6 @@ data class LegendData(
     val isLine: Boolean = false,
     val environmentMetric: Environment? = null,
 )
-
-@Composable
-fun ChartHeader(amount: Int, promptInfoDialog: (() -> Unit)? = null) {
-    Box(modifier = Modifier.fillMaxWidth().height(32.dp).padding(horizontal = 8.dp)) {
-        Text(
-            text = "$amount ${stringResource(Res.string.logs)}",
-            modifier = Modifier.align(Alignment.Center),
-            style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = MaterialTheme.typography.labelMedium.fontSize,
-        )
-
-        if (promptInfoDialog != null) {
-            IconButton(onClick = promptInfoDialog, modifier = Modifier.align(Alignment.CenterEnd).size(32.dp)) {
-                Icon(
-                    imageVector = Icons.Rounded.Info,
-                    contentDescription = stringResource(Res.string.info),
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp),
-                )
-            }
-        }
-    }
-}
 
 /**
  * Creates the legend that identifies the colors used for the graph.

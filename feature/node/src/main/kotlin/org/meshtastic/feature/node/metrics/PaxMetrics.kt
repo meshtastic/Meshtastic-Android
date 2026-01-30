@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -72,6 +71,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.ble_devices
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.no_pax_metrics_logs
 import org.meshtastic.core.strings.pax
 import org.meshtastic.core.strings.pax_metrics_log
@@ -183,7 +183,7 @@ private fun PaxMetricsChart(
             vicoScrollState = vicoScrollState,
         )
 
-        Legend(legendData = LEGEND_DATA)
+        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 4.dp))
     }
 }
 
@@ -236,7 +236,9 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.pax_metrics_log),
+                subtitle =
+                stringResource(Res.string.pax_metrics_log) +
+                    " (${paxMetrics.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -256,52 +258,65 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             // Graph
             if (graphData.isNotEmpty()) {
-                ChartHeader(graphData.size)
-                PaxMetricsChart(
-                    modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-                    totalSeries = totalSeries,
-                    bleSeries = bleSeries,
-                    wifiSeries = wifiSeries,
-                    vicoScrollState = vicoScrollState,
-                    selectedX = selectedX,
-                    onPointSelected = { x ->
-                        selectedX = x
-                        val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
-                        if (index != -1) {
-                            coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                        }
-                    },
-                )
-            }
-            // List
-            if (paxMetrics.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.no_pax_metrics_logs),
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    textAlign = TextAlign.Center,
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    state = lazyListState,
-                ) {
-                    itemsIndexed(paxMetrics) { _, (log, pax) ->
-                        PaxMetricsItem(
-                            log = log,
-                            pax = pax,
-                            dateFormat = dateFormat,
-                            isSelected = (log.received_date / 1000).toDouble() == selectedX,
-                            onClick = {
-                                selectedX = (log.received_date / 1000).toDouble()
-                                coroutineScope.launch {
-                                    vicoScrollState.animateScroll(
-                                        Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
-                                    )
+                AdaptiveMetricLayout(
+                    chartPart = { modifier ->
+                        PaxMetricsChart(
+                            modifier = modifier,
+                            totalSeries = totalSeries,
+                            bleSeries = bleSeries,
+                            wifiSeries = wifiSeries,
+                            vicoScrollState = vicoScrollState,
+                            selectedX = selectedX,
+                            onPointSelected = { x ->
+                                selectedX = x
+                                val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
+                                if (index != -1) {
+                                    coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                                 }
                             },
                         )
-                    }
+                    },
+                    listPart = { modifier ->
+                        if (paxMetrics.isEmpty()) {
+                            Text(
+                                text = stringResource(Res.string.no_pax_metrics_logs),
+                                modifier = modifier.fillMaxSize().padding(16.dp),
+                                textAlign = TextAlign.Center,
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                state = lazyListState,
+                            ) {
+                                itemsIndexed(paxMetrics) { _, (log, pax) ->
+                                    PaxMetricsItem(
+                                        log = log,
+                                        pax = pax,
+                                        dateFormat = dateFormat,
+                                        isSelected = (log.received_date / 1000).toDouble() == selectedX,
+                                        onClick = {
+                                            selectedX = (log.received_date / 1000).toDouble()
+                                            coroutineScope.launch {
+                                                vicoScrollState.animateScroll(
+                                                    Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    },
+                )
+            } else {
+                // Empty state if no graph data
+                if (paxMetrics.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.no_pax_metrics_logs),
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
         }
