@@ -54,19 +54,27 @@ develocity {
             def cacheUrl = getMeshProperty("GRADLE_CACHE_URL")?.trim()
             def cacheUsername = getMeshProperty("GRADLE_CACHE_USERNAME")?.trim()
             def cachePassword = getMeshProperty("GRADLE_CACHE_PASSWORD")?.trim()
+
             if (cacheUrl) {
                 def isLogic = settingsDir.name == "build-logic"
-                println "Meshtastic ${isLogic ? 'Build Logic' : 'Build'}: Remote cache URL found. Using remote build cache."
+                println "Meshtastic ${isLogic ? 'Build Logic' : 'Build'}: Remote cache URL found."
+                
                 url = cacheUrl
+                
                 if (cacheUsername && cachePassword) {
                     credentials {
                         username = cacheUsername
                         password = cachePassword
                     }
                 }
+
                 allowInsecureProtocol = true
                 allowUntrustedServer = true
-                push = true
+                
+                // 403 fix: Only push if we have credentials OR if we're local.
+                // On CI, we only push if we have the keys to the kingdom.
+                push = (cacheUsername && cachePassword)
+
                 enabled = true
             } else {
                 enabled = false

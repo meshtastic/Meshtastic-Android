@@ -36,6 +36,10 @@ on:
         required: true
       GRADLE_CACHE_URL:
         required: false
+      GRADLE_CACHE_USERNAME:
+        required: false
+      GRADLE_CACHE_PASSWORD:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -53,6 +57,10 @@ jobs:
     outputs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
+    env:
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -96,6 +104,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: prepare-build-info
     environment: Release
+    env:
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -146,7 +158,6 @@ jobs:
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-          GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
         run: bundle exec fastlane internal
 
       - name: Upload Google AAB artifact
@@ -177,6 +188,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: prepare-build-info
     environment: Release
+    env:
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -216,7 +231,6 @@ jobs:
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-          GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
         run: bundle exec fastlane fdroid_build
 
       - name: Upload F-Droid APK artifact
