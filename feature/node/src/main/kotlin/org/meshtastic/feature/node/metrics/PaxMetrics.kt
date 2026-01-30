@@ -414,10 +414,7 @@ fun PaxMetricsItem(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     MetricIndicator(PaxSeries.PAX.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = "PAX: ${pax.ble + pax.wifi}",
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
+                    Text(text = "PAX: ${pax.ble + pax.wifi}", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.width(8.dp))
                     MetricIndicator(PaxSeries.BLE.color)
                     Spacer(Modifier.width(4.dp))

@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -166,37 +165,44 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 )
             }
 
-            EnvironmentMetricsChart(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-                telemetries = processedTelemetries.reversed(),
-                graphData = graphData,
-                promptInfoDialog = { displayInfoDialog = true },
-                vicoScrollState = vicoScrollState,
-                selectedX = selectedX,
-                onPointSelected = { x ->
-                    selectedX = x
-                    val index = processedTelemetries.indexOfFirst { it.time.toDouble() == x }
-                    if (index != -1) {
-                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                    }
-                },
-            )
-
-            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(processedTelemetries) { _, telemetry ->
-                    EnvironmentMetricsCard(
-                        telemetry = telemetry,
-                        environmentDisplayFahrenheit = state.isFahrenheit,
-                        isSelected = telemetry.time.toDouble() == selectedX,
-                        onClick = {
-                            selectedX = telemetry.time.toDouble()
-                            coroutineScope.launch {
-                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS))
+            AdaptiveMetricLayout(
+                chartPart = { modifier ->
+                    EnvironmentMetricsChart(
+                        modifier = modifier,
+                        telemetries = processedTelemetries.reversed(),
+                        graphData = graphData,
+                        promptInfoDialog = { displayInfoDialog = true },
+                        vicoScrollState = vicoScrollState,
+                        selectedX = selectedX,
+                        onPointSelected = { x ->
+                            selectedX = x
+                            val index = processedTelemetries.indexOfFirst { it.time.toDouble() == x }
+                            if (index != -1) {
+                                coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
                         },
                     )
-                }
-            }
+                },
+                listPart = { modifier ->
+                    LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
+                        itemsIndexed(processedTelemetries) { _, telemetry ->
+                            EnvironmentMetricsCard(
+                                telemetry = telemetry,
+                                environmentDisplayFahrenheit = state.isFahrenheit,
+                                isSelected = telemetry.time.toDouble() == selectedX,
+                                onClick = {
+                                    selectedX = telemetry.time.toDouble()
+                                    coroutineScope.launch {
+                                        vicoScrollState.animateScroll(
+                                            Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS),
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+                },
+            )
         }
     }
 }
@@ -384,7 +390,7 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
                         color = MaterialTheme.colorScheme.onSurface,
                         fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(Modifier.width(4.dp))
                     IndoorAirQuality(iaq = iaqValue, displayMode = IaqDisplayMode.Dot)
                 }
             }

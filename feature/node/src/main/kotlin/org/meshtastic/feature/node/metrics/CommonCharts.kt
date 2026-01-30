@@ -150,9 +150,7 @@ data class LegendData(
 
 @Composable
 fun ChartHeader(amount: Int, promptInfoDialog: (() -> Unit)? = null) {
-    Box(
-        modifier = Modifier.fillMaxWidth().height(32.dp).padding(horizontal = 8.dp),
-    ) {
+    Box(modifier = Modifier.fillMaxWidth().height(32.dp).padding(horizontal = 8.dp)) {
         Text(
             text = "$amount ${stringResource(Res.string.logs)}",
             modifier = Modifier.align(Alignment.Center),
@@ -161,10 +159,7 @@ fun ChartHeader(amount: Int, promptInfoDialog: (() -> Unit)? = null) {
         )
 
         if (promptInfoDialog != null) {
-            IconButton(
-                onClick = promptInfoDialog,
-                modifier = Modifier.align(Alignment.CenterEnd).size(32.dp),
-            ) {
+            IconButton(onClick = promptInfoDialog, modifier = Modifier.align(Alignment.CenterEnd).size(32.dp)) {
                 Icon(
                     imageVector = Icons.Rounded.Info,
                     contentDescription = stringResource(Res.string.info),
@@ -190,10 +185,7 @@ fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         legendData.forEach { data ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 4.dp),
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 4.dp)) {
                 LegendLabel(text = stringResource(data.nameRes), color = data.color, isLine = data.isLine)
             }
         }
@@ -261,13 +253,7 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
 
 @Composable
 fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
-    Box(
-        modifier =
-        modifier
-            .size(8.dp)
-            .clip(CircleShape)
-            .background(color),
-    )
+    Box(modifier = modifier.size(8.dp).clip(CircleShape).background(color))
 }
 
 @Composable

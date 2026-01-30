@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -183,35 +182,42 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 }
             }
 
-            PowerMetricsChart(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.25f),
-                telemetries = data.reversed(),
-                selectedChannel = selectedChannel,
-                vicoScrollState = vicoScrollState,
-                selectedX = selectedX,
-                onPointSelected = { x ->
-                    selectedX = x
-                    val index = data.indexOfFirst { it.time.toDouble() == x }
-                    if (index != -1) {
-                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                    }
-                },
-            )
-
-            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, telemetry ->
-                    PowerMetricsCard(
-                        telemetry = telemetry,
-                        isSelected = telemetry.time.toDouble() == selectedX,
-                        onClick = {
-                            selectedX = telemetry.time.toDouble()
-                            coroutineScope.launch {
-                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
+            AdaptiveMetricLayout(
+                chartPart = { modifier ->
+                    PowerMetricsChart(
+                        modifier = modifier,
+                        telemetries = data.reversed(),
+                        selectedChannel = selectedChannel,
+                        vicoScrollState = vicoScrollState,
+                        selectedX = selectedX,
+                        onPointSelected = { x ->
+                            selectedX = x
+                            val index = data.indexOfFirst { it.time.toDouble() == x }
+                            if (index != -1) {
+                                coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
                         },
                     )
-                }
-            }
+                },
+                listPart = { modifier ->
+                    LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
+                        itemsIndexed(data) { _, telemetry ->
+                            PowerMetricsCard(
+                                telemetry = telemetry,
+                                isSelected = telemetry.time.toDouble() == selectedX,
+                                onClick = {
+                                    selectedX = telemetry.time.toDouble()
+                                    coroutineScope.launch {
+                                        vicoScrollState.animateScroll(
+                                            Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f),
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+                },
+            )
         }
     }
 }
@@ -248,17 +254,23 @@ private fun PowerMetricsChart(
         LaunchedEffect(telemetries, selectedChannel) {
             modelProducer.runTransaction {
                 lineSeries {
-                    series(x = telemetries.map { it.time }, y = telemetries.map { retrieveCurrent(selectedChannel, it) })
+                    series(
+                        x = telemetries.map { it.time },
+                        y = telemetries.map { retrieveCurrent(selectedChannel, it) },
+                    )
                 }
                 lineSeries {
-                    series(x = telemetries.map { it.time }, y = telemetries.map { retrieveVoltage(selectedChannel, it) })
+                    series(
+                        x = telemetries.map { it.time },
+                        y = telemetries.map { retrieveVoltage(selectedChannel, it) },
+                    )
                 }
             }
         }
 
         GenericMetricChart(
             modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
             layers =
             listOf(
                 rememberLineCartesianLayer(

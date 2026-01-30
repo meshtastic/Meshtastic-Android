@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -164,37 +163,42 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 )
             }
 
-            SignalMetricsChart(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-                meshPackets = data.reversed(),
-                promptInfoDialog = { displayInfoDialog = true },
-                vicoScrollState = vicoScrollState,
-                selectedX = selectedX,
-                onPointSelected = { x ->
-                    selectedX = x
-                    val index = data.indexOfFirst { it.rxTime.toDouble() == x }
-                    if (index != -1) {
-                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                    }
-                },
-            )
-
-            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, meshPacket ->
-                    SignalMetricsCard(
-                        meshPacket = meshPacket,
-                        isSelected = meshPacket.rxTime.toDouble() == selectedX,
-                        onClick = {
-                            selectedX = meshPacket.rxTime.toDouble()
-                            coroutineScope.launch {
-                                vicoScrollState.animateScroll(
-                                    Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS),
-                                )
+            AdaptiveMetricLayout(
+                chartPart = { modifier ->
+                    SignalMetricsChart(
+                        modifier = modifier,
+                        meshPackets = data.reversed(),
+                        promptInfoDialog = { displayInfoDialog = true },
+                        vicoScrollState = vicoScrollState,
+                        selectedX = selectedX,
+                        onPointSelected = { x ->
+                            selectedX = x
+                            val index = data.indexOfFirst { it.rxTime.toDouble() == x }
+                            if (index != -1) {
+                                coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
                         },
                     )
-                }
-            }
+                },
+                listPart = { modifier ->
+                    LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
+                        itemsIndexed(data) { _, meshPacket ->
+                            SignalMetricsCard(
+                                meshPacket = meshPacket,
+                                isSelected = meshPacket.rxTime.toDouble() == selectedX,
+                                onClick = {
+                                    selectedX = meshPacket.rxTime.toDouble()
+                                    coroutineScope.launch {
+                                        vicoScrollState.animateScroll(
+                                            Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS),
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+                },
+            )
         }
     }
 }
@@ -240,7 +244,7 @@ private fun SignalMetricsChart(
 
         GenericMetricChart(
             modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
             layers =
             listOf(
                 rememberLineCartesianLayer(
@@ -281,7 +285,7 @@ private fun SignalMetricsChart(
             vicoScrollState = vicoScrollState,
         )
 
-        Legend(legendData = LEGEND_DATA)
+        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }
 

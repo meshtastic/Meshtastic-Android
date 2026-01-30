@@ -190,36 +190,42 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 )
             }
 
-            DeviceMetricsChart(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-                telemetries = data.reversed(),
-                promptInfoDialog = { displayInfoDialog = true },
-                vicoScrollState = vicoScrollState,
-                selectedX = selectedX,
-                onPointSelected = { x ->
-                    selectedX = x
-                    val index = data.indexOfFirst { it.time.toDouble() == x }
-                    if (index != -1) {
-                        coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                    }
-                },
-            )
-
-            /* Device Metric Cards */
-            LazyColumn(modifier = Modifier.fillMaxSize(), state = lazyListState) {
-                itemsIndexed(data) { _, telemetry ->
-                    DeviceMetricsCard(
-                        telemetry = telemetry,
-                        isSelected = telemetry.time.toDouble() == selectedX,
-                        onClick = {
-                            selectedX = telemetry.time.toDouble()
-                            coroutineScope.launch {
-                                vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f))
+            AdaptiveMetricLayout(
+                chartPart = { modifier ->
+                    DeviceMetricsChart(
+                        modifier = modifier,
+                        telemetries = data.reversed(),
+                        promptInfoDialog = { displayInfoDialog = true },
+                        vicoScrollState = vicoScrollState,
+                        selectedX = selectedX,
+                        onPointSelected = { x ->
+                            selectedX = x
+                            val index = data.indexOfFirst { it.time.toDouble() == x }
+                            if (index != -1) {
+                                coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
                         },
                     )
-                }
-            }
+                },
+                listPart = { modifier ->
+                    LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
+                        itemsIndexed(data) { _, telemetry ->
+                            DeviceMetricsCard(
+                                telemetry = telemetry,
+                                isSelected = telemetry.time.toDouble() == selectedX,
+                                onClick = {
+                                    selectedX = telemetry.time.toDouble()
+                                    coroutineScope.launch {
+                                        vicoScrollState.animateScroll(
+                                            Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f),
+                                        )
+                                    }
+                                },
+                            )
+                        }
+                    }
+                },
+            )
         }
     }
 }
@@ -272,7 +278,7 @@ private fun DeviceMetricsChart(
 
         GenericMetricChart(
             modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
             layers =
             listOf(
                 rememberLineCartesianLayer(
@@ -327,7 +333,7 @@ private fun DeviceMetricsChart(
             vicoScrollState = vicoScrollState,
         )
 
-        Legend(legendData = LEGEND_DATA)
+        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
@@ -364,6 +370,7 @@ private fun DeviceMetricsChartPreview() {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
+@Suppress("LongMethod")
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.deviceMetrics
     val time = telemetry.time * MS_PER_SEC
