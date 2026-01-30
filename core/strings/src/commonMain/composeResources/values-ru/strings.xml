@@ -69,13 +69,13 @@
     <string name="routing_error_pki_send_fail_public_key">PKI не отправлен, нет открытого ключа</string>
     <string name="role_client">Client</string>
     <string name="role_client_desc">Приложение подключено или автономное устройство обмена сообщениями.</string>
-    <string name="role_client_mute">Клиент без ретрансляций</string>
+    <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Устройство, которое не пересылает пакеты с других устройств.</string>
-    <string name="role_client_base">Базовый клиент</string>
+    <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Обрабатывает пакеты от избранных нод как ROUTER_LATE, а все остальные пакеты - как от CLIENT.</string>
     <string name="role_router">Router</string>
     <string name="role_router_desc">Инфраструктурная нода для расширения охвата сети путем передачи сообщений. Видима в списке нод.</string>
-    <string name="role_router_client">Клиент маршрутизатор</string>
+    <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Сочетание ROUTER и CLIENT. Не для носимых устройств.</string>
     <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">Инфраструктурная нода для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не видна в списке нод.</string>
@@ -89,7 +89,7 @@
     <string name="role_client_hidden_desc">Устройство, которое передает сигнал только при необходимости для скрытности или экономии энергии.</string>
     <string name="role_lost_and_found">Lost and Found</string>
     <string name="role_lost_and_found_desc">Регулярно передает местоположение в виде сообщения на канал по умолчанию для помощи в восстановлении устройства.</string>
-    <string name="role_tak_tracker">TAK трекер</string>
+    <string name="role_tak_tracker">TAK Tracker</string>
     <string name="role_tak_tracker_desc">Включает автоматические трансляции TAK PLI и сокращает рутинные трансляции.</string>
     <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Инфраструктурная нода, которая всегда ретранслирует пакеты один раз, но только после всех остальных режимов, обеспечивая дополнительное покрытие для локальных кластеров. Видима в списке.</string>
@@ -430,8 +430,8 @@
     <string name="traceroute_showing_nodes">Показаны %1$d/%2$d узлов</string>
     <string name="traceroute_duration">Продолжительность: %1$s с</string>
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
-    <string name="traceroute_route_towards_dest">Проложенный маршрут к месту назначения:\n\n</string>
-    <string name="traceroute_route_back_to_us">Маршрут, ведущий к нам:\n\n</string>
+    <string name="traceroute_route_towards_dest">Маршрут к месту назначения:\n\n</string>
+    <string name="traceroute_route_back_to_us">Маршрут к нам:\n\n</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="forty_eight_hours">48ч</string>
     <string name="one_week">1нед</string>
