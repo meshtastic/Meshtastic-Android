@@ -36,6 +36,7 @@ import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudSync
+import androidx.compose.material.icons.twotone.HowToReg
 import androidx.compose.ui.graphics.vector.ImageVector
 
 val MeshtasticIcons.Favorite: ImageVector
@@ -80,3 +81,6 @@ val MeshtasticIcons.VolumeMuteTwoTone: ImageVector
 
 val MeshtasticIcons.CheckCircle: ImageVector
     get() = Icons.Rounded.CheckCircleOutline
+
+val MeshtasticIcons.Acknowledged: ImageVector
+    get() = Icons.TwoTone.HowToReg
