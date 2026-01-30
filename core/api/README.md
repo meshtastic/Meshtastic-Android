@@ -4,6 +4,8 @@ This module contains the stable AIDL interface and dependencies required to inte
 
 ## Integration
 
+[![](https://jitpack.io/v/meshtastic/Meshtastic-Android.svg)](https://jitpack.io/#meshtastic/Meshtastic-Android)
+
 To communicate with the Meshtastic Android service from your own application, we recommend using **JitPack**.
 
 Add the JitPack repository to your root `build.gradle.kts` (or `settings.gradle.kts`):
