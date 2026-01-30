@@ -18,15 +18,15 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.ui.graphics.Color
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.ui.theme.GraphColors.Blue
+import org.meshtastic.core.ui.theme.GraphColors.Cyan
+import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
-import org.meshtastic.core.ui.theme.GraphColors.LightGreen
-import org.meshtastic.core.ui.theme.GraphColors.Magenta
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.core.ui.theme.GraphColors.Red
-import org.meshtastic.core.ui.theme.GraphColors.Yellow
 import org.meshtastic.proto.TelemetryProtos
 
 @Suppress("MagicNumber")
@@ -34,7 +34,7 @@ enum class Environment(val color: Color) {
     TEMPERATURE(Red) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.temperature
     },
-    HUMIDITY(InfantryBlue) {
+    HUMIDITY(Blue) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.relativeHumidity
     },
     SOIL_TEMPERATURE(Pink) {
@@ -47,13 +47,13 @@ enum class Environment(val color: Color) {
     BAROMETRIC_PRESSURE(Green) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.barometricPressure
     },
-    GAS_RESISTANCE(Yellow) {
+    GAS_RESISTANCE(InfantryBlue) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.gasResistance
     },
-    IAQ(Magenta) {
+    IAQ(Cyan) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.iaq.toFloat()
     },
-    LUX(LightGreen) {
+    LUX(Gold) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.lux
     },
     UV_LUX(Orange) {

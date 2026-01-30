@@ -18,13 +18,14 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -45,6 +46,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -69,6 +71,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.ble_devices
+import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.no_pax_metrics_logs
 import org.meshtastic.core.strings.pax
 import org.meshtastic.core.strings.pax_metrics_log
@@ -79,6 +82,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.core.ui.theme.GraphColors.Orange
+import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.proto.PaxcountProtos
 import org.meshtastic.proto.Portnums.PortNum
@@ -86,10 +91,17 @@ import java.text.DateFormat
 import java.util.Date
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
-    PAX(Color.Black, Res.string.pax),
-    BLE(Color.Cyan, Res.string.ble_devices),
-    WIFI(Color.Green, Res.string.wifi_devices),
+    PAX(Color.Gray, Res.string.pax),
+    BLE(Purple, Res.string.ble_devices),
+    WIFI(Orange, Res.string.wifi_devices),
 }
+
+private val LEGEND_DATA =
+    listOf(
+        LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
+        LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
+        LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
+    )
 
 @Suppress("LongMethod")
 @Composable
@@ -102,73 +114,77 @@ private fun PaxMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    if (totalSeries.isEmpty()) return
+    Column(modifier = modifier) {
+        if (totalSeries.isEmpty()) return@Column
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    val paxColor = PaxSeries.PAX.color
-    val bleColor = PaxSeries.BLE.color
-    val wifiColor = PaxSeries.WIFI.color
+        val modelProducer = remember { CartesianChartModelProducer() }
+        val paxColor = PaxSeries.PAX.color
+        val bleColor = PaxSeries.BLE.color
+        val wifiColor = PaxSeries.WIFI.color
 
-    LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
-        modelProducer.runTransaction {
-            lineSeries {
-                series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
-                series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
-                series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
+        LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
+            modelProducer.runTransaction {
+                lineSeries {
+                    series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
+                    series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
+                    series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
+                }
             }
         }
-    }
 
-    val axisLabel = ChartStyling.rememberAxisLabel()
-    val marker =
-        ChartStyling.rememberMarker(
-            valueFormatter =
-            ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                when (color.copy(1f)) {
-                    bleColor -> "BLE: %.0f".format(value)
-                    wifiColor -> "WiFi: %.0f".format(value)
-                    paxColor -> "PAX: %.0f".format(value)
-                    else -> "%.0f".format(value)
-                }
-            },
-        )
+        val axisLabel = ChartStyling.rememberAxisLabel()
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    when (color.copy(1f)) {
+                        bleColor -> "BLE: %.0f".format(value)
+                        wifiColor -> "WiFi: %.0f".format(value)
+                        paxColor -> "PAX: %.0f".format(value)
+                        else -> "%.0f".format(value)
+                    }
+                },
+            )
 
-    GenericMetricChart(
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        layers =
-        listOf(
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createGradientLine(
-                        lineColor = bleColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                    ChartStyling.createGradientLine(
-                        lineColor = wifiColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                    ChartStyling.createBoldLine(
-                        lineColor = paxColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+        GenericMetricChart(
+            modelProducer = modelProducer,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            layers =
+            listOf(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createGradientLine(
+                            lineColor = bleColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
+                        ChartStyling.createGradientLine(
+                            lineColor = wifiColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
+                        ChartStyling.createBoldLine(
+                            lineColor = paxColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
                     ),
                 ),
             ),
-        ),
-        startAxis = VerticalAxis.rememberStart(label = axisLabel),
-        bottomAxis =
-        HorizontalAxis.rememberBottom(
-            label = axisLabel,
-            valueFormatter = CommonCharts.dynamicTimeFormatter,
-            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-            labelRotationDegrees = 45f,
-        ),
-        marker = marker,
-        selectedX = selectedX,
-        onPointSelected = onPointSelected,
-        vicoScrollState = vicoScrollState,
-    )
+            startAxis = VerticalAxis.rememberStart(label = axisLabel),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                label = axisLabel,
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+                labelRotationDegrees = 45f,
+            ),
+            marker = marker,
+            selectedX = selectedX,
+            onPointSelected = onPointSelected,
+            vicoScrollState = vicoScrollState,
+        )
+
+        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 4.dp))
+    }
 }
 
 @Composable
@@ -215,18 +231,14 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val totalSeries = graphData.map { it.first to (it.second + it.third) }
     val bleSeries = graphData.map { it.first to it.second }
     val wifiSeries = graphData.map { it.first to it.third }
-    val legendData =
-        listOf(
-            LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
-            LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
-            LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
-        )
 
     Scaffold(
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.pax_metrics_log),
+                subtitle =
+                stringResource(Res.string.pax_metrics_log) +
+                    " (${paxMetrics.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -246,52 +258,65 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             // Graph
             if (graphData.isNotEmpty()) {
-                ChartHeader(graphData.size)
-                Legend(legendData = legendData)
-                PaxMetricsChart(
-                    totalSeries = totalSeries,
-                    bleSeries = bleSeries,
-                    wifiSeries = wifiSeries,
-                    vicoScrollState = vicoScrollState,
-                    selectedX = selectedX,
-                    onPointSelected = { x ->
-                        selectedX = x
-                        val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
-                        if (index != -1) {
-                            coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                        }
-                    },
-                )
-            }
-            // List
-            if (paxMetrics.isEmpty()) {
-                Text(
-                    text = stringResource(Res.string.no_pax_metrics_logs),
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    textAlign = TextAlign.Center,
-                )
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    state = lazyListState,
-                ) {
-                    itemsIndexed(paxMetrics) { _, (log, pax) ->
-                        PaxMetricsItem(
-                            log = log,
-                            pax = pax,
-                            dateFormat = dateFormat,
-                            isSelected = (log.received_date / 1000).toDouble() == selectedX,
-                            onClick = {
-                                selectedX = (log.received_date / 1000).toDouble()
-                                coroutineScope.launch {
-                                    vicoScrollState.animateScroll(
-                                        Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
-                                    )
+                AdaptiveMetricLayout(
+                    chartPart = { modifier ->
+                        PaxMetricsChart(
+                            modifier = modifier,
+                            totalSeries = totalSeries,
+                            bleSeries = bleSeries,
+                            wifiSeries = wifiSeries,
+                            vicoScrollState = vicoScrollState,
+                            selectedX = selectedX,
+                            onPointSelected = { x ->
+                                selectedX = x
+                                val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
+                                if (index != -1) {
+                                    coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                                 }
                             },
                         )
-                    }
+                    },
+                    listPart = { modifier ->
+                        if (paxMetrics.isEmpty()) {
+                            Text(
+                                text = stringResource(Res.string.no_pax_metrics_logs),
+                                modifier = modifier.fillMaxSize().padding(16.dp),
+                                textAlign = TextAlign.Center,
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(horizontal = 16.dp),
+                                state = lazyListState,
+                            ) {
+                                itemsIndexed(paxMetrics) { _, (log, pax) ->
+                                    PaxMetricsItem(
+                                        log = log,
+                                        pax = pax,
+                                        dateFormat = dateFormat,
+                                        isSelected = (log.received_date / 1000).toDouble() == selectedX,
+                                        onClick = {
+                                            selectedX = (log.received_date / 1000).toDouble()
+                                            coroutineScope.launch {
+                                                vicoScrollState.animateScroll(
+                                                    Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                        }
+                    },
+                )
+            } else {
+                // Empty state if no graph data
+                if (paxMetrics.isEmpty()) {
+                    Text(
+                        text = stringResource(Res.string.no_pax_metrics_logs),
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
         }
@@ -397,22 +422,28 @@ fun PaxMetricsItem(
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth(),
             )
-            val total = pax.ble + pax.wifi
-            val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = summary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f, fill = true),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    MetricIndicator(PaxSeries.PAX.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(text = "PAX: ${pax.ble + pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.width(8.dp))
+                    MetricIndicator(PaxSeries.BLE.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(text = "B:${pax.ble}", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.width(8.dp))
+                    MetricIndicator(PaxSeries.WIFI.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(text = "W:${pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                }
+
                 Text(
                     text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.alignByBaseline(),
                 )
             }
         }

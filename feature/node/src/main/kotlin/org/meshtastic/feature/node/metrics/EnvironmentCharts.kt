@@ -16,8 +16,7 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -111,136 +110,128 @@ fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
-    promptInfoDialog: () -> Unit,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    ChartHeader(amount = telemetries.size)
-    if (telemetries.isEmpty()) {
-        return
-    }
+    Column(modifier = modifier) {
+        if (telemetries.isEmpty()) {
+            return@Column
+        }
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    val shouldPlot = graphData.shouldPlot
-    val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+        val modelProducer = remember { CartesianChartModelProducer() }
+        val shouldPlot = graphData.shouldPlot
+        val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
-    val allLegendData = LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3
-    val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
-
-    LaunchedEffect(telemetries, graphData) {
-        modelProducer.runTransaction {
-            /* Pressure on its own layer/axis */
-            if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
-                lineSeries {
-                    series(
-                        x = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t)?.let { t.time } },
-                        y = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t) },
-                    )
-                }
+        val allLegendData =
+            (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3).filter {
+                graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0]
             }
-            /* Everything else on the default axis */
-            Environment.entries.forEach { metric ->
-                if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+        val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
+
+        LaunchedEffect(telemetries, graphData) {
+            modelProducer.runTransaction {
+                /* Pressure on its own layer/axis */
+                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
                     lineSeries {
                         series(
-                            x = telemetries.mapNotNull { t -> metric.getValue(t)?.let { t.time } },
-                            y = telemetries.mapNotNull { t -> metric.getValue(t) },
+                            x =
+                            telemetries.mapNotNull { t ->
+                                Environment.BAROMETRIC_PRESSURE.getValue(t)?.let { t.time }
+                            },
+                            y = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t) },
                         )
+                    }
+                }
+                /* Everything else on the default axis */
+                Environment.entries.forEach { metric ->
+                    if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+                        lineSeries {
+                            series(
+                                x = telemetries.mapNotNull { t -> metric.getValue(t)?.let { t.time } },
+                                y = telemetries.mapNotNull { t -> metric.getValue(t) },
+                            )
+                        }
                     }
                 }
             }
         }
-    }
 
-    val marker =
-        ChartStyling.rememberMarker(
-            valueFormatter =
-            ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                val label = colorToLabel[color.copy(alpha = 1f)] ?: ""
-                "%s: %.1f".format(label, value)
-            },
-        )
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    val label = colorToLabel[color.copy(alpha = 1f)] ?: ""
+                    "%s: %.1f".format(label, value)
+                },
+            )
 
-    val layers = mutableListOf<LineCartesianLayer>()
-    if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
-        layers.add(
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createGradientLine(
-                        Environment.BAROMETRIC_PRESSURE.color,
-                        ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.Start,
-            ),
-        )
-    }
-    Environment.entries.forEach { metric ->
-        if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+        val layers = mutableListOf<LineCartesianLayer>()
+        if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
             layers.add(
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                        ChartStyling.createGradientLine(
+                            Environment.BAROMETRIC_PRESSURE.color,
+                            ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
                     ),
-                    verticalAxisPosition = Axis.Position.Vertical.End,
+                    verticalAxisPosition = Axis.Position.Vertical.Start,
                 ),
             )
         }
-    }
-
-    if (layers.isNotEmpty()) {
-        val otherMetricsPlotted =
-            Environment.entries.filter { it != Environment.BAROMETRIC_PRESSURE && shouldPlot[it.ordinal] }
-        val endAxisColor = if (otherMetricsPlotted.size == 1) otherMetricsPlotted.first().color else onSurfaceColor
-
-        GenericMetricChart(
-            modelProducer = modelProducer,
-            modifier = modifier.padding(8.dp),
-            layers = layers,
-            startAxis =
-            if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
-                VerticalAxis.rememberStart(
-                    label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
-                    valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },
+        Environment.entries.forEach { metric ->
+            if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+                layers.add(
+                    rememberLineCartesianLayer(
+                        lineProvider =
+                        LineCartesianLayer.LineProvider.series(
+                            ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                        ),
+                        verticalAxisPosition = Axis.Position.Vertical.End,
+                    ),
                 )
-            } else {
-                null
-            },
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                valueFormatter = { _, value, _ -> "%.0f".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                labelRotationDegrees = 45f,
-            ),
-            marker = marker,
-            selectedX = selectedX,
-            onPointSelected = onPointSelected,
-            vicoScrollState = vicoScrollState,
-        )
+            }
+        }
+
+        if (layers.isNotEmpty()) {
+            val otherMetricsPlotted =
+                Environment.entries.filter { it != Environment.BAROMETRIC_PRESSURE && shouldPlot[it.ordinal] }
+            val endAxisColor = if (otherMetricsPlotted.size == 1) otherMetricsPlotted.first().color else onSurfaceColor
+
+            GenericMetricChart(
+                modelProducer = modelProducer,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                layers = layers,
+                startAxis =
+                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
+                        valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                VerticalAxis.rememberEnd(
+                    label = ChartStyling.rememberAxisLabel(color = endAxisColor),
+                    valueFormatter = { _, value, _ -> "%.0f".format(value) },
+                ),
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    label = ChartStyling.rememberAxisLabel(),
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                    labelRotationDegrees = 45f,
+                ),
+                marker = marker,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+                vicoScrollState = vicoScrollState,
+            )
+        }
+
+        Legend(legendData = allLegendData, modifier = Modifier.padding(top = 0.dp))
     }
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    MetricLegends(graphData = graphData, promptInfoDialog = promptInfoDialog)
-
-    Spacer(modifier = Modifier.height(16.dp))
-}
-
-@Composable
-private fun MetricLegends(graphData: EnvironmentGraphingData, promptInfoDialog: () -> Unit) {
-    Legend(LEGEND_DATA_1.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, displayInfoIcon = false)
-    Legend(LEGEND_DATA_3.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, displayInfoIcon = false)
-    Legend(
-        LEGEND_DATA_2.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] },
-        promptInfoDialog = promptInfoDialog,
-    )
 }
