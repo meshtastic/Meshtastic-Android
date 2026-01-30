@@ -37,7 +37,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -116,6 +118,7 @@ private val LEGEND_DATA =
         ),
     )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 @Composable
 fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
@@ -165,6 +168,19 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                PowerChannel.entries.forEach { channel ->
+                    FilterChip(
+                        selected = selectedChannel == channel,
+                        onClick = { selectedChannel = channel },
+                        label = { Text(stringResource(channel.strRes)) },
+                    )
+                }
+            }
+
             PowerMetricsChart(
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                 telemetries = data.reversed(),
