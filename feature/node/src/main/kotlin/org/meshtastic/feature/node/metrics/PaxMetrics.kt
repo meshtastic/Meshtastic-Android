@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -95,6 +96,13 @@ private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     WIFI(Orange, Res.string.wifi_devices),
 }
 
+private val LEGEND_DATA =
+    listOf(
+        LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
+        LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
+        LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
+    )
+
 @Suppress("LongMethod")
 @Composable
 private fun PaxMetricsChart(
@@ -106,73 +114,77 @@ private fun PaxMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    if (totalSeries.isEmpty()) return
+    Column(modifier = modifier) {
+        if (totalSeries.isEmpty()) return@Column
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    val paxColor = PaxSeries.PAX.color
-    val bleColor = PaxSeries.BLE.color
-    val wifiColor = PaxSeries.WIFI.color
+        val modelProducer = remember { CartesianChartModelProducer() }
+        val paxColor = PaxSeries.PAX.color
+        val bleColor = PaxSeries.BLE.color
+        val wifiColor = PaxSeries.WIFI.color
 
-    LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
-        modelProducer.runTransaction {
-            lineSeries {
-                series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
-                series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
-                series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
+        LaunchedEffect(totalSeries, bleSeries, wifiSeries) {
+            modelProducer.runTransaction {
+                lineSeries {
+                    series(x = bleSeries.map { it.first }, y = bleSeries.map { it.second })
+                    series(x = wifiSeries.map { it.first }, y = wifiSeries.map { it.second })
+                    series(x = totalSeries.map { it.first }, y = totalSeries.map { it.second })
+                }
             }
         }
-    }
 
-    val axisLabel = ChartStyling.rememberAxisLabel()
-    val marker =
-        ChartStyling.rememberMarker(
-            valueFormatter =
-            ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                when (color.copy(1f)) {
-                    bleColor -> "BLE: %.0f".format(value)
-                    wifiColor -> "WiFi: %.0f".format(value)
-                    paxColor -> "PAX: %.0f".format(value)
-                    else -> "%.0f".format(value)
-                }
-            },
-        )
+        val axisLabel = ChartStyling.rememberAxisLabel()
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    when (color.copy(1f)) {
+                        bleColor -> "BLE: %.0f".format(value)
+                        wifiColor -> "WiFi: %.0f".format(value)
+                        paxColor -> "PAX: %.0f".format(value)
+                        else -> "%.0f".format(value)
+                    }
+                },
+            )
 
-    GenericMetricChart(
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        layers =
-        listOf(
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createGradientLine(
-                        lineColor = bleColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                    ChartStyling.createGradientLine(
-                        lineColor = wifiColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                    ChartStyling.createBoldLine(
-                        lineColor = paxColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+        GenericMetricChart(
+            modelProducer = modelProducer,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            layers =
+            listOf(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createGradientLine(
+                            lineColor = bleColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
+                        ChartStyling.createGradientLine(
+                            lineColor = wifiColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
+                        ChartStyling.createBoldLine(
+                            lineColor = paxColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
                     ),
                 ),
             ),
-        ),
-        startAxis = VerticalAxis.rememberStart(label = axisLabel),
-        bottomAxis =
-        HorizontalAxis.rememberBottom(
-            label = axisLabel,
-            valueFormatter = CommonCharts.dynamicTimeFormatter,
-            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-            labelRotationDegrees = 45f,
-        ),
-        marker = marker,
-        selectedX = selectedX,
-        onPointSelected = onPointSelected,
-        vicoScrollState = vicoScrollState,
-    )
+            startAxis = VerticalAxis.rememberStart(label = axisLabel),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                label = axisLabel,
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+                labelRotationDegrees = 45f,
+            ),
+            marker = marker,
+            selectedX = selectedX,
+            onPointSelected = onPointSelected,
+            vicoScrollState = vicoScrollState,
+        )
+
+        Legend(legendData = LEGEND_DATA)
+    }
 }
 
 @Composable
@@ -219,12 +231,6 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val totalSeries = graphData.map { it.first to (it.second + it.third) }
     val bleSeries = graphData.map { it.first to it.second }
     val wifiSeries = graphData.map { it.first to it.third }
-    val legendData =
-        listOf(
-            LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
-            LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
-            LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
-        )
 
     Scaffold(
         topBar = {
@@ -251,8 +257,8 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             // Graph
             if (graphData.isNotEmpty()) {
                 ChartHeader(graphData.size)
-                Legend(legendData = legendData)
                 PaxMetricsChart(
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                     totalSeries = totalSeries,
                     bleSeries = bleSeries,
                     wifiSeries = wifiSeries,

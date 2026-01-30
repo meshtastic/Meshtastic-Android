@@ -234,101 +234,101 @@ private fun DeviceMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    ChartHeader(amount = telemetries.size)
-    if (telemetries.isEmpty()) return
+    Column(modifier = modifier) {
+        ChartHeader(amount = telemetries.size, promptInfoDialog = promptInfoDialog)
+        if (telemetries.isEmpty()) return@Column
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    val batteryColor = Device.BATTERY.color
-    val voltageColor = Device.VOLTAGE.color
-    val chUtilColor = Device.CH_UTIL.color
-    val airUtilColor = Device.AIR_UTIL.color
-    val marker =
-        ChartStyling.rememberMarker(
-            valueFormatter =
-            ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                when (color.copy(alpha = 1f)) {
-                    batteryColor -> "Battery: %.1f%%".format(value)
-                    voltageColor -> "Voltage: %.1f V".format(value)
-                    chUtilColor -> "ChUtil: %.1f%%".format(value)
-                    airUtilColor -> "AirUtil: %.1f%%".format(value)
-                    else -> "%.1f".format(value)
+        val modelProducer = remember { CartesianChartModelProducer() }
+        val batteryColor = Device.BATTERY.color
+        val voltageColor = Device.VOLTAGE.color
+        val chUtilColor = Device.CH_UTIL.color
+        val airUtilColor = Device.AIR_UTIL.color
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    when (color.copy(alpha = 1f)) {
+                        batteryColor -> "Battery: %.1f%%".format(value)
+                        voltageColor -> "Voltage: %.1f V".format(value)
+                        chUtilColor -> "ChUtil: %.1f%%".format(value)
+                        airUtilColor -> "AirUtil: %.1f%%".format(value)
+                        else -> "%.1f".format(value)
+                    }
+                },
+            )
+
+        LaunchedEffect(telemetries) {
+            modelProducer.runTransaction {
+                /* Series for Left Axis (0-100%) */
+                lineSeries {
+                    series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.batteryLevel })
+                    series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.channelUtilization })
+                    series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.airUtilTx })
                 }
-            },
+                /* Series for Right Axis (Voltage) */
+                lineSeries { series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.voltage }) }
+            }
+        }
+
+        GenericMetricChart(
+            modelProducer = modelProducer,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            layers =
+            listOf(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createBoldLine(
+                            lineColor = batteryColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
+                        ChartStyling.createPointOnlyLine(
+                            pointColor = chUtilColor,
+                            pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
+                        ),
+                        ChartStyling.createPointOnlyLine(
+                            pointColor = airUtilColor,
+                            pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
+                        ),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.Start,
+                ),
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createGradientLine(
+                            lineColor = voltageColor,
+                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
+                        ),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.End,
+                ),
+            ),
+            startAxis =
+            VerticalAxis.rememberStart(
+                label = ChartStyling.rememberAxisLabel(color = batteryColor),
+                valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
+            ),
+            endAxis =
+            VerticalAxis.rememberEnd(
+                label = ChartStyling.rememberAxisLabel(color = voltageColor),
+                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+            ),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                label = ChartStyling.rememberAxisLabel(),
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+                labelRotationDegrees = 45f,
+            ),
+            marker = marker,
+            selectedX = selectedX,
+            onPointSelected = onPointSelected,
+            vicoScrollState = vicoScrollState,
         )
 
-    LaunchedEffect(telemetries) {
-        modelProducer.runTransaction {
-            /* Series for Left Axis (0-100%) */
-            lineSeries {
-                series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.batteryLevel })
-                series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.channelUtilization })
-                series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.airUtilTx })
-            }
-            /* Series for Right Axis (Voltage) */
-            lineSeries { series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.voltage }) }
-        }
+        Legend(legendData = LEGEND_DATA)
     }
-
-    val axisLabel = ChartStyling.rememberAxisLabel()
-
-    GenericMetricChart(
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        layers =
-        listOf(
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createBoldLine(
-                        lineColor = batteryColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                    ChartStyling.createPointOnlyLine(
-                        pointColor = chUtilColor,
-                        pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
-                    ),
-                    ChartStyling.createPointOnlyLine(
-                        pointColor = airUtilColor,
-                        pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
-                    ),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.Start,
-            ),
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createGradientLine(
-                        lineColor = voltageColor,
-                        pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                    ),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.End,
-            ),
-        ),
-        startAxis =
-        VerticalAxis.rememberStart(
-            label = ChartStyling.rememberAxisLabel(color = batteryColor),
-            valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
-        ),
-        endAxis =
-        VerticalAxis.rememberEnd(
-            label = ChartStyling.rememberAxisLabel(color = voltageColor),
-            valueFormatter = { _, value, _ -> "%.1f V".format(value) },
-        ),
-        bottomAxis =
-        HorizontalAxis.rememberBottom(
-            label = axisLabel,
-            valueFormatter = CommonCharts.dynamicTimeFormatter,
-            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-            labelRotationDegrees = 45f,
-        ),
-        marker = marker,
-        selectedX = selectedX,
-        onPointSelected = onPointSelected,
-        vicoScrollState = vicoScrollState,
-    )
-
-    Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 }
 
 @Suppress("detekt:MagicNumber") // fake data

@@ -20,10 +20,11 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +33,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -43,6 +43,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -148,18 +149,30 @@ data class LegendData(
 )
 
 @Composable
-fun ChartHeader(amount: Int) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+fun ChartHeader(amount: Int, promptInfoDialog: (() -> Unit)? = null) {
+    Box(
+        modifier = Modifier.fillMaxWidth().height(32.dp).padding(horizontal = 8.dp),
     ) {
         Text(
             text = "$amount ${stringResource(Res.string.logs)}",
-            modifier = Modifier.wrapContentWidth(),
+            modifier = Modifier.align(Alignment.Center),
             style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            fontSize = MaterialTheme.typography.labelMedium.fontSize,
         )
+
+        if (promptInfoDialog != null) {
+            IconButton(
+                onClick = promptInfoDialog,
+                modifier = Modifier.align(Alignment.CenterEnd).size(32.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Info,
+                    contentDescription = stringResource(Res.string.info),
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
     }
 }
 
@@ -167,29 +180,23 @@ fun ChartHeader(amount: Int) {
  * Creates the legend that identifies the colors used for the graph.
  *
  * @param legendData A list containing the `LegendData` to build the labels.
- * @param promptInfoDialog Executes when the user presses the info icon.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun Legend(legendData: List<LegendData>, displayInfoIcon: Boolean = true, promptInfoDialog: () -> Unit = {}) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Spacer(modifier = Modifier.weight(1f))
-        legendData.forEachIndexed { index, data ->
-            LegendLabel(text = stringResource(data.nameRes), color = data.color, isLine = data.isLine)
-
-            if (index != legendData.lastIndex) {
-                Spacer(modifier = Modifier.weight(1f))
+fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
+    FlowRow(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        legendData.forEach { data ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 4.dp),
+            ) {
+                LegendLabel(text = stringResource(data.nameRes), color = data.color, isLine = data.isLine)
             }
         }
-        if (displayInfoIcon) {
-            Spacer(modifier = Modifier.width(4.dp))
-            Icon(
-                imageVector = Icons.Rounded.Info,
-                modifier = Modifier.clickable { promptInfoDialog() },
-                contentDescription = stringResource(Res.string.info),
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -231,12 +238,12 @@ fun LegendInfoDialog(pairedRes: List<Pair<StringResource, StringResource>>, onDi
 
 @Composable
 private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
-    Canvas(modifier = Modifier.size(4.dp)) {
+    Canvas(modifier = Modifier.size(height = 4.dp, width = if (isLine) 16.dp else 4.dp)) {
         if (isLine) {
             drawLine(
                 color = color,
                 start = Offset(x = 0f, y = size.height / 2f),
-                end = Offset(x = 16f, y = size.height / 2f),
+                end = Offset(x = size.width, y = size.height / 2f),
                 strokeWidth = 2.dp.toPx(),
                 cap = StrokeCap.Round,
             )
@@ -248,7 +255,7 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
     Text(
         text = text,
         color = MaterialTheme.colorScheme.onSurface,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+        fontSize = MaterialTheme.typography.labelSmall.fontSize,
     )
 }
 
@@ -322,5 +329,5 @@ private fun LegendPreview() {
             LegendData(nameRes = Res.string.rssi, color = Color.Red),
             LegendData(nameRes = Res.string.snr, color = Color.Green),
         )
-    Legend(legendData = data, promptInfoDialog = {})
+    Legend(legendData = data)
 }

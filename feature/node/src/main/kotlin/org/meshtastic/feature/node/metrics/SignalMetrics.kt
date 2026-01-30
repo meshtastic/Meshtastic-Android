@@ -209,80 +209,80 @@ private fun SignalMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    ChartHeader(amount = meshPackets.size)
-    if (meshPackets.isEmpty()) {
-        return
-    }
+    Column(modifier = modifier) {
+        ChartHeader(amount = meshPackets.size, promptInfoDialog = promptInfoDialog)
+        if (meshPackets.isEmpty()) return@Column
 
-    val modelProducer = remember { CartesianChartModelProducer() }
+        val modelProducer = remember { CartesianChartModelProducer() }
 
-    LaunchedEffect(meshPackets) {
-        modelProducer.runTransaction {
-            /* Use separate lineSeries calls to associate them with different vertical axes */
-            lineSeries { series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { it.rxRssi }) }
-            lineSeries { series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { it.rxSnr }) }
+        LaunchedEffect(meshPackets) {
+            modelProducer.runTransaction {
+                /* Use separate lineSeries calls to associate them with different vertical axes */
+                lineSeries { series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { it.rxRssi }) }
+                lineSeries { series(x = meshPackets.map { it.rxTime }, y = meshPackets.map { it.rxSnr }) }
+            }
         }
-    }
 
-    val rssiColor = SignalMetric.RSSI.color
-    val snrColor = SignalMetric.SNR.color
+        val rssiColor = SignalMetric.RSSI.color
+        val snrColor = SignalMetric.SNR.color
 
-    val marker =
-        ChartStyling.rememberMarker(
-            valueFormatter =
-            ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                if (color.copy(alpha = 1f) == rssiColor) {
-                    "RSSI: %.0f dBm".format(value)
-                } else {
-                    "SNR: %.1f dB".format(value)
-                }
-            },
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    if (color.copy(alpha = 1f) == rssiColor) {
+                        "RSSI: %.0f dBm".format(value)
+                    } else {
+                        "SNR: %.1f dB".format(value)
+                    }
+                },
+            )
+
+        GenericMetricChart(
+            modelProducer = modelProducer,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            layers =
+            listOf(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.Start,
+                ),
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.End,
+                ),
+            ),
+            startAxis =
+            VerticalAxis.rememberStart(
+                label = ChartStyling.rememberAxisLabel(color = rssiColor),
+                valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
+            ),
+            endAxis =
+            VerticalAxis.rememberEnd(
+                label = ChartStyling.rememberAxisLabel(color = snrColor),
+                valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
+            ),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                label = ChartStyling.rememberAxisLabel(),
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                labelRotationDegrees = 45f,
+            ),
+            marker = marker,
+            selectedX = selectedX,
+            onPointSelected = onPointSelected,
+            vicoScrollState = vicoScrollState,
         )
 
-    GenericMetricChart(
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        layers =
-        listOf(
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.Start,
-            ),
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.End,
-            ),
-        ),
-        startAxis =
-        VerticalAxis.rememberStart(
-            label = ChartStyling.rememberAxisLabel(color = rssiColor),
-            valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
-        ),
-        endAxis =
-        VerticalAxis.rememberEnd(
-            label = ChartStyling.rememberAxisLabel(color = snrColor),
-            valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
-        ),
-        bottomAxis =
-        HorizontalAxis.rememberBottom(
-            label = ChartStyling.rememberAxisLabel(),
-            valueFormatter = CommonCharts.dynamicTimeFormatter,
-            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-            labelRotationDegrees = 45f,
-        ),
-        marker = marker,
-        selectedX = selectedX,
-        onPointSelected = onPointSelected,
-        vicoScrollState = vicoScrollState,
-    )
-
-    Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
+        Legend(legendData = LEGEND_DATA)
+    }
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

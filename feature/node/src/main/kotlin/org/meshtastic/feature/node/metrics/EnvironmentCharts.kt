@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -116,7 +114,7 @@ fun EnvironmentMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    ChartHeader(amount = telemetries.size)
+    ChartHeader(amount = telemetries.size, promptInfoDialog = promptInfoDialog)
     if (telemetries.isEmpty()) {
         return
     }
@@ -125,7 +123,8 @@ fun EnvironmentMetricsChart(
     val shouldPlot = graphData.shouldPlot
     val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
-    val allLegendData = LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3
+    val allLegendData = (LEGEND_DATA_1 + LEGEND_DATA_2 + LEGEND_DATA_3)
+        .filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }
     val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
 
     LaunchedEffect(telemetries, graphData) {
@@ -198,7 +197,7 @@ fun EnvironmentMetricsChart(
 
         GenericMetricChart(
             modelProducer = modelProducer,
-            modifier = modifier.padding(8.dp),
+            modifier = modifier.padding(horizontal = 8.dp).padding(bottom = 0.dp),
             layers = layers,
             startAxis =
             if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
@@ -228,19 +227,5 @@ fun EnvironmentMetricsChart(
         )
     }
 
-    Spacer(modifier = Modifier.height(16.dp))
-
-    MetricLegends(graphData = graphData, promptInfoDialog = promptInfoDialog)
-
-    Spacer(modifier = Modifier.height(16.dp))
-}
-
-@Composable
-private fun MetricLegends(graphData: EnvironmentGraphingData, promptInfoDialog: () -> Unit) {
-    Legend(LEGEND_DATA_1.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, displayInfoIcon = false)
-    Legend(LEGEND_DATA_3.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, displayInfoIcon = false)
-    Legend(
-        LEGEND_DATA_2.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] },
-        promptInfoDialog = promptInfoDialog,
-    )
+    Legend(legendData = allLegendData, modifier = Modifier.padding(top = 0.dp))
 }

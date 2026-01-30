@@ -184,7 +184,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
             }
 
             PowerMetricsChart(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.25f),
                 telemetries = data.reversed(),
                 selectedChannel = selectedChannel,
                 vicoScrollState = vicoScrollState,
@@ -226,81 +226,81 @@ private fun PowerMetricsChart(
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
 ) {
-    ChartHeader(amount = telemetries.size)
-    if (telemetries.isEmpty()) {
-        return
-    }
+    Column(modifier = modifier) {
+        ChartHeader(amount = telemetries.size)
+        if (telemetries.isEmpty()) return@Column
 
-    val modelProducer = remember { CartesianChartModelProducer() }
-    val currentColor = PowerMetric.CURRENT.color
-    val voltageColor = PowerMetric.VOLTAGE.color
-    val marker =
-        ChartStyling.rememberMarker(
-            valueFormatter =
-            ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                when (color.copy(1f)) {
-                    currentColor -> "Current: %.0f mA".format(value)
-                    voltageColor -> "Voltage: %.1f V".format(value)
-                    else -> "%.1f".format(value)
+        val modelProducer = remember { CartesianChartModelProducer() }
+        val currentColor = PowerMetric.CURRENT.color
+        val voltageColor = PowerMetric.VOLTAGE.color
+        val marker =
+            ChartStyling.rememberMarker(
+                valueFormatter =
+                ChartStyling.createColoredMarkerValueFormatter { value, color ->
+                    when (color.copy(1f)) {
+                        currentColor -> "Current: %.0f mA".format(value)
+                        voltageColor -> "Voltage: %.1f V".format(value)
+                        else -> "%.1f".format(value)
+                    }
+                },
+            )
+
+        LaunchedEffect(telemetries, selectedChannel) {
+            modelProducer.runTransaction {
+                lineSeries {
+                    series(x = telemetries.map { it.time }, y = telemetries.map { retrieveCurrent(selectedChannel, it) })
                 }
-            },
-        )
-
-    LaunchedEffect(telemetries, selectedChannel) {
-        modelProducer.runTransaction {
-            lineSeries {
-                series(x = telemetries.map { it.time }, y = telemetries.map { retrieveCurrent(selectedChannel, it) })
-            }
-            lineSeries {
-                series(x = telemetries.map { it.time }, y = telemetries.map { retrieveVoltage(selectedChannel, it) })
+                lineSeries {
+                    series(x = telemetries.map { it.time }, y = telemetries.map { retrieveVoltage(selectedChannel, it) })
+                }
             }
         }
+
+        GenericMetricChart(
+            modelProducer = modelProducer,
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp),
+            layers =
+            listOf(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createBoldLine(currentColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.Start,
+                ),
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createGradientLine(voltageColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
+                    ),
+                    verticalAxisPosition = Axis.Position.Vertical.End,
+                ),
+            ),
+            startAxis =
+            VerticalAxis.rememberStart(
+                label = ChartStyling.rememberAxisLabel(color = currentColor),
+                valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
+            ),
+            endAxis =
+            VerticalAxis.rememberEnd(
+                label = ChartStyling.rememberAxisLabel(color = voltageColor),
+                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+            ),
+            bottomAxis =
+            HorizontalAxis.rememberBottom(
+                label = ChartStyling.rememberAxisLabel(),
+                valueFormatter = CommonCharts.dynamicTimeFormatter,
+                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                labelRotationDegrees = 45f,
+            ),
+            marker = marker,
+            selectedX = selectedX,
+            onPointSelected = onPointSelected,
+            vicoScrollState = vicoScrollState,
+        )
+
+        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
-
-    GenericMetricChart(
-        modelProducer = modelProducer,
-        modifier = modifier.padding(8.dp),
-        layers =
-        listOf(
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createBoldLine(currentColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.Start,
-            ),
-            rememberLineCartesianLayer(
-                lineProvider =
-                LineCartesianLayer.LineProvider.series(
-                    ChartStyling.createGradientLine(voltageColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
-                ),
-                verticalAxisPosition = Axis.Position.Vertical.End,
-            ),
-        ),
-        startAxis =
-        VerticalAxis.rememberStart(
-            label = ChartStyling.rememberAxisLabel(color = currentColor),
-            valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
-        ),
-        endAxis =
-        VerticalAxis.rememberEnd(
-            label = ChartStyling.rememberAxisLabel(color = voltageColor),
-            valueFormatter = { _, value, _ -> "%.1f V".format(value) },
-        ),
-        bottomAxis =
-        HorizontalAxis.rememberBottom(
-            label = ChartStyling.rememberAxisLabel(),
-            valueFormatter = CommonCharts.dynamicTimeFormatter,
-            itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-            labelRotationDegrees = 45f,
-        ),
-        marker = marker,
-        selectedX = selectedX,
-        onPointSelected = onPointSelected,
-        vicoScrollState = vicoScrollState,
-    )
-
-    Legend(legendData = LEGEND_DATA, displayInfoIcon = false)
 }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

@@ -28,7 +28,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
@@ -252,12 +251,10 @@ object ChartStyling {
     }
 
     /**
-     * Creates a standard [HorizontalAxis.ItemPlacer] with optimized spacing.
-     *
-     * @param spacing The number of data points to skip between labels.
+     * Creates a standard [com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer] with optimized spacing.
      */
-    fun rememberItemPlacer(spacing: Int = 50): HorizontalAxis.ItemPlacer =
-        HorizontalAxis.ItemPlacer.aligned(spacing = { spacing }, addExtremeLabelPadding = true)
+    fun rememberItemPlacer(spacing: Int = 50): com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer =
+        com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.ItemPlacer.aligned(spacing = { spacing }, addExtremeLabelPadding = true)
 
     /**
      * Creates and remembers a [com.patrykandpatrick.vico.compose.common.component.TextComponent] styled for axis
