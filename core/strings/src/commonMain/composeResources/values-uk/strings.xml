@@ -50,6 +50,8 @@
     <string name="role_sensor">Датчик</string>
     <string name="role_tak">ТАК</string>
     <string name="role_tak_tracker_desc">Увімкнути автоматичну передачу TAK PLI та зменшити кількість звичайних трансляцій.</string>
+    <string name="rebroadcast_mode_all">Усі</string>
+    <string name="rebroadcast_mode_known_only">Лише відомі</string>
     <string name="rebroadcast_mode_known_only_desc">Ігнорує отримані повідомлення від чужих мереж, як-от LOCAL ONLY, але робить крок далі, також ігноруючи повідомлення від вузлів, яких немає в списку відомих вузлів.</string>
     <string name="config_device_tzdef_summary">Часовий пояс для дати на екрані та журналі пристрою.</string>
     <string name="config_device_use_phone_tz">Використовувати часовий пояс телефону</string>
@@ -120,6 +122,7 @@
     <string name="debug_default_search">Пошук в журналах…</string>
     <string name="debug_search_next">Наступний збіг</string>
     <string name="debug_search_prev">Попередій збіг</string>
+    <string name="debug_search_clear">Очистити пошук</string>
     <string name="debug_filter_add">Додати фільтр</string>
     <string name="debug_filter_clear">Очистити всі фільтри</string>
     <string name="debug_clear">Очистити журнал</string>
@@ -155,6 +158,7 @@
     <string name="delete">Видалити</string>
     <string name="delete_for_everyone">Видалити для всіх</string>
     <string name="delete_for_me">Видалити для мене</string>
+    <string name="select">Вибрати</string>
     <string name="select_all">Вибрати все</string>
     <string name="delete_selection">Видалити вибране</string>
     <string name="map_style_selection">Вибір стилю</string>
@@ -223,6 +227,7 @@
     <string name="remove">Видалити</string>
     <string name="remove_node_text">Цей вузол буде видалений зі списку доки ваш вузол не отримає дані з нього знову.</string>
     <string name="mute_notifications">Вимкнути сповіщення</string>
+    <string name="mute_1_hour">1 година</string>
     <string name="mute_8_hours">8 годин</string>
     <string name="mute_1_week">1 тиждень</string>
     <string name="mute_always">Завжди</string>
@@ -242,6 +247,8 @@
     <string name="more_details">Докладніше</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
+    <string name="node_map">Мапа вузлів</string>
+    <string name="env_metrics_log">Метрики довкілля</string>
     <string name="administration">Адміністрування</string>
     <string name="remote_admin">Віддалене керування</string>
     <string name="share_to">Поділитися з…</string>
@@ -251,6 +258,7 @@
     <string name="max">Макс</string>
     <string name="copy">Копіювати</string>
     <string name="favorite">Обране</string>
+    <string name="add_favorite">Додати до обраних</string>
     <string name="remove_favorite">Видалити з обраних</string>
     <string name="favorite_add">Додати '%1$s' як обраний вузол?</string>
     <string name="favorite_remove">Видалити '%1$s' з обраних вузлів?</string>
@@ -287,6 +295,7 @@
     <string name="ptt_pin">PTT контакт</string>
     <string name="bluetooth_config">Налаштування Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth увімкнено</string>
+    <string name="fixed_pin">Фіксований PIN</string>
     <string name="gpio_pin">GPIO контакт</string>
     <string name="type">Тип</string>
     <string name="hide_password">Приховати пароль</string>
@@ -298,9 +307,12 @@
     <string name="green">Зелений</string>
     <string name="blue">Синій</string>
     <string name="messages">Повідомлення</string>
+    <string name="log_retention_never">Ніколи не видаляти журнали</string>
+    <string name="friendly_name">Дружня назва</string>
     <string name="device_config">Пристрій</string>
     <string name="role">Роль пристрою</string>
     <string name="time_zone">Часовий пояс</string>
+    <string name="display_config">Дисплей пристрою</string>
     <string name="flip_screen">Перевернути екран</string>
     <string name="display_units">Одиниці виміру</string>
     <string name="oled_type">Тип OLED</string>
@@ -407,6 +419,14 @@
     <string name="notes">Нотатки</string>
     <string name="public_key_changed">Відкритий ключ змінено</string>
     <string name="import_label">Імпортувати</string>
+    <string name="request">Запросити</string>
+    <string name="user_info">Дані користувача</string>
+    <string name="request_telemetry">Запросити телеметрію</string>
+    <string name="request_device_metrics">Метрики пристрою</string>
+    <string name="request_environment_metrics">Метрики довкілля</string>
+    <string name="request_power_metrics">Метрики живлення</string>
+    <string name="request_local_stats">Локальна статистика</string>
+    <string name="request_metadata">Метадані</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Використовувати 12-г формат часу</string>
@@ -421,6 +441,7 @@
     <string name="i_agree">Погоджуюся.</string>
     <string name="should_update_firmware">Рекомендується оновлення прошивки.</string>
     <string name="should_update">Щоб скористатися найновішими виправленнями помилок та функціями, оновіть прошивку вашого вузла.\n\nОстання стабільна версія прошивки: %1$s</string>
+    <string name="expires">Діє до</string>
     <string name="time">Час</string>
     <string name="date">Дата</string>
     <string name="only_favorites">Лише обрані</string>
@@ -433,7 +454,9 @@
     <string name="unknown_channel">Невідомий канал</string>
     <string name="advanced_title">Розширені</string>
     <string name="clean_node_database_title">Очистити базу даних вузлів</string>
+    <string name="clean_nodes_older_than">Очистити вузли, які не були онлайн більше %1$d дні(в)</string>
     <string name="clean_unknown_nodes">Очистити лише невідомі вузли</string>
+    <string name="clean_ignored_nodes">Очистити проігноровані вузли</string>
     <string name="clean_now">Очистити зараз</string>
     <string name="clean_node_database_confirmation">Це призведе до вилучення %1$d вузлів з вашої бази даних. Цю дію не можна скасувати.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
@@ -501,12 +524,20 @@
     <string name="firmware_update_title">Оновити прошивку</string>
     <string name="firmware_update_checking">Перевірка наявності оновлень...</string>
     <string name="firmware_update_device">Пристрій: %1$s</string>
+    <string name="firmware_update_latest">Оновити до: %1$s</string>
     <string name="firmware_update_stable">Стабільна</string>
     <string name="firmware_update_alpha">Альфа</string>
     <string name="firmware_update_disconnect_warning">Примітка: це тимчасово від'єднає ваш пристрій на час оновлення.</string>
+    <string name="firmware_update_downloading_percent">Завантаження прошивки... %1$d%%</string>
     <string name="firmware_update_error">Помилка: %1$s</string>
     <string name="firmware_update_retry">Повторити спробу</string>
     <string name="firmware_update_success">Оновлення успішне!</string>
+    <string name="firmware_update_done">Готово</string>
+    <string name="firmware_update_starting_dfu">Запуск DFU...</string>
+    <string name="firmware_update_updating">Оновлення... %1$s</string>
+    <string name="firmware_update_enabling_dfu">Увімкнення режиму DFU...</string>
+    <string name="firmware_update_validating">Перевірка прошивки...</string>
+    <string name="firmware_update_disconnecting">Від'єднання...</string>
     <string name="firmware_update_unknown_hardware">Невідома модель обладнання: %1$d</string>
     <string name="firmware_update_no_device">Немає під'єднаних пристроїв</string>
     <string name="firmware_update_not_found_in_release">Не вдалося знайти прошивку %1$s в релізі.</string>
@@ -516,6 +547,8 @@
     <string name="firmware_update_almost_there">Майже готово...</string>
     <string name="firmware_update_taking_a_while">Це може зайняти хвилинку...</string>
     <string name="firmware_update_select_file">Вибрати локальний файл</string>
+    <string name="firmware_update_local_file">Локальний файл</string>
+    <string name="firmware_update_source_local">Джерело: локальний файл</string>
     <string name="firmware_update_channel_name">Оновити прошивку</string>
     <string name="interval_unset">Скинути</string>
     <!-- Compass -->
