@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  See the <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MagicNumber")
 
@@ -32,19 +32,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +44,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +52,6 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
-import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -72,7 +61,6 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
@@ -83,20 +71,14 @@ import org.meshtastic.core.strings.battery
 import org.meshtastic.core.strings.ch_util_definition
 import org.meshtastic.core.strings.channel_utilization
 import org.meshtastic.core.strings.device_metrics_log
-import org.meshtastic.core.strings.info
-import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.voltage
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.TelemetryProtos
@@ -141,101 +123,78 @@ private val LEGEND_DATA =
 @Composable
 fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    var displayInfoDialog by remember { mutableStateOf(false) }
     val data = state.deviceMetrics
 
-    val lazyListState = rememberLazyListState()
-    val vicoScrollState = rememberVicoScrollState()
-    val coroutineScope = rememberCoroutineScope()
-    var selectedX by remember { mutableStateOf<Double?>(null) }
+    val hasBattery = remember(data) { data.any { it.deviceMetrics.hasBatteryLevel() } }
+    val hasVoltage = remember(data) { data.any { it.deviceMetrics.hasVoltage() } }
+    val hasChUtil = remember(data) { data.any { it.deviceMetrics.hasChannelUtilization() } }
+    val hasAirUtil = remember(data) { data.any { it.deviceMetrics.hasAirUtilTx() } }
 
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+    val filteredLegendData = remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
+        LEGEND_DATA.filter { d ->
+            when (d.nameRes) {
+                Res.string.battery -> hasBattery
+                Res.string.voltage -> hasVoltage
+                Res.string.channel_utilization -> hasChUtil
+                Res.string.air_utilization -> hasAirUtil
+                else -> true
+            }
+        }
+    }
+
+    val infoItems = remember(hasChUtil, hasAirUtil) {
+        buildList {
+            if (hasChUtil) {
+                add(
+                    InfoDialogData(
+                        Res.string.channel_utilization,
+                        Res.string.ch_util_definition,
+                        Device.CH_UTIL.color,
+                    ),
+                )
+            }
+            if (hasAirUtil) {
+                add(
+                    InfoDialogData(
+                        Res.string.air_utilization,
+                        Res.string.air_util_definition,
+                        Device.AIR_UTIL.color,
+                    ),
+                )
+            }
+        }
+    }
+
+    BaseMetricScreen(
+        viewModel = viewModel,
+        onNavigateUp = onNavigateUp,
+        telemetryType = TelemetryType.DEVICE,
+        titleRes = Res.string.device_metrics_log,
+        data = data,
+        timeProvider = { it.time.toDouble() },
+        infoData = infoItems,
+        chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
+            DeviceMetricsChart(
+                modifier = modifier,
+                telemetries = data.reversed(),
+                legendData = filteredLegendData,
+                vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+            )
+        },
+        listPart = { modifier, selectedX, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize()) {
+                itemsIndexed(data) { _, telemetry ->
+                    DeviceMetricsCard(
+                        telemetry = telemetry,
+                        isSelected = telemetry.time.toDouble() == selectedX,
+                        onClick = { onCardClick(telemetry.time.toDouble()) },
+                    )
                 }
             }
         }
-    }
-
-    Scaffold(
-        topBar = {
-            MainAppBar(
-                title = state.node?.user?.longName ?: "",
-                subtitle =
-                stringResource(Res.string.device_metrics_log) +
-                    " (${data.size} ${stringResource(Res.string.logs)})",
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
-                onNavigateUp = onNavigateUp,
-                actions = {
-                    IconButton(onClick = { displayInfoDialog = true }) {
-                        Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
-                    }
-                    if (!state.isLocal) {
-                        IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.DEVICE) }) {
-                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
-                        }
-                    }
-                },
-                onClickChip = {},
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            if (displayInfoDialog) {
-                LegendInfoDialog(
-                    pairedRes =
-                    listOf(
-                        Pair(Res.string.channel_utilization, Res.string.ch_util_definition),
-                        Pair(Res.string.air_utilization, Res.string.air_util_definition),
-                    ),
-                    onDismiss = { displayInfoDialog = false },
-                )
-            }
-
-            AdaptiveMetricLayout(
-                chartPart = { modifier ->
-                    DeviceMetricsChart(
-                        modifier = modifier,
-                        telemetries = data.reversed(),
-                        vicoScrollState = vicoScrollState,
-                        selectedX = selectedX,
-                        onPointSelected = { x ->
-                            selectedX = x
-                            val index = data.indexOfFirst { it.time.toDouble() == x }
-                            if (index != -1) {
-                                coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                            }
-                        },
-                    )
-                },
-                listPart = { modifier ->
-                    LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                        itemsIndexed(data) { _, telemetry ->
-                            DeviceMetricsCard(
-                                telemetry = telemetry,
-                                isSelected = telemetry.time.toDouble() == selectedX,
-                                onClick = {
-                                    selectedX = telemetry.time.toDouble()
-                                    coroutineScope.launch {
-                                        vicoScrollState.animateScroll(
-                                            Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f),
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                    }
-                },
-            )
-        }
-    }
+    )
 }
 
 @Suppress("LongMethod")
@@ -243,6 +202,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
+    legendData: List<LegendData>,
     vicoScrollState: VicoScrollState,
     selectedX: Double?,
     onPointSelected: (Double) -> Unit,
@@ -339,7 +299,7 @@ private fun DeviceMetricsChart(
             vicoScrollState = vicoScrollState,
         )
 
-        Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
+        Legend(legendData = legendData, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
@@ -366,6 +326,7 @@ private fun DeviceMetricsChartPreview() {
         DeviceMetricsChart(
             modifier = Modifier.height(400.dp),
             telemetries = telemetries,
+            legendData = LEGEND_DATA,
             vicoScrollState = rememberVicoScrollState(),
             selectedX = null,
             onPointSelected = {},
@@ -403,10 +364,14 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                         )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MetricIndicator(Device.BATTERY.color)
-                            Spacer(Modifier.width(4.dp))
-                            MetricIndicator(Device.VOLTAGE.color)
-                            Spacer(Modifier.width(8.dp))
+                            if (deviceMetrics.hasBatteryLevel()) {
+                                MetricIndicator(Device.BATTERY.color)
+                                Spacer(Modifier.width(4.dp))
+                            }
+                            if (deviceMetrics.hasVoltage()) {
+                                MetricIndicator(Device.VOLTAGE.color)
+                                Spacer(Modifier.width(8.dp))
+                            }
                             MaterialBatteryInfo(level = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
                         }
                     }
@@ -416,21 +381,25 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                     /* Channel Utilization and Air Utilization Tx */
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            MetricIndicator(Device.CH_UTIL.color)
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "Ch: %.1f%%".format(deviceMetrics.channelUtilization),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            MetricIndicator(Device.AIR_UTIL.color)
-                            Spacer(Modifier.width(4.dp))
-                            Text(
-                                text = "Air: %.1f%%".format(deviceMetrics.airUtilTx),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                            )
+                            if (deviceMetrics.hasChannelUtilization()) {
+                                MetricIndicator(Device.CH_UTIL.color)
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = "Ch: %.1f%%".format(deviceMetrics.channelUtilization),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                )
+                                Spacer(Modifier.width(12.dp))
+                            }
+                            if (deviceMetrics.hasAirUtilTx()) {
+                                MetricIndicator(Device.AIR_UTIL.color)
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = "Air: %.1f%%".format(deviceMetrics.airUtilTx),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                )
+                            }
                         }
                         Text(
                             text = stringResource(Res.string.uptime) + ": " + formatUptime(deviceMetrics.uptimeSeconds),
@@ -491,10 +460,18 @@ private fun DeviceMetricsScreenPreview() {
 
                 if (displayInfoDialog) {
                     LegendInfoDialog(
-                        pairedRes =
+                        infoData =
                         listOf(
-                            Pair(Res.string.channel_utilization, Res.string.ch_util_definition),
-                            Pair(Res.string.air_utilization, Res.string.air_util_definition),
+                            InfoDialogData(
+                                Res.string.channel_utilization,
+                                Res.string.ch_util_definition,
+                                Device.CH_UTIL.color,
+                            ),
+                            InfoDialogData(
+                                Res.string.air_utilization,
+                                Res.string.air_util_definition,
+                                Device.AIR_UTIL.color,
+                            ),
                         ),
                         onDismiss = { displayInfoDialog = false },
                     )
@@ -503,6 +480,7 @@ private fun DeviceMetricsScreenPreview() {
                 DeviceMetricsChart(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                     telemetries = telemetries.reversed(),
+                    legendData = LEGEND_DATA,
                     vicoScrollState = rememberVicoScrollState(),
                     selectedX = null,
                     onPointSelected = {},

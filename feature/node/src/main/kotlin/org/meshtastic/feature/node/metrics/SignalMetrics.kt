@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  See the <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
 
@@ -31,36 +31,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
-import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -69,29 +56,18 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.info
-import org.meshtastic.core.strings.logs
-import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.rssi_definition
 import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.strings.snr
 import org.meshtastic.core.strings.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
-import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.proto.MeshProtos.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
@@ -109,106 +85,41 @@ private val LEGEND_DATA =
 @Composable
 fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-    var displayInfoDialog by remember { mutableStateOf(false) }
     val data = state.signalMetrics
 
-    val lazyListState = rememberLazyListState()
-    val vicoScrollState = rememberVicoScrollState()
-    val coroutineScope = rememberCoroutineScope()
-    var selectedX by remember { mutableStateOf<Double?>(null) }
-
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
-                }
-            }
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            MainAppBar(
-                title = state.node?.user?.longName ?: "",
-                subtitle =
-                stringResource(Res.string.signal_quality) + " (${data.size} ${stringResource(Res.string.logs)})",
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
-                onNavigateUp = onNavigateUp,
-                actions = {
-                    IconButton(onClick = { displayInfoDialog = true }) {
-                        Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
-                    }
-                    if (!state.isLocal) {
-                        IconButton(onClick = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) }) {
-                            androidx.compose.material3.Icon(
-                                imageVector = MeshtasticIcons.Refresh,
-                                contentDescription =
-                                stringResource(Res.string.signal_quality) +
-                                    " " +
-                                    stringResource(Res.string.request_telemetry),
-                            )
-                        }
-                    }
-                },
-                onClickChip = {},
+    BaseMetricScreen(
+        viewModel = viewModel,
+        onNavigateUp = onNavigateUp,
+        telemetryType = TelemetryType.LOCAL_STATS,
+        titleRes = Res.string.signal_quality,
+        data = data,
+        timeProvider = { it.rxTime.toDouble() },
+        infoData =
+        listOf(
+            InfoDialogData(Res.string.snr, Res.string.snr_definition, SignalMetric.SNR.color),
+            InfoDialogData(Res.string.rssi, Res.string.rssi_definition, SignalMetric.RSSI.color),
+        ),
+        chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
+            SignalMetricsChart(
+                modifier = modifier,
+                meshPackets = data.reversed(),
+                vicoScrollState = vicoScrollState,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            if (displayInfoDialog) {
-                LegendInfoDialog(
-                    pairedRes =
-                    listOf(
-                        Pair(Res.string.snr, Res.string.snr_definition),
-                        Pair(Res.string.rssi, Res.string.rssi_definition),
-                    ),
-                    onDismiss = { displayInfoDialog = false },
-                )
-            }
-
-            AdaptiveMetricLayout(
-                chartPart = { modifier ->
-                    SignalMetricsChart(
-                        modifier = modifier,
-                        meshPackets = data.reversed(),
-                        vicoScrollState = vicoScrollState,
-                        selectedX = selectedX,
-                        onPointSelected = { x ->
-                            selectedX = x
-                            val index = data.indexOfFirst { it.rxTime.toDouble() == x }
-                            if (index != -1) {
-                                coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                            }
-                        },
+        listPart = { modifier, selectedX, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize()) {
+                itemsIndexed(data) { _, meshPacket ->
+                    SignalMetricsCard(
+                        meshPacket = meshPacket,
+                        isSelected = meshPacket.rxTime.toDouble() == selectedX,
+                        onClick = { onCardClick(meshPacket.rxTime.toDouble()) },
                     )
-                },
-                listPart = { modifier ->
-                    LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                        itemsIndexed(data) { _, meshPacket ->
-                            SignalMetricsCard(
-                                meshPacket = meshPacket,
-                                isSelected = meshPacket.rxTime.toDouble() == selectedX,
-                                onClick = {
-                                    selectedX = meshPacket.rxTime.toDouble()
-                                    coroutineScope.launch {
-                                        vicoScrollState.animateScroll(
-                                            Scroll.Absolute.x(meshPacket.rxTime.toDouble(), SCROLL_BIAS),
-                                        )
-                                    }
-                                },
-                            )
-                        }
-                    }
-                },
-            )
-        }
-    }
+                }
+            }
+        },
+    )
 }
 
 @Suppress("LongMethod")

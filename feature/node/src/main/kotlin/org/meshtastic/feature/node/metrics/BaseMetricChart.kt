@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  See the <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
 
@@ -22,11 +22,28 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
@@ -39,21 +56,21 @@ import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarkerVisibil
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.info
+import org.meshtastic.core.strings.logs
+import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.Refresh
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 
 /**
  * A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point
  * selection synchronization.
- *
- * @param modelProducer The [CartesianChartModelProducer] for the chart.
- * @param layers The chart layers (e.g., LineCartesianLayer).
- * @param modifier The modifier for the chart host.
- * @param startAxis The start vertical axis.
- * @param endAxis The end vertical axis.
- * @param bottomAxis The bottom horizontal axis.
- * @param marker The marker to show on interaction.
- * @param selectedX The currently selected X value (used for persistent markers).
- * @param onPointSelected Callback when a point is selected via interaction.
- * @param vicoScrollState The scroll state for the chart.
  */
 @Composable
 fun GenericMetricChart(
@@ -101,12 +118,8 @@ fun GenericMetricChart(
 }
 
 /**
- * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for
- * narrow screens (phones).
- *
- * @param chartPart The Composable function to render the chart part of the screen.
- * @param listPart The Composable function to render the list part of the screen.
- * @param modifier The modifier for the adaptive layout container.
+ * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column
+ * for narrow screens (phones).
  */
 @Composable
 fun AdaptiveMetricLayout(
@@ -126,6 +139,95 @@ fun AdaptiveMetricLayout(
                 chartPart(Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f))
                 listPart(Modifier.fillMaxWidth().weight(1f))
             }
+        }
+    }
+}
+
+/**
+ * A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and synchronization.
+ */
+@Composable
+fun <T> BaseMetricScreen(
+    viewModel: MetricsViewModel,
+    onNavigateUp: () -> Unit,
+    telemetryType: TelemetryType?,
+    titleRes: StringResource,
+    data: List<T>,
+    timeProvider: (T) -> Double,
+    infoData: List<InfoDialogData> = emptyList(),
+    chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
+    listPart: @Composable (Modifier, Double?, (Double) -> Unit) -> Unit,
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var displayInfoDialog by remember { mutableStateOf(false) }
+
+    val lazyListState = rememberLazyListState()
+    val vicoScrollState = rememberVicoScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    var selectedX by remember { mutableStateOf<Double?>(null) }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                subtitle = stringResource(titleRes) + " (${data.size} ${stringResource(Res.string.logs)})",
+                ourNode = null,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {
+                    if (infoData.isNotEmpty()) {
+                        IconButton(onClick = { displayInfoDialog = true }) {
+                            Icon(imageVector = Icons.Rounded.Info, contentDescription = stringResource(Res.string.info))
+                        }
+                    }
+                    if (!state.isLocal && telemetryType != null) {
+                        IconButton(onClick = { viewModel.requestTelemetry(telemetryType) }) {
+                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
+                        }
+                    }
+                },
+                onClickChip = {},
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { innerPadding ->
+        Column(modifier = Modifier.padding(innerPadding)) {
+            if (displayInfoDialog) {
+                LegendInfoDialog(infoData = infoData, onDismiss = { displayInfoDialog = false })
+            }
+
+            AdaptiveMetricLayout(
+                chartPart = { modifier ->
+                    chartPart(modifier, selectedX, vicoScrollState) { x ->
+                        selectedX = x
+                        val index = data.indexOfFirst { timeProvider(it) == x }
+                        if (index != -1) {
+                            coroutineScope.launch { lazyListState.animateScrollToItem(index) }
+                        }
+                    }
+                },
+                listPart = { modifier ->
+                    listPart(modifier, selectedX) { x ->
+                        selectedX = x
+                        coroutineScope.launch {
+                            vicoScrollState.animateScroll(Scroll.Absolute.x(x, CommonCharts.SCROLL_BIAS))
+                        }
+                    }
+                }
+            )
         }
     }
 }

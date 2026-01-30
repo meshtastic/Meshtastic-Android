@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  See the <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MagicNumber")
 
@@ -28,13 +28,14 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,10 +53,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
@@ -85,36 +84,24 @@ object CommonCharts {
 
     /**
      * Gets the Material 3 primary color with optional opacity adjustment.
-     *
-     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
-     * @return Color based on current theme's primary color.
      */
     @Composable
     fun getMaterial3PrimaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
 
     /**
      * Gets the Material 3 secondary color with optional opacity adjustment.
-     *
-     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
-     * @return Color based on current theme's secondary color.
      */
     @Composable
     fun getMaterial3SecondaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
 
     /**
      * Gets the Material 3 tertiary color with optional opacity adjustment.
-     *
-     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
-     * @return Color based on current theme's tertiary color.
      */
     @Composable
     fun getMaterial3TertiaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.tertiary.copy(alpha = alpha)
 
     /**
      * Gets the Material 3 error color with optional opacity adjustment.
-     *
-     * @param alpha The alpha/opacity value (0f-1f). Defaults to 1f (fully opaque).
-     * @return Color based on current theme's error color.
      */
     @Composable
     fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
@@ -144,10 +131,14 @@ data class LegendData(
     val environmentMetric: Environment? = null,
 )
 
+data class InfoDialogData(
+    val titleRes: StringResource,
+    val definitionRes: StringResource,
+    val color: Color,
+)
+
 /**
  * Creates the legend that identifies the colors used for the graph.
- *
- * @param legendData A list containing the `LegendData` to build the labels.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -167,37 +158,50 @@ fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
 
 /**
  * Displays a dialog with information about the legend items.
- *
- * @param pairedRes A list of `Pair`s containing (term, definition).
- * @param onDismiss Executes when the user presses the close button.
  */
 @Composable
-fun LegendInfoDialog(pairedRes: List<Pair<StringResource, StringResource>>, onDismiss: () -> Unit) {
+fun LegendInfoDialog(infoData: List<InfoDialogData>, onDismiss: () -> Unit) {
     AlertDialog(
+        icon = { Icon(imageVector = Icons.Rounded.Info, contentDescription = null) },
         title = {
             Text(
                 text = stringResource(Res.string.info),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.headlineSmall,
             )
         },
         text = {
-            Column {
-                for (pair in pairedRes) {
-                    Text(
-                        text = stringResource(pair.first),
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        textDecoration = TextDecoration.Underline,
-                    )
-                    Text(text = stringResource(pair.second), style = TextStyle.Default)
-
-                    Spacer(modifier = Modifier.height(24.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                for (item in infoData) {
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MetricIndicator(item.color)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(item.titleRes),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = item.color,
+                            )
+                        }
+                        Text(
+                            text = stringResource(item.definitionRes),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 16.dp),
+                        )
+                    }
                 }
             }
         },
         onDismissRequest = onDismiss,
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.close)) } },
-        shape = RoundedCornerShape(16.dp),
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(Res.string.close), fontWeight = FontWeight.Bold)
+            }
+        },
+        shape = RoundedCornerShape(28.dp),
     )
 }
 
