@@ -1,5 +1,5 @@
 jdk:
-  - openjdk21
+  - openjdk17
 before_install:
   - ./gradlew :core:proto:generateGoogleReleaseProto
 install:

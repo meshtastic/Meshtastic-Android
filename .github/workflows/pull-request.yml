@@ -38,8 +38,7 @@ jobs:
     needs: check-changes
     if: needs.check-changes.outputs.code_changed == 'true'
     uses: ./.github/workflows/reusable-lint.yml
-    secrets:
-      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+    secrets: inherit
 
   build:
     needs: lint
