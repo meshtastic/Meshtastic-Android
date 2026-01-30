@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
 
@@ -142,7 +142,9 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
         topBar = {
             MainAppBar(
                 title = state.node?.user?.longName ?: "",
-                subtitle = stringResource(Res.string.env_metrics_log) + " (${processedTelemetries.size} ${stringResource(Res.string.logs)})",
+                subtitle =
+                stringResource(Res.string.env_metrics_log) +
+                    " (${processedTelemetries.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -200,13 +202,15 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                                 onClick = {
                                     selectedX = telemetry.time.toDouble()
                                     coroutineScope.launch {
-                                        vicoScrollState.animateScroll(Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS))
+                                        vicoScrollState.animateScroll(
+                                            Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS),
+                                        )
                                     }
                                 },
                             )
                         }
                     }
-                }
+                },
             )
         }
     }

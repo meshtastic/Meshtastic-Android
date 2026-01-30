@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MagicNumber")
 
@@ -130,40 +130,42 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val hasChUtil = remember(data) { data.any { it.deviceMetrics.hasChannelUtilization() } }
     val hasAirUtil = remember(data) { data.any { it.deviceMetrics.hasAirUtilTx() } }
 
-    val filteredLegendData = remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
-        LEGEND_DATA.filter { d ->
-            when (d.nameRes) {
-                Res.string.battery -> hasBattery
-                Res.string.voltage -> hasVoltage
-                Res.string.channel_utilization -> hasChUtil
-                Res.string.air_utilization -> hasAirUtil
-                else -> true
+    val filteredLegendData =
+        remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
+            LEGEND_DATA.filter { d ->
+                when (d.nameRes) {
+                    Res.string.battery -> hasBattery
+                    Res.string.voltage -> hasVoltage
+                    Res.string.channel_utilization -> hasChUtil
+                    Res.string.air_utilization -> hasAirUtil
+                    else -> true
+                }
             }
         }
-    }
 
-    val infoItems = remember(hasChUtil, hasAirUtil) {
-        buildList {
-            if (hasChUtil) {
-                add(
-                    InfoDialogData(
-                        Res.string.channel_utilization,
-                        Res.string.ch_util_definition,
-                        Device.CH_UTIL.color,
-                    ),
-                )
-            }
-            if (hasAirUtil) {
-                add(
-                    InfoDialogData(
-                        Res.string.air_utilization,
-                        Res.string.air_util_definition,
-                        Device.AIR_UTIL.color,
-                    ),
-                )
+    val infoItems =
+        remember(hasChUtil, hasAirUtil) {
+            buildList {
+                if (hasChUtil) {
+                    add(
+                        InfoDialogData(
+                            Res.string.channel_utilization,
+                            Res.string.ch_util_definition,
+                            Device.CH_UTIL.color,
+                        ),
+                    )
+                }
+                if (hasAirUtil) {
+                    add(
+                        InfoDialogData(
+                            Res.string.air_utilization,
+                            Res.string.air_util_definition,
+                            Device.AIR_UTIL.color,
+                        ),
+                    )
+                }
             }
         }
-    }
 
     BaseMetricScreen(
         viewModel = viewModel,
@@ -193,7 +195,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                     )
                 }
             }
-        }
+        },
     )
 }
 

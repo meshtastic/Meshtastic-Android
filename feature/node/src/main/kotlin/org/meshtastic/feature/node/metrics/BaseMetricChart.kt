@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.metrics
 
@@ -118,8 +118,8 @@ fun GenericMetricChart(
 }
 
 /**
- * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column
- * for narrow screens (phones).
+ * An adaptive layout for metric screens. Uses a split Row for wide screens (tablets/landscape) and a stacked Column for
+ * narrow screens (phones).
  */
 @Composable
 fun AdaptiveMetricLayout(
@@ -143,10 +143,9 @@ fun AdaptiveMetricLayout(
     }
 }
 
-/**
- * A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and synchronization.
- */
+/** A high-level template for metric screens that handles the Scaffold, AppBar, adaptive layout, and synchronization. */
 @Composable
+@Suppress("LongMethod")
 fun <T> BaseMetricScreen(
     viewModel: MetricsViewModel,
     onNavigateUp: () -> Unit,
@@ -226,7 +225,7 @@ fun <T> BaseMetricScreen(
                             vicoScrollState.animateScroll(Scroll.Absolute.x(x, CommonCharts.SCROLL_BIAS))
                         }
                     }
-                }
+                },
             )
         }
     }

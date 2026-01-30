@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See the <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("MagicNumber")
 
@@ -82,27 +82,19 @@ object CommonCharts {
     const val MAX_PERCENT_VALUE = 100f
     const val SCROLL_BIAS = 0.5f
 
-    /**
-     * Gets the Material 3 primary color with optional opacity adjustment.
-     */
+    /** Gets the Material 3 primary color with optional opacity adjustment. */
     @Composable
     fun getMaterial3PrimaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.primary.copy(alpha = alpha)
 
-    /**
-     * Gets the Material 3 secondary color with optional opacity adjustment.
-     */
+    /** Gets the Material 3 secondary color with optional opacity adjustment. */
     @Composable
     fun getMaterial3SecondaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.secondary.copy(alpha = alpha)
 
-    /**
-     * Gets the Material 3 tertiary color with optional opacity adjustment.
-     */
+    /** Gets the Material 3 tertiary color with optional opacity adjustment. */
     @Composable
     fun getMaterial3TertiaryColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.tertiary.copy(alpha = alpha)
 
-    /**
-     * Gets the Material 3 error color with optional opacity adjustment.
-     */
+    /** Gets the Material 3 error color with optional opacity adjustment. */
     @Composable
     fun getMaterial3ErrorColor(alpha: Float = 1f): Color = MaterialTheme.colorScheme.error.copy(alpha = alpha)
 
@@ -131,15 +123,9 @@ data class LegendData(
     val environmentMetric: Environment? = null,
 )
 
-data class InfoDialogData(
-    val titleRes: StringResource,
-    val definitionRes: StringResource,
-    val color: Color,
-)
+data class InfoDialogData(val titleRes: StringResource, val definitionRes: StringResource, val color: Color)
 
-/**
- * Creates the legend that identifies the colors used for the graph.
- */
+/** Creates the legend that identifies the colors used for the graph. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
@@ -156,9 +142,7 @@ fun Legend(legendData: List<LegendData>, modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Displays a dialog with information about the legend items.
- */
+/** Displays a dialog with information about the legend items. */
 @Composable
 fun LegendInfoDialog(infoData: List<InfoDialogData>, onDismiss: () -> Unit) {
     AlertDialog(
