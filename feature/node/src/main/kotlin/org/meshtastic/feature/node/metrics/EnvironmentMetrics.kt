@@ -206,11 +206,15 @@ private fun TemperatureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, e
     envMetrics.temperature?.let { temperature ->
         if (!temperature.isNaN()) {
             val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
-            Text(
-                text = textFormat.format(stringResource(Res.string.temperature), temperature),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MetricIndicator(Environment.TEMPERATURE.color)
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = textFormat.format(stringResource(Res.string.temperature), temperature),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                )
+            }
         }
     }
 }
@@ -227,21 +231,29 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
         ) {
             if (hasHumidity) {
                 val humidity = envMetrics.relativeHumidity!!
-                Text(
-                    text = "%s %.2f%%".format(stringResource(Res.string.humidity), humidity),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    modifier = Modifier.padding(vertical = 0.dp),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.HUMIDITY.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "%s %.2f%%".format(stringResource(Res.string.humidity), humidity),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        modifier = Modifier.padding(vertical = 0.dp),
+                    )
+                }
             }
             if (hasPressure) {
                 val pressure = envMetrics.barometricPressure!!
-                Text(
-                    text = "%.2f hPa".format(pressure),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    modifier = Modifier.padding(vertical = 0.dp),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.BAROMETRIC_PRESSURE.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "%.2f hPa".format(pressure),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        modifier = Modifier.padding(vertical = 0.dp),
+                    )
+                }
             }
         }
     }
@@ -258,25 +270,36 @@ private fun SoilMetricsDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, e
             val soilMoistureTextFormat = "%s %d%%"
             envMetrics.soilMoisture?.let { soilMoistureValue ->
                 if (soilMoistureValue != Int.MIN_VALUE) {
-                    Text(
-                        text =
-                        soilMoistureTextFormat.format(stringResource(Res.string.soil_moisture), soilMoistureValue),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MetricIndicator(Environment.SOIL_MOISTURE.color)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text =
+                            soilMoistureTextFormat.format(
+                                stringResource(Res.string.soil_moisture),
+                                soilMoistureValue,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        )
+                    }
                 }
             }
             envMetrics.soilTemperature?.let { soilTemperature ->
                 if (!soilTemperature.isNaN()) {
-                    Text(
-                        text =
-                        soilTemperatureTextFormat.format(
-                            stringResource(Res.string.soil_temperature),
-                            soilTemperature,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        MetricIndicator(Environment.SOIL_TEMPERATURE.color)
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text =
+                            soilTemperatureTextFormat.format(
+                                stringResource(Res.string.soil_temperature),
+                                soilTemperature,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        )
+                    }
                 }
             }
         }
@@ -292,19 +315,27 @@ private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (hasLux) {
                 val luxValue = envMetrics.lux!!
-                Text(
-                    text = "%s %.0f lx".format(stringResource(Res.string.lux), luxValue),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.LUX.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "%s %.0f lx".format(stringResource(Res.string.lux), luxValue),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
             }
             if (hasUvLux) {
                 val uvLuxValue = envMetrics.uvLux!!
-                Text(
-                    text = "%s %.0f UVlx".format(stringResource(Res.string.uv_lux), uvLuxValue),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.UV_LUX.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "%s %.0f UVlx".format(stringResource(Res.string.uv_lux), uvLuxValue),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
             }
         }
     }
@@ -346,6 +377,8 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (iaqValue != null && iaqValue != Int.MIN_VALUE) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.IAQ.color)
+                    Spacer(Modifier.width(4.dp))
                     Text(
                         text = stringResource(Res.string.iaq),
                         color = MaterialTheme.colorScheme.onSurface,
@@ -356,11 +389,15 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
                 }
             }
             if (gasResistance != null && !gasResistance.isNaN()) {
-                Text(
-                    text = "%s %.2f Ohm".format(stringResource(Res.string.gas_resistance), gasResistance),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    MetricIndicator(Environment.GAS_RESISTANCE.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "%s %.2f Ohm".format(stringResource(Res.string.gas_resistance), gasResistance),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
             }
         }
     }

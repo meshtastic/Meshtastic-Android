@@ -18,13 +18,14 @@ package org.meshtastic.feature.node.metrics
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -45,6 +46,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -399,22 +401,31 @@ fun PaxMetricsItem(
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth(),
             )
-            val total = pax.ble + pax.wifi
-            val summary = "PAX: $total (B:${pax.ble}  W:${pax.wifi})"
             Row(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = summary,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.weight(1f, fill = true),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                    MetricIndicator(PaxSeries.PAX.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "PAX: ${pax.ble + pax.wifi}",
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    MetricIndicator(PaxSeries.BLE.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(text = "B:${pax.ble}", style = MaterialTheme.typography.bodyLarge)
+                    Spacer(Modifier.width(8.dp))
+                    MetricIndicator(PaxSeries.WIFI.color)
+                    Spacer(Modifier.width(4.dp))
+                    Text(text = "W:${pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                }
+
                 Text(
                     text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.alignByBaseline(),
                 )
             }
         }

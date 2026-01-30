@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -51,6 +52,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -77,7 +79,6 @@ import org.meshtastic.core.strings.air_util_definition
 import org.meshtastic.core.strings.air_utilization
 import org.meshtastic.core.strings.battery
 import org.meshtastic.core.strings.ch_util_definition
-import org.meshtastic.core.strings.channel_air_util
 import org.meshtastic.core.strings.channel_utilization
 import org.meshtastic.core.strings.device_metrics_log
 import org.meshtastic.core.strings.uptime
@@ -87,9 +88,9 @@ import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
@@ -107,7 +108,7 @@ private enum class Device(val color: Color) {
     CH_UTIL(Purple) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
     },
-    AIR_UTIL(Pink) {
+    AIR_UTIL(Cyan) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.airUtilTx
     }, ;
 
@@ -305,7 +306,10 @@ private fun DeviceMetricsChart(
             ),
         ),
         startAxis =
-        VerticalAxis.rememberStart(label = axisLabel, valueFormatter = { _, value, _ -> "%.0f%%".format(value) }),
+        VerticalAxis.rememberStart(
+            label = ChartStyling.rememberAxisLabel(color = batteryColor),
+            valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
+        ),
         endAxis =
         VerticalAxis.rememberEnd(
             label = ChartStyling.rememberAxisLabel(color = voltageColor),
@@ -386,21 +390,36 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                             style = MaterialTheme.typography.titleMediumEmphasized,
                         )
 
-                        MaterialBatteryInfo(level = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MetricIndicator(Device.BATTERY.color)
+                            Spacer(Modifier.width(4.dp))
+                            MetricIndicator(Device.VOLTAGE.color)
+                            Spacer(Modifier.width(8.dp))
+                            MaterialBatteryInfo(level = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     /* Channel Utilization and Air Utilization Tx */
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        val text =
-                            stringResource(Res.string.channel_air_util)
-                                .format(deviceMetrics.channelUtilization, deviceMetrics.airUtilTx)
-                        Text(
-                            text = text,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            MetricIndicator(Device.CH_UTIL.color)
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "Ch: %.1f%%".format(deviceMetrics.channelUtilization),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            MetricIndicator(Device.AIR_UTIL.color)
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "Air: %.1f%%".format(deviceMetrics.airUtilTx),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            )
+                        }
                         Text(
                             text = stringResource(Res.string.uptime) + ": " + formatUptime(deviceMetrics.uptimeSeconds),
                             color = MaterialTheme.colorScheme.onSurface,

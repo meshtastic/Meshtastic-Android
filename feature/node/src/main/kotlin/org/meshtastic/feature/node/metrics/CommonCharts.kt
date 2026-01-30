@@ -253,6 +253,17 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
 }
 
 @Composable
+fun MetricIndicator(color: Color, modifier: Modifier = Modifier) {
+    Box(
+        modifier =
+        modifier
+            .size(8.dp)
+            .clip(CircleShape)
+            .background(color),
+    )
+}
+
+@Composable
 fun DeleteItem(onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,

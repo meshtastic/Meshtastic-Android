@@ -22,7 +22,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
-import org.meshtastic.core.ui.theme.GraphColors.LightGreen
+import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Pink
 import org.meshtastic.core.ui.theme.GraphColors.Purple
@@ -47,16 +47,16 @@ enum class Environment(val color: Color) {
     BAROMETRIC_PRESSURE(Green) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.barometricPressure
     },
-    GAS_RESISTANCE(Orange) {
+    GAS_RESISTANCE(InfantryBlue) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.gasResistance
     },
     IAQ(Cyan) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.iaq.toFloat()
     },
-    LUX(LightGreen) {
+    LUX(Gold) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.lux
     },
-    UV_LUX(Gold) {
+    UV_LUX(Orange) {
         override fun getValue(telemetry: TelemetryProtos.Telemetry) = telemetry.environmentMetrics.uvLux
     }, ;
 

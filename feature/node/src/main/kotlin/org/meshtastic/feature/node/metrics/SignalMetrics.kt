@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -50,6 +51,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -78,7 +80,6 @@ import org.meshtastic.core.strings.snr
 import org.meshtastic.core.strings.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SnrAndRssi
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.GraphColors.Blue
@@ -303,7 +304,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
     ) {
         Surface(color = Color.Transparent) {
             SelectionContainer {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     /* Data */
                     Box(modifier = Modifier.weight(weight = 5f).height(IntrinsicSize.Min)) {
                         Column(modifier = Modifier.padding(12.dp)) {
@@ -318,7 +319,21 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                             Spacer(modifier = Modifier.height(8.dp))
 
                             /* SNR and RSSI */
-                            SnrAndRssi(meshPacket.rxSnr, meshPacket.rxRssi)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                MetricIndicator(SignalMetric.RSSI.color)
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = "%.0f dBm".format(meshPacket.rxRssi.toFloat()),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                MetricIndicator(SignalMetric.SNR.color)
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = "%.1f dB".format(meshPacket.rxSnr),
+                                    style = MaterialTheme.typography.labelLarge,
+                                )
+                            }
                         }
                     }
 
