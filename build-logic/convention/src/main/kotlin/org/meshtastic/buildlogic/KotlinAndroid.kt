@@ -20,6 +20,8 @@ package org.meshtastic.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import com.android.build.api.dsl.LibraryExtension
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
@@ -37,16 +39,25 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 internal fun Project.configureKotlinAndroid(
     commonExtension: CommonExtension,
 ) {
+    val compileSdkVersion = configProperties.getProperty("COMPILE_SDK").toInt()
+    val minSdkVersion = configProperties.getProperty("MIN_SDK").toInt()
+    val targetSdkVersion = configProperties.getProperty("TARGET_SDK").toInt()
 
     commonExtension.apply {
-        compileSdk = configProperties.getProperty("COMPILE_SDK").toInt()
-
-        defaultConfig.apply {
-            minSdk = configProperties.getProperty("MIN_SDK").toInt()
-            if (commonExtension is ApplicationExtension) {
-                commonExtension.defaultConfig.targetSdk = configProperties.getProperty("TARGET_SDK").toInt()
+        when (this) {
+            is ApplicationExtension -> {
+                compileSdk = compileSdkVersion
+                defaultConfig.targetSdk = targetSdkVersion
+            }
+            is LibraryExtension -> {
+                compileSdk = compileSdkVersion
             }
         }
+
+        defaultConfig.minSdk = minSdkVersion
+
+        compileOptions.sourceCompatibility = JavaVersion.VERSION_17
+        compileOptions.targetCompatibility = JavaVersion.VERSION_17
     }
 
     configureKotlin<KotlinAndroidProjectExtension>()
