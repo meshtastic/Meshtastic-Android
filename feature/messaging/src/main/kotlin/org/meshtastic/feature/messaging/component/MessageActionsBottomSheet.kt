@@ -86,7 +86,9 @@ fun MessageActionsContent(
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
-            leadingContent = { Icon(Icons.AutoMirrored.Rounded.Reply, contentDescription = stringResource(Res.string.reply)) },
+            leadingContent = {
+                Icon(Icons.AutoMirrored.Rounded.Reply, contentDescription = stringResource(Res.string.reply))
+            },
             modifier = Modifier.clickable(onClick = onReply),
         )
 

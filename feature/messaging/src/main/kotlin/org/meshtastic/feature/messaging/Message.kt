@@ -828,7 +828,8 @@ private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Uni
         },
         leadingIcon = {
             Icon(
-                imageVector = if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.AutoMirrored.Rounded.SpeakerNotes,
+                imageVector =
+                if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.AutoMirrored.Rounded.SpeakerNotes,
                 contentDescription = title,
             )
         },
