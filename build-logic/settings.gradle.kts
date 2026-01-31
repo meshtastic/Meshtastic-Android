@@ -24,6 +24,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("com.gradle.develocity") version("4.3.2")
+}
+
 dependencyResolutionManagement {
     repositories {
         gradlePluginPortal()
@@ -43,6 +47,9 @@ dependencyResolutionManagement {
         }
     }
 }
+
+// Shared Develocity and Build Cache configuration
+apply(from = "../gradle/develocity.settings.gradle")
 
 rootProject.name = "build-logic"
 include(":convention")

@@ -7,6 +7,10 @@ on:
         required: false
       GRADLE_CACHE_URL:
         required: false
+      GRADLE_CACHE_USERNAME:
+        required: false
+      GRADLE_CACHE_PASSWORD:
+        required: false
 
 jobs:
   lint:
@@ -14,6 +18,8 @@ jobs:
     timeout-minutes: 10
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6

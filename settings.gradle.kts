@@ -72,52 +72,8 @@ plugins {
     id("com.gradle.common-custom-user-data-gradle-plugin") version "2.4.0"
 }
 
-fun Settings.getMeshProperty(key: String): String? {
-    val env = System.getenv(key)
-    if (!env.isNullOrBlank()) return env
-
-    val localFile = file("local.properties")
-    if (localFile.exists()) {
-        val props = java.util.Properties()
-        localFile.inputStream().use { props.load(it) }
-        if (props.containsKey(key)) return props.getProperty(key)
-    }
-
-    val configFile = file("config.properties")
-    if (configFile.exists()) {
-        val props = java.util.Properties()
-        configFile.inputStream().use { props.load(it) }
-        if (props.containsKey(key)) return props.getProperty(key)
-    }
-    return null
-}
-
-develocity {
-    buildScan {
-        capture {
-            fileFingerprints.set(true)
-        }
-        publishing.onlyIf { false }
-    }
-    buildCache {
-        local {
-            isEnabled = true
-        }
-        remote(HttpBuildCache::class.java) {
-            val cacheUrl = getMeshProperty("GRADLE_CACHE_URL")?.trim()
-            if (!cacheUrl.isNullOrBlank()) {
-                println("Meshtastic Build: Remote cache URL found. Using remote build cache.")
-                url = uri(cacheUrl)
-                isAllowInsecureProtocol = true
-                isPush = true
-                isEnabled = true
-            } else {
-                println("Meshtastic Build: Remote cache URL not found. Disabling remote cache write.")
-                isEnabled = false
-            }
-        }
-    }
-}
+// Shared Develocity and Build Cache configuration
+apply(from = "gradle/develocity.settings.gradle")
 
 @Suppress("UnstableApiUsage")
 toolchainManagement {
