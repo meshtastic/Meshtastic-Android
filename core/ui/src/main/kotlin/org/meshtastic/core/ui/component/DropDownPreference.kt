@@ -78,8 +78,8 @@ fun <T> DropDownPreference(
             val descriptor = (selectedItem as ProtocolMessageEnum).descriptorForType
 
             @Suppress("UNCHECKED_CAST")
-            enum?.filter { entries -> descriptor.values.any { it.name == entries.name && it.options.deprecated } }
-                as? List<T> ?: emptyList() // Safe cast to List<T> or return emptyList if cast fails
+            (enum?.filter { entries -> descriptor.values.any { it.name == entries.name && it.options.deprecated } }
+                ?: emptyList()) as List<T>
         } else {
             emptyList()
         }

@@ -23,9 +23,9 @@ import android.provider.Settings
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.BatteryAlert
-import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.SpeakerPhone
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,7 +74,7 @@ internal fun NotificationsScreen(showNextButton: Boolean, onSkip: () -> Unit, on
     val features = remember {
         listOf(
             FeatureUIData(
-                icon = Icons.Outlined.Message,
+                icon = Icons.AutoMirrored.Outlined.Message,
                 titleRes = Res.string.incoming_messages,
                 subtitleRes = Res.string.notifications_for_channel_and_direct_messages,
             ),

@@ -92,9 +92,9 @@ fun BitwisePreference(
             }
             PreferenceFooter(
                 enabled = enabled,
-                negativeText = Res.string.clear,
+                negativeText = org.jetbrains.compose.resources.stringResource(Res.string.clear),
                 onNegativeClicked = { onItemSelected(0) },
-                positiveText = Res.string.close,
+                positiveText = org.jetbrains.compose.resources.stringResource(Res.string.close),
                 onPositiveClicked = { expanded = false },
             )
         }

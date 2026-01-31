@@ -81,7 +81,7 @@ fun AppIntroductionScreen(onDone: () -> Unit) {
                             // For Android Tiramisu (API 33) and above, this requests POST_NOTIFICATIONS
                             // For lower versions, notificationPermissionState will be null, and this branch isn't
                             // taken.
-                            notificationPermissionState?.launchPermissionRequest()
+                            notificationPermissionState.launchPermissionRequest()
                         }
                     },
                 )
