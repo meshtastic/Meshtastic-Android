@@ -21,6 +21,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureKotlinAndroid
+import org.meshtastic.buildlogic.configureTestOptions
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -64,6 +65,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     buildConfig = true
                 }
             }
+            configureTestOptions()
         }
     }
 }

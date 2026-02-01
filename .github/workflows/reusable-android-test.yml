@@ -12,12 +12,17 @@ on:
         description: 'JSON array string of API levels to run tests on (e.g., `[35]` or `[26, 34, 35]`)'
         required: false
         type: string
-        default: '[26, 35]' # Default to running both if not specified by caller
+        default: '[26, 35]'
       test_flavors:
         description: 'Which flavors to test: "google", "fdroid", or "both"'
         required: false
         type: string
         default: 'both'
+      num_shards:
+        description: 'Number of shards to split tests into'
+        required: false
+        type: number
+        default: 1
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
@@ -31,7 +36,29 @@ on:
         required: false
 
 jobs:
+  setup-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+          API_LEVELS='${{ inputs.api_levels }}'
+          FLAVORS='${{ inputs.test_flavors }}'
+          NUM_SHARDS=${{ inputs.num_shards }}
+
+          if [ "$FLAVORS" = "both" ]; then
+            FLAVORS_JSON='["google", "fdroid"]'
+          else
+            FLAVORS_JSON="[\"$FLAVORS\"]"
+          fi
+
+          SHARDS_JSON=$(seq 0 $((NUM_SHARDS - 1)) | jq -R . | jq -s -c .)
+          
+          echo "matrix={\"api_level\":$API_LEVELS,\"flavor\":$FLAVORS_JSON,\"shard\":$SHARDS_JSON}" >> $GITHUB_OUTPUT
+
   androidTest:
+    needs: setup-matrix
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -39,14 +66,14 @@ jobs:
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     strategy:
-      matrix:
-        api-level: ${{ fromJson(inputs.api_levels) }} # Use the input to define the matrix
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup-matrix.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           submodules: 'recursive'
-          fetch-depth: 1  # Shallow clone - no version code calculation needed
+          fetch-depth: 1
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -78,13 +105,13 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
+          key: avd-${{ matrix.api_level }}
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ matrix.api-level }}
+          api-level: ${{ matrix.api_level }}
           arch: x86_64
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
@@ -94,25 +121,23 @@ jobs:
       - name: Determine test tasks
         id: test-tasks
         run: |
-          if [ "${{ inputs.test_flavors }}" = "google" ]; then
+          if [ "${{ matrix.flavor }}" = "google" ]; then
             echo "tasks=connectedGoogleDebugAndroidTest" >> $GITHUB_OUTPUT
-          elif [ "${{ inputs.test_flavors }}" = "fdroid" ]; then
-            echo "tasks=connectedFdroidDebugAndroidTest" >> $GITHUB_OUTPUT
           else
-            echo "tasks=connectedFdroidDebugAndroidTest connectedGoogleDebugAndroidTest" >> $GITHUB_OUTPUT
+            echo "tasks=connectedFdroidDebugAndroidTest" >> $GITHUB_OUTPUT
           fi
 
-      - name: Run Android Instrumented Tests and Generate Coverage
+      - name: Run Sharded Android Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2
         env:
           ANDROID_EMULATOR_WAIT_TIME_BEFORE_KILL: 60
         with:
-          api-level: ${{ matrix.api-level }}
+          api-level: ${{ matrix.api_level }}
           arch: x86_64
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport --continue --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport -Pandroid.testInstrumentationRunnerArguments.numShards=${{ inputs.num_shards }} -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} --continue --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}
@@ -136,7 +161,7 @@ jobs:
         if: ${{ always() && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v6
         with:
-          name: android-test-reports-api-${{ matrix.api-level }}
+          name: android-test-reports-api-${{ matrix.api_level }}-${{ matrix.flavor }}-shard-${{ matrix.shard }}
           path: |
             **/build/outputs/androidTest-results/connected/**
             **/build/reports/androidTests/connected/**

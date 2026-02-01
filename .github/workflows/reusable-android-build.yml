@@ -23,6 +23,11 @@ on:
         required: false
         type: boolean
         default: true
+      test_flavors:
+        description: 'Which flavors to build and test: "google", "fdroid", or "both"'
+        required: false
+        type: string
+        default: 'both'
 
 jobs:
   build:
@@ -77,8 +82,21 @@ jobs:
         run: |
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
+
+      - name: Determine build tasks
+        id: build-tasks
+        run: |
+          FLAVOR="${{ inputs.test_flavors }}"
+          if [ "$FLAVOR" = "google" ]; then
+            echo "tasks=assembleGoogleDebug testGoogleDebugUnitTest" >> $GITHUB_OUTPUT
+          elif [ "$FLAVOR" = "fdroid" ]; then
+            echo "tasks=assembleFdroidDebug testFdroidDebugUnitTest" >> $GITHUB_OUTPUT
+          else
+            echo "tasks=assembleDebug testGoogleDebugUnitTest testFdroidDebugUnitTest" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build and Run Unit Tests
-        run: ./gradlew assembleDebug testDebugUnitTest testGoogleDebugUnitTest testFdroidDebugUnitTest koverXmlReport --continue --scan
+        run: ./gradlew ${{ steps.build-tasks.outputs.tasks }} koverXmlReport -Pci=true --continue --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
@@ -101,14 +119,14 @@ jobs:
           files: "**/build/test-results/**/*.xml,**/build/outputs/androidTest-results/**/*.xml"
 
       - name: Upload F-Droid debug artifact
-        if: ${{ inputs.upload_artifacts }}
+        if: ${{ inputs.upload_artifacts && (inputs.test_flavors == 'fdroid' || inputs.test_flavors == 'both') }}
         uses: actions/upload-artifact@v6
         with:
           name: fdroidDebug
           path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
           retention-days: 14
       - name: Upload Google debug artifact
-        if: ${{ inputs.upload_artifacts }}
+        if: ${{ inputs.upload_artifacts && (inputs.test_flavors == 'google' || inputs.test_flavors == 'both') }}
         uses: actions/upload-artifact@v6
         with:
           name: googleDebug
