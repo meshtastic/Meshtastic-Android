@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.ByteString
+import okio.ByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.encodeToString
@@ -147,7 +147,7 @@ private fun EditBase64PreferencePreview() {
         value = Channel.getRandomKey(),
         enabled = true,
         keyboardActions = KeyboardActions {},
-        onValueChange = {},
+        onValueChange = { _ -> },
         onGenerateKey = {},
         modifier = Modifier.padding(16.dp),
     )

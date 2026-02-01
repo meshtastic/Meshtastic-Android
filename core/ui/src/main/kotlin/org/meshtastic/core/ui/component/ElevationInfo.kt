@@ -29,7 +29,7 @@ import org.meshtastic.core.strings.altitude
 import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 
 @Composable
 fun ElevationInfo(

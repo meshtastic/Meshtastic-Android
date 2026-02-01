@@ -21,22 +21,22 @@ package org.meshtastic.core.ui.component.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.User
 
 /** Simple [PreviewParameterProvider] that provides true and false values. */
 class BooleanProvider : PreviewParameterProvider<Boolean> {
     override val values: Sequence<Boolean> = sequenceOf(false, true)
 }
 
-private val user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build()
+private val user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe")
 val previewNode =
     Node(
         num = 13444,
         user = user,
         isIgnored = false,
-        paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+        paxcounter = Paxcount(ble = 10, wifi = 5),
         environmentMetrics =
-        TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
+        EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
     )

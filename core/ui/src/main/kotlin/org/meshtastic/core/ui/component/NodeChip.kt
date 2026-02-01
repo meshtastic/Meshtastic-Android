@@ -38,9 +38,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.User
 
 @Composable
 fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit)? = null) {
@@ -53,12 +53,12 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
             Modifier.width(IntrinsicSize.Min)
                 .defaultMinSize(minWidth = 72.dp, minHeight = 32.dp)
                 .padding(horizontal = 8.dp)
-                .semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } },
+                .semantics { contentDescription = node.user.short_name.ifEmpty { "Node" } },
             contentAlignment = Alignment.Center,
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = node.user.shortName.ifEmpty { "???" },
+                text = node.user.short_name.ifEmpty { "???" },
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 textDecoration = TextDecoration.LineThrough.takeIf { node.isIgnored },
                 textAlign = TextAlign.Center,
@@ -80,15 +80,15 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
 @Preview
 @Composable
 private fun NodeChipPreview() {
-    val user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build()
+    val user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe")
     val node =
         Node(
             num = 13444,
             user = user,
             isIgnored = false,
-            paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+            paxcounter = Paxcount(ble = 10, wifi = 5),
             environmentMetrics =
-            TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
+            EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
         )
     NodeChip(node = node)
 }

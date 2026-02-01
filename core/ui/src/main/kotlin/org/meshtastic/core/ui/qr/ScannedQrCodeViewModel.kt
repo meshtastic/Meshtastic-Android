@@ -27,12 +27,10 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.AppOnlyProtos
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.config
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,23 +41,25 @@ constructor(
     private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
     private val localConfig =
-        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
     /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
+    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+        getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(channelSet.settings)
 
-        val newConfig = config { lora = channelSet.loraConfig }
-        if (localConfig.value.lora != newConfig.lora) setConfig(newConfig)
+        val loraConfig = channelSet.lora_config
+        if (loraConfig != null && localConfig.value.lora != loraConfig) {
+            setConfig(Config(lora = loraConfig))
+        }
     }
 
-    private fun setChannel(channel: ChannelProtos.Channel) {
+    private fun setChannel(channel: Channel) {
         try {
-            serviceRepository.meshService?.setChannel(channel.toByteArray())
+            serviceRepository.meshService?.setChannel(Channel.ADAPTER.encode(channel))
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Set channel error" }
         }
@@ -68,7 +68,7 @@ constructor(
     // Set the radio config (also updates our saved copy in preferences)
     private fun setConfig(config: Config) {
         try {
-            serviceRepository.meshService?.setConfig(config.toByteArray())
+            serviceRepository.meshService?.setConfig(Config.ADAPTER.encode(config))
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Set config error" }
         }

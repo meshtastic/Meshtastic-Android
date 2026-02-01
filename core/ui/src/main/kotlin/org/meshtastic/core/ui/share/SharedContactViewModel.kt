@@ -27,7 +27,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,6 +41,6 @@ constructor(
     val unfilteredNodes: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
+    fun addSharedContact(sharedContact: SharedContact) =
         viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.ImportContact(sharedContact)) }
 }

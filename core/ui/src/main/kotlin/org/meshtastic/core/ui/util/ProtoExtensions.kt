@@ -26,6 +26,7 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
+import org.meshtastic.proto.Data
 import kotlin.time.Duration.Companion.days
 
 private const val SECONDS_TO_MILLIS = 1000L
@@ -48,10 +49,13 @@ fun Position.formatPositionTime(): String {
     return timeText
 }
 
-fun MeshPacket.toPosition(): Position? = if (decoded?.want_response != true) {
-    decoded?.payload?.let { runCatching { Position.ADAPTER.decode(it) }.getOrNull() }
-} else {
-    null
+fun MeshPacket.toPosition(): Position? {
+    val decoded = decoded ?: return null
+    return if (decoded.want_response != true) {
+        decoded.payload.let { runCatching { Position.ADAPTER.decode(it) }.getOrNull() }
+    } else {
+        null
+    }
 }
 
 /**
