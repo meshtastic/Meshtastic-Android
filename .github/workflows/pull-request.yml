@@ -1,5 +1,3 @@
-name: Android CI (PR)
-
 on:
   pull_request:
     branches:
@@ -41,16 +39,20 @@ jobs:
     secrets: inherit
 
   build:
-    needs: lint
-    if: ${{ !cancelled() && !failure() }}
+    needs:
+      - check-changes
+      - lint
+    if: ${{ needs.check-changes.outputs.code_changed == 'true' && !cancelled() && !failure() }}
     uses: ./.github/workflows/reusable-android-build.yml
     with:
       test_flavors: 'google'
     secrets: inherit
 
   androidTest:
-    needs: lint
-    if: ${{ !cancelled() && !failure() }}
+    needs:
+      - check-changes
+      - lint
+    if: ${{ needs.check-changes.outputs.code_changed == 'true' && !cancelled() && !failure() }}
     uses: ./.github/workflows/reusable-android-test.yml
     with:
       api_levels: '[35]' # Run only on API 35 for PRs
