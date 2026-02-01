@@ -134,12 +134,13 @@ fun EnvironmentMetricsChart(
                 /* Pressure on its own layer/axis */
                 if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
                     lineSeries {
+                        val pressureData = telemetries.filter {
+                            val v = Environment.BAROMETRIC_PRESSURE.getValue(it)
+                            v != null && !v.isNaN()
+                        }
                         series(
-                            x =
-                            telemetries.mapNotNull { t ->
-                                Environment.BAROMETRIC_PRESSURE.getValue(t)?.let { t.time }
-                            },
-                            y = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t) },
+                            x = pressureData.map { it.time },
+                            y = pressureData.map { Environment.BAROMETRIC_PRESSURE.getValue(it)!! },
                         )
                     }
                 }
@@ -147,9 +148,13 @@ fun EnvironmentMetricsChart(
                 Environment.entries.forEach { metric ->
                     if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
                         lineSeries {
+                            val metricData = telemetries.filter {
+                                val v = metric.getValue(it)
+                                v != null && !v.isNaN()
+                            }
                             series(
-                                x = telemetries.mapNotNull { t -> metric.getValue(t)?.let { t.time } },
-                                y = telemetries.mapNotNull { t -> metric.getValue(t) },
+                                x = metricData.map { it.time },
+                                y = metricData.map { metric.getValue(it)!! },
                             )
                         }
                     }
