@@ -23,7 +23,10 @@ import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.testing.Test
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.withType
 import org.gradle.plugin.use.PluginDependency
 import java.io.FileInputStream
 import java.util.Properties
@@ -52,3 +55,18 @@ val Project.configProperties: Properties
         }
         return properties
     }
+
+/**
+ * Configure common test options like parallel execution and logging.
+ */
+internal fun Project.configureTestOptions() {
+    tasks.withType<Test>().configureEach {
+        // Parallelize unit tests
+        maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+
+        // Show test results in the console
+        testLogging {
+            events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        }
+    }
+}

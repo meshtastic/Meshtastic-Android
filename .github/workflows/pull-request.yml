@@ -44,6 +44,8 @@ jobs:
     needs: lint
     if: ${{ !cancelled() && !failure() }}
     uses: ./.github/workflows/reusable-android-build.yml
+    with:
+      test_flavors: 'google'
     secrets: inherit
 
   androidTest:
@@ -53,6 +55,7 @@ jobs:
     with:
       api_levels: '[35]' # Run only on API 35 for PRs
       test_flavors: 'google' # Run only Google flavor for PRs (faster)
+      num_shards: 2 # Run tests in parallel across 2 emulators
     secrets: inherit
 
   # This job handles the case when no code changes are detected (docs-only PRs)

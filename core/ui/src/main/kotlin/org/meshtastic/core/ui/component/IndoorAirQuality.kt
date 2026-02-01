@@ -114,7 +114,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
         return
     }
     var isLegendOpen by remember { mutableStateOf(false) }
-    val iaqEnum = if (iaq != null) getIaq(iaq) else null
+    val iaqEnum = getIaq(iaq)
     val gradient = Brush.linearGradient(colors = Iaq.entries.map { it.color })
 
     if (iaqEnum != null) {
@@ -164,7 +164,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
 
                 IaqDisplayMode.Gauge -> {
                     CircularProgressIndicator(
-                        progress = iaq / 500f,
+                        progress = { iaq / 500f },
                         modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
                         strokeWidth = 8.dp,
                         color = iaqEnum.color,
@@ -178,7 +178,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                         modifier = Modifier.clickable { isLegendOpen = true },
                     ) {
                         LinearProgressIndicator(
-                            progress = iaq / 500f,
+                            progress = { iaq / 500f },
                             modifier = Modifier.fillMaxWidth().height(20.dp),
                             color = iaqEnum.color,
                         )

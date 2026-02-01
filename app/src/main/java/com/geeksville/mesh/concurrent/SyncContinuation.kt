@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.concurrent
 /** A deferred execution object (with various possible implementations) */
 interface Continuation<in T> {
@@ -45,25 +44,36 @@ class CallbackContinuation<in T>(private val cb: (Result<T>) -> Unit) : Continua
  */
 class SyncContinuation<T> : Continuation<T> {
 
-    private val mbox = java.lang.Object()
+    private val lock = java.util.concurrent.locks.ReentrantLock()
+    private val condition = lock.newCondition()
     private var result: Result<T>? = null
 
     override fun resume(res: Result<T>) {
-        synchronized(mbox) {
+        lock.lock()
+        try {
             result = res
-            mbox.notify()
+            condition.signal()
+        } finally {
+            lock.unlock()
         }
     }
 
     // Wait for the result (or throw an exception)
+    @Suppress("NestedBlockDepth")
     fun await(timeoutMsecs: Long = 0): T {
-        synchronized(mbox) {
+        lock.lock()
+        try {
             val startT = System.currentTimeMillis()
             while (result == null) {
-                mbox.wait(timeoutMsecs)
-
-                if (timeoutMsecs > 0 && ((System.currentTimeMillis() - startT) >= timeoutMsecs)) {
-                    throw Exception("SyncContinuation timeout")
+                if (timeoutMsecs > 0) {
+                    val remaining = timeoutMsecs - (System.currentTimeMillis() - startT)
+                    if (remaining <= 0) {
+                        throw Exception("SyncContinuation timeout")
+                    }
+                    // await returns false if waiting time elapsed
+                    condition.await(remaining, java.util.concurrent.TimeUnit.MILLISECONDS)
+                } else {
+                    condition.await()
                 }
             }
 
@@ -73,6 +83,8 @@ class SyncContinuation<T> : Continuation<T> {
             } else {
                 throw Exception("This shouldn't happen")
             }
+        } finally {
+            lock.unlock()
         }
     }
 }

@@ -77,49 +77,55 @@ configure<ApplicationExtension> {
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
         @Suppress("UnstableApiUsage")
-        androidResources.localeFilters.addAll(
-            listOf(
-                "en",
-                "ar",
-                "bg",
-                "ca",
-                "cs",
-                "de",
-                "el",
-                "es",
-                "et",
-                "fi",
-                "fr",
-                "ga",
-                "gl",
-                "hr",
-                "ht",
-                "hu",
-                "is",
-                "it",
-                "iw",
-                "ja",
-                "ko",
-                "lt",
-                "nl",
-                "no",
-                "pl",
-                "pt",
-                "pt-rBR",
-                "ro",
-                "ru",
-                "sk",
-                "sl",
-                "sq",
-                "sr",
-                "srp",
-                "sv",
-                "tr",
-                "uk",
-                "zh-rCN",
-                "zh-rTW",
-            ),
-        )
+        val ci = project.findProperty("ci")?.toString()?.toBoolean() ?: false
+        if (ci) {
+            println("CI build detected - limiting locale filters for faster packaging")
+            androidResources.localeFilters.addAll(listOf("en"))
+        } else {
+            androidResources.localeFilters.addAll(
+                listOf(
+                    "en",
+                    "ar",
+                    "bg",
+                    "ca",
+                    "cs",
+                    "de",
+                    "el",
+                    "es",
+                    "et",
+                    "fi",
+                    "fr",
+                    "ga",
+                    "gl",
+                    "hr",
+                    "ht",
+                    "hu",
+                    "is",
+                    "it",
+                    "iw",
+                    "ja",
+                    "ko",
+                    "lt",
+                    "nl",
+                    "no",
+                    "pl",
+                    "pt",
+                    "pt-rBR",
+                    "ro",
+                    "ru",
+                    "sk",
+                    "sl",
+                    "sq",
+                    "sr",
+                    "srp",
+                    "sv",
+                    "tr",
+                    "uk",
+                    "zh-rCN",
+                    "zh-rTW",
+                ),
+            )
+        }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
         dependenciesInfo {

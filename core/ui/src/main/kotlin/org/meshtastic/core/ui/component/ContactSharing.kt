@@ -260,7 +260,7 @@ fun userFieldsToString(user: MeshProtos.User): String {
             val value = user.getField(fieldDescriptor)
             val valueString = valueToString(value, fieldDescriptor) // Using the helper from previous example
             fieldLines.add("$fieldName: $valueString")
-        } else if (fieldDescriptor.isRepeated || fieldDescriptor.hasDefaultValue() || fieldDescriptor.isOptional) {
+        } else if (fieldDescriptor.isRepeated || fieldDescriptor.hasDefaultValue() || fieldDescriptor.hasPresence()) {
             val defaultValue = fieldDescriptor.defaultValue
             val valueString =
                 if (fieldDescriptor.isRepeated) {

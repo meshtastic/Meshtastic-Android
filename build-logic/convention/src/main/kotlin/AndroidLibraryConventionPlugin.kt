@@ -23,6 +23,7 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureFlavors
 import org.meshtastic.buildlogic.configureKotlinAndroid
+import org.meshtastic.buildlogic.configureTestOptions
 import org.meshtastic.buildlogic.disableUnnecessaryAndroidTests
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
@@ -50,6 +51,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             extensions.configure<LibraryAndroidComponentsExtension> {
                 disableUnnecessaryAndroidTests(target)
             }
+            configureTestOptions()
         }
     }
 }
