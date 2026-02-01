@@ -140,9 +140,7 @@ class MeshService : Service() {
                 SERVICE_NOTIFY_ID,
                 notification,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    var types =
-                        ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
-                            ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                     if (hasLocationPermission()) {
                         types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
                     }

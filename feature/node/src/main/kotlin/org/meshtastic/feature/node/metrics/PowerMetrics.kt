@@ -253,15 +253,17 @@ private fun PowerMetricsChart(
         LaunchedEffect(telemetries, selectedChannel) {
             modelProducer.runTransaction {
                 lineSeries {
+                    val currentData = telemetries.filter { !retrieveCurrent(selectedChannel, it).isNaN() }
                     series(
-                        x = telemetries.map { it.time },
-                        y = telemetries.map { retrieveCurrent(selectedChannel, it) },
+                        x = currentData.map { it.time },
+                        y = currentData.map { retrieveCurrent(selectedChannel, it) },
                     )
                 }
                 lineSeries {
+                    val voltageData = telemetries.filter { !retrieveVoltage(selectedChannel, it).isNaN() }
                     series(
-                        x = telemetries.map { it.time },
-                        y = telemetries.map { retrieveVoltage(selectedChannel, it) },
+                        x = voltageData.map { it.time },
+                        y = voltageData.map { retrieveVoltage(selectedChannel, it) },
                     )
                 }
             }
