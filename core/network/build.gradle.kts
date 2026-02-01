@@ -37,7 +37,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.protobuf)
+
 }
 
 configure<LibraryExtension> {

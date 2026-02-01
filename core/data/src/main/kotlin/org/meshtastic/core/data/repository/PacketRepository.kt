@@ -34,8 +34,9 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.PortNum
+import okio.ByteString.Companion.toByteString
 import javax.inject.Inject
 
 class PacketRepository
@@ -199,8 +200,8 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-                val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
-                dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+                val updatedData = packet.data.copy(status = status, sfppHash = hash.toByteString(), time = newTime)
+                dao.update(packet.copy(data = updatedData, sfpp_hash = hash.toByteString(), received_time = newTime))
             }
         }
 
@@ -222,7 +223,7 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime)
+                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
                 dao.update(updatedReaction)
             }
         }
@@ -240,8 +241,8 @@ constructor(
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-            val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
-            dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+            val updatedData = packet.data.copy(status = status, sfppHash = hash.toByteString(), time = newTime)
+            dao.update(packet.copy(data = updatedData, sfpp_hash = hash.toByteString(), received_time = newTime))
         }
 
         dao.findReactionBySfppHash(hash)?.let { reaction ->
@@ -249,7 +250,7 @@ constructor(
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime)
+            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
             dao.update(updatedReaction)
         }
     }
@@ -340,7 +341,7 @@ constructor(
         }
 
     private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<Packet>> =
-        getAllPackets(PortNum.WAYPOINT_APP_VALUE)
+        getAllPackets(PortNum.WAYPOINT_APP.value)
 
     companion object {
         private const val CONTACTS_PAGE_SIZE = 30

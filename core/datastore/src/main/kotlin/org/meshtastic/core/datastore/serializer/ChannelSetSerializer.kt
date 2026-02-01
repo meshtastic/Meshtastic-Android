@@ -19,23 +19,23 @@ package org.meshtastic.core.datastore.serializer
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
-import com.google.protobuf.InvalidProtocolBufferException
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
+import okio.IOException
+import org.meshtastic.proto.ChannelSet
 import java.io.InputStream
 import java.io.OutputStream
 
 /** Serializer for the [ChannelSet] object defined in apponly.proto. */
 @Suppress("BlockingMethodInNonBlockingContext")
 object ChannelSetSerializer : Serializer<ChannelSet> {
-    override val defaultValue: ChannelSet = ChannelSet.getDefaultInstance()
+    override val defaultValue: ChannelSet = ChannelSet()
 
     override suspend fun readFrom(input: InputStream): ChannelSet {
         try {
-            return ChannelSet.parseFrom(input)
-        } catch (exception: InvalidProtocolBufferException) {
+            return ChannelSet.ADAPTER.decode(input)
+        } catch (exception: IOException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
 
-    override suspend fun writeTo(t: ChannelSet, output: OutputStream) = t.writeTo(output)
+    override suspend fun writeTo(t: ChannelSet, output: OutputStream) = ChannelSet.ADAPTER.encode(output, t)
 }

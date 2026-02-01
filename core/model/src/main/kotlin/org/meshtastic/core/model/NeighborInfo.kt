@@ -16,28 +16,32 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.proto.PortNum
 
-val MeshProtos.MeshPacket.neighborInfo: MeshProtos.NeighborInfo?
-    get() =
-        if (hasDecoded() && decoded.portnumValue == 71) { // NEIGHBORINFO_APP_VALUE = 71
-            runCatching { MeshProtos.NeighborInfo.parseFrom(decoded.payload) }.getOrNull()
+val MeshPacket.neighborInfo: NeighborInfo?
+    get() {
+        val decoded = this.decoded
+        return if (decoded != null && decoded.portnum == PortNum.NEIGHBORINFO_APP) {
+            runCatching { NeighborInfo.ADAPTER.decode(decoded.payload) }.getOrNull()
         } else {
             null
         }
+    }
 
-fun MeshProtos.NeighborInfo.getNeighborInfoResponse(
+fun NeighborInfo.getNeighborInfoResponse(
     getUser: (nodeNum: Int) -> String,
     header: String = "Neighbors:",
 ): String = buildString {
     append(header)
     append("\n\n")
-    if (neighborsList.isEmpty()) {
+    if (neighbors.isEmpty()) {
         append("No neighbors reported.")
     } else {
-        neighborsList.forEach { n ->
+        neighbors.forEach { n ->
             append("• ")
-            append(getUser(n.nodeId))
+            append(getUser(n.node_id))
             append(" (SNR: ")
             append(n.snr)
             append(")\n")
@@ -45,7 +49,7 @@ fun MeshProtos.NeighborInfo.getNeighborInfoResponse(
     }
 }
 
-fun MeshProtos.MeshPacket.getNeighborInfoResponse(
+fun MeshPacket.getNeighborInfoResponse(
     getUser: (nodeNum: Int) -> String,
     header: String = "Neighbors:",
 ): String? = neighborInfo?.getNeighborInfoResponse(getUser, header)

@@ -21,10 +21,11 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.google.protobuf.TextFormat
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.FromRadio
-import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.NodeInfo
+import org.meshtastic.proto.Position
 import java.io.IOException
 
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
@@ -37,52 +38,28 @@ data class MeshLog(
     @ColumnInfo(name = "from_num", defaultValue = "0") val fromNum: Int = 0,
     @ColumnInfo(name = "port_num", defaultValue = "0") val portNum: Int = 0,
     @ColumnInfo(name = "from_radio", typeAffinity = ColumnInfo.BLOB, defaultValue = "x''")
-    val fromRadio: FromRadio = FromRadio.getDefaultInstance(),
+    val fromRadio: FromRadio = FromRadio(),
 ) {
 
-    val meshPacket: MeshProtos.MeshPacket?
+    val meshPacket: MeshPacket?
         get() {
-            if (message_type == "Packet") {
-                val builder = MeshProtos.MeshPacket.newBuilder()
-                try {
-                    TextFormat.getParser().merge(raw_message, builder)
-                    return builder.build()
-                } catch (e: IOException) {}
-            }
+            // TextFormat parsing is not supported in Wire.
+            // TODO: partial implementation or JSON migration if needed.
             return null
         }
 
-    val nodeInfo: MeshProtos.NodeInfo?
+    val nodeInfo: NodeInfo?
         get() {
-            if (message_type == "NodeInfo") {
-                val builder = MeshProtos.NodeInfo.newBuilder()
-                try {
-                    TextFormat.getParser().merge(raw_message, builder)
-                    return builder.build()
-                } catch (e: IOException) {}
-            }
             return null
         }
 
-    val myNodeInfo: MeshProtos.MyNodeInfo?
+    val myNodeInfo: MyNodeInfo?
         get() {
-            if (message_type == "MyNodeInfo") {
-                val builder = MeshProtos.MyNodeInfo.newBuilder()
-                try {
-                    TextFormat.getParser().merge(raw_message, builder)
-                    return builder.build()
-                } catch (e: IOException) {}
-            }
             return null
         }
 
-    val position: MeshProtos.Position?
+    val position: Position?
         get() {
-            return meshPacket?.run {
-                if (hasDecoded() && decoded.portnumValue == Portnums.PortNum.POSITION_APP_VALUE) {
-                    return MeshProtos.Position.parseFrom(decoded.payload)
-                }
-                return null
-            } ?: nodeInfo?.position
+            return null
         }
 }

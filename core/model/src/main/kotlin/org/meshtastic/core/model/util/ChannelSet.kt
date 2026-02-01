@@ -24,8 +24,9 @@ import co.touchlab.kermit.Logger
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
+import org.meshtastic.proto.ChannelSet
 import java.net.MalformedURLException
 
 private const val MESHTASTIC_HOST = "meshtastic.org"
@@ -46,20 +47,31 @@ fun Uri.toChannelSet(): ChannelSet {
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
-    val url = ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
+    val fragmentBytes = Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS)
+    val url = ChannelSet.ADAPTER.decode(fragmentBytes.toByteString())
     val shouldAdd =
         fragment?.substringAfter('?', "")?.takeUnless { it.isBlank() }?.equals("add=true")
             ?: getBooleanQueryParameter("add", false)
 
-    return url.toBuilder().apply { if (shouldAdd) clearLoraConfig() }.build()
+    return if (shouldAdd) url.copy(lora_config = null) else url
 }
 
 /** @return A list of globally unique channel IDs usable with MQTT subscribe() */
 val ChannelSet.subscribeList: List<String>
-    get() = settingsList.filter { it.downlinkEnabled }.map { Channel(it, loraConfig).name }
+    get() {
+        val loraConfig = this.lora_config
+        return settings.filter { it.downlink_enabled }.mapNotNull {
+            if (loraConfig != null) Channel(it, loraConfig).name else null
+        }
+    }
 
-fun ChannelSet.getChannel(index: Int): Channel? =
-    if (settingsCount > index) Channel(getSettings(index), loraConfig) else null
+fun ChannelSet.getChannel(index: Int): Channel? {
+    val loraConfig = this.lora_config
+    return if (settings.size > index) {
+        val s = settings[index]
+        if (loraConfig != null) Channel(s, loraConfig) else null
+    } else null
+}
 
 /** Return the primary channel info */
 val ChannelSet.primaryChannel: Channel?
@@ -71,7 +83,7 @@ val ChannelSet.primaryChannel: Channel?
  * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): Uri {
-    val channelBytes = this.toByteArray() ?: ByteArray(0) // if unset just use empty
+    val channelBytes = ChannelSet.ADAPTER.encode(this)
     val enc = Base64.encodeToString(channelBytes, BASE64FLAGS)
     val p = if (upperCasePrefix) URL_PREFIX.uppercase() else URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""
@@ -88,3 +100,4 @@ fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
     Logger.e { "URL was too complex to render as barcode" }
     null
 }
+

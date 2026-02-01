@@ -80,7 +80,7 @@ import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.DeliveryInfo
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.User
 
 @Composable
 private fun ReactionItem(
@@ -343,7 +343,7 @@ private fun ReactionRowPreview() {
             listOf(
                 Reaction(
                     replyId = 1,
-                    user = MeshProtos.User.getDefaultInstance(),
+                    user = User(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
                     snr = -1.0f,
@@ -352,7 +352,7 @@ private fun ReactionRowPreview() {
                 ),
                 Reaction(
                     replyId = 1,
-                    user = MeshProtos.User.getDefaultInstance(),
+                    user = User(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
                     snr = -1.0f,

@@ -43,7 +43,7 @@ detekt = "1.23.8"
 devtools-ksp = "2.3.5"
 markdownRenderer = "0.39.1"
 osmdroid-android = "6.1.20"
-protobuf = "4.33.5"
+wire = "5.2.1"
 vico = "3.0.0-beta.3"
 
 
@@ -116,8 +116,7 @@ maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = 
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
-protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
+wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
@@ -238,7 +237,7 @@ datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.22.0
 # Removed dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
-protobuf = { id = "com.google.protobuf", version = "0.9.6" }
+wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }

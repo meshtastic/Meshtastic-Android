@@ -14,52 +14,56 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.protobuf)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.wire)
     `maven-publish`
 }
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["googleRelease"])
-                artifactId = "core-proto"
-            }
-        }
-    }
-}
+// afterEvaluate {
+//     publishing {
+//         publications {
+//             create<MavenPublication>("release") {
+//                 from(components["googleRelease"])
+//                 artifactId = "core-proto"
+//             }
+//         }
+//     }
+// }
 
-configure<LibraryExtension> {
-    namespace = "org.meshtastic.core.proto"
-
-    defaultConfig {
-        // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
+kotlin {
+    jvm()
+    androidLibrary {
+        namespace = "org.meshtastic.core.proto"
+        compileSdk = 35
         minSdk = 21
+        
+        compilerOptions {
+             jvmTarget.set(JvmTarget.JVM_17)
+        }
     }
-
-    publishing { singleVariant("googleRelease") { withSourcesJar() } }
-}
-
-// per protobuf-gradle-plugin docs, this is recommended for android
-protobuf {
-    protoc { artifact = libs.protobuf.protoc.get().toString() }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java") {}
-                create("kotlin") {}
-            }
+    
+    sourceSets {
+        commonMain.dependencies {
+            api(libs.wire.runtime)
         }
     }
 }
 
-dependencies {
-    // This needs to be API for consuming modules
-    api(libs.protobuf.kotlin)
+wire {
+    sourcePath {
+        srcDir("src/main/proto")
+        srcDir("src/main/wire-includes")
+    }
+    kotlin {
+    }
+    root("meshtastic.*")
 }
+
+

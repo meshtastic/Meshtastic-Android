@@ -43,8 +43,11 @@ import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.longName
+import org.meshtastic.core.model.util.shortName
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.User
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -107,27 +110,23 @@ constructor(
     fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
         ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))
 
-    fun getUser(nodeNum: Int): MeshProtos.User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
+    fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
 
-    fun getUser(userId: String): MeshProtos.User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
-        ?: MeshProtos.User.newBuilder()
-            .setId(userId)
-            .setLongName(
-                if (userId == DataPacket.ID_LOCAL) {
-                    ourNodeInfo.value?.user?.longName ?: "Local"
-                } else {
-                    "Meshtastic ${userId.takeLast(n = 4)}"
-                },
-            )
-            .setShortName(
-                if (userId == DataPacket.ID_LOCAL) {
-                    ourNodeInfo.value?.user?.shortName ?: "Local"
-                } else {
-                    userId.takeLast(n = 4)
-                },
-            )
-            .setHwModel(MeshProtos.HardwareModel.UNSET)
-            .build()
+    fun getUser(userId: String): User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
+        ?: User(
+            id = userId,
+            long_name = if (userId == DataPacket.ID_LOCAL) {
+                ourNodeInfo.value?.user?.longName ?: "Local"
+            } else {
+                "Meshtastic ${userId.takeLast(n = 4)}"
+            },
+            short_name = if (userId == DataPacket.ID_LOCAL) {
+                ourNodeInfo.value?.user?.shortName ?: "Local"
+            } else {
+                userId.takeLast(n = 4)
+            },
+            hw_model = HardwareModel.UNSET,
+        )
 
     fun getNodes(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,

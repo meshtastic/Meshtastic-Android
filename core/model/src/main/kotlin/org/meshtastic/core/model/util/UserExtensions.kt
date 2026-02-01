@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model.util
 
-import android.util.Base64
-import okio.ByteString
-import okio.ByteString.Companion.toByteString
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.User
 
-fun ByteString.encodeToString() = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
+val User.longName: String
+    get() = long_name
 
-fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()
+val User.shortName: String
+    get() = short_name
+
+val User.isLicensed: Boolean
+    get() = is_licensed
+
+val User.hwModel: HardwareModel
+    get() = hw_model
+
+/**
+ * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null if
+ * unset
+ */
+val User.hwModelString: String?
+    get() =
+        if (hw_model == HardwareModel.UNSET) {
+            null
+        } else {
+            hw_model.name.replace('_', '-').replace('p', '.').lowercase()
+        }

@@ -19,23 +19,23 @@ package org.meshtastic.core.datastore.serializer
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
-import com.google.protobuf.InvalidProtocolBufferException
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
+import okio.IOException
+import org.meshtastic.proto.LocalModuleConfig
 import java.io.InputStream
 import java.io.OutputStream
 
 /** Serializer for the [LocalModuleConfig] object defined in localonly.proto. */
 @Suppress("BlockingMethodInNonBlockingContext")
 object ModuleConfigSerializer : Serializer<LocalModuleConfig> {
-    override val defaultValue: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
+    override val defaultValue: LocalModuleConfig = LocalModuleConfig()
 
     override suspend fun readFrom(input: InputStream): LocalModuleConfig {
         try {
-            return LocalModuleConfig.parseFrom(input)
-        } catch (exception: InvalidProtocolBufferException) {
+            return LocalModuleConfig.ADAPTER.decode(input)
+        } catch (exception: IOException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
 
-    override suspend fun writeTo(t: LocalModuleConfig, output: OutputStream) = t.writeTo(output)
+    override suspend fun writeTo(t: LocalModuleConfig, output: OutputStream) = LocalModuleConfig.ADAPTER.encode(output, t)
 }

@@ -21,7 +21,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Position
 
 @Entity(
     tableName = "traceroute_node_position",
@@ -41,5 +41,5 @@ data class TracerouteNodePositionEntity(
     @ColumnInfo(name = "log_uuid") val logUuid: String,
     @ColumnInfo(name = "request_id") val requestId: Int,
     @ColumnInfo(name = "node_num") val nodeNum: Int,
-    @ColumnInfo(name = "position", typeAffinity = ColumnInfo.BLOB) val position: MeshProtos.Position,
+    @ColumnInfo(name = "position", typeAffinity = ColumnInfo.BLOB) val position: Position,
 )
