@@ -65,7 +65,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
 
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
@@ -125,7 +124,7 @@
         <service
             android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
-            android:foregroundServiceType="connectedDevice|location|dataSync"
+            android:foregroundServiceType="connectedDevice|location"
             android:exported="true" tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
