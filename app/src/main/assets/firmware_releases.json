@@ -189,9 +189,9 @@
   },
   "pullRequests": [
     {
-      "id": "9495",
-      "title": "BUGNUM-9406: Decreased text size for the Heltec E213",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9495",
+      "id": "9501",
+      "title": "Improved Periodic class",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9501",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
@@ -246,6 +246,12 @@
       "id": "9196",
       "title": "Morse Code Input for Single-Button Devices",
       "page_url": "https://github.com/meshtastic/firmware/pull/9196",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9186",
+      "title": "fix: extend retransmission timeout for ROUTER_LATE broadcast window",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9186",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
