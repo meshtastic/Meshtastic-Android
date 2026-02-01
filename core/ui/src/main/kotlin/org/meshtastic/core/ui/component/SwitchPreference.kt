@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedContent
@@ -47,24 +46,22 @@ fun SwitchPreference(
     containerColor: Color? = null,
     loading: Boolean = false,
 ) {
+    val defaultColors = ListItemDefaults.colors()
+
+    @Suppress("DEPRECATION")
+    val currentColors =
+        if (enabled) {
+            defaultColors
+        } else {
+            defaultColors.copy(
+                headlineColor = defaultColors.contentColor.copy(alpha = 0.5f),
+                supportingTextColor = defaultColors.supportingContentColor.copy(alpha = 0.5f),
+            )
+        }
+            .let { if (containerColor != null) it.copy(containerColor = containerColor) else it }
+
     ListItem(
-        colors =
-        ListItemDefaults.colors()
-            .copy(
-                headlineColor =
-                if (enabled) {
-                    ListItemDefaults.colors().headlineColor
-                } else {
-                    ListItemDefaults.colors().headlineColor.copy(alpha = 0.5f)
-                },
-                supportingTextColor =
-                if (enabled) {
-                    ListItemDefaults.colors().supportingTextColor
-                } else {
-                    ListItemDefaults.colors().supportingTextColor.copy(alpha = 0.5f)
-                },
-                containerColor = containerColor ?: ListItemDefaults.colors().containerColor,
-            ),
+        colors = currentColors,
         modifier =
         (padding?.let { Modifier.padding(it) } ?: modifier).toggleable(
             value = checked,

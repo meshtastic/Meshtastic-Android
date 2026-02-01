@@ -293,7 +293,6 @@ constructor(
                         TelemetryType.LOCAL_STATS -> localStats = TelemetryProtos.LocalStats.getDefaultInstance()
                         TelemetryType.DEVICE -> deviceMetrics = TelemetryProtos.DeviceMetrics.getDefaultInstance()
                         TelemetryType.HOST -> hostMetrics = TelemetryProtos.HostMetrics.getDefaultInstance()
-                        else -> {}
                     }
                 }
                     .toByteString()

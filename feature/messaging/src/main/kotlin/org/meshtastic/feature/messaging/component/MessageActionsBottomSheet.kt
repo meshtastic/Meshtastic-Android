@@ -27,10 +27,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Reply
 import androidx.compose.material.icons.rounded.AddReaction
 import androidx.compose.material.icons.rounded.ContentCopy
 import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Reply
 import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -86,7 +86,9 @@ fun MessageActionsContent(
 
         ListItem(
             headlineContent = { Text(stringResource(Res.string.reply)) },
-            leadingContent = { Icon(Icons.Rounded.Reply, contentDescription = stringResource(Res.string.reply)) },
+            leadingContent = {
+                Icon(Icons.AutoMirrored.Rounded.Reply, contentDescription = stringResource(Res.string.reply))
+            },
             modifier = Modifier.clickable(onClick = onReply),
         )
 

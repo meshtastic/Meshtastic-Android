@@ -48,6 +48,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.rounded.SpeakerNotes
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.rounded.ArrowDownward
 import androidx.compose.material.icons.rounded.ChatBubbleOutline
@@ -57,7 +58,6 @@ import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FilterListOff
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.SpeakerNotes
 import androidx.compose.material.icons.rounded.SpeakerNotesOff
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
@@ -828,7 +828,8 @@ private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Uni
         },
         leadingIcon = {
             Icon(
-                imageVector = if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.Rounded.SpeakerNotes,
+                imageVector =
+                if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.AutoMirrored.Rounded.SpeakerNotes,
                 contentDescription = title,
             )
         },

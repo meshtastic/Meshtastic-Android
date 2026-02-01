@@ -21,5 +21,8 @@ kotlin {
     @Suppress("UnstableApiUsage")
     android { androidResources.enable = false }
 
-    sourceSets { androidMain.dependencies { implementation(libs.androidx.core.ktx) } }
+    sourceSets {
+        androidMain.dependencies { implementation(libs.androidx.core.ktx) }
+        commonTest.dependencies { implementation(kotlin("test")) }
+    }
 }
