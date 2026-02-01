@@ -520,7 +520,7 @@ internal fun MessageStatusDialog(
         remember(message.relayNode, nodes, ourNode) {
             derivedStateOf {
                 message.relayNode?.let { relayNodeId ->
-                    Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.longName
+                    Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
                 }
             }
         }

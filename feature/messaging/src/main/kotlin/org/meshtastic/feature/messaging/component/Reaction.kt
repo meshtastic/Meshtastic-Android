@@ -218,7 +218,7 @@ internal fun ReactionDialog(
 
         val relayNodeName =
             reaction.relayNode?.let { relayNodeId ->
-                Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.longName
+                Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
             }
 
         DeliveryInfo(
@@ -268,9 +268,9 @@ internal fun ReactionDialog(
                     val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
                     val displayName =
                         if (isLocal) {
-                            "${reaction.user.longName} (${stringResource(Res.string.you)})"
+                            "${reaction.user.long_name} (${stringResource(Res.string.you)})"
                         } else {
-                            reaction.user.longName
+                            reaction.user.long_name
                         }
                     Text(text = displayName, style = MaterialTheme.typography.titleMedium)
                     Row(verticalAlignment = Alignment.CenterVertically) {

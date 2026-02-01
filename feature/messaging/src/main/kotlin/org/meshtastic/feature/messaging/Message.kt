@@ -227,7 +227,7 @@ fun MessageScreen(
         remember(nodeId, channelName, viewModel) {
             when (nodeId) {
                 DataPacket.ID_BROADCAST -> channelName
-                else -> viewModel.getUser(nodeId).longName
+                else -> viewModel.getUser(nodeId).long_name
             }
         }
 
@@ -535,7 +535,7 @@ private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ou
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.shortName ?: unknownUserText),
+                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.short_name ?: unknownUserText),
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(

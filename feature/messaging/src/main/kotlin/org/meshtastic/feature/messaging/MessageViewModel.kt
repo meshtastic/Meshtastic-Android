@@ -190,7 +190,7 @@ constructor(
         // if the destination is a node, we need to ensure it's a
         // favorite so it does not get removed from the on-device node database.
         if (channel == null) { // no channel specified, so we assume it's a direct message
-            val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
+            val fwVersion = ourNodeInfo.value?.metadata?.firmware_version
             val destNode = nodeRepository.getNode(dest)
             val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
 
