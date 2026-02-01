@@ -113,19 +113,19 @@ constructor(
 
     private fun fromRadioPacketFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
-            try {
-                // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
-                val packet =
+            val packet =
+                try {
                     fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
-                        ?: run {
-                            Logger.d { "[$address] fromRadio queue drain complete (read empty/null)" }
-                            break
-                        }
-                send(packet)
-            } catch (e: Exception) {
-                Logger.w(e) { "[$address] Error reading fromRadioCharacteristic (likely disconnected)" }
+                } catch (e: Exception) {
+                    Logger.w(e) { "[$address] Error reading fromRadioCharacteristic (likely disconnected)" }
+                    null
+                }
+
+            if (packet == null) {
+                Logger.d { "[$address] fromRadio queue drain complete or error reading characteristic" }
                 break
             }
+            send(packet)
         }
     }
 
