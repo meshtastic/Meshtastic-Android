@@ -31,7 +31,7 @@ class HiltConventionPlugin : Plugin<Project> {
                 // fixme: remove when hilt supports kotlin 2.3.x
                 "ksp"(libs.library("kotlin-metadata-jvm"))
 
-                "ksp"(libs.library("hilt.compiler"))
+                "ksp"(libs.library("hilt-compiler"))
                 "implementation"(libs.library("hilt-android"))
             }
 

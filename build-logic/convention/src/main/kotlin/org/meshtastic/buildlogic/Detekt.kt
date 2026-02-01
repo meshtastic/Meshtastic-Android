@@ -28,6 +28,7 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
     config.setFrom("$rootDir/config/detekt/detekt.yml")
     buildUponDefaultConfig = true
     allRules = false
+    parallel = true
     
     // Default sources
     source.setFrom(
