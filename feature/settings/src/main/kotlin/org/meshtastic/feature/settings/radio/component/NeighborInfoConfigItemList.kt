@@ -37,14 +37,12 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val neighborInfoConfig = state.moduleConfig.neighborInfo
-    val formState = rememberConfigState(initialValue = neighborInfoConfig)
+    val formState = rememberConfigState(initialValue = neighborInfoConfig, adapter = ModuleConfig.NeighborInfoConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -74,7 +72,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                     value = formState.value.updateInterval,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { updateInterval = it } },
+                    onValueChanged = { formState.value = formState.value.copy(updateInterval = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -82,7 +80,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                     summary = stringResource(Res.string.config_device_transmitOverLora_summary),
                     checked = formState.value.transmitOverLora,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { transmitOverLora = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(transmitOverLora = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

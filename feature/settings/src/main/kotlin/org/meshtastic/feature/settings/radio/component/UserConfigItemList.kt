@@ -47,17 +47,17 @@ import org.meshtastic.core.ui.component.RegularPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.User
 
 @Composable
 fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
-    val formState = rememberConfigState(initialValue = userConfig)
-    val capabilities = remember(state.metadata?.firmwareVersion) { Capabilities(state.metadata?.firmwareVersion) }
+    val formState = rememberConfigState(initialValue = userConfig, adapter = User.ADAPTER)
+    val capabilities = remember(state.metadata?.firmware_version) { Capabilities(state.metadata?.firmware_version) }
 
-    val validLongName = formState.value.longName.isNotBlank()
-    val validShortName = formState.value.shortName.isNotBlank()
+    val validLongName = formState.value.long_name.isNotBlank()
+    val validShortName = formState.value.short_name.isNotBlank()
     val validNames = validLongName && validShortName
     val focusManager = LocalFocusManager.current
 
@@ -80,31 +80,31 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.long_name),
-                    value = formState.value.longName,
+                    value = formState.value.long_name,
                     maxSize = 39, // long_name max_size:40
                     enabled = state.connected,
                     isError = !validLongName,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { longName = it } },
+                    onValueChanged = { formState.value = formState.value.copy(long_name = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.short_name),
-                    value = formState.value.shortName,
+                    value = formState.value.short_name,
                     maxSize = 4, // short_name max_size:5
                     enabled = state.connected,
                     isError = !validShortName,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { shortName = it } },
+                    onValueChanged = { formState.value = formState.value.copy(short_name = it) },
                 )
                 HorizontalDivider()
                 RegularPreference(
                     title = stringResource(Res.string.hardware_model),
-                    subtitle = formState.value.hwModel.name,
+                    subtitle = formState.value.hw_model.name,
                     onClick = {},
                 )
                 HorizontalDivider()
@@ -112,19 +112,19 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
                     title = stringResource(Res.string.unmessageable),
                     summary = stringResource(Res.string.unmonitored_or_infrastructure),
                     checked =
-                    formState.value.isUnmessagable ||
+                    formState.value.is_unmessagable == true ||
                         (!capabilities.canToggleUnmessageable && formState.value.role.isUnmessageableRole()),
-                    enabled = formState.value.hasIsUnmessagable() || capabilities.canToggleUnmessageable,
-                    onCheckedChange = { formState.value = formState.value.copy { isUnmessagable = it } },
+                    enabled = formState.value.is_unmessagable != null || capabilities.canToggleUnmessageable,
+                    onCheckedChange = { formState.value = formState.value.copy(is_unmessagable = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.licensed_amateur_radio),
                     summary = stringResource(Res.string.licensed_amateur_radio_text),
-                    checked = formState.value.isLicensed,
+                    checked = formState.value.is_licensed == true,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { isLicensed = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(is_licensed = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

@@ -33,7 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.MessageLite
+import com.squareup.wire.Message
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.discard_changes
@@ -44,7 +44,7 @@ import org.meshtastic.feature.settings.radio.ResponseState
 
 @Suppress("LongMethod")
 @Composable
-fun <T : MessageLite> RadioConfigScreenList(
+fun <T : Message<T, *>> RadioConfigScreenList(
     title: String,
     onBack: () -> Unit,
     responseState: ResponseState<Any>,

@@ -56,7 +56,7 @@ fun ShutdownConfirmationDialog(
     icon: ImageVector? = Icons.Rounded.Warning,
     onConfirm: () -> Unit,
 ) {
-    val nodeLongName = node?.user?.longName ?: "Unknown Node"
+    val nodeLongName = node?.user?.long_name ?: "Unknown Node"
 
     AlertDialog(
         onDismissRequest = {},

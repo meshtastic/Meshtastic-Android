@@ -36,14 +36,12 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val remoteHardwareConfig = state.moduleConfig.remoteHardware
-    val formState = rememberConfigState(initialValue = remoteHardwareConfig)
+    val formState = rememberConfigState(initialValue = remoteHardwareConfig, adapter = ModuleConfig.RemoteHardwareConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -72,7 +70,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()
                     title = stringResource(Res.string.allow_undefined_pin_access),
                     checked = formState.value.allowUndefinedPinAccess,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { allowUndefinedPinAccess = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(allowUndefinedPinAccess = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()

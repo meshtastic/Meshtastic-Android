@@ -38,14 +38,12 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val ambientLightingConfig = state.moduleConfig.ambientLighting
-    val formState = rememberConfigState(initialValue = ambientLightingConfig)
+    val formState = rememberConfigState(initialValue = ambientLightingConfig, adapter = ModuleConfig.AmbientLightingConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -66,7 +64,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                     title = stringResource(Res.string.led_state),
                     checked = formState.value.ledState,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { ledState = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(ledState = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -75,21 +73,21 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                     value = formState.value.current,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { current = it } },
+                    onValueChanged = { formState.value = formState.value.copy(current = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.red),
                     value = formState.value.red,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { red = it } },
+                    onValueChanged = { formState.value = formState.value.copy(red = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.green),
                     value = formState.value.green,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { green = it } },
+                    onValueChanged = { formState.value = formState.value.copy(green = it) },
                 )
 
                 EditTextPreference(
@@ -97,7 +95,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(
                     value = formState.value.blue,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { blue = it } },
+                    onValueChanged = { formState.value = formState.value.copy(blue = it) },
                 )
             }
         }

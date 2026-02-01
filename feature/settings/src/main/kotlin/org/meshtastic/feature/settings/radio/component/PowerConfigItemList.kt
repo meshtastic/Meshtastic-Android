@@ -47,13 +47,12 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
 
 @Composable
 fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val powerConfig = state.radioConfig.power
-    val formState = rememberConfigState(initialValue = powerConfig)
+    val formState = rememberConfigState(initialValue = powerConfig, adapter = Config.PowerConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -75,7 +74,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     summary = stringResource(Res.string.config_power_is_power_saving_summary),
                     checked = formState.value.isPowerSaving,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(isPowerSaving = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -86,7 +85,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it.toInt() }
+                        formState.value = formState.value.copy(onBatteryShutdownAfterSecs = it.toInt())
                     },
                 )
                 HorizontalDivider()
@@ -95,7 +94,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     checked = formState.value.adcMultiplierOverride > 0f,
                     enabled = state.connected,
                     onCheckedChange = {
-                        formState.value = formState.value.copy { adcMultiplierOverride = if (it) 1.0f else 0.0f }
+                        formState.value = formState.value.copy(adcMultiplierOverride = if (it) 1.0f else 0.0f)
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -106,7 +105,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                         value = formState.value.adcMultiplierOverride,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                        onValueChanged = { formState.value = formState.value.copy { adcMultiplierOverride = it } },
+                        onValueChanged = { formState.value = formState.value.copy(adcMultiplierOverride = it) },
                     )
                 }
                 HorizontalDivider()
@@ -116,14 +115,14 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     selectedItem = formState.value.waitBluetoothSecs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy { waitBluetoothSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(waitBluetoothSecs = it.toInt()) },
                 )
                 HorizontalDivider()
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.super_deep_sleep_duration_seconds),
                     selectedItem = formState.value.sdsSecs.toLong(),
-                    onItemSelected = { formState.value = formState.value.copy { sdsSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(sdsSecs = it.toInt()) },
                     enabled = state.connected,
                     items = sdsSecsItems.map { it.value to it.toDisplayString() },
                 )
@@ -134,7 +133,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     selectedItem = formState.value.minWakeSecs.toLong(),
                     enabled = state.connected,
                     items = minWakeItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy { minWakeSecs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(minWakeSecs = it.toInt()) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -142,7 +141,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     value = formState.value.deviceBatteryInaAddress,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { deviceBatteryInaAddress = it } },
+                    onValueChanged = { formState.value = formState.value.copy(deviceBatteryInaAddress = it) },
                 )
             }
         }

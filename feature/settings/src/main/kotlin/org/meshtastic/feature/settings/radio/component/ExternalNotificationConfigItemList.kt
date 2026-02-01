@@ -77,8 +77,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 import java.io.File
 
 private const val MAX_RINGTONE_SIZE = 230
@@ -93,7 +91,7 @@ fun ExternalNotificationConfigScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val extNotificationConfig = state.moduleConfig.externalNotification
     val ringtone = state.ringtone
-    val formState = rememberConfigState(initialValue = extNotificationConfig)
+    val formState = rememberConfigState(initialValue = extNotificationConfig, adapter = ModuleConfig.ExternalNotificationConfig.ADAPTER)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
@@ -159,7 +157,7 @@ fun ExternalNotificationConfigScreen(
                     title = stringResource(Res.string.alert_message_led),
                     checked = formState.value.alertMessage,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { alertMessage = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(alertMessage = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -167,7 +165,7 @@ fun ExternalNotificationConfigScreen(
                     title = stringResource(Res.string.alert_message_buzzer),
                     checked = formState.value.alertMessageBuzzer,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { alertMessageBuzzer = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(alertMessageBuzzer = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -175,7 +173,7 @@ fun ExternalNotificationConfigScreen(
                     title = stringResource(Res.string.alert_message_vibra),
                     checked = formState.value.alertMessageVibra,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { alertMessageVibra = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(alertMessageVibra = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -187,7 +185,7 @@ fun ExternalNotificationConfigScreen(
                     title = stringResource(Res.string.alert_bell_led),
                     checked = formState.value.alertBell,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { alertBell = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(alertBell = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -195,7 +193,7 @@ fun ExternalNotificationConfigScreen(
                     title = stringResource(Res.string.alert_bell_buzzer),
                     checked = formState.value.alertBellBuzzer,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { alertBellBuzzer = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(alertBellBuzzer = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -203,7 +201,7 @@ fun ExternalNotificationConfigScreen(
                     title = stringResource(Res.string.alert_bell_vibra),
                     checked = formState.value.alertBellVibra,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { alertBellVibra = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(alertBellVibra = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -217,7 +215,7 @@ fun ExternalNotificationConfigScreen(
                     items = gpio,
                     selectedItem = formState.value.output,
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.copy { output = it } },
+                    onItemSelected = { formState.value = formState.value.copy(output = it) },
                 )
                 if (formState.value.output != 0) {
                     HorizontalDivider()
@@ -225,7 +223,7 @@ fun ExternalNotificationConfigScreen(
                         title = stringResource(Res.string.output_led_active_high),
                         checked = formState.value.active,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.copy { active = it } },
+                        onCheckedChange = { formState.value = formState.value.copy(active = it) },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
@@ -235,7 +233,7 @@ fun ExternalNotificationConfigScreen(
                     items = gpio,
                     selectedItem = formState.value.outputBuzzer,
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.copy { outputBuzzer = it } },
+                    onItemSelected = { formState.value = formState.value.copy(outputBuzzer = it) },
                 )
                 if (formState.value.outputBuzzer != 0) {
                     HorizontalDivider()
@@ -243,7 +241,7 @@ fun ExternalNotificationConfigScreen(
                         title = stringResource(Res.string.use_pwm_buzzer),
                         checked = formState.value.usePwm,
                         enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.copy { usePwm = it } },
+                        onCheckedChange = { formState.value = formState.value.copy(usePwm = it) },
                         containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
@@ -253,7 +251,7 @@ fun ExternalNotificationConfigScreen(
                     items = gpio,
                     selectedItem = formState.value.outputVibra,
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.copy { outputVibra = it } },
+                    onItemSelected = { formState.value = formState.value.copy(outputVibra = it) },
                 )
                 HorizontalDivider()
                 val outputItems = remember { IntervalConfiguration.OUTPUT.allowedIntervals }
@@ -262,7 +260,7 @@ fun ExternalNotificationConfigScreen(
                     items = outputItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.outputMs.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.copy { outputMs = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(outputMs = it.toInt()) },
                 )
                 HorizontalDivider()
                 val nagItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
@@ -271,7 +269,7 @@ fun ExternalNotificationConfigScreen(
                     items = nagItems.map { it.value to it.toDisplayString() },
                     selectedItem = formState.value.nagTimeout.toLong(),
                     enabled = state.connected,
-                    onItemSelected = { formState.value = formState.value.copy { nagTimeout = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(nagTimeout = it.toInt()) },
                 )
                 HorizontalDivider()
                 EditTextPreference(

@@ -33,14 +33,12 @@ import org.meshtastic.core.strings.status_message_config
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val statusMessageConfig = state.moduleConfig.statusmessage
-    val formState = rememberConfigState(initialValue = statusMessageConfig)
+    val formState = rememberConfigState(initialValue = statusMessageConfig, adapter = ModuleConfig.StatusMessageConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -66,7 +64,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { nodeStatus = it } },
+                    onValueChanged = { formState.value = formState.value.copy(nodeStatus = it) },
                 )
             }
         }

@@ -40,15 +40,13 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.SerialConfig
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
+import org.meshtastic.proto.ModuleConfig
 
 @Composable
 fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val serialConfig = state.moduleConfig.serial
-    val formState = rememberConfigState(initialValue = serialConfig)
+    val serialConfig = state.moduleConfig.serial ?: ModuleConfig.SerialConfig()
+    val formState = rememberConfigState(initialValue = serialConfig, adapter = ModuleConfig.SerialConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -59,7 +57,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { serial = it }
+            val config = state.moduleConfig.copy(serial = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -69,7 +67,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     title = stringResource(Res.string.serial_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -77,7 +75,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     title = stringResource(Res.string.echo_enabled),
                     checked = formState.value.echo,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { echo = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(echo = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -86,7 +84,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     value = formState.value.rxd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { rxd = it } },
+                    onValueChanged = { formState.value = formState.value.copy(rxd = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -94,18 +92,18 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     value = formState.value.txd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { txd = it } },
+                    onValueChanged = { formState.value = formState.value.copy(txd = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.serial_baud_rate),
                     enabled = state.connected,
                     items =
-                    SerialConfig.Serial_Baud.entries
-                        .filter { it != SerialConfig.Serial_Baud.UNRECOGNIZED }
+                    ModuleConfig.SerialConfig.Serial_Baud.entries
+                        .filter { it != ModuleConfig.SerialConfig.Serial_Baud.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = formState.value.baud,
-                    onItemSelected = { formState.value = formState.value.copy { baud = it } },
+                    onItemSelected = { formState.value = formState.value.copy(baud = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
@@ -113,25 +111,25 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     value = formState.value.timeout,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { timeout = it } },
+                    onValueChanged = { formState.value = formState.value.copy(timeout = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.serial_mode),
                     enabled = state.connected,
                     items =
-                    SerialConfig.Serial_Mode.entries
-                        .filter { it != SerialConfig.Serial_Mode.UNRECOGNIZED }
+                    ModuleConfig.SerialConfig.Serial_Mode.entries
+                        .filter { it != ModuleConfig.SerialConfig.Serial_Mode.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = formState.value.mode,
-                    onItemSelected = { formState.value = formState.value.copy { mode = it } },
+                    onItemSelected = { formState.value = formState.value.copy(mode = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.override_console_serial_port),
-                    checked = formState.value.overrideConsoleSerialPort,
+                    checked = formState.value.override_console_serial_port,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { overrideConsoleSerialPort = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(override_console_serial_port = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }

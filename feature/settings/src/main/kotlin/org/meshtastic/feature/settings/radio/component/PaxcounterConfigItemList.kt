@@ -41,14 +41,12 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val paxcounterConfig = state.moduleConfig.paxcounter
-    val formState = rememberConfigState(initialValue = paxcounterConfig)
+    val formState = rememberConfigState(initialValue = paxcounterConfig, adapter = ModuleConfig.PaxcounterConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -80,7 +78,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
-                        formState.value = formState.value.copy { paxcounterUpdateInterval = it.toInt() }
+                        formState.value = formState.value.copy(paxcounterUpdateInterval = it.toInt())
                     },
                 )
                 HorizontalDivider()
@@ -89,7 +87,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
                     value = formState.value.wifiThreshold,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { wifiThreshold = it } },
+                    onValueChanged = { formState.value = formState.value.copy(wifiThreshold = it) },
                 )
                 HorizontalDivider()
                 SignedIntegerEditTextPreference(
@@ -97,7 +95,7 @@ fun PaxcounterConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), on
                     value = formState.value.bleThreshold,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { bleThreshold = it } },
+                    onValueChanged = { formState.value = formState.value.copy(bleThreshold = it) },
                 )
             }
         }

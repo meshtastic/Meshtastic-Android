@@ -53,15 +53,13 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.CannedMessageConfig
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val cannedMessageConfig = state.moduleConfig.cannedMessage
     val messages = state.cannedMessageMessages
-    val formState = rememberConfigState(initialValue = cannedMessageConfig)
+    val formState = rememberConfigState(initialValue = cannedMessageConfig, adapter = ModuleConfig.CannedMessageConfig.ADAPTER)
     var messagesInput by rememberSaveable(messages) { mutableStateOf(messages) }
     val focusManager = LocalFocusManager.current
 
@@ -107,21 +105,21 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                     value = formState.value.inputbrokerPinA,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { inputbrokerPinA = it } },
+                    onValueChanged = { formState.value = formState.value.copy(inputbrokerPinA = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_b_port),
                     value = formState.value.inputbrokerPinB,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { inputbrokerPinB = it } },
+                    onValueChanged = { formState.value = formState.value.copy(inputbrokerPinB = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_press_port),
                     value = formState.value.inputbrokerPinPress,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { inputbrokerPinPress = it } },
+                    onValueChanged = { formState.value = formState.value.copy(inputbrokerPinPress = it) },
                 )
                 DropDownPreference(
                     title = stringResource(Res.string.generate_input_event_on_press),
@@ -131,7 +129,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                         .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = formState.value.inputbrokerEventPress,
-                    onItemSelected = { formState.value = formState.value.copy { inputbrokerEventPress = it } },
+                    onItemSelected = { formState.value = formState.value.copy(inputbrokerEventPress = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -142,7 +140,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                         .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = formState.value.inputbrokerEventCw,
-                    onItemSelected = { formState.value = formState.value.copy { inputbrokerEventCw = it } },
+                    onItemSelected = { formState.value = formState.value.copy(inputbrokerEventCw = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
@@ -153,7 +151,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                         .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = formState.value.inputbrokerEventCcw,
-                    onItemSelected = { formState.value = formState.value.copy { inputbrokerEventCcw = it } },
+                    onItemSelected = { formState.value = formState.value.copy(inputbrokerEventCcw = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
@@ -173,13 +171,13 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { allowInputSource = it } },
+                    onValueChanged = { formState.value = formState.value.copy(allowInputSource = it) },
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.send_bell),
                     checked = formState.value.sendBell,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { sendBell = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(sendBell = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()

@@ -23,7 +23,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.google.protobuf.MessageLite
+import com.squareup.wire.Message
+import com.squareup.wire.ProtoAdapter
 
 /**
  * A state holder for managing config data within a Composable.
@@ -32,10 +33,13 @@ import com.google.protobuf.MessageLite
  * whether the current value has been modified ("dirty"), and provides simple methods to save the changes or reset to
  * the initial state.
  *
- * @param T The type of the data being managed, typically a Protobuf message.
+ * @param T The type of the data being managed, typically a Wire message.
  * @property initialValue The original, unmodified value of the config data.
  */
-class ConfigState<T : MessageLite>(private val initialValue: T) {
+class ConfigState<T : Message<T, *>>(
+    private val initialValue: T,
+    private val adapter: ProtoAdapter<T>
+) {
     var value by mutableStateOf(initialValue)
 
     val isDirty: Boolean
@@ -46,12 +50,14 @@ class ConfigState<T : MessageLite>(private val initialValue: T) {
     }
 
     companion object {
-        fun <T : MessageLite> saver(initialValue: T): Saver<ConfigState<T>, ByteArray> = Saver(
-            save = { it.value.toByteArray() },
+        fun <T : Message<T, *>> saver(
+            initialValue: T,
+            adapter: ProtoAdapter<T>
+        ): Saver<ConfigState<T>, ByteArray> = Saver(
+            save = { adapter.encode(it.value) },
             restore = {
-                ConfigState(initialValue).apply {
-                    @Suppress("UNCHECKED_CAST")
-                    value = initialValue.parserForType.parseFrom(it) as T
+                ConfigState(initialValue, adapter).apply {
+                    value = adapter.decode(it)
                 }
             },
         )
@@ -64,7 +70,13 @@ class ConfigState<T : MessageLite>(private val initialValue: T) {
  *
  * @param initialValue The initial value to populate the config with. The config will be reset if this value changes
  *   across recompositions.
+ * @param adapter The ProtoAdapter for serializing/deserializing the config value.
  */
 @Composable
-fun <T : MessageLite> rememberConfigState(initialValue: T): ConfigState<T> =
-    rememberSaveable(initialValue, saver = ConfigState.saver(initialValue)) { ConfigState(initialValue) }
+fun <T : Message<T, *>> rememberConfigState(
+    initialValue: T,
+    adapter: ProtoAdapter<T>
+): ConfigState<T> =
+    rememberSaveable(initialValue, saver = ConfigState.saver(initialValue, adapter)) {
+        ConfigState(initialValue, adapter)
+    }

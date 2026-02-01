@@ -42,14 +42,12 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.AudioConfig
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val audioConfig = state.moduleConfig.audio
-    val formState = rememberConfigState(initialValue = audioConfig)
+    val formState = rememberConfigState(initialValue = audioConfig, adapter = ModuleConfig.AudioConfig.ADAPTER)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -79,7 +77,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                     value = formState.value.pttPin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { pttPin = it } },
+                    onValueChanged = { formState.value = formState.value.copy(pttPin = it) },
                 )
                 DropDownPreference(
                     title = stringResource(Res.string.codec2_sample_rate),
@@ -89,7 +87,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack:
                         .filter { it != AudioConfig.Audio_Baud.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = formState.value.bitrate,
-                    onItemSelected = { formState.value = formState.value.copy { bitrate = it } },
+                    onItemSelected = { formState.value = formState.value.copy(bitrate = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(

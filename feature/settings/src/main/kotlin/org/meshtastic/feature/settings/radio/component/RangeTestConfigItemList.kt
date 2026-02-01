@@ -37,14 +37,12 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
 
 @Composable
 fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val rangeTestConfig = state.moduleConfig.rangeTest
-    val formState = rememberConfigState(initialValue = rangeTestConfig)
+    val formState = rememberConfigState(initialValue = rangeTestConfig, adapter = ModuleConfig.RangeTestConfig.ADAPTER)
 
     RadioConfigScreenList(
         title = stringResource(Res.string.range_test),
@@ -74,14 +72,14 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     selectedItem = formState.value.sender.toLong(),
                     enabled = state.connected,
                     items = rangeItems.map { it.value to it.toDisplayString() },
-                    onItemSelected = { formState.value = formState.value.copy { sender = it.toInt() } },
+                    onItemSelected = { formState.value = formState.value.copy(sender = it.toInt()) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
                     checked = formState.value.save,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { save = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(save = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
