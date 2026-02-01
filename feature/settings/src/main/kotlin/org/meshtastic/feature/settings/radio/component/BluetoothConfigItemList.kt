@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -38,13 +37,12 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.config
 
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val bluetoothConfig = state.radioConfig.bluetooth
-    val formState = rememberConfigState(initialValue = bluetoothConfig, adapter = Config.BluetoothConfig.ADAPTER)
+    val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig()
+    val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -55,7 +53,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = config { bluetooth = it }
+            val config = Config(bluetooth = it)
             viewModel.setConfig(config)
         },
     ) {
@@ -72,17 +70,14 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 DropDownPreference(
                     title = stringResource(Res.string.pairing_mode),
                     enabled = state.connected,
-                    items =
-                    Config.BluetoothConfig.PairingMode.entries
-                        .filter { it != Config.BluetoothConfig.PairingMode.UNRECOGNIZED }
-                        .map { it to it.name },
-                    selectedItem = formState.value.mode,
+                    items = Config.BluetoothConfig.PairingMode.entries.map { it to it.name },
+                    selectedItem = formState.value.mode ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
                     onItemSelected = { formState.value = formState.value.copy(mode = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.fixed_pin),
-                    value = formState.value.fixed_pin,
+                    value = formState.value.fixed_pin ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {

@@ -59,7 +59,6 @@ import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
@@ -67,6 +66,7 @@ import java.io.FileWriter
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import org.meshtastic.proto.Position as ProtoPosition
 
 @Suppress("LongParameterList")
 @HiltViewModel
@@ -128,18 +128,15 @@ constructor(
                 } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
                     val hwModel = node.user.hw_model.value
                     val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
+                    // Support both Nordic DFU (requiresDfu) and ESP32 Unified OTA (supportsUnifiedOta)
                     val capabilities = Capabilities(node.metadata?.firmware_version)
-                    val isSerial = radioPrefs.isSerial()
 
                     // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
-                    val isEsp32OtaSupported = hw?.isEsp32Arc == true && capabilities.supportsEsp32Ota && !isSerial
+                    // TODO: Re-enable when supportsUnifiedOta is added to DeviceHardware
+                    val isEsp32OtaSupported = false
+                        // hw?.supportsUnifiedOta == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
 
-                    // Nordic DFU/USB update is supported for NRF52/RP2040.
-                    // For ESP32, we do NOT support Serial updates from the app yet, even if requiresDfu is true
-                    // (which might be set for S3 native USB, but is currently unused by our handlers).
-                    val isDfuSupported = hw?.requiresDfu == true && hw.isEsp32Arc != true
-
-                    flow { emit(isDfuSupported || isEsp32OtaSupported) }
+                    flow { emit(hw?.requiresDfu == true || isEsp32OtaSupported) }
                 } else {
                     flowOf(false)
                 }
@@ -214,14 +211,14 @@ constructor(
             // Capture the current node value while we're still on main thread
             val nodes = nodeRepository.nodeDBbyNum.value
 
-            // Converts a MeshProtos.Position (nullable) to a Position, but only if it's valid, otherwise returns null.
+            // Converts a ProtoPosition (nullable) to a Position, but only if it's valid, otherwise returns null.
             // The returned Position is guaranteed to be non-null and valid, or null if the input was null or invalid.
-            val positionToPos: (org.meshtastic.proto.Position?) -> Position? = { meshPosition ->
+            val positionToPos: (ProtoPosition?) -> Position? = { meshPosition ->
                 meshPosition?.let { Position(it) }?.takeIf { it.isValid() }
             }
 
             writeToUri(uri) { writer ->
-                val nodePositions = mutableMapOf<Int, org.meshtastic.proto.Position?>()
+                val nodePositions = mutableMapOf<Int, ProtoPosition?>()
 
                 @Suppress("MaxLineLength")
                 writer.appendLine(
@@ -249,8 +246,8 @@ constructor(
 
                         // packets must have rxSNR, and optionally match the filter given as a param.
                         if (
-                            (filterPortnum == null || proto.decoded?.portnum?.value == filterPortnum) &&
-                            proto.rx_snr != 0.0f
+                            (filterPortnum == null || (proto.decoded?.portnum?.value ?: 0) == filterPortnum) &&
+                            (proto.rx_snr ?: 0f) != 0.0f
                         ) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
@@ -286,23 +283,19 @@ constructor(
                                         .toString()
                                 }
 
-                            val hopLimit = proto.hop_limit
+                            val hopLimit = proto.hop_limit ?: 0
 
+                            val decoded = proto.decoded
+                            val encrypted = proto.encrypted
                             val payload =
                                 when {
-                                    proto.decoded?.portnum?.value !in
-                                        setOf(
-                                            PortNum.TEXT_MESSAGE_APP.value,
-                                            PortNum.RANGE_TEST_APP.value,
-                                        ) -> "<${proto.decoded?.portnum}>"
+                                    (decoded?.portnum?.value ?: 0) !in
+                                        setOf(PortNum.TEXT_MESSAGE_APP.value, PortNum.RANGE_TEST_APP.value) ->
+                                        "<${decoded?.portnum}>"
 
-                                    proto.decoded?.payload != null -> {
-                                        proto.decoded?.payload?.utf8()?.replace("\"", "\"\"") ?: ""
-                                    }
+                                    decoded != null -> decoded.payload.utf8().replace("\"", "\"\"")
 
-                                    proto.encrypted != null -> {
-                                        "${proto.encrypted?.size ?: 0} encrypted bytes"
-                                    }
+                                    encrypted != null -> "${encrypted.size} encrypted bytes"
                                     else -> ""
                                 }
 

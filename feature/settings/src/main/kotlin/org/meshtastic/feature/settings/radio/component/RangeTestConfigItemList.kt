@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.material3.CardDefaults
@@ -37,12 +36,13 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
+import org.meshtastic.proto.ModuleConfig
 
 @Composable
 fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val rangeTestConfig = state.moduleConfig.rangeTest
-    val formState = rememberConfigState(initialValue = rangeTestConfig, adapter = ModuleConfig.RangeTestConfig.ADAPTER)
+    val rangeTestConfig = state.moduleConfig.range_test ?: ModuleConfig.RangeTestConfig()
+    val formState = rememberConfigState(initialValue = rangeTestConfig)
 
     RadioConfigScreenList(
         title = stringResource(Res.string.range_test),
@@ -52,7 +52,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { rangeTest = it }
+            val config = ModuleConfig(range_test = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -60,16 +60,16 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
             TitledCard(title = stringResource(Res.string.range_test_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.range_test_enabled),
-                    checked = formState.value.enabled,
+                    checked = formState.value.enabled ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 val rangeItems = remember { IntervalConfiguration.RANGE_TEST_SENDER.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.sender_message_interval_seconds),
-                    selectedItem = formState.value.sender.toLong(),
+                    selectedItem = (formState.value.sender ?: 0).toLong(),
                     enabled = state.connected,
                     items = rangeItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(sender = it.toInt()) },
@@ -77,7 +77,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
-                    checked = formState.value.save,
+                    checked = formState.value.save ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(save = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

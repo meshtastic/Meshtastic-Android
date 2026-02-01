@@ -120,7 +120,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.config
 import java.time.ZoneId
 
 private val Config.DeviceConfig.Role.description: StringResource
@@ -150,7 +149,8 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
             Config.DeviceConfig.RebroadcastMode.LOCAL_ONLY -> Res.string.rebroadcast_mode_local_only_desc
             Config.DeviceConfig.RebroadcastMode.KNOWN_ONLY -> Res.string.rebroadcast_mode_known_only_desc
             Config.DeviceConfig.RebroadcastMode.NONE -> Res.string.rebroadcast_mode_none_desc
-            Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> Res.string.rebroadcast_mode_core_portnums_only_desc
+            Config.DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY ->
+                Res.string.rebroadcast_mode_core_portnums_only_desc
             else -> Res.string.unrecognized
         }
 
@@ -158,15 +158,15 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
 @Composable
 fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val deviceConfig = state.radioConfig.device
-    val formState = rememberConfigState(initialValue = deviceConfig, adapter = Config.DeviceConfig.ADAPTER)
-    var selectedRole by rememberSaveable { mutableStateOf(formState.value.role) }
+    val deviceConfig = state.radioConfig.device ?: Config.DeviceConfig()
+    val formState = rememberConfigState(initialValue = deviceConfig)
+    var selectedRole by rememberSaveable { mutableStateOf(formState.value.role ?: Config.DeviceConfig.Role.CLIENT) }
     val infrastructureRoles =
         listOf(Config.DeviceConfig.Role.ROUTER, Config.DeviceConfig.Role.ROUTER_LATE, Config.DeviceConfig.Role.REPEATER)
     if (selectedRole != formState.value.role) {
         if (selectedRole in infrastructureRoles) {
             RouterRoleConfirmationDialog(
-                onDismiss = { selectedRole = formState.value.role },
+                onDismiss = { selectedRole = formState.value.role ?: Config.DeviceConfig.Role.CLIENT },
                 onConfirm = { formState.value = formState.value.copy(role = selectedRole) },
             )
         } else {
@@ -182,28 +182,30 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = config { device = it }
+            val config = Config(device = it)
             viewModel.setConfig(config)
         },
     ) {
         item {
             TitledCard(title = stringResource(Res.string.options)) {
+                val currentRole = formState.value.role ?: Config.DeviceConfig.Role.CLIENT
                 DropDownPreference(
                     title = stringResource(Res.string.role),
                     enabled = state.connected,
-                    selectedItem = formState.value.role,
+                    selectedItem = currentRole,
                     onItemSelected = { selectedRole = it },
-                    summary = stringResource(formState.value.role.description),
+                    summary = stringResource(currentRole.description),
                 )
 
                 HorizontalDivider()
 
+                val currentRebroadcastMode = formState.value.rebroadcast_mode ?: Config.DeviceConfig.RebroadcastMode.ALL
                 DropDownPreference(
                     title = stringResource(Res.string.rebroadcast_mode),
                     enabled = state.connected,
-                    selectedItem = formState.value.rebroadcast_mode,
+                    selectedItem = currentRebroadcastMode,
                     onItemSelected = { formState.value = formState.value.copy(rebroadcast_mode = it) },
-                    summary = stringResource(formState.value.rebroadcast_mode.description),
+                    summary = stringResource(currentRebroadcastMode.description),
                 )
 
                 HorizontalDivider()
@@ -211,7 +213,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                 val nodeInfoBroadcastIntervals = remember { IntervalConfiguration.NODE_INFO_BROADCAST.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.nodeinfo_broadcast_interval),
-                    selectedItem = formState.value.node_info_broadcast_secs.toLong(),
+                    selectedItem = (formState.value.node_info_broadcast_secs ?: 0).toLong(),
                     enabled = state.connected,
                     items = nodeInfoBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(node_info_broadcast_secs = it.toInt()) },
@@ -272,7 +274,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
 
                 EditTextPreference(
                     title = "",
-                    value = formState.value.tzdef,
+                    value = formState.value.tzdef ?: "",
                     summary = stringResource(Res.string.config_device_tzdef_summary),
                     maxSize = 64, // tzdef max_size:65
                     enabled = state.connected,
@@ -309,20 +311,20 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
             TitledCard(title = stringResource(Res.string.gpio)) {
                 EditTextPreference(
                     title = stringResource(Res.string.button_gpio),
-                    value = formState.value.button_gpio.toString(),
+                    value = formState.value.button_gpio ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(button_gpio = it.toIntOrNull() ?: 0) },
+                    onValueChanged = { formState.value = formState.value.copy(button_gpio = it) },
                 )
 
                 HorizontalDivider()
 
                 EditTextPreference(
                     title = stringResource(Res.string.buzzer_gpio),
-                    value = formState.value.buzzer_gpio.toString(),
+                    value = formState.value.buzzer_gpio ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(buzzer_gpio = it.toIntOrNull() ?: 0) },
+                    onValueChanged = { formState.value = formState.value.copy(buzzer_gpio = it) },
                 )
             }
         }

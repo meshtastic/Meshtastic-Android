@@ -37,8 +37,8 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val statusMessageConfig = state.moduleConfig.statusmessage
-    val formState = rememberConfigState(initialValue = statusMessageConfig, adapter = ModuleConfig.StatusMessageConfig.ADAPTER)
+    val statusMessageConfig = state.moduleConfig.status_message ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
+    val formState = rememberConfigState(initialValue = statusMessageConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -49,7 +49,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { statusmessage = it }
+            val config = org.meshtastic.proto.ModuleConfig(status_message = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -57,14 +57,14 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
             TitledCard(title = stringResource(Res.string.status_message_config)) {
                 EditTextPreference(
                     title = stringResource(Res.string.node_status_summary),
-                    value = formState.value.nodeStatus,
+                    value = formState.value.node_status,
                     maxSize = 80, // status_message max_size:80
                     enabled = state.connected,
                     isError = false,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(nodeStatus = it) },
+                    onValueChanged = { formState.value = formState.value.copy(node_status = it) },
                 )
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -45,7 +44,7 @@ import org.meshtastic.proto.ModuleConfig
 fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val storeForwardConfig = state.moduleConfig.store_forward ?: ModuleConfig.StoreForwardConfig()
-    val formState = rememberConfigState(initialValue = storeForwardConfig, adapter = ModuleConfig.StoreForwardConfig.ADAPTER)
+    val formState = rememberConfigState(initialValue = storeForwardConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -56,7 +55,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = state.moduleConfig.copy(store_forward = it)
+            val config = ModuleConfig(store_forward = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -64,7 +63,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
             TitledCard(title = stringResource(Res.string.store_forward_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.store_forward_enabled),
-                    checked = formState.value.enabled,
+                    checked = formState.value.enabled ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -72,7 +71,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.heartbeat),
-                    checked = formState.value.heartbeat,
+                    checked = formState.value.heartbeat ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(heartbeat = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -80,7 +79,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.number_of_records),
-                    value = formState.value.records,
+                    value = formState.value.records ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(records = it) },
@@ -88,7 +87,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.history_return_max),
-                    value = formState.value.history_return_max,
+                    value = formState.value.history_return_max ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(history_return_max = it) },
@@ -96,7 +95,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.history_return_window),
-                    value = formState.value.history_return_window,
+                    value = formState.value.history_return_window ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(history_return_window = it) },
@@ -104,7 +103,7 @@ fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), 
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.server),
-                    checked = formState.value.is_server,
+                    checked = formState.value.is_server ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(is_server = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

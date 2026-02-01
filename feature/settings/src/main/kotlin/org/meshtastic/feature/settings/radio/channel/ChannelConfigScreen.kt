@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.channel
 
 import androidx.compose.animation.AnimatedVisibility
@@ -75,9 +74,8 @@ import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDial
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
 import org.meshtastic.feature.settings.radio.channel.component.SECONDARY_CHANNEL_EPOCH
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
-import org.meshtastic.proto.channelSettings
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 
 @Composable
 fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -91,9 +89,9 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         title = stringResource(Res.string.channels),
         onBack = onBack,
         settingsList = state.channelList,
-        loraConfig = state.radioConfig.lora,
+        loraConfig = state.radioConfig.lora ?: Config.LoRaConfig(),
         maxChannels = viewModel.maxChannels,
-        firmwareVersion = state.metadata?.firmwareVersion ?: "0.0.0",
+        firmwareVersion = state.metadata?.firmware_version ?: "0.0.0",
         enabled = state.connected,
         onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
     )
@@ -105,7 +103,7 @@ private fun ChannelConfigScreen(
     title: String,
     onBack: () -> Unit,
     settingsList: List<ChannelSettings>,
-    loraConfig: LoRaConfig,
+    loraConfig: Config.LoRaConfig,
     maxChannels: Int = 8,
     firmwareVersion: String,
     enabled: Boolean,
@@ -141,7 +139,7 @@ private fun ChannelConfigScreen(
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
         EditChannelDialog(
-            channelSettings = with(settingsListInput) { if (size > index) get(index) else channelSettings {} },
+            channelSettings = with(settingsListInput) { if (size > index) get(index) else ChannelSettings() },
             modemPresetName = modemPresetName,
             onAddClick = {
                 if (settingsListInput.size > index) {
@@ -176,7 +174,7 @@ private fun ChannelConfigScreen(
                 FloatingActionButton(
                     onClick = {
                         if (maxChannels > settingsListInput.size) {
-                            settingsListInput.add(channelSettings { psk = Channel.default.settings.psk })
+                            settingsListInput.add(ChannelSettings(psk = Channel.default.settings.psk))
                             showEditChannelDialog = settingsListInput.lastIndex
                         }
                     },
@@ -191,14 +189,14 @@ private fun ChannelConfigScreen(
             Column {
                 ChannelConfigHeader(
                     frequency =
-                    if (loraConfig.overrideFrequency != 0f) {
-                        loraConfig.overrideFrequency
+                    if (loraConfig.override_frequency != 0f) {
+                        loraConfig.override_frequency
                     } else {
                         primaryChannel.radioFreq
                     },
                     slot =
-                    if (loraConfig.channelNum != 0) {
-                        loraConfig.channelNum
+                    if (loraConfig.channel_num != 0) {
+                        loraConfig.channel_num
                     } else {
                         primaryChannel.channelNum
                     },
@@ -285,7 +283,7 @@ private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, sett
     if (firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
         /* Essentially the first index with the setting enabled */
         for ((i, settings) in settingsList.withIndex()) {
-            if (settings.moduleSettings.positionPrecision > 0) {
+            if ((settings.module_settings?.position_precision ?: 0) > 0) {
                 output = i
                 break
             }
@@ -293,7 +291,7 @@ private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, sett
     } else {
         /* Only the primary channel at index 0 can share locations automatically */
         val primary = settingsList[0]
-        if (primary.moduleSettings.positionPrecision > 0) {
+        if ((primary.module_settings?.position_precision ?: 0) > 0) {
             output = 0
         }
     }
@@ -308,11 +306,8 @@ private fun ChannelConfigScreenPreview() {
         onBack = {},
         settingsList =
         listOf(
-            channelSettings {
-                psk = Channel.default.settings.psk
-                name = Channel.default.name
-            },
-            channelSettings { name = stringResource(Res.string.channel_name) },
+            ChannelSettings(psk = Channel.default.settings.psk, name = Channel.default.name),
+            ChannelSettings(name = stringResource(Res.string.channel_name)),
         ),
         loraConfig = Channel.default.loraConfig,
         firmwareVersion = "1.3.2",

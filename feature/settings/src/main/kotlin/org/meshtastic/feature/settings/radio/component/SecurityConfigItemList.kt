@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import android.app.Activity
@@ -43,9 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.encodeToString
-import okio.ByteString.Companion.encodeUtf8
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.admin_key
 import org.meshtastic.core.strings.admin_keys
@@ -77,8 +76,7 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.SecurityConfig
-import org.meshtastic.proto.config
+import org.meshtastic.proto.Config
 import java.security.SecureRandom
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -86,13 +84,13 @@ import java.security.SecureRandom
 fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val node by viewModel.destNode.collectAsStateWithLifecycle()
-    val securityConfig = state.radioConfig.security
-    val formState = rememberConfigState(initialValue = securityConfig, adapter = Config.SecurityConfig.ADAPTER)
+    val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
+    val formState = rememberConfigState(initialValue = securityConfig)
 
     var publicKey by rememberSaveable { mutableStateOf(formState.value.public_key) }
     LaunchedEffect(formState.value.private_key) {
         if (formState.value.private_key != securityConfig.private_key) {
-            publicKey = "".encodeUtf8()
+            publicKey = ByteString.EMPTY
         } else if (formState.value.private_key == securityConfig.private_key) {
             publicKey = securityConfig.public_key
         }
@@ -111,7 +109,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         onConfirm = {
             formState.value = it
             showKeyGenerationDialog = false
-            val config = config { security = formState.value }
+            val config = Config(security = formState.value)
             viewModel.setConfig(config)
         },
         onDismiss = { showKeyGenerationDialog = false },
@@ -153,7 +151,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = config { security = it }
+            val config = Config(security = it)
             viewModel.setConfig(config)
         },
     ) {
@@ -214,9 +212,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     maxCount = 3,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = {
-                        formState.value = formState.value.copy(admin_key = it)
-                    },
+                    onValuesChanged = { formState.value = formState.value.copy(admin_key = it) },
                 )
             }
         }
@@ -225,7 +221,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.serial_console),
                     summary = stringResource(Res.string.config_security_serial_enabled),
-                    checked = formState.value.serial_enabled,
+                    checked = formState.value.serial_enabled ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(serial_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -234,7 +230,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.debug_log_api_enabled),
                     summary = stringResource(Res.string.config_security_debug_log_api_enabled),
-                    checked = formState.value.debug_log_api_enabled,
+                    checked = formState.value.debug_log_api_enabled ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(debug_log_api_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -246,7 +242,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.managed_mode),
                     summary = stringResource(Res.string.config_security_is_managed),
-                    checked = formState.value.is_managed,
+                    checked = formState.value.is_managed ?: false,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
                     onCheckedChange = { formState.value = formState.value.copy(is_managed = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -254,7 +250,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.legacy_admin_channel),
-                    checked = formState.value.admin_channel_enabled,
+                    checked = formState.value.admin_channel_enabled ?: false,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -268,7 +264,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
 @Composable
 fun PrivateKeyRegenerateDialog(
     showKeyGenerationDialog: Boolean,
-    onConfirm: (SecurityConfig) -> Unit,
+    onConfirm: (Config.SecurityConfig) -> Unit,
     onDismiss: () -> Unit = {},
 ) {
     if (showKeyGenerationDialog) {
@@ -287,9 +283,8 @@ fun PrivateKeyRegenerateDialog(
                         // and set the second to left-most bit of f[31].
                         f[0] = (f[0].toInt() and 0xF8).toByte()
                         f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
-                        val securityInput = SecurityConfig(
-                            private_key = okio.ByteString.of(*f)
-                        )
+                        val securityInput =
+                            Config.SecurityConfig(private_key = f.toByteString(), public_key = ByteString.EMPTY)
                         onConfirm(securityInput)
                     },
                 ) {

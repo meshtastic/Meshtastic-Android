@@ -30,16 +30,6 @@ import androidx.compose.material.icons.filled.Sensors
 import androidx.compose.material.icons.filled.SettingsRemote
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Usb
-import androidx.compose.material.icons.rounded.Cloud
-import androidx.compose.material.icons.rounded.DataUsage
-import androidx.compose.material.icons.rounded.LightMode
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.People
-import androidx.compose.material.icons.rounded.PermScanWifi
-import androidx.compose.material.icons.rounded.Sensors
-import androidx.compose.material.icons.rounded.SettingsRemote
-import androidx.compose.material.icons.rounded.Speed
-import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
@@ -56,96 +46,84 @@ import org.meshtastic.core.strings.paxcounter
 import org.meshtastic.core.strings.range_test
 import org.meshtastic.core.strings.remote_hardware
 import org.meshtastic.core.strings.serial
-import org.meshtastic.core.strings.status_message
 import org.meshtastic.core.strings.store_forward
 import org.meshtastic.core.strings.telemetry
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.MeshProtos.DeviceMetadata
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.DeviceMetadata
 
 enum class ModuleRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    MQTT(
-        Res.string.mqtt,
-        SettingsRoutes.MQTT,
-        Icons.Rounded.Cloud,
-        AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
-    ),
+    MQTT(Res.string.mqtt, SettingsRoutes.MQTT, Icons.Default.Cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
         Res.string.serial,
         SettingsRoutes.Serial,
-        Icons.Rounded.Usb,
-        AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
+        Icons.Default.Usb,
+        AdminMessage.ModuleConfigType.SERIAL_CONFIG.value,
     ),
     EXT_NOTIFICATION(
         Res.string.external_notification,
         SettingsRoutes.ExtNotification,
-        Icons.Rounded.Notifications,
-        AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
+        Icons.Default.Notifications,
+        AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
     ),
     STORE_FORWARD(
         Res.string.store_forward,
         SettingsRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
-        AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG.value,
     ),
     RANGE_TEST(
         Res.string.range_test,
         SettingsRoutes.RangeTest,
-        Icons.Rounded.Speed,
-        AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
+        Icons.Default.Speed,
+        AdminMessage.ModuleConfigType.RANGETEST_CONFIG.value,
     ),
     TELEMETRY(
         Res.string.telemetry,
         SettingsRoutes.Telemetry,
-        Icons.Rounded.DataUsage,
-        AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
+        Icons.Default.DataUsage,
+        AdminMessage.ModuleConfigType.TELEMETRY_CONFIG.value,
     ),
     CANNED_MESSAGE(
         Res.string.canned_message,
         SettingsRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
-        AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG.value,
     ),
     AUDIO(
         Res.string.audio,
         SettingsRoutes.Audio,
         Icons.AutoMirrored.Default.VolumeUp,
-        AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
+        AdminMessage.ModuleConfigType.AUDIO_CONFIG.value,
     ),
     REMOTE_HARDWARE(
         Res.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
-        Icons.Rounded.SettingsRemote,
-        AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
+        Icons.Default.SettingsRemote,
+        AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG.value,
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
-        Icons.Rounded.People,
-        AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
+        Icons.Default.People,
+        AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG.value,
     ),
     AMBIENT_LIGHTING(
         Res.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
-        Icons.Rounded.LightMode,
-        AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
+        Icons.Default.LightMode,
+        AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG.value,
     ),
     DETECTION_SENSOR(
         Res.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
-        Icons.Rounded.Sensors,
-        AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
+        Icons.Default.Sensors,
+        AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG.value,
     ),
     PAXCOUNTER(
         Res.string.paxcounter,
         SettingsRoutes.Paxcounter,
-        Icons.Rounded.PermScanWifi,
-        AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
-    ),
-    STATUS_MESSAGE(
-        Res.string.status_message,
-        SettingsRoutes.StatusMessage,
-        Icons.AutoMirrored.Default.Message,
-        AdminProtos.AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG_VALUE,
+        Icons.Default.PermScanWifi,
+        AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
     ),
     ;
 
@@ -156,7 +134,7 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
             when (metadata) {
                 null -> true // Include all routes if metadata is null
-                else -> metadata.excludedModules and it.bitfield == 0
+                else -> (metadata.excluded_modules ?: 0) and it.bitfield == 0
             }
         }
     }

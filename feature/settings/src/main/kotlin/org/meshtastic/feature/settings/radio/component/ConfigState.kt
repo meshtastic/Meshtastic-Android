@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.squareup.wire.Message
-import com.squareup.wire.ProtoAdapter
 
 /**
  * A state holder for managing config data within a Composable.
@@ -36,10 +34,7 @@ import com.squareup.wire.ProtoAdapter
  * @param T The type of the data being managed, typically a Wire message.
  * @property initialValue The original, unmodified value of the config data.
  */
-class ConfigState<T : Message<T, *>>(
-    private val initialValue: T,
-    private val adapter: ProtoAdapter<T>
-) {
+class ConfigState<T : Message<T, *>>(private val initialValue: T) {
     var value by mutableStateOf(initialValue)
 
     val isDirty: Boolean
@@ -50,16 +45,9 @@ class ConfigState<T : Message<T, *>>(
     }
 
     companion object {
-        fun <T : Message<T, *>> saver(
-            initialValue: T,
-            adapter: ProtoAdapter<T>
-        ): Saver<ConfigState<T>, ByteArray> = Saver(
-            save = { adapter.encode(it.value) },
-            restore = {
-                ConfigState(initialValue, adapter).apply {
-                    value = adapter.decode(it)
-                }
-            },
+        fun <T : Message<T, *>> saver(initialValue: T): Saver<ConfigState<T>, ByteArray> = Saver(
+            save = { it.value.adapter.encode(it.value) },
+            restore = { ConfigState(initialValue).apply { value = initialValue.adapter.decode(it) } },
         )
     }
 }
@@ -70,13 +58,7 @@ class ConfigState<T : Message<T, *>>(
  *
  * @param initialValue The initial value to populate the config with. The config will be reset if this value changes
  *   across recompositions.
- * @param adapter The ProtoAdapter for serializing/deserializing the config value.
  */
 @Composable
-fun <T : Message<T, *>> rememberConfigState(
-    initialValue: T,
-    adapter: ProtoAdapter<T>
-): ConfigState<T> =
-    rememberSaveable(initialValue, saver = ConfigState.saver(initialValue, adapter)) {
-        ConfigState(initialValue, adapter)
-    }
+fun <T : Message<T, *>> rememberConfigState(initialValue: T): ConfigState<T> =
+    rememberSaveable(initialValue, saver = ConfigState.saver(initialValue)) { ConfigState(initialValue) }
