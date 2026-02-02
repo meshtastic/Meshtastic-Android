@@ -7,17 +7,18 @@ Lisätietoja Meshtastic-projektista saat verkkosivuiltamme: <a href="https://www
 
 Projekti on vielä kehitysvaiheessa (beta). Otamme mielellämme yhteydenottoja vastaan! Jos sinulla on kysyttävää, palautetta tai ongelmia, tule mukaan meidän ystävälliseen ja aktiiviseen yhteisöömme:
 
-<b>Keskustelufoorumi:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions
+• <b>Keskustelufoorumi:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions
 </a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
-• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+• <b>Ilmoita ongelmasta:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues
+</a>
 
-<b>Documentation</b>
+<b>Dokumentaatio</b>
 
 Lisätietoja tämän sovelluksen ja Meshtasticin ominaisuuksista ja toiminnoista saat katsomalla virallisen dokumentaatiomme:
-<a href="https://meshtastic.org/docs/">View Documentation</a>
+<a href="https://meshtastic.org/docs/">Näytä dokumentaatio</a>
 
-<b>Translations</b>
+<b>Käännökset</b>
 
 Voit auttaa kääntämään sovelluksen omalle kielellesi Crowdinin avulla:
 <a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

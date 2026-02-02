@@ -1,1 +1,1 @@
-For detailed release notes, please visit: https://github.com/meshtastic/Meshtastic-Android/releases/
+Yksityiskohtaiset julkaisutiedot löydät osoitteesta: https://github.com/meshtastic/Meshtastic-Android/releases/
