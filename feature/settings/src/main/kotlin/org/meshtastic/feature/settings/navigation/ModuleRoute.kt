@@ -20,16 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.DataUsage
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PermScanWifi
-import androidx.compose.material.icons.filled.Sensors
-import androidx.compose.material.icons.filled.SettingsRemote
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.DataUsage
 import androidx.compose.material.icons.rounded.LightMode
@@ -42,6 +32,7 @@ import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
@@ -62,7 +53,13 @@ import org.meshtastic.core.strings.telemetry
 import org.meshtastic.proto.AdminProtos
 import org.meshtastic.proto.MeshProtos.DeviceMetadata
 
-enum class ModuleRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
+enum class ModuleRoute(
+    val title: StringResource,
+    val route: Route,
+    val icon: ImageVector?,
+    val type: Int = 0,
+    val isSupported: (Capabilities) -> Boolean = { true },
+) {
     MQTT(
         Res.string.mqtt,
         SettingsRoutes.MQTT,
@@ -146,6 +143,7 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         SettingsRoutes.StatusMessage,
         Icons.AutoMirrored.Default.Message,
         AdminProtos.AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG_VALUE,
+        isSupported = { it.supportsStatusMessage },
     ),
     ;
 
@@ -153,10 +151,11 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         get() = 1 shl ordinal
 
     companion object {
-        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
-            when (metadata) {
-                null -> true // Include all routes if metadata is null
-                else -> metadata.excludedModules and it.bitfield == 0
+        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> {
+            val capabilities = Capabilities(metadata?.firmwareVersion)
+            return entries.filter {
+                val isExcluded = metadata != null && (metadata.excludedModules and it.bitfield != 0)
+                !isExcluded && it.isSupported(capabilities)
             }
         }
     }
