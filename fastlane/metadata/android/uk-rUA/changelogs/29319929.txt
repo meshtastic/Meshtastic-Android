@@ -1,4 +1,4 @@
-## 📦 Uncategorized
+## 📦 Без категорії
 
 - chore(build): Enable and configure Compose Compiler reports
    - PR: #4289
@@ -36,7 +36,7 @@
    - PR: #4311
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4310
-- Update VERSION_NAME_BASE to 2.7.12
+- Оновити VERSION_NAME_BASE до 2.7.12
    - PR: #4312
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4314
@@ -60,7 +60,7 @@
    - PR: #4322
 - fix(notifications): Suppress notifications for muted contacts an…
    - PR: #4323
-- chore(deps): update io.mockk:mockk to v1.14.9
+- chore(deps): оновлення io.mockk:mockk до v1.14.9
    - PR: #4325
 - fix(mesh): Set `hopStart` to match `hopLimit` in sent packets
    - PR: #4324
@@ -80,7 +80,7 @@
    - PR: #4335
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4332
-- chore(deps): update datadog to v3.6.0
+- chore(deps): оновлення datadog до v3.6.0
    - PR: #4340
 - chore(deps): update core/proto/src/main/proto digest to bc63a57
    - PR: #4337
@@ -116,7 +116,7 @@
    - PR: #4356
 - chore(repo): replace the triage robots
    - PR: #4359
-- chore(deps): update gradle to v9.3.1
+- chore(deps): оновити gradle до v9.3.1
    - PR: #4358
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4360
@@ -136,7 +136,7 @@
    - PR: #4363
 - chore(ci): Remove GitHub Packages publishing workflow
    - PR: #4368
-- chore(deps): update protobuf runtime to v4.33.5
+- chore(deps): оновлення protobuf runtime до v4.33.5
    - PR: #4367
 - build: Lower JDK to 17 and minSdk to 21
    - PR: #4369

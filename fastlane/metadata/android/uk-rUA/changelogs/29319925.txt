@@ -1,4 +1,4 @@
-## 📦 Uncategorized
+## 📦 Без категорії
 
 - chore(build): Enable and configure Compose Compiler reports
    - PR: #4289
