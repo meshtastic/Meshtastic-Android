@@ -1,21 +1,21 @@
 Meshtastic on työkalu, jolla Android-laitteita voi käyttää avoimen lähdekoodin, verkosta riippumattomien mesh-radioiden kanssa. Tämä sovellus on Meshtastic-projektin pääasiakasohjelma, jonka avulla voit hallita mesh-laitteitasi ja viestiä muiden käyttäjien kanssa.
 
-Lisätietoja Meshtastic-projektista saat verkkosivuiltamme: [meshtastic.org](https://www.meshtastic.org). Radiolaitteissa toimiva laiteohjelmisto on erillinen avoimen lähdekoodin projekti, jonka löydät täältä: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
-**Käyttäjäyhteisö ja tukipalvelut**
+<b>Community and Support</b>
 
 Projekti on vielä kehitysvaiheessa (beta). Otamme mielellämme yhteydenottoja vastaan! Jos sinulla on kysyttävää, palautetta tai ongelmia, tule mukaan meidän ystävälliseen ja aktiiviseen yhteisöömme:
 
-*   **Keskustelufoorumi:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
-*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
-*   **Raportoi ongelmasta:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
 
-***Dokumentaatio*
+<b>Documentation</b>
 
 Lisätietoja tämän sovelluksen ja Meshtasticin ominaisuuksista ja toiminnoista saat katsomalla virallisen dokumentaatiomme:
-[**Katso dokumentaatio**](https://meshtastic.org/docs/)
+<a href="https://meshtastic.org/docs/">View Documentation</a>
 
-**Käännökset**
+<b>Translations</b>
 
 Voit auttaa kääntämään sovelluksen omalle kielellesi Crowdinin avulla:
-[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

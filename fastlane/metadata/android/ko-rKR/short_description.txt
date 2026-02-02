@@ -1,1 +1,1 @@
-The official app for Meshtastic, an open-source, off-grid, mesh radio.
+오픈 소스이자 독립형 메쉬 라디오인 메쉬타스틱의 공식 앱입니다.
