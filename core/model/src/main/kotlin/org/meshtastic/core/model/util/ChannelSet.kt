@@ -23,6 +23,7 @@ import co.touchlab.kermit.Logger
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig
