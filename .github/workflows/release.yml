@@ -73,29 +73,10 @@ jobs:
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
-      - name: Download Release SHA Artifact
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: release_sha
-          path: .
-
-      - name: Resolve Commit SHA
-        id: resolve_sha
-        run: |
-          if [ -f release_sha.txt ]; then
-            SHA=$(cat release_sha.txt)
-            echo "Using SHA from artifact: $SHA"
-            echo "SHA=$SHA" >> $GITHUB_OUTPUT
-          else
-            echo "Using input SHA or Tag"
-            echo "SHA=${{ inputs.commit_sha || inputs.tag_name }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ steps.resolve_sha.outputs.SHA }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
       - name: Set up JDK 17
@@ -130,39 +111,16 @@ jobs:
           echo "versionCode=$VERSION_CODE" >> $GITHUB_OUTPUT
         shell: bash
 
-  release-google:
-    runs-on: ubuntu-latest
-    needs: [prepare-build-info, run-lint]
-    environment: Release
     env:
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
-      - name: Download Release SHA Artifact
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: release_sha
-          path: .
-
-      - name: Resolve Commit SHA
-        id: resolve_sha
-        run: |
-          if [ -f release_sha.txt ]; then
-            SHA=$(cat release_sha.txt)
-            echo "Using SHA from artifact: $SHA"
-            echo "SHA=$SHA" >> $GITHUB_OUTPUT
-          else
-            echo "Using input SHA or Tag"
-            echo "SHA=${{ inputs.commit_sha || inputs.tag_name }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ steps.resolve_sha.outputs.SHA }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
       - name: Set up JDK 17
@@ -266,29 +224,10 @@ jobs:
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
-      - name: Download Release SHA Artifact
-        uses: actions/download-artifact@v4
-        continue-on-error: true
-        with:
-          name: release_sha
-          path: .
-
-      - name: Resolve Commit SHA
-        id: resolve_sha
-        run: |
-          if [ -f release_sha.txt ]; then
-            SHA=$(cat release_sha.txt)
-            echo "Using SHA from artifact: $SHA"
-            echo "SHA=$SHA" >> $GITHUB_OUTPUT
-          else
-            echo "Using input SHA or Tag"
-            echo "SHA=${{ inputs.commit_sha || inputs.tag_name }}" >> $GITHUB_OUTPUT
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ steps.resolve_sha.outputs.SHA }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
       - name: Set up JDK 17
@@ -344,14 +283,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.commit_sha || inputs.tag_name }}
+          ref: ${{ inputs.tag_name }}
           fetch-depth: 0
-
-      - name: Push Git Tag on Success
-        if: ${{ inputs.commit_sha != '' }}
-        run: |
-          git tag ${{ inputs.tag_name }} ${{ inputs.commit_sha }}
-          git push origin ${{ inputs.tag_name }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v7

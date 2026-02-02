@@ -35,7 +35,6 @@ jobs:
       release_name: ${{ steps.calculate_tags.outputs.release_name }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
-      release_commit_sha: ${{ steps.get_sha.outputs.release_commit_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -241,49 +240,13 @@ jobs:
           else
             echo "No changes to commit."
           fi
+          
+          # Pre-emptive Tagging: Tag the commit (new or existing) and push immediately
+          # This ensures downstream workflows can simply checkout the tag.
+          echo "Tagging and pushing $FINAL_TAG..."
+          git tag "$FINAL_TAG"
+          git push origin "$FINAL_TAG"
         shell: bash
-
-      - name: Get Commit SHA to Tag
-        id: get_sha
-        run: |
-          CHANNEL="${{ inputs.channel }}"
-          echo "Debug: Determining SHA for channel '$CHANNEL'"
-          
-          SHA=""
-          
-          if [[ "$CHANNEL" == "internal" ]]; then
-            # Internal build uses the latest commit (including any asset updates)
-            SHA=$(git rev-parse HEAD)
-          else
-            # Promotions use the SHA of the tag we are promoting
-            TAG_TO_PROCESS="${{ steps.calculate_tags.outputs.tag_to_process }}"
-            echo "Debug: Promoting tag '$TAG_TO_PROCESS'"
-            SHA=$(git rev-parse $TAG_TO_PROCESS)
-          fi
-          
-          # Trim whitespace to ensure clean output
-          SHA=$(echo "$SHA" | xargs)
-          
-          echo "Debug: Resolved SHA: '$SHA'"
-          
-          if [ -z "$SHA" ]; then
-            echo "::error::Calculated SHA is empty! Cannot proceed."
-            exit 1
-          fi
-          
-          # Save SHA to file for artifact upload (bypassing secret masking in outputs)
-          echo "$SHA" > release_sha.txt
-          
-          # We don't output release_commit_sha to GITHUB_OUTPUT anymore to avoid it being dropped if masked.
-          # Downstream workflows will read the artifact.
-        shell: bash
-
-      - name: Upload Release SHA Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release_sha
-          path: release_sha.txt
-          retention-days: 1
 
   call-release-workflow:
     if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
@@ -291,7 +254,6 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.final_tag }}
-      commit_sha: ${{ needs.determine-tags.outputs.release_commit_sha }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
     secrets: inherit
@@ -304,7 +266,6 @@ jobs:
       tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
       release_name: ${{ needs.determine-tags.outputs.release_name }}
       final_tag: ${{ needs.determine-tags.outputs.final_tag }}
-      commit_sha: ${{ needs.determine-tags.outputs.release_commit_sha }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
       from_channel: ${{ needs.determine-tags.outputs.from_channel }}
