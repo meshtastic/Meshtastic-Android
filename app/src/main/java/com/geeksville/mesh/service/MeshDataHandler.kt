@@ -105,7 +105,7 @@ constructor(
 
     fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
-        val fromUs = myNodeNum == (packet.from ?: 0)
+        val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
 
         val shouldBroadcast = handleDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
@@ -227,25 +227,25 @@ constructor(
                 // If it has a commit hash, it's already on the chain (Confirmed)
                 // Otherwise it's still being routed via SF++ (Routing)
                 val status =
-                    if (sfpp.commit_hash?.size == 0) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
+                    if (sfpp.commit_hash.size == 0) MessageStatus.SFPP_ROUTING else MessageStatus.SFPP_CONFIRMED
 
                 // Prefer a full 16-byte hash calculated from the message bytes if available
                 // But only if it's NOT a fragment, otherwise the calculated hash would be wrong
                 val hash =
                     when {
-                        (sfpp.message_hash?.size ?: 0) != 0 -> sfpp.message_hash?.toByteArray()
-                        !isFragment && (sfpp.message?.size ?: 0) != 0 -> {
+                        sfpp.message_hash.size != 0 -> sfpp.message_hash.toByteArray()
+                        !isFragment && sfpp.message.size != 0 -> {
                             SfppHasher.computeMessageHash(
-                                encryptedPayload = sfpp.message!!.toByteArray(),
+                                encryptedPayload = sfpp.message.toByteArray(),
                                 // Map 0 back to NODENUM_BROADCAST to match firmware hash calculation
                                 to =
                                 if (sfpp.encapsulated_to == 0) {
                                     DataPacket.NODENUM_BROADCAST
                                 } else {
-                                    sfpp.encapsulated_to ?: 0
+                                    sfpp.encapsulated_to
                                 },
-                                from = sfpp.encapsulated_from ?: 0,
-                                id = sfpp.encapsulated_id ?: 0,
+                                from = sfpp.encapsulated_from,
+                                id = sfpp.encapsulated_id,
                             )
                         }
                         else -> null
@@ -259,27 +259,27 @@ constructor(
                     packetRepository
                         .get()
                         .updateSFPPStatus(
-                            packetId = sfpp.encapsulated_id ?: 0,
-                            from = sfpp.encapsulated_from ?: 0,
-                            to = sfpp.encapsulated_to ?: 0,
+                            packetId = sfpp.encapsulated_id,
+                            from = sfpp.encapsulated_from,
+                            to = sfpp.encapsulated_to,
                             hash = hash,
                             status = status,
-                            rxTime = (sfpp.encapsulated_rxtime ?: 0).toLong() and 0xFFFFFFFFL,
+                            rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
                             myNodeNum = nodeManager.myNodeNum ?: 0,
                         )
-                    sfpp.encapsulated_id?.let { serviceBroadcasts.broadcastMessageStatus(it, status) }
+                    serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulated_id, status)
                 }
             }
 
             StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE -> {
                 scope.handledLaunch {
-                    sfpp.message_hash?.let {
+                    sfpp.message_hash.let {
                         packetRepository
                             .get()
                             .updateSFPPStatusByHash(
                                 hash = it.toByteArray(),
                                 status = MessageStatus.SFPP_CONFIRMED,
-                                rxTime = (sfpp.encapsulated_rxtime ?: 0).toLong() and 0xFFFFFFFFL,
+                                rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
                             )
                     }
                 }
@@ -300,29 +300,29 @@ constructor(
     private fun handlePaxCounter(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
         val p = Paxcount.ADAPTER.decode(payload)
-        nodeManager.handleReceivedPaxcounter(packet.from ?: 0, p)
+        nodeManager.handleReceivedPaxcounter(packet.from, p)
     }
 
     private fun handlePosition(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val p = Position.ADAPTER.decode(payload)
-        nodeManager.handleReceivedPosition(packet.from ?: 0, myNodeNum, p, dataPacket.time)
+        nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time)
     }
 
     private fun handleWaypoint(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val u = Waypoint.ADAPTER.decode(payload)
-        if ((u.locked_to ?: 0) != 0 && u.locked_to != packet.from) return
+        if (u.locked_to != 0 && u.locked_to != packet.from) return
         val currentSecond = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
-        rememberDataPacket(dataPacket, myNodeNum, updateNotification = (u.expire ?: 0) > currentSecond)
+        rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
     }
 
     private fun handleAdminMessage(packet: MeshPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val u = AdminMessage.ADAPTER.decode(payload)
-        u.session_passkey?.let { commandSender.setSessionPasskey(it) }
+        u.session_passkey.let { commandSender.setSessionPasskey(it) }
 
-        val fromNum = packet.from ?: 0
+        val fromNum = packet.from
         if (fromNum == myNodeNum) {
             u.get_config_response?.let { configHandler.handleDeviceConfig(it) }
             u.get_channel_response?.let { configHandler.handleChannel(it) }
@@ -339,7 +339,7 @@ constructor(
 
     private fun handleTextMessage(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val decoded = packet.decoded ?: return
-        if ((decoded.reply_id ?: 0) != 0 && (decoded.emoji ?: 0) != 0) {
+        if (decoded.reply_id != 0 && decoded.emoji != 0) {
             rememberReaction(packet)
         } else {
             rememberDataPacket(dataPacket, myNodeNum)
@@ -352,13 +352,13 @@ constructor(
             User.ADAPTER.decode(payload)
                 .let { if (it.is_licensed == true) it.copy(public_key = okio.ByteString.EMPTY) else it }
                 .let { if (packet.via_mqtt == true) it.copy(long_name = "${it.long_name} (MQTT)") else it }
-        nodeManager.handleReceivedUser(packet.from ?: 0, u, packet.channel ?: 0)
+        nodeManager.handleReceivedUser(packet.from, u, packet.channel)
     }
 
     private fun handleNodeStatus(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val s = StatusMessage.ADAPTER.decode(payload)
-        nodeManager.handleReceivedNodeStatus(packet.from ?: 0, s)
+        nodeManager.handleReceivedNodeStatus(packet.from, s)
         rememberDataPacket(dataPacket, myNodeNum)
     }
 
@@ -366,9 +366,9 @@ constructor(
         val payload = packet.decoded?.payload ?: return
         val t =
             Telemetry.ADAPTER.decode(payload).let {
-                if ((it.time ?: 0) == 0) it.copy(time = (dataPacket.time.milliseconds.inWholeSeconds).toInt()) else it
+                if (it.time == 0) it.copy(time = (dataPacket.time.milliseconds.inWholeSeconds).toInt()) else it
             }
-        val fromNum = packet.from ?: 0
+        val fromNum = packet.from
         val isRemote = (fromNum != myNodeNum)
         if (!isRemote) {
             connectionManager.updateTelemetry(t)
@@ -438,7 +438,7 @@ constructor(
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,
-            dataMapper.toNodeID(packet.from ?: 0),
+            dataMapper.toNodeID(packet.from),
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
         )
@@ -624,7 +624,7 @@ constructor(
                 }
                 val text =
                     "Total messages: ${h.history_messages}\n" +
-                        "History window: ${h.window?.milliseconds?.inWholeMinutes} min\n" +
+                        "History window: ${h.window.milliseconds.inWholeMinutes} min\n" +
                         "Last request: ${h.last_request}"
                 val u =
                     dataPacket.copy(
@@ -632,7 +632,7 @@ constructor(
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     )
                 rememberDataPacket(u, myNodeNum)
-                historyManager.updateStoreForwardLastRequest("router_history", h.last_request ?: 0, transport)
+                historyManager.updateStoreForwardLastRequest("router_history", h.last_request, transport)
             }
             s.heartbeat != null -> {
                 val hb = s.heartbeat!!
@@ -758,7 +758,7 @@ constructor(
             }
 
             PortNum.WAYPOINT_APP.value -> {
-                val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name ?: "")
+                val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
                 serviceNotifications.updateWaypointNotification(
                     contactKey,
                     getSenderName(dataPacket),
@@ -776,28 +776,28 @@ constructor(
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
         val decoded = packet.decoded ?: return@handledLaunch
         val emoji = decoded.payload.toByteArray().decodeToString()
-        val fromId = dataMapper.toNodeID(packet.from ?: 0)
-        val toId = dataMapper.toNodeID(packet.to ?: 0)
+        val fromId = dataMapper.toNodeID(packet.from)
+        val toId = dataMapper.toNodeID(packet.to)
 
         val reaction =
             ReactionEntity(
                 myNodeNum = nodeManager.myNodeNum ?: 0,
-                replyId = decoded.reply_id ?: 0,
+                replyId = decoded.reply_id,
                 userId = fromId,
                 emoji = emoji,
                 timestamp = System.currentTimeMillis(),
-                snr = packet.rx_snr ?: 0f,
-                rssi = packet.rx_rssi ?: 0,
+                snr = packet.rx_snr,
+                rssi = packet.rx_rssi,
                 hopsAway =
-                if ((packet.hop_start ?: 0) == 0 || (packet.hop_limit ?: 0) > (packet.hop_start ?: 0)) {
+                if (packet.hop_start == 0 || packet.hop_limit > packet.hop_start) {
                     HOPS_AWAY_UNAVAILABLE
                 } else {
-                    (packet.hop_start ?: 0) - (packet.hop_limit ?: 0)
+                    packet.hop_start - packet.hop_limit
                 },
                 packetId = packet.id,
                 status = MessageStatus.RECEIVED,
                 to = toId,
-                channel = packet.channel ?: 0,
+                channel = packet.channel,
             )
 
         // Check for duplicates before inserting
@@ -813,7 +813,7 @@ constructor(
         packetRepository.get().insertReaction(reaction)
 
         // Find the original packet to get the contactKey
-        packetRepository.get().getPacketByPacketId(decoded.reply_id ?: 0)?.let { original ->
+        packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { original ->
             // Skip notification if the original message was filtered
             if (original.packet.filtered) return@let
 

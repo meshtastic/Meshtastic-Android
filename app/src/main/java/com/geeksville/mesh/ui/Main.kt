@@ -219,7 +219,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
 
     val clientNotification by uIViewModel.clientNotification.collectAsStateWithLifecycle()
     clientNotification?.let { notification ->
-        var message = notification.message ?: ""
+        var message = notification.message
         val compromisedKeys =
             if (notification.low_entropy_key != null || notification.duplicated_public_key != null) {
                 message = stringResource(Res.string.compromised_keys)

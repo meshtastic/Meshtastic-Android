@@ -133,10 +133,10 @@ constructor(
 
     fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
-            if ((packet.rx_time ?: 0) == 0) {
+            if (packet.rx_time == 0) {
                 (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
             } else {
-                packet.rx_time ?: 0
+                packet.rx_time
             }
         val preparedPacket = packet.copy(rx_time = rxTime)
 
@@ -186,8 +186,8 @@ constructor(
                 message_type = "Packet",
                 received_date = System.currentTimeMillis(),
                 raw_message = packet.toString(),
-                fromNum = packet.from ?: 0,
-                portNum = packet.decoded!!.portnum?.value ?: 0,
+                fromNum = packet.from,
+                portNum = packet.decoded!!.portnum.value,
                 fromRadio = FromRadio(packet = packet),
             )
         val logJob = insertMeshLog(log)
@@ -197,24 +197,24 @@ constructor(
         scope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
 
         myNodeNum?.let { myNum ->
-            val from = packet.from ?: 0
+            val from = packet.from
             val isOtherNode = myNum != from
             nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) {
                 it.lastHeard = (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
             }
-            nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel ?: 0) {
-                it.lastHeard = packet.rx_time ?: 0
-                it.snr = packet.rx_snr ?: 0f
-                it.rssi = packet.rx_rssi ?: 0
+            nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel) {
+                it.lastHeard = packet.rx_time
+                it.snr = packet.rx_snr
+                it.rssi = packet.rx_rssi
                 it.hopsAway =
                     if (packet.decoded!!.portnum == PortNum.RANGE_TEST_APP) {
                         0
-                    } else if ((packet.hop_start ?: 0) == 0 && (packet.decoded!!.bitfield ?: 0) == 0) {
+                    } else if (packet.hop_start == 0 && (packet.decoded!!.bitfield ?: 0) == 0) {
                         -1
-                    } else if ((packet.hop_limit ?: 0) > (packet.hop_start ?: 0)) {
+                    } else if (packet.hop_limit > packet.hop_start) {
                         -1
                     } else {
-                        (packet.hop_start ?: 0) - (packet.hop_limit ?: 0)
+                        packet.hop_start - packet.hop_limit
                     }
             }
 

@@ -221,7 +221,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.serial_console),
                     summary = stringResource(Res.string.config_security_serial_enabled),
-                    checked = formState.value.serial_enabled ?: false,
+                    checked = formState.value.serial_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(serial_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -230,7 +230,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.debug_log_api_enabled),
                     summary = stringResource(Res.string.config_security_debug_log_api_enabled),
-                    checked = formState.value.debug_log_api_enabled ?: false,
+                    checked = formState.value.debug_log_api_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(debug_log_api_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -242,7 +242,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.managed_mode),
                     summary = stringResource(Res.string.config_security_is_managed),
-                    checked = formState.value.is_managed ?: false,
+                    checked = formState.value.is_managed,
                     enabled = state.connected && formState.value.admin_key.isNotEmpty(),
                     onCheckedChange = { formState.value = formState.value.copy(is_managed = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -250,7 +250,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.legacy_admin_channel),
-                    checked = formState.value.admin_channel_enabled ?: false,
+                    checked = formState.value.admin_channel_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
