@@ -27,7 +27,7 @@ on:
       GRADLE_ENCRYPTION_KEY:
         required: false
       CODECOV_TOKEN:
-        required: true
+        required: false
       GRADLE_CACHE_URL:
         required: false
       GRADLE_CACHE_USERNAME:
