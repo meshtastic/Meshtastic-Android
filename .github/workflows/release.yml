@@ -74,7 +74,7 @@ jobs:
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Download Release SHA Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: release_sha
@@ -141,7 +141,7 @@ jobs:
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Download Release SHA Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: release_sha
@@ -267,7 +267,7 @@ jobs:
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
     steps:
       - name: Download Release SHA Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         continue-on-error: true
         with:
           name: release_sha
