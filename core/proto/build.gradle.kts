@@ -14,46 +14,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.wire)
     `maven-publish`
 }
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-// afterEvaluate {
-//     publishing {
-//         publications {
-//             create<MavenPublication>("release") {
-//                 from(components["googleRelease"])
-//                 artifactId = "core-proto"
-//             }
-//         }
-//     }
-// }
-
 kotlin {
+    // Keep jvm() for desktop/server consumers
     jvm()
-    androidLibrary {
-        namespace = "org.meshtastic.core.proto"
-        compileSdk = 35
-        minSdk = 21
-        
-        compilerOptions {
-             jvmTarget.set(JvmTarget.JVM_17)
-        }
-    }
-    
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.wire.runtime)
-        }
-    }
+
+    // Override minSdk for ATAK compatibility (standard is 26)
+    androidLibrary { minSdk = 21 }
+
+    sourceSets { commonMain.dependencies { api(libs.wire.runtime) } }
 }
 
 wire {
@@ -61,9 +38,19 @@ wire {
         srcDir("src/main/proto")
         srcDir("src/main/wire-includes")
     }
-    kotlin {
-    }
+    kotlin {}
     root("meshtastic.*")
 }
 
-
+// Modern KMP publication uses the project name as the artifactId by default.
+// We rename the publications to include the 'core-' prefix for consistency.
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        val baseId = artifactId
+        if (baseId == "proto") {
+            artifactId = "core-proto"
+        } else if (baseId.startsWith("proto-")) {
+            artifactId = baseId.replace("proto-", "core-proto-")
+        }
+    }
+}

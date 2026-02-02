@@ -516,9 +516,7 @@ constructor(
                 Person.Builder()
                     .setName(msg.node.user.long_name)
                     .setKey(msg.node.user.id)
-                    .setIcon(
-                        createPersonIcon(msg.node.user.short_name, msg.node.colors.second, msg.node.colors.first),
-                    )
+                    .setIcon(createPersonIcon(msg.node.user.short_name, msg.node.colors.second, msg.node.colors.first))
                     .build()
 
             val text =

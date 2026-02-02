@@ -225,8 +225,7 @@ constructor(
                     entity.longName = entity.user.long_name
                     entity.shortName = entity.user.short_name
                 } else {
-                    var newUser =
-                        user.let { if (it.is_licensed) it.copy(public_key = ByteString.EMPTY) else it }
+                    var newUser = user.let { if (it.is_licensed) it.copy(public_key = ByteString.EMPTY) else it }
                     if (info.via_mqtt) {
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }
