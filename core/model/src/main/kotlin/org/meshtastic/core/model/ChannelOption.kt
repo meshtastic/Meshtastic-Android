@@ -321,6 +321,3 @@ enum class ChannelOption(val modemPreset: ModemPreset, val bandwidth: Float) {
         }
     }
 }
-
-
-

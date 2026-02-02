@@ -46,17 +46,17 @@ internal fun PowerMetrics(node: Node) {
         remember(node.powerMetrics) {
             buildList {
                 with(node.powerMetrics) {
-                    if (ch1Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Rounded.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1Current), Icons.Rounded.Power))
+                    if ((ch1_voltage ?: 0f) != 0f) {
+                        add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1_voltage), Icons.Rounded.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1_current), Icons.Rounded.Power))
                     }
-                    if (ch2Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Rounded.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2Current), Icons.Rounded.Power))
+                    if ((ch2_voltage ?: 0f) != 0f) {
+                        add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2_voltage), Icons.Rounded.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2_current), Icons.Rounded.Power))
                     }
-                    if (ch3Voltage != 0f) {
-                        add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Rounded.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3Current), Icons.Rounded.Power))
+                    if ((ch3_voltage ?: 0f) != 0f) {
+                        add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3_voltage), Icons.Rounded.Bolt))
+                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3_current), Icons.Rounded.Power))
                     }
                 }
             }

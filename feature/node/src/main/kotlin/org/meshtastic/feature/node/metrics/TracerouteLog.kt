@@ -90,7 +90,8 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.RouteDiscovery
 
 private data class TracerouteDialog(
     val message: AnnotatedString,
@@ -122,7 +123,8 @@ fun TracerouteLogScreen(
         }
     }
 
-    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
+    fun getUsername(nodeNum: Int): String =
+        with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
 
     var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
     var errorMessageRes by remember { mutableStateOf<StringResource?>(null) }
@@ -142,7 +144,7 @@ fun TracerouteLogScreen(
         topBar = {
             val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsState()
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle = stringResource(Res.string.traceroute_log),
                 ourNode = null,
                 showNodeChip = false,
@@ -169,9 +171,9 @@ fun TracerouteLogScreen(
         ) {
             items(state.tracerouteRequests, key = { it.uuid }) { log ->
                 val result =
-                    remember(state.tracerouteRequests, log.fromRadio.packet.id) {
+                    remember(state.tracerouteRequests, log.fromRadio.packet?.id) {
                         state.tracerouteResults.find {
-                            it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id
+                            it.fromRadio.packet?.decoded?.request_id == log.fromRadio.packet?.id
                         }
                     }
                 val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
@@ -187,12 +189,12 @@ fun TracerouteLogScreen(
 
                 val tracerouteDetailsAnnotated: AnnotatedString? =
                     result?.let { res ->
-                        if (route != null && route.routeList.isNotEmpty() && route.routeBackList.isNotEmpty()) {
+                        if (route != null && route.route.isNotEmpty() && route.route_back.isNotEmpty()) {
                             val seconds =
                                 (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
                             val annotatedBase =
                                 annotateTraceroute(
-                                    res.fromRadio.packet.getTracerouteResponse(
+                                    res.fromRadio.packet?.getTracerouteResponse(
                                         ::getUsername,
                                         headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
                                         headerBack = stringResource(Res.string.traceroute_route_back_to_us),
@@ -206,7 +208,7 @@ fun TracerouteLogScreen(
                         } else {
                             // For cases where there's a result but no full route, display plain text
                             res.fromRadio.packet
-                                .getTracerouteResponse(
+                                ?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
                                     headerBack = stringResource(Res.string.traceroute_route_back_to_us),
@@ -217,9 +219,9 @@ fun TracerouteLogScreen(
                 val overlay =
                     route?.let {
                         TracerouteOverlay(
-                            requestId = log.fromRadio.packet.id,
-                            forwardRoute = it.routeList,
-                            returnRoute = it.routeBackList,
+                            requestId = log.fromRadio.packet?.id ?: 0,
+                            forwardRoute = it.route,
+                            returnRoute = it.route_back,
                         )
                     }
 
@@ -246,7 +248,7 @@ fun TracerouteLogScreen(
                                 showDialog =
                                     TracerouteDialog(
                                         message = it,
-                                        requestId = log.fromRadio.packet.id,
+                                        requestId = log.fromRadio.packet?.id ?: 0,
                                         responseLogUuid = responseLogUuid,
                                         overlay = overlay,
                                     )
@@ -278,7 +280,7 @@ private fun TracerouteLogDialogs(
     dialog?.let { dialogState ->
         val snapshotPositionsFlow =
             remember(dialogState.responseLogUuid) { viewModel.tracerouteSnapshotPositions(dialogState.responseLogUuid) }
-        val snapshotPositions by snapshotPositionsFlow.collectAsStateWithLifecycle(emptyMap<Int, MeshProtos.Position>())
+        val snapshotPositions by snapshotPositionsFlow.collectAsStateWithLifecycle(emptyMap<Int, Position>())
         SimpleAlertDialog(
             title = Res.string.traceroute,
             text = { SelectionContainer { Text(text = dialogState.message) } },
@@ -316,24 +318,24 @@ private fun TracerouteLogDialogs(
 
 /** Generates a display string and icon based on the route discovery information. */
 @Composable
-private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
+private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
         stringResource(Res.string.routing_error_no_response) to MeshtasticIcons.PersonOff
     }
     // A direct route means the sender and receiver are the only two nodes in the route.
-    routeCount <= 2 && routeBackCount <= 2 -> { // also check routeBackCount for direct to be more robust
+    route.size <= 2 && route_back.size <= 2 -> { // also check route_back size for direct to be more robust
         stringResource(Res.string.traceroute_direct) to MeshtasticIcons.Group
     }
 
-    routeCount == routeBackCount -> {
-        val hops = routeCount - 2
+    route.size == route_back.size -> {
+        val hops = route.size - 2
         pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
 
     else -> {
         // Asymmetric route
-        val towards = maxOf(0, routeCount - 2)
-        val back = maxOf(0, routeBackCount - 2)
+        val towards = maxOf(0, route.size - 2)
+        val back = maxOf(0, route_back.size - 2)
         stringResource(Res.string.traceroute_diff, towards, back) to MeshtasticIcons.Route
     }
 }

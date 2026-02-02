@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.connections.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -56,9 +55,9 @@ import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
 private const val RSSI_DELAY = 10
@@ -113,9 +112,9 @@ fun CurrentlyConnectedInfo(
             }
 
             Column(modifier = Modifier.weight(1f, fill = true)) {
-                Text(text = node.user.longName, style = MaterialTheme.typography.titleMedium)
+                Text(text = node.user.long_name ?: "", style = MaterialTheme.typography.titleMedium)
 
-                node.metadata?.firmwareVersion?.let { firmwareVersion ->
+                node.metadata?.firmware_version?.let { firmwareVersion ->
                     Text(
                         text = stringResource(Res.string.firmware_version, firmwareVersion),
                         style = MaterialTheme.typography.bodySmall,
@@ -150,14 +149,10 @@ private fun CurrentlyConnectedInfoPreview() {
             node =
             Node(
                 num = 13444,
-                user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build(),
+                user = User(short_name = "\uD83E\uDEE0", long_name = "John Doe"),
                 isIgnored = false,
-                paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
-                environmentMetrics =
-                TelemetryProtos.EnvironmentMetrics.newBuilder()
-                    .setTemperature(25f)
-                    .setRelativeHumidity(60f)
-                    .build(),
+                paxcounter = Paxcount(ble = 10, wifi = 5),
+                environmentMetrics = EnvironmentMetrics(temperature = 25f, relative_humidity = 60f),
             ),
             onNavigateToNodeDetails = {},
             onClickDisconnect = {},

@@ -184,6 +184,7 @@ constructor(
                                             FirmwareUpdateMethod.Usb
                                         }
                                     }
+
                                     radioPrefs.isBle() -> FirmwareUpdateMethod.Ble
                                     radioPrefs.isTcp() -> FirmwareUpdateMethod.Wifi
                                     else -> FirmwareUpdateMethod.Unknown
@@ -451,7 +452,7 @@ constructor(
 
     private suspend fun checkBatteryLevel(): Boolean {
         val node = nodeRepository.ourNodeInfo.value ?: return true
-        val level = node.batteryLevel
+        val level = node.batteryLevel ?: 1
         val isBatteryLow = level in 1..MIN_BATTERY_LEVEL
 
         if (isBatteryLow) {
@@ -463,7 +464,7 @@ constructor(
 
     private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
         val nodeInfo = nodeRepository.ourNodeInfo.value
-        val hwModelInt = nodeInfo?.user?.hwModel?.number
+        val hwModelInt = nodeInfo?.user?.hw_model?.value
         val target = ourNode.pioEnv
 
         return if (hwModelInt != null) {

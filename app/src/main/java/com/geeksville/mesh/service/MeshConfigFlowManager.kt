@@ -28,7 +28,12 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Heartbeat
+import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.NodeInfo
+import org.meshtastic.proto.ToRadio
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -57,11 +62,11 @@ constructor(
         this.scope = scope
     }
 
-    private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
+    private val newNodes = mutableListOf<NodeInfo>()
     val newNodeCount: Int
         get() = newNodes.size
 
-    private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
+    private var rawMyNodeInfo: MyNodeInfo? = null
     private var newMyNodeInfo: MyNodeEntity? = null
     private var myNodeInfo: MyNodeEntity? = null
 
@@ -92,9 +97,7 @@ constructor(
 
     private fun sendHeartbeat() {
         try {
-            packetHandler.sendToRadio(
-                MeshProtos.ToRadio.newBuilder().apply { heartbeat = MeshProtos.Heartbeat.getDefaultInstance() },
-            )
+            packetHandler.sendToRadio(ToRadio(heartbeat = Heartbeat()))
             Logger.d { "Heartbeat sent between nonce stages" }
         } catch (ex: IOException) {
             Logger.w(ex) { "Failed to send heartbeat; proceeding with node-info stage" }
@@ -127,10 +130,10 @@ constructor(
         analytics.setDeviceAttributes(mi.firmwareVersion ?: "unknown", mi.model ?: "unknown")
     }
 
-    fun handleMyInfo(myInfo: MeshProtos.MyNodeInfo) {
-        Logger.i { "MyNodeInfo received: ${myInfo.myNodeNum}" }
+    fun handleMyInfo(myInfo: MyNodeInfo) {
+        Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
         rawMyNodeInfo = myInfo
-        nodeManager.myNodeNum = myInfo.myNodeNum
+        nodeManager.myNodeNum = myInfo.my_node_num ?: 0
         regenMyNodeInfo()
 
         scope.handledLaunch {
@@ -140,42 +143,42 @@ constructor(
         }
     }
 
-    fun handleLocalMetadata(metadata: MeshProtos.DeviceMetadata) {
+    fun handleLocalMetadata(metadata: DeviceMetadata) {
         Logger.i { "Local Metadata received" }
         regenMyNodeInfo(metadata)
     }
 
-    fun handleNodeInfo(info: MeshProtos.NodeInfo) {
+    fun handleNodeInfo(info: NodeInfo) {
         newNodes.add(info)
     }
 
-    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = MeshProtos.DeviceMetadata.getDefaultInstance()) {
+    private fun regenMyNodeInfo(metadata: DeviceMetadata? = DeviceMetadata()) {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
             val mi =
                 with(myInfo) {
                     MyNodeEntity(
-                        myNodeNum = myNodeNum,
+                        myNodeNum = my_node_num ?: 0,
                         model =
-                        when (val hwModel = metadata?.hwModel) {
+                        when (val hwModel = metadata?.hw_model) {
                             null,
-                            MeshProtos.HardwareModel.UNSET,
+                            HardwareModel.UNSET,
                             -> null
                             else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                         },
-                        firmwareVersion = metadata?.firmwareVersion,
+                        firmwareVersion = metadata?.firmware_version,
                         couldUpdate = false,
                         shouldUpdate = false,
                         currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,
                         messageTimeoutMsec = 300000,
-                        minAppVersion = minAppVersion,
+                        minAppVersion = min_app_version ?: 0,
                         maxChannels = 8,
                         hasWifi = metadata?.hasWifi == true,
-                        deviceId = deviceId.toStringUtf8(),
-                        pioEnv = if (myInfo.pioEnv.isNullOrEmpty()) null else myInfo.pioEnv,
+                        deviceId = device_id?.utf8() ?: "",
+                        pioEnv = if (myInfo.pio_env.isNullOrEmpty()) null else myInfo.pio_env,
                     )
                 }
-            if (metadata != null && metadata != MeshProtos.DeviceMetadata.getDefaultInstance()) {
+            if (metadata != null && metadata != DeviceMetadata()) {
                 scope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
             }
             newMyNodeInfo = mi

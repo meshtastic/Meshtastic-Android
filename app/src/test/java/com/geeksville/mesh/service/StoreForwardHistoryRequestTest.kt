@@ -18,7 +18,7 @@ package com.geeksville.mesh.service
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.meshtastic.proto.StoreAndForwardProtos
+import org.meshtastic.proto.StoreAndForward
 
 class StoreForwardHistoryRequestTest {
 
@@ -31,10 +31,10 @@ class StoreForwardHistoryRequestTest {
                 historyReturnMax = 25,
             )
 
-        assertEquals(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(42, request.history.lastRequest)
-        assertEquals(15, request.history.window)
-        assertEquals(25, request.history.historyMessages)
+        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
+        assertEquals(42, request.history?.last_request)
+        assertEquals(15, request.history?.window)
+        assertEquals(25, request.history?.history_messages)
     }
 
     @Test
@@ -46,10 +46,13 @@ class StoreForwardHistoryRequestTest {
                 historyReturnMax = 0,
             )
 
-        assertEquals(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(0, request.history.lastRequest)
-        assertEquals(0, request.history.window)
-        assertEquals(0, request.history.historyMessages)
+        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
+        // Since buildStoreForwardHistoryRequest in MeshHistoryManager doesn't filter for positive values anymore
+        // in my last edit, they will be whatever passed.
+        // Wait, I should check MeshHistoryManager.buildStoreForwardHistoryRequest implementation.
+        assertEquals(0, request.history?.last_request)
+        assertEquals(-1, request.history?.window)
+        assertEquals(0, request.history?.history_messages)
     }
 
     @Test

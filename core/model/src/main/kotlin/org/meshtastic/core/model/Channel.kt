@@ -25,10 +25,7 @@ import org.meshtastic.proto.Config.LoRaConfig
 import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import java.security.SecureRandom
 
-data class Channel(
-    val settings: ChannelSettings = default.settings,
-    val loraConfig: LoRaConfig = default.loraConfig,
-) {
+data class Channel(val settings: ChannelSettings = default.settings, val loraConfig: LoRaConfig = default.loraConfig) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         private val channelDefaultKey =
@@ -59,12 +56,7 @@ data class Channel(
             Channel(
                 ChannelSettings(psk = defaultPSK.toByteString()),
                 // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
-                LoRaConfig(
-                    use_preset = true,
-                    modem_preset = ModemPreset.LONG_FAST,
-                    hop_limit = 3,
-                    tx_enabled = true,
-                ),
+                LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST, hop_limit = 3, tx_enabled = true),
             )
 
         fun getRandomKey(size: Int = 32): ByteString {
@@ -137,4 +129,3 @@ data class Channel(
         return result
     }
 }
-

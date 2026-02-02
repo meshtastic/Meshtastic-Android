@@ -180,7 +180,7 @@ fun <T> BaseMetricScreen(
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle = stringResource(titleRes) + " (${data.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,

@@ -26,7 +26,6 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Position
-import org.meshtastic.proto.Data
 import kotlin.time.Duration.Companion.days
 
 private const val SECONDS_TO_MILLIS = 1000L

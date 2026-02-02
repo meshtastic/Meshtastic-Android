@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.qr
 
 import android.os.RemoteException
@@ -43,8 +42,7 @@ constructor(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
-    private val localConfig =
-        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
+    private val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
     /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {

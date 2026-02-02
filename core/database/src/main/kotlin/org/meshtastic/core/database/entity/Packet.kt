@@ -198,5 +198,3 @@ private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?)
 
 private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =
     this.map { it.toReaction(getNode) }
-
-

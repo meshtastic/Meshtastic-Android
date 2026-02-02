@@ -118,15 +118,13 @@ data class NodeEntity(
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: User = User(),
     @ColumnInfo(name = "long_name") var longName: String? = null,
     @ColumnInfo(name = "short_name") var shortName: String? = null, // used in includeUnknown filter
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    var position: WirePosition = WirePosition(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var position: WirePosition = WirePosition(),
     var latitude: Double = 0.0,
     var longitude: Double = 0.0,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     @ColumnInfo(name = "last_heard") var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB)
-    var deviceTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB) var deviceTelemetry: Telemetry = Telemetry(),
     var channel: Int = 0,
     @ColumnInfo(name = "via_mqtt") var viaMqtt: Boolean = false,
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
@@ -135,10 +133,8 @@ data class NodeEntity(
     @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
-    var powerTelemetry: Telemetry = Telemetry(),
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    var paxcounter: Paxcount = Paxcount(),
+    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
@@ -249,6 +245,3 @@ data class NodeEntity(
         hopsAway = hopsAway,
     )
 }
-
-
-

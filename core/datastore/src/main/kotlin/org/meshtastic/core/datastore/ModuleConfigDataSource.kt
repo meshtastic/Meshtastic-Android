@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import okio.IOException
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
-import okio.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,7 +49,8 @@ class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: 
         when {
             config.mqtt != null -> current.copy(mqtt = config.mqtt)
             config.serial != null -> current.copy(serial = config.serial)
-            config.external_notification != null -> current.copy(external_notification = config.external_notification)
+            config.external_notification != null ->
+                current.copy(external_notification = config.external_notification)
             config.store_forward != null -> current.copy(store_forward = config.store_forward)
             config.range_test != null -> current.copy(range_test = config.range_test)
             config.telemetry != null -> current.copy(telemetry = config.telemetry)

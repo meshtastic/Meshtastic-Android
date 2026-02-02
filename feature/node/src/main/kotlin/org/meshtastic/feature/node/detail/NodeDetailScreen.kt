@@ -143,7 +143,7 @@ private fun NodeDetailScaffold(
         modifier = modifier,
         topBar = {
             MainAppBar(
-                title = node?.user?.longName ?: "",
+                title = node?.user?.long_name ?: "",
                 ourNode = uiState.ourNode,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -213,6 +213,7 @@ private fun NodeDetailContent(
             )
         } else {
             val loadingDescription = stringResource(Res.string.loading)
+            val loadingMessage = stringResource(Res.string.loading)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(modifier = Modifier.semantics { contentDescription = loadingDescription })
             }

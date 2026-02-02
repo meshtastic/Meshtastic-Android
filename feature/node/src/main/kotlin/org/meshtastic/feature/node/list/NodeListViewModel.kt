@@ -35,8 +35,8 @@ import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,7 +59,7 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
+    private val _sharedContactRequested: MutableStateFlow<SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
@@ -99,8 +99,8 @@ constructor(
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
-                distanceUnits = profile.config.display.units.number,
-                tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+                distanceUnits = profile.config?.display?.units?.value ?: 0,
+                tempInFahrenheit = profile.module_config?.telemetry?.environment_display_fahrenheit ?: false,
             )
         }
             .stateInWhileSubscribed(initialValue = NodesUiState())
@@ -124,10 +124,10 @@ constructor(
                                     val role = node.user.role
                                     val infrastructureRoles =
                                         listOf(
-                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER,
-                                            ConfigProtos.Config.DeviceConfig.Role.REPEATER,
-                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
-                                            ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE,
+                                            Config.DeviceConfig.Role.ROUTER,
+                                            Config.DeviceConfig.Role.REPEATER,
+                                            Config.DeviceConfig.Role.ROUTER_LATE,
+                                            Config.DeviceConfig.Role.CLIENT_BASE,
                                         )
                                     role !in infrastructureRoles && !node.isEffectivelyUnmessageable
                                 } else {
@@ -151,7 +151,7 @@ constructor(
         nodeFilterPreferences.setNodeSort(sort)
     }
 
-    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
+    fun setSharedContactRequested(sharedContact: SharedContact?) {
         _sharedContactRequested.value = sharedContact
     }
 

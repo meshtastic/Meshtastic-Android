@@ -16,8 +16,9 @@
  */
 package com.geeksville.mesh.service
 
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshPacket
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,27 +30,25 @@ class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManage
         nodeManager.nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
     }
 
-    fun toDataPacket(packet: MeshPacket): DataPacket? = if (!packet.hasDecoded()) {
-        null
-    } else {
-        val data = packet.decoded
-        DataPacket(
+    fun toDataPacket(packet: MeshPacket): DataPacket? {
+        val decoded = packet.decoded ?: return null
+        return DataPacket(
             from = toNodeID(packet.from),
             to = toNodeID(packet.to),
-            time = packet.rxTime * 1000L,
+            time = packet.rx_time * 1000L,
             id = packet.id,
-            dataType = data.portnumValue,
-            bytes = data.payload.toByteArray(),
-            hopLimit = packet.hopLimit,
-            channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
-            wantAck = packet.wantAck,
-            hopStart = packet.hopStart,
-            snr = packet.rxSnr,
-            rssi = packet.rxRssi,
-            replyId = data.replyId,
-            relayNode = packet.relayNode,
-            viaMqtt = packet.viaMqtt,
-            emoji = data.emoji,
+            dataType = decoded.portnum.value,
+            bytes = decoded.payload.toByteArray().toByteString(),
+            hopLimit = packet.hop_limit,
+            channel = if (packet.pki_encrypted == true) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+            wantAck = packet.want_ack == true,
+            hopStart = packet.hop_start,
+            snr = packet.rx_snr,
+            rssi = packet.rx_rssi,
+            replyId = decoded.reply_id,
+            relayNode = packet.relay_node,
+            viaMqtt = packet.via_mqtt == true,
+            emoji = decoded.emoji,
         )
     }
 }

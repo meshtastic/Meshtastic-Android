@@ -90,7 +90,7 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.Config
 
 fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
     false
@@ -120,13 +120,12 @@ fun ConnectionsScreen(
     val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
-    val connectionState by
-        connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.Disconnected)
+    val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
-    val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
+    val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -219,7 +218,7 @@ fun ConnectionsScreen(
                                         CurrentlyConnectedInfo(
                                             node = node,
                                             bleDevice =
-                                            bleDevices.firstOrNull { it.fullAddress == selectedDevice }
+                                            bleDevices.find { it.fullAddress == selectedDevice }
                                                 as DeviceListEntry.Ble?,
                                             onNavigateToNodeDetails = onNavigateToNodeDetails,
                                             onClickDisconnect = { scanModel.disconnect() },

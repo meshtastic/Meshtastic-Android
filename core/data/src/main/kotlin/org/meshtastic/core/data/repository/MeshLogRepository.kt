@@ -59,7 +59,8 @@ constructor(
         val telemetry = Telemetry.ADAPTER.decode(payload)
         telemetry.copy(
             time = (log.received_date / MILLIS_TO_SECONDS).toInt(),
-            environment_metrics = telemetry.environment_metrics?.let { metrics ->
+            environment_metrics =
+            telemetry.environment_metrics?.let { metrics ->
                 metrics.copy(
                     temperature = metrics.temperature ?: Float.NaN,
                     relative_humidity = metrics.relative_humidity ?: Float.NaN,
@@ -71,16 +72,15 @@ constructor(
                     lux = metrics.lux ?: Float.NaN,
                     uv_lux = metrics.uv_lux ?: Float.NaN,
                     iaq = metrics.iaq ?: Int.MIN_VALUE,
-                    soil_moisture = metrics.soil_moisture ?: Int.MIN_VALUE
+                    soil_moisture = metrics.soil_moisture ?: Int.MIN_VALUE,
                 )
             },
         )
-    }.getOrNull()
+    }
+        .getOrNull()
 
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = dbManager.currentDb
-        .flatMapLatest {
-            it.meshLogDao().getLogsFrom(nodeNum, PortNum.TELEMETRY_APP.value, MAX_MESH_PACKETS)
-        }
+        .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, PortNum.TELEMETRY_APP.value, MAX_MESH_PACKETS) }
         .distinctUntilChanged()
         .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
         .flowOn(dispatchers.io)
@@ -99,7 +99,9 @@ constructor(
      * If 'portNum' is not specified, returns all MeshPackets. Otherwise, filters by 'portNum'.
      */
     fun getMeshPacketsFrom(nodeNum: Int, portNum: Int = PortNum.UNKNOWN_APP.value): Flow<List<MeshPacket>> =
-        getLogsFrom(nodeNum, portNum).mapLatest { list -> list.mapNotNull { it.fromRadio.packet } }.flowOn(dispatchers.io)
+        getLogsFrom(nodeNum, portNum)
+            .mapLatest { list -> list.mapNotNull { it.fromRadio.packet } }
+            .flowOn(dispatchers.io)
 
     fun getMyNodeInfo(): Flow<MyNodeInfo?> = getLogsFrom(0, 0)
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }

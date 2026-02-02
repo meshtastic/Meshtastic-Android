@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import android.graphics.Color
@@ -49,14 +48,9 @@ data class MeshUser(
         "role=$role)"
 
     /** Create our model object from a protobuf. */
-    constructor(p: org.meshtastic.proto.User) : this(
-        p.id,
-        p.long_name ?: "",
-        p.short_name ?: "",
-        p.hw_model,
-        p.is_licensed,
-        p.role.value,
-    )
+    constructor(
+        p: org.meshtastic.proto.User,
+    ) : this(p.id, p.long_name ?: "", p.short_name ?: "", p.hw_model, p.is_licensed, p.role.value)
 
     /**
      * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null

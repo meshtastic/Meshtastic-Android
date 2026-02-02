@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.sharing
 
 import android.net.Uri
@@ -33,13 +32,10 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.AppOnlyProtos
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
 
 @HiltViewModel
@@ -53,29 +49,28 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    val localConfig =
-        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
+    val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
     // managed mode disables all access to configuration
     val isManaged: Boolean
-        get() = localConfig.value.security.isManaged
+        get() = localConfig.value.security?.is_managed == true
 
     var txEnabled: Boolean
-        get() = localConfig.value.lora.txEnabled
+        get() = localConfig.value.lora?.tx_enabled == true
         set(value) {
-            updateLoraConfig { it.copy { txEnabled = value } }
+            updateLoraConfig { it.copy(tx_enabled = value) }
         }
 
     var region: Config.LoRaConfig.RegionCode
-        get() = localConfig.value.lora.region
+        get() = localConfig.value.lora?.region ?: Config.LoRaConfig.RegionCode.UNSET
         set(value) {
-            updateLoraConfig { it.copy { region = value } }
+            updateLoraConfig { it.copy(region = value) }
         }
 
-    private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
-    val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
+    private val _requestChannelSet = MutableStateFlow<ChannelSet?>(null)
+    val requestChannelSet: StateFlow<ChannelSet?>
         get() = _requestChannelSet
 
     fun requestChannelUrl(url: Uri, onError: () -> Unit) = runCatching { _requestChannelSet.value = url.toChannelSet() }
@@ -89,17 +84,19 @@ constructor(
     }
 
     /** Set the radio config (also updates our saved copy in preferences). */
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
-        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
+    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+        getChannelList(channelSet.settings, channels.value.settings).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(channelSet.settings)
 
-        val newConfig = config { lora = channelSet.loraConfig }
-        if (localConfig.value.lora != newConfig.lora) setConfig(newConfig)
+        val newLoraConfig = channelSet.lora_config
+        if (localConfig.value.lora != newLoraConfig) {
+            setConfig(Config(lora = newLoraConfig))
+        }
     }
 
-    fun setChannel(channel: ChannelProtos.Channel) {
+    fun setChannel(channel: Channel) {
         try {
-            serviceRepository.meshService?.setChannel(channel.toByteArray())
+            serviceRepository.meshService?.setChannel(channel.encode())
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Set channel error" }
         }
@@ -108,7 +105,7 @@ constructor(
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
         try {
-            serviceRepository.meshService?.setConfig(config.toByteArray())
+            serviceRepository.meshService?.setConfig(config.encode())
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Set config error" }
         }
@@ -119,7 +116,7 @@ constructor(
     }
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
-        val data = body(localConfig.value.lora)
-        setConfig(config { lora = data })
+        val data = body(localConfig.value.lora ?: Config.LoRaConfig())
+        setConfig(Config(lora = data))
     }
 }

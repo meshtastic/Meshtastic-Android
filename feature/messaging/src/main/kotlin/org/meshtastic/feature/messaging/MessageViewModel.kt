@@ -49,8 +49,8 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.Config.DeviceConfig.Role
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config.DeviceConfig.Role
 import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
@@ -239,11 +239,8 @@ constructor(
 
     private fun sendSharedContact(node: Node) = viewModelScope.launch {
         try {
-            val contact = SharedContact(
-                node_num = node.num,
-                user = node.user,
-                manually_verified = node.manuallyVerified
-            )
+            val contact =
+                SharedContact(node_num = node.num, user = node.user, manually_verified = node.manuallyVerified)
             serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Send shared contact error" }

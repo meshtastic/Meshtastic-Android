@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.contact
 
 import androidx.compose.animation.AnimatedVisibility
@@ -60,7 +59,7 @@ import org.meshtastic.core.strings.some_username
 import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelSet
 
 @Suppress("LongMethod")
 @Composable
@@ -72,7 +71,7 @@ fun ContactItem(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onNodeChipClick: () -> Unit = {},
-    channels: AppOnlyProtos.ChannelSet? = null,
+    channels: ChannelSet? = null,
 ) = with(contact) {
     val isOutlined = !selected && !isActive
 
@@ -113,7 +112,7 @@ fun ContactItem(
 @Composable
 private fun ContactHeader(
     contact: Contact,
-    channels: AppOnlyProtos.ChannelSet?,
+    channels: ChannelSet?,
     modifier: Modifier = Modifier,
     onNodeChipClick: () -> Unit = {},
 ) {

@@ -22,11 +22,11 @@ import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
-import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
@@ -116,9 +116,12 @@ constructor(
                 channel_url = channels.getChannelUrl().toString(),
                 config = localConfig,
                 module_config = localModuleConfig,
-                fixed_position = if (node != null && localConfig.position?.fixed_position == true) {
+                fixed_position =
+                if (node != null && localConfig.position?.fixed_position == true) {
                     node.position
-                } else null
+                } else {
+                    null
+                },
             )
         }
 }

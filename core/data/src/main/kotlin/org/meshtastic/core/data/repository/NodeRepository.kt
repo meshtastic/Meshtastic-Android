@@ -44,8 +44,8 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.longName
-import org.meshtastic.core.model.util.shortName
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.core.model.util.shortName
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User
 import javax.inject.Inject
@@ -115,12 +115,14 @@ constructor(
     fun getUser(userId: String): User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
         ?: User(
             id = userId,
-            long_name = if (userId == DataPacket.ID_LOCAL) {
+            long_name =
+            if (userId == DataPacket.ID_LOCAL) {
                 ourNodeInfo.value?.user?.longName ?: "Local"
             } else {
                 "Meshtastic ${userId.takeLast(n = 4)}"
             },
-            short_name = if (userId == DataPacket.ID_LOCAL) {
+            short_name =
+            if (userId == DataPacket.ID_LOCAL) {
                 ourNodeInfo.value?.user?.shortName ?: "Local"
             } else {
                 userId.takeLast(n = 4)

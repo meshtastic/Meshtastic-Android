@@ -73,7 +73,7 @@ import org.meshtastic.core.ui.component.SoilTemperatureInfo
 import org.meshtastic.core.ui.component.TemperatureInfo
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig
+import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
@@ -95,7 +95,7 @@ fun NodeItem(
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val originalLongName = thatNode.user.longName.ifEmpty { stringResource(Res.string.unknown_username) }
+    val originalLongName = (thatNode.user.long_name ?: "").ifEmpty { stringResource(Res.string.unknown_username) }
 
     @Suppress("MagicNumber")
     val longName =
@@ -107,7 +107,10 @@ fun NodeItem(
             }
         }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
-    val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
+    val system =
+        remember(distanceUnits) {
+            Config.DisplayConfig.DisplayUnits.fromValue(distanceUnits) ?: Config.DisplayConfig.DisplayUnits.METRIC
+        }
     val distance =
         remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
 
@@ -135,7 +138,7 @@ fun NodeItem(
     val unmessageable =
         remember(thatNode) {
             when {
-                thatNode.user.hasIsUnmessagable() -> thatNode.user.isUnmessagable
+                thatNode.user.is_unmessagable != null -> thatNode.user.is_unmessagable!!
                 else -> thatNode.user.role.isUnmessageableRole()
             }
         }
@@ -190,7 +193,7 @@ private fun NodeItemHeader(
         NodeKeyStatusIcon(
             hasPKC = thatNode.hasPKC,
             mismatchKey = thatNode.mismatchKey,
-            publicKey = thatNode.user.publicKey,
+            publicKey = thatNode.user.public_key,
             modifier = Modifier.size(32.dp),
         )
         Text(
@@ -216,7 +219,7 @@ private fun NodeItemHeader(
 private fun NodeItemMetrics(
     thatNode: Node,
     distance: String?,
-    system: DisplayConfig.DisplayUnits,
+    system: Config.DisplayConfig.DisplayUnits,
     contentColor: Color,
 ) {
     Row(
@@ -224,8 +227,12 @@ private fun NodeItemMetrics(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        if (thatNode.batteryLevel > 0 || thatNode.voltage > 0f) {
-            MaterialBatteryInfo(level = thatNode.batteryLevel, voltage = thatNode.voltage, contentColor = contentColor)
+        if ((thatNode.batteryLevel ?: 0) > 0 || (thatNode.voltage ?: 0f) > 0f) {
+            MaterialBatteryInfo(
+                level = thatNode.batteryLevel ?: 0,
+                voltage = thatNode.voltage ?: 0f,
+                contentColor = contentColor,
+            )
         } else {
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -235,13 +242,13 @@ private fun NodeItemMetrics(
             }
             thatNode.validPosition?.let { position ->
                 ElevationInfo(
-                    altitude = position.altitude,
+                    altitude = position.altitude ?: 0,
                     system = system,
                     suffix = stringResource(Res.string.elevation_suffix),
                     contentColor = contentColor,
                 )
             }
-            val satCount = thatNode.validPosition?.satsInView ?: 0
+            val satCount = thatNode.validPosition?.sats_in_view ?: 0
             if (satCount > 0) {
                 SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
             }
@@ -255,49 +262,49 @@ private fun NodeItemMetrics(
 private fun NodeItemEnvironment(thatNode: Node, tempInFahrenheit: Boolean, contentColor: Color) {
     val env = thatNode.environmentMetrics
     val pax = thatNode.paxcounter
-    if (thatNode.hasEnvironmentMetrics || pax.ble != 0 || pax.wifi != 0) {
+    if (thatNode.hasEnvironmentMetrics || (pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0) {
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            if (pax.ble != 0 || pax.wifi != 0) {
-                PaxcountInfo(pax = "B:${pax.ble} W:${pax.wifi}", contentColor = contentColor)
+            if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0) {
+                PaxcountInfo(pax = "B:${pax.ble ?: 0} W:${pax.wifi ?: 0}", contentColor = contentColor)
             }
-            if (env.temperature != 0f) {
+            if ((env.temperature ?: 0f) != 0f) {
                 val temp =
                     if (tempInFahrenheit) {
-                        "%.1f°F".format(celsiusToFahrenheit(env.temperature))
+                        "%.1f°F".format(celsiusToFahrenheit(env.temperature ?: 0f))
                     } else {
-                        "%.1f°C".format(env.temperature)
+                        "%.1f°C".format(env.temperature ?: 0f)
                     }
                 TemperatureInfo(temp = temp, contentColor = contentColor)
             }
-            if (env.relativeHumidity != 0f) {
-                HumidityInfo(humidity = "%.0f%%".format(env.relativeHumidity), contentColor = contentColor)
+            if ((env.relative_humidity ?: 0f) != 0f) {
+                HumidityInfo(humidity = "%.0f%%".format(env.relative_humidity ?: 0f), contentColor = contentColor)
             }
-            if (env.barometricPressure != 0f) {
-                PressureInfo(pressure = "%.1fhPa".format(env.barometricPressure), contentColor = contentColor)
+            if ((env.barometric_pressure ?: 0f) != 0f) {
+                PressureInfo(pressure = "%.1fhPa".format(env.barometric_pressure ?: 0f), contentColor = contentColor)
             }
-            if (env.soilTemperature != 0f) {
+            if ((env.soil_temperature ?: 0f) != 0f) {
                 val temp =
                     if (tempInFahrenheit) {
-                        "%.1f°F".format(celsiusToFahrenheit(env.soilTemperature))
+                        "%.1f°F".format(celsiusToFahrenheit(env.soil_temperature ?: 0f))
                     } else {
-                        "%.1f°C".format(env.soilTemperature)
+                        "%.1f°C".format(env.soil_temperature ?: 0f)
                     }
                 SoilTemperatureInfo(temp = temp, contentColor = contentColor)
             }
-            if (env.soilMoisture != 0 && env.soilTemperature != 0f) {
-                SoilMoistureInfo(moisture = "${env.soilMoisture}%", contentColor = contentColor)
+            if ((env.soil_moisture ?: 0) != 0 && (env.soil_temperature ?: 0f) != 0f) {
+                SoilMoistureInfo(moisture = "${env.soil_moisture}%", contentColor = contentColor)
             }
-            if (env.voltage != 0f) {
-                PowerInfo(value = "%.2fV".format(env.voltage), contentColor = contentColor)
+            if ((env.voltage ?: 0f) != 0f) {
+                PowerInfo(value = "%.2fV".format(env.voltage ?: 0f), contentColor = contentColor)
             }
-            if (env.current != 0f) {
-                PowerInfo(value = "%.1fmA".format(env.current), contentColor = contentColor)
+            if ((env.current ?: 0f) != 0f) {
+                PowerInfo(value = "%.1fmA".format(env.current ?: 0f), contentColor = contentColor)
             }
-            if (env.iaq != 0) {
+            if ((env.iaq ?: 0) != 0) {
                 AirQualityInfo(iaq = "${env.iaq}", contentColor = contentColor)
             }
         }
@@ -311,9 +318,9 @@ private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        HardwareInfo(hwModel = thatNode.user.hwModel.name, contentColor = contentColor)
-        RoleInfo(role = thatNode.user.role.name, contentColor = contentColor)
-        NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
+        HardwareInfo(hwModel = thatNode.user.hw_model?.name ?: "", contentColor = contentColor)
+        RoleInfo(role = thatNode.user.role?.name ?: "", contentColor = contentColor)
+        NodeIdInfo(id = (thatNode.user.id ?: "").ifEmpty { "???" }, contentColor = contentColor)
     }
 }
 

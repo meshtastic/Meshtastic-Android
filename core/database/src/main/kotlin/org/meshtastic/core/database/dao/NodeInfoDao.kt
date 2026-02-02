@@ -23,8 +23,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
-import okio.ByteString
 import kotlinx.coroutines.flow.Flow
+import okio.ByteString
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
@@ -289,8 +289,7 @@ interface NodeInfoDao {
             nodes
                 .filter { node ->
                     // Only backfill if columns are NULL AND the user is not a placeholder (hwModel != UNSET)
-                    (node.longName == null || node.shortName == null) &&
-                        node.user.hw_model != HardwareModel.UNSET
+                    (node.longName == null || node.shortName == null) && node.user.hw_model != HardwareModel.UNSET
                 }
                 .map { node -> node.copy(longName = node.user.long_name, shortName = node.user.short_name) }
         if (nodesToUpdate.isNotEmpty()) {

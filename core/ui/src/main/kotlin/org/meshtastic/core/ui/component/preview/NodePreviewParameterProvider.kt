@@ -39,15 +39,9 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 long_name = "Mickey Mouse",
                 short_name = "MM",
                 hw_model = HardwareModel.TBEAM,
-                role = Config.DeviceConfig.Role.ROUTER
+                role = Config.DeviceConfig.Role.ROUTER,
             ),
-            position =
-            Position(
-                latitude_i = 338125110,
-                longitude_i = -1179189760,
-                altitude = 138,
-                sats_in_view = 4
-            ),
+            position = Position(latitude_i = 338125110, longitude_i = -1179189760, altitude = 138, sats_in_view = 4),
             lastHeard = currentTime(),
             channel = 0,
             snr = 12.5F,
@@ -58,7 +52,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 air_util_tx = 3.5F,
                 battery_level = 85,
                 voltage = 3.7F,
-                uptime_seconds = 3600
+                uptime_seconds = 3600,
             ),
             isFavorite = true,
             hopsAway = 0,
@@ -72,7 +66,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 long_name = "Minnie Mouse",
                 short_name = "MiMo",
                 id = "minnieMouseId",
-                hw_model = HardwareModel.HELTEC_V3
+                hw_model = HardwareModel.HELTEC_V3,
             ),
             snr = 12.5F,
             rssi = -42,
@@ -83,13 +77,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
     private val donaldDuck =
         Node(
             num = Random.nextInt(),
-            position =
-            Position(
-                latitude_i = 338052347,
-                longitude_i = -1179208460,
-                altitude = 121,
-                sats_in_view = 66
-            ),
+            position = Position(latitude_i = 338052347, longitude_i = -1179208460, altitude = 121, sats_in_view = 66),
             lastHeard = currentTime() - 300,
             channel = 0,
             snr = 12.5F,
@@ -100,7 +88,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 air_util_tx = 3.5F,
                 battery_level = 85,
                 voltage = 3.7F,
-                uptime_seconds = 3600
+                uptime_seconds = 3600,
             ),
             user =
             User(
@@ -108,7 +96,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 long_name = "Donald Duck, the Grand Duck of the Ducks",
                 short_name = "DoDu",
                 hw_model = HardwareModel.HELTEC_V3,
-                public_key = ByteArray(32) { 1 }.toByteString()
+                public_key = ByteArray(32) { 1 }.toByteString(),
             ),
             environmentMetrics =
             EnvironmentMetrics(
@@ -120,14 +108,9 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
                 current = 0.0F,
                 iaq = 100,
                 soil_temperature = 28.0F,
-                soil_moisture = 50
+                soil_moisture = 50,
             ),
-            paxcounter =
-            Paxcount(
-                wifi = 30,
-                ble = 39,
-                uptime = 420
-            ),
+            paxcounter = Paxcount(wifi = 30, ble = 39, uptime = 420),
             isFavorite = true,
             hopsAway = 2,
         )
@@ -135,12 +118,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
     private val unknown =
         donaldDuck.copy(
             user =
-            User(
-                id = "myId",
-                long_name = "Meshtastic myId",
-                short_name = "myId",
-                hw_model = HardwareModel.UNSET
-            ),
+            User(id = "myId", long_name = "Meshtastic myId", short_name = "myId", hw_model = HardwareModel.UNSET),
             environmentMetrics = EnvironmentMetrics(),
             paxcounter = Paxcount(),
         )

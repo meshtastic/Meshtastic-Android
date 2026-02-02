@@ -99,7 +99,7 @@ import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
 import org.meshtastic.core.ui.icon.VolumeUpTwoTone
-import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelSet
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -129,8 +129,8 @@ fun ContactsScreen(
     // Create channel placeholders (always show broadcast contacts, even when empty)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val channelPlaceholders =
-        remember(channels.settingsList.size) {
-            (0 until channels.settingsList.size).map { ch ->
+        remember(channels.settings.size) {
+            (0 until channels.settings.size).map { ch ->
                 Contact(
                     contactKey = "$ch^all",
                     shortName = "$ch",
@@ -485,7 +485,7 @@ private fun ContactListViewPaged(
     onNodeChipClick: (Contact) -> Unit,
     listState: LazyListState,
     modifier: Modifier = Modifier,
-    channels: AppOnlyProtos.ChannelSet? = null,
+    channels: ChannelSet? = null,
 ) {
     val haptics = LocalHapticFeedback.current
 
@@ -521,7 +521,7 @@ private fun ContactListContentInternal(
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
     listState: LazyListState,
-    channels: AppOnlyProtos.ChannelSet?,
+    channels: ChannelSet?,
     haptics: HapticFeedback,
     modifier: Modifier = Modifier,
 ) {
@@ -559,7 +559,7 @@ private fun LazyListScope.contactListPlaceholdersItems(
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
-    channels: AppOnlyProtos.ChannelSet?,
+    channels: ChannelSet?,
     haptics: HapticFeedback,
 ) {
     items(
@@ -592,7 +592,7 @@ private fun LazyListScope.contactListPagedItems(
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
     onNodeChipClick: (Contact) -> Unit,
-    channels: AppOnlyProtos.ChannelSet?,
+    channels: ChannelSet?,
     haptics: HapticFeedback,
 ) {
     items(

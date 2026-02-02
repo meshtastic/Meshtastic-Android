@@ -38,16 +38,12 @@ fun Any.toOneLineString() = this.toString().replace('\n', ' ')
 fun Config.toOneLineString(): String {
     // Wire toString uses field=value format
     val redactedFields = """(wifi_psk|public_key|private_key|admin_key)=[^,}]+"""
-    return this.toString()
-        .replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }
-        .replace('\n', ' ')
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 
 fun MeshPacket.toOneLineString(): String {
     val redactedFields = """(public_key|private_key|admin_key)=[^,}]+""" // Redact keys
-    return this.toString()
-        .replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }
-        .replace('\n', ' ')
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 
 fun Any.toPIIString() = if (!BuildConfig.DEBUG) {

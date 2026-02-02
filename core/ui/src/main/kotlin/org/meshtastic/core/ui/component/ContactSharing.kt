@@ -41,14 +41,20 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.jetbrains.compose.resources.stringResource
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.WriterException
+import com.journeyapps.barcodescanner.BarcodeEncoder
+import com.journeyapps.barcodescanner.ScanContract
+import com.journeyapps.barcodescanner.ScanOptions
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.qr_code
@@ -58,12 +64,6 @@ import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.WriterException
-import com.journeyapps.barcodescanner.BarcodeEncoder
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
 import java.net.MalformedURLException
 
 /**
@@ -226,12 +226,20 @@ fun compareUsers(oldUser: User, newUser: User): String {
 
     if (oldUser.id != newUser.id) changes.add("id: ${oldUser.id} -> ${newUser.id}")
     if (oldUser.long_name != newUser.long_name) changes.add("long_name: ${oldUser.long_name} -> ${newUser.long_name}")
-    if (oldUser.short_name != newUser.short_name) changes.add("short_name: ${oldUser.short_name} -> ${newUser.short_name}")
-    if (oldUser.macaddr != newUser.macaddr) changes.add("macaddr: ${oldUser.macaddr?.base64()} -> ${newUser.macaddr?.base64()}")
+    if (oldUser.short_name != newUser.short_name) {
+        changes.add("short_name: ${oldUser.short_name} -> ${newUser.short_name}")
+    }
+    if (oldUser.macaddr != newUser.macaddr) {
+        changes.add("macaddr: ${oldUser.macaddr?.base64()} -> ${newUser.macaddr?.base64()}")
+    }
     if (oldUser.hw_model != newUser.hw_model) changes.add("hw_model: ${oldUser.hw_model} -> ${newUser.hw_model}")
-    if (oldUser.is_licensed != newUser.is_licensed) changes.add("is_licensed: ${oldUser.is_licensed} -> ${newUser.is_licensed}")
+    if (oldUser.is_licensed != newUser.is_licensed) {
+        changes.add("is_licensed: ${oldUser.is_licensed} -> ${newUser.is_licensed}")
+    }
     if (oldUser.role != newUser.role) changes.add("role: ${oldUser.role} -> ${newUser.role}")
-    if (oldUser.public_key != newUser.public_key) changes.add("public_key: ${oldUser.public_key?.base64()} -> ${newUser.public_key?.base64()}")
+    if (oldUser.public_key != newUser.public_key) {
+        changes.add("public_key: ${oldUser.public_key?.base64()} -> ${newUser.public_key?.base64()}")
+    }
 
     return if (changes.isEmpty()) {
         "No changes detected."

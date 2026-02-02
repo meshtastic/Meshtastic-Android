@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
@@ -36,7 +37,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
-import okio.ByteString.Companion.toByteString
 import javax.inject.Inject
 
 class PacketRepository
@@ -201,7 +201,9 @@ constructor(
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
                 val updatedData = packet.data.copy(status = status, sfppHash = hash.toByteString(), time = newTime)
-                dao.update(packet.copy(data = updatedData, sfpp_hash = hash.toByteString(), received_time = newTime))
+                dao.update(
+                    packet.copy(data = updatedData, sfpp_hash = hash.toByteString(), received_time = newTime),
+                )
             }
         }
 
@@ -223,7 +225,8 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
+                val updatedReaction =
+                    reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
                 dao.update(updatedReaction)
             }
         }
@@ -250,7 +253,8 @@ constructor(
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
+            val updatedReaction =
+                reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
             dao.update(updatedReaction)
         }
     }

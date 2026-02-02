@@ -37,7 +37,8 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val statusMessageConfig = state.moduleConfig.status_message ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
+    val statusMessageConfig =
+        state.moduleConfig.statusmessage ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
     val formState = rememberConfigState(initialValue = statusMessageConfig)
     val focusManager = LocalFocusManager.current
 
@@ -49,7 +50,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = org.meshtastic.proto.ModuleConfig(status_message = it)
+            val config = org.meshtastic.proto.ModuleConfig(statusmessage = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -57,7 +58,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
             TitledCard(title = stringResource(Res.string.status_message_config)) {
                 EditTextPreference(
                     title = stringResource(Res.string.node_status_summary),
-                    value = formState.value.node_status,
+                    value = formState.value.node_status ?: "",
                     maxSize = 80, // status_message max_size:80
                     enabled = state.connected,
                     isError = false,

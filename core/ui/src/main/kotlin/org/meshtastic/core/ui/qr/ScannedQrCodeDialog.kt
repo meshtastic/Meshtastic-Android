@@ -61,8 +61,6 @@ import org.meshtastic.core.strings.replace
 import org.meshtastic.core.strings.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.ChannelSettings
-import org.meshtastic.proto.Config
 
 @Composable
 fun ScannedQrCodeDialog(
@@ -122,14 +120,15 @@ fun ScannedQrCodeDialog(
     val selectedChannelSet =
         if (shouldReplace) {
             channelSet.copy(
-                settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+                settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true },
             )
         } else {
             channelSet.copy(
-                settings = channelSet.settings.filterIndexed { i, _ ->
+                settings =
+                channelSet.settings.filterIndexed { i, _ ->
                     val isExisting = i < channels.settings.size
                     isExisting || channelSelections.getOrNull(i) == true
-                }
+                },
             )
         }
 
@@ -302,16 +301,8 @@ fun ScannedQrCodeDialog(
 @Composable
 private fun ScannedQrCodeDialogPreview() {
     ScannedQrCodeDialog(
-        channels =
-        ChannelSet(
-            settings = listOf(Channel.default.settings),
-            lora_config = Channel.default.loraConfig,
-        ),
-        incoming =
-        ChannelSet(
-            settings = listOf(Channel.default.settings),
-            lora_config = Channel.default.loraConfig,
-        ),
+        channels = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+        incoming = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
         onDismiss = {},
         onConfirm = {},
     )

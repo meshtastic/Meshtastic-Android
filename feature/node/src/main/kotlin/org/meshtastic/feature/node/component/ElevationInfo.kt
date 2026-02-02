@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material3.MaterialTheme
@@ -30,13 +29,13 @@ import org.meshtastic.core.strings.altitude
 import org.meshtastic.core.strings.elevation_suffix
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
 
 @Composable
 fun ElevationInfo(
     modifier: Modifier = Modifier,
     altitude: Int,
-    system: DisplayUnits,
+    system: Config.DisplayConfig.DisplayUnits,
     suffix: String = stringResource(Res.string.elevation_suffix),
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
@@ -52,5 +51,5 @@ fun ElevationInfo(
 @Composable
 @Preview
 private fun ElevationInfoPreview() {
-    MaterialTheme { ElevationInfo(altitude = 100, system = DisplayUnits.METRIC, suffix = "ASL") }
+    MaterialTheme { ElevationInfo(altitude = 100, system = Config.DisplayConfig.DisplayUnits.METRIC, suffix = "ASL") }
 }

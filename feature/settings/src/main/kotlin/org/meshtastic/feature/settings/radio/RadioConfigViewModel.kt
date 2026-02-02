@@ -342,6 +342,7 @@ constructor(
                         ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting,
                         detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor,
                         paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
+                        statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
                     ),
                 )
             }
@@ -501,8 +502,8 @@ constructor(
     private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: Config.SecurityConfig) =
         withContext(Dispatchers.IO) {
             try {
-                val publicKeyBytes = securityConfig.public_key.toByteArray()
-                val privateKeyBytes = securityConfig.private_key.toByteArray()
+                val publicKeyBytes = securityConfig.public_key?.toByteArray() ?: ByteArray(0)
+                val privateKeyBytes = securityConfig.private_key?.toByteArray() ?: ByteArray(0)
 
                 // Convert byte arrays to Base64 strings for human readability in JSON
                 val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
@@ -569,6 +570,7 @@ constructor(
                 lmc.ambient_lighting?.let { setModuleConfig(ModuleConfig(ambient_lighting = it)) }
                 lmc.detection_sensor?.let { setModuleConfig(ModuleConfig(detection_sensor = it)) }
                 lmc.paxcounter?.let { setModuleConfig(ModuleConfig(paxcounter = it)) }
+                lmc.statusmessage?.let { setModuleConfig(ModuleConfig(statusmessage = it)) }
             }
             meshService?.commitEditSettings(destNum)
         }
@@ -735,7 +737,7 @@ constructor(
                             state.copy(
                                 channelList =
                                 state.channelList.toMutableList().apply {
-                                    val index = response.index
+                                    val index = response.index ?: 0
                                     val settings = response.settings ?: ChannelSettings()
                                     // Make sure list is large enough
                                     while (size <= index) add(ChannelSettings())
@@ -744,14 +746,14 @@ constructor(
                             )
                         }
                         incrementCompleted()
-                        val index = response.index
+                        val index = response.index ?: 0
                         if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                             // Not done yet, request next channel
                             getChannel(destNum, index + 1)
                         }
                     } else {
                         // Received last channel, update total and start channel editor
-                        setResponseStateTotal(response.index + 1)
+                        setResponseStateTotal((response.index ?: 0) + 1)
                     }
                 }
 
@@ -786,6 +788,7 @@ constructor(
                                 ambient_lighting = response.ambient_lighting ?: state.moduleConfig.ambient_lighting,
                                 detection_sensor = response.detection_sensor ?: state.moduleConfig.detection_sensor,
                                 paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter,
+                                statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage,
                             ),
                         )
                     }

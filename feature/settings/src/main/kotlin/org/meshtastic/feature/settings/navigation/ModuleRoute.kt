@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DataUsage
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PermScanWifi
@@ -46,6 +47,7 @@ import org.meshtastic.core.strings.paxcounter
 import org.meshtastic.core.strings.range_test
 import org.meshtastic.core.strings.remote_hardware
 import org.meshtastic.core.strings.serial
+import org.meshtastic.core.strings.status_message
 import org.meshtastic.core.strings.store_forward
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.proto.AdminMessage
@@ -124,6 +126,12 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         SettingsRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
         AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
+    ),
+    STATUS_MESSAGE(
+        Res.string.status_message,
+        SettingsRoutes.StatusMessage,
+        Icons.Default.Message,
+        AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
     ),
     ;
 

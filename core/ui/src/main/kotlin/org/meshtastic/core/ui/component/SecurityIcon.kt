@@ -375,7 +375,9 @@ fun SecurityIcon(
     externalOnClick: (() -> Unit)? = null,
 ) {
     val channelByNameMap =
-        remember(channelSet) { channelSet.settings.associateBy { Channel(it, channelSet.lora_config ?: Channel.default.loraConfig).name } }
+        remember(channelSet) {
+            channelSet.settings.associateBy { Channel(it, channelSet.lora_config ?: Channel.default.loraConfig).name }
+        }
 
     channelByNameMap[channelName]?.let { channelSetting ->
         SecurityIcon(

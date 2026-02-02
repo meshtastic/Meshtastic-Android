@@ -93,7 +93,8 @@ fun NeighborInfoLogScreen(
         }
     }
 
-    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
+    fun getUsername(nodeNum: Int): String =
+        with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
 
     var showDialog by remember { mutableStateOf<AnnotatedString?>(null) }
     val context = LocalContext.current
@@ -115,7 +116,7 @@ fun NeighborInfoLogScreen(
         topBar = {
             val lastRequestNeighborsTime by viewModel.lastRequestNeighborsTime.collectAsState()
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle = stringResource(Res.string.neighbor_info),
                 ourNode = null,
                 showNodeChip = false,
@@ -142,9 +143,9 @@ fun NeighborInfoLogScreen(
         ) {
             items(state.neighborInfoRequests, key = { it.uuid }) { log ->
                 val result =
-                    remember(state.neighborInfoResults, log.fromRadio.packet.id) {
+                    remember(state.neighborInfoResults, log.fromRadio.packet?.id) {
                         state.neighborInfoResults.find {
-                            it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id
+                            it.fromRadio.packet?.decoded?.request_id == log.fromRadio.packet?.id
                         }
                     }
 

@@ -26,11 +26,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
-import org.meshtastic.proto.ModuleConfigProtos
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,14 +44,11 @@ constructor(
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private val _localConfig = MutableStateFlow(LocalConfig.getDefaultInstance())
+    private val _localConfig = MutableStateFlow(LocalConfig())
     val localConfig = _localConfig.asStateFlow()
 
-    private val _moduleConfig = MutableStateFlow(LocalModuleConfig.getDefaultInstance())
+    private val _moduleConfig = MutableStateFlow(LocalModuleConfig())
     val moduleConfig = _moduleConfig.asStateFlow()
-
-    private val configTotal = ConfigProtos.Config.getDescriptor().fields.size
-    private val moduleTotal = ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size
 
     fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -60,28 +57,27 @@ constructor(
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
     }
 
-    fun handleDeviceConfig(config: ConfigProtos.Config) {
+    fun handleDeviceConfig(config: Config) {
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        val configCount = _localConfig.value.allFields.size
-        serviceRepository.setStatusMessage("Device config ($configCount / $configTotal)")
+        serviceRepository.setStatusMessage("Device config received")
     }
 
-    fun handleModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
+    fun handleModuleConfig(config: ModuleConfig) {
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        val moduleCount = _moduleConfig.value.allFields.size
-        serviceRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
+        serviceRepository.setStatusMessage("Module config received")
     }
 
-    fun handleChannel(ch: ChannelProtos.Channel) {
+    fun handleChannel(ch: Channel) {
         // We always want to save channel settings we receive from the radio
         scope.handledLaunch { radioConfigRepository.updateChannelSettings(ch) }
 
         // Update status message if we have node info, otherwise use a generic one
         val mi = nodeManager.getMyNodeInfo()
+        val index = ch.index ?: 0
         if (mi != null) {
-            serviceRepository.setStatusMessage("Channels (${ch.index + 1} / ${mi.maxChannels})")
+            serviceRepository.setStatusMessage("Channels (${index + 1} / ${mi.maxChannels})")
         } else {
-            serviceRepository.setStatusMessage("Channels (${ch.index + 1})")
+            serviceRepository.setStatusMessage("Channels (${index + 1})")
         }
     }
 }

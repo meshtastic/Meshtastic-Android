@@ -20,7 +20,7 @@ package org.meshtastic.core.model
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Config
 
 class ChannelOptionTest {
 
@@ -33,12 +33,8 @@ class ChannelOptionTest {
      */
     @Test
     fun `ensure every ModemPreset is mapped in ChannelOption`() {
-        // Get all possible ModemPreset values, excluding the ones we expect to ignore.
-        val unmappedPresets =
-            ModemPreset.entries.filter {
-                // UNRECOGNIZED is a system-generated value for forward compatibility.
-                it != ModemPreset.UNRECOGNIZED
-            }
+        // Get all possible ModemPreset values.
+        val unmappedPresets = Config.LoRaConfig.ModemPreset.entries
 
         unmappedPresets.forEach { preset ->
             // Attempt to find the corresponding ChannelOption
@@ -62,7 +58,7 @@ class ChannelOptionTest {
      */
     @Test
     fun `ensure no extra mappings exist in ChannelOption`() {
-        val protoPresets = ModemPreset.entries.filter { it != ModemPreset.UNRECOGNIZED }.toSet()
+        val protoPresets = Config.LoRaConfig.ModemPreset.entries.toSet()
         val mappedPresets = ChannelOption.entries.map { it.modemPreset }.toSet()
 
         assertEquals(

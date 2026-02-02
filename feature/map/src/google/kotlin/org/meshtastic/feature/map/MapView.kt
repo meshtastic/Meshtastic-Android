@@ -119,11 +119,9 @@ import org.meshtastic.feature.map.component.NodeClusterMarkers
 import org.meshtastic.feature.map.component.WaypointMarkers
 import org.meshtastic.feature.map.model.NodeClusterItem
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import org.meshtastic.proto.MeshProtos.Position
-import org.meshtastic.proto.MeshProtos.Waypoint
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.waypoint
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.Waypoint
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -295,12 +293,12 @@ fun MapView(
 
     val nodeClusterItems =
         displayNodes.map { node ->
-            val latLng = LatLng(node.position.latitudeI * DEG_D, node.position.longitudeI * DEG_D)
+            val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
             NodeClusterItem(
                 node = node,
                 nodePosition = latLng,
-                nodeTitle = "${node.user.shortName} ${formatAgo(node.position.time)}",
-                nodeSnippet = "${node.user.longName}",
+                nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
+                nodeSnippet = "${node.user.long_name}",
             )
         }
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
@@ -438,10 +436,11 @@ fun MapView(
                 MapProperties(mapType = effectiveGoogleMapType, isMyLocationEnabled = hasLocationPermission),
                 onMapLongClick = { latLng ->
                     if (isConnected) {
-                        val newWaypoint = waypoint {
-                            latitudeI = (latLng.latitude / DEG_D).toInt()
-                            longitudeI = (latLng.longitude / DEG_D).toInt()
-                        }
+                        val newWaypoint =
+                            Waypoint(
+                                latitude_i = (latLng.latitude / DEG_D).toInt(),
+                                longitude_i = (latLng.longitude / DEG_D).toInt(),
+                            )
                         editingWaypoint = newWaypoint
                     }
                 },
@@ -617,18 +616,18 @@ fun MapView(
                     onSendClicked = { updatedWp ->
                         var finalWp = updatedWp
                         if (updatedWp.id == 0) {
-                            finalWp = finalWp.copy { id = mapViewModel.generatePacketId() ?: 0 }
+                            finalWp = finalWp.copy(id = mapViewModel.generatePacketId() ?: 0)
                         }
-                        if (updatedWp.icon == 0) {
-                            finalWp = finalWp.copy { icon = 0x1F4CD }
+                        if ((updatedWp.icon ?: 0) == 0) {
+                            finalWp = finalWp.copy(icon = 0x1F4CD)
                         }
 
                         mapViewModel.sendWaypoint(finalWp)
                         editingWaypoint = null
                     },
                     onDeleteClicked = { wpToDelete ->
-                        if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
-                            val deleteMarkerWp = wpToDelete.copy { expire = 1 }
+                        if ((wpToDelete.locked_to ?: 0) == 0 && isConnected && wpToDelete.id != 0) {
+                            val deleteMarkerWp = wpToDelete.copy(expire = 1)
                             mapViewModel.sendWaypoint(deleteMarkerWp)
                         }
                         mapViewModel.deleteWaypoint(wpToDelete.id)
@@ -683,25 +682,25 @@ fun MapView(
                 followPhoneBearing = followPhoneBearing,
             )
         }
-        if (showLayersBottomSheet) {
-            ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
-                CustomMapLayersSheet(mapLayers, onToggleVisibility, onRemoveLayer, onAddLayerClicked)
-            }
+    }
+    if (showLayersBottomSheet) {
+        ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
+            CustomMapLayersSheet(mapLayers, onToggleVisibility, onRemoveLayer, onAddLayerClicked)
         }
-        showClusterItemsDialog?.let {
-            ClusterItemsListDialog(
-                items = it,
-                onDismiss = { showClusterItemsDialog = null },
-                onItemClick = { item ->
-                    navigateToNodeDetails(item.node.num)
-                    showClusterItemsDialog = null
-                },
-            )
-        }
-        if (showCustomTileManagerSheet) {
-            ModalBottomSheet(onDismissRequest = { showCustomTileManagerSheet = false }) {
-                CustomTileProviderManagerSheet(mapViewModel = mapViewModel)
-            }
+    }
+    showClusterItemsDialog?.let {
+        ClusterItemsListDialog(
+            items = it,
+            onDismiss = { showClusterItemsDialog = null },
+            onItemClick = { item ->
+                navigateToNodeDetails(item.node.num)
+                showClusterItemsDialog = null
+            },
+        )
+    }
+    if (showCustomTileManagerSheet) {
+        ModalBottomSheet(onDismissRequest = { showCustomTileManagerSheet = false }) {
+            CustomTileProviderManagerSheet(mapViewModel = mapViewModel)
         }
     }
 }
@@ -763,25 +762,28 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayU
 
     Card {
         Column(modifier = Modifier.padding(8.dp)) {
-            PositionRow(label = stringResource(Res.string.latitude), value = "%.5f".format(position.latitudeI * DEG_D))
+            PositionRow(
+                label = stringResource(Res.string.latitude),
+                value = "%.5f".format((position.latitude_i ?: 0) * DEG_D),
+            )
 
             PositionRow(
                 label = stringResource(Res.string.longitude),
-                value = "%.5f".format(position.longitudeI * DEG_D),
+                value = "%.5f".format((position.longitude_i ?: 0) * DEG_D),
             )
 
-            PositionRow(label = stringResource(Res.string.sats), value = position.satsInView.toString())
+            PositionRow(label = stringResource(Res.string.sats), value = position.sats_in_view?.toString() ?: "")
 
             PositionRow(
                 label = stringResource(Res.string.alt),
-                value = position.altitude.metersIn(displayUnits).toString(displayUnits),
+                value = (position.altitude ?: 0).metersIn(displayUnits).toString(displayUnits),
             )
 
             PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
 
             PositionRow(
                 label = stringResource(Res.string.heading),
-                value = "%.0f°".format(position.groundTrack * HEADING_DEG),
+                value = "%.0f°".format((position.ground_track ?: 0) * HEADING_DEG),
             )
 
             PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime())
@@ -791,13 +793,13 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayU
 
 @Composable
 private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): String {
-    val speedInMps = position.groundSpeed
+    val speedInMps = position.ground_speed ?: 0
     val mpsText = "%d m/s".format(speedInMps)
     val speedText =
         if (speedInMps > 10) {
             when (displayUnits) {
-                DisplayUnits.METRIC -> "%.1f Km/h".format(position.groundSpeed.mpsToKmph())
-                DisplayUnits.IMPERIAL -> "%.1f mph".format(position.groundSpeed.mpsToMph())
+                DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
+                DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
                 else -> mpsText // Fallback or handle UNRECOGNIZED
             }
         } else {
@@ -806,11 +808,11 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
     return speedText
 }
 
-internal fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
-private fun Waypoint.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+private fun Waypoint.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
 private fun offsetPolyline(
     points: List<LatLng>,

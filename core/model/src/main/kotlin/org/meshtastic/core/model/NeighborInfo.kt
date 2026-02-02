@@ -30,26 +30,22 @@ val MeshPacket.neighborInfo: NeighborInfo?
         }
     }
 
-fun NeighborInfo.getNeighborInfoResponse(
-    getUser: (nodeNum: Int) -> String,
-    header: String = "Neighbors:",
-): String = buildString {
-    append(header)
-    append("\n\n")
-    if (neighbors.isEmpty()) {
-        append("No neighbors reported.")
-    } else {
-        neighbors.forEach { n ->
-            append("• ")
-            append(getUser(n.node_id))
-            append(" (SNR: ")
-            append(n.snr)
-            append(")\n")
+fun NeighborInfo.getNeighborInfoResponse(getUser: (nodeNum: Int) -> String, header: String = "Neighbors:"): String =
+    buildString {
+        append(header)
+        append("\n\n")
+        if (neighbors.isEmpty()) {
+            append("No neighbors reported.")
+        } else {
+            neighbors.forEach { n ->
+                append("• ")
+                append(getUser(n.node_id))
+                append(" (SNR: ")
+                append(n.snr)
+                append(")\n")
+            }
         }
     }
-}
 
-fun MeshPacket.getNeighborInfoResponse(
-    getUser: (nodeNum: Int) -> String,
-    header: String = "Neighbors:",
-): String? = neighborInfo?.getNeighborInfoResponse(getUser, header)
+fun MeshPacket.getNeighborInfoResponse(getUser: (nodeNum: Int) -> String, header: String = "Neighbors:"): String? =
+    neighborInfo?.getNeighborInfoResponse(getUser, header)

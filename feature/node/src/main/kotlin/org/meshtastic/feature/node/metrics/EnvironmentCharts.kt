@@ -42,7 +42,7 @@ import org.meshtastic.core.strings.soil_moisture
 import org.meshtastic.core.strings.soil_temperature
 import org.meshtastic.core.strings.temperature
 import org.meshtastic.core.strings.uv_lux
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")
 private val LEGEND_DATA_1 =
@@ -137,7 +137,7 @@ fun EnvironmentMetricsChart(
                         series(
                             x =
                             telemetries.mapNotNull { t ->
-                                Environment.BAROMETRIC_PRESSURE.getValue(t)?.let { t.time }
+                                Environment.BAROMETRIC_PRESSURE.getValue(t)?.let { t.time ?: 0 }
                             },
                             y = telemetries.mapNotNull { t -> Environment.BAROMETRIC_PRESSURE.getValue(t) },
                         )
@@ -148,7 +148,7 @@ fun EnvironmentMetricsChart(
                     if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
                         lineSeries {
                             series(
-                                x = telemetries.mapNotNull { t -> metric.getValue(t)?.let { t.time } },
+                                x = telemetries.mapNotNull { t -> metric.getValue(t)?.let { t.time ?: 0 } },
                                 y = telemetries.mapNotNull { t -> metric.getValue(t) },
                             )
                         }

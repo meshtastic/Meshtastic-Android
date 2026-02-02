@@ -185,4 +185,3 @@ data class DataPacket(
         fun idToDefaultNodeNum(id: String?): Int? = runCatching { id?.toLong(16)?.toInt() }.getOrNull()
     }
 }
-

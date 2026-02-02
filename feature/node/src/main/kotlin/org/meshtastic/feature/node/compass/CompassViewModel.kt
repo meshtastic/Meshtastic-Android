@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.compass
 
 import android.hardware.GeomagneticField
@@ -36,7 +35,8 @@ import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.ui.component.precisionBitsToMeters
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Position
 import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -68,17 +68,18 @@ constructor(
 
     private var updatesJob: Job? = null
     private var targetPosition: Pair<Double, Double>? = null
-    private var targetPositionProto: org.meshtastic.proto.MeshProtos.Position? = null
+    private var targetPositionProto: Position? = null
     private var targetPositionTimeSec: Long? = null
 
-    fun start(node: Node, displayUnits: DisplayUnits) {
+    fun start(node: Node, displayUnits: Config.DisplayConfig.DisplayUnits) {
         val targetPos = node.validPosition?.let { node.latitude to node.longitude }
         targetPosition = targetPos
         targetPositionProto = node.position
         val targetColor = Color(node.colors.second)
-        val targetName = node.user.longName.ifBlank { node.user.shortName.ifBlank { node.num.toString() } }
+        val targetName =
+            (node.user.long_name ?: "").ifBlank { (node.user.short_name ?: "").ifBlank { node.num.toString() } }
         targetPositionTimeSec =
-            node.position.timestamp.takeIf { it > 0 }?.toLong() ?: node.position.time.takeIf { it > 0 }?.toLong()
+            node.position.timestamp?.takeIf { it > 0 }?.toLong() ?: node.position.time?.takeIf { it > 0 }?.toLong()
 
         _uiState.update {
             it.copy(
@@ -216,17 +217,16 @@ constructor(
         val positionTime = targetPositionTimeSec
         if (positionTime == null || positionTime <= 0) return null
 
-        val gpsAccuracyMm = position.gpsAccuracy.toFloat()
+        val gpsAccuracyMm = (position.gps_accuracy ?: 0).toFloat()
+        val pdop = position.PDOP ?: 0
+        val hdop = position.HDOP ?: 0
+        val vdop = position.VDOP ?: 0
         val dop: Float? =
             when {
-                position.getPDOP() > 0 -> position.getPDOP() / HUNDRED
-                position.getHDOP() > 0 && position.getVDOP() > 0 ->
-                    sqrt(
-                        (position.getHDOP() / HUNDRED).toDouble().pow(2.0) +
-                            (position.getVDOP() / HUNDRED).toDouble().pow(2.0),
-                    )
-                        .toFloat()
-                position.getHDOP() > 0 -> position.getHDOP() / HUNDRED
+                pdop > 0 -> pdop / HUNDRED
+                hdop > 0 && vdop > 0 ->
+                    sqrt((hdop / HUNDRED).toDouble().pow(2.0) + (vdop / HUNDRED).toDouble().pow(2.0)).toFloat()
+                hdop > 0 -> hdop / HUNDRED
                 else -> null
             }
 
@@ -235,8 +235,9 @@ constructor(
         }
 
         // Fallback: infer radius from precision bits if provided
-        if (position.precisionBits > 0) {
-            return precisionBitsToMeters(position.precisionBits).toFloat()
+        val precisionBits = position.precision_bits ?: 0
+        if (precisionBits > 0) {
+            return precisionBitsToMeters(precisionBits).toFloat()
         }
 
         return null

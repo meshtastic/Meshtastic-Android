@@ -20,28 +20,29 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.FirmwareEdition
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.Telemetry
 
 data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
     val isFahrenheit: Boolean = false,
-    val displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits =
-        ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC,
+    val displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
     val node: Node? = null,
-    val deviceMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
-    val signalMetrics: List<MeshProtos.MeshPacket> = emptyList(),
-    val powerMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
-    val hostMetrics: List<TelemetryProtos.Telemetry> = emptyList(),
+    val deviceMetrics: List<Telemetry> = emptyList(),
+    val signalMetrics: List<MeshPacket> = emptyList(),
+    val powerMetrics: List<Telemetry> = emptyList(),
+    val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshLog> = emptyList(),
     val neighborInfoRequests: List<MeshLog> = emptyList(),
     val neighborInfoResults: List<MeshLog> = emptyList(),
-    val positionLogs: List<MeshProtos.Position> = emptyList(),
+    val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
-    val firmwareEdition: MeshProtos.FirmwareEdition? = null,
+    val firmwareEdition: FirmwareEdition? = null,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
     val paxMetrics: List<MeshLog> = emptyList(),

@@ -52,12 +52,15 @@ import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
+fun LinkedCoordinatesItem(
+    node: Node,
+    displayUnits: Config.DisplayConfig.DisplayUnits = Config.DisplayConfig.DisplayUnits.METRIC,
+) {
     val context = LocalContext.current
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -91,7 +94,7 @@ fun LinkedCoordinatesItem(node: Node, displayUnits: DisplayUnits = DisplayUnits.
         supportingText = "$ago • $coordinates$elevationText",
         trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),
         onClick = {
-            val label = URLEncoder.encode(node.user.longName, "utf-8")
+            val label = URLEncoder.encode(node.user.long_name ?: "", "utf-8")
             val uri = "geo:0,0?q=${node.latitude},${node.longitude}&z=17&label=$label".toUri()
             val intent = Intent(Intent.ACTION_VIEW, uri).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
 

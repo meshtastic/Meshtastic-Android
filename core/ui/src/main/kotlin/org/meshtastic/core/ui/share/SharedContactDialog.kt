@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.share
 
 import androidx.compose.foundation.layout.Column
@@ -56,7 +55,9 @@ fun SharedContactDialog(
             Column {
                 if (node != null) {
                     Text(text = stringResource(Res.string.import_known_shared_contact_text))
-                    if ((node.user.public_key?.size ?: 0) > 0 && node.user.public_key != sharedContact.user?.public_key) {
+                    if (
+                        (node.user.public_key?.size ?: 0) > 0 && node.user.public_key != sharedContact.user?.public_key
+                    ) {
                         Text(
                             text = stringResource(Res.string.public_key_changed),
                             color = MaterialTheme.colorScheme.error,

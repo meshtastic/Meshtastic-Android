@@ -59,92 +59,78 @@ import org.meshtastic.core.strings.weight
 import org.meshtastic.core.strings.wind
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.Config
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 internal fun EnvironmentMetrics(
     node: Node,
-    displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
     isFahrenheit: Boolean = false,
 ) {
     val vectorMetrics =
         remember(node.environmentMetrics, isFahrenheit, displayUnits) {
             buildList {
                 with(node.environmentMetrics) {
-                    if (!temperature.isNaN()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.temperature,
-                                temperature.toTempString(isFahrenheit),
-                                Icons.Rounded.Thermostat,
-                            ),
-                        )
+                    temperature?.let { temp ->
+                        if (!temp.isNaN()) {
+                            add(
+                                VectorMetricInfo(
+                                    Res.string.temperature,
+                                    temp.toTempString(isFahrenheit),
+                                    Icons.Rounded.Thermostat,
+                                ),
+                            )
+                        }
                     }
-                    if (hasRelativeHumidity()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.humidity,
-                                "%.0f%%".format(relativeHumidity),
-                                Icons.Rounded.WaterDrop,
-                            ),
-                        )
+                    relative_humidity?.let { rh ->
+                        add(VectorMetricInfo(Res.string.humidity, "%.0f%%".format(rh), Icons.Rounded.WaterDrop))
                     }
-                    if (hasBarometricPressure()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.pressure,
-                                "%.0f hPa".format(barometricPressure),
-                                Icons.Rounded.Speed,
-                            ),
-                        )
+                    barometric_pressure?.let { bp ->
+                        add(VectorMetricInfo(Res.string.pressure, "%.0f hPa".format(bp), Icons.Rounded.Speed))
                     }
-                    if (hasGasResistance()) {
-                        add(
-                            VectorMetricInfo(
-                                Res.string.gas_resistance,
-                                "%.0f MΩ".format(gasResistance),
-                                Icons.Rounded.BlurOn,
-                            ),
-                        )
+                    gas_resistance?.let { gr ->
+                        add(VectorMetricInfo(Res.string.gas_resistance, "%.0f MΩ".format(gr), Icons.Rounded.BlurOn))
                     }
-                    if (hasVoltage()) {
-                        add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(voltage), Icons.Rounded.Bolt))
+                    voltage?.let { v ->
+                        add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(v), Icons.Rounded.Bolt))
                     }
-                    if (hasCurrent()) {
-                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(current), Icons.Rounded.Power))
+                    current?.let { c ->
+                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(c), Icons.Rounded.Power))
                     }
-                    if (hasIaq()) add(VectorMetricInfo(Res.string.iaq, iaq.toString(), Icons.Rounded.Air))
-                    if (hasDistance()) {
+                    iaq?.let { i -> add(VectorMetricInfo(Res.string.iaq, i.toString(), Icons.Rounded.Air)) }
+                    distance?.let { d ->
                         add(
                             VectorMetricInfo(
                                 Res.string.distance,
-                                distance.toSmallDistanceString(displayUnits),
+                                d.toSmallDistanceString(displayUnits),
                                 Icons.Rounded.Height,
                             ),
                         )
                     }
-                    if (hasLux()) add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(lux), Icons.Rounded.LightMode))
-                    if (hasUvLux()) {
-                        add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uvLux), Icons.Rounded.LightMode))
+                    lux?.let { l ->
+                        add(VectorMetricInfo(Res.string.lux, "%.0f lx".format(l), Icons.Rounded.LightMode))
                     }
-                    if (hasWindSpeed()) {
+                    uv_lux?.let { uvl ->
+                        add(VectorMetricInfo(Res.string.uv_lux, "%.0f lx".format(uvl), Icons.Rounded.LightMode))
+                    }
+                    wind_speed?.let { ws ->
                         @Suppress("MagicNumber")
-                        val normalizedBearing = (windDirection + 180) % 360
+                        val normalizedBearing = ((wind_direction ?: 0) + 180) % 360
                         add(
                             VectorMetricInfo(
                                 Res.string.wind,
-                                windSpeed.toSpeedString(displayUnits),
+                                ws.toFloat().toSpeedString(displayUnits),
                                 Icons.Outlined.Navigation,
                                 normalizedBearing.toFloat(),
                             ),
                         )
                     }
-                    if (hasWeight()) {
-                        add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(weight), Icons.Rounded.Scale))
+                    weight?.let { w ->
+                        add(VectorMetricInfo(Res.string.weight, "%.2f kg".format(w), Icons.Rounded.Scale))
                     }
-                    if (hasTemperature() && hasRelativeHumidity()) {
-                        val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)
+                    if (temperature != null && relative_humidity != null) {
+                        val dewPoint = UnitConversions.calculateDewPoint(temperature!!, relative_humidity!!)
                         if (!dewPoint.isNaN()) {
                             add(
                                 DrawableMetricInfo(
@@ -155,29 +141,31 @@ internal fun EnvironmentMetrics(
                             )
                         }
                     }
-                    if (hasSoilTemperature() && !soilTemperature.isNaN()) {
-                        add(
-                            DrawableMetricInfo(
-                                Res.string.soil_temperature,
-                                soilTemperature.toTempString(isFahrenheit),
-                                org.meshtastic.feature.node.R.drawable.soil_temperature,
-                            ),
-                        )
+                    soil_temperature?.let { st ->
+                        if (!st.isNaN()) {
+                            add(
+                                DrawableMetricInfo(
+                                    Res.string.soil_temperature,
+                                    st.toTempString(isFahrenheit),
+                                    org.meshtastic.feature.node.R.drawable.soil_temperature,
+                                ),
+                            )
+                        }
                     }
-                    if (hasSoilMoisture()) {
+                    soil_moisture?.let { sm ->
                         add(
                             DrawableMetricInfo(
                                 Res.string.soil_moisture,
-                                "%d%%".format(soilMoisture),
+                                "%d%%".format(sm),
                                 org.meshtastic.feature.node.R.drawable.soil_moisture,
                             ),
                         )
                     }
-                    if (hasRadiation()) {
+                    radiation?.let { r ->
                         add(
                             DrawableMetricInfo(
                                 Res.string.radiation,
-                                "%.1f µR/h".format(radiation),
+                                "%.1f µR/h".format(r),
                                 org.meshtastic.feature.node.R.drawable.ic_filled_radioactive_24,
                             ),
                         )

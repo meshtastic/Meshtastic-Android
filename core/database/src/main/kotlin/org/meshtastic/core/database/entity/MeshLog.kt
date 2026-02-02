@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.entity
 
 import androidx.room.ColumnInfo
@@ -26,7 +25,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.Position
-import java.io.IOException
 
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
 @Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])

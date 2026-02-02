@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model.util
 
 import android.graphics.Bitmap
@@ -60,9 +59,9 @@ fun Uri.toChannelSet(): ChannelSet {
 val ChannelSet.subscribeList: List<String>
     get() {
         val loraConfig = this.lora_config
-        return settings.filter { it.downlink_enabled }.mapNotNull {
-            if (loraConfig != null) Channel(it, loraConfig).name else null
-        }
+        return settings
+            .filter { it.downlink_enabled }
+            .mapNotNull { if (loraConfig != null) Channel(it, loraConfig).name else null }
     }
 
 fun ChannelSet.getChannel(index: Int): Channel? {
@@ -70,7 +69,9 @@ fun ChannelSet.getChannel(index: Int): Channel? {
     return if (settings.size > index) {
         val s = settings[index]
         if (loraConfig != null) Channel(s, loraConfig) else null
-    } else null
+    } else {
+        null
+    }
 }
 
 /** Return the primary channel info */
@@ -100,4 +101,3 @@ fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
     Logger.e { "URL was too complex to render as barcode" }
     null
 }
-

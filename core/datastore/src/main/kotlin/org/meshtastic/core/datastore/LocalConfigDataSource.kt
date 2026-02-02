@@ -15,13 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.datastore
+
 import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import okio.IOException
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
-import okio.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
