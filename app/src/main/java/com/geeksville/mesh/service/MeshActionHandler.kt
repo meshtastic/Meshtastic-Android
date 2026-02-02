@@ -79,10 +79,12 @@ constructor(
                 is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
-                    commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = action.contact) }
+                    commandSender.sendAdmin(myNodeNum) { 
+                        AdminMessage(add_contact = action.contact)
+                    }
                 }
                 is ServiceAction.GetDeviceMetadata -> {
-                    commandSender.sendAdmin(action.destNum, wantResponse = true) {
+                    commandSender.sendAdmin(action.destNum, wantResponse = true) { 
                         AdminMessage(get_device_metadata_request = true)
                     }
                 }
@@ -142,11 +144,7 @@ constructor(
     private fun handleImportContact(action: ServiceAction.ImportContact, myNodeNum: Int) {
         val verifiedContact = action.contact.copy(manually_verified = true)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = verifiedContact) }
-        nodeManager.handleReceivedUser(
-            verifiedContact.node_num,
-            verifiedContact.user ?: User(),
-            manuallyVerified = true,
-        )
+        nodeManager.handleReceivedUser(verifiedContact.node_num, verifiedContact.user ?: User(), manuallyVerified = true)
     }
 
     private fun rememberReaction(action: ServiceAction.Reaction, packetId: Int, myNodeNum: Int) {
@@ -171,9 +169,19 @@ constructor(
     }
 
     fun handleSetOwner(u: org.meshtastic.core.model.MeshUser, myNodeNum: Int) {
-        val newUser = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
-        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_owner = newUser) }
-        nodeManager.handleReceivedUser(myNodeNum, newUser)
+        val newUser = User(
+            id = u.id,
+            long_name = u.longName,
+            short_name = u.shortName,
+            is_licensed = u.isLicensed
+        )
+        commandSender.sendAdmin(myNodeNum) {
+            AdminMessage(set_owner = newUser)
+        }
+        nodeManager.handleReceivedUser(
+            myNodeNum,
+            newUser,
+        )
     }
 
     fun handleSend(p: DataPacket, myNodeNum: Int) {
@@ -237,9 +245,7 @@ constructor(
     }
 
     fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) {
-            AdminMessage(get_module_config_request = AdminMessage.ModuleConfigType.fromValue(config))
-        }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_module_config_request = AdminMessage.ModuleConfigType.fromValue(config)) }
     }
 
     fun handleSetRingtone(destNum: Int, ringtone: String) {
@@ -255,9 +261,7 @@ constructor(
     }
 
     fun handleGetCannedMessages(id: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) {
-            AdminMessage(get_canned_message_module_messages_request = true)
-        }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_canned_message_module_messages_request = true) }
     }
 
     fun handleSetChannel(payload: ByteArray?, myNodeNum: Int) {
@@ -307,9 +311,11 @@ constructor(
     }
 
     fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
-        val otaMode = org.meshtastic.proto.OTAMode.fromValue(mode) ?: org.meshtastic.proto.OTAMode.NO_REBOOT_OTA
-        val otaEvent =
-            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY)
+        val otaMode = AdminMessage.OTAEvent.OTAMode.fromValue(mode) ?: AdminMessage.OTAEvent.OTAMode.NO_REBOOT_OTA
+        val otaEvent = AdminMessage.OTAEvent(
+            reboot_ota_mode = otaMode,
+            ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY
+        )
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }
     }
 
@@ -322,9 +328,7 @@ constructor(
     }
 
     fun handleGetDeviceConnectionStatus(requestId: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
-            AdminMessage(get_device_connection_status_request = true)
-        }
+        commandSender.sendAdmin(destNum, requestId, wantResponse = true) { AdminMessage(get_device_connection_status_request = true) }
     }
 
     fun handleUpdateLastAddress(deviceAddr: String?) {

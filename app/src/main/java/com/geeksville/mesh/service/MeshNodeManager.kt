@@ -136,8 +136,8 @@ constructor(
         NodeEntity(
             num = n,
             user = defaultUser,
-            longName = defaultUser.long_name ?: "",
-            shortName = defaultUser.short_name ?: "",
+            longName = defaultUser.long_name,
+            shortName = defaultUser.short_name,
             channel = channel,
         )
     }
@@ -168,15 +168,15 @@ constructor(
             val shouldPreserve = shouldPreserveExistingUser(it.user, p)
 
             if (shouldPreserve) {
-                it.longName = it.user.long_name ?: ""
-                it.shortName = it.user.short_name ?: ""
+                it.longName = it.user.long_name
+                it.shortName = it.user.short_name
                 it.channel = channel
                 it.manuallyVerified = manuallyVerified
             } else {
                 val keyMatch = !it.hasPKC || it.user.public_key == p.public_key
                 it.user = if (keyMatch) p else p.copy(public_key = ByteString.EMPTY)
-                it.longName = p.long_name ?: ""
-                it.shortName = p.short_name ?: ""
+                it.longName = p.long_name
+                it.shortName = p.short_name
                 it.channel = channel
                 it.manuallyVerified = manuallyVerified
                 if (newNode) {
@@ -222,8 +222,8 @@ constructor(
             val user = info.user
             if (user != null) {
                 if (shouldPreserveExistingUser(entity.user, user)) {
-                    entity.longName = entity.user.long_name ?: ""
-                    entity.shortName = entity.user.short_name ?: ""
+                    entity.longName = entity.user.long_name
+                    entity.shortName = entity.user.short_name
                 } else {
                     var newUser =
                         user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
@@ -231,8 +231,8 @@ constructor(
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }
                     entity.user = newUser
-                    entity.longName = newUser.long_name ?: ""
-                    entity.shortName = newUser.short_name ?: ""
+                    entity.longName = newUser.long_name
+                    entity.shortName = newUser.short_name
                 }
             }
             val position = info.position
@@ -255,9 +255,9 @@ constructor(
     }
 
     private fun shouldPreserveExistingUser(existing: User, incoming: User): Boolean {
-        val isDefaultName = (incoming.long_name ?: "").matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isDefaultName = (incoming.long_name).matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
         val isDefaultHwModel = incoming.hw_model == HardwareModel.UNSET
-        val hasExistingUser = (existing.id ?: "").isNotEmpty() && existing.hw_model != HardwareModel.UNSET
+        val hasExistingUser = (existing.id).isNotEmpty() && existing.hw_model != HardwareModel.UNSET
         return hasExistingUser && isDefaultName && isDefaultHwModel
     }
 

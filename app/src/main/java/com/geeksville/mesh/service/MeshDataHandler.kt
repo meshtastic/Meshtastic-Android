@@ -603,8 +603,8 @@ constructor(
     private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForward, myNodeNum: Int) {
         Logger.d { "StoreAndForward: variant from ${dataPacket.from}" }
         val transport = currentTransport()
-        val isHistory = s.history != null
-        val lastRequest = if (isHistory) s.history?.last_request ?: 0 else 0
+        val h = s.history
+        val lastRequest = h?.last_request ?: 0
         val baseContext = "transport=$transport from=${dataPacket.from}"
         historyLog { "rxStoreForward $baseContext lastRequest=$lastRequest" }
         when {
@@ -617,8 +617,7 @@ constructor(
                     )
                 rememberDataPacket(u, myNodeNum)
             }
-            s.history != null -> {
-                val h = s.history!!
+            h != null -> {
                 @Suppress("MaxLineLength")
                 historyLog(Log.DEBUG) {
                     "routerHistory $baseContext messages=${h.history_messages} window=${h.window} lastReq=${h.last_request}"
@@ -775,10 +774,10 @@ constructor(
 
     @Suppress("LongMethod", "KotlinConstantConditions")
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
-        val emoji = packet.decoded?.payload?.toByteArray()?.decodeToString() ?: ""
+        val decoded = packet.decoded ?: return@handledLaunch
+        val emoji = decoded.payload.toByteArray().decodeToString()
         val fromId = dataMapper.toNodeID(packet.from ?: 0)
         val toId = dataMapper.toNodeID(packet.to ?: 0)
-        val decoded = packet.decoded ?: return@handledLaunch
 
         val reaction =
             ReactionEntity(
