@@ -13,7 +13,7 @@ For more information about the Meshtastic project, please visit our website: <a 
 <b>Documentation</b>
 
 Щоб дізнатися більше про можливості цього додатку і Meshtastic загалом, перегляньте нашу офіційну документацію:
-<a href="https://meshtastic.org/docs/">View Documentation</a>
+<a href="https://meshtastic.org/docs/">Переглянути документацію</a>
 
 <b>Translations</b>
 
