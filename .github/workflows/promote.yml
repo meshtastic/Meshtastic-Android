@@ -137,12 +137,17 @@ jobs:
             --prerelease=${{ inputs.channel != 'production' }}
 
       - name: Notify Discord
-        if: ${{ inputs.channel != 'internal' && secrets.DISCORD_WEBHOOK_ANDROID != '' }}
+        if: ${{ inputs.channel != 'internal' }}
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
           VERSION: ${{ inputs.final_tag }}
           CHANNEL: ${{ inputs.channel }}
         run: |
+          if [[ -z "$DISCORD_WEBHOOK" ]]; then
+            echo "No Discord webhook provided. Skipping notification."
+            exit 0
+          fi
+
           # Determine Track Name for Display
           if [ "$CHANNEL" == "closed" ]; then TRACK="Alpha (Closed)"; fi
           if [ "$CHANNEL" == "open" ]; then TRACK="Beta (Open)"; fi
