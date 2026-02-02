@@ -138,7 +138,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport -Pandroid.testInstrumentationRunnerArguments.numShards=${{ inputs.num_shards }} -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} --continue --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport -Pci=true -Pandroid.testInstrumentationRunnerArguments.numShards=${{ inputs.num_shards }} -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} --continue --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload coverage reports to Codecov
         if: ${{ !cancelled() }}

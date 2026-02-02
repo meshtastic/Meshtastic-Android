@@ -51,4 +51,4 @@ jobs:
           add-job-summary: always
 
       - name: Run Spotless and Detekt
-        run: ./gradlew spotlessCheck detekt --scan
+        run: ./gradlew spotlessCheck detekt -Pci=true --scan
