@@ -253,15 +253,17 @@ private fun PowerMetricsChart(
         LaunchedEffect(telemetries, selectedChannel) {
             modelProducer.runTransaction {
                 lineSeries {
+                    val currentData = telemetries.filter { !retrieveCurrent(selectedChannel, it).isNaN() }
                     series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { retrieveCurrent(selectedChannel, it) },
+                        x = currentData.map { it.time ?: 0 },
+                        y = currentData.map { retrieveCurrent(selectedChannel, it) },
                     )
                 }
                 lineSeries {
+                    val voltageData = telemetries.filter { !retrieveVoltage(selectedChannel, it).isNaN() }
                     series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { retrieveVoltage(selectedChannel, it) },
+                        x = voltageData.map { it.time ?: 0 },
+                        y = voltageData.map { retrieveVoltage(selectedChannel, it) },
                     )
                 }
             }
@@ -397,14 +399,14 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
 private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: 0f
-    PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: 0f
-    PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: 0f
+    PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
+    PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
+    PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
 }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
 private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: 0f
-    PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: 0f
-    PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: 0f
+    PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
+    PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
+    PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
 }

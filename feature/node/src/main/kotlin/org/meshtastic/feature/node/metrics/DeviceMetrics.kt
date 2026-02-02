@@ -238,20 +238,23 @@ private fun DeviceMetricsChart(
                         x = telemetries.map { it.time ?: 0 },
                         y = telemetries.map { it.device_metrics?.battery_level ?: 0 },
                     )
+                    val chUtilData = telemetries.filter { it.device_metrics?.channel_utilization != null }
                     series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { it.device_metrics?.channel_utilization ?: 0f },
+                        x = chUtilData.map { it.time ?: 0 },
+                        y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
                     )
+                    val airUtilData = telemetries.filter { it.device_metrics?.air_util_tx != null }
                     series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { it.device_metrics?.air_util_tx ?: 0f },
+                        x = airUtilData.map { it.time ?: 0 },
+                        y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
                     )
                 }
                 /* Series for Right Axis (Voltage) */
                 lineSeries {
+                    val voltageData = telemetries.filter { it.device_metrics?.voltage != null }
                     series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { it.device_metrics?.voltage ?: 0f },
+                        x = voltageData.map { it.time ?: 0 },
+                        y = voltageData.map { it.device_metrics?.voltage ?: 0f },
                     )
                 }
             }

@@ -139,8 +139,14 @@ private fun SignalMetricsChart(
         LaunchedEffect(meshPackets) {
             modelProducer.runTransaction {
                 /* Use separate lineSeries calls to associate them with different vertical axes */
-                lineSeries { series(x = meshPackets.map { it.rx_time ?: 0 }, y = meshPackets.map { it.rx_rssi ?: 0 }) }
-                lineSeries { series(x = meshPackets.map { it.rx_time ?: 0 }, y = meshPackets.map { it.rx_snr ?: 0f }) }
+                lineSeries {
+                    val rssiData = meshPackets.filter { (it.rx_rssi ?: 0) != 0 }
+                    series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 })
+                }
+                lineSeries {
+                    val snrData = meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) }
+                    series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f })
+                }
             }
         }
 

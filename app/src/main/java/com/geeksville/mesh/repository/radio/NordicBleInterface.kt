@@ -113,13 +113,18 @@ constructor(
 
     private fun fromRadioPacketFlow(): Flow<ByteArray> = channelFlow {
         while (isActive) {
-            // Use safe call and Elvis operator for cleaner loop termination if read fails or returns empty
             val packet =
-                fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
-                    ?: run {
-                        Logger.d { "[$address] fromRadio queue drain complete (read empty/null)" }
-                        break
-                    }
+                try {
+                    fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
+                } catch (e: Exception) {
+                    Logger.w(e) { "[$address] Error reading fromRadioCharacteristic (likely disconnected)" }
+                    null
+                }
+
+            if (packet == null) {
+                Logger.d { "[$address] fromRadio queue drain complete or error reading characteristic" }
+                break
+            }
             send(packet)
         }
     }
@@ -221,6 +226,11 @@ constructor(
                 .onEach { state ->
                     Logger.i { "[$address] BLE connection state changed to $state" }
                     if (state is ConnectionState.Disconnected) {
+                        toRadioCharacteristic = null
+                        fromNumCharacteristic = null
+                        fromRadioCharacteristic = null
+                        logRadioCharacteristic = null
+
                         val uptime =
                             if (connectionStartTime > 0) {
                                 System.currentTimeMillis() - connectionStartTime
