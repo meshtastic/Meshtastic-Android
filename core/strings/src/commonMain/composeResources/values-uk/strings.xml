@@ -341,6 +341,7 @@
     <string name="low_battery_message">Вузол %1$s має низький заряд акумулятора (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Сповіщення про низький рівень заряду</string>
     <string name="low_battery_title">Низький заряд батареї: %1$s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Сповіщення про низький рівень заряду акумулятора (улюблені вузли)</string>
     <string name="baro_pressure">Атмосферний тиск</string>
     <string name="udp_enabled">Увімкнено</string>
     <string name="udp_broadcast">UDP трансляція</string>
@@ -364,7 +365,9 @@
     <string name="remote_hardware">Віддалене обладнання</string>
     <string name="neighbor_info">Інформація про сусідів</string>
     <string name="audio_config">Налаштування аудіо</string>
+    <string name="codec_2_enabled">CODEC 2 увімкнено</string>
     <string name="ptt_pin">PTT контакт</string>
+    <string name="codec2_sample_rate">Частота дискретизації CODEC2</string>
     <string name="bluetooth_config">Налаштування Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth увімкнено</string>
     <string name="fixed_pin">Фіксований PIN</string>
@@ -541,6 +544,7 @@
     <string name="bottom_nav_settings">Налаштування</string>
     <string name="set_your_region">Встановіть ваш регіон</string>
     <string name="reply">Відповісти</string>
+    <string name="i_agree_to_share_my_location">Я прочитав і розумію, текст вище. Я добровільно даю згоду на незашифровану передачу даних мого вузла через MQTT</string>
     <string name="i_agree">Погоджуюся.</string>
     <string name="should_update_firmware">Рекомендується оновлення прошивки.</string>
     <string name="should_update">Щоб скористатися найновішими виправленнями помилок та функціями, оновіть прошивку вашого вузла.\n\nОстання стабільна версія прошивки: %1$s</string>
@@ -685,10 +689,12 @@
     <string name="firmware_update_source_local">Джерело: локальний файл</string>
     <string name="firmware_update_unknown_release">Невідомий віддалений реліз</string>
     <string name="firmware_update_disclaimer_title">Попередження про оновлення</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy каже: \"Тримайся напоготові!\"</string>
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Перезавантаження у DFU...</string>
     <string name="firmware_update_waiting_for_device">Очікування пристрою DFU...</string>
     <string name="firmware_update_copying">Копіювання прошивки...</string>
+    <string name="firmware_update_save_dfu_file">Будь ласка, збережіть .uf2 файл на DFU диск вашого пристрою.</string>
     <string name="firmware_update_flashing">Прошивка пристрою, будь ласка, зачекайте...</string>
     <string name="firmware_update_method_usb">Передача файлів через USB</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
@@ -698,6 +704,7 @@
     <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні \"Зберегти як\", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
     <string name="firmware_update_verifying">Перевірка оновлення...</string>
     <string name="firmware_update_verification_failed">Час очікування підтвердження минув. Пристрій не під'єднався вчасно.</string>
+    <string name="firmware_update_waiting_reconnect">Очікування на перепідключення пристрою...</string>
     <string name="firmware_update_target">Ціль: %1$s</string>
     <string name="firmware_update_release_notes">Примітки до релізу</string>
     <string name="firmware_update_unknown_error">Невідома помилка</string>

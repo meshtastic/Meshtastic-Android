@@ -196,5 +196,13 @@
    - PR: #4407
 - fix(ci): use PAT for release workflow to bypass branch protection
    - PR: #4408
+- fix(ci): ensure release commit is pushed to branch and validate SHA
+   - PR: #4409
+- fix(ci): robust SHA passing for release workflow
+   - PR: #4410
+- fix(ci): ensure release SHA is passed correctly and validate inputs
+   - PR: #4411
+- fix(ci): robust SHA passing via artifact to bypass secret masking
+   - PR: #4412
 
 

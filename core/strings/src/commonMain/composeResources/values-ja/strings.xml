@@ -23,6 +23,7 @@
     <string name="desc_node_filter_clear">ノードフィルターをクリアします</string>
     <string name="node_filter_include_unknown">不明なものを含める</string>
     <string name="node_filter_show_details">詳細を表示</string>
+    <string name="node_sort_title">並べ替え</string>
     <string name="node_sort_button">ノードの並べ替えオプション</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">チャンネル</string>
@@ -74,6 +75,7 @@
     <string name="config_device_ledHeartbeatEnabled_summary">デバイスの点滅するLEDを制御します。ほとんどのデバイスでは、最大4つあるLEDのうちの1つを制御します。充電用LEDとGPS用LEDは制御できません。</string>
     <string name="config_device_transmitOverLora_summary">近隣ノード情報(NeighborInfo)をMQTTやPhoneAPIへ送信することに加えて、LoRa無線経由でも送信すべきかどうかを設定します。デフォルトの名前とキーが設定されたチャンネルでは利用できません。</string>
     <!-- Position Config -->
+    <string name="gpio">GPIO</string>
     <string name="channel">チャンネル</string>
     <string name="channel_name">チャンネル名</string>
     <string name="qr_code">QRコード</string>
