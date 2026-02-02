@@ -20,19 +20,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.DataUsage
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.Message
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.PermScanWifi
-import androidx.compose.material.icons.filled.Sensors
-import androidx.compose.material.icons.filled.SettingsRemote
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.rounded.Cloud
+import androidx.compose.material.icons.rounded.DataUsage
+import androidx.compose.material.icons.rounded.LightMode
+import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.People
+import androidx.compose.material.icons.rounded.PermScanWifi
+import androidx.compose.material.icons.rounded.Sensors
+import androidx.compose.material.icons.rounded.SettingsRemote
+import androidx.compose.material.icons.rounded.Speed
+import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
@@ -53,18 +53,29 @@ import org.meshtastic.core.strings.telemetry
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.DeviceMetadata
 
-enum class ModuleRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    MQTT(Res.string.mqtt, SettingsRoutes.MQTT, Icons.Default.Cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
+enum class ModuleRoute(
+    val title: StringResource,
+    val route: Route,
+    val icon: ImageVector?,
+    val type: Int = 0,
+    val isSupported: (Capabilities) -> Boolean = { true },
+) {
+    MQTT(
+        Res.string.mqtt,
+        SettingsRoutes.MQTT,
+        Icons.Rounded.Cloud,
+        AdminMessage.ModuleConfigType.MQTT_CONFIG.value,
+    ),
     SERIAL(
         Res.string.serial,
         SettingsRoutes.Serial,
-        Icons.Default.Usb,
+        Icons.Rounded.Usb,
         AdminMessage.ModuleConfigType.SERIAL_CONFIG.value,
     ),
     EXT_NOTIFICATION(
         Res.string.external_notification,
         SettingsRoutes.ExtNotification,
-        Icons.Default.Notifications,
+        Icons.Rounded.Notifications,
         AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG.value,
     ),
     STORE_FORWARD(
@@ -76,13 +87,13 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
     RANGE_TEST(
         Res.string.range_test,
         SettingsRoutes.RangeTest,
-        Icons.Default.Speed,
+        Icons.Rounded.Speed,
         AdminMessage.ModuleConfigType.RANGETEST_CONFIG.value,
     ),
     TELEMETRY(
         Res.string.telemetry,
         SettingsRoutes.Telemetry,
-        Icons.Default.DataUsage,
+        Icons.Rounded.DataUsage,
         AdminMessage.ModuleConfigType.TELEMETRY_CONFIG.value,
     ),
     CANNED_MESSAGE(
@@ -100,38 +111,39 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
     REMOTE_HARDWARE(
         Res.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
-        Icons.Default.SettingsRemote,
+        Icons.Rounded.SettingsRemote,
         AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG.value,
     ),
     NEIGHBOR_INFO(
         Res.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
-        Icons.Default.People,
+        Icons.Rounded.People,
         AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG.value,
     ),
     AMBIENT_LIGHTING(
         Res.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
-        Icons.Default.LightMode,
+        Icons.Rounded.LightMode,
         AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG.value,
     ),
     DETECTION_SENSOR(
         Res.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
-        Icons.Default.Sensors,
+        Icons.Rounded.Sensors,
         AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG.value,
     ),
     PAXCOUNTER(
         Res.string.paxcounter,
         SettingsRoutes.Paxcounter,
-        Icons.Default.PermScanWifi,
+        Icons.Rounded.PermScanWifi,
         AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG.value,
     ),
     STATUS_MESSAGE(
         Res.string.status_message,
         SettingsRoutes.StatusMessage,
-        Icons.Default.Message,
+        Icons.AutoMirrored.Default.Message,
         AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
+        isSupported = { it.supportsStatusMessage },
     ),
     ;
 
@@ -139,10 +151,12 @@ enum class ModuleRoute(val title: StringResource, val route: Route, val icon: Im
         get() = 1 shl ordinal
 
     companion object {
-        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
-            when (metadata) {
-                null -> true // Include all routes if metadata is null
-                else -> (metadata.excluded_modules ?: 0) and it.bitfield == 0
+        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> {
+            val capabilities = Capabilities(metadata?.firmware_version)
+            return entries.filter {
+                val excludedModules = metadata?.excluded_modules ?: 0
+                val isExcluded = (excludedModules and it.bitfield) != 0
+                !isExcluded && it.isSupported(capabilities)
             }
         }
     }

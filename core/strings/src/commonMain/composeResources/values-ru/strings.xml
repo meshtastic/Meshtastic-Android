@@ -311,7 +311,7 @@
     <string name="quick_chat_show">Показать меню быстрого чата</string>
     <string name="quick_chat_hide">Скрыть меню быстрого чата</string>
     <string name="quick_chat_show_label">Показать быстрый чат</string>
-    <string name="factory_reset">Сброс настроек к заводским настройкам</string>
+    <string name="factory_reset">Сброс до заводских настроек</string>
     <string name="bluetooth_disabled">Bluetooth отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
     <string name="open_settings">Открыть настройки</string>
     <string name="firmware_version">Версия прошивки: %1$s</string>
@@ -390,7 +390,7 @@
     <string name="encryption_pkc">Общий ключ шифрования</string>
     <string name="encryption_pkc_text">Прямые сообщения используют новую инфраструктуру открытого ключа для шифрования.</string>
     <string name="encryption_error">Несоответствие публичного ключа</string>
-    <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить ноду и позволить её снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
+    <string name="encryption_error_text">Открытый ключ не соответствует записанному ключу. Вы можете удалить ноду и позволить ей снова обменяться ключами, но это может указывать на серьезную проблему с безопасностью. Свяжитесь с пользователем по другому надежному каналу чтобы определить, произошла ли смена ключа в результате сброса настроек или другого преднамеренного действия.</string>
     <string name="userinfo">Пользовательская информация</string>
     <string name="meshtastic_new_nodes_notifications">Уведомления о новых нодах</string>
     <string name="more_details">Подробнее</string>
@@ -487,7 +487,7 @@
     <string name="audio">Звук</string>
     <string name="remote_hardware">Удаленное устройство</string>
     <string name="neighbor_info">Информация об окружении</string>
-    <string name="ambient_lighting">Световое освещение</string>
+    <string name="ambient_lighting">Фоновое освещение</string>
     <string name="detection_sensor">Датчик обнаружения</string>
     <string name="paxcounter">Счётчик прохожих</string>
     <string name="audio_config">Настройка звука</string>
@@ -765,8 +765,8 @@
     <string name="notes">Заметки</string>
     <string name="add_a_note">Добавить личную заметку…</string>
     <string name="import_shared_contact">Импортировать контакт?</string>
-    <string name="unmessageable">Не отправляемо</string>
-    <string name="unmonitored_or_infrastructure">Неконтролируемые или инфраструктура</string>
+    <string name="unmessageable">Без сообщений</string>
+    <string name="unmonitored_or_infrastructure">Неконтролируемая или инфраструктура</string>
     <string name="import_known_shared_contact_text">Внимание: Данный контакт уже существует, импорт перезапишет ранее известную информацию о нём.</string>
     <string name="public_key_changed">Публичный ключ изменён</string>
     <string name="import_label">Импортировать</string>

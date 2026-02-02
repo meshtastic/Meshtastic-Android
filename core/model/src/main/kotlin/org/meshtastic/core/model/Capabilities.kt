@@ -56,6 +56,14 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsQrCodeSharing: Boolean
         get() = isSupported("2.6.8")
 
+    /** Support for Status Message module. Supported since firmware v2.7.17. */
+    val supportsStatusMessage: Boolean
+        get() = isSupported("2.7.17")
+
+    /** Support for location sharing on secondary channels. Supported since firmware v2.6.10. */
+    val supportsSecondaryChannelLocation: Boolean
+        get() = isSupported("2.6.10")
+
     /** Support for ESP32 Unified OTA. Supported since firmware v2.7.18. */
     val supportsEsp32Ota: Boolean
         get() = isSupported("2.7.18")
