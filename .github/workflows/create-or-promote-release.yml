@@ -261,6 +261,9 @@ jobs:
             SHA=$(git rev-parse $TAG_TO_PROCESS)
           fi
           
+          # Trim whitespace to ensure clean output
+          SHA=$(echo "$SHA" | xargs)
+          
           echo "Debug: Resolved SHA: '$SHA'"
           
           if [ -z "$SHA" ]; then
