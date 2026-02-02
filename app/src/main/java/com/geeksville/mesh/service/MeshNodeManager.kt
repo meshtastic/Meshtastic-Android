@@ -218,7 +218,7 @@ constructor(
     }
 
     fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true) {
-        updateNodeInfo(info.num ?: 0, withBroadcast = withBroadcast) { entity ->
+        updateNodeInfo(info.num, withBroadcast = withBroadcast) { entity ->
             val user = info.user
             if (user != null) {
                 if (shouldPreserveExistingUser(entity.user, user)) {
@@ -226,8 +226,8 @@ constructor(
                     entity.shortName = entity.user.short_name
                 } else {
                     var newUser =
-                        user.let { if (it.is_licensed == true) it.copy(public_key = ByteString.EMPTY) else it }
-                    if (info.via_mqtt == true) {
+                        user.let { if (it.is_licensed) it.copy(public_key = ByteString.EMPTY) else it }
+                    if (info.via_mqtt) {
                         newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
                     }
                     entity.user = newUser
@@ -241,16 +241,16 @@ constructor(
                 entity.latitude = Position.degD(position.latitude_i ?: 0)
                 entity.longitude = Position.degD(position.longitude_i ?: 0)
             }
-            entity.lastHeard = info.last_heard ?: 0
+            entity.lastHeard = info.last_heard
             if (info.device_metrics != null) {
                 entity.deviceTelemetry = Telemetry(device_metrics = info.device_metrics)
             }
-            entity.channel = info.channel ?: 0
-            entity.viaMqtt = info.via_mqtt == true
+            entity.channel = info.channel
+            entity.viaMqtt = info.via_mqtt
             entity.hopsAway = info.hops_away ?: -1
-            entity.isFavorite = info.is_favorite == true
-            entity.isIgnored = info.is_ignored == true
-            entity.isMuted = info.is_muted == true
+            entity.isFavorite = info.is_favorite
+            entity.isIgnored = info.is_ignored
+            entity.isMuted = info.is_muted
         }
     }
 

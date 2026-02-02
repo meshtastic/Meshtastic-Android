@@ -180,15 +180,15 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         val min = if (minValues.isEmpty()) 0f else minValues.minOf { it }
         val max = if (maxValues.isEmpty()) 1f else maxValues.maxOf { it }
 
-        val oldest = telemetries.minBy { it.time ?: 0 }
-        val newest = telemetries.maxBy { it.time ?: 0 }
+        val oldest = telemetries.minBy { it.time }
+        val newest = telemetries.maxBy { it.time }
 
         return EnvironmentGraphingData(
             metrics = telemetries,
             shouldPlot = shouldPlot.toList(),
             leftMinMax = Pair(minPressureValue, maxPressureValue),
             rightMinMax = Pair(min, max),
-            times = Pair(oldest.time ?: 0, newest.time ?: 0),
+            times = Pair(oldest.time, newest.time),
         )
     }
 }
