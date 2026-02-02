@@ -106,16 +106,6 @@ jobs:
           fi
         shell: bash
 
-      - name: Determine previous tag
-        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
-        id: previous_tag
-        run: |
-          # Find the tag reachable from the parent of the current HEAD
-          # Exclude tags with hyphens to skip pre-releases
-          PREV_TAG=$(git describe --tags --abbrev=0 --exclude "*-*" HEAD 2>/dev/null || echo "")
-          echo "Found previous tag: $PREV_TAG"
-          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
-
       - name: Update External Assets (Firmware, Hardware, Protos)
         if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
         run: |
@@ -181,21 +171,9 @@ jobs:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
-      - name: Generate Changelog Content
-        if: ${{ !inputs.dry_run && inputs.channel == 'internal' && steps.previous_tag.outputs.PREV_TAG != '' }}
-        uses: mikepenz/release-changelog-builder-action@v6
-        id: build_changelog
-        with:
-          configuration: .github/release.yml
-          fromTag: ${{ steps.previous_tag.outputs.PREV_TAG }}
-          toTag: HEAD
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit Release Assets (Changelog, Translations, Data, Config)
+      - name: Commit Release Assets (Translations, Data, Config)
         if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
         env:
-          CHANGELOG: ${{ steps.build_changelog.outputs.changelog }}
           FINAL_TAG: ${{ steps.calculate_tags.outputs.final_tag }}
         run: |
           # Calculate Version Code
@@ -212,13 +190,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Add changelog if generated
-          if [ ! -z "$CHANGELOG" ]; then
-            FILE_PATH="fastlane/metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
-            echo "$CHANGELOG" > "$FILE_PATH"
-            git add "$FILE_PATH"
-          fi
-          
           # Add updated data files
           git add config.properties
           git add app/src/main/assets/firmware_releases.json || true
@@ -234,7 +205,6 @@ jobs:
             git commit -m "chore(release): prepare $FINAL_TAG [skip ci]
 
           - Bump base version to ${{ inputs.base_version }}
-          - Add changelog for version code $VERSION_CODE
           - Sync translations and assets"
             git push origin HEAD:${{ github.ref_name }}
           else

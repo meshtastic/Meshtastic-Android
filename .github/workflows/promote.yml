@@ -182,4 +182,3 @@ jobs:
           )
 
           curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"
-
