@@ -88,11 +88,12 @@ class MeshDataMapperTest {
                 rx_rssi = -100,
                 hop_limit = 3,
                 hop_start = 3,
-                decoded = Data(
+                decoded =
+                Data(
                     portnum = PortNum.TEXT_MESSAGE_APP,
                     payload = "hello".encodeToByteArray().toByteString(),
-                    reply_id = 123
-                )
+                    reply_id = 123,
+                ),
             )
 
         val result = mapper.toDataPacket(proto)
@@ -110,12 +111,7 @@ class MeshDataMapperTest {
 
     @Test
     fun `toDataPacket maps PKC channel correctly for encrypted packets`() {
-        val proto =
-            MeshPacket(
-                pki_encrypted = true,
-                channel = 1,
-                decoded = Data()
-            )
+        val proto = MeshPacket(pki_encrypted = true, channel = 1, decoded = Data())
 
         every { nodeManager.nodeDBbyNodeNum[any()] } returns null
 

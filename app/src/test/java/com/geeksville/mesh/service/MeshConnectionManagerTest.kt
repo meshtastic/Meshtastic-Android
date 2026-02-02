@@ -141,7 +141,7 @@ class MeshConnectionManagerTest {
         val config =
             LocalConfig(
                 power = Config.PowerConfig(is_power_saving = false),
-                device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT)
+                device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT),
             )
         every { radioConfigRepository.localConfigFlow } returns flowOf(config)
 

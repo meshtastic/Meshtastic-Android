@@ -73,8 +73,7 @@ class MeshCommandSenderHopLimitTest {
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
 
         // Ensure localConfig has lora.hop_limit = 0
-        localConfigFlow.value =
-            LocalConfig(lora = Config.LoRaConfig(hop_limit = 0))
+        localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 0))
 
         commandSender.sendData(packet)
 
@@ -88,13 +87,13 @@ class MeshCommandSenderHopLimitTest {
 
     @Test
     fun `sendData respects non-zero hop limit from config`() = runTest(testDispatcher) {
-        val packet = DataPacket(to = DataPacket.ID_BROADCAST, bytes = byteArrayOf(1, 2, 3).toByteString(), dataType = 1)
+        val packet =
+            DataPacket(to = DataPacket.ID_BROADCAST, bytes = byteArrayOf(1, 2, 3).toByteString(), dataType = 1)
 
         val meshPacketSlot = slot<MeshPacket>()
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
 
-        localConfigFlow.value =
-            LocalConfig(lora = Config.LoRaConfig(hop_limit = 7))
+        localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 7))
 
         commandSender.sendData(packet)
 
@@ -109,8 +108,7 @@ class MeshCommandSenderHopLimitTest {
         val meshPacketSlot = slot<MeshPacket>()
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
 
-        localConfigFlow.value =
-            LocalConfig(lora = Config.LoRaConfig(hop_limit = 6))
+        localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 6))
 
         // Mock node manager interactions
         nodeManager.nodeDBbyNodeNum.remove(destNum)

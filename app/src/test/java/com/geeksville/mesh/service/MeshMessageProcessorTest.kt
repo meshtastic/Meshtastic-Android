@@ -58,11 +58,7 @@ class MeshMessageProcessorTest {
 
     @Test
     fun `early packets are buffered and flushed when DB is ready`() = runTest(testDispatcher) {
-        val packet =
-            MeshPacket(
-                id = 123,
-                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)
-            )
+        val packet = MeshPacket(id = 123, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
 
         // 1. Database is NOT ready
         isNodeDbReady.value = false
@@ -83,11 +79,7 @@ class MeshMessageProcessorTest {
 
     @Test
     fun `packets are processed immediately if DB is already ready`() = runTest(testDispatcher) {
-        val packet =
-            MeshPacket(
-                id = 456,
-                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP)
-            )
+        val packet = MeshPacket(id = 456, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
 
         isNodeDbReady.value = true
         testScheduler.runCurrent()

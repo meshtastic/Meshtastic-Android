@@ -91,7 +91,7 @@ class PacketHandlerTest {
             QueueStatus(
                 mesh_packet_id = 789,
                 res = 0, // Success
-                free = 1
+                free = 1,
             )
 
         handler.handleQueueStatus(status)

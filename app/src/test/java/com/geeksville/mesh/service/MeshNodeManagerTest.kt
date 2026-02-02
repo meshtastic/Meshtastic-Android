@@ -57,22 +57,14 @@ class MeshNodeManagerTest {
     @Test
     fun `handleReceivedUser preserves existing user if incoming is default`() {
         val nodeNum = 1234
-        val existingUser = User(
-            id = "!12345678",
-            long_name = "My Custom Name",
-            short_name = "MCN",
-            hw_model = HardwareModel.TLORA_V2
-        )
+        val existingUser =
+            User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
 
         // Setup existing node
         nodeManager.updateNodeInfo(nodeNum) { it.user = existingUser }
 
-        val incomingDefaultUser = User(
-            id = "!12345678",
-            long_name = "Meshtastic 5678",
-            short_name = "5678",
-            hw_model = HardwareModel.UNSET
-        )
+        val incomingDefaultUser =
+            User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
         nodeManager.handleReceivedUser(nodeNum, incomingDefaultUser)
 
@@ -84,21 +76,13 @@ class MeshNodeManagerTest {
     @Test
     fun `handleReceivedUser updates user if incoming is higher detail`() {
         val nodeNum = 1234
-        val existingUser = User(
-            id = "!12345678",
-            long_name = "Meshtastic 5678",
-            short_name = "5678",
-            hw_model = HardwareModel.UNSET
-        )
+        val existingUser =
+            User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
         nodeManager.updateNodeInfo(nodeNum) { it.user = existingUser }
 
-        val incomingDetailedUser = User(
-            id = "!12345678",
-            long_name = "Real User",
-            short_name = "RU",
-            hw_model = HardwareModel.TLORA_V1
-        )
+        val incomingDetailedUser =
+            User(id = "!12345678", long_name = "Real User", short_name = "RU", hw_model = HardwareModel.TLORA_V1)
 
         nodeManager.handleReceivedUser(nodeNum, incomingDetailedUser)
 
@@ -110,10 +94,7 @@ class MeshNodeManagerTest {
     @Test
     fun `handleReceivedPosition updates node position`() {
         val nodeNum = 1234
-        val position = Position(
-            latitude_i = 450000000,
-            longitude_i = 900000000
-        )
+        val position = Position(latitude_i = 450000000, longitude_i = 900000000)
 
         nodeManager.handleReceivedPosition(nodeNum, 9999, position)
 

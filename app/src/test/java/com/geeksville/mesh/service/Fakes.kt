@@ -30,12 +30,11 @@ class Fakes {
 
 class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun clearNotifications() {}
+
     override fun initChannels() {}
 
-    override fun updateServiceStateNotification(
-        summaryString: String?,
-        telemetry: Telemetry?,
-    ): Notification = mockk(relaxed = true)
+    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification =
+        mockk(relaxed = true)
 
     override suspend fun updateMessageNotification(
         contactKey: String,
@@ -64,12 +63,15 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
     ) {}
 
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {}
+
     override fun showNewNodeSeenNotification(node: NodeEntity) {}
+
     override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {}
 
     override fun showClientNotification(clientNotification: ClientNotification) {}
 
     override fun cancelMessageNotification(contactKey: String) {}
+
     override fun cancelLowBatteryNotification(node: NodeEntity) {}
 
     override fun clearClientNotification(notification: ClientNotification) {}

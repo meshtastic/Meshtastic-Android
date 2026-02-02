@@ -36,11 +36,7 @@ class TCPInterfaceTest {
         val testScope = CoroutineScope(testDispatcher + Job())
         every { fakes.service.serviceScope } returns testScope
 
-        val dispatchers = CoroutineDispatchers(
-            io = testDispatcher,
-            main = testDispatcher,
-            default = testDispatcher
-        )
+        val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
         val tcpIf =
             object : TCPInterface(fakes.service, dispatchers, "127.0.0.1") {
                 var lastSent: ByteArray? = null
