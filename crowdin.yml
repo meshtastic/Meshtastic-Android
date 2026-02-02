@@ -8,5 +8,3 @@ files:
     type: android
   - source: /fastlane/metadata/android/en-US/*.txt
     translation: /fastlane/metadata/android/%android_code%/%original_file_name%
-  - source: /fastlane/metadata/android/en-US/changelogs/*.txt
-    translation: /fastlane/metadata/android/%android_code%/changelogs/%original_file_name%
