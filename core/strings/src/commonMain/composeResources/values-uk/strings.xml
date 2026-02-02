@@ -86,6 +86,7 @@
     <string name="config_display_flip_screen_summary">Перевернути екран по вертикалі.</string>
     <string name="config_display_units_summary">Одиниці, що показуються на екрані пристрою.</string>
     <string name="config_lora_region_summary">Регіон, де ви будете використовувати радіо.</string>
+    <string name="config_lora_modem_preset_summary">Доступні пресети для модема, за замовчуванням — Long Fast.</string>
     <string name="label_very_long_slow">Дуже велика дальність - Повільно</string>
     <string name="label_long_fast">Велика дальність - Швидко</string>
     <string name="label_long_turbo">Long Range - Turbo</string>
@@ -96,7 +97,11 @@
     <string name="label_short_turbo">Мала дальність - Турбо</string>
     <string name="label_short_fast">Мала дальність - Повільно</string>
     <string name="label_short_slow">Мала дальність - Повільно</string>
+    <string name="config_network_wifi_enabled_summary">Увімкнення Wi-Fi вимкне Bluetooth-з'єднання до програми.</string>
+    <string name="config_network_eth_enabled_summary">Увімкнення Ethernet вимкне Bluetooth-з'єднання до програми. З'єднання з вузлами через TCP недоступні на пристроях Apple.</string>
+    <string name="config_network_udp_enabled_summary">Увімкнути трансляцію пакетів через UDP через локальну мережу.</string>
     <string name="config_position_gps_update_interval_summary">Як часто слід намагатися отримати позицію GPS (&lt;10 сек тримає GPS постійно увімкненим).</string>
+    <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <!-- Position Config -->
     <string name="minimum_interval">Мінімальний проміжок</string>
     <string name="minimum_distance">Мінімальна відстань</string>
@@ -154,6 +159,12 @@
     <string name="debug_export_cancelled">Експорт скасовано</string>
     <string name="debug_export_success">%1$d журналів експортовано</string>
     <string name="debug_export_failed">Не вдалося записати файл журналу: %1$s</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d година</item>
+        <item quantity="few">%1$d години</item>
+        <item quantity="many">%1$d годин</item>
+        <item quantity="other">%1$d годин</item>
+    </plurals>
     <string name="debug_filters">Фільтри</string>
     <string name="debug_active_filters">Активні фільтри</string>
     <string name="debug_default_search">Пошук в журналах…</string>
@@ -281,6 +292,7 @@
     <string name="logs">Журнали подій</string>
     <string name="info">Інформація</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Значення ключа шифрування</string>
     <string name="encryption_psk">Спільний ключ</string>
     <string name="encryption_pkc">Шифрування з відкритим ключем</string>
     <string name="encryption_error">Не збігаються відкритий ключ</string>

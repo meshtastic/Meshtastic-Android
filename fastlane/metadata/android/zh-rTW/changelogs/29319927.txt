@@ -8,7 +8,7 @@
    - PR: #4241
 - chore(deps): update dagger & hilt to v2.59
    - PR: #4297
-- chore(deps): оновлення fastlane до v2.231.1
+- chore(deps): update fastlane to v2.231.1
    - PR: #4296
 - feat(service): Introduce fallback worker to ensure service stays alive
    - PR: #4295
@@ -36,7 +36,7 @@
    - PR: #4311
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4310
-- Оновити VERSION_NAME_BASE до 2.7.12
+- Update VERSION_NAME_BASE to 2.7.12
    - PR: #4312
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4314
@@ -60,7 +60,7 @@
    - PR: #4322
 - fix(notifications): Suppress notifications for muted contacts an…
    - PR: #4323
-- chore(deps): оновлення io.mockk:mockk до v1.14.9
+- chore(deps): update io.mockk:mockk to v1.14.9
    - PR: #4325
 - fix(mesh): Set `hopStart` to match `hopLimit` in sent packets
    - PR: #4324
@@ -116,7 +116,7 @@
    - PR: #4356
 - chore(repo): replace the triage robots
    - PR: #4359
-- chore(deps): оновити gradle до v9.3.1
+- chore(deps): update gradle to v9.3.1
    - PR: #4358
 - chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
    - PR: #4360
@@ -136,7 +136,7 @@
    - PR: #4363
 - chore(ci): Remove GitHub Packages publishing workflow
    - PR: #4368
-- chore(deps): оновлення protobuf runtime до v4.33.5
+- chore(deps): update protobuf runtime to v4.33.5
    - PR: #4367
 - build: Lower JDK to 17 and minSdk to 21
    - PR: #4369
@@ -198,5 +198,7 @@
    - PR: #4408
 - fix(ci): ensure release commit is pushed to branch and validate SHA
    - PR: #4409
+- fix(ci): robust SHA passing for release workflow
+   - PR: #4410
 
 
