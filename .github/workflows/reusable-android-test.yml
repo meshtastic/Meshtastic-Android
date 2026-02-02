@@ -62,6 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}

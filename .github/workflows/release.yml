@@ -68,6 +68,7 @@ jobs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -115,6 +116,7 @@ jobs:
     needs: [prepare-build-info, run-lint]
     environment: Release
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -221,6 +223,7 @@ jobs:
     needs: [prepare-build-info, run-lint]
     environment: Release
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}

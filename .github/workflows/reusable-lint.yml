@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest  # Lint is fast, doesn't need large runner
     timeout-minutes: 10
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
