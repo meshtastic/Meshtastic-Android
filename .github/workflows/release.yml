@@ -56,6 +56,12 @@ permissions:
   attestations: write
 
 jobs:
+  run-lint:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      ref: ${{ inputs.commit_sha || inputs.tag_name }}
+    secrets: inherit
+
   prepare-build-info:
     runs-on: ubuntu-latest
     outputs:
@@ -106,7 +112,7 @@ jobs:
 
   release-google:
     runs-on: ubuntu-latest
-    needs: prepare-build-info
+    needs: [prepare-build-info, run-lint]
     environment: Release
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
@@ -212,7 +218,7 @@ jobs:
 
   release-fdroid:
     runs-on: ubuntu-latest
-    needs: prepare-build-info
+    needs: [prepare-build-info, run-lint]
     environment: Release
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
