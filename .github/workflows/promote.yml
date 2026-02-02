@@ -19,6 +19,10 @@ on:
         description: 'The final tag for the release'
         required: true
         type: string
+      commit_sha:
+        description: 'The commit SHA to tag'
+        required: false
+        type: string
       channel:
         description: 'The channel to promote to'
         required: true
@@ -67,7 +71,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.tag_name }}
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
 
@@ -111,8 +115,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
+
+      - name: Push Git Tag on Success
+        if: ${{ inputs.commit_sha != '' }}
+        run: |
+          git tag ${{ inputs.final_tag }} ${{ inputs.commit_sha }}
+          git push origin ${{ inputs.final_tag }}
 
       - name: Update GitHub Release with gh CLI
         env:
