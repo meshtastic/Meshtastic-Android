@@ -1,33 +1,48 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:DeviceConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>LongMethod:SecurityConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
-    <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>CyclomaticComplexMethod:EditDeviceProfileDialog.kt$@Suppress("LongMethod") @OptIn(ExperimentalLayoutApi::class) @Composable fun EditDeviceProfileDialog( title: String, deviceProfile: DeviceProfile, onConfirm: (DeviceProfile) -> Unit, onDismiss: () -> Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>CyclomaticComplexMethod:ExternalNotificationConfigItemList.kt$@Suppress("LongMethod", "TooGenericExceptionCaught") @Composable fun ExternalNotificationConfigScreen( onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: RadioConfigViewModel = hiltViewModel(), )</ID>
+    <ID>CyclomaticComplexMethod:MQTTConfigItemList.kt$@Composable fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>CyclomaticComplexMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$fun installProfile(protobuf: DeviceProfile)</ID>
+    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
+    <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun setRemoteModuleConfig(destNum: Int, config: ModuleConfig)</ID>
+    <ID>CyclomaticComplexMethod:SecurityConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LargeClass:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
+    <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:DeviceConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
+    <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:PositionConfigItemList.kt$@OptIn(ExperimentalPermissionsApi::class) @Composable fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
+    <ID>LongMethod:SecurityConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
+    <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit)</ID>
     <ID>MagicNumber:Debug.kt$3</ID>
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.CHANNEL_URL$3</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.CONFIG$4</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.FIXED_POSITION$6</ID>
+    <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.MODULE_CONFIG$5</ID>
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
-    <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
-    <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
+    <ID>NestedBlockDepth:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
+    <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
+    <ID>TooGenericExceptionCaught:DebugViewModel.kt$DebugViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
     <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
+    <ID>UnusedPrivateMember:RadioConfigViewModel.kt$RadioConfigViewModel$private fun setChannels(channelUrl: String)</ID>
+    <ID>UnusedPrivateProperty:SettingsViewModel.kt$SettingsViewModel$val capabilities = Capabilities(node.metadata?.firmware_version)</ID>
   </CurrentIssues>
 </SmellBaseline>
