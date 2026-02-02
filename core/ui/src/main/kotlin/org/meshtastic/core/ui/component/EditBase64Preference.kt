@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.dp
 import okio.ByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.util.base64ToByteString
 import org.meshtastic.core.model.util.encodeToString
-import org.meshtastic.core.model.util.toByteString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.error
 import org.meshtastic.core.strings.reset
@@ -87,7 +87,7 @@ fun EditBase64Preference(
             value = valueState,
             onValueChange = {
                 valueState = it
-                runCatching { it.toByteString() }.onSuccess(onValueChange)
+                runCatching { it.base64ToByteString() }.onSuccess(onValueChange)
             },
             modifier = Modifier.fillMaxWidth().onFocusChanged { focusState -> isFocused = focusState.isFocused },
             enabled = enabled,

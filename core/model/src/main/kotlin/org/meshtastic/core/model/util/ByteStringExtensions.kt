@@ -22,4 +22,9 @@ import okio.ByteString.Companion.toByteString
 
 fun ByteString.encodeToString(): String = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
 
-fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()
+/**
+ * Decodes a Base64 string into a [ByteString].
+ *
+ * @throws IllegalArgumentException if the string is not valid Base64.
+ */
+fun String.base64ToByteString(): ByteString = Base64.decode(this, Base64.NO_WRAP).toByteString()
