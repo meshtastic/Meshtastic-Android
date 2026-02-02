@@ -1,21 +1,21 @@
 Meshtastic е инструмент за използване на устройства с Android с mesh радиостанции с отворен код извън мрежата. Това приложение е основният клиент за проекта Meshtastic, което ви позволява да управлявате вашите mesh устройства и да комуникирате с други потребители.
 
-За повече информация относно проекта Meshtastic, моля посетете нашия уебсайт: [meshtastic.org](https://www.meshtastic.org). Фърмуерът, който работи на радио устройствата, е отделен проект с отворен код, който можете да намерите тук: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
-**Общност и поддръжка**
+<b>Community and Support</b>
 
 Този проект в момента е в бета версия. Ще се радваме да чуем мнението ви! Ако имате въпроси, отзиви или срещнете някакви проблеми, моля, присъединете се към нашата приятелска и активна общност:
 
-*   **Дискусионен форум:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
-*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
-*   **Докладване на проблем:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
 
-**Документация**
+<b>Documentation</b>
 
 За да научите повече за функциите и възможностите на това приложение и Meshtastic, моля, вижте нашата официална документация:
-[**Преглед на документацията**](https://meshtastic.org/docs/)
+<a href="https://meshtastic.org/docs/">View Documentation</a>
 
-**Преводи**
+<b>Translations</b>
 
 Можете да помогнете за превода на приложението на родния си език, използвайки Crowdin:
-[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

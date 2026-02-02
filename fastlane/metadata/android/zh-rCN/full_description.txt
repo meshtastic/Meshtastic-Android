@@ -1,21 +1,21 @@
-Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+Meshtastic 是一款将安卓设备与开源、无互联网、基于多跳网状形无线电配合使用的客户端程序。 此应用是Meshtastic的安卓客户端，允许您管理您的Meshtastic设备并与其他Meshtastic用户沟通。
 
-For more information about the Meshtastic project, please visit our website: [meshtastic.org](https://www.meshtastic.org). The firmware that runs on the radio devices is a separate open-source project, which you can find here: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
-**Community and Support**
+<b>Community and Support</b>
 
-This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+此项目目前处于测试阶段。 我们非常乐意听取您的建议和意见！ 如果您有任何疑问，反馈或遇到任何问题，请加入我们友好和活跃的社区：
 
-*   **Discussion Forum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
-*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
-*   **Report an Issue:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
 
-**Documentation**
+<b>Documentation</b>
 
-To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
-[**View Documentation**](https://meshtastic.org/docs/)
+要了解更多关于此应用和 Meshtastic的功能和功能，请查看我们的官方文档：
+<a href="https://meshtastic.org/docs/">View Documentation</a>
 
-**Translations**
+<b>Translations</b>
 
-You can help translate the app into your native language using Crowdin:
-[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)
+您可以使用 Crowdin 来帮助将应用程序翻译成您的母语：
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

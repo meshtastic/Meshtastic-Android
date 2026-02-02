@@ -1,1 +1,1 @@
-The official app for Meshtastic, an open-source, off-grid, mesh radio.
+Meshtastic的官方应用，是一个开源、无互联网、基于多跳网状形无线电项目。
