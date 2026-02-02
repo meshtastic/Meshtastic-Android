@@ -282,6 +282,13 @@
     <string name="mute_8_hours">8 hodin</string>
     <string name="mute_1_week">1 týden</string>
     <string name="mute_always">Vždy</string>
+    <string name="mute_status_always">Trvale ztlumeno</string>
+    <string name="mute_status_unmuted">Neztlumeno</string>
+    <string name="mute_status_muted_for_days">Ztlumeno na %1$d dní, %2$.1f hodiny</string>
+    <string name="mute_status_muted_for_hours">Ztlumeno na %1$.1f hodin</string>
+    <string name="mute_status_label">Stav ztlumení</string>
+    <string name="mute_add">Ztlumit oznámení pro '%1$s'?</string>
+    <string name="mute_remove">Zrušit ztlumení oznámení pro '%1$s'?</string>
     <string name="replace">Nahradit</string>
     <string name="wifi_qr_code_scan">Skenovat WiFi QR kód</string>
     <string name="wifi_qr_code_error">Neplatný formát QR kódu WiFi</string>
@@ -301,6 +308,7 @@
     <string name="encryption_psk">Sdílený klíč</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
+    <string name="userinfo">Informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="more_details">Více detailů</string>
     <string name="snr">SNR</string>
@@ -337,6 +345,7 @@
     <string name="view_on_map">Zobrazit na mapě</string>
     <string name="traceroute_showing_nodes">Zobrazuji %1$d/%2$d uzlů</string>
     <string name="traceroute_duration">Doba trvání: %1$s s</string>
+    <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Trasa směrem k cíli:\n\n</string>
     <string name="traceroute_route_back_to_us">Trasa zpět k nám:\n\n</string>
     <string name="twenty_four_hours">24H</string>
@@ -641,6 +650,8 @@
     <string name="import_known_shared_contact_text">Upozornění: Tento kontakt je znám, import přepíše předchozí kontaktní informace.</string>
     <string name="public_key_changed">Veřejný klíč změněn</string>
     <string name="request">Vyžádání informací</string>
+    <string name="requesting_from">Vyžádání %1$s od %2$s</string>
+    <string name="user_info">Informace o uživateli</string>
     <string name="request_telemetry">Vyžádat telemetrii</string>
     <string name="request_device_metrics">Metriky zařízení</string>
     <string name="request_environment_metrics">Metriky prostředí</string>
@@ -832,7 +843,7 @@
     <string name="firmware_update_checking">Hledání aktualizací...</string>
     <string name="firmware_update_device">Zařízení: %1$s</string>
     <string name="firmware_update_currently_installed">Aktuálně instalováno: %1$s</string>
-    <string name="firmware_update_latest">Aktualizovat na %1$s</string>
+    <string name="firmware_update_latest">Aktualizovat na: %1$s</string>
     <string name="firmware_update_stable">Stabilní</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Poznámka: Během aktualizace dojde dočasně k odpojení vašeho zařízení.</string>
@@ -919,5 +930,7 @@
     <string name="mark_as_read">Označit jako přečtené</string>
     <string name="now">Nyní</string>
     <string name="add_channels_title">Přidat kanály</string>
+    <string name="add_channels_description">Vyberte kanály z QR kódu, které chcete přidat. Stávající kanály nebudou změněny.</string>
+    <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
     <!-- Message Filter -->
 </resources>
