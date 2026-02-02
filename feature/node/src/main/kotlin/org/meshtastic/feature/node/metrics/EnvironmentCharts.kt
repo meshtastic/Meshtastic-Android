@@ -154,10 +154,7 @@ fun EnvironmentMetricsChart(
                                     val v = metric.getValue(it)
                                     v != null && !v.isNaN()
                                 }
-                            series(
-                                x = metricData.map { it.time ?: 0 },
-                                y = metricData.map { metric.getValue(it)!! },
-                            )
+                            series(x = metricData.map { it.time ?: 0 }, y = metricData.map { metric.getValue(it)!! })
                         }
                     }
                 }
