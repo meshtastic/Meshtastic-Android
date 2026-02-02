@@ -1,6 +1,6 @@
--keep class org.meshtastic.proto.MeshProtos$DeviceMetadata
--keep class org.meshtastic.proto.MeshProtos$FromRadio
--keep class org.meshtastic.proto.MeshProtos$Position
--keep class org.meshtastic.proto.MeshProtos$User
--keep class org.meshtastic.proto.PaxcountProtos$Paxcount
--keep class org.meshtastic.proto.TelemetryProtos$Telemetry
+-keep class org.meshtastic.proto.DeviceMetadata
+-keep class org.meshtastic.proto.FromRadio
+-keep class org.meshtastic.proto.Position
+-keep class org.meshtastic.proto.User
+-keep class org.meshtastic.proto.Paxcount
+-keep class org.meshtastic.proto.Telemetry

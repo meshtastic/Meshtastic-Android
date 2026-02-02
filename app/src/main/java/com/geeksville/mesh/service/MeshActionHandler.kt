@@ -38,6 +38,7 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
 import javax.inject.Inject
@@ -143,7 +144,7 @@ constructor(
         val verifiedContact = action.contact.copy(manually_verified = true)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = verifiedContact) }
         nodeManager.handleReceivedUser(
-            verifiedContact.node_num,
+            verifiedContact.node_num ?: 0,
             verifiedContact.user ?: User(),
             manuallyVerified = true,
         )
@@ -307,7 +308,7 @@ constructor(
     }
 
     fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
-        val otaMode = AdminMessage.OTAEvent.OTAMode.fromValue(mode) ?: AdminMessage.OTAEvent.OTAMode.NO_REBOOT_OTA
+        val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
             AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY)
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }

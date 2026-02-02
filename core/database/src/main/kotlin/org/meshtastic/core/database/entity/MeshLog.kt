@@ -40,24 +40,21 @@ data class MeshLog(
 ) {
 
     val meshPacket: MeshPacket?
-        get() {
-            // TextFormat parsing is not supported in Wire.
-            // TODO: partial implementation or JSON migration if needed.
-            return null
-        }
+        get() = fromRadio.packet
 
     val nodeInfo: NodeInfo?
-        get() {
-            return null
-        }
+        get() = fromRadio.node_info
 
     val myNodeInfo: MyNodeInfo?
-        get() {
-            return null
-        }
+        get() = fromRadio.my_info
 
     val position: Position?
-        get() {
-            return null
-        }
+        get() =
+            fromRadio.packet?.decoded?.payload?.let {
+                if (fromRadio.packet?.decoded?.portnum == org.meshtastic.proto.PortNum.POSITION_APP) {
+                    runCatching { Position.ADAPTER.decode(it) }.getOrNull()
+                } else {
+                    null
+                }
+            }
 }

@@ -20,6 +20,6 @@ import android.util.Base64
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 
-fun ByteString.encodeToString() = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
+fun ByteString.encodeToString(): String = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
 
 fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()

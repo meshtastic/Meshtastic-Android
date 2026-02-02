@@ -21,6 +21,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -30,12 +31,12 @@ import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.proto.MeshProtos.Data
-import org.meshtastic.proto.MeshProtos.FromRadio
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.Portnums.PortNum
-import org.meshtastic.proto.TelemetryProtos.EnvironmentMetrics
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Telemetry
 import java.util.UUID
 
 class MeshLogRepositoryTest {
@@ -57,15 +58,10 @@ class MeshLogRepositoryTest {
     @Test
     fun `parseTelemetryLog preserves zero temperature`() = runTest(testDispatcher) {
         val zeroTemp = 0.0f
-        val envMetrics = EnvironmentMetrics.newBuilder().setTemperature(zeroTemp).build()
-        val telemetry = Telemetry.newBuilder().setEnvironmentMetrics(envMetrics).build()
+        val telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = zeroTemp))
 
         val meshPacket =
-            MeshPacket.newBuilder()
-                .setDecoded(
-                    Data.newBuilder().setPayload(telemetry.toByteString()).setPortnum(PortNum.TELEMETRY_APP),
-                )
-                .build()
+            MeshPacket(decoded = Data(payload = telemetry.encode().toByteString(), portnum = PortNum.TELEMETRY_APP))
 
         val meshLog =
             MeshLog(
@@ -73,7 +69,7 @@ class MeshLogRepositoryTest {
                 message_type = "telemetry",
                 received_date = System.currentTimeMillis(),
                 raw_message = "",
-                fromRadio = FromRadio.newBuilder().setPacket(meshPacket).build(),
+                fromRadio = FromRadio(packet = meshPacket),
             )
 
         // Using reflection to test private method parseTelemetryLog
@@ -82,22 +78,17 @@ class MeshLogRepositoryTest {
         val result = method.invoke(repository, meshLog) as Telemetry?
 
         assertNotNull(result)
-        val resultMetrics = result?.environmentMetrics
+        val resultMetrics = result?.environment_metrics
         assertNotNull(resultMetrics)
-        assertEquals(zeroTemp, resultMetrics?.temperature!!, 0.01f)
+        assertEquals(zeroTemp, resultMetrics?.temperature ?: 0f, 0.01f)
     }
 
     @Test
     fun `parseTelemetryLog maps missing temperature to NaN`() = runTest(testDispatcher) {
-        val envMetrics = EnvironmentMetrics.newBuilder().build() // Temperature not set
-        val telemetry = Telemetry.newBuilder().setEnvironmentMetrics(envMetrics).build()
+        val telemetry = Telemetry(environment_metrics = EnvironmentMetrics(temperature = null))
 
         val meshPacket =
-            MeshPacket.newBuilder()
-                .setDecoded(
-                    Data.newBuilder().setPayload(telemetry.toByteString()).setPortnum(PortNum.TELEMETRY_APP),
-                )
-                .build()
+            MeshPacket(decoded = Data(payload = telemetry.encode().toByteString(), portnum = PortNum.TELEMETRY_APP))
 
         val meshLog =
             MeshLog(
@@ -105,7 +96,7 @@ class MeshLogRepositoryTest {
                 message_type = "telemetry",
                 received_date = System.currentTimeMillis(),
                 raw_message = "",
-                fromRadio = FromRadio.newBuilder().setPacket(meshPacket).build(),
+                fromRadio = FromRadio(packet = meshPacket),
             )
 
         val method = MeshLogRepository::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
@@ -113,9 +104,9 @@ class MeshLogRepositoryTest {
         val result = method.invoke(repository, meshLog) as Telemetry?
 
         assertNotNull(result)
-        val resultMetrics = result?.environmentMetrics
+        val resultMetrics = result?.environment_metrics
 
         // Should be NaN as per repository logic for missing fields
-        assertEquals(Float.NaN, resultMetrics?.temperature!!, 0.01f)
+        assertEquals(Float.NaN, resultMetrics?.temperature ?: 0f, 0.01f)
     }
 }
