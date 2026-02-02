@@ -26,8 +26,8 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
         if (d != null && !d.want_response && d.portnum == PortNum.TRACEROUTE_APP) {
             val originalRd = runCatching { RouteDiscovery.ADAPTER.decode(d.payload) }.getOrNull() ?: return null
 
-            val destinationId = if (to != 0) to else this.to
-            val sourceId = if (from != 0) from else this.from
+            val destinationId = if (d.dest != 0) d.dest else this.to
+            val sourceId = if (d.source != 0) d.source else this.from
 
             // Note: Wire lists are immutable
             val fullRoute = listOf(destinationId) + originalRd.route + sourceId
@@ -36,7 +36,7 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
             // hopStart was not populated prior to 2.3.0. The bitfield was added in 2.5.0 and
             // is used to detect versions where hopStart can be trusted to have been set.
             // Assuming default integer values of 0 for hop_start and snr_back_count if unset.
-            val hopStartVal = hop_start ?: 0
+            val hopStartVal = hop_start
             val hasBitfield = (d.bitfield ?: 0) != 0
 
             return originalRd.copy(

@@ -275,22 +275,22 @@ constructor(
         val hasLocalStats = telemetry?.local_stats != null
         val hasDeviceMetrics = telemetry?.device_metrics != null
         val message =
-            if (hasLocalStats) {
-                val localStats = telemetry!!.local_stats
-                val localStatsMessage = localStats?.formatToString()
-                cachedTelemetry = telemetry
-                nextStatsUpdateMillis = System.currentTimeMillis() + FIFTEEN_MINUTES_IN_MILLIS
-                localStatsMessage
-            } else if (cachedTelemetry == null && hasDeviceMetrics) {
-                val deviceMetrics = telemetry!!.device_metrics
-                val deviceMetricsMessage = deviceMetrics.formatToString()
-                if (cachedLocalStats == null) {
+            when {
+                hasLocalStats -> {
+                    val localStatsMessage = telemetry?.local_stats?.formatToString()
                     cachedTelemetry = telemetry
+                    nextStatsUpdateMillis = System.currentTimeMillis() + FIFTEEN_MINUTES_IN_MILLIS
+                    localStatsMessage
                 }
-                nextStatsUpdateMillis = System.currentTimeMillis()
-                deviceMetricsMessage
-            } else {
-                null
+                cachedTelemetry == null && hasDeviceMetrics -> {
+                    val deviceMetricsMessage = telemetry?.device_metrics?.formatToString()
+                    if (cachedLocalStats == null) {
+                        cachedTelemetry = telemetry
+                    }
+                    nextStatsUpdateMillis = System.currentTimeMillis()
+                    deviceMetricsMessage
+                }
+                else -> null
             }
 
         cachedMessage = message ?: cachedMessage ?: getString(Res.string.no_local_stats)
@@ -431,7 +431,7 @@ constructor(
     }
 
     override fun showNewNodeSeenNotification(node: NodeEntity) {
-        val notification = createNewNodeSeenNotification(node.user.short_name ?: "", node.user.long_name ?: "")
+        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name)
         notificationManager.notify(node.num, notification)
     }
 
@@ -442,7 +442,7 @@ constructor(
 
     override fun showClientNotification(clientNotification: ClientNotification) {
         val notification =
-            createClientNotification(getString(Res.string.client_notification), clientNotification.message ?: "")
+            createClientNotification(getString(Res.string.client_notification), clientNotification.message)
         notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
@@ -517,7 +517,7 @@ constructor(
                     .setName(msg.node.user.long_name)
                     .setKey(msg.node.user.id)
                     .setIcon(
-                        createPersonIcon(msg.node.user.short_name ?: "", msg.node.colors.second, msg.node.colors.first),
+                        createPersonIcon(msg.node.user.short_name, msg.node.colors.second, msg.node.colors.first),
                     )
                     .build()
 
@@ -537,7 +537,7 @@ constructor(
                         .setKey(reaction.user.id)
                         .setIcon(
                             createPersonIcon(
-                                reaction.user.short_name ?: "",
+                                reaction.user.short_name,
                                 reactorNode.colors.second,
                                 reactorNode.colors.first,
                             ),
@@ -612,7 +612,7 @@ constructor(
             .build()
     }
 
-    private fun createNewNodeSeenNotification(name: String, message: String?): Notification {
+    private fun createNewNodeSeenNotification(name: String, message: String): Notification {
         val title = getString(Res.string.new_node_seen).format(name)
         val builder =
             commonBuilder(NotificationType.NewNode)
@@ -621,11 +621,9 @@ constructor(
                 .setContentTitle(title)
                 .setWhen(System.currentTimeMillis())
                 .setShowWhen(true)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(message))
 
-        message?.let {
-            builder.setContentText(it)
-            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
-        }
         return builder.build()
     }
 
@@ -648,17 +646,13 @@ constructor(
             .build()
     }
 
-    private fun createClientNotification(name: String, message: String?): Notification =
+    private fun createClientNotification(name: String, message: String): Notification =
         commonBuilder(NotificationType.Client)
             .setCategory(Notification.CATEGORY_ERROR)
             .setAutoCancel(true)
             .setContentTitle(name)
-            .apply {
-                message?.let {
-                    setContentText(it)
-                    setStyle(NotificationCompat.BigTextStyle().bigText(it))
-                }
-            }
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
             .build()
 
     // endregion
@@ -805,17 +799,15 @@ constructor(
 }
 
 // Extension function to format LocalStats into a readable string.
-private fun LocalStats?.formatToString(): String? {
-    if (this == null) return null
+private fun LocalStats.formatToString(): String {
     val parts = mutableListOf<String>()
-    uptime_seconds?.let { parts.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { parts.add("ChUtil: %.2f%%".format(it)) }
-    air_util_tx?.let { parts.add("AirUtilTX: %.2f%%".format(it)) }
+    parts.add("Uptime: ${formatUptime(uptime_seconds)}")
+    parts.add("ChUtil: %.2f%%".format(channel_utilization))
+    parts.add("AirUtilTX: %.2f%%".format(air_util_tx))
     return parts.joinToString("\n")
 }
 
-private fun DeviceMetrics?.formatToString(): String? {
-    if (this == null) return null
+private fun DeviceMetrics.formatToString(): String {
     val parts = mutableListOf<String>()
     battery_level?.let { parts.add("Battery Level: $it") }
     uptime_seconds?.let { parts.add("Uptime: ${formatUptime(it)}") }
