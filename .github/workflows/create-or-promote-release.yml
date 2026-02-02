@@ -35,7 +35,7 @@ jobs:
       release_name: ${{ steps.calculate_tags.outputs.release_name }}
       final_tag: ${{ steps.calculate_tags.outputs.final_tag }}
       from_channel: ${{ steps.calculate_tags.outputs.from_channel }}
-      commit_sha: ${{ steps.get_sha.outputs.commit_sha }}
+      release_commit_sha: ${{ steps.get_sha.outputs.release_commit_sha }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -249,6 +249,8 @@ jobs:
           CHANNEL="${{ inputs.channel }}"
           echo "Debug: Determining SHA for channel '$CHANNEL'"
           
+          SHA=""
+          
           if [[ "$CHANNEL" == "internal" ]]; then
             # Internal build uses the latest commit (including any asset updates)
             SHA=$(git rev-parse HEAD)
@@ -266,7 +268,7 @@ jobs:
             exit 1
           fi
           
-          echo "commit_sha=$SHA" >> $GITHUB_OUTPUT
+          echo "release_commit_sha=$SHA" >> $GITHUB_OUTPUT
         shell: bash
 
   call-release-workflow:
@@ -275,7 +277,7 @@ jobs:
     uses: ./.github/workflows/release.yml
     with:
       tag_name: ${{ needs.determine-tags.outputs.final_tag }}
-      commit_sha: ${{ needs.determine-tags.outputs.commit_sha }}
+      commit_sha: ${{ needs.determine-tags.outputs.release_commit_sha }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
     secrets: inherit
@@ -288,7 +290,7 @@ jobs:
       tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
       release_name: ${{ needs.determine-tags.outputs.release_name }}
       final_tag: ${{ needs.determine-tags.outputs.final_tag }}
-      commit_sha: ${{ needs.determine-tags.outputs.commit_sha }}
+      commit_sha: ${{ needs.determine-tags.outputs.release_commit_sha }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
       from_channel: ${{ needs.determine-tags.outputs.from_channel }}
