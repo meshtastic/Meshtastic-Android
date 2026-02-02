@@ -271,8 +271,19 @@ jobs:
             exit 1
           fi
           
-          echo "release_commit_sha=$SHA" >> $GITHUB_OUTPUT
+          # Save SHA to file for artifact upload (bypassing secret masking in outputs)
+          echo "$SHA" > release_sha.txt
+          
+          # We don't output release_commit_sha to GITHUB_OUTPUT anymore to avoid it being dropped if masked.
+          # Downstream workflows will read the artifact.
         shell: bash
+
+      - name: Upload Release SHA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release_sha
+          path: release_sha.txt
+          retention-days: 1
 
   call-release-workflow:
     if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
