@@ -237,7 +237,7 @@ jobs:
           - Bump base version to ${{ inputs.base_version }}
           - Add changelog for version code $VERSION_CODE
           - Sync translations and assets"
-            git push
+            git push origin HEAD:${{ github.ref_name }}
           else
             echo "No changes to commit."
           fi
@@ -246,14 +246,26 @@ jobs:
       - name: Get Commit SHA to Tag
         id: get_sha
         run: |
-          if [[ "${{ inputs.channel }}" == "internal" ]]; then
+          CHANNEL="${{ inputs.channel }}"
+          echo "Debug: Determining SHA for channel '$CHANNEL'"
+          
+          if [[ "$CHANNEL" == "internal" ]]; then
             # Internal build uses the latest commit (including any asset updates)
             SHA=$(git rev-parse HEAD)
           else
             # Promotions use the SHA of the tag we are promoting
             TAG_TO_PROCESS="${{ steps.calculate_tags.outputs.tag_to_process }}"
+            echo "Debug: Promoting tag '$TAG_TO_PROCESS'"
             SHA=$(git rev-parse $TAG_TO_PROCESS)
           fi
+          
+          echo "Debug: Resolved SHA: '$SHA'"
+          
+          if [ -z "$SHA" ]; then
+            echo "::error::Calculated SHA is empty! Cannot proceed."
+            exit 1
+          fi
+          
           echo "commit_sha=$SHA" >> $GITHUB_OUTPUT
         shell: bash
 
