@@ -240,10 +240,14 @@ jobs:
           else
             echo "No changes to commit."
           fi
-          
-          # Pre-emptive Tagging: Tag the commit (new or existing) and push immediately
-          # This ensures downstream workflows can simply checkout the tag.
-          echo "Tagging and pushing $FINAL_TAG..."
+        shell: bash
+
+      - name: Create and Push Release Tag
+        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        env:
+          FINAL_TAG: ${{ steps.calculate_tags.outputs.final_tag }}
+        run: |
+          echo "Tagging and pushing release: $FINAL_TAG"
           git tag "$FINAL_TAG"
           git push origin "$FINAL_TAG"
         shell: bash
