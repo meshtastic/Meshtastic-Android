@@ -116,9 +116,14 @@ jobs:
           echo "Found previous tag: $PREV_TAG"
           echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
 
-      - name: Update Firmware and Hardware Data
+      - name: Update External Assets (Firmware, Hardware, Protos)
         if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
         run: |
+          # Update Submodules (Protobufs)
+          echo "Updating core/proto submodule..."
+          git submodule update --init --remote core/proto
+          
+          # Update Firmware List
           firmware_file_path="app/src/main/assets/firmware_releases.json"
           temp_firmware_file="/tmp/new_firmware_releases.json"
           
@@ -137,6 +142,7 @@ jobs:
             fi
           fi
 
+          # Update Hardware List
           hardware_file_path="app/src/main/assets/device_hardware.json"
           temp_hardware_file="/tmp/new_device_hardware.json"
 
@@ -217,6 +223,7 @@ jobs:
           git add config.properties
           git add app/src/main/assets/firmware_releases.json || true
           git add app/src/main/assets/device_hardware.json || true
+          git add core/proto || true
           
           # Add updated translations (fastlane metadata and strings)
           git add fastlane/metadata/android || true
