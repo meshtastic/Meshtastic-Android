@@ -23,18 +23,14 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.model.util.URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
 
 @RunWith(AndroidJUnit4::class)
 class ChannelTest {
     @Test
     fun channelUrlGood() {
-        val ch = channelSet {
-            settings.add(Channel.default.settings)
-            loraConfig = Channel.default.loraConfig
-        }
+        val ch = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig)
         val channelUrl = ch.getChannelUrl()
 
         Assert.assertTrue(channelUrl.toString().startsWith(URL_PREFIX))
@@ -71,16 +67,11 @@ class ChannelTest {
 
     @Test
     fun allModemPresetsHaveValidNames() {
-        ConfigProtos.Config.LoRaConfig.ModemPreset.values().forEach { preset ->
+        Config.LoRaConfig.ModemPreset.entries.forEach { preset ->
             // Skip UNRECOGNIZED if it exists (Wire generates it sometimes) or generic UNSET values if applicable
-            // In this specific enum, assuming all valid defined presets should map.
             if (preset.name == "UNSET" || preset.name == "UNRECOGNIZED") return@forEach
 
-            val loraConfig =
-                Channel.default.loraConfig.copy {
-                    usePreset = true
-                    modemPreset = preset
-                }
+            val loraConfig = Channel.default.loraConfig.copy(use_preset = true, modem_preset = preset)
             val channel = Channel(loraConfig = loraConfig)
 
             // We want to ensure it is NOT "Invalid"

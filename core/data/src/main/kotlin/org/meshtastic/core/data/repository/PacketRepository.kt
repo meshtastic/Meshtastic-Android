@@ -238,23 +238,23 @@ constructor(
         rxTime: Long = 0,
     ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        dao.findPacketBySfppHash(hash)?.let { packet ->
+        val hashByteString = hash.toByteString()
+        dao.findPacketBySfppHash(hashByteString)?.let { packet ->
             // If it's already confirmed, don't downgrade it
             if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-            val updatedData = packet.data.copy(status = status, sfppHash = hash.toByteString(), time = newTime)
-            dao.update(packet.copy(data = updatedData, sfpp_hash = hash.toByteString(), received_time = newTime))
+            val updatedData = packet.data.copy(status = status, sfppHash = hashByteString, time = newTime)
+            dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
         }
 
-        dao.findReactionBySfppHash(hash)?.let { reaction ->
+        dao.findReactionBySfppHash(hashByteString)?.let { reaction ->
             if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-            val updatedReaction =
-                reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
+            val updatedReaction = reaction.copy(status = status, sfpp_hash = hashByteString, timestamp = newTime)
             dao.update(updatedReaction)
         }
     }

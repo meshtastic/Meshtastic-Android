@@ -60,12 +60,7 @@ enum class ModuleRoute(
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
 ) {
-    MQTT(
-        Res.string.mqtt,
-        SettingsRoutes.MQTT,
-        Icons.Rounded.Cloud,
-        AdminMessage.ModuleConfigType.MQTT_CONFIG.value,
-    ),
+    MQTT(Res.string.mqtt, SettingsRoutes.MQTT, Icons.Rounded.Cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
         Res.string.serial,
         SettingsRoutes.Serial,

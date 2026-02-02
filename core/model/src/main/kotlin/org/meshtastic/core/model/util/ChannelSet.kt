@@ -23,9 +23,9 @@ import co.touchlab.kermit.Logger
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
-import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config.LoRaConfig
 import java.net.MalformedURLException
 
 private const val MESHTASTIC_HOST = "meshtastic.org"
@@ -58,25 +58,22 @@ fun Uri.toChannelSet(): ChannelSet {
 /** @return A list of globally unique channel IDs usable with MQTT subscribe() */
 val ChannelSet.subscribeList: List<String>
     get() {
-        val loraConfig = this.lora_config
-        return settings
-            .filter { it.downlink_enabled }
-            .mapNotNull { if (loraConfig != null) Channel(it, loraConfig).name else null }
+        val loraConfig = this.lora_config ?: LoRaConfig()
+        return settings.filter { it.downlink_enabled }.map { Channel(it, loraConfig).name }
     }
 
-fun ChannelSet.getChannel(index: Int): Channel? {
-    val loraConfig = this.lora_config
-    return if (settings.size > index) {
-        val s = settings[index]
-        if (loraConfig != null) Channel(s, loraConfig) else null
-    } else {
-        null
-    }
+fun ChannelSet.getChannel(index: Int): Channel? = if (settings.size > index) {
+    val s = settings[index]
+    Channel(s, lora_config ?: LoRaConfig())
+} else {
+    null
 }
 
 /** Return the primary channel info */
 val ChannelSet.primaryChannel: Channel?
     get() = getChannel(0)
+
+fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
 
 /**
  * Return a URL that represents the [ChannelSet]
