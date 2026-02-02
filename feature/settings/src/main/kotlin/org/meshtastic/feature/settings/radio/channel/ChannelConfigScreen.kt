@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.channel
 
 import androidx.compose.animation.AnimatedVisibility
@@ -53,8 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add
 import org.meshtastic.core.strings.cancel
@@ -73,7 +72,6 @@ import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHead
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
-import org.meshtastic.feature.settings.radio.channel.component.SECONDARY_CHANNEL_EPOCH
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelProtos.ChannelSettings
 import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
@@ -114,8 +112,7 @@ private fun ChannelConfigScreen(
     val primarySettings = settingsList.getOrNull(0) ?: return
     val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
     val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
-    val fwVersion by
-        remember(firmwareVersion) { mutableStateOf(DeviceVersion(firmwareVersion.substringBeforeLast("."))) }
+    val capabilities by remember(firmwareVersion) { mutableStateOf(Capabilities(firmwareVersion)) }
 
     val focusManager = LocalFocusManager.current
     val settingsListInput =
@@ -156,7 +153,7 @@ private fun ChannelConfigScreen(
     }
 
     if (showChannelLegendDialog) {
-        ChannelLegendDialog(fwVersion) { showChannelLegendDialog = false }
+        ChannelLegendDialog(capabilities) { showChannelLegendDialog = false }
     }
 
     Scaffold(
@@ -211,7 +208,7 @@ private fun ChannelConfigScreen(
 
                 ChannelLegend { showChannelLegendDialog = true }
 
-                val locationChannel = determineLocationSharingChannel(fwVersion, settingsListInput.toList())
+                val locationChannel = determineLocationSharingChannel(capabilities, settingsListInput.toList())
 
                 LazyColumn(
                     modifier =
@@ -276,13 +273,13 @@ private fun ChannelConfigScreen(
 /**
  * Determines what [Channel] if any is enabled to conduct automatic location sharing.
  *
- * @param firmwareVersion of the connected node.
+ * @param capabilities of the connected node.
  * @param settingsList Current list of channels on the node.
  * @return the index of the channel within `settingsList`.
  */
-private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, settingsList: List<ChannelSettings>): Int {
+private fun determineLocationSharingChannel(capabilities: Capabilities, settingsList: List<ChannelSettings>): Int {
     var output = -1
-    if (firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
+    if (capabilities.supportsSecondaryChannelLocation) {
         /* Essentially the first index with the setting enabled */
         for ((i, settings) in settingsList.withIndex()) {
             if (settings.moduleSettings.positionPrecision > 0) {

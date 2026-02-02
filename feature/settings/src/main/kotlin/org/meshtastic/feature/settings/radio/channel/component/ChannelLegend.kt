@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.channel.component
 
 import androidx.compose.foundation.clickable
@@ -45,7 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.channel_features
 import org.meshtastic.core.strings.downlink_enabled
@@ -64,12 +63,27 @@ import org.meshtastic.core.strings.security_icon_help_dismiss
 import org.meshtastic.core.strings.uplink_enabled
 import org.meshtastic.core.strings.uplink_feature_description
 
-/**
- * At this firmware version periodic position sharing on a secondary channel was implemented. To enable this feature the
- * user must disable position on the primary channel and enable on a secondary channel. The lowest indexed secondary
- * channel with the position enabled will conduct the automatic position broadcasts.
- */
-internal const val SECONDARY_CHANNEL_EPOCH = "2.6.10"
+@Composable
+internal fun ChannelLegend(onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().clickable { onClick.invoke() },
+        horizontalArrangement = Arrangement.SpaceEvenly,
+    ) {
+        Row {
+            Icon(imageVector = Icons.Filled.Info, contentDescription = stringResource(Res.string.info))
+            Text(
+                text = stringResource(Res.string.primary),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 16.dp),
+            )
+        }
+        Text(
+            text = stringResource(Res.string.secondary),
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.padding(start = 16.dp),
+        )
+    }
+}
 
 internal enum class ChannelIcons(
     val icon: ImageVector,
@@ -94,29 +108,7 @@ internal enum class ChannelIcons(
 }
 
 @Composable
-internal fun ChannelLegend(onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable { onClick.invoke() },
-        horizontalArrangement = Arrangement.SpaceEvenly,
-    ) {
-        Row {
-            Icon(imageVector = Icons.Filled.Info, contentDescription = stringResource(Res.string.info))
-            Text(
-                text = stringResource(Res.string.primary),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp),
-            )
-        }
-        Text(
-            text = stringResource(Res.string.secondary),
-            color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.padding(start = 16.dp),
-        )
-    }
-}
-
-@Composable
-internal fun ChannelLegendDialog(firmwareVersion: DeviceVersion, onDismiss: () -> Unit) {
+internal fun ChannelLegendDialog(capabilities: Capabilities, onDismiss: () -> Unit) {
     AlertDialog(
         modifier = Modifier.fillMaxSize(),
         onDismissRequest = onDismiss,
@@ -148,7 +140,7 @@ internal fun ChannelLegendDialog(firmwareVersion: DeviceVersion, onDismiss: () -
                 )
                 Text(
                     text =
-                    if (firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
+                    if (capabilities.supportsSecondaryChannelLocation) {
                         /* 2.6.10+ */
                         "- ${stringResource(Res.string.secondary_channel_position_feature)}"
                     } else {
@@ -192,5 +184,5 @@ private fun IconDefinitions() {
 @Preview
 @Composable
 private fun PreviewChannelLegendDialog() {
-    ChannelLegendDialog(firmwareVersion = DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {}
+    ChannelLegendDialog(capabilities = Capabilities("2.6.10")) {}
 }

@@ -66,6 +66,18 @@ class CapabilitiesTest {
     }
 
     @Test
+    fun `supportsSecondaryChannelLocation requires v2 6 10`() {
+        assertFalse(caps("2.6.9").supportsSecondaryChannelLocation)
+        assertTrue(caps("2.6.10").supportsSecondaryChannelLocation)
+    }
+
+    @Test
+    fun `supportsStatusMessage requires v2 7 17`() {
+        assertFalse(caps("2.7.16").supportsStatusMessage)
+        assertTrue(caps("2.7.17").supportsStatusMessage)
+    }
+
+    @Test
     fun `null firmware returns all false`() {
         val c = caps(null)
         assertFalse(c.canMuteNode)
@@ -74,6 +86,8 @@ class CapabilitiesTest {
         assertFalse(c.canToggleTelemetryEnabled)
         assertFalse(c.canToggleUnmessageable)
         assertFalse(c.supportsQrCodeSharing)
+        assertFalse(c.supportsSecondaryChannelLocation)
+        assertFalse(c.supportsStatusMessage)
     }
 
     @Test
@@ -85,6 +99,8 @@ class CapabilitiesTest {
         assertFalse(c.canToggleTelemetryEnabled)
         assertFalse(c.canToggleUnmessageable)
         assertFalse(c.supportsQrCodeSharing)
+        assertFalse(c.supportsSecondaryChannelLocation)
+        assertFalse(c.supportsStatusMessage)
     }
 
     @Test
@@ -96,6 +112,8 @@ class CapabilitiesTest {
         assertTrue(c.canToggleTelemetryEnabled)
         assertTrue(c.canToggleUnmessageable)
         assertTrue(c.supportsQrCodeSharing)
+        assertTrue(c.supportsSecondaryChannelLocation)
+        assertTrue(c.supportsStatusMessage)
     }
 
     @Test
@@ -107,5 +125,7 @@ class CapabilitiesTest {
         assertTrue(c.canToggleTelemetryEnabled)
         assertTrue(c.canToggleUnmessageable)
         assertTrue(c.supportsQrCodeSharing)
+        assertTrue(c.supportsSecondaryChannelLocation)
+        assertTrue(c.supportsStatusMessage)
     }
 }
