@@ -3,12 +3,25 @@
 name: Deploy Documentation
 
 on:
-  schedule:
-    # Runs at 00:00 UTC every Sunday
-    - cron: '0 0 * * 0'
+  push:
+    branches:
+      - main
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout'
+        required: false
+        type: string
+  
+  # Allow this workflow to be called from other workflows
+  workflow_call:
+    inputs:
+      ref:
+        description: 'The branch, tag or SHA to checkout'
+        required: false
+        type: string
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -32,6 +45,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: 'recursive'
+          ref: ${{ inputs.ref || '' }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v5
