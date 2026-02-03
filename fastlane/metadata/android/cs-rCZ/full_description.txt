@@ -1,21 +1,21 @@
 Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
 
-For more information about the Meshtastic project, please visit our website: [meshtastic.org](https://www.meshtastic.org). The firmware that runs on the radio devices is a separate open-source project, which you can find here: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 
-**Community and Support**
+<b>Community and Support</b>
 
 This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
 
-*   **Discussion Forum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
-*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
-*   **Report an Issue:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
 
-**Documentation**
+<b>Documentation</b>
 
 To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
-[**View Documentation**](https://meshtastic.org/docs/)
+<a href="https://meshtastic.org/docs/">View Documentation</a>
 
-**Translations**
+<b>Translations</b>
 
 You can help translate the app into your native language using Crowdin:
-[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

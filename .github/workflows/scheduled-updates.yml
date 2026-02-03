@@ -78,6 +78,9 @@ jobs:
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
 
+      - name: Fix file permissions
+        run: sudo chown -R $USER:$USER .
+
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -126,6 +129,12 @@ jobs:
           branch: 'scheduled-updates'
           base: 'main'
           delete-branch: true
+          add-paths: |
+            app/src/main/assets/firmware_releases.json
+            app/src/main/assets/device_hardware.json
+            fastlane/metadata/android/**
+            **/strings.xml
+            **/README.md
           labels: |
             automation
             l10n

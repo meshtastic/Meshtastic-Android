@@ -40,6 +40,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ secrets.CROWDIN_GITHUB_TOKEN }}
 
       - name: Calculate tags
         id: calculate_tags
@@ -105,21 +106,120 @@ jobs:
           fi
         shell: bash
 
-      - name: Create and push new tag
-        if: ${{ !inputs.dry_run }}
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Update External Assets (Firmware, Hardware, Protos)
+        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
         run: |
-          FINAL_TAG="${{ steps.calculate_tags.outputs.final_tag }}"
-          if [[ "${{ inputs.channel }}" == "internal" ]]; then
-            # For internal, tag the current HEAD. tag_to_process and final_tag are the same.
-            git tag $FINAL_TAG
+          # Update Submodules (Protobufs)
+          echo "Updating core/proto submodule..."
+          git submodule update --init --remote core/proto
+          
+          # Update Firmware List
+          firmware_file_path="app/src/main/assets/firmware_releases.json"
+          temp_firmware_file="/tmp/new_firmware_releases.json"
+          
+          echo "Fetching latest firmware releases..."
+          curl -s --fail https://api.meshtastic.org/github/firmware/list > "$temp_firmware_file"
+          
+          if ! jq empty "$temp_firmware_file" 2>/dev/null; then
+            echo "::error::Firmware API returned invalid JSON data. Aborting."
+            exit 1
           else
-            # For promotions, create the new tag pointing to the same commit as the old tag.
-            TAG_TO_PROCESS="${{ steps.calculate_tags.outputs.tag_to_process }}"
-            git tag $FINAL_TAG $TAG_TO_PROCESS
+            if [ ! -f "$firmware_file_path" ] || ! jq --sort-keys . "$temp_firmware_file" | diff -q - <(jq --sort-keys . "$firmware_file_path"); then
+              echo "Changes detected in firmware list or local file missing. Updating $firmware_file_path."
+              cp "$temp_firmware_file" "$firmware_file_path"
+            else
+              echo "No changes detected in firmware list."
+            fi
           fi
-          git push origin $FINAL_TAG
+
+          # Update Hardware List
+          hardware_file_path="app/src/main/assets/device_hardware.json"
+          temp_hardware_file="/tmp/new_device_hardware.json"
+
+          echo "Fetching latest device hardware data..."
+          curl -s --fail https://api.meshtastic.org/resource/deviceHardware > "$temp_hardware_file"
+
+          if ! jq empty "$temp_hardware_file" 2>/dev/null; then
+            echo "::error::Hardware API returned invalid JSON data. Aborting."
+            exit 1
+          else
+            if [ ! -f "$hardware_file_path" ] || ! jq --sort-keys . "$temp_hardware_file" | diff -q - <(jq --sort-keys . "$hardware_file_path"); then
+              echo "Changes detected in hardware list or local file missing. Updating $hardware_file_path."
+              cp "$temp_hardware_file" "$hardware_file_path"
+            else
+              echo "No changes detected in hardware list."
+            fi
+          fi
+
+      - name: Sync with Crowdin
+        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        uses: crowdin/github-action@v2
+        with:
+          base_url: 'https://meshtastic.crowdin.com/api/v2'
+          config: 'crowdin.yml'
+          crowdin_branch_name: 'main'
+          upload_sources: true
+          upload_sources_args: '--preserve-hierarchy'
+          upload_translations: false
+          download_translations: true
+          download_translations_args: '--preserve-hierarchy'
+          create_pull_request: false
+          push_translations: false
+          push_sources: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+
+      - name: Commit Release Assets (Translations, Data, Config)
+        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        env:
+          FINAL_TAG: ${{ steps.calculate_tags.outputs.final_tag }}
+        run: |
+          # Calculate Version Code
+          OFFSET=$(grep '^VERSION_CODE_OFFSET=' config.properties | cut -d'=' -f2)
+          COMMIT_COUNT=$(git rev-list --count HEAD)
+          # +1 because we are about to add a commit
+          VERSION_CODE=$((COMMIT_COUNT + OFFSET + 1))
+          
+          echo "Calculated Version Code: $VERSION_CODE"
+          
+          # Update VERSION_NAME_BASE in config.properties
+          sed -i "s/^VERSION_NAME_BASE=.*/VERSION_NAME_BASE=${{ inputs.base_version }}/" config.properties
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Add updated data files
+          git add config.properties
+          git add app/src/main/assets/firmware_releases.json || true
+          git add app/src/main/assets/device_hardware.json || true
+          git add core/proto || true
+          
+          # Add updated translations (fastlane metadata and strings)
+          git add fastlane/metadata/android || true
+          git add "**/strings.xml" || true
+          
+          # Only commit if there are changes
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(release): prepare $FINAL_TAG [skip ci]
+
+          - Bump base version to ${{ inputs.base_version }}
+          - Sync translations and assets"
+            git push origin HEAD:${{ github.ref_name }}
+          else
+            echo "No changes to commit."
+          fi
+        shell: bash
+
+      - name: Create and Push Release Tag
+        if: ${{ !inputs.dry_run && inputs.channel == 'internal' }}
+        env:
+          FINAL_TAG: ${{ steps.calculate_tags.outputs.final_tag }}
+        run: |
+          echo "Tagging and pushing release: $FINAL_TAG"
+          git tag "$FINAL_TAG"
+          git push origin "$FINAL_TAG"
         shell: bash
 
   call-release-workflow:
@@ -127,7 +227,7 @@ jobs:
     needs: determine-tags
     uses: ./.github/workflows/release.yml
     with:
-      tag_name: ${{ needs.determine-tags.outputs.tag_to_process }}
+      tag_name: ${{ needs.determine-tags.outputs.final_tag }}
       channel: ${{ inputs.channel }}
       base_version: ${{ inputs.base_version }}
     secrets: inherit

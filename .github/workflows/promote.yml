@@ -19,6 +19,10 @@ on:
         description: 'The final tag for the release'
         required: true
         type: string
+      commit_sha:
+        description: 'The commit SHA to tag'
+        required: false
+        type: string
       channel:
         description: 'The channel to promote to'
         required: true
@@ -46,6 +50,8 @@ on:
         required: true
       GRADLE_ENCRYPTION_KEY:
         required: true
+      DISCORD_WEBHOOK_ANDROID:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -67,7 +73,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.tag_name }}
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
 
@@ -111,8 +117,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
+          ref: ${{ inputs.commit_sha || inputs.tag_name }}
           fetch-depth: 0
           submodules: 'recursive'
+
+      - name: Push Git Tag on Success
+        if: ${{ inputs.commit_sha != '' }}
+        run: |
+          git tag ${{ inputs.final_tag }} ${{ inputs.commit_sha }}
+          git push origin ${{ inputs.final_tag }}
 
       - name: Update GitHub Release with gh CLI
         env:
@@ -122,3 +135,50 @@ jobs:
             --tag ${{ inputs.final_tag }} \
             --title "${{ inputs.release_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})" \
             --prerelease=${{ inputs.channel != 'production' }}
+
+      - name: Notify Discord
+        if: ${{ inputs.channel != 'internal' }}
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_ANDROID }}
+          VERSION: ${{ inputs.final_tag }}
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          if [[ -z "$DISCORD_WEBHOOK" ]]; then
+            echo "No Discord webhook provided. Skipping notification."
+            exit 0
+          fi
+
+          # Determine Track Name for Display
+          if [ "$CHANNEL" == "closed" ]; then TRACK="Alpha (Closed)"; fi
+          if [ "$CHANNEL" == "open" ]; then TRACK="Beta (Open)"; fi
+          if [ "$CHANNEL" == "production" ]; then TRACK="Production"; fi
+
+          # Construct JSON Payload
+          PAYLOAD=$(cat <<EOF
+          {
+            "content": null,
+            "embeds": [
+              {
+                "title": "🚀 New Android Release: $VERSION",
+                "description": "A new build has been promoted to the **$TRACK** track.",
+                "color": 5763719,
+                "fields": [
+                  {
+                    "name": "Track",
+                    "value": "$TRACK",
+                    "inline": true
+                  },
+                  {
+                    "name": "Version",
+                    "value": "$VERSION",
+                    "inline": true
+                  }
+                ],
+                "url": "https://github.com/meshtastic/Meshtastic-Android/releases/tag/$VERSION"
+              }
+            ]
+          }
+          EOF
+          )
+
+          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$DISCORD_WEBHOOK"

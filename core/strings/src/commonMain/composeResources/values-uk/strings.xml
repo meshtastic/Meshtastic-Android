@@ -86,6 +86,7 @@
     <string name="config_display_flip_screen_summary">Перевернути екран по вертикалі.</string>
     <string name="config_display_units_summary">Одиниці, що показуються на екрані пристрою.</string>
     <string name="config_lora_region_summary">Регіон, де ви будете використовувати радіо.</string>
+    <string name="config_lora_modem_preset_summary">Доступні пресети для модема, за замовчуванням — Long Fast.</string>
     <string name="label_very_long_slow">Дуже велика дальність - Повільно</string>
     <string name="label_long_fast">Велика дальність - Швидко</string>
     <string name="label_long_turbo">Long Range - Turbo</string>
@@ -96,7 +97,11 @@
     <string name="label_short_turbo">Мала дальність - Турбо</string>
     <string name="label_short_fast">Мала дальність - Повільно</string>
     <string name="label_short_slow">Мала дальність - Повільно</string>
+    <string name="config_network_wifi_enabled_summary">Увімкнення Wi-Fi вимкне Bluetooth-з'єднання до програми.</string>
+    <string name="config_network_eth_enabled_summary">Увімкнення Ethernet вимкне Bluetooth-з'єднання до програми. З'єднання з вузлами через TCP недоступні на пристроях Apple.</string>
+    <string name="config_network_udp_enabled_summary">Увімкнути трансляцію пакетів через UDP через локальну мережу.</string>
     <string name="config_position_gps_update_interval_summary">Як часто слід намагатися отримати позицію GPS (&lt;10 сек тримає GPS постійно увімкненим).</string>
+    <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <!-- Position Config -->
     <string name="minimum_interval">Мінімальний проміжок</string>
     <string name="minimum_distance">Мінімальна відстань</string>
@@ -154,6 +159,12 @@
     <string name="debug_export_cancelled">Експорт скасовано</string>
     <string name="debug_export_success">%1$d журналів експортовано</string>
     <string name="debug_export_failed">Не вдалося записати файл журналу: %1$s</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d година</item>
+        <item quantity="few">%1$d години</item>
+        <item quantity="many">%1$d годин</item>
+        <item quantity="other">%1$d годин</item>
+    </plurals>
     <string name="debug_filters">Фільтри</string>
     <string name="debug_active_filters">Активні фільтри</string>
     <string name="debug_default_search">Пошук в журналах…</string>
@@ -281,6 +292,7 @@
     <string name="logs">Журнали подій</string>
     <string name="info">Інформація</string>
     <string name="iaq">IAQ</string>
+    <string name="show_all_key_title">Значення ключа шифрування</string>
     <string name="encryption_psk">Спільний ключ</string>
     <string name="encryption_pkc">Шифрування з відкритим ключем</string>
     <string name="encryption_error">Не збігаються відкритий ключ</string>
@@ -329,6 +341,7 @@
     <string name="low_battery_message">Вузол %1$s має низький заряд акумулятора (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Сповіщення про низький рівень заряду</string>
     <string name="low_battery_title">Низький заряд батареї: %1$s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Сповіщення про низький рівень заряду акумулятора (улюблені вузли)</string>
     <string name="baro_pressure">Атмосферний тиск</string>
     <string name="udp_enabled">Увімкнено</string>
     <string name="udp_broadcast">UDP трансляція</string>
@@ -352,7 +365,9 @@
     <string name="remote_hardware">Віддалене обладнання</string>
     <string name="neighbor_info">Інформація про сусідів</string>
     <string name="audio_config">Налаштування аудіо</string>
+    <string name="codec_2_enabled">CODEC 2 увімкнено</string>
     <string name="ptt_pin">PTT контакт</string>
+    <string name="codec2_sample_rate">Частота дискретизації CODEC2</string>
     <string name="bluetooth_config">Налаштування Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth увімкнено</string>
     <string name="fixed_pin">Фіксований PIN</string>
@@ -529,6 +544,7 @@
     <string name="bottom_nav_settings">Налаштування</string>
     <string name="set_your_region">Встановіть ваш регіон</string>
     <string name="reply">Відповісти</string>
+    <string name="i_agree_to_share_my_location">Я прочитав і розумію, текст вище. Я добровільно даю згоду на незашифровану передачу даних мого вузла через MQTT</string>
     <string name="i_agree">Погоджуюся.</string>
     <string name="should_update_firmware">Рекомендується оновлення прошивки.</string>
     <string name="should_update">Щоб скористатися найновішими виправленнями помилок та функціями, оновіть прошивку вашого вузла.\n\nОстання стабільна версія прошивки: %1$s</string>
@@ -661,16 +677,24 @@
     <string name="firmware_update_no_device">Немає під'єднаних пристроїв</string>
     <string name="firmware_update_not_found_in_release">Не вдалося знайти прошивку %1$s в релізі.</string>
     <string name="firmware_update_extracting">Розпакування прошивки...</string>
+    <string name="firmware_update_starting_service">Відключення для запуску DFU сервісу...</string>
     <string name="firmware_update_failed">Помилка оновлення</string>
+    <string name="firmware_update_hang_tight">Зачекайте, ми над цим працюємо...</string>
+    <string name="firmware_update_keep_device_close">Тримайте пристрій близько до вашого телефону.</string>
     <string name="firmware_update_do_not_close">Не закривайте застосунок.</string>
     <string name="firmware_update_almost_there">Майже готово...</string>
     <string name="firmware_update_taking_a_while">Це може зайняти хвилинку...</string>
     <string name="firmware_update_select_file">Вибрати локальний файл</string>
     <string name="firmware_update_local_file">Локальний файл</string>
     <string name="firmware_update_source_local">Джерело: локальний файл</string>
+    <string name="firmware_update_unknown_release">Невідомий віддалений реліз</string>
     <string name="firmware_update_disclaimer_title">Попередження про оновлення</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy каже: \"Тримайся напоготові!\"</string>
     <string name="chirpy">Chirpy</string>
+    <string name="firmware_update_rebooting">Перезавантаження у DFU...</string>
+    <string name="firmware_update_waiting_for_device">Очікування пристрою DFU...</string>
     <string name="firmware_update_copying">Копіювання прошивки...</string>
+    <string name="firmware_update_save_dfu_file">Будь ласка, збережіть .uf2 файл на DFU диск вашого пристрою.</string>
     <string name="firmware_update_flashing">Прошивка пристрою, будь ласка, зачекайте...</string>
     <string name="firmware_update_method_usb">Передача файлів через USB</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
@@ -680,6 +704,8 @@
     <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні \"Зберегти як\", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
     <string name="firmware_update_verifying">Перевірка оновлення...</string>
     <string name="firmware_update_verification_failed">Час очікування підтвердження минув. Пристрій не під'єднався вчасно.</string>
+    <string name="firmware_update_waiting_reconnect">Очікування на перепідключення пристрою...</string>
+    <string name="firmware_update_target">Ціль: %1$s</string>
     <string name="firmware_update_release_notes">Примітки до релізу</string>
     <string name="firmware_update_unknown_error">Невідома помилка</string>
     <string name="firmware_update_dfu_error">Помилка DFU: %1$s</string>

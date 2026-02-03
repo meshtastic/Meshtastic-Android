@@ -1,0 +1,200 @@
+## 📦 Без категорії
+
+- chore(build): Enable and configure Compose Compiler reports
+   - PR: #4289
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4287
+- feat: word-based message filtering with quarantine approach (stored but hidden)
+   - PR: #4241
+- chore(deps): оновлення dagger та hilt до v2.59
+   - PR: #4297
+- chore(deps): оновлення fastlane до v2.231.1
+   - PR: #4296
+- feat(service): Introduce fallback worker to ensure service stays alive
+   - PR: #4295
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4299
+- feat(node): Refactor Node Detail screen and enhance user feedback
+   - PR: #4291
+- feat: Improve channel migration logic and add tests
+   - PR: #4294
+- Refactor: Only show advanced and app settings for local node
+   - PR: #4290
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4301
+- feat: Add Status Message module support
+   - PR: #4163
+- chore(deps): update app.cash.molecule:molecule-runtime to v2.2.0
+   - PR: #4302
+- chore(deps): update com.android.tools:common to v32
+   - PR: #4306
+- chore(deps): update org.robolectric:robolectric to v4.16.1
+   - PR: #4305
+- chore(deps): Update Gradle and library versions
+   - PR: #4309
+- build: Upgrade build configuration and dependencies
+   - PR: #4311
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4310
+- Оновити VERSION_NAME_BASE до 2.7.12
+   - PR: #4312
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4314
+- refactor(ui): Icon audit and node list item refactor
+   - PR: #4313
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4315
+- fix(ui): Prevent NaN values in environment metrics
+   - PR: #4316
+- fix(usb): Add error handling for serial write operations
+   - PR: #4318
+- fix(service): Add error handling for invalid StoreForward++ packets
+   - PR: #4319
+- refactor(core): Optimize and share network state flows
+   - PR: #4320
+- fix: map cluster crash
+   - PR: #4317
+- ci(release): Ensure artifacts are always uploaded and attested
+   - PR: #4321
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4322
+- fix(notifications): Suppress notifications for muted contacts an…
+   - PR: #4323
+- chore(deps): оновлення io.mockk:mockk до v1.14.9
+   - PR: #4325
+- fix(mesh): Set `hopStart` to match `hopLimit` in sent packets
+   - PR: #4324
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4327
+- feat(ui): Remove uptime from SignalInfo
+   - PR: #4328
+- feat(messaging): Improve message bubble UI and add delivery status action
+   - PR: #4330
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4329
+- chore(deps): update google maps compose to v8 (major)
+   - PR: #4338
+- fix(node): list and detail usability fixes
+   - PR: #4336
+- chore(deps): update io.nlopez.compose.rules:detekt to v0.5.6
+   - PR: #4335
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4332
+- chore(deps): оновлення datadog до v3.6.0
+   - PR: #4340
+- chore(deps): update core/proto/src/main/proto digest to bc63a57
+   - PR: #4337
+- refactor(firmware): Inject dispatcher into `BleOtaTransport`
+   - PR: #4339
+- fix(caps): Correct firmware version for `canMuteNode`
+   - PR: #4341
+- chore(deps): update static analysis to v8.2.1
+   - PR: #4342
+- chore(lint): Disable ForbiddenComment detekt rule
+   - PR: #4344
+- fix(neighborinfo): disable neighbor info dialog temporarily
+   - PR: #4345
+- chore(deps): update plugin com.gradle.develocity to v4.3.2
+   - PR: #4347
+- chore(deps): update devtools.ksp to v2.3.5
+   - PR: #4349
+- Refactor: Replace custom charts with Vico library
+   - PR: #4348
+- chore(deps): update androidx.work:work-runtime-ktx to v2.11.1
+   - PR: #4351
+- chore(deps): update androidx navigation to v2.9.7
+   - PR: #4350
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4343
+- chore(deps): update androidx (general)
+   - PR: #4352
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4353
+- fix(reactions): fix sent message reaction alignment
+   - PR: #4355
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4356
+- chore(repo): replace the triage robots
+   - PR: #4359
+- chore(deps): оновити gradle до v9.3.1
+   - PR: #4358
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4360
+- feat(build): Add support for remote Gradle build cache
+   - PR: #4357
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4361
+- Refactor: Create `core:api` module and set up publishing
+   - PR: #4362
+- chore: Apply maven-publish plugin consistently
+   - PR: #4364
+- feat: Add JitPack configuration for publishing
+   - PR: #4365
+- build: Configure JitPack publishing for core modules
+   - PR: #4366
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4363
+- chore(ci): Remove GitHub Packages publishing workflow
+   - PR: #4368
+- chore(deps): оновлення protobuf runtime до v4.33.5
+   - PR: #4367
+- build: Lower JDK to 17 and minSdk to 21
+   - PR: #4369
+- chore(deps): update androidx.activity:activity-compose to v1.12.3
+   - PR: #4370
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4371
+- Update README with JitPack integration details
+   - PR: #4372
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4373
+- chore(build): more downgrades to JDK 17
+   - PR: #4374
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4375
+- refactor(build): Centralize Android SDK and Java versions
+   - PR: #4377
+- fix(node): fix regressions since node ui refactor
+   - PR: #4379
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4376
+- feat(charts): voltage, colors, legends, and adaptive ui
+   - PR: #4383
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4384
+- refactor(build): Centralize Develocity and build cache configuration
+   - PR: #4382
+- chore(deps): update kotlin ecosystem to v0.9.5
+   - PR: #4381
+- Update full_description.txt
+   - PR: #4388
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4385
+- chore(ci): Optimize and stabilize Gradle builds and CI workflows
+   - PR: #4390
+- Refactor PR workflow to include check-changes step
+   - PR: #4397
+- docs: fix typo and url
+   - PR: #4396
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4395
+- chore(deps): update markdown renderer (mike penz) to v0.39.2
+   - PR: #4393
+- chore: fix regressions in the release
+   - PR: #4398
+- ci18n: Add fastlane metadata to Crowdin
+   - PR: #4402
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4399
+- feat(settings): Add firmware capability checks for settings
+   - PR: #4403
+- ci: fix scheduled-updates workflow by explicitly adding paths
+   - PR: #4405
+- chore: Scheduled updates (Firmware, Hardware, Translations, Graphs)
+   - PR: #4406
+- feat(release): Automate changelog, asset updates, and tagging
+   - PR: #4407
+- fix(ci): use PAT for release workflow to bypass branch protection
+   - PR: #4408
+
+

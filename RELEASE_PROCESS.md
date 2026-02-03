@@ -11,9 +11,11 @@ The entire release process is managed by a single, manually-triggered GitHub Act
     1.  `version`: The base version number you are releasing (e.g., `2.4.0`).
     2.  `channel`: The release channel you are targeting (`internal`, `closed`, `open`, or `production`).
 -   **Automation:** The workflow handles everything automatically:
-    -   Calculates the correct Git tag based on the channel (e.g., `v2.4.0-internal.1` or `v2.4.0`).
-    -   Pushes the new tag to the repository.
-    -   Calls a reusable workflow that builds the app, deploys it to the correct Google Play track, and attaches the artifacts (`.aab`/`.apk`) to a GitHub Release.
+    -   **Syncs Assets:** Fetches the latest firmware/hardware lists, protobuf definitions, and translations (Crowdin).
+    -   **Generates Changelog:** Creates a clean changelog from commits since the last production release and commits it to the repo.
+    -   **Updates Config:** Automatically bumps the `VERSION_NAME_BASE` in `config.properties`.
+    -   **Verifies & Tags:** Runs lint checks, builds the app, and *only* tags the release if successful.
+    -   **Deploys:** Uploads the build to the correct Google Play track and attaches artifacts (`.aab`/`.apk`) to a GitHub Release.
 -   **Changelog:** Release notes are auto-generated from PR labels. Ensure PRs are labeled correctly to maintain an accurate changelog.
 
 ## Release Steps
@@ -27,7 +29,11 @@ The entire release process is managed by a single, manually-triggered GitHub Act
 5.  Select the `internal` channel.
 6.  Click **"Run workflow"**.
 
-The workflow will create an incremental internal tag (e.g., `v2.4.0-internal.1`) and publish a **draft** pre-release on GitHub.
+The workflow will:
+1.  **Create a new commit** on the current branch containing updated assets, translations, and the new changelog.
+2.  **Tag** that commit with an incremental internal tag (e.g., `v2.4.0-internal.1`).
+3.  **Build & Deploy** the verified artifact to the Play Store Internal track.
+4.  Publish a **draft** pre-release on GitHub.
 
 ### 2. Promote to the Next Channel
 

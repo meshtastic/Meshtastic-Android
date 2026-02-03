@@ -11,6 +11,10 @@ on:
         description: 'The tag that triggered the release'
         required: true
         type: string
+      commit_sha:
+        description: 'The commit SHA to build and tag'
+        required: false
+        type: string
       channel:
         description: 'The channel to create a release for or promote to'
         required: true
@@ -52,12 +56,19 @@ permissions:
   attestations: write
 
 jobs:
+  run-lint:
+    uses: ./.github/workflows/reusable-lint.yml
+    with:
+      ref: ${{ inputs.commit_sha || inputs.tag_name }}
+    secrets: inherit
+
   prepare-build-info:
     runs-on: ubuntu-latest
     outputs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -102,9 +113,10 @@ jobs:
 
   release-google:
     runs-on: ubuntu-latest
-    needs: prepare-build-info
+    needs: [prepare-build-info, run-lint]
     environment: Release
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -186,9 +198,10 @@ jobs:
 
   release-fdroid:
     runs-on: ubuntu-latest
-    needs: prepare-build-info
+    needs: [prepare-build-info, run-lint]
     environment: Release
     env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -249,6 +262,12 @@ jobs:
     runs-on: ubuntu-latest
     needs: [prepare-build-info, release-google, release-fdroid]
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag_name }}
+          fetch-depth: 0
+
       - name: Download all artifacts
         uses: actions/download-artifact@v7
         with:

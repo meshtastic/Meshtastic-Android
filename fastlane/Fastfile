@@ -17,15 +17,18 @@ default_platform(:android)
 
 platform :android do
   desc "Deploy a new version to the internal track on Google Play"
-  lane :internal do
+  lane :internal do |options|
     aab_path = build_google_release
+    
+    changelog = options[:changelog]
+
     upload_to_play_store(
       track: 'internal',
       aab: aab_path,
       release_status: 'completed',
       skip_upload_apk: true,
-      skip_upload_metadata: true,
-      skip_upload_changelogs: true,
+      skip_upload_metadata: false,
+      skip_upload_changelogs: false,
       skip_upload_images: true,
       skip_upload_screenshots: true,
     )

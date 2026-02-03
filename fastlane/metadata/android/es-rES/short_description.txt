@@ -1,1 +1,1 @@
-The official app for Meshtastic, an open-source, off-grid, mesh radio.
+La aplicación oficial de Meshtastic, una radio en red mallada, independiente y de código abierto.
