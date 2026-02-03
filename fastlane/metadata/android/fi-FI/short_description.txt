@@ -1,0 +1,1 @@
+Virallinen Meshtastic-sovellus avoimen lähdekoodin mesh-radiolle.

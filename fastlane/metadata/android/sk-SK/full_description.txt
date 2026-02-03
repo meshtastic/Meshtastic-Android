@@ -1,0 +1,21 @@
+Meshtastic je nástroj pre Android zariadenia s open-source kódom, pre off-grid rádiá siete mesh. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+
+<b>Community and Support</b>
+
+Tento projekt je aktuálne v beta štádiu vývoja. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+
+<b>Documentation</b>
+
+To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
+<a href="https://meshtastic.org/docs/">View Documentation</a>
+
+<b>Translations</b>
+
+Môžete pomôcť preložiť túto aplikáciu do Vašej rodnej reči pomocou Crowdin:
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

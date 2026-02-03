@@ -1,0 +1,1 @@
+Den officiella appen för Meshtastic, en öppen källkod, off-grid, mesh radio.

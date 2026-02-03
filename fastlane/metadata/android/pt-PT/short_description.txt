@@ -1,0 +1,1 @@
+Aplicativo oficial para Meshtastic, código aberto, fora da rede, rádio de malha.
