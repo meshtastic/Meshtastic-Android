@@ -1,0 +1,21 @@
+Meshtastic est un outil permettant d'utiliser des appareils Android avec des radios open-source, hors ligne, utilisant un réseau maillé. Cette application est le client principal du projet Meshtastic, vous permettant de gérer vos périphériques maillés et de communiquer avec d'autres utilisateurs.
+
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+
+<b>Community and Support</b>
+
+Ce projet est actuellement en version bêta. Vos commentaires sont les bienvenus ! Si vous avez des questions, des commentaires ou si vous rencontrez des problèmes, veuillez rejoindre notre communauté amicale et active :
+
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+
+<b>Documentation</b>
+
+Pour en savoir plus sur les fonctionnalités et les capacités de cette application et Meshtastic, veuillez consulter notre documentation officielle :
+<a href="https://meshtastic.org/docs/">View Documentation</a>
+
+<b>Translations</b>
+
+Vous pouvez aider à traduire l'application dans votre langue maternelle en utilisant Crowdin :
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

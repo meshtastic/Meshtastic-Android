@@ -1,0 +1,21 @@
+Meshtastic — це інструмент для використання пристроїв на базі Android з відкритим початковим кодом для створення радіо Mesh-мереж. Цей додаток є основним клієнтом проєкту Meshtastic, який дозволяє керувати вашими Mesh пристроями та спілкуватися з іншими користувачами.
+
+Для додаткової інформації про проєкт Meshtastic, відвідайте наш вебсайт: <a href="https://www.meshtastic.org">meshtastic.org</a>. Прошивка, що працює на радіопристроях — це окремий проєкт з відкритим початковим кодом, який можна знайти тут: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+
+<b>Спільнота та Підтримка</b>
+
+Цей проєкт наразі знаходиться в стадії бета-версії. Ми цінуємо зворотній зв'язок! Якщо у вас є питання, відгуки або виникнуть проблеми, будь ласка, приєднуйтесь до нашої дружньої та активної спільноти:
+
+• <b>Форум:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Повідомити про проблему::</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+
+<b>Документація</b>
+
+Щоб дізнатися більше про можливості цього додатку і Meshtastic загалом, перегляньте нашу офіційну документацію:
+<a href="https://meshtastic.org/docs/">Переглянути документацію</a>
+
+<b>Переклади</b>
+
+Ви можете допомогти перекласти додаток на вашу рідну мову за допомогою Crowdin:
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>
