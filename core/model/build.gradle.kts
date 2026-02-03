@@ -48,6 +48,8 @@ configure<LibraryExtension> {
         minSdk = 21
     }
 
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+
     publishing { singleVariant("googleRelease") { withSourcesJar() } }
 }
 
@@ -62,6 +64,7 @@ dependencies {
 
     testImplementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)
