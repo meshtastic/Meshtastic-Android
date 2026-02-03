@@ -174,12 +174,12 @@
     <string name="position_packet">Position Packet</string>
     <string name="broadcast_interval">Broadcast Interval</string>
     <string name="smart_position">Smart Position</string>
-    <string name="minimum_interval">Minimum Interval</string>
-    <string name="minimum_distance">Minimum Distance</string>
+    <string name="minimum_interval">Smart Interval</string>
+    <string name="minimum_distance">Smart Distance</string>
     <string name="device_gps">Device GPS</string>
     <string name="fixed_position">Fixed Position</string>
     <string name="altitude">Altitude</string>
-    <string name="update_interval">Update Interval</string>
+    <string name="update_interval">GPS Polling Interval</string>
     <string name="advanced_device_gps">Advanced Device GPS</string>
     <string name="gps_receive_gpio">GPS Receive GPIO</string>
     <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
