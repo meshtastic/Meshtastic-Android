@@ -20,8 +20,7 @@ import co.touchlab.kermit.Logger
 import com.squareup.wire.Message
 import com.squareup.wire.ProtoAdapter
 import okio.ByteString
-
-// ...existing javadoc...
+import okio.ByteString.Companion.toByteString
 
 @Suppress("unused") // These are extension functions meant to be imported elsewhere
 fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteString?, logger: Logger? = null): T? {
@@ -40,10 +39,9 @@ fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteString?, logger:
  * @param logger Optional logger for error reporting
  * @return The decoded message, or null if bytes is null or decoding fails
  */
-@Suppress("SpreadOperator")
 fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteArray?, logger: Logger? = null): T? {
     if (bytes == null || bytes.isEmpty()) return null
-    return decodeOrNull(ByteString.of(*bytes), logger)
+    return decodeOrNull(bytes.toByteString(), logger)
 }
 
 /**
