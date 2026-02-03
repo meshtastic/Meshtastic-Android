@@ -60,6 +60,7 @@ import org.meshtastic.proto.StoreForwardPlusPlus
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
+import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -211,7 +212,7 @@ constructor(
         val sfpp =
             try {
                 StoreForwardPlusPlus.ADAPTER.decode(payload)
-            } catch (e: Exception) {
+            } catch (e: IOException) {
                 Logger.e(e) { "Failed to parse StoreForwardPlusPlus packet" }
                 return
             }
@@ -293,7 +294,7 @@ constructor(
                 Logger.i { "SF++: Node ${packet.from} is requesting links" }
             }
 
-            else -> {}
+            else -> {} // Unknown SFPP message type
         }
     }
 
@@ -517,8 +518,8 @@ constructor(
                 return@handledLaunch
             }
 
-            if (shouldRetryReaction && reaction != null) {
-                val newRetryCount = reaction.retryCount + 1
+            if (shouldRetryReaction) {
+                val newRetryCount = reaction!!.retryCount + 1
 
                 // Emit retry event to UI and wait for user response
                 val retryEvent =
