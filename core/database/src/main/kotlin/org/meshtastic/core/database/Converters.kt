@@ -23,6 +23,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.Paxcount
@@ -43,62 +44,32 @@ class Converters {
     @TypeConverter fun dataToString(value: DataPacket): String = json.encodeToString(DataPacket.serializer(), value)
 
     @TypeConverter
-    fun bytesToFromRadio(bytes: ByteArray): FromRadio = try {
-        FromRadio.ADAPTER.decode(bytes)
-    } catch (ex: Exception) {
-        Logger.e(ex) { "bytesToFromRadio TypeConverter error" }
-        FromRadio()
-    }
+    fun bytesToFromRadio(bytes: ByteArray): FromRadio = FromRadio.ADAPTER.decodeOrNull(bytes, Logger) ?: FromRadio()
 
     @TypeConverter fun fromRadioToBytes(value: FromRadio): ByteArray? = FromRadio.ADAPTER.encode(value)
 
-    @TypeConverter
-    fun bytesToUser(bytes: ByteArray): User = try {
-        User.ADAPTER.decode(bytes)
-    } catch (ex: Exception) {
-        Logger.e(ex) { "bytesToUser TypeConverter error" }
-        User()
-    }
+    @TypeConverter fun bytesToUser(bytes: ByteArray): User = User.ADAPTER.decodeOrNull(bytes, Logger) ?: User()
 
     @TypeConverter fun userToBytes(value: User): ByteArray? = User.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToPosition(bytes: ByteArray): Position = try {
-        Position.ADAPTER.decode(bytes)
-    } catch (ex: Exception) {
-        Logger.e(ex) { "bytesToPosition TypeConverter error" }
-        Position()
-    }
+    fun bytesToPosition(bytes: ByteArray): Position = Position.ADAPTER.decodeOrNull(bytes, Logger) ?: Position()
 
     @TypeConverter fun positionToBytes(value: Position): ByteArray? = Position.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToTelemetry(bytes: ByteArray): Telemetry = try {
-        Telemetry.ADAPTER.decode(bytes)
-    } catch (ex: Exception) {
-        Logger.e(ex) { "bytesToTelemetry TypeConverter error" }
-        Telemetry()
-    }
+    fun bytesToTelemetry(bytes: ByteArray): Telemetry = Telemetry.ADAPTER.decodeOrNull(bytes, Logger) ?: Telemetry()
 
     @TypeConverter fun telemetryToBytes(value: Telemetry): ByteArray? = Telemetry.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToPaxcounter(bytes: ByteArray): Paxcount = try {
-        Paxcount.ADAPTER.decode(bytes)
-    } catch (ex: Exception) {
-        Logger.e(ex) { "bytesToPaxcounter TypeConverter error" }
-        Paxcount()
-    }
+    fun bytesToPaxcounter(bytes: ByteArray): Paxcount = Paxcount.ADAPTER.decodeOrNull(bytes, Logger) ?: Paxcount()
 
     @TypeConverter fun paxCounterToBytes(value: Paxcount): ByteArray? = Paxcount.ADAPTER.encode(value)
 
     @TypeConverter
-    fun bytesToMetadata(bytes: ByteArray): DeviceMetadata = try {
-        DeviceMetadata.ADAPTER.decode(bytes)
-    } catch (ex: Exception) {
-        Logger.e(ex) { "bytesToMetadata TypeConverter error" }
-        DeviceMetadata()
-    }
+    fun bytesToMetadata(bytes: ByteArray): DeviceMetadata =
+        DeviceMetadata.ADAPTER.decodeOrNull(bytes, Logger) ?: DeviceMetadata()
 
     @TypeConverter fun metadataToBytes(value: DeviceMetadata): ByteArray? = DeviceMetadata.ADAPTER.encode(value)
 

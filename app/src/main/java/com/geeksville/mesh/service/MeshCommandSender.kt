@@ -32,6 +32,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
@@ -120,9 +121,20 @@ constructor(
         if (p.id == 0) p.id = generatePacketId()
         val bytes = p.bytes ?: ByteString.EMPTY
         require(p.dataType != 0) { "Port numbers must be non-zero!" }
-        if (bytes.size >= Constants.DATA_PAYLOAD_LEN.value) {
+
+        // Use Wire extension for accurate size validation
+        val data =
+            Data(
+                portnum = PortNum.fromValue(p.dataType) ?: PortNum.UNKNOWN_APP,
+                payload = bytes,
+                reply_id = p.replyId ?: 0,
+                emoji = p.emoji,
+            )
+
+        if (!Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)) {
+            val actualSize = Data.ADAPTER.encodedSize(data)
             p.status = MessageStatus.ERROR
-            throw RemoteException("Message too long")
+            throw RemoteException("Message too long: $actualSize bytes (max ${Constants.DATA_PAYLOAD_LEN.value})")
         } else {
             p.status = MessageStatus.QUEUED
         }

@@ -38,6 +38,8 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.toReadableString
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminMessage
@@ -438,15 +440,14 @@ constructor(
      * @return A human-readable string representation of the decoded payload, or an error message if decoding fails, or
      *   null if the log does not contain a decodable packet.
      */
-    @Suppress("detekt:CyclomaticComplexMethod") // large switch that detekt doesn't parse well.
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun decodePayloadFromMeshLog(log: MeshLog): String? {
         var result: String? = null
         val packet = log.meshPacket
         if (packet == null || packet.decoded == null) {
             result = null
         } else {
-            val portnumValue = packet.decoded!!.portnum?.value ?: 0
-            val portnum = packet.decoded!!.portnum
+            val portnumValue = packet.decoded!!.portnum.value ?: 0
             val payload = packet.decoded!!.payload.toByteArray()
             result =
                 try {
@@ -454,16 +455,36 @@ constructor(
                         PortNum.TEXT_MESSAGE_APP.value,
                         PortNum.ALERT_APP.value,
                         -> payload.toString(Charsets.UTF_8)
-                        PortNum.POSITION_APP.value -> Position.ADAPTER.decode(payload).toString()
-                        PortNum.WAYPOINT_APP.value -> Waypoint.ADAPTER.decode(payload).toString()
-                        PortNum.NODEINFO_APP.value -> User.ADAPTER.decode(payload).toString()
-                        PortNum.TELEMETRY_APP.value -> Telemetry.ADAPTER.decode(payload).toString()
-                        PortNum.ROUTING_APP.value -> Routing.ADAPTER.decode(payload).toString()
-                        PortNum.ADMIN_APP.value -> AdminMessage.ADAPTER.decode(payload).toString()
-                        PortNum.PAXCOUNTER_APP.value -> Paxcount.ADAPTER.decode(payload).toString()
-                        PortNum.STORE_FORWARD_APP.value -> StoreAndForward.ADAPTER.decode(payload).toString()
+                        PortNum.POSITION_APP.value ->
+                            Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
+                                ?: "Failed to decode Position"
+                        PortNum.WAYPOINT_APP.value ->
+                            Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
+                                ?: "Failed to decode Waypoint"
+                        PortNum.NODEINFO_APP.value ->
+                            User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
+                                ?: "Failed to decode User"
+                        PortNum.TELEMETRY_APP.value ->
+                            Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
+                                ?: "Failed to decode Telemetry"
+                        PortNum.ROUTING_APP.value ->
+                            Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
+                                ?: "Failed to decode Routing"
+                        PortNum.ADMIN_APP.value ->
+                            AdminMessage.ADAPTER.decodeOrNull(payload)?.let {
+                                AdminMessage.ADAPTER.toReadableString(it)
+                            } ?: "Failed to decode AdminMessage"
+                        PortNum.PAXCOUNTER_APP.value ->
+                            Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
+                                ?: "Failed to decode Paxcount"
+                        PortNum.STORE_FORWARD_APP.value ->
+                            StoreAndForward.ADAPTER.decodeOrNull(payload)?.let {
+                                StoreAndForward.ADAPTER.toReadableString(it)
+                            } ?: "Failed to decode StoreAndForward"
                         PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
-                            StoreForwardPlusPlus.ADAPTER.decode(payload).toString()
+                            StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
+                                StoreForwardPlusPlus.ADAPTER.toReadableString(it)
+                            } ?: "Failed to decode StoreForwardPlusPlus"
                         PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
                         PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
                         else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }

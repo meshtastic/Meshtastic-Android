@@ -38,6 +38,8 @@ import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
+import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.RetryEvent
@@ -300,13 +302,14 @@ constructor(
 
     private fun handlePaxCounter(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
-        val p = Paxcount.ADAPTER.decode(payload)
+        val p = Paxcount.ADAPTER.decodeOrNull(payload, Logger) ?: return
         nodeManager.handleReceivedPaxcounter(packet.from, p)
     }
 
     private fun handlePosition(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
-        val p = Position.ADAPTER.decode(payload)
+        val p = Position.ADAPTER.decodeOrNull(payload, Logger) ?: return
+        Logger.d { "Position from ${packet.from}: ${Position.ADAPTER.toOneLiner(p)}" }
         nodeManager.handleReceivedPosition(packet.from, myNodeNum, p, dataPacket.time)
     }
 
@@ -358,7 +361,7 @@ constructor(
 
     private fun handleNodeStatus(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
-        val s = StatusMessage.ADAPTER.decode(payload)
+        val s = StatusMessage.ADAPTER.decodeOrNull(payload, Logger) ?: return
         nodeManager.handleReceivedNodeStatus(packet.from, s)
         rememberDataPacket(dataPacket, myNodeNum)
     }
@@ -366,9 +369,10 @@ constructor(
     private fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val t =
-            Telemetry.ADAPTER.decode(payload).let {
+            (Telemetry.ADAPTER.decodeOrNull(payload, Logger) ?: return).let {
                 if (it.time == 0) it.copy(time = (dataPacket.time.milliseconds.inWholeSeconds).toInt()) else it
             }
+        Logger.d { "Telemetry from ${packet.from}: ${Telemetry.ADAPTER.toOneLiner(t)}" }
         val fromNum = packet.from
         val isRemote = (fromNum != myNodeNum)
         if (!isRemote) {
@@ -433,7 +437,7 @@ constructor(
 
     private fun handleRouting(packet: MeshPacket, dataPacket: DataPacket) {
         val payload = packet.decoded?.payload ?: return
-        val r = Routing.ADAPTER.decode(payload)
+        val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
             serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle))
         }

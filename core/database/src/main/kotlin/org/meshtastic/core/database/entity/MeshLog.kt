@@ -20,6 +20,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import co.touchlab.kermit.Logger
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
@@ -52,7 +54,7 @@ data class MeshLog(
         get() =
             fromRadio.packet?.decoded?.payload?.let {
                 if (fromRadio.packet?.decoded?.portnum == org.meshtastic.proto.PortNum.POSITION_APP) {
-                    runCatching { Position.ADAPTER.decode(it) }.getOrNull()
+                    Position.ADAPTER.decodeOrNull(it, Logger)
                 } else {
                     null
                 }

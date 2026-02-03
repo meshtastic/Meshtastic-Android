@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.model
 
+import co.touchlab.kermit.Logger
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
@@ -24,7 +26,7 @@ val MeshPacket.neighborInfo: NeighborInfo?
     get() {
         val decoded = this.decoded
         return if (decoded != null && decoded.portnum == PortNum.NEIGHBORINFO_APP) {
-            runCatching { NeighborInfo.ADAPTER.decode(decoded.payload) }.getOrNull()
+            NeighborInfo.ADAPTER.decodeOrNull(decoded.payload, Logger)
         } else {
             null
         }

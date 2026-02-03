@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.model
 
+import co.touchlab.kermit.Logger
+import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.RouteDiscovery
@@ -24,7 +26,7 @@ val MeshPacket.fullRouteDiscovery: RouteDiscovery?
     get() {
         val d = decoded
         if (d != null && !d.want_response && d.portnum == PortNum.TRACEROUTE_APP) {
-            val originalRd = runCatching { RouteDiscovery.ADAPTER.decode(d.payload) }.getOrNull() ?: return null
+            val originalRd = RouteDiscovery.ADAPTER.decodeOrNull(d.payload, Logger) ?: return null
 
             val destinationId = if (d.dest != 0) d.dest else this.to
             val sourceId = if (d.source != 0) d.source else this.from
