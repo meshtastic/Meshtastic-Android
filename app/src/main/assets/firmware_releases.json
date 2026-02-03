@@ -241,12 +241,6 @@
       "title": "Change I2C pins to NFC pads for XIAO nRF52840",
       "page_url": "https://github.com/meshtastic/firmware/pull/9238",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9213",
-      "title": "Feature T-Deck Pro and T-Deck: add Chinese IME and built-in GB2312 pinyin table",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9213",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
