@@ -81,6 +81,10 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
 
+      - name: Run Gradle Doctor
+        run: ./gradlew doctor
+        continue-on-error: true
+
       - name: Calculate Version Code
         id: calculate_version_code
         uses: ./.github/actions/calculate-version-code
@@ -93,7 +97,7 @@ jobs:
           IS_FIRST_API=$(echo '${{ inputs.api_levels }}' | jq -r '.[0] == ${{ matrix.api_level }}')
           
           if [ "${{ inputs.run_lint }}" = "true" ] && [ "$IS_FIRST_API" = "true" ]; then
-            TASKS="$TASKS spotlessCheck detekt "
+            TASKS="$TASKS spotlessCheck detekt :app:dependencyGuard "
           fi
           
           FLAVOR="${{ inputs.test_flavors }}"
@@ -146,13 +150,13 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --continue --scan
+          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --continue --scan
 
       - name: Run Check (no Emulator)
         if: inputs.run_instrumented_tests == false
         env:
           VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
-        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --continue --scan
+        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --continue --scan
 
       - name: Upload coverage results to Codecov
         if: ${{ !cancelled() }}
@@ -185,6 +189,14 @@ jobs:
           name: googleDebug
           path: app/build/outputs/apk/google/debug/app-google-debug.apk
           retention-days: 14
+
+      - name: Report App Size
+        if: always() && steps.tasks.outputs.is_first_api == 'true'
+        run: |
+          echo "### 📦 App Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload reports
         if: ${{ always() && inputs.upload_artifacts }}

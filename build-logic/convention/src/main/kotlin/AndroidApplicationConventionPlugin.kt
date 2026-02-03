@@ -35,6 +35,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.analytics")
             apply(plugin = "meshtastic.kover")
             apply(plugin = "meshtastic.dokka")
+            apply(plugin = "meshtastic.dokka")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
@@ -59,6 +60,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         isDebuggable = true
                         isPseudoLocalesEnabled = true
                         enableAndroidTestCoverage = true
+                        // Disable PNG crunching for faster debug builds
+                        isCrunchPngs = false
                     }
                 }
 

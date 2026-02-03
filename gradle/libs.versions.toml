@@ -45,6 +45,8 @@ markdownRenderer = "0.39.2"
 osmdroid-android = "6.1.20"
 wire = "5.2.1"
 vico = "3.0.0-beta.3"
+gradle-doctor = "0.10.0"
+dependency-guard = "0.5.0"
 
 
 [libraries]
@@ -106,7 +108,7 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.8.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
-guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.5.0-android" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
@@ -176,8 +178,7 @@ org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.c
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
-streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version = "1.7.4" }
-    kermit = { module = "co.touchlab:kermit", version = "2.0.8" }
+kermit = { module = "co.touchlab:kermit", version = "2.0.8" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version = "4.3.0" }
@@ -241,6 +242,8 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
+gradle-doctor = { id = "com.osacky.doctor", version.ref = "gradle-doctor" }
+dependency-guard = { id = "com.dropbox.dependency-guard", version.ref = "dependency-guard" }
 
 # Meshtastic
 meshtastic-analytics = { id = "meshtastic.analytics" }

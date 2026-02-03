@@ -41,7 +41,17 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
+    alias(libs.plugins.dependency.guard) apply false
     alias(libs.plugins.meshtastic.root)
+    alias(libs.plugins.gradle.doctor)
+}
+
+doctor {
+    // We've adopted Parallel GC as suggested.
+    // Keeping javaHome check disabled as it's common for JAVA_HOME to differ from AS JDK.
+    javaHome {
+        ensureJavaHomeMatches.set(false)
+    }
 }
 
 

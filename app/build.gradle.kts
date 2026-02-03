@@ -34,7 +34,10 @@ plugins {
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
     alias(libs.plugins.aboutlibraries)
+    id("com.dropbox.dependency-guard")
 }
+
+dependencyGuard { configuration("googleReleaseRuntimeClasspath") }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
@@ -233,7 +236,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
-    implementation(libs.streamsupport.minifuture)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
