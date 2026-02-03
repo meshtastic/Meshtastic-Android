@@ -12,9 +12,9 @@ on:
       run_instrumented_tests:
         type: boolean
         default: true
-      test_flavors:
+      flavors:
         type: string
-        default: 'google' # 'google', 'fdroid', or 'both'
+        default: '["google"]'
       api_levels:
         type: string
         default: '[35]'
@@ -50,6 +50,7 @@ jobs:
       fail-fast: true
       matrix:
         api_level: ${{ fromJson(inputs.api_levels) }}
+        flavor: ${{ fromJson(inputs.flavors) }}
     env:
       GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
@@ -89,14 +90,15 @@ jobs:
         id: tasks
         run: |
           TASKS=""
-          # Only run Lint and Unit Tests on the first API level in the matrix to save time and resources
+          # Only run Lint and Unit Tests on the first API level and first flavor in the matrix to save time and resources
           IS_FIRST_API=$(echo '${{ inputs.api_levels }}' | jq -r '.[0] == ${{ matrix.api_level }}')
+          IS_FIRST_FLAVOR=$(echo '${{ inputs.flavors }}' | jq -r '.[0] == "${{ matrix.flavor }}"')
           
-          if [ "${{ inputs.run_lint }}" = "true" ] && [ "$IS_FIRST_API" = "true" ]; then
+          if [ "${{ inputs.run_lint }}" = "true" ] && [ "$IS_FIRST_API" = "true" ] && [ "$IS_FIRST_FLAVOR" = "true" ]; then
             TASKS="$TASKS spotlessCheck detekt "
           fi
           
-          FLAVOR="${{ inputs.test_flavors }}"
+          FLAVOR="${{ matrix.flavor }}"
           if [ "$IS_FIRST_API" = "true" ]; then
             if [ "$FLAVOR" = "google" ]; then
               TASKS="$TASKS assembleGoogleDebug "
@@ -104,18 +106,14 @@ jobs:
             elif [ "$FLAVOR" = "fdroid" ]; then
               TASKS="$TASKS assembleFdroidDebug "
               [ "${{ inputs.run_unit_tests }}" = "true" ] && TASKS="$TASKS testFdroidDebugUnitTest "
-            else
-              TASKS="$TASKS assembleDebug "
-              [ "${{ inputs.run_unit_tests }}" = "true" ] && TASKS="$TASKS testGoogleDebugUnitTest testFdroidDebugUnitTest "
             fi
           fi
           
           # Instrumented Test Tasks
           if [ "${{ inputs.run_instrumented_tests }}" = "true" ]; then
-            if [ "$FLAVOR" = "google" ] || [ "$FLAVOR" = "both" ]; then
+            if [ "$FLAVOR" = "google" ]; then
               TASKS="$TASKS connectedGoogleDebugAndroidTest "
-            fi
-            if [ "$FLAVOR" = "fdroid" ] || [ "$FLAVOR" = "both" ]; then
+            elif [ "$FLAVOR" = "fdroid" ]; then
               TASKS="$TASKS connectedFdroidDebugAndroidTest "
             fi
           fi
@@ -170,20 +168,12 @@ jobs:
           report_type: test_results
           files: "**/build/test-results/**/*.xml,**/build/outputs/androidTest-results/**/*.xml"
 
-      - name: Upload F-Droid debug artifact
-        if: ${{ steps.tasks.outputs.is_first_api == 'true' && inputs.upload_artifacts && (inputs.test_flavors == 'fdroid' || inputs.test_flavors == 'both') }}
+      - name: Upload debug artifact
+        if: ${{ steps.tasks.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v6
         with:
-          name: fdroidDebug
-          path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
-          retention-days: 14
-
-      - name: Upload Google debug artifact
-        if: ${{ steps.tasks.outputs.is_first_api == 'true' && inputs.upload_artifacts && (inputs.test_flavors == 'google' || inputs.test_flavors == 'both') }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: googleDebug
-          path: app/build/outputs/apk/google/debug/app-google-debug.apk
+          name: ${{ matrix.flavor }}Debug
+          path: app/build/outputs/apk/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug.apk
           retention-days: 14
 
       - name: Report App Size
@@ -198,7 +188,7 @@ jobs:
         if: ${{ always() && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v6
         with:
-          name: reports-api-${{ matrix.api_level }}
+          name: reports-${{ matrix.flavor }}-api-${{ matrix.api_level }}
           path: |
             **/build/reports
             **/build/test-results

@@ -62,6 +62,7 @@ jobs:
       run_lint: true
       run_unit_tests: false
       run_instrumented_tests: false
+      flavors: '["google"]'
       upload_artifacts: false
     secrets: inherit
 
