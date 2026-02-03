@@ -160,27 +160,6 @@ jobs:
           echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
           echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
-      - name: Determine previous tag
-        id: previous_tag
-        run: |
-          CURRENT_TAG="${{ inputs.tag_name }}"
-          # Find the tag reachable from the parent of the current tag
-          # Exclude tags with hyphens to skip pre-releases (e.g. -internal, -beta)
-          PREV_TAG=$(git describe --tags --abbrev=0 --exclude "*-*" "$CURRENT_TAG^" 2>/dev/null || echo "")
-          echo "Found previous tag: $PREV_TAG"
-          echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
-
-      - name: Generate Changelog for Play Store
-        if: steps.previous_tag.outputs.PREV_TAG != ''
-        uses: mikepenz/release-changelog-builder-action@v6
-        id: build_changelog
-        with:
-          configuration: .github/release.yml
-          fromTag: ${{ steps.previous_tag.outputs.PREV_TAG }}
-          toTag: ${{ inputs.tag_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -191,8 +170,7 @@ jobs:
         env:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-          CHANGELOG: ${{ steps.build_changelog.outputs.changelog }}
-        run: bundle exec fastlane internal changelog:"$CHANGELOG"
+        run: bundle exec fastlane internal
 
       - name: Upload Google AAB artifact
         if: always()

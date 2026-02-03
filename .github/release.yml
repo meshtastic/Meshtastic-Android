@@ -1,21 +1,36 @@
-# .github/release.yml
+# .github/release.yml - GitHub Release Notes Configuration
 
 changelog:
+  exclude:
+    labels:
+      - dependencies
+      - automation
+      - release
+      - repo
+      - skip-changelog
+      - chore
+      - ci
+      - build
+      - testing
+      - test
+      - refactor
+      - documentation
+      - translation
+    authors:
+      - renovate[bot]
+      - dependabot[bot]
+      - github-actions[bot]
+
   categories:
     - title: 🏗️ Features
       labels:
         - enhancement
-      exclude:
-        labels:
-          - dependencies
-
-    - title: 🛠️Fixes
+        - feature
+    - title: 🛠️ Fixes
+      labels:
+        - bug
+        - bugfix
+        - fix
+    - title: 📝 Other Changes
       labels:
         - '*'
-      exclude:
-        labels:
-          - enhancement
-          - dependencies
-          - repo
-          - automation
-          - release
