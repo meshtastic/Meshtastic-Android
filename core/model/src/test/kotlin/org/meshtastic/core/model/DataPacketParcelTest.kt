@@ -26,7 +26,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
+@Config(sdk = [34])
 class DataPacketParcelTest {
 
     @Test
@@ -38,6 +38,7 @@ class DataPacketParcelTest {
         parcel.writeParcelable(original, 0)
         parcel.setDataPosition(0)
 
+        @Suppress("DEPRECATION")
         val created = parcel.readParcelable<DataPacket>(DataPacket::class.java.classLoader)
         parcel.recycle()
 

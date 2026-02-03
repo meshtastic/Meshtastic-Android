@@ -81,10 +81,12 @@ class DataPacketTest {
 
     @Test
     fun `readFromParcel maintains alignment and updates all fields including bytes and dataType`() {
+        val bytes = byteArrayOf(1, 2, 3).toByteString()
+        val sfppHash = byteArrayOf(4, 5, 6).toByteString()
         val original =
             DataPacket(
                 to = "recipient",
-                bytes = byteArrayOf(1, 2, 3),
+                bytes = bytes,
                 dataType = 42,
                 from = "sender",
                 time = 123456789L,
@@ -102,7 +104,7 @@ class DataPacketTest {
                 viaMqtt = true,
                 retryCount = 1,
                 emoji = 10,
-                sfppHash = byteArrayOf(4, 5, 6),
+                sfppHash = sfppHash,
             )
 
         val parcel = Parcel.obtain()
@@ -114,7 +116,7 @@ class DataPacketTest {
 
         // Verify that all fields were updated correctly
         assertEquals("recipient", packetToUpdate.to)
-        assertArrayEquals(byteArrayOf(1, 2, 3), packetToUpdate.bytes)
+        assertEquals(bytes, packetToUpdate.bytes)
         assertEquals(42, packetToUpdate.dataType)
         assertEquals("sender", packetToUpdate.from)
         assertEquals(123456789L, packetToUpdate.time)
@@ -132,7 +134,7 @@ class DataPacketTest {
         assertEquals(true, packetToUpdate.viaMqtt)
         assertEquals(1, packetToUpdate.retryCount)
         assertEquals(10, packetToUpdate.emoji)
-        assertArrayEquals(byteArrayOf(4, 5, 6), packetToUpdate.sfppHash)
+        assertEquals(sfppHash, packetToUpdate.sfppHash)
 
         parcel.recycle()
     }
