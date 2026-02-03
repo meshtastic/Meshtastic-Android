@@ -374,7 +374,8 @@ private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
             if (hasCurrent) {
                 val current = envMetrics.current!!
                 Text(
-                    text = "%s %.2f mA".format(stringResource(Res.string.current), current),
+                    text = "%s %s".format(stringResource(Res.string.current),
+                                          numberToHuman(current)),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )

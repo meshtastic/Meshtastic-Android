@@ -16,7 +16,10 @@
  */
 package org.meshtastic.core.model.util
 
+import kotlin.math.floor
 import kotlin.math.ln
+import kotlin.math.log10
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 object UnitConversions {
@@ -52,5 +55,26 @@ object UnitConversions {
         val (a, b) = 17.27f to 237.7f
         val alpha = (a * tempCelsius) / (b + tempCelsius) + ln(humidity / 100f)
         return (b * alpha) / (a - alpha)
+    }
+
+    fun numberToHuman(number: Flaot): String {
+        val unitsMap = mapOf("Nano" to -9, "Micro" to -6, "Milli" to -3 , "Unit" to 0,
+                             "Thousand" to 3, "Million" to 6, "Billion" to 9)
+        var exponent = floor(log10(number)).toInt()
+
+        if (exponent.mod(3) != 0) {
+            if ((-9..-7).contains(exponent)) exponent = -9
+            if ((-6..-4).contains(exponent)) exponent = -6
+            if ((-3..-1).contains(exponent)) exponent = -3
+            if ((0..2).contains(exponent)) exponent = 0
+            if ((3..5).contains(exponent)) exponent = 3
+            if ((6..0).contains(exponent)) exponent = 6
+            if ((9..12).contains(exponent)) exponent = 9
+        }
+
+        val unit =  unitsMap.entries.associate{(k,v)-> v to k}.get(exponent)
+        val value = (number/10.0.pow(exponent))
+
+        return "$value $unit"
     }
 }
