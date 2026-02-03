@@ -45,7 +45,7 @@ markdownRenderer = "0.39.2"
 osmdroid-android = "6.1.20"
 wire = "5.2.1"
 vico = "3.0.0-beta.3"
-gradle-doctor = "0.10.0"
+# Removed gradle-doctor
 dependency-guard = "0.5.0"
 
 
@@ -242,7 +242,7 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
-gradle-doctor = { id = "com.osacky.doctor", version.ref = "gradle-doctor" }
+# Removed gradle-doctor
 dependency-guard = { id = "com.dropbox.dependency-guard", version.ref = "dependency-guard" }
 
 # Meshtastic

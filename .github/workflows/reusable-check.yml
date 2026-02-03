@@ -81,10 +81,6 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
 
-      - name: Run Gradle Doctor
-        run: ./gradlew doctor
-        continue-on-error: true
-
       - name: Calculate Version Code
         id: calculate_version_code
         uses: ./.github/actions/calculate-version-code
