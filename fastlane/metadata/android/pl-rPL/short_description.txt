@@ -1,1 +1,0 @@
-Oficjalna aplikacja Meshtastic, otwarto źródłowego radia Mesh.
