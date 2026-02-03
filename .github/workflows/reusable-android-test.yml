@@ -138,7 +138,16 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} -Pci=true -Pandroid.testInstrumentationRunnerArguments.numShards=${{ inputs.num_shards }} -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} --continue --scan && ( killall -INT crashpad_handler || true )
+          script: ./gradlew ${{ steps.test-tasks.outputs.tasks }} koverXmlReport -Pci=true -Pandroid.testInstrumentationRunnerArguments.numShards=${{ inputs.num_shards }} -Pandroid.testInstrumentationRunnerArguments.shardIndex=${{ matrix.shard }} --continue --scan && ( killall -INT crashpad_handler || true )
+
+      - name: Upload coverage reports to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: coverage
+          slug: meshtastic/Meshtastic-Android
+          files: "**/build/reports/kover/report.xml"
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
@@ -158,50 +167,3 @@ jobs:
             **/build/outputs/androidTest-results/connected/**
             **/build/reports/androidTests/connected/**
           retention-days: 14
-
-  coverage:
-    needs: androidTest
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
-    if: ${{ !cancelled() }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          submodules: 'recursive'
-          fetch-depth: 1
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '17'
-          distribution: 'jetbrains'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-          add-job-summary: always
-
-      - name: Generate Coverage Reports
-        run: ./gradlew koverXmlReport --scan
-
-      - name: Upload coverage reports to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          report_type: coverage
-          slug: meshtastic/Meshtastic-Android
-          files: "**/build/reports/kover/report.xml"
-

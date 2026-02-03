@@ -100,23 +100,14 @@ jobs:
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: meshtastic/Meshtastic-Android
-          report_type: coverage
-          directory: .
-          files: "**/build/reports/kover/report.xml"
-
-      - name: Upload test results to Codecov
+      - name: Upload results to Codecov
         if: ${{ !cancelled() }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          report_type: test_results
-          directory: .
-          files: "**/build/test-results/**/*.xml,**/build/outputs/androidTest-results/**/*.xml"
+          slug: meshtastic/Meshtastic-Android
+          files: "**/build/reports/kover/report.xml,**/build/test-results/**/*.xml"
+          fail_ci_if_error: false
 
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts && (inputs.test_flavors == 'fdroid' || inputs.test_flavors == 'both') }}
@@ -139,6 +130,5 @@ jobs:
         with:
           name: upload-reports
           path: |
-            build/reports
             **/build/reports
           retention-days: 14
