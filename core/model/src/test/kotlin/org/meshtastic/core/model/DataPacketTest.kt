@@ -16,12 +16,18 @@
  */
 package org.meshtastic.core.model
 
+import android.os.Parcel
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class DataPacketTest {
     @Test
     fun `DataPacket sfppHash is nullable and correctly set`() {
@@ -71,5 +77,63 @@ class DataPacketTest {
         assertNotEquals(p1, p3)
         assertNotEquals(p1, p4)
         assertNotEquals(p1.hashCode(), p3.hashCode())
+    }
+
+    @Test
+    fun `readFromParcel maintains alignment and updates all fields including bytes and dataType`() {
+        val original =
+            DataPacket(
+                to = "recipient",
+                bytes = byteArrayOf(1, 2, 3),
+                dataType = 42,
+                from = "sender",
+                time = 123456789L,
+                id = 100,
+                status = MessageStatus.RECEIVED,
+                hopLimit = 3,
+                channel = 1,
+                wantAck = true,
+                hopStart = 5,
+                snr = 1.5f,
+                rssi = -90,
+                replyId = 50,
+                relayNode = 123,
+                relays = 2,
+                viaMqtt = true,
+                retryCount = 1,
+                emoji = 10,
+                sfppHash = byteArrayOf(4, 5, 6),
+            )
+
+        val parcel = Parcel.obtain()
+        original.writeToParcel(parcel, 0)
+        parcel.setDataPosition(0)
+
+        val packetToUpdate = DataPacket(to = "old", channel = 0, text = "old")
+        packetToUpdate.readFromParcel(parcel)
+
+        // Verify that all fields were updated correctly
+        assertEquals("recipient", packetToUpdate.to)
+        assertArrayEquals(byteArrayOf(1, 2, 3), packetToUpdate.bytes)
+        assertEquals(42, packetToUpdate.dataType)
+        assertEquals("sender", packetToUpdate.from)
+        assertEquals(123456789L, packetToUpdate.time)
+        assertEquals(100, packetToUpdate.id)
+        assertEquals(MessageStatus.RECEIVED, packetToUpdate.status)
+        assertEquals(3, packetToUpdate.hopLimit)
+        assertEquals(1, packetToUpdate.channel)
+        assertEquals(true, packetToUpdate.wantAck)
+        assertEquals(5, packetToUpdate.hopStart)
+        assertEquals(1.5f, packetToUpdate.snr)
+        assertEquals(-90, packetToUpdate.rssi)
+        assertEquals(50, packetToUpdate.replyId)
+        assertEquals(123, packetToUpdate.relayNode)
+        assertEquals(2, packetToUpdate.relays)
+        assertEquals(true, packetToUpdate.viaMqtt)
+        assertEquals(1, packetToUpdate.retryCount)
+        assertEquals(10, packetToUpdate.emoji)
+        assertArrayEquals(byteArrayOf(4, 5, 6), packetToUpdate.sfppHash)
+
+        parcel.recycle()
     }
 }

@@ -48,9 +48,9 @@ enum class MessageStatus : Parcelable {
 @Serializable
 data class DataPacket(
     var to: String? = ID_BROADCAST, // a nodeID string, or ID_BROADCAST for broadcast
-    val bytes: ByteArray?,
+    var bytes: ByteArray?,
     // A port number for this packet (formerly called DataType, see portnums.proto for new usage instructions)
-    val dataType: Int,
+    var dataType: Int,
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
@@ -229,13 +229,11 @@ data class DataPacket(
 
     override fun describeContents(): Int = 0
 
-    // Update our object from our parcel (used for inout parameters
+    /** Update our object from our parcel (used for inout parameters) */
     fun readFromParcel(parcel: Parcel) {
         to = parcel.readString()
-        // parcel.createByteArray() // Wait, this doesn't update bytes! bytes is a VAL.
-        // Actually this method is a bit broken because it can't update val fields.
-        // But it seems only to be used for inout parameters in some places.
-        // I won't touch it unless I have to.
+        bytes = parcel.createByteArray()
+        dataType = parcel.readInt()
         from = parcel.readString()
         time = parcel.readLong()
         id = parcel.readInt()
