@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9513",
+      "title": "Inkhud battery icon improvements.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9513",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9509",
       "title": "fix(power): reset LPF when adc_multiplier_override changes at runtime",
       "page_url": "https://github.com/meshtastic/firmware/pull/9509",
