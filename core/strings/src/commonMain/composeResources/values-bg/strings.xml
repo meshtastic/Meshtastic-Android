@@ -670,6 +670,8 @@
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Сигурност на канала</string>
+    <string name="security_icon_help_title_all">Значения на сигурността на канала</string>
+    <string name="security_icon_help_show_all">Показване на всички значения</string>
     <string name="security_icon_help_show_less">Показване на текущия статус</string>
     <string name="security_icon_help_dismiss">Отхвърляне</string>
     <string name="confirm_delete_node">Сигурни ли сте, че искате да изтриете този възел?</string>

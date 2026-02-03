@@ -29,7 +29,7 @@ testRetry = "1.6.4"
 compose-multiplatform = "1.10.0"
 
 # Google
-hilt = "2.59"
+hilt = "2.59.1"
 maps-compose = "8.0.0"
 
 # Networking

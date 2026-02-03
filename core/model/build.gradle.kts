@@ -37,6 +37,8 @@ configure<LibraryExtension> {
         minSdk = 21
     }
 
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+
     publishing { singleVariant("googleRelease") { withSourcesJar() } }
 }
 
