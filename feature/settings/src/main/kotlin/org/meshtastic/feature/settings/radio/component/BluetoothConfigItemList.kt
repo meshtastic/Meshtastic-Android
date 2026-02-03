@@ -70,11 +70,12 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                 DropDownPreference(
                     title = stringResource(Res.string.pairing_mode),
                     enabled = state.connected,
-                    items = Config.BluetoothConfig.PairingMode.entries
+                    items =
+                    Config.BluetoothConfig.PairingMode.entries
                         .filter { it.name != "UNRECOGNIZED" }
                         .map { it to it.name },
-                    selectedItem = formState.value.mode
-                        ?.takeUnless { it.name == "UNRECOGNIZED" }
+                    selectedItem =
+                    formState.value.mode?.takeUnless { it.name == "UNRECOGNIZED" }
                         ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
                     onItemSelected = { formState.value = formState.value.copy(mode = it) },
                 )
