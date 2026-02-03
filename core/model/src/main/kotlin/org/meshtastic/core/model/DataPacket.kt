@@ -29,15 +29,6 @@ import org.meshtastic.core.model.util.ByteStringSerializer
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint
 
-/** Generic [Parcel.readParcelable] Android 13 compatibility extension. */
-private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? =
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-        @Suppress("DEPRECATION")
-        readParcelable(loader)
-    } else {
-        readParcelable(loader, T::class.java)
-    }
-
 @Parcelize
 enum class MessageStatus : Parcelable {
     UNKNOWN, // Not set for this message
@@ -88,7 +79,21 @@ data class DataPacket(
         from = parcel.readString()
         time = parcel.readLong()
         id = parcel.readInt()
-        status = parcel.readString()?.let { MessageStatus.valueOf(it) }
+        
+        // MessageStatus is a known Parcelable type (enum), so Parcelize writes it optimized:
+        // 1. Presence flag (Int: 1 or 0)
+        // 2. Content (Enum Name as String)
+        status = if (parcel.readInt() != 0) {
+            val name = parcel.readString()
+            try {
+                if (name != null) MessageStatus.valueOf(name) else MessageStatus.UNKNOWN
+            } catch (e: IllegalArgumentException) {
+                MessageStatus.UNKNOWN
+            }
+        } else {
+            null
+        }
+
         hopLimit = parcel.readInt()
         channel = parcel.readInt()
         wantAck = parcel.readInt() != 0
