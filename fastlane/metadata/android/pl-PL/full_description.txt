@@ -1,0 +1,21 @@
+Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. To jest oficjalna aplikacja klienta projektu Meshtastic, umożliwiająca komunikację z innymi użytkownikami sieci mesh oraz obsługę ich urządzeń.
+
+For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+
+<b>Community and Support</b>
+
+Projekt jest w fazie beta. We would love to hear from you! Odpowiedzi na twoje pytania lub problemy możesz otrzymać dołączając do naszej społeczności:
+
+• <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
+• <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
+• <b>Report an Issue:</b> <a href="https://github.com/meshtastic/Meshtastic-Android/issues">https://github.com/meshtastic/Meshtastic-Android/issues</a>
+
+<b>Documentation</b>
+
+To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
+<a href="https://meshtastic.org/docs/">View Documentation</a>
+
+<b>Translations</b>
+
+You can help translate the app into your native language using Crowdin:
+<a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

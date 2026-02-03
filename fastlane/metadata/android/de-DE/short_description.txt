@@ -1,0 +1,1 @@
+Die offizielle Anwendung für Meshtastic, ein unabhängiges, vernetztes Open Source Funknetzwerk.
