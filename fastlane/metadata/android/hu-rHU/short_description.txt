@@ -1,1 +1,0 @@
-A Meshtastic hivatalos alkalmazása, egy nyílt forráskódú, hálózaton kívüli mesh rádióhoz.

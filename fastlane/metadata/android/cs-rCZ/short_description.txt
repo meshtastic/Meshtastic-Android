@@ -1,1 +1,0 @@
-Oficiální aplikace pro Meshtastic, open-source, off-grid, mesh rádio.
