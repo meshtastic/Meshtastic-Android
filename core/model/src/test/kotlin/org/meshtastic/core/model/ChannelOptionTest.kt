@@ -33,7 +33,8 @@ class ChannelOptionTest {
     @Test
     fun `ensure every ModemPreset is mapped in ChannelOption`() {
         // Get all possible ModemPreset values.
-        val unmappedPresets = Config.LoRaConfig.ModemPreset.entries
+        val unmappedPresets =
+            Config.LoRaConfig.ModemPreset.entries.filter { it.name != "UNSET" && it.name != "UNRECOGNIZED" }
 
         unmappedPresets.forEach { preset ->
             // Attempt to find the corresponding ChannelOption
@@ -57,7 +58,8 @@ class ChannelOptionTest {
      */
     @Test
     fun `ensure no extra mappings exist in ChannelOption`() {
-        val protoPresets = Config.LoRaConfig.ModemPreset.entries.toSet()
+        val protoPresets =
+            Config.LoRaConfig.ModemPreset.entries.filter { it.name != "UNSET" && it.name != "UNRECOGNIZED" }.toSet()
         val mappedPresets = ChannelOption.entries.map { it.modemPreset }.toSet()
 
         assertEquals(

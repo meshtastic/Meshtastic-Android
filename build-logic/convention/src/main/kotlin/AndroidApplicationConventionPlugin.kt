@@ -35,7 +35,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.analytics")
             apply(plugin = "meshtastic.kover")
             apply(plugin = "meshtastic.dokka")
-            apply(plugin = "meshtastic.dokka")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)

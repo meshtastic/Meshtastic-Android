@@ -185,6 +185,8 @@ constructor(
                 DataPacket.nodeNumToDefaultId(to)
             }
 
+        val hashByteString = hash.toByteString()
+
         packets.forEach { packet ->
             // For sent messages, from is stored as ID_LOCAL, but SFPP packet has node number
             val fromMatches =
@@ -200,10 +202,8 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-                val updatedData = packet.data.copy(status = status, sfppHash = hash.toByteString(), time = newTime)
-                dao.update(
-                    packet.copy(data = updatedData, sfpp_hash = hash.toByteString(), received_time = newTime),
-                )
+                val updatedData = packet.data.copy(status = status, sfppHash = hashByteString, time = newTime)
+                dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
             }
         }
 
@@ -226,7 +226,7 @@ constructor(
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
                 val updatedReaction =
-                    reaction.copy(status = status, sfpp_hash = hash.toByteString(), timestamp = newTime)
+                    reaction.copy(status = status, sfpp_hash = hashByteString, timestamp = newTime)
                 dao.update(updatedReaction)
             }
         }

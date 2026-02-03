@@ -69,10 +69,9 @@ fun Project.configureDokkaAggregation() {
         }
     }
 
-    val subprojectPaths = subprojects.map { it.path }
-    dependencies.apply {
-        subprojectPaths.forEach { path ->
-            add("dokka", project(path))
+    subprojects.forEach { subproject ->
+        subproject.pluginManager.withPlugin("org.jetbrains.dokka") {
+            dependencies.add("dokka", subproject)
         }
     }
 }
