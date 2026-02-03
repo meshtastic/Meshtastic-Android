@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9520",
+      "title": "Add SHT21 sensor support and related configurations",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9520",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9514",
       "title": "Allow inkhud user applets to consume inputs with opt-in system",
       "page_url": "https://github.com/meshtastic/firmware/pull/9514",
