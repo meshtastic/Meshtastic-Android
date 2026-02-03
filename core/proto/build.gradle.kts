@@ -38,7 +38,12 @@ wire {
         srcDir("src/main/proto")
         srcDir("src/main/wire-includes")
     }
-    kotlin {}
+    kotlin {
+        // Flattens 'oneof' fields into nullable properties on the parent class.
+        // This removes the intermediate sealed classes, simplifying usage and reducing method count/binary size.
+        // Codebase is already written to use the nullable properties (e.g. packet.decoded vs packet.payload_variant.decoded).
+        boxOneOfsMinSize = 5000
+    }
     root("meshtastic.*")
 }
 
