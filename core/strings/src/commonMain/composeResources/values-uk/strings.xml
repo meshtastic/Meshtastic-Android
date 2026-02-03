@@ -35,6 +35,7 @@
     <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="via_mqtt">через MQTT</string>
     <string name="node_sort_via_favorite">через Обране</string>
+    <string name="node_filter_show_ignored">Показати лише ігноровані вузли</string>
     <string name="message_status_enroute">Очікування на підтвердження</string>
     <string name="message_status_queued">У черзі для надсилання</string>
     <string name="message_status_sfpp_routing">Маршрутизація через SF++ ланцюжок…</string>
@@ -85,6 +86,7 @@
     <string name="config_device_use_phone_tz">Використовувати часовий пояс телефону</string>
     <string name="config_display_flip_screen_summary">Перевернути екран по вертикалі.</string>
     <string name="config_display_units_summary">Одиниці, що показуються на екрані пристрою.</string>
+    <string name="config_display_wake_on_tap_or_motion_summary">Вимагає наявність акселерометра на вашому пристрої.</string>
     <string name="config_lora_region_summary">Регіон, де ви будете використовувати радіо.</string>
     <string name="config_lora_modem_preset_summary">Доступні пресети для модема, за замовчуванням — Long Fast.</string>
     <string name="label_very_long_slow">Дуже велика дальність - Повільно</string>
@@ -165,6 +167,12 @@
         <item quantity="many">%1$d годин</item>
         <item quantity="other">%1$d годин</item>
     </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дні</item>
+        <item quantity="many">%1$d днів</item>
+        <item quantity="other">%1$d днів</item>
+    </plurals>
     <string name="debug_filters">Фільтри</string>
     <string name="debug_active_filters">Активні фільтри</string>
     <string name="debug_default_search">Пошук в журналах…</string>
@@ -173,6 +181,8 @@
     <string name="debug_search_clear">Очистити пошук</string>
     <string name="debug_filter_add">Додати фільтр</string>
     <string name="debug_filter_clear">Очистити всі фільтри</string>
+    <string name="debug_filter_add_custom">Додати свій фільтр</string>
+    <string name="debug_filter_preset_title">Готові фільтри</string>
     <string name="debug_clear">Очистити журнал</string>
     <string name="clear">Очистити</string>
     <string name="message_delivery_status">Статус доставки повідомлень</string>
@@ -184,6 +194,7 @@
     <string name="okay">Гаразд</string>
     <string name="must_set_region">Ви повинні встановити регіон!</string>
     <string name="cant_change_no_radio">Неможливо змінити канал, тому що радіо поки що не підключені. Будь ласка, спробуйте ще раз.</string>
+    <string name="save_rangetest">Експортувати rangetest пакети</string>
     <string name="export_data_csv">Експортувати всі пакети</string>
     <string name="reset">Скинути</string>
     <string name="scan">Сканувати</string>
@@ -317,6 +328,8 @@
     <string name="traceroute_showing_nodes">Показується %1$d/%2$d вузлів</string>
     <string name="traceroute_duration">Тривалість: %1$s сек</string>
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
+    <string name="traceroute_route_towards_dest">Маршрут у напрямку призначення:\n\n</string>
+    <string name="traceroute_route_back_to_us">Зворотний маршрут до нас:\n\n</string>
     <string name="twenty_four_hours">24Г</string>
     <string name="forty_eight_hours">48Г</string>
     <string name="one_week">1Т</string>
@@ -330,7 +343,7 @@
     <string name="remove_favorite">Видалити з обраних</string>
     <string name="favorite_add">Додати '%1$s' як обраний вузол?</string>
     <string name="favorite_remove">Видалити '%1$s' з обраних вузлів?</string>
-    <string name="power_metrics_log">Метрики живлення</string>
+    <string name="power_metrics_log">Показники живлення</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
@@ -384,6 +397,7 @@
     <string name="blue">Синій</string>
     <string name="send_bell">Надіслати дзвіночок</string>
     <string name="messages">Повідомлення</string>
+    <string name="device_db_cache_limit_summary">Макс. кількість баз даних, що зберігаються на цьому телефоні</string>
     <string name="log_retention_never">Ніколи не видаляти журнали</string>
     <string name="friendly_name">Дружня назва</string>
     <string name="gpio_pin_to_monitor">GPIO контакт для моніторингу</string>
@@ -485,6 +499,7 @@
     <string name="short_name">Коротка назва</string>
     <string name="hardware_model">Модель обладнання</string>
     <string name="licensed_amateur_radio">Ліцензований радіоаматор</string>
+    <string name="licensed_amateur_radio_text">Включення цієї опції вимикає шифрування і не сумісне зі стандартною мережею Meshtastic.</string>
     <string name="pressure">Атмосферний тиск</string>
     <string name="distance">Відстань</string>
     <string name="wind">Вітер</string>
@@ -496,6 +511,7 @@
     <string name="import_configuration">Імпортувати налаштування</string>
     <string name="export_configuration">Експортувати налаштування</string>
     <string name="hardware">Апаратне забезпечення</string>
+    <string name="supported">Підтримується</string>
     <string name="node_number">Номер вузла</string>
     <string name="user_id">ID користувача</string>
     <string name="uptime">Час роботи</string>
@@ -544,6 +560,7 @@
     <string name="bottom_nav_settings">Налаштування</string>
     <string name="set_your_region">Встановіть ваш регіон</string>
     <string name="reply">Відповісти</string>
+    <string name="map_reporting_consent_text">Увімкнувши цю функцію, ви визнаєте і прямо погоджуєтесь з передачею географічного розташування вашого пристрою в режимі реального часу через протокол MQTT без шифрування. Ці дані можуть використовуватися для таких цілей, як відображення розташування на мапах, відстеження пристроїв і пов'язаних з цим функцій телеметрії.</string>
     <string name="i_agree_to_share_my_location">Я прочитав і розумію, текст вище. Я добровільно даю згоду на незашифровану передачу даних мого вузла через MQTT</string>
     <string name="i_agree">Погоджуюся.</string>
     <string name="should_update_firmware">Рекомендується оновлення прошивки.</string>
@@ -598,7 +615,7 @@
     <string name="latest_stable_firmware">Остання стабільна</string>
     <string name="latest_alpha_firmware">Остання альфа</string>
     <string name="supported_by_community">Підтримується спільнотою Meshtastic</string>
-    <string name="firmware_edition">Версія прошивки</string>
+    <string name="firmware_edition">Тип прошивки</string>
     <string name="discovered_network_devices">Виявлені мережеві пристрої</string>
     <string name="get_started">З чого почати</string>
     <string name="intro_welcome">Ласкаво просимо до</string>
@@ -638,6 +655,8 @@
     <string name="url_template">Шаблон URL</string>
     <string name="app_settings">Застосунок</string>
     <string name="app_version">Версія</string>
+    <string name="channel_features">Характеристики каналу</string>
+    <string name="icon_meanings">Значення іконок</string>
     <string name="device_configuration">Налаштування пристрою</string>
     <string name="one_hour">1 година</string>
     <string name="eight_hours">8 Годин</string>
