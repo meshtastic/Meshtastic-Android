@@ -64,10 +64,16 @@ fun Project.configureKover() {
     }
 }
 
+/**
+ * Configure Kover aggregation in a way that is compatible with Gradle Isolated Projects.
+ * Instead of iterating through subprojects and checking plugins, we add all subprojects
+ * as dependencies and let Kover resolve them.
+ */
 fun Project.configureKoverAggregation() {
-    subprojects.forEach { subproject ->
-        subproject.plugins.withId("org.jetbrains.kotlinx.kover") {
-            dependencies.add("kover", subproject)
+    val subprojectPaths = subprojects.map { it.path }
+    dependencies.apply {
+        subprojectPaths.forEach { path ->
+            add("kover", project(path))
         }
     }
 }
