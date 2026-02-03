@@ -137,10 +137,10 @@ fun EnvironmentMetricsChart(
                         val pressureData =
                             telemetries.filter {
                                 val v = Environment.BAROMETRIC_PRESSURE.getValue(it)
-                                v != null && !v.isNaN()
+                                it.time != 0 && v != null && !v.isNaN()
                             }
                         series(
-                            x = pressureData.map { it.time ?: 0 },
+                            x = pressureData.map { it.time },
                             y = pressureData.map { Environment.BAROMETRIC_PRESSURE.getValue(it)!! },
                         )
                     }
@@ -152,9 +152,9 @@ fun EnvironmentMetricsChart(
                             val metricData =
                                 telemetries.filter {
                                     val v = metric.getValue(it)
-                                    v != null && !v.isNaN()
+                                    it.time != 0 && v != null && !v.isNaN()
                                 }
-                            series(x = metricData.map { it.time ?: 0 }, y = metricData.map { metric.getValue(it)!! })
+                            series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it)!! })
                         }
                     }
                 }

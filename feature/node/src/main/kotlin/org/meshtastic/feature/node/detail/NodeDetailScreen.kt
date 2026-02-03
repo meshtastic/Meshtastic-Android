@@ -213,7 +213,6 @@ private fun NodeDetailContent(
             )
         } else {
             val loadingDescription = stringResource(Res.string.loading)
-            val loadingMessage = stringResource(Res.string.loading)
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(modifier = Modifier.semantics { contentDescription = loadingDescription })
             }

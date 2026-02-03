@@ -95,8 +95,8 @@ abstract class BaseMapViewModel(
                 list
                     .associateBy { packet -> packet.data.waypoint!!.id }
                     .filterValues {
-                        it.data.waypoint!!.expire == 0 ||
-                            (it.data.waypoint!!.expire ?: 0) > System.currentTimeMillis() / 1000
+                        val expire = it.data.waypoint!!.expire ?: 0
+                        expire == 0 || expire > System.currentTimeMillis() / 1000
                     }
             }
             .stateInWhileSubscribed(initialValue = emptyMap())

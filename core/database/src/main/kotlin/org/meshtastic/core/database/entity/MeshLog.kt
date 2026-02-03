@@ -58,5 +58,5 @@ data class MeshLog(
                 } else {
                     null
                 }
-            }
+            } ?: nodeInfo?.position
 }

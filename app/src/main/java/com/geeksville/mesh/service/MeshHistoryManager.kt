@@ -51,9 +51,9 @@ constructor(
         ): StoreAndForward {
             val history =
                 StoreAndForward.History(
-                    last_request = lastRequest,
-                    window = historyReturnWindow,
-                    history_messages = historyReturnMax,
+                    last_request = lastRequest.coerceAtLeast(0),
+                    window = historyReturnWindow.coerceAtLeast(0),
+                    history_messages = historyReturnMax.coerceAtLeast(0),
                 )
             return StoreAndForward(rr = StoreAndForward.RequestResponse.CLIENT_HISTORY, history = history)
         }

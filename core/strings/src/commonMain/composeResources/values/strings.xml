@@ -1167,5 +1167,6 @@
     <string name="filter_hide_count">Hide %1$d filtered</string>
     <string name="filter_message_label">Filtered</string>
     <string name="filter_enable_for_contact">Enable filtering</string>
+    <string name="filter_disable_for_contact">Disable filtering</string>
     <string name="channel_url">Channel URL</string>
 </resources>
