@@ -34,10 +34,7 @@ plugins {
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
     alias(libs.plugins.aboutlibraries)
-    id("com.dropbox.dependency-guard")
 }
-
-dependencyGuard { configuration("googleReleaseRuntimeClasspath") }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()

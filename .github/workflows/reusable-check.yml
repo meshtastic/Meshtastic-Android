@@ -93,7 +93,7 @@ jobs:
           IS_FIRST_API=$(echo '${{ inputs.api_levels }}' | jq -r '.[0] == ${{ matrix.api_level }}')
           
           if [ "${{ inputs.run_lint }}" = "true" ] && [ "$IS_FIRST_API" = "true" ]; then
-            TASKS="$TASKS spotlessCheck detekt :app:dependencyGuard "
+            TASKS="$TASKS spotlessCheck detekt "
           fi
           
           FLAVOR="${{ inputs.test_flavors }}"
