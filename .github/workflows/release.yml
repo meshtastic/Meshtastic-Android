@@ -57,9 +57,12 @@ permissions:
 
 jobs:
   run-lint:
-    uses: ./.github/workflows/reusable-lint.yml
+    uses: ./.github/workflows/reusable-check.yml
     with:
-      ref: ${{ inputs.commit_sha || inputs.tag_name }}
+      run_lint: true
+      run_unit_tests: false
+      run_instrumented_tests: false
+      upload_artifacts: false
     secrets: inherit
 
   prepare-build-info:
