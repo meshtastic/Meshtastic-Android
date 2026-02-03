@@ -39,28 +39,35 @@ constructor(
 ) {
     @Suppress("CyclomaticComplexMethod")
     fun handleFromRadio(proto: FromRadio) {
+        val myInfo = proto.my_info
+        val metadata = proto.metadata
+        val nodeInfo = proto.node_info
+        val configCompleteId = proto.config_complete_id
+        val mqttProxyMessage = proto.mqttClientProxyMessage
+        val queueStatus = proto.queueStatus
+        val config = proto.config
+        val moduleConfig = proto.moduleConfig
+        val channel = proto.channel
+        val clientNotification = proto.clientNotification
+
         when {
-            proto.my_info != null -> proto.my_info?.let { router.configFlowManager.handleMyInfo(it) }
-            proto.metadata != null -> proto.metadata?.let { router.configFlowManager.handleLocalMetadata(it) }
-            proto.node_info != null ->
-                proto.node_info?.let {
-                    router.configFlowManager.handleNodeInfo(it)
-                    serviceRepository.setStatusMessage("Nodes (${router.configFlowManager.newNodeCount})")
-                }
-            proto.config_complete_id != null ->
-                proto.config_complete_id?.let { router.configFlowManager.handleConfigComplete(it) }
-            proto.mqttClientProxyMessage != null ->
-                proto.mqttClientProxyMessage?.let { mqttManager.handleMqttProxyMessage(it) }
-            proto.queueStatus != null -> proto.queueStatus?.let { packetHandler.handleQueueStatus(it) }
-            proto.config != null -> proto.config?.let { router.configHandler.handleDeviceConfig(it) }
-            proto.moduleConfig != null -> proto.moduleConfig?.let { router.configHandler.handleModuleConfig(it) }
-            proto.channel != null -> proto.channel?.let { router.configHandler.handleChannel(it) }
-            proto.clientNotification != null ->
-                proto.clientNotification?.let { notification ->
-                    serviceRepository.setClientNotification(notification)
-                    serviceNotifications.showClientNotification(notification)
-                    packetHandler.removeResponse(notification.reply_id ?: 0, complete = false)
-                }
+            myInfo != null -> router.configFlowManager.handleMyInfo(myInfo)
+            metadata != null -> router.configFlowManager.handleLocalMetadata(metadata)
+            nodeInfo != null -> {
+                router.configFlowManager.handleNodeInfo(nodeInfo)
+                serviceRepository.setStatusMessage("Nodes (${router.configFlowManager.newNodeCount})")
+            }
+            configCompleteId != null -> router.configFlowManager.handleConfigComplete(configCompleteId)
+            mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
+            queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
+            config != null -> router.configHandler.handleDeviceConfig(config)
+            moduleConfig != null -> router.configHandler.handleModuleConfig(moduleConfig)
+            channel != null -> router.configHandler.handleChannel(channel)
+            clientNotification != null -> {
+                serviceRepository.setClientNotification(clientNotification)
+                serviceNotifications.showClientNotification(clientNotification)
+                packetHandler.removeResponse(clientNotification.reply_id ?: 0, complete = false)
+            }
             // Logging-only variants are handled by MeshMessageProcessor before dispatching here
             proto.packet != null ||
                 proto.log_record != null ||

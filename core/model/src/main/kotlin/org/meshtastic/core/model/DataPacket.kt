@@ -18,6 +18,7 @@ package org.meshtastic.core.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import co.touchlab.kermit.Logger
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
@@ -79,20 +80,22 @@ data class DataPacket(
         from = parcel.readString()
         time = parcel.readLong()
         id = parcel.readInt()
-        
+
         // MessageStatus is a known Parcelable type (enum), so Parcelize writes it optimized:
         // 1. Presence flag (Int: 1 or 0)
         // 2. Content (Enum Name as String)
-        status = if (parcel.readInt() != 0) {
-            val name = parcel.readString()
-            try {
-                if (name != null) MessageStatus.valueOf(name) else MessageStatus.UNKNOWN
-            } catch (e: IllegalArgumentException) {
-                MessageStatus.UNKNOWN
+        status =
+            if (parcel.readInt() != 0) {
+                val name = parcel.readString()
+                try {
+                    if (name != null) MessageStatus.valueOf(name) else MessageStatus.UNKNOWN
+                } catch (e: IllegalArgumentException) {
+                    Logger.w(e) { "Unknown MessageStatus: $name" }
+                    MessageStatus.UNKNOWN
+                }
+            } else {
+                null
             }
-        } else {
-            null
-        }
 
         hopLimit = parcel.readInt()
         channel = parcel.readInt()

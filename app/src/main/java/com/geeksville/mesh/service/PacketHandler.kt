@@ -83,8 +83,8 @@ constructor(
         radioInterfaceService.sendToRadio(b)
         p.packet?.id?.let { changeStatus(it, MessageStatus.ENROUTE) }
 
-        if (p.packet?.decoded != null) {
-            val packet = p.packet!!
+        val packet = p.packet
+        if (packet?.decoded != null) {
             val packetToSave =
                 MeshLog(
                     uuid = UUID.randomUUID().toString(),

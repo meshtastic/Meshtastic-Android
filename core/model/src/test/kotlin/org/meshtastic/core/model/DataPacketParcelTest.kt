@@ -56,76 +56,67 @@ class DataPacketParcelTest {
 
         // Read using manual readFromParcel
         // We start with an empty packet and populate it
-        val restored = DataPacket(
-            to = "dummy",
-            channel = 0,
-            text = "dummy"
-        )
+        val restored = DataPacket(to = "dummy", channel = 0, text = "dummy")
         // Reset fields to ensure they are overwritten
         restored.to = null
         restored.from = null
         restored.bytes = null
         restored.sfppHash = null
-        
+
         restored.readFromParcel(parcel)
         parcel.recycle()
 
         assertDataPacketsEqual(original, restored)
     }
-    
+
     @Test
     fun `DataPacket with nulls handles parcelization correctly`() {
-        val original = DataPacket(
-            to = null,
-            bytes = null,
-            dataType = 99,
-            from = null,
-            time = 123L,
-            status = null,
-            replyId = null,
-            relayNode = null,
-            sfppHash = null
-        )
+        val original =
+            DataPacket(
+                to = null,
+                bytes = null,
+                dataType = 99,
+                from = null,
+                time = 123L,
+                status = null,
+                replyId = null,
+                relayNode = null,
+                sfppHash = null,
+            )
 
         val parcel = Parcel.obtain()
         original.writeToParcel(parcel, 0)
         parcel.setDataPosition(0)
 
-        val restored = DataPacket(
-            to = "dummy",
-            channel = 0,
-            text = "dummy"
-        )
+        val restored = DataPacket(to = "dummy", channel = 0, text = "dummy")
         restored.readFromParcel(parcel)
         parcel.recycle()
 
         assertDataPacketsEqual(original, restored)
     }
 
-    private fun createFullDataPacket(): DataPacket {
-        return DataPacket(
-            to = "destNode",
-            bytes = "Hello World".toByteArray().toByteString(),
-            dataType = 1,
-            from = "srcNode",
-            time = 1234567890L,
-            id = 42,
-            status = MessageStatus.DELIVERED,
-            hopLimit = 3,
-            channel = 5,
-            wantAck = true,
-            hopStart = 7,
-            snr = 12.5f,
-            rssi = -80,
-            replyId = 101,
-            relayNode = 202,
-            relays = 1,
-            viaMqtt = true,
-            retryCount = 2,
-            emoji = 0x1F600,
-            sfppHash = "sfpp".toByteArray().toByteString()
-        )
-    }
+    private fun createFullDataPacket(): DataPacket = DataPacket(
+        to = "destNode",
+        bytes = "Hello World".toByteArray().toByteString(),
+        dataType = 1,
+        from = "srcNode",
+        time = 1234567890L,
+        id = 42,
+        status = MessageStatus.DELIVERED,
+        hopLimit = 3,
+        channel = 5,
+        wantAck = true,
+        hopStart = 7,
+        snr = 12.5f,
+        rssi = -80,
+        replyId = 101,
+        relayNode = 202,
+        relays = 1,
+        viaMqtt = true,
+        retryCount = 2,
+        emoji = 0x1F600,
+        sfppHash = "sfpp".toByteArray().toByteString(),
+    )
 
     private fun assertDataPacketsEqual(expected: DataPacket, actual: DataPacket) {
         assertEquals("to", expected.to, actual.to)

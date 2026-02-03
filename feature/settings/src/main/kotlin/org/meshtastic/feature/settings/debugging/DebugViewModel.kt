@@ -285,7 +285,7 @@ constructor(
             combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
                 searchManager.findSearchMatches(searchText, logs)
             }
-                .collect { matches ->
+                .collect {
                     searchManager.updateMatches(searchManager.searchText.value, filterManager.filteredLogs.value)
                 }
         }
@@ -370,7 +370,7 @@ constructor(
         var mutated = false
         nodeIds.toSet().forEach { nodeId -> mutated = mutated or msg.annotateNodeId(nodeId) }
         return if (mutated) {
-            return msg.toString()
+            msg.toString()
         } else {
             rawMessage
         }
@@ -381,12 +381,10 @@ constructor(
         val nodeIdStr = nodeId.toUInt().toString()
         // Only match if whitespace before and after
         val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
-        regex.find(this)?.let { matchResult ->
-            matchResult.groupValues.let { _ ->
-                regex.findAll(this).toList().asReversed().forEach { match ->
-                    val idx = match.range.last + 1
-                    insert(idx, " (${nodeId.asNodeId()})")
-                }
+        regex.find(this)?.let { _ ->
+            regex.findAll(this).toList().asReversed().forEach { match ->
+                val idx = match.range.last + 1
+                insert(idx, " (${nodeId.asNodeId()})")
             }
             return true
         }
@@ -442,58 +440,51 @@ constructor(
      */
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun decodePayloadFromMeshLog(log: MeshLog): String? {
-        var result: String? = null
         val packet = log.meshPacket
-        if (packet == null || packet.decoded == null) {
-            result = null
-        } else {
-            val portnumValue = packet.decoded!!.portnum.value ?: 0
-            val payload = packet.decoded!!.payload.toByteArray()
-            result =
-                try {
-                    when (portnumValue) {
-                        PortNum.TEXT_MESSAGE_APP.value,
-                        PortNum.ALERT_APP.value,
-                        -> payload.toString(Charsets.UTF_8)
-                        PortNum.POSITION_APP.value ->
-                            Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
-                                ?: "Failed to decode Position"
-                        PortNum.WAYPOINT_APP.value ->
-                            Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
-                                ?: "Failed to decode Waypoint"
-                        PortNum.NODEINFO_APP.value ->
-                            User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
-                                ?: "Failed to decode User"
-                        PortNum.TELEMETRY_APP.value ->
-                            Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
-                                ?: "Failed to decode Telemetry"
-                        PortNum.ROUTING_APP.value ->
-                            Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
-                                ?: "Failed to decode Routing"
-                        PortNum.ADMIN_APP.value ->
-                            AdminMessage.ADAPTER.decodeOrNull(payload)?.let {
-                                AdminMessage.ADAPTER.toReadableString(it)
-                            } ?: "Failed to decode AdminMessage"
-                        PortNum.PAXCOUNTER_APP.value ->
-                            Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
-                                ?: "Failed to decode Paxcount"
-                        PortNum.STORE_FORWARD_APP.value ->
-                            StoreAndForward.ADAPTER.decodeOrNull(payload)?.let {
-                                StoreAndForward.ADAPTER.toReadableString(it)
-                            } ?: "Failed to decode StoreAndForward"
-                        PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
-                            StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
-                                StoreForwardPlusPlus.ADAPTER.toReadableString(it)
-                            } ?: "Failed to decode StoreForwardPlusPlus"
-                        PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
-                        PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
-                        else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
-                    }
-                } catch (e: Exception) {
-                    "Failed to decode payload: ${e.message}"
-                }
+        val decoded = packet?.decoded ?: return null
+
+        val portnumValue = decoded.portnum.value
+        val payload = decoded.payload.toByteArray()
+        return try {
+            when (portnumValue) {
+                PortNum.TEXT_MESSAGE_APP.value,
+                PortNum.ALERT_APP.value,
+                -> payload.toString(Charsets.UTF_8)
+                PortNum.POSITION_APP.value ->
+                    Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Position"
+                PortNum.WAYPOINT_APP.value ->
+                    Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Waypoint"
+                PortNum.NODEINFO_APP.value ->
+                    User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode User"
+                PortNum.TELEMETRY_APP.value ->
+                    Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Telemetry"
+                PortNum.ROUTING_APP.value ->
+                    Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Routing"
+                PortNum.ADMIN_APP.value ->
+                    AdminMessage.ADAPTER.decodeOrNull(payload)?.let { AdminMessage.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode AdminMessage"
+                PortNum.PAXCOUNTER_APP.value ->
+                    Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Paxcount"
+                PortNum.STORE_FORWARD_APP.value ->
+                    StoreAndForward.ADAPTER.decodeOrNull(payload)?.let { StoreAndForward.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode StoreAndForward"
+                PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
+                    StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
+                        StoreForwardPlusPlus.ADAPTER.toReadableString(it)
+                    } ?: "Failed to decode StoreForwardPlusPlus"
+                PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
+                PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
+                else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
+            }
+        } catch (e: Exception) {
+            "Failed to decode payload: ${e.message}"
         }
-        return result
     }
 
     private fun formatNodeWithShortName(nodeNum: Int): String {

@@ -154,7 +154,6 @@ constructor(
         when (decoded.portnum) {
             PortNum.TRACEROUTE_APP -> {
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
-                shouldBroadcast = false
             }
             PortNum.ROUTING_APP -> {
                 handleRouting(packet, dataPacket)
@@ -163,22 +162,18 @@ constructor(
 
             PortNum.PAXCOUNTER_APP -> {
                 handlePaxCounter(packet)
-                shouldBroadcast = false
             }
 
             PortNum.STORE_FORWARD_APP -> {
                 handleStoreAndForward(packet, dataPacket, myNodeNum)
-                shouldBroadcast = false
             }
 
             PortNum.STORE_FORWARD_PLUSPLUS_APP -> {
                 handleStoreForwardPlusPlus(packet)
-                shouldBroadcast = false
             }
 
             PortNum.ADMIN_APP -> {
                 handleAdminMessage(packet, myNodeNum)
-                shouldBroadcast = false
             }
 
             PortNum.NEIGHBORINFO_APP -> {
@@ -190,7 +185,6 @@ constructor(
             PortNum.DETECTION_SENSOR_APP,
             -> {
                 handleRangeTest(dataPacket, myNodeNum)
-                shouldBroadcast = false
             }
             else -> {}
         }
@@ -295,8 +289,6 @@ constructor(
             StoreForwardPlusPlus.SFPP_message_type.LINK_REQUEST -> {
                 Logger.i { "SF++: Node ${packet.from} is requesting links" }
             }
-
-            else -> {} // Unknown SFPP message type
         }
     }
 
@@ -380,11 +372,13 @@ constructor(
         }
 
         nodeManager.updateNodeInfo(fromNum) { nodeEntity ->
+            val metrics = t.device_metrics
+            val environment = t.environment_metrics
+            val power = t.power_metrics
             when {
-                t.device_metrics != null -> {
+                metrics != null -> {
                     nodeEntity.deviceTelemetry = t
                     if (fromNum == myNodeNum || (isRemote && nodeEntity.isFavorite)) {
-                        val metrics = t.device_metrics!!
                         if (
                             (metrics.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
                             (metrics.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
@@ -401,8 +395,8 @@ constructor(
                     }
                 }
 
-                t.environment_metrics != null -> nodeEntity.environmentTelemetry = t
-                t.power_metrics != null -> nodeEntity.powerTelemetry = t
+                environment != null -> nodeEntity.environmentTelemetry = t
+                power != null -> nodeEntity.powerTelemetry = t
             }
         }
     }
@@ -523,7 +517,7 @@ constructor(
             }
 
             if (shouldRetryReaction) {
-                val newRetryCount = reaction!!.retryCount + 1
+                val newRetryCount = reaction.retryCount + 1
 
                 // Emit retry event to UI and wait for user response
                 val retryEvent =

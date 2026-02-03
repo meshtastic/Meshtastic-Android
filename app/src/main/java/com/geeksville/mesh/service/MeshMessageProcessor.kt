@@ -96,8 +96,9 @@ constructor(
         // Audit log every incoming variant
         logVariant(proto)
 
-        if (proto.packet != null) {
-            handleReceivedMeshPacket(proto.packet!!, myNodeNum)
+        val packet = proto.packet
+        if (packet != null) {
+            handleReceivedMeshPacket(packet, myNodeNum)
         } else {
             fromRadioDispatcher.handleFromRadio(proto)
         }
@@ -179,7 +180,7 @@ constructor(
     }
 
     private fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
-        if (packet.decoded == null) return
+        val decoded = packet.decoded ?: return
         val log =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -187,7 +188,7 @@ constructor(
                 received_date = System.currentTimeMillis(),
                 raw_message = packet.toString(),
                 fromNum = packet.from,
-                portNum = packet.decoded!!.portnum.value,
+                portNum = decoded.portnum.value,
                 fromRadio = FromRadio(packet = packet),
             )
         val logJob = insertMeshLog(log)
@@ -207,9 +208,9 @@ constructor(
                 it.snr = packet.rx_snr
                 it.rssi = packet.rx_rssi
                 it.hopsAway =
-                    if (packet.decoded!!.portnum == PortNum.RANGE_TEST_APP) {
+                    if (decoded.portnum == PortNum.RANGE_TEST_APP) {
                         0
-                    } else if (packet.hop_start == 0 && (packet.decoded!!.bitfield ?: 0) == 0) {
+                    } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
                         -1
                     } else if (packet.hop_limit > packet.hop_start) {
                         -1
