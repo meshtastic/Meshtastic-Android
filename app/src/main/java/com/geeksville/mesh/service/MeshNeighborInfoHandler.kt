@@ -61,29 +61,45 @@ constructor(
         val requestId = packet.decoded.requestId
         val start = commandSender.neighborInfoStartTimes.remove(requestId)
 
-        val neighbors =
-            ni.neighborsList.joinToString("\n") { n ->
-                val node = nodeManager.nodeDBbyNodeNum[n.nodeId]
-                val name = node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
-                "• $name (SNR: ${n.snr})"
+        // Only show response if packet is addressed to us and we sent a request in the last 3 minutes
+        val myNodeNum = nodeManager.myNodeNum
+        val isAddressedToUs = packet.to == myNodeNum
+        val isRecentRequest = start != null && (System.currentTimeMillis() - start) < NEIGHBOR_RQ_COOLDOWN
+
+        if (isAddressedToUs && isRecentRequest) {
+            val neighbors =
+                ni.neighborsList.joinToString("\n") { n ->
+                    val node = nodeManager.nodeDBbyNodeNum[n.nodeId]
+                    val name =
+                        node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
+                    "• $name (SNR: ${n.snr})"
+                }
+
+            val formatted =
+                "Neighbors of ${nodeManager.nodeDBbyNodeNum[packet.from]?.longName ?: "Unknown"}:\n$neighbors"
+
+            val responseText =
+                if (start != null) {
+                    val elapsedMs = System.currentTimeMillis() - start
+                    val seconds = elapsedMs / MILLIS_PER_SECOND
+                    Logger.i { "Neighbor info $requestId complete in $seconds s" }
+                    String.format(Locale.US, "%s\n\nDuration: %.1f s", formatted, seconds)
+                } else {
+                    formatted
+                }
+
+            serviceRepository.setNeighborInfoResponse(responseText)
+        } else {
+            Logger.d {
+                "Neighbor info response filtered: isAddressedToUs=$isAddressedToUs, isRecentRequest=$isRecentRequest"
             }
-
-        val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[packet.from]?.longName ?: "Unknown"}:\n$neighbors"
-
-        val responseText =
-            if (start != null) {
-                val elapsedMs = System.currentTimeMillis() - start
-                val seconds = elapsedMs / MILLIS_PER_SECOND
-                Logger.i { "Neighbor info $requestId complete in $seconds s" }
-                String.format(Locale.US, "%s\n\nDuration: %.1f s", formatted, seconds)
-            } else {
-                formatted
-            }
-
-        serviceRepository.setNeighborInfoResponse(responseText)
+        }
     }
 
     companion object {
         private const val MILLIS_PER_SECOND = 1000.0
+
+        // Only show neighbor info responses for requests sent in the last 3 minutes
+        private const val NEIGHBOR_RQ_COOLDOWN = 3 * 60 * 1000L // 3 minutes in milliseconds
     }
 }
