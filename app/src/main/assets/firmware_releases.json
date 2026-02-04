@@ -241,18 +241,6 @@
       "title": "Allow using Spreading Factors 5 and 6",
       "page_url": "https://github.com/meshtastic/firmware/pull/9363",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9329",
-      "title": "Add Support for HDC1080 Moisture and Temperature Sensor",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9329",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9319",
-      "title": "fix(PortduinoGlue): spi_dev_int packing",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9319",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
