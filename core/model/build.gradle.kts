@@ -39,14 +39,14 @@ configure<LibraryExtension> {
 
     testOptions { unitTests { isIncludeAndroidResources = true } }
 
-    publishing { singleVariant("googleRelease") { withSourcesJar() } }
+    publishing { singleVariant("release") { withSourcesJar() } }
 }
 
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("googleRelease") {
-                from(components["googleRelease"])
+            create<MavenPublication>("release") {
+                from(components["release"])
                 artifactId = "core-model"
             }
         }

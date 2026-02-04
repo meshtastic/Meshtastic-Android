@@ -246,6 +246,7 @@ meshtastic-android-application-compose = { id = "meshtastic.android.application.
 meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
 meshtastic-android-library = { id = "meshtastic.android.library" }
 meshtastic-android-library-compose = { id = "meshtastic.android.library.compose" }
+meshtastic-android-library-flavors = { id = "meshtastic.android.library.flavors" }
 meshtastic-android-lint = { id = "meshtastic.android.lint" }
 meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-test = { id = "meshtastic.android.test" }

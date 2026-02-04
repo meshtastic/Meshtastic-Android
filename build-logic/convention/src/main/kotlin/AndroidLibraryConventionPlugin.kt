@@ -21,7 +21,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.meshtastic.buildlogic.configureFlavors
 import org.meshtastic.buildlogic.configureKotlinAndroid
 import org.meshtastic.buildlogic.configureTestOptions
 import org.meshtastic.buildlogic.disableUnnecessaryAndroidTests
@@ -41,7 +40,12 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 configureKotlinAndroid(this)
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
-                configureFlavors(this)
+
+                defaultConfig {
+                    // When flavorless modules depend on flavored modules (like :core:data),
+                    // they need a strategy to pick a variant. We default to 'google'.
+                    missingDimensionStrategy("marketplace", "google")
+                }
 
                 buildTypes {
                     getByName("debug") {

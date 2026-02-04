@@ -30,15 +30,15 @@ configure<com.android.build.api.dsl.LibraryExtension> {
         minSdk = 21
     }
 
-    publishing { singleVariant("googleRelease") { withSourcesJar() } }
+    publishing { singleVariant("release") { withSourcesJar() } }
 }
 
 // Map the Android component to a Maven publication
 afterEvaluate {
     publishing {
         publications {
-            create<MavenPublication>("googleRelease") {
-                from(components["googleRelease"])
+            create<MavenPublication>("release") {
+                from(components["release"])
                 artifactId = "core-api"
             }
         }

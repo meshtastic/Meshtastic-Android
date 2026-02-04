@@ -112,13 +112,17 @@ gradlePlugin {
             id = "meshtastic.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
-        register("androidFlavors") {
+        register("androidApplicationFlavors") {
             id = "meshtastic.android.application.flavors"
             implementationClass = "AndroidApplicationFlavorsConventionPlugin"
         }
         register("androidLibrary") {
             id = "meshtastic.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
+        }
+        register("androidLibraryFlavors") {
+            id = "meshtastic.android.library.flavors"
+            implementationClass = "AndroidLibraryFlavorsConventionPlugin"
         }
         register("androidLint") {
             id = "meshtastic.android.lint"
@@ -167,12 +171,12 @@ gradlePlugin {
             id = "meshtastic.kmp.library.compose"
             implementationClass = "KmpLibraryComposeConventionPlugin"
         }
-        
+
         register("dokka") {
             id = "meshtastic.dokka"
             implementationClass = "DokkaConventionPlugin"
         }
-        
+
         register("kover") {
             id = "meshtastic.kover"
             implementationClass = "KoverConventionPlugin"
