@@ -125,7 +125,6 @@ truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
 # Jetbrains
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-kotlin-metadata-jvm = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version = "0.9.0" }
 dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "2.1.0" }
 
 
