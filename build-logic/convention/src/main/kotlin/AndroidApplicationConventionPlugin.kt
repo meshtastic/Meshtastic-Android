@@ -28,6 +28,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
         with(target) {
 
             apply(plugin = "com.android.application")
+            apply(plugin = "org.gradle.test-retry")
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.detekt")
             apply(plugin = "meshtastic.spotless")
@@ -58,6 +59,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         isDebuggable = true
                         isPseudoLocalesEnabled = true
                         enableAndroidTestCoverage = true
+                        // Disable PNG crunching for faster debug builds
+                        isCrunchPngs = false
                     }
                 }
 

@@ -80,7 +80,7 @@ import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.DeliveryInfo
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.User
 
 @Composable
 private fun ReactionItem(
@@ -218,7 +218,7 @@ internal fun ReactionDialog(
 
         val relayNodeName =
             reaction.relayNode?.let { relayNodeId ->
-                Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.longName
+                Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
             }
 
         DeliveryInfo(
@@ -268,9 +268,9 @@ internal fun ReactionDialog(
                     val isLocal = reaction.user.id == myId || reaction.user.id == DataPacket.ID_LOCAL
                     val displayName =
                         if (isLocal) {
-                            "${reaction.user.longName} (${stringResource(Res.string.you)})"
+                            "${reaction.user.long_name} (${stringResource(Res.string.you)})"
                         } else {
-                            reaction.user.longName
+                            reaction.user.long_name
                         }
                     Text(text = displayName, style = MaterialTheme.typography.titleMedium)
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -343,7 +343,7 @@ private fun ReactionRowPreview() {
             listOf(
                 Reaction(
                     replyId = 1,
-                    user = MeshProtos.User.getDefaultInstance(),
+                    user = User(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
                     snr = -1.0f,
@@ -352,7 +352,7 @@ private fun ReactionRowPreview() {
                 ),
                 Reaction(
                     replyId = 1,
-                    user = MeshProtos.User.getDefaultInstance(),
+                    user = User(),
                     emoji = "\uD83D\uDE42",
                     timestamp = 1L,
                     snr = -1.0f,

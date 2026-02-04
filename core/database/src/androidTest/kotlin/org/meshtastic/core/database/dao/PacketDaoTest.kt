@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import okio.ByteString.Companion.toByteString
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -36,7 +37,7 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.Portnums
+import org.meshtastic.proto.PortNum
 
 @RunWith(AndroidJUnit4::class)
 class PacketDaoTest {
@@ -68,11 +69,11 @@ class PacketDaoTest {
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = contactKey,
                 received_time = System.currentTimeMillis(),
                 read = false,
-                DataPacket(DataPacket.ID_BROADCAST, 0, "Message $it!"),
+                data = DataPacket(DataPacket.ID_BROADCAST, 0, "Message $it!"),
             )
         }
     }
@@ -104,7 +105,7 @@ class PacketDaoTest {
 
     @Test
     fun test_getAllPackets() = runBlocking {
-        val packets = packetDao.getAllPackets(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE).first()
+        val packets = packetDao.getAllPackets(PortNum.TEXT_MESSAGE_APP.value).first()
         assertEquals(testContactKeys.size * SAMPLE_SIZE, packets.size)
 
         val onlyMyNodeNum = packets.all { it.myNodeNum == myNodeNum }
@@ -177,7 +178,7 @@ class PacketDaoTest {
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
                 received_time = System.currentTimeMillis(),
                 read = true,
@@ -195,58 +196,58 @@ class PacketDaoTest {
     @Test
     fun test_sfppHashPersistence() = runBlocking {
         val hash = byteArrayOf(1, 2, 3, 4)
+        val hashByteString = hash.toByteString()
         val packet =
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
                 received_time = System.currentTimeMillis(),
                 read = true,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = 0, text = "Test"),
-                sfpp_hash = hash,
+                sfpp_hash = hashByteString,
             )
 
         packetDao.insert(packet)
 
         val retrieved =
-            packetDao.getAllPackets(Portnums.PortNum.TEXT_MESSAGE_APP_VALUE).first().find {
-                it.sfpp_hash?.contentEquals(hash) == true
-            }
+            packetDao.getAllPackets(PortNum.TEXT_MESSAGE_APP.value).first().find { it.sfpp_hash == hashByteString }
         assertNotNull(retrieved)
-        assertTrue(retrieved?.sfpp_hash?.contentEquals(hash) == true)
+        assertEquals(hashByteString, retrieved?.sfpp_hash)
     }
 
     @Test
     fun test_findPacketBySfppHash() = runBlocking {
         val hash = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+        val hashByteString = hash.toByteString()
         val packet =
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
                 received_time = System.currentTimeMillis(),
                 read = true,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = 0, text = "Test"),
-                sfpp_hash = hash,
+                sfpp_hash = hashByteString,
             )
 
         packetDao.insert(packet)
 
         // Exact match
-        val found = packetDao.findPacketBySfppHash(hash)
+        val found = packetDao.findPacketBySfppHash(hashByteString)
         assertNotNull(found)
-        assertTrue(found?.sfpp_hash?.contentEquals(hash) == true)
+        assertEquals(hashByteString, found?.sfpp_hash)
 
         // Substring match (first 8 bytes)
-        val shortHash = hash.copyOf(8)
+        val shortHash = hash.copyOf(8).toByteString()
         val foundShort = packetDao.findPacketBySfppHash(shortHash)
         assertNotNull(foundShort)
-        assertTrue(foundShort?.sfpp_hash?.contentEquals(hash) == true)
+        assertEquals(hashByteString, foundShort?.sfpp_hash)
 
         // No match
-        val wrongHash = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+        val wrongHash = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0).toByteString()
         val notFound = packetDao.findPacketBySfppHash(wrongHash)
         assertNull(notFound)
     }
@@ -254,6 +255,7 @@ class PacketDaoTest {
     @Test
     fun test_findReactionBySfppHash() = runBlocking {
         val hash = byteArrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+        val hashByteString = hash.toByteString()
         val reaction =
             ReactionEntity(
                 myNodeNum = myNodeNum,
@@ -261,20 +263,20 @@ class PacketDaoTest {
                 userId = "sender",
                 emoji = "👍",
                 timestamp = System.currentTimeMillis(),
-                sfpp_hash = hash,
+                sfpp_hash = hashByteString,
             )
 
         packetDao.insert(reaction)
 
-        val found = packetDao.findReactionBySfppHash(hash)
+        val found = packetDao.findReactionBySfppHash(hashByteString)
         assertNotNull(found)
-        assertTrue(found?.sfpp_hash?.contentEquals(hash) == true)
+        assertEquals(hashByteString, found?.sfpp_hash)
 
-        val shortHash = hash.copyOf(8)
+        val shortHash = hash.copyOf(8).toByteString()
         val foundShort = packetDao.findReactionBySfppHash(shortHash)
         assertNotNull(foundShort)
 
-        val wrongHash = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0)
+        val wrongHash = byteArrayOf(0, 0, 0, 0, 0, 0, 0, 0).toByteString()
         assertNull(packetDao.findReactionBySfppHash(wrongHash))
     }
 
@@ -286,7 +288,7 @@ class PacketDaoTest {
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
                 received_time = System.currentTimeMillis(),
                 read = true,
@@ -309,7 +311,7 @@ class PacketDaoTest {
         val packetId = 999
         val fromNum = 123
         val toNum = 456
-        val hash = byteArrayOf(9, 8, 7, 6)
+        val hash = byteArrayOf(9, 8, 7, 6).toByteString()
 
         val fromId = DataPacket.nodeNumToDefaultId(fromNum)
         val toId = DataPacket.nodeNumToDefaultId(toNum)
@@ -318,7 +320,7 @@ class PacketDaoTest {
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
                 received_time = System.currentTimeMillis(),
                 read = true,
@@ -339,8 +341,8 @@ class PacketDaoTest {
 
         val updated = packetDao.findPacketsWithId(packetId)[0]
         assertEquals(MessageStatus.SFPP_CONFIRMED, updated.data.status)
-        assertTrue(updated.data.sfppHash?.contentEquals(hash) == true)
-        assertTrue(updated.sfpp_hash?.contentEquals(hash) == true)
+        assertEquals(hash, updated.data.sfppHash)
+        assertEquals(hash, updated.sfpp_hash)
     }
 
     @Test
@@ -352,7 +354,7 @@ class PacketDaoTest {
             Packet(
                 uuid = 0L,
                 myNodeNum = myNodeNum,
-                port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = filteredContactKey,
                 received_time = System.currentTimeMillis(),
                 read = false,
@@ -376,7 +378,7 @@ class PacketDaoTest {
                 Packet(
                     uuid = 0L,
                     myNodeNum = myNodeNum,
-                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    port_num = PortNum.TEXT_MESSAGE_APP.value,
                     contact_key = contactKey,
                     received_time = System.currentTimeMillis() + i,
                     read = false,
@@ -424,7 +426,7 @@ class PacketDaoTest {
                 Packet(
                     uuid = 0L,
                     myNodeNum = myNodeNum,
-                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    port_num = PortNum.TEXT_MESSAGE_APP.value,
                     contact_key = contactKey,
                     received_time = System.currentTimeMillis() + index,
                     read = false,
@@ -439,7 +441,7 @@ class PacketDaoTest {
                 Packet(
                     uuid = 0L,
                     myNodeNum = myNodeNum,
-                    port_num = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                    port_num = PortNum.TEXT_MESSAGE_APP.value,
                     contact_key = contactKey,
                     received_time = System.currentTimeMillis() + normalMessages.size + index,
                     read = true, // Filtered messages are marked as read

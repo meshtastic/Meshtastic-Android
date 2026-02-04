@@ -22,12 +22,13 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import okio.ByteString
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.getShortDateTime
-import org.meshtastic.proto.MeshProtos.User
+import org.meshtastic.proto.User
 
 data class PacketEntity(
     @Embedded val packet: Packet,
@@ -87,7 +88,7 @@ data class Packet(
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
-    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
+    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
     @ColumnInfo(name = "filtered", defaultValue = "0") val filtered: Boolean = false,
 ) {
     companion object {
@@ -144,7 +145,7 @@ data class Reaction(
     val relayNode: Int? = null,
     val to: String? = null,
     val channel: Int = 0,
-    val sfppHash: ByteArray? = null,
+    val sfppHash: ByteString? = null,
 )
 
 @Suppress("ConstructorParameterNaming")
@@ -170,7 +171,7 @@ data class ReactionEntity(
     @ColumnInfo(name = "relay_node") val relayNode: Int? = null,
     @ColumnInfo(name = "to") val to: String? = null,
     @ColumnInfo(name = "channel", defaultValue = "0") val channel: Int = 0,
-    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteArray? = null,
+    @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
 )
 
 private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node): Reaction {

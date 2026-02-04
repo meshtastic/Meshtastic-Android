@@ -29,11 +29,10 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.model.Position
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.position
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
+import org.meshtastic.proto.Position as ProtoPosition
 
 @Singleton
 class MeshLocationManager
@@ -46,7 +45,7 @@ constructor(
     private var locationFlow: Job? = null
 
     @SuppressLint("MissingPermission")
-    fun start(scope: CoroutineScope, sendPositionFn: (MeshProtos.Position) -> Unit) {
+    fun start(scope: CoroutineScope, sendPositionFn: (ProtoPosition) -> Unit) {
         this.scope = scope
         if (locationFlow?.isActive == true) return
 
@@ -56,18 +55,21 @@ constructor(
                     .getLocations()
                     .onEach { location ->
                         sendPositionFn(
-                            position {
-                                latitudeI = Position.degI(location.latitude)
-                                longitudeI = Position.degI(location.longitude)
+                            ProtoPosition(
+                                latitude_i = Position.degI(location.latitude),
+                                longitude_i = Position.degI(location.longitude),
+                                altitude =
                                 if (LocationCompat.hasMslAltitude(location)) {
-                                    altitude = LocationCompat.getMslAltitudeMeters(location).toInt()
-                                }
-                                altitudeHae = location.altitude.toInt()
-                                time = (location.time.milliseconds.inWholeSeconds).toInt()
-                                groundSpeed = location.speed.toInt()
-                                groundTrack = location.bearing.toInt()
-                                locationSource = MeshProtos.Position.LocSource.LOC_EXTERNAL
-                            },
+                                    LocationCompat.getMslAltitudeMeters(location).toInt()
+                                } else {
+                                    null
+                                },
+                                altitude_hae = location.altitude.toInt(),
+                                time = (location.time.milliseconds.inWholeSeconds).toInt(),
+                                ground_speed = location.speed.toInt(),
+                                ground_track = location.bearing.toInt(),
+                                location_source = ProtoPosition.LocSource.LOC_EXTERNAL,
+                            ),
                         )
                     }
                     .launchIn(scope)

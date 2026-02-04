@@ -18,7 +18,7 @@ package com.geeksville.mesh.service
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.meshtastic.proto.StoreAndForwardProtos
+import org.meshtastic.proto.StoreAndForward
 
 class StoreForwardHistoryRequestTest {
 
@@ -31,14 +31,14 @@ class StoreForwardHistoryRequestTest {
                 historyReturnMax = 25,
             )
 
-        assertEquals(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(42, request.history.lastRequest)
-        assertEquals(15, request.history.window)
-        assertEquals(25, request.history.historyMessages)
+        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
+        assertEquals(42, request.history?.last_request)
+        assertEquals(15, request.history?.window)
+        assertEquals(25, request.history?.history_messages)
     }
 
     @Test
-    fun `buildStoreForwardHistoryRequest omits non-positive parameters`() {
+    fun `buildStoreForwardHistoryRequest clamps non-positive parameters`() {
         val request =
             MeshHistoryManager.buildStoreForwardHistoryRequest(
                 lastRequest = 0,
@@ -46,10 +46,10 @@ class StoreForwardHistoryRequestTest {
                 historyReturnMax = 0,
             )
 
-        assertEquals(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
-        assertEquals(0, request.history.lastRequest)
-        assertEquals(0, request.history.window)
-        assertEquals(0, request.history.historyMessages)
+        assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
+        assertEquals(0, request.history?.last_request)
+        assertEquals(0, request.history?.window)
+        assertEquals(0, request.history?.history_messages)
     }
 
     @Test

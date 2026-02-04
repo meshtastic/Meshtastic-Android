@@ -24,13 +24,14 @@ import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import okio.ByteString
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
+import org.meshtastic.proto.ChannelSettings
 
 @Suppress("TooManyFunctions")
 @Dao
@@ -300,7 +301,7 @@ interface PacketDao {
         AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
         """,
     )
-    suspend fun findPacketBySfppHash(hash: ByteArray): Packet?
+    suspend fun findPacketBySfppHash(hash: ByteString): Packet?
 
     @Transaction
     suspend fun getQueuedPackets(): List<DataPacket>? = getDataPackets().filter { it.status == MessageStatus.QUEUED }
@@ -386,7 +387,7 @@ interface PacketDao {
         AND substr(sfpp_hash, 1, 8) = substr(:hash, 1, 8)
         """,
     )
-    suspend fun findReactionBySfppHash(hash: ByteArray): ReactionEntity?
+    suspend fun findReactionBySfppHash(hash: ByteString): ReactionEntity?
 
     @Query(
         """

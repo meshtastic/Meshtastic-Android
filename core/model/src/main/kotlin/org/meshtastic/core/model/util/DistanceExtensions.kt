@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,21 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MatchingDeclarationName")
 
 package org.meshtastic.core.model.util
 
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import java.util.Locale
 
 enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: Int) {
-    METER("m", multiplier = 1F, DisplayUnits.METRIC_VALUE),
-    KILOMETER("km", multiplier = 0.001F, DisplayUnits.METRIC_VALUE),
-    FOOT("ft", multiplier = 3.28084F, DisplayUnits.IMPERIAL_VALUE),
-    MILE("mi", multiplier = 0.000621371F, DisplayUnits.IMPERIAL_VALUE),
+    METER("m", multiplier = 1F, DisplayUnits.METRIC.value),
+    KILOMETER("km", multiplier = 0.001F, DisplayUnits.METRIC.value),
+    FOOT("ft", multiplier = 3.28084F, DisplayUnits.IMPERIAL.value),
+    MILE("mi", multiplier = 0.000621371F, DisplayUnits.IMPERIAL.value),
     ;
 
     companion object {
@@ -55,8 +54,8 @@ fun Int.metersIn(unit: DistanceUnit): Float = this * unit.multiplier
 
 fun Int.metersIn(system: DisplayUnits): Float {
     val unit =
-        when (system.number) {
-            DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
+        when (system.value) {
+            DisplayUnits.IMPERIAL.value -> DistanceUnit.FOOT
             else -> DistanceUnit.METER
         }
     return this.metersIn(unit)
@@ -71,8 +70,8 @@ fun Float.toString(unit: DistanceUnit): String = if (unit in setOf(DistanceUnit.
 
 fun Float.toString(system: DisplayUnits): String {
     val unit =
-        when (system.number) {
-            DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
+        when (system.value) {
+            DisplayUnits.IMPERIAL.value -> DistanceUnit.FOOT
             else -> DistanceUnit.METER
         }
     return this.toString(unit)
@@ -83,7 +82,7 @@ private const val MILE_THRESHOLD = 1609
 
 fun Int.toDistanceString(system: DisplayUnits): String {
     val unit =
-        if (system.number == DisplayUnits.METRIC_VALUE) {
+        if (system.value == DisplayUnits.METRIC.value) {
             if (this < KILOMETER_THRESHOLD) DistanceUnit.METER else DistanceUnit.KILOMETER
         } else {
             if (this < MILE_THRESHOLD) DistanceUnit.FOOT else DistanceUnit.MILE

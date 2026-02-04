@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import android.app.Activity
@@ -42,10 +41,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.protobuf.ByteString
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.encodeToString
-import org.meshtastic.core.model.util.toByteString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.admin_key
 import org.meshtastic.core.strings.admin_keys
@@ -77,9 +76,7 @@ import org.meshtastic.core.ui.component.EditListPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
-import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.Config
 import java.security.SecureRandom
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -87,15 +84,15 @@ import java.security.SecureRandom
 fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val node by viewModel.destNode.collectAsStateWithLifecycle()
-    val securityConfig = state.radioConfig.security
+    val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
 
-    var publicKey by rememberSaveable { mutableStateOf(formState.value.publicKey) }
-    LaunchedEffect(formState.value.privateKey) {
-        if (formState.value.privateKey != securityConfig.privateKey) {
-            publicKey = "".toByteString()
-        } else if (formState.value.privateKey == securityConfig.privateKey) {
-            publicKey = securityConfig.publicKey
+    var publicKey by rememberSaveable { mutableStateOf(formState.value.public_key) }
+    LaunchedEffect(formState.value.private_key) {
+        if (formState.value.private_key != securityConfig.private_key) {
+            publicKey = ByteString.EMPTY
+        } else if (formState.value.private_key == securityConfig.private_key) {
+            publicKey = securityConfig.public_key
         }
     }
 
@@ -112,7 +109,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         onConfirm = {
             formState.value = it
             showKeyGenerationDialog = false
-            val config = config { security = formState.value }
+            val config = Config(security = formState.value)
             viewModel.setConfig(config)
         },
         onDismiss = { showKeyGenerationDialog = false },
@@ -133,7 +130,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                                 type = "application/*"
                                 putExtra(
                                     Intent.EXTRA_TITLE,
-                                    "${node?.user?.shortName}_keys_${System.currentTimeMillis()}.json",
+                                    "${node?.user?.short_name}_keys_${System.currentTimeMillis()}.json",
                                 )
                             }
                         exportConfigLauncher.launch(intent)
@@ -154,7 +151,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = config { security = it }
+            val config = Config(security = it)
             viewModel.setConfig(config)
         },
     ) {
@@ -168,25 +165,25 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     readOnly = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = {
-                        if (it.size() == 32) {
-                            formState.value = formState.value.copy { this.publicKey = it }
+                        if (it.size == 32) {
+                            formState.value = formState.value.copy(public_key = it)
                         }
                     },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.publicKey.encodeToString()) },
+                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.public_key.encodeToString()) },
                 )
                 HorizontalDivider()
                 EditBase64Preference(
                     title = stringResource(Res.string.private_key),
                     summary = stringResource(Res.string.config_security_private_key),
-                    value = formState.value.privateKey,
+                    value = formState.value.private_key,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = {
-                        if (it.size() == 32) {
-                            formState.value = formState.value.copy { privateKey = it }
+                        if (it.size == 32) {
+                            formState.value = formState.value.copy(private_key = it)
                         }
                     },
-                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.privateKey.encodeToString()) },
+                    trailingIcon = { CopyIconButton(valueToCopy = formState.value.private_key.encodeToString()) },
                 )
                 HorizontalDivider()
                 NodeActionButton(
@@ -211,17 +208,11 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 EditListPreference(
                     title = stringResource(Res.string.admin_key),
                     summary = stringResource(Res.string.config_security_admin_key),
-                    list = formState.value.adminKeyList,
+                    list = formState.value.admin_key,
                     maxCount = 3,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValuesChanged = {
-                        formState.value =
-                            formState.value.copy {
-                                adminKey.clear()
-                                adminKey.addAll(it)
-                            }
-                    },
+                    onValuesChanged = { formState.value = formState.value.copy(admin_key = it) },
                 )
             }
         }
@@ -230,18 +221,18 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.serial_console),
                     summary = stringResource(Res.string.config_security_serial_enabled),
-                    checked = formState.value.serialEnabled,
+                    checked = formState.value.serial_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { serialEnabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(serial_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.debug_log_api_enabled),
                     summary = stringResource(Res.string.config_security_debug_log_api_enabled),
-                    checked = formState.value.debugLogApiEnabled,
+                    checked = formState.value.debug_log_api_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { debugLogApiEnabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(debug_log_api_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -251,17 +242,17 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 SwitchPreference(
                     title = stringResource(Res.string.managed_mode),
                     summary = stringResource(Res.string.config_security_is_managed),
-                    checked = formState.value.isManaged,
-                    enabled = state.connected && formState.value.adminKeyCount > 0,
-                    onCheckedChange = { formState.value = formState.value.copy { isManaged = it } },
+                    checked = formState.value.is_managed,
+                    enabled = state.connected && formState.value.admin_key.isNotEmpty(),
+                    onCheckedChange = { formState.value = formState.value.copy(is_managed = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.legacy_admin_channel),
-                    checked = formState.value.adminChannelEnabled,
+                    checked = formState.value.admin_channel_enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { adminChannelEnabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
@@ -273,7 +264,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
 @Composable
 fun PrivateKeyRegenerateDialog(
     showKeyGenerationDialog: Boolean,
-    onConfirm: (SecurityConfig) -> Unit,
+    onConfirm: (Config.SecurityConfig) -> Unit,
     onDismiss: () -> Unit = {},
 ) {
     if (showKeyGenerationDialog) {
@@ -284,22 +275,16 @@ fun PrivateKeyRegenerateDialog(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        // Generate a random "f" value
+                        val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+                        // Adjust the value to make it valid as an "s" value for eval().
+                        // According to the specification we need to mask off the 3
+                        // right-most bits of f[0], mask off the left-most bit of f[31],
+                        // and set the second to left-most bit of f[31].
+                        f[0] = (f[0].toInt() and 0xF8).toByte()
+                        f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
                         val securityInput =
-                            SecurityConfig.newBuilder()
-                                .apply {
-                                    clearPrivateKey()
-                                    clearPublicKey()
-                                    // Generate a random "f" value
-                                    val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
-                                    // Adjust the value to make it valid as an "s" value for eval().
-                                    // According to the specification we need to mask off the 3
-                                    // right-most bits of f[0], mask off the left-most bit of f[31],
-                                    // and set the second to left-most bit of f[31].
-                                    f[0] = (f[0].toInt() and 0xF8).toByte()
-                                    f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
-                                    privateKey = ByteString.copyFrom(f)
-                                }
-                                .build()
+                            Config.SecurityConfig(private_key = f.toByteString(), public_key = ByteString.EMPTY)
                         onConfirm(securityInput)
                     },
                 ) {

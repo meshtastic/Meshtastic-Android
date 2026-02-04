@@ -30,11 +30,10 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.FromRadio.PayloadVariantCase
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.fromRadio
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.LogRecord
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import java.util.ArrayDeque
 import java.util.Locale
 import java.util.UUID
@@ -77,17 +76,12 @@ constructor(
     }
 
     fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?) {
-        runCatching { MeshProtos.FromRadio.parseFrom(bytes) }
-            .onSuccess { proto ->
-                if (proto.payloadVariantCase == PayloadVariantCase.PAYLOADVARIANT_NOT_SET) {
-                    Logger.w { "Received FromRadio with PAYLOADVARIANT_NOT_SET. rawBytes=${bytes.toHexString()}" }
-                }
-                processFromRadio(proto, myNodeNum)
-            }
+        runCatching { FromRadio.ADAPTER.decode(bytes) }
+            .onSuccess { proto -> processFromRadio(proto, myNodeNum) }
             .onFailure { primaryException ->
                 runCatching {
-                    val logRecord = MeshProtos.LogRecord.parseFrom(bytes)
-                    processFromRadio(fromRadio { this.logRecord = logRecord }, myNodeNum)
+                    val logRecord = LogRecord.ADAPTER.decode(bytes)
+                    processFromRadio(FromRadio(log_record = logRecord), myNodeNum)
                 }
                     .onFailure { _ ->
                         Logger.e(primaryException) {
@@ -98,31 +92,32 @@ constructor(
             }
     }
 
-    private fun processFromRadio(proto: MeshProtos.FromRadio, myNodeNum: Int?) {
+    private fun processFromRadio(proto: FromRadio, myNodeNum: Int?) {
         // Audit log every incoming variant
         logVariant(proto)
 
-        if (proto.payloadVariantCase == PayloadVariantCase.PACKET) {
-            handleReceivedMeshPacket(proto.packet, myNodeNum)
+        val packet = proto.packet
+        if (packet != null) {
+            handleReceivedMeshPacket(packet, myNodeNum)
         } else {
             fromRadioDispatcher.handleFromRadio(proto)
         }
     }
 
-    private fun logVariant(proto: MeshProtos.FromRadio) {
+    private fun logVariant(proto: FromRadio) {
         val (type, message) =
-            when (proto.payloadVariantCase) {
-                PayloadVariantCase.LOG_RECORD -> "LogRecord" to proto.logRecord.toString()
-                PayloadVariantCase.REBOOTED -> "Rebooted" to proto.rebooted.toString()
-                PayloadVariantCase.XMODEMPACKET -> "XmodemPacket" to proto.xmodemPacket.toString()
-                PayloadVariantCase.DEVICEUICONFIG -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
-                PayloadVariantCase.FILEINFO -> "FileInfo" to proto.fileInfo.toString()
-                PayloadVariantCase.MY_INFO -> "MyInfo" to proto.myInfo.toString()
-                PayloadVariantCase.NODE_INFO -> "NodeInfo" to proto.nodeInfo.toString()
-                PayloadVariantCase.CONFIG -> "Config" to proto.config.toString()
-                PayloadVariantCase.MODULECONFIG -> "ModuleConfig" to proto.moduleConfig.toString()
-                PayloadVariantCase.CHANNEL -> "Channel" to proto.channel.toString()
-                PayloadVariantCase.CLIENTNOTIFICATION -> "ClientNotification" to proto.clientNotification.toString()
+            when {
+                proto.log_record != null -> "LogRecord" to proto.log_record.toString()
+                proto.rebooted != null -> "Rebooted" to proto.rebooted.toString()
+                proto.xmodemPacket != null -> "XmodemPacket" to proto.xmodemPacket.toString()
+                proto.deviceuiConfig != null -> "DeviceUIConfig" to proto.deviceuiConfig.toString()
+                proto.fileInfo != null -> "FileInfo" to proto.fileInfo.toString()
+                proto.my_info != null -> "MyInfo" to proto.my_info.toString()
+                proto.node_info != null -> "NodeInfo" to proto.node_info.toString()
+                proto.config != null -> "Config" to proto.config.toString()
+                proto.moduleConfig != null -> "ModuleConfig" to proto.moduleConfig.toString()
+                proto.channel != null -> "Channel" to proto.channel.toString()
+                proto.clientNotification != null -> "ClientNotification" to proto.clientNotification.toString()
                 else -> return
             }
 
@@ -139,8 +134,12 @@ constructor(
 
     fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
-            if (packet.rxTime == 0) (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt() else packet.rxTime
-        val preparedPacket = packet.toBuilder().setRxTime(rxTime).build()
+            if (packet.rx_time == 0) {
+                (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
+            } else {
+                packet.rx_time
+            }
+        val preparedPacket = packet.copy(rx_time = rxTime)
 
         if (nodeManager.isNodeDbReady.value) {
             processReceivedMeshPacket(preparedPacket, myNodeNum)
@@ -151,23 +150,15 @@ constructor(
                     val dropped = earlyReceivedPackets.removeFirst()
                     historyLog(Log.WARN) {
                         val portLabel =
-                            if (dropped.hasDecoded()) {
-                                Portnums.PortNum.forNumber(dropped.decoded.portnumValue)?.name
-                                    ?: dropped.decoded.portnumValue.toString()
-                            } else {
-                                "unknown"
-                            }
+                            dropped.decoded?.portnum?.name ?: dropped.decoded?.portnum?.value?.toString() ?: "unknown"
                         "dropEarlyPacket bufferFull size=$queueSize id=${dropped.id} port=$portLabel"
                     }
                 }
                 earlyReceivedPackets.addLast(preparedPacket)
                 val portLabel =
-                    if (preparedPacket.hasDecoded()) {
-                        Portnums.PortNum.forNumber(preparedPacket.decoded.portnumValue)?.name
-                            ?: preparedPacket.decoded.portnumValue.toString()
-                    } else {
-                        "unknown"
-                    }
+                    preparedPacket.decoded?.portnum?.name
+                        ?: preparedPacket.decoded?.portnum?.value?.toString()
+                        ?: "unknown"
                 historyLog {
                     "queueEarlyPacket size=${earlyReceivedPackets.size} id=${preparedPacket.id} port=$portLabel"
                 }
@@ -189,7 +180,7 @@ constructor(
     }
 
     private fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
-        if (!packet.hasDecoded()) return
+        val decoded = packet.decoded ?: return
         val log =
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
@@ -197,8 +188,8 @@ constructor(
                 received_date = System.currentTimeMillis(),
                 raw_message = packet.toString(),
                 fromNum = packet.from,
-                portNum = packet.decoded.portnumValue,
-                fromRadio = fromRadio { this.packet = packet },
+                portNum = decoded.portnum.value,
+                fromRadio = FromRadio(packet = packet),
             )
         val logJob = insertMeshLog(log)
         logInsertJobByPacketId[packet.id] = logJob
@@ -207,23 +198,24 @@ constructor(
         scope.handledLaunch { serviceRepository.emitMeshPacket(packet) }
 
         myNodeNum?.let { myNum ->
-            val isOtherNode = myNum != packet.from
+            val from = packet.from
+            val isOtherNode = myNum != from
             nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) {
                 it.lastHeard = (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
             }
-            nodeManager.updateNodeInfo(packet.from, withBroadcast = false, channel = packet.channel) {
-                it.lastHeard = packet.rxTime
-                it.snr = packet.rxSnr
-                it.rssi = packet.rxRssi
+            nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel) {
+                it.lastHeard = packet.rx_time
+                it.snr = packet.rx_snr
+                it.rssi = packet.rx_rssi
                 it.hopsAway =
-                    if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
+                    if (decoded.portnum == PortNum.RANGE_TEST_APP) {
                         0
-                    } else if (packet.hopStart == 0 && !packet.decoded.hasBitfield()) {
+                    } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
                         -1
-                    } else if (packet.hopLimit > packet.hopStart) {
+                    } else if (packet.hop_limit > packet.hop_start) {
                         -1
                     } else {
-                        packet.hopStart - packet.hopLimit
+                        packet.hop_start - packet.hop_limit
                     }
             }
 

@@ -148,8 +148,8 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             MqttAndVerificationRow(node)
         }
-        val publicKey = node.publicKey ?: node.user.publicKey
-        if (!publicKey.isEmpty) {
+        val publicKey = node.publicKey ?: node.user.public_key
+        if (publicKey != null && publicKey.size > 0) {
             SectionDivider()
             PublicKeyItem(publicKey.toByteArray())
         }
@@ -161,13 +161,13 @@ private fun NameAndRoleRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
         InfoItem(
             label = stringResource(Res.string.short_name),
-            value = node.user.shortName.ifEmpty { "???" },
+            value = (node.user.short_name ?: "").ifEmpty { "???" },
             icon = MeshtasticIcons.Person,
             modifier = Modifier.weight(1f),
         )
         InfoItem(
             label = stringResource(Res.string.role),
-            value = node.user.role.name,
+            value = node.user.role?.name ?: "",
             icon = MeshtasticIcons.Role,
             modifier = Modifier.weight(1f),
         )
@@ -219,14 +219,14 @@ private fun UserAndUptimeRow(node: Node) {
     Row(modifier = Modifier.fillMaxWidth()) {
         InfoItem(
             label = stringResource(Res.string.user_id),
-            value = node.user.id,
+            value = node.user.id ?: "",
             icon = MeshtasticIcons.Person,
             modifier = Modifier.weight(1f),
         )
-        if (node.deviceMetrics.uptimeSeconds > 0) {
+        if ((node.deviceMetrics.uptime_seconds ?: 0) > 0) {
             InfoItem(
                 label = stringResource(Res.string.uptime),
-                value = formatUptime(node.deviceMetrics.uptimeSeconds),
+                value = formatUptime(node.deviceMetrics.uptime_seconds!!),
                 icon = MeshtasticIcons.ArrowCircleUp,
                 modifier = Modifier.weight(1f),
             )

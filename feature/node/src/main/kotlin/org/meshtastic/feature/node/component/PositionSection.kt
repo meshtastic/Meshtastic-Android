@@ -55,7 +55,7 @@ import org.meshtastic.core.strings.position
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
+import org.meshtastic.proto.Config
 
 private const val EXCHANGE_BUTTON_WEIGHT = 1.1f
 private const val COMPASS_BUTTON_WEIGHT = 0.9f
@@ -148,7 +148,7 @@ private fun PositionMap(node: Node, distance: String?) {
 private fun PositionActionButtons(
     node: Node,
     hasValidPosition: Boolean,
-    displayUnits: DisplayUnits,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
     onAction: (NodeDetailAction) -> Unit,
 ) {
     Row(

@@ -36,10 +36,10 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.MeshProtos.ToRadio
-import org.meshtastic.proto.fromRadio
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.ToRadio
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -76,24 +76,24 @@ constructor(
      * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
      * bound to the RadioInterfaceService
      */
-    fun sendToRadio(p: ToRadio.Builder) {
-        val built = p.build()
-        Logger.d { "Sending to radio ${built.toPIIString()}" }
-        val b = built.toByteArray()
+    fun sendToRadio(p: ToRadio) {
+        Logger.d { "Sending to radio ${p.toPIIString()}" }
+        val b = p.encode()
 
         radioInterfaceService.sendToRadio(b)
-        changeStatus(p.packet.id, MessageStatus.ENROUTE)
+        p.packet?.id?.let { changeStatus(it, MessageStatus.ENROUTE) }
 
-        if (p.packet.hasDecoded()) {
+        val packet = p.packet
+        if (packet?.decoded != null) {
             val packetToSave =
                 MeshLog(
                     uuid = UUID.randomUUID().toString(),
                     message_type = "Packet",
                     received_date = System.currentTimeMillis(),
-                    raw_message = p.packet.toString(),
-                    fromNum = p.packet.from,
-                    portNum = p.packet.decoded.portnumValue,
-                    fromRadio = fromRadio { packet = p.packet },
+                    raw_message = packet.toString(),
+                    fromNum = packet.from ?: 0,
+                    portNum = packet.decoded?.portnum?.value ?: 0,
+                    fromRadio = FromRadio(packet = packet),
                 )
             insertMeshLog(packetToSave)
         }
@@ -119,9 +119,9 @@ constructor(
         }
     }
 
-    fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
+    fun handleQueueStatus(queueStatus: QueueStatus) {
         Logger.d { "[queueStatus] ${queueStatus.toOneLineString()}" }
-        val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
+        val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, mesh_packet_id) }
         if (success && isFull) return // Queue is full, wait for free != 0
         if (requestId != 0) {
             queueResponse.remove(requestId)?.complete(success)
@@ -192,7 +192,7 @@ constructor(
             if (connectionStateHolder.connectionState.value != ConnectionState.Connected) {
                 throw RadioNotConnectedException()
             }
-            sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
+            sendToRadio(ToRadio(packet = packet))
         } catch (ex: Exception) {
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
             deferred.complete(false)

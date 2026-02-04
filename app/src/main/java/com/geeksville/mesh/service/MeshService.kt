@@ -49,6 +49,7 @@ import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -89,7 +90,7 @@ class MeshService : Service() {
 
     companion object {
         fun actionReceived(portNum: Int): String {
-            val portType = org.meshtastic.proto.Portnums.PortNum.forNumber(portNum)
+            val portType = PortNum.fromValue(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
             return com.geeksville.mesh.service.actionReceived(portStr)
         }
@@ -217,9 +218,7 @@ class MeshService : Service() {
             override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
             override fun getConfig(): ByteArray = toRemoteExceptions {
-                runBlocking {
-                    radioConfigRepository.localConfigFlow.first().toByteArray() ?: throw NoDeviceConfigException()
-                }
+                runBlocking { radioConfigRepository.localConfigFlow.first().encode() }
             }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
@@ -279,7 +278,7 @@ class MeshService : Service() {
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.channelSetFlow.first().toByteArray() }
+                runBlocking { radioConfigRepository.channelSetFlow.first().encode() }
             }
 
             override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()

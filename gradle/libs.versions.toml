@@ -43,8 +43,10 @@ detekt = "1.23.8"
 devtools-ksp = "2.3.5"
 markdownRenderer = "0.39.2"
 osmdroid-android = "6.1.20"
-protobuf = "4.33.5"
+wire = "5.2.1"
 vico = "3.0.0-beta.3"
+# Removed gradle-doctor
+dependency-guard = "0.5.0"
 
 
 [libraries]
@@ -106,7 +108,7 @@ androidx-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.8.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
-guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
+guava = { module = "com.google.guava:guava", version = "33.5.0-android" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
@@ -116,8 +118,7 @@ maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = 
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
-protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
-protobuf-protoc = { module = "com.google.protobuf:protoc", version.ref = "protobuf" }
+wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
 truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
@@ -177,8 +178,7 @@ org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.c
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
-streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version = "1.7.4" }
-    kermit = { module = "co.touchlab:kermit", version = "2.0.8" }
+kermit = { module = "co.touchlab:kermit", version = "2.0.8" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version = "4.3.0" }
@@ -238,10 +238,12 @@ datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.22.0
 # Removed dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
-protobuf = { id = "com.google.protobuf", version = "0.9.6" }
+wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version = "8.2.1" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
+# Removed gradle-doctor
+dependency-guard = { id = "com.dropbox.dependency-guard", version.ref = "dependency-guard" }
 
 # Meshtastic
 meshtastic-analytics = { id = "meshtastic.analytics" }

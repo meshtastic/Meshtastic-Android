@@ -134,6 +134,8 @@ configure<ApplicationExtension> {
             // Disables dependency metadata when building Android App Bundles (for Google Play)
             includeInBundle = false
         }
+
+        testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
     }
 
     // Configure existing product flavors (defined by convention plugin)
@@ -231,7 +233,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
-    implementation(libs.streamsupport.minifuture)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)

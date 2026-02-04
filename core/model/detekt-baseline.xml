@@ -1,11 +1,13 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>MagicNumber:ChannelSet.kt$40</ID>
     <ID>MagicNumber:ChannelSet.kt$960</ID>
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>
+    <ID>SwallowedException:DataPacket.kt$DataPacket$e: Exception</ID>
     <ID>TooGenericExceptionCaught:ChannelSet.kt$ex: Throwable</ID>
-    <ID>TooManyFunctions:Extensions.kt$org.meshtastic.core.model.util.Extensions.kt</ID>
+    <ID>TooGenericExceptionCaught:DataPacket.kt$DataPacket$e: Exception</ID>
+    <ID>UnusedPrivateMember:DataPacket.kt$private inline fun &lt;reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T?</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -27,7 +27,9 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 
 class MeshMessageProcessorTest {
 
@@ -56,13 +58,7 @@ class MeshMessageProcessorTest {
 
     @Test
     fun `early packets are buffered and flushed when DB is ready`() = runTest(testDispatcher) {
-        val packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = 123
-                    decoded = MeshProtos.Data.newBuilder().setPortnumValue(1).build()
-                }
-                .build()
+        val packet = MeshPacket(id = 123, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
 
         // 1. Database is NOT ready
         isNodeDbReady.value = false
@@ -83,13 +79,7 @@ class MeshMessageProcessorTest {
 
     @Test
     fun `packets are processed immediately if DB is already ready`() = runTest(testDispatcher) {
-        val packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = 456
-                    decoded = MeshProtos.Data.newBuilder().setPortnumValue(1).build()
-                }
-                .build()
+        val packet = MeshPacket(id = 456, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
 
         isNodeDbReady.value = true
         testScheduler.runCurrent()

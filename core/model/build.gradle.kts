@@ -25,23 +25,12 @@ plugins {
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["googleRelease"])
-                artifactId = "core-model"
-            }
-        }
-    }
-}
-
 configure<LibraryExtension> {
+    namespace = "org.meshtastic.core.model"
     buildFeatures {
         buildConfig = true
         aidl = true
     }
-    namespace = "org.meshtastic.core.model"
 
     defaultConfig {
         // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
@@ -51,6 +40,17 @@ configure<LibraryExtension> {
     testOptions { unitTests { isIncludeAndroidResources = true } }
 
     publishing { singleVariant("googleRelease") { withSourcesJar() } }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("googleRelease") {
+                from(components["googleRelease"])
+                artifactId = "core-model"
+            }
+        }
+    }
 }
 
 dependencies {

@@ -9,46 +9,26 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint:
+  android-check:
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    uses: ./.github/workflows/reusable-lint.yml
-    secrets: inherit
-
-  build:
-    needs: lint
-    if: github.repository == 'meshtastic/Meshtastic-Android'
-    uses: ./.github/workflows/reusable-android-build.yml
+    uses: ./.github/workflows/reusable-check.yml
     with:
-      upload_artifacts: false
-    secrets: inherit
-
-  androidTest:
-    needs: lint
-    if: github.repository == 'meshtastic/Meshtastic-Android'
-    uses: ./.github/workflows/reusable-android-test.yml
-    with:
-      api_levels: '[26, 35]' # Run on both API 26 and 35 for merge queue
-      test_flavors: 'both' # Run both flavors for merge queue (comprehensive)
+      api_levels: '[26, 35]' # Comprehensive testing for Merge Queue
+      flavors: '["google", "fdroid"]'
       upload_artifacts: false
     secrets: inherit
 
   check-workflow-status:
-    name: Check Workflow Status  # Matches another in pull-request, and is required for merge to main.
+    name: Check Workflow Status
     runs-on: ubuntu-latest
     needs:
-      - lint
-      - build
-      - androidTest
+      - android-check
     if: always()
     steps:
       - name: Check Workflow Status
         run: |
-          exit_on_result() {
-            if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
-              echo "Job '$1' failed or was cancelled."
-              exit 1
-            fi
-          }
-          exit_on_result "lint" "${{ needs.lint.result }}"
-          exit_on_result "build" "${{ needs.build.result }}"
-          exit_on_result "androidTest" "${{ needs.androidTest.result }}"
+          if [[ "${{ needs.android-check.result }}" == "failure" || "${{ needs.android-check.result }}" == "cancelled" ]]; then
+            echo "::error::Android Check failed"
+            exit 1
+          fi
+          echo "All jobs passed successfully"

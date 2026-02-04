@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.channel.component
 
 import androidx.compose.foundation.layout.Spacer
@@ -35,10 +34,8 @@ import org.meshtastic.core.strings.delete
 import org.meshtastic.core.ui.component.ChannelItem
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.ConfigKt.loRaConfig
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
-import org.meshtastic.proto.channelSettings
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
 
 @Composable
 internal fun ChannelCard(
@@ -46,7 +43,7 @@ internal fun ChannelCard(
     title: String,
     enabled: Boolean,
     channelSettings: ChannelSettings,
-    loraConfig: LoRaConfig,
+    loraConfig: Config.LoRaConfig,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     sharesLocation: Boolean,
@@ -58,14 +55,14 @@ internal fun ChannelCard(
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
-    if (channelSettings.uplinkEnabled) {
+    if (channelSettings.uplink_enabled) {
         Icon(
             imageVector = ChannelIcons.UPLINK.icon,
             contentDescription = stringResource(ChannelIcons.UPLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
-    if (channelSettings.downlinkEnabled) {
+    if (channelSettings.downlink_enabled) {
         Icon(
             imageVector = ChannelIcons.DOWNLINK.icon,
             contentDescription = stringResource(ChannelIcons.DOWNLINK.descriptionResId),
@@ -91,12 +88,8 @@ private fun ChannelCardPreview() {
             index = 0,
             title = "Medium Fast",
             enabled = true,
-            channelSettings =
-            channelSettings {
-                uplinkEnabled = true
-                downlinkEnabled = true
-            },
-            loraConfig = loRaConfig {},
+            channelSettings = ChannelSettings(uplink_enabled = true, downlink_enabled = true),
+            loraConfig = Config.LoRaConfig(),
             onEditClick = {},
             onDeleteClick = {},
             sharesLocation = true,

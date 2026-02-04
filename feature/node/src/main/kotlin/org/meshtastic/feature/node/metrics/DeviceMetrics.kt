@@ -81,21 +81,20 @@ import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel.toFloat()
+        override fun getValue(telemetry: Telemetry): Float = (telemetry.device_metrics?.battery_level ?: 0).toFloat()
     },
     VOLTAGE(Gold) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.voltage
+        override fun getValue(telemetry: Telemetry): Float = telemetry.device_metrics?.voltage ?: 0f
     },
     CH_UTIL(Purple) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
+        override fun getValue(telemetry: Telemetry): Float = telemetry.device_metrics?.channel_utilization ?: 0f
     },
     AIR_UTIL(Cyan) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.airUtilTx
+        override fun getValue(telemetry: Telemetry): Float = telemetry.device_metrics?.air_util_tx ?: 0f
     }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float
@@ -125,10 +124,10 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val state by viewModel.state.collectAsStateWithLifecycle()
     val data = state.deviceMetrics
 
-    val hasBattery = remember(data) { data.any { it.deviceMetrics.hasBatteryLevel() } }
-    val hasVoltage = remember(data) { data.any { it.deviceMetrics.hasVoltage() } }
-    val hasChUtil = remember(data) { data.any { it.deviceMetrics.hasChannelUtilization() } }
-    val hasAirUtil = remember(data) { data.any { it.deviceMetrics.hasAirUtilTx() } }
+    val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
+    val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
+    val hasChUtil = remember(data) { data.any { it.device_metrics?.channel_utilization != null } }
+    val hasAirUtil = remember(data) { data.any { it.device_metrics?.air_util_tx != null } }
 
     val filteredLegendData =
         remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
@@ -173,7 +172,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         telemetryType = TelemetryType.DEVICE,
         titleRes = Res.string.device_metrics_log,
         data = data,
-        timeProvider = { it.time.toDouble() },
+        timeProvider = { (it.time ?: 0).toDouble() },
         infoData = infoItems,
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             DeviceMetricsChart(
@@ -190,8 +189,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 itemsIndexed(data) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,
-                        isSelected = telemetry.time.toDouble() == selectedX,
-                        onClick = { onCardClick(telemetry.time.toDouble()) },
+                        isSelected = (telemetry.time ?: 0).toDouble() == selectedX,
+                        onClick = { onCardClick((telemetry.time ?: 0).toDouble()) },
                     )
                 }
             }
@@ -235,16 +234,28 @@ private fun DeviceMetricsChart(
             modelProducer.runTransaction {
                 /* Series for Left Axis (0-100%) */
                 lineSeries {
-                    series(x = telemetries.map { it.time }, y = telemetries.map { it.deviceMetrics.batteryLevel })
-                    val chUtilData = telemetries.filter { !it.deviceMetrics.channelUtilization.isNaN() }
-                    series(x = chUtilData.map { it.time }, y = chUtilData.map { it.deviceMetrics.channelUtilization })
-                    val airUtilData = telemetries.filter { !it.deviceMetrics.airUtilTx.isNaN() }
-                    series(x = airUtilData.map { it.time }, y = airUtilData.map { it.deviceMetrics.airUtilTx })
+                    series(
+                        x = telemetries.map { it.time ?: 0 },
+                        y = telemetries.map { it.device_metrics?.battery_level ?: 0 },
+                    )
+                    val chUtilData = telemetries.filter { it.device_metrics?.channel_utilization != null }
+                    series(
+                        x = chUtilData.map { it.time ?: 0 },
+                        y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
+                    )
+                    val airUtilData = telemetries.filter { it.device_metrics?.air_util_tx != null }
+                    series(
+                        x = airUtilData.map { it.time ?: 0 },
+                        y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
+                    )
                 }
                 /* Series for Right Axis (Voltage) */
                 lineSeries {
-                    val voltageData = telemetries.filter { !it.deviceMetrics.voltage.isNaN() }
-                    series(x = voltageData.map { it.time }, y = voltageData.map { it.deviceMetrics.voltage })
+                    val voltageData = telemetries.filter { it.device_metrics?.voltage != null }
+                    series(
+                        x = voltageData.map { it.time ?: 0 },
+                        y = voltageData.map { it.device_metrics?.voltage ?: 0f },
+                    )
                 }
             }
         }
@@ -317,17 +328,17 @@ private fun DeviceMetricsChartPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
     val telemetries =
         List(20) { i ->
-            Telemetry.newBuilder()
-                .setTime(now - (19 - i) * 60 * 60) // 1-hour intervals, oldest first
-                .setDeviceMetrics(
-                    TelemetryProtos.DeviceMetrics.newBuilder()
-                        .setBatteryLevel(80 - i)
-                        .setVoltage(3.7f - i * 0.02f)
-                        .setChannelUtilization(10f + i * 2)
-                        .setAirUtilTx(5f + i)
-                        .setUptimeSeconds(3600 + i * 300),
-                )
-                .build()
+            Telemetry(
+                time = now - (19 - i) * 60 * 60, // 1-hour intervals, oldest first
+                device_metrics =
+                org.meshtastic.proto.DeviceMetrics(
+                    battery_level = 80 - i,
+                    voltage = 3.7f - i * 0.02f,
+                    channel_utilization = 10f + i * 2,
+                    air_util_tx = 5f + i,
+                    uptime_seconds = 3600 + i * 300,
+                ),
+            )
         }
     AppTheme {
         DeviceMetricsChart(
@@ -345,8 +356,8 @@ private fun DeviceMetricsChartPreview() {
 @Composable
 @Suppress("LongMethod")
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
-    val deviceMetrics = telemetry.deviceMetrics
-    val time = telemetry.time * MS_PER_SEC
+    val deviceMetrics = telemetry.device_metrics
+    val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -371,15 +382,18 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                         )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (deviceMetrics.hasBatteryLevel()) {
+                            if (deviceMetrics?.battery_level != null) {
                                 MetricIndicator(Device.BATTERY.color)
                                 Spacer(Modifier.width(4.dp))
                             }
-                            if (deviceMetrics.hasVoltage()) {
+                            if (deviceMetrics?.voltage != null) {
                                 MetricIndicator(Device.VOLTAGE.color)
                                 Spacer(Modifier.width(8.dp))
                             }
-                            MaterialBatteryInfo(level = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
+                            MaterialBatteryInfo(
+                                level = deviceMetrics?.battery_level ?: 0,
+                                voltage = deviceMetrics?.voltage ?: 0f,
+                            )
                         }
                     }
 
@@ -388,28 +402,31 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                     /* Channel Utilization and Air Utilization Tx */
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (deviceMetrics.hasChannelUtilization()) {
+                            if (deviceMetrics?.channel_utilization != null) {
                                 MetricIndicator(Device.CH_UTIL.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "Ch: %.1f%%".format(deviceMetrics.channelUtilization),
+                                    text = "Ch: %.1f%%".format(deviceMetrics.channel_utilization ?: 0f),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 )
                                 Spacer(Modifier.width(12.dp))
                             }
-                            if (deviceMetrics.hasAirUtilTx()) {
+                            if (deviceMetrics?.air_util_tx != null) {
                                 MetricIndicator(Device.AIR_UTIL.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "Air: %.1f%%".format(deviceMetrics.airUtilTx),
+                                    text = "Air: %.1f%%".format(deviceMetrics.air_util_tx ?: 0f),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 )
                             }
                         }
                         Text(
-                            text = stringResource(Res.string.uptime) + ": " + formatUptime(deviceMetrics.uptimeSeconds),
+                            text =
+                            stringResource(Res.string.uptime) +
+                                ": " +
+                                formatUptime(deviceMetrics?.uptime_seconds ?: 0),
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
@@ -426,17 +443,17 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 private fun DeviceMetricsCardPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
     val telemetry =
-        Telemetry.newBuilder()
-            .setTime(now)
-            .setDeviceMetrics(
-                TelemetryProtos.DeviceMetrics.newBuilder()
-                    .setBatteryLevel(75)
-                    .setVoltage(3.65f)
-                    .setChannelUtilization(22.5f)
-                    .setAirUtilTx(12.0f)
-                    .setUptimeSeconds(7200),
-            )
-            .build()
+        Telemetry(
+            time = now,
+            device_metrics =
+            org.meshtastic.proto.DeviceMetrics(
+                battery_level = 75,
+                voltage = 3.65f,
+                channel_utilization = 22.5f,
+                air_util_tx = 12.0f,
+                uptime_seconds = 7200,
+            ),
+        )
     AppTheme { DeviceMetricsCard(telemetry = telemetry, isSelected = false, onClick = {}) }
 }
 
@@ -447,17 +464,17 @@ private fun DeviceMetricsScreenPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
     val telemetries =
         List(24) { i ->
-            Telemetry.newBuilder()
-                .setTime(now - (23 - i) * 60 * 60) // 1-hour intervals, oldest first
-                .setDeviceMetrics(
-                    TelemetryProtos.DeviceMetrics.newBuilder()
-                        .setBatteryLevel(85 - i * 2) // Battery decreases over time
-                        .setVoltage(3.8f - i * 0.01f) // Voltage decreases slightly
-                        .setChannelUtilization(15f + i * 1.5f) // Channel utilization increases
-                        .setAirUtilTx(8f + i * 0.8f) // Air utilization increases
-                        .setUptimeSeconds(3600 + i * 3600), // Uptime increases by 1 hour each
-                )
-                .build()
+            Telemetry(
+                time = now - (23 - i) * 60 * 60, // 1-hour intervals, oldest first
+                device_metrics =
+                org.meshtastic.proto.DeviceMetrics(
+                    battery_level = 85 - i * 2, // Battery decreases over time
+                    voltage = 3.8f - i * 0.01f, // Voltage decreases slightly
+                    channel_utilization = 15f + i * 1.5f, // Channel utilization increases
+                    air_util_tx = 8f + i * 0.8f, // Air utilization increases
+                    uptime_seconds = 3600 + i * 3600, // Uptime increases by 1 hour each
+                ),
+            )
         }
 
     AppTheme {

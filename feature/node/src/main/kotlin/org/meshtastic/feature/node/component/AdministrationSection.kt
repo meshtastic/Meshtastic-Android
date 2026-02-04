@@ -49,7 +49,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.FirmwareEdition
 
 @Composable
 fun AdministrationSection(
@@ -82,7 +82,7 @@ fun AdministrationSection(
         }
     }
 
-    val firmwareVersion = node.metadata?.firmwareVersion
+    val firmwareVersion = node.metadata?.firmware_version
     val firmwareEdition = metricsState.firmwareEdition
     if (firmwareVersion != null || (firmwareEdition != null && metricsState.isLocal)) {
         FirmwareSection(metricsState, firmwareEdition, firmwareVersion, onFirmwareSelect)
@@ -92,7 +92,7 @@ fun AdministrationSection(
 @Composable
 private fun FirmwareSection(
     metricsState: MetricsState,
-    firmwareEdition: MeshProtos.FirmwareEdition?,
+    firmwareEdition: FirmwareEdition?,
     firmwareVersion: String?,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
 ) {
@@ -101,7 +101,7 @@ private fun FirmwareSection(
             firmwareEdition?.let { edition ->
                 val icon =
                     when (edition) {
-                        MeshProtos.FirmwareEdition.VANILLA -> Icons.Rounded.Icecream
+                        FirmwareEdition.VANILLA -> Icons.Rounded.Icecream
                         else -> Icons.Rounded.ForkLeft
                     }
 

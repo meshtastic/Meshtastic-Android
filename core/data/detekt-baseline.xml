@@ -1,16 +1,10 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$1000L</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$30</ID>
     <ID>MagicNumber:LocationRepository.kt$LocationRepository$31</ID>
-    <ID>MagicNumber:PacketRepository.kt$PacketRepository$500</ID>
-    <ID>MaxLineLength:DeviceHardwareRepository.kt$DeviceHardwareRepository$"DeviceHardwareRepository: applying quirk: requiresBootloaderUpgradeForOta=${quirk.requiresBootloaderUpgradeForOta}, infoUrl=${quirk.infoUrl}"</ID>
-    <ID>MaxLineLength:DeviceHardwareRepository.kt$DeviceHardwareRepository$"DeviceHardwareRepository: cache ${if (staleEntity == null) "empty" else "incomplete"} for hwModel=$hwModel, falling back to bundled JSON asset"</ID>
-    <ID>MaxLineLength:DeviceHardwareRepository.kt$DeviceHardwareRepository$"DeviceHardwareRepository: failed to load device hardware from bundled JSON for hwModel=$hwModel"</ID>
-    <ID>MaxLineLength:DeviceHardwareRepository.kt$DeviceHardwareRepository$"DeviceHardwareRepository: lookup after JSON load for hwModel=$hwModel ${if (base != null) "succeeded" else "returned null"}"</ID>
-    <ID>MaxLineLength:DeviceHardwareRepository.kt$DeviceHardwareRepository$"DeviceHardwareRepository: lookup after remote fetch for hwModel=$hwModel ${if (fromDb != null) "succeeded" else "returned null"}"</ID>
     <ID>TooGenericExceptionCaught:LocationRepository.kt$LocationRepository$e: Exception</ID>
     <ID>TooManyFunctions:PacketRepository.kt$PacketRepository</ID>
   </CurrentIssues>

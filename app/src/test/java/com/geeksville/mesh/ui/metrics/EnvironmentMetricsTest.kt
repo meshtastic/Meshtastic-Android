@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.metrics
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.Telemetry
 
 class EnvironmentMetricsTest {
 
@@ -33,15 +32,14 @@ class EnvironmentMetricsTest {
         val expectedSoilTemperatureFahrenheit = celsiusToFahrenheit(initialSoilTemperatureCelsius)
 
         val telemetry =
-            TelemetryProtos.Telemetry.newBuilder()
-                .setEnvironmentMetrics(
-                    TelemetryProtos.EnvironmentMetrics.newBuilder()
-                        .setTemperature(initialTemperatureCelsius)
-                        .setSoilTemperature(initialSoilTemperatureCelsius)
-                        .build(),
-                )
-                .setTime(1000)
-                .build()
+            Telemetry(
+                environment_metrics =
+                EnvironmentMetrics(
+                    temperature = initialTemperatureCelsius,
+                    soil_temperature = initialSoilTemperatureCelsius,
+                ),
+                time = 1000,
+            )
 
         val data = listOf(telemetry)
 
@@ -50,15 +48,16 @@ class EnvironmentMetricsTest {
         val processedTelemetries =
             if (isFahrenheit) {
                 data.map { tel ->
-                    val temperatureFahrenheit = celsiusToFahrenheit(tel.environmentMetrics.temperature)
-                    val soilTemperatureFahrenheit = celsiusToFahrenheit(tel.environmentMetrics.soilTemperature)
-                    tel.copy {
-                        environmentMetrics =
-                            tel.environmentMetrics.copy {
-                                temperature = temperatureFahrenheit
-                                soilTemperature = soilTemperatureFahrenheit
-                            }
-                    }
+                    val metrics = tel.environment_metrics!!
+                    val temperatureFahrenheit = celsiusToFahrenheit(metrics.temperature ?: 0f)
+                    val soilTemperatureFahrenheit = celsiusToFahrenheit(metrics.soil_temperature ?: 0f)
+                    tel.copy(
+                        environment_metrics =
+                        metrics.copy(
+                            temperature = temperatureFahrenheit,
+                            soil_temperature = soilTemperatureFahrenheit,
+                        ),
+                    )
                 }
             } else {
                 data
@@ -66,7 +65,11 @@ class EnvironmentMetricsTest {
 
         val resultTelemetry = processedTelemetries.first()
 
-        assertEquals(expectedTemperatureFahrenheit, resultTelemetry.environmentMetrics.temperature, 0.01f)
-        assertEquals(expectedSoilTemperatureFahrenheit, resultTelemetry.environmentMetrics.soilTemperature, 0.01f)
+        assertEquals(expectedTemperatureFahrenheit, resultTelemetry.environment_metrics?.temperature ?: 0f, 0.01f)
+        assertEquals(
+            expectedSoilTemperatureFahrenheit,
+            resultTelemetry.environment_metrics?.soil_temperature ?: 0f,
+            0.01f,
+        )
     }
 }

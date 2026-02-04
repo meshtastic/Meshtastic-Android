@@ -42,9 +42,10 @@ import org.meshtastic.core.strings.connected_count
 import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.device_sleeping
 import org.meshtastic.core.strings.disconnected
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos.ToRadio
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -101,8 +102,8 @@ constructor(
     private fun onRadioConnectionState(newState: ConnectionState) {
         scope.handledLaunch {
             val localConfig = radioConfigRepository.localConfigFlow.first()
-            val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
-            val lsEnabled = localConfig.power.isPowerSaving || isRouter
+            val isRouter = localConfig.device?.role == Config.DeviceConfig.Role.ROUTER
+            val lsEnabled = localConfig.power?.is_power_saving == true || isRouter
 
             val effectiveState =
                 when (newState) {
@@ -161,7 +162,7 @@ constructor(
             scope.handledLaunch {
                 try {
                     val localConfig = radioConfigRepository.localConfigFlow.first()
-                    val timeout = (localConfig.power?.lsSecs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
+                    val timeout = (localConfig.power?.ls_secs ?: 0) + DEVICE_SLEEP_TIMEOUT_SECONDS
                     Logger.d { "Waiting for sleeping device, timeout=$timeout secs" }
                     delay(timeout.seconds)
                     Logger.w { "Device timeout out, setting disconnected" }
@@ -191,11 +192,11 @@ constructor(
     }
 
     fun startConfigOnly() {
-        packetHandler.sendToRadio(ToRadio.newBuilder().apply { wantConfigId = CONFIG_ONLY_NONCE })
+        packetHandler.sendToRadio(ToRadio(want_config_id = CONFIG_ONLY_NONCE))
     }
 
     fun startNodeInfoOnly() {
-        packetHandler.sendToRadio(ToRadio.newBuilder().apply { wantConfigId = NODE_INFO_NONCE })
+        packetHandler.sendToRadio(ToRadio(want_config_id = NODE_INFO_NONCE))
     }
 
     fun onHasSettings() {
@@ -204,7 +205,11 @@ constructor(
         // Start MQTT if enabled
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
-            mqttManager.start(scope, moduleConfig.mqtt.enabled, moduleConfig.mqtt.proxyToClientEnabled)
+            mqttManager.start(
+                scope,
+                moduleConfig.mqtt?.enabled == true,
+                moduleConfig.mqtt?.proxy_to_client_enabled == true,
+            )
         }
 
         reportConnection()
@@ -213,12 +218,14 @@ constructor(
         // Request history
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
-            historyManager.requestHistoryReplay("onHasSettings", myNodeNum, moduleConfig.storeForward, "Unknown")
+            moduleConfig.store_forward?.let {
+                historyManager.requestHistoryReplay("onHasSettings", myNodeNum, it, "Unknown")
+            }
         }
 
         // Set time
         commandSender.sendAdmin(myNodeNum) {
-            setTimeOnly = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
+            AdminMessage(set_time_only = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt())
         }
         updateStatusNotification()
     }
@@ -234,11 +241,11 @@ constructor(
         )
     }
 
-    fun updateTelemetry(telemetry: TelemetryProtos.Telemetry) {
+    fun updateTelemetry(telemetry: Telemetry) {
         updateStatusNotification(telemetry)
     }
 
-    fun updateStatusNotification(telemetry: TelemetryProtos.Telemetry? = null): Notification {
+    fun updateStatusNotification(telemetry: Telemetry? = null): Notification {
         val summary =
             when (connectionStateHolder.connectionState.value) {
                 is ConnectionState.Connected ->

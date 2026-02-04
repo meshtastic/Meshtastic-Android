@@ -16,9 +16,9 @@
  */
 package com.geeksville.mesh.service
 
-import com.google.protobuf.ByteString
 import io.mockk.every
 import io.mockk.mockk
+import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -26,7 +26,9 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 
 class MeshDataMapperTest {
 
@@ -64,7 +66,7 @@ class MeshDataMapperTest {
 
     @Test
     fun `toDataPacket returns null when no decoded data`() {
-        val packet = MeshProtos.MeshPacket.newBuilder().build()
+        val packet = MeshPacket()
         assertNull(mapper.toDataPacket(packet))
     }
 
@@ -77,26 +79,22 @@ class MeshDataMapperTest {
         every { nodeManager.nodeDBbyNodeNum[any()] } returns nodeEntity
 
         val proto =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = 42
-                    from = nodeNum
-                    to = DataPacket.NODENUM_BROADCAST
-                    rxTime = 1600000000
-                    rxSnr = 5.5f
-                    rxRssi = -100
-                    hopLimit = 3
-                    hopStart = 3
-                    decoded =
-                        MeshProtos.Data.newBuilder()
-                            .apply {
-                                portnumValue = 1 // TEXT_MESSAGE_APP
-                                payload = ByteString.copyFrom("hello".toByteArray())
-                                replyId = 123
-                            }
-                            .build()
-                }
-                .build()
+            MeshPacket(
+                id = 42,
+                from = nodeNum,
+                to = DataPacket.NODENUM_BROADCAST,
+                rx_time = 1600000000,
+                rx_snr = 5.5f,
+                rx_rssi = -100,
+                hop_limit = 3,
+                hop_start = 3,
+                decoded =
+                Data(
+                    portnum = PortNum.TEXT_MESSAGE_APP,
+                    payload = "hello".encodeToByteArray().toByteString(),
+                    reply_id = 123,
+                ),
+            )
 
         val result = mapper.toDataPacket(proto)
         assertNotNull(result)
@@ -106,21 +104,14 @@ class MeshDataMapperTest {
         assertEquals(1600000000000L, result.time)
         assertEquals(5.5f, result.snr)
         assertEquals(-100, result.rssi)
-        assertEquals(1, result.dataType)
-        assertEquals("hello", result.bytes?.decodeToString())
+        assertEquals(PortNum.TEXT_MESSAGE_APP.value, result.dataType)
+        assertEquals("hello", result.bytes?.utf8())
         assertEquals(123, result.replyId)
     }
 
     @Test
     fun `toDataPacket maps PKC channel correctly for encrypted packets`() {
-        val proto =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    pkiEncrypted = true
-                    channel = 1
-                    decoded = MeshProtos.Data.getDefaultInstance()
-                }
-                .build()
+        val proto = MeshPacket(pki_encrypted = true, channel = 1, decoded = Data())
 
         every { nodeManager.nodeDBbyNodeNum[any()] } returns null
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,71 +16,79 @@
  */
 package com.geeksville.mesh.service
 
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.fromRadio
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.NodeInfo
+import org.meshtastic.proto.QueueStatus
 
 class FromRadioPacketHandlerTest {
-
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val router: MeshRouter = mockk(relaxed = true)
     private val mqttManager: MeshMqttManager = mockk(relaxed = true)
     private val packetHandler: PacketHandler = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
-    private val configFlowManager: MeshConfigFlowManager = mockk(relaxed = true)
-    private val configHandler: MeshConfigHandler = mockk(relaxed = true)
 
     private lateinit var handler: FromRadioPacketHandler
 
     @Before
-    fun setUp() {
-        every { router.configFlowManager } returns configFlowManager
-        every { router.configHandler } returns configHandler
+    fun setup() {
         handler = FromRadioPacketHandler(serviceRepository, router, mqttManager, packetHandler, serviceNotifications)
     }
 
     @Test
     fun `handleFromRadio routes MY_INFO to configFlowManager`() {
-        val myInfo = MeshProtos.MyNodeInfo.newBuilder().setMyNodeNum(1234).build()
-        val proto = fromRadio { this.myInfo = myInfo }
+        val myInfo = MyNodeInfo(my_node_num = 1234)
+        val proto = FromRadio(my_info = myInfo)
 
         handler.handleFromRadio(proto)
 
-        verify { configFlowManager.handleMyInfo(myInfo) }
+        verify { router.configFlowManager.handleMyInfo(myInfo) }
     }
 
     @Test
     fun `handleFromRadio routes METADATA to configFlowManager`() {
-        val metadata = MeshProtos.DeviceMetadata.newBuilder().setFirmwareVersion("v1.0").build()
-        val proto = fromRadio { this.metadata = metadata }
+        val metadata = DeviceMetadata(firmware_version = "v1.0")
+        val proto = FromRadio(metadata = metadata)
 
         handler.handleFromRadio(proto)
 
-        verify { configFlowManager.handleLocalMetadata(metadata) }
+        verify { router.configFlowManager.handleLocalMetadata(metadata) }
     }
 
     @Test
-    fun `handleFromRadio routes NODE_INFO to configFlowManager`() {
-        val nodeInfo = MeshProtos.NodeInfo.newBuilder().setNum(1234).build()
-        val proto = fromRadio { this.nodeInfo = nodeInfo }
+    fun `handleFromRadio routes NODE_INFO to configFlowManager and updates status`() {
+        val nodeInfo = NodeInfo(num = 1234)
+        val proto = FromRadio(node_info = nodeInfo)
 
         handler.handleFromRadio(proto)
 
-        verify { configFlowManager.handleNodeInfo(nodeInfo) }
+        verify { router.configFlowManager.handleNodeInfo(nodeInfo) }
         verify { serviceRepository.setStatusMessage(any()) }
     }
 
     @Test
+    fun `handleFromRadio routes CONFIG_COMPLETE_ID to configFlowManager`() {
+        val nonce = 69420
+        val proto = FromRadio(config_complete_id = nonce)
+
+        handler.handleFromRadio(proto)
+
+        verify { router.configFlowManager.handleConfigComplete(nonce) }
+    }
+
+    @Test
     fun `handleFromRadio routes QUEUESTATUS to packetHandler`() {
-        val queueStatus = MeshProtos.QueueStatus.newBuilder().setFree(5).build()
-        val proto = fromRadio { this.queueStatus = queueStatus }
+        val queueStatus = QueueStatus(free = 10)
+        val proto = FromRadio(queueStatus = queueStatus)
 
         handler.handleFromRadio(proto)
 
@@ -89,23 +97,23 @@ class FromRadioPacketHandlerTest {
 
     @Test
     fun `handleFromRadio routes CONFIG to configHandler`() {
-        val config = ConfigProtos.Config.newBuilder().build()
-        val proto = fromRadio { this.config = config }
+        val config = Config(lora = Config.LoRaConfig(use_preset = true))
+        val proto = FromRadio(config = config)
 
         handler.handleFromRadio(proto)
 
-        verify { configHandler.handleDeviceConfig(config) }
+        verify { router.configHandler.handleDeviceConfig(config) }
     }
 
     @Test
     fun `handleFromRadio routes CLIENTNOTIFICATION to serviceRepository and notifications`() {
-        val notification = MeshProtos.ClientNotification.newBuilder().setReplyId(42).build()
-        val proto = fromRadio { this.clientNotification = notification }
+        val notification = ClientNotification(message = "test")
+        val proto = FromRadio(clientNotification = notification)
 
         handler.handleFromRadio(proto)
 
         verify { serviceRepository.setClientNotification(notification) }
         verify { serviceNotifications.showClientNotification(notification) }
-        verify { packetHandler.removeResponse(42, false) }
+        verify { packetHandler.removeResponse(0, complete = false) }
     }
 }

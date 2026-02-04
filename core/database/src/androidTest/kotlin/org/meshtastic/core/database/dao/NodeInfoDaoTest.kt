@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.dao
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import okio.ByteString.Companion.toByteString
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -37,9 +36,9 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.user
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
 
 @RunWith(AndroidJUnit4::class)
 class NodeInfoDaoTest {
@@ -54,12 +53,12 @@ class NodeInfoDaoTest {
         NodeEntity(
             num = 7,
             user =
-            user {
-                id = "!a1b2c3d4"
-                longName = "Meshtastic c3d4"
-                shortName = "c3d4"
-                hwModel = MeshProtos.HardwareModel.UNSET
-            },
+            User(
+                id = "!a1b2c3d4",
+                long_name = "Meshtastic c3d4",
+                short_name = "c3d4",
+                hw_model = HardwareModel.UNSET,
+            ),
             longName = "Meshtastic c3d4",
             shortName = null, // Dao filter for includeUnknown
         )
@@ -68,13 +67,13 @@ class NodeInfoDaoTest {
         NodeEntity(
             num = 8,
             user =
-            user {
-                id = "+16508765308".format(8)
-                longName = "Kevin Mester"
-                shortName = "KLO"
-                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-                isLicensed = false
-            },
+            User(
+                id = "+16508765308".format(8),
+                long_name = "Kevin Mester",
+                short_name = "KLO",
+                hw_model = HardwareModel.ANDROID_SIM,
+                is_licensed = false,
+            ),
             longName = "Kevin Mester",
             shortName = "KLO",
             latitude = 30.267153,
@@ -86,12 +85,12 @@ class NodeInfoDaoTest {
         NodeEntity(
             num = 9,
             user =
-            user {
-                id = "!25060801"
-                longName = "Meshtastic 0801"
-                shortName = "0801"
-                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-            },
+            User(
+                id = "!25060801",
+                long_name = "Meshtastic 0801",
+                short_name = "0801",
+                hw_model = HardwareModel.ANDROID_SIM,
+            ),
             longName = "Meshtastic 0801",
             shortName = "0801",
             hopsAway = 0,
@@ -102,12 +101,12 @@ class NodeInfoDaoTest {
         NodeEntity(
             num = 10,
             user =
-            user {
-                id = "!25060802"
-                longName = "Meshtastic 0802"
-                shortName = "0802"
-                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-            },
+            User(
+                id = "!25060802",
+                long_name = "Meshtastic 0802",
+                short_name = "0802",
+                hw_model = HardwareModel.ANDROID_SIM,
+            ),
             longName = "Meshtastic 0802",
             shortName = "0802",
             hopsAway = 0,
@@ -118,12 +117,12 @@ class NodeInfoDaoTest {
         NodeEntity(
             num = 11,
             user =
-            user {
-                id = "!25060803"
-                longName = "Meshtastic 0803"
-                shortName = "0803"
-                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-            },
+            User(
+                id = "!25060803",
+                long_name = "Meshtastic 0803",
+                short_name = "0803",
+                hw_model = HardwareModel.ANDROID_SIM,
+            ),
             longName = "Meshtastic 0803",
             shortName = "0803",
             hopsAway = 0,
@@ -134,12 +133,12 @@ class NodeInfoDaoTest {
         NodeEntity(
             num = 12,
             user =
-            user {
-                id = "!25060804"
-                longName = "Meshtastic 0804"
-                shortName = "0804"
-                hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-            },
+            User(
+                id = "!25060804",
+                long_name = "Meshtastic 0804",
+                short_name = "0804",
+                hw_model = HardwareModel.ANDROID_SIM,
+            ),
             longName = "Meshtastic 0804",
             shortName = "0804",
             hopsAway = 3,
@@ -179,14 +178,14 @@ class NodeInfoDaoTest {
                 NodeEntity(
                     num = 1000 + index,
                     user =
-                    user {
-                        id = "+165087653%02d".format(9 + index)
-                        longName = "Kevin Mester$index"
-                        shortName = "KM$index"
-                        hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-                        isLicensed = false
-                        publicKey = ByteString.copyFrom(ByteArray(32) { index.toByte() })
-                    },
+                    User(
+                        id = "+165087653%02d".format(9 + index),
+                        long_name = "Kevin Mester$index",
+                        short_name = "KM$index",
+                        hw_model = HardwareModel.ANDROID_SIM,
+                        is_licensed = false,
+                        public_key = ByteArray(32) { index.toByte() }.toByteString(),
+                    ),
                     longName = "Kevin Mester$index",
                     shortName = "KM$index",
                     latitude = pos.first,
@@ -256,14 +255,14 @@ class NodeInfoDaoTest {
     @Test
     fun testSortByAlpha() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.ALPHABETICAL)
-        val sortedNodes = nodes.sortedBy { it.user.longName.uppercase() }
+        val sortedNodes = nodes.sortedBy { it.user.long_name?.uppercase() ?: "" }
         assertEquals(sortedNodes, nodes)
     }
 
     @Test
     fun testSortByDistance() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.DISTANCE)
-        fun NodeEntity.toNode() = Node(num = num, user = user, position = position)
+        fun NodeEntity.toNode() = Node(num = num, user = user, position = position ?: Position())
         val sortedNodes =
             nodes.sortedWith( // nodes with invalid (null) positions at the end
                 compareBy<Node> { it.validPosition == null }.thenBy { it.distance(ourNode.toNode()) },
@@ -281,7 +280,7 @@ class NodeInfoDaoTest {
     @Test
     fun testSortByViaMqtt() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.VIA_MQTT)
-        val sortedNodes = nodes.sortedBy { it.user.longName.contains("(MQTT)") }
+        val sortedNodes = nodes.sortedBy { it.user.long_name?.contains("(MQTT)") == true }
         assertEquals(sortedNodes, nodes)
     }
 
@@ -339,8 +338,7 @@ class NodeInfoDaoTest {
 
     @Test
     fun testPkcMismatch() = runBlocking {
-        val newNode =
-            testNodes[1].copy(user = testNodes[1].user.copy { publicKey = ByteString.copyFrom(ByteArray(32) { 99 }) })
+        val newNode = testNodes[1].copy(user = testNodes[1].user.copy(public_key = ByteArray(32) { 99 }.toByteString()))
         nodeInfoDao.putAll(listOf(newNode))
         val nodes = getNodes()
         val containsMismatchNode = nodes.any { it.mismatchKey }

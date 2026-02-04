@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import androidx.core.os.LocaleListCompat
@@ -22,12 +21,12 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.HardwareModel
 import java.util.Locale
 
 class NodeInfoTest {
-    private val model = MeshProtos.HardwareModel.ANDROID_SIM
+    private val model = HardwareModel.ANDROID_SIM
     private val node =
         listOf(
             NodeInfo(4, MeshUser("+zero", "User Zero", "U0", model)),
@@ -58,9 +57,9 @@ class NodeInfoTest {
 
     @Test
     fun distanceStrGood() {
-        Assert.assertEquals(node[1].distanceStr(node[2], DisplayUnits.METRIC_VALUE), "1.1 km")
-        Assert.assertEquals(node[1].distanceStr(node[3], DisplayUnits.METRIC_VALUE), "111 m")
-        Assert.assertEquals(node[1].distanceStr(node[4], DisplayUnits.IMPERIAL_VALUE), "1.1 mi")
-        Assert.assertEquals(node[1].distanceStr(node[3], DisplayUnits.IMPERIAL_VALUE), "364 ft")
+        Assert.assertEquals(node[1].distanceStr(node[2], Config.DisplayConfig.DisplayUnits.METRIC.value), "1.1 km")
+        Assert.assertEquals(node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.METRIC.value), "111 m")
+        Assert.assertEquals(node[1].distanceStr(node[4], Config.DisplayConfig.DisplayUnits.IMPERIAL.value), "1.1 mi")
+        Assert.assertEquals(node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.IMPERIAL.value), "364 ft")
     }
 }

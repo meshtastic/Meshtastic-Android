@@ -22,8 +22,8 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.google.protobuf.ByteString
-import com.google.protobuf.kotlin.isNotEmpty
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics
@@ -31,10 +31,12 @@ import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.User
+import org.meshtastic.proto.Position as WirePosition
 
 data class NodeWithRelations(
     @Embedded val node: NodeEntity,
@@ -50,15 +52,15 @@ data class NodeWithRelations(
             snr = snr,
             rssi = rssi,
             lastHeard = lastHeard,
-            deviceMetrics = deviceTelemetry.deviceMetrics,
+            deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
             channel = channel,
             viaMqtt = viaMqtt,
             hopsAway = hopsAway,
             isFavorite = isFavorite,
             isIgnored = isIgnored,
             isMuted = isMuted,
-            environmentMetrics = environmentTelemetry.environmentMetrics,
-            powerMetrics = powerTelemetry.powerMetrics,
+            environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
+            powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
             paxcounter = paxcounter,
             notes = notes,
             manuallyVerified = manuallyVerified,
@@ -94,7 +96,7 @@ data class NodeWithRelations(
 @Entity(tableName = "metadata", indices = [Index(value = ["num"])])
 data class MetadataEntity(
     @PrimaryKey val num: Int,
-    @ColumnInfo(name = "proto", typeAffinity = ColumnInfo.BLOB) val proto: MeshProtos.DeviceMetadata,
+    @ColumnInfo(name = "proto", typeAffinity = ColumnInfo.BLOB) val proto: DeviceMetadata,
     val timestamp: Long = System.currentTimeMillis(),
 )
 
@@ -113,18 +115,16 @@ data class MetadataEntity(
 )
 data class NodeEntity(
     @PrimaryKey(autoGenerate = false) val num: Int, // This is immutable, and used as a key
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var user: User = User(),
     @ColumnInfo(name = "long_name") var longName: String? = null,
     @ColumnInfo(name = "short_name") var shortName: String? = null, // used in includeUnknown filter
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    var position: MeshProtos.Position = MeshProtos.Position.getDefaultInstance(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var position: WirePosition = WirePosition(),
     var latitude: Double = 0.0,
     var longitude: Double = 0.0,
     var snr: Float = Float.MAX_VALUE,
     var rssi: Int = Int.MAX_VALUE,
     @ColumnInfo(name = "last_heard") var lastHeard: Int = 0, // the last time we've seen this node in secs since 1970
-    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB)
-    var deviceTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.getDefaultInstance(),
+    @ColumnInfo(name = "device_metrics", typeAffinity = ColumnInfo.BLOB) var deviceTelemetry: Telemetry = Telemetry(),
     var channel: Int = 0,
     @ColumnInfo(name = "via_mqtt") var viaMqtt: Boolean = false,
     @ColumnInfo(name = "hops_away") var hopsAway: Int = -1,
@@ -132,33 +132,34 @@ data class NodeEntity(
     @ColumnInfo(name = "is_ignored", defaultValue = "0") var isIgnored: Boolean = false,
     @ColumnInfo(name = "is_muted", defaultValue = "0") var isMuted: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
-    var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.newBuilder().build(),
-    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
-    var powerTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.getDefaultInstance(),
-    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
-    var paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
+    var environmentTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB) var powerTelemetry: Telemetry = Telemetry(),
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB) var paxcounter: Paxcount = Paxcount(),
     @ColumnInfo(name = "public_key") var publicKey: ByteString? = null,
     @ColumnInfo(name = "notes", defaultValue = "") var notes: String = "",
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
     var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
     @ColumnInfo(name = "node_status") var nodeStatus: String? = null,
 ) {
-    val deviceMetrics: TelemetryProtos.DeviceMetrics
-        get() = deviceTelemetry.deviceMetrics
+    val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
+        get() = deviceTelemetry.device_metrics
 
-    val environmentMetrics: TelemetryProtos.EnvironmentMetrics
-        get() = environmentTelemetry.environmentMetrics
+    val environmentMetrics: org.meshtastic.proto.EnvironmentMetrics?
+        get() = environmentTelemetry.environment_metrics
+
+    val powerMetrics: org.meshtastic.proto.PowerMetrics?
+        get() = powerTelemetry.power_metrics
 
     val isUnknownUser
-        get() = user.hwModel == MeshProtos.HardwareModel.UNSET
+        get() = user.hw_model == HardwareModel.UNSET
 
     val hasPKC
-        get() = (publicKey ?: user.publicKey).isNotEmpty()
+        get() = (publicKey ?: user.public_key)?.size?.let { it > 0 } == true
 
-    fun setPosition(p: MeshProtos.Position, defaultTime: Int = currentTime()) {
-        position = p.copy { time = if (p.time != 0) p.time else defaultTime }
-        latitude = degD(p.latitudeI)
-        longitude = degD(p.longitudeI)
+    fun setPosition(p: WirePosition, defaultTime: Int = currentTime()) {
+        position = p.copy(time = if (p.time != 0) p.time else defaultTime)
+        latitude = degD(p.latitude_i ?: 0)
+        longitude = degD(p.longitude_i ?: 0)
     }
 
     /** true if the device was heard from recently */
@@ -173,7 +174,7 @@ data class NodeEntity(
 
         fun degI(d: Double) = (d * 1e7).toInt()
 
-        val ERROR_BYTE_STRING: ByteString = ByteString.copyFrom(ByteArray(32) { 0 })
+        val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
 
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
@@ -185,17 +186,17 @@ data class NodeEntity(
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
-        deviceMetrics = deviceTelemetry.deviceMetrics,
+        deviceMetrics = deviceMetrics ?: org.meshtastic.proto.DeviceMetrics(),
         channel = channel,
         viaMqtt = viaMqtt,
         hopsAway = hopsAway,
         isFavorite = isFavorite,
         isIgnored = isIgnored,
         isMuted = isMuted,
-        environmentMetrics = environmentTelemetry.environmentMetrics,
-        powerMetrics = powerTelemetry.powerMetrics,
+        environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
+        powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
         paxcounter = paxcounter,
-        publicKey = publicKey ?: user.publicKey,
+        publicKey = publicKey ?: user.public_key,
         notes = notes,
         nodeStatus = nodeStatus,
     )
@@ -205,22 +206,22 @@ data class NodeEntity(
         user =
         MeshUser(
             id = user.id,
-            longName = user.longName,
-            shortName = user.shortName,
-            hwModel = user.hwModel,
-            role = user.roleValue,
+            longName = user.long_name ?: "",
+            shortName = user.short_name ?: "",
+            hwModel = user.hw_model,
+            role = user.role.value,
         )
             .takeIf { user.id.isNotEmpty() },
         position =
         Position(
             latitude = latitude,
             longitude = longitude,
-            altitude = position.altitude,
+            altitude = position.altitude ?: 0,
             time = position.time,
-            satellitesInView = position.satsInView,
-            groundSpeed = position.groundSpeed,
-            groundTrack = position.groundTrack,
-            precisionBits = position.precisionBits,
+            satellitesInView = position.sats_in_view ?: 0,
+            groundSpeed = position.ground_speed ?: 0,
+            groundTrack = position.ground_track ?: 0,
+            precisionBits = position.precision_bits ?: 0,
         )
             .takeIf { it.isValid() },
         snr = snr,
@@ -229,16 +230,16 @@ data class NodeEntity(
         deviceMetrics =
         DeviceMetrics(
             time = deviceTelemetry.time,
-            batteryLevel = deviceMetrics.batteryLevel,
-            voltage = deviceMetrics.voltage,
-            channelUtilization = deviceMetrics.channelUtilization,
-            airUtilTx = deviceMetrics.airUtilTx,
-            uptimeSeconds = deviceMetrics.uptimeSeconds,
+            batteryLevel = deviceMetrics?.battery_level ?: 0,
+            voltage = deviceMetrics?.voltage ?: 0f,
+            channelUtilization = deviceMetrics?.channel_utilization ?: 0f,
+            airUtilTx = deviceMetrics?.air_util_tx ?: 0f,
+            uptimeSeconds = deviceMetrics?.uptime_seconds ?: 0,
         ),
         channel = channel,
         environmentMetrics =
         EnvironmentMetrics.fromTelemetryProto(
-            environmentTelemetry.environmentMetrics,
+            environmentTelemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics(),
             environmentTelemetry.time,
         ),
         hopsAway = hopsAway,

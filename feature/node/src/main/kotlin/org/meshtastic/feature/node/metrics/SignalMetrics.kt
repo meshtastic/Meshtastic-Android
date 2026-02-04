@@ -68,7 +68,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
     SNR(Green),
@@ -93,7 +93,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         telemetryType = TelemetryType.LOCAL_STATS,
         titleRes = Res.string.signal_quality,
         data = data,
-        timeProvider = { it.rxTime.toDouble() },
+        timeProvider = { (it.rx_time ?: 0).toDouble() },
         infoData =
         listOf(
             InfoDialogData(Res.string.snr, Res.string.snr_definition, SignalMetric.SNR.color),
@@ -113,8 +113,8 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 itemsIndexed(data) { _, meshPacket ->
                     SignalMetricsCard(
                         meshPacket = meshPacket,
-                        isSelected = meshPacket.rxTime.toDouble() == selectedX,
-                        onClick = { onCardClick(meshPacket.rxTime.toDouble()) },
+                        isSelected = (meshPacket.rx_time ?: 0).toDouble() == selectedX,
+                        onClick = { onCardClick((meshPacket.rx_time ?: 0).toDouble()) },
                     )
                 }
             }
@@ -140,12 +140,12 @@ private fun SignalMetricsChart(
             modelProducer.runTransaction {
                 /* Use separate lineSeries calls to associate them with different vertical axes */
                 lineSeries {
-                    val rssiData = meshPackets.filter { it.rxRssi != 0 && !it.rxRssi.toFloat().isNaN() }
-                    series(x = rssiData.map { it.rxTime }, y = rssiData.map { it.rxRssi })
+                    val rssiData = meshPackets.filter { (it.rx_rssi ?: 0) != 0 }
+                    series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 })
                 }
                 lineSeries {
-                    val snrData = meshPackets.filter { !it.rxSnr.isNaN() }
-                    series(x = snrData.map { it.rxTime }, y = snrData.map { it.rxSnr })
+                    val snrData = meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) }
+                    series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f })
                 }
             }
         }
@@ -215,7 +215,7 @@ private fun SignalMetricsChart(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
-    val time = meshPacket.rxTime * MS_PER_SEC
+    val time = (meshPacket.rx_time ?: 0).toLong() * MS_PER_SEC
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -250,14 +250,14 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                                 MetricIndicator(SignalMetric.RSSI.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "%.0f dBm".format(meshPacket.rxRssi.toFloat()),
+                                    text = "%.0f dBm".format((meshPacket.rx_rssi ?: 0).toFloat()),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 MetricIndicator(SignalMetric.SNR.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "%.1f dB".format(meshPacket.rxSnr),
+                                    text = "%.1f dB".format(meshPacket.rx_snr ?: 0f),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }
@@ -266,7 +266,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
 
                     /* Signal Indicator */
                     Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                        LoraSignalIndicator(meshPacket.rxSnr, meshPacket.rxRssi)
+                        LoraSignalIndicator(meshPacket.rx_snr ?: 0f, meshPacket.rx_rssi ?: 0)
                     }
                 }
             }
