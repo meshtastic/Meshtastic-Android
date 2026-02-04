@@ -43,7 +43,7 @@ detekt = "1.23.8"
 devtools-ksp = "2.3.5"
 markdownRenderer = "0.39.2"
 osmdroid-android = "6.1.20"
-wire = "5.2.1"
+wire = "5.5.0"
 vico = "3.0.0-beta.3"
 # Removed gradle-doctor
 dependency-guard = "0.5.0"
