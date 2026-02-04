@@ -18,7 +18,6 @@
 package org.meshtastic.buildlogic
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.ApplicationProductFlavor
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.dsl.ProductFlavor
@@ -38,34 +37,28 @@ fun configureFlavors(
     commonExtension: CommonExtension,
     flavorConfigurationBlock: ProductFlavor.(flavor: MeshtasticFlavor) -> Unit = {},
 ) {
-    (commonExtension as? ApplicationExtension)?.apply {
+    commonExtension.apply {
         FlavorDimension.entries.forEach { flavorDimension ->
             flavorDimensions += flavorDimension.name
         }
 
-        productFlavors {
-            MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
-                register(meshtasticFlavor.name) {
-                    dimension = meshtasticFlavor.dimension.name
-                    flavorConfigurationBlock(this, meshtasticFlavor)
-                    if (meshtasticFlavor.default) {
-                        isDefault = true
+        when (this) {
+            is ApplicationExtension -> productFlavors {
+                MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
+                    register(meshtasticFlavor.name) {
+                        dimension = meshtasticFlavor.dimension.name
+                        flavorConfigurationBlock(this, meshtasticFlavor)
+                        if (meshtasticFlavor.default) {
+                            isDefault = true
+                        }
                     }
                 }
             }
-        }
-    }
-    (commonExtension as? LibraryExtension)?.apply {
-        FlavorDimension.entries.forEach { flavorDimension ->
-            flavorDimensions += flavorDimension.name
-        }
-
-        productFlavors {
-            MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
-                register(meshtasticFlavor.name) {
-                    dimension = meshtasticFlavor.dimension.name
-                    flavorConfigurationBlock(this, meshtasticFlavor)
-                    if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
+            is LibraryExtension -> productFlavors {
+                MeshtasticFlavor.entries.forEach { meshtasticFlavor ->
+                    register(meshtasticFlavor.name) {
+                        dimension = meshtasticFlavor.dimension.name
+                        flavorConfigurationBlock(this, meshtasticFlavor)
                         if (meshtasticFlavor.default) {
                             isDefault = true
                         }
@@ -75,4 +68,3 @@ fun configureFlavors(
         }
     }
 }
-

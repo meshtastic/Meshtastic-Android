@@ -17,9 +17,7 @@
 
 package org.meshtastic.buildlogic
 
-import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
-import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 
@@ -29,8 +27,9 @@ import org.gradle.kotlin.dsl.dependencies
 internal fun Project.configureAndroidCompose(
     commonExtension: CommonExtension,
 ) {
-    (commonExtension as? ApplicationExtension)?.buildFeatures?.compose = true
-    (commonExtension as? LibraryExtension)?.buildFeatures?.compose = true
+    commonExtension.apply {
+        buildFeatures.compose = true
+    }
 
     dependencies {
         val bom = libs.library("androidx-compose-bom")
