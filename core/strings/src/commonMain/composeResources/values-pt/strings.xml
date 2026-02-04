@@ -98,12 +98,9 @@
     <!-- Position Config -->
     <string name="broadcast_interval">Intervalo de difusão</string>
     <string name="smart_position">Posição Inteligente</string>
-    <string name="minimum_interval">Intervalo Mínimo</string>
-    <string name="minimum_distance">Distância Mínima</string>
     <string name="device_gps">GPS do Dispositivo</string>
     <string name="fixed_position">Posição fixa</string>
     <string name="altitude">Altitude</string>
-    <string name="update_interval">Intervalo de Atualização</string>
     <string name="debug">Depuração</string>
     <string name="channel">Canal</string>
     <string name="channel_name">Nome do Canal</string>

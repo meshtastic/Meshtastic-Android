@@ -140,12 +140,9 @@
     <string name="position_packet">Positionspaket</string>
     <string name="broadcast_interval">Sändningsintervall</string>
     <string name="smart_position">Smart position</string>
-    <string name="minimum_interval">Minsta intervall</string>
-    <string name="minimum_distance">Minsta avstånd</string>
     <string name="device_gps">Enhetens GPS</string>
     <string name="fixed_position">Fast plats</string>
     <string name="altitude">Altitud</string>
-    <string name="update_interval">Uppdateringsintervall</string>
     <string name="advanced_device_gps">Avancerad enhets-GPS</string>
     <string name="gps_receive_gpio">GPIO för GPS-mottagning</string>
     <string name="gps_transmit_gpio">GPIO för GPS-sändning</string>

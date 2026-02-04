@@ -112,11 +112,8 @@
     <!-- Position Config -->
     <string name="broadcast_interval">Интервал на излъчване</string>
     <string name="smart_position">Интелигентна позиция</string>
-    <string name="minimum_interval">Минимален интервал</string>
-    <string name="minimum_distance">Минимално разстояние</string>
     <string name="fixed_position">Фиксирана позиция</string>
     <string name="altitude">Надморска височина</string>
-    <string name="update_interval">Интервал на актуализиране</string>
     <string name="gps_receive_gpio">GPIO за приемане от GPS</string>
     <string name="gps_transmit_gpio">GPIO за предаване от GPS</string>
     <string name="gpio">GPIO</string>

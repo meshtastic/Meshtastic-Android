@@ -141,12 +141,9 @@
     <string name="position_packet">Pakiet lokalizacji</string>
     <string name="broadcast_interval">Interwał transmisji</string>
     <string name="smart_position">Inteligentne Pozycjonowanie</string>
-    <string name="minimum_interval">Minimalny interwał</string>
-    <string name="minimum_distance">Minimalna Odległość</string>
     <string name="device_gps">Ustawienia GPS</string>
     <string name="fixed_position">Położenie stałe</string>
     <string name="altitude">Wysokość</string>
-    <string name="update_interval">Częstotliwość aktualizacji</string>
     <string name="advanced_device_gps">Zaawansowanie ustawienia GPS</string>
     <string name="gps_receive_gpio">GPS Rx GPIO</string>
     <string name="gps_transmit_gpio">GPS Tx GPIO</string>

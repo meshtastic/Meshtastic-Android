@@ -112,12 +112,9 @@
     <string name="position_packet">Paket Pozície</string>
     <string name="broadcast_interval">Broadcastový Interval</string>
     <string name="smart_position">Inteligentná poloha</string>
-    <string name="minimum_interval">Minimálny Interval</string>
-    <string name="minimum_distance">Minimálna vzdialenosť</string>
     <string name="device_gps">GPS Zariadenia</string>
     <string name="fixed_position">Fixná Pozícia</string>
     <string name="altitude">Nadmorská výška</string>
-    <string name="update_interval">Aktualizačný interval</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladenie</string>
     <string name="channel">Kanál</string>

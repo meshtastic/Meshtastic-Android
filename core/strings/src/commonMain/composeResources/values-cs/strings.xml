@@ -115,11 +115,8 @@
     <string name="position_packet">Polohový paket</string>
     <string name="broadcast_interval">Interval vysílání</string>
     <string name="smart_position">Chytrá poloha</string>
-    <string name="minimum_interval">Minimální interval</string>
-    <string name="minimum_distance">Minimální vzdálenost</string>
     <string name="device_gps">GPS zařízení</string>
     <string name="fixed_position">Pevná poloha</string>
-    <string name="update_interval">Interval aktualizace</string>
     <string name="advanced_device_gps">Pokročilé nastavení GPS zařízení</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladění</string>

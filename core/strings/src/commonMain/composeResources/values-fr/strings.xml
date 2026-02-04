@@ -153,12 +153,9 @@
     <string name="position_packet">Paquet de position</string>
     <string name="broadcast_interval">Intervalle de diffusion</string>
     <string name="smart_position">Position Intelligente</string>
-    <string name="minimum_interval">Intervalle minimum</string>
-    <string name="minimum_distance">Distance minimale</string>
     <string name="device_gps">Appareil GPS</string>
     <string name="fixed_position">Position fixe</string>
     <string name="altitude">Altitude</string>
-    <string name="update_interval">Intervalle de mise à jour</string>
     <string name="advanced_device_gps">Appareil GPS avancé</string>
     <string name="gps_receive_gpio">GPIO réception du GPS</string>
     <string name="gps_transmit_gpio">GPIO émission du GPS</string>

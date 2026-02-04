@@ -153,12 +153,9 @@
     <string name="position_packet">位置数据包</string>
     <string name="broadcast_interval">广播间隔</string>
     <string name="smart_position">智能位置</string>
-    <string name="minimum_interval">最小间隔</string>
-    <string name="minimum_distance">最小距离</string>
     <string name="device_gps">设备 GPS</string>
     <string name="fixed_position">固定位置</string>
     <string name="altitude">海拔</string>
-    <string name="update_interval">更新间隔</string>
     <string name="advanced_device_gps">高级设备 GPS</string>
     <string name="gps_receive_gpio">GPS 接收GPIO</string>
     <string name="gps_transmit_gpio">GPS 输出 GPIO</string>

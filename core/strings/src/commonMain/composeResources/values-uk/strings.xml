@@ -105,11 +105,8 @@
     <string name="config_position_gps_update_interval_summary">Як часто слід намагатися отримати позицію GPS (&lt;10 сек тримає GPS постійно увімкненим).</string>
     <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
     <!-- Position Config -->
-    <string name="minimum_interval">Мінімальний проміжок</string>
-    <string name="minimum_distance">Мінімальна відстань</string>
     <string name="device_gps">GPS пристрій</string>
     <string name="altitude">Висота</string>
-    <string name="update_interval">Частота оновлення</string>
     <string name="gps_receive_gpio">GPIO отримання GPS</string>
     <string name="gps_transmit_gpio">GPIO передачі GPS</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>

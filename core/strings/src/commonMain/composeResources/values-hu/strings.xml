@@ -143,12 +143,9 @@
     <string name="position_packet">Pozíciócsomag</string>
     <string name="broadcast_interval">Sugárzási időköz</string>
     <string name="smart_position">Intelligens pozíció</string>
-    <string name="minimum_interval">Minimális időköz</string>
-    <string name="minimum_distance">Minimális távolság</string>
     <string name="device_gps">Eszköz GPS-e</string>
     <string name="fixed_position">Rögzített pozíció</string>
     <string name="altitude">Magasság</string>
-    <string name="update_interval">Frissítési időköz</string>
     <string name="advanced_device_gps">Speciális eszköz-GPS</string>
     <string name="gps_receive_gpio">GPS vevő (RX) GPIO</string>
     <string name="gps_transmit_gpio">GPS adó (TX) GPIO</string>
