@@ -143,7 +143,7 @@ private fun NodeDetailScaffold(
         modifier = modifier,
         topBar = {
             MainAppBar(
-                title = node?.user?.longName ?: "",
+                title = node?.user?.long_name ?: "",
                 ourNode = uiState.ourNode,
                 showNodeChip = false,
                 canNavigateUp = true,

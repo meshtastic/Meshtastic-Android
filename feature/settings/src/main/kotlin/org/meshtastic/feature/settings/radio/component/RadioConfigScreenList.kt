@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -33,7 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.MessageLite
+import com.squareup.wire.Message
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.discard_changes
@@ -44,7 +43,7 @@ import org.meshtastic.feature.settings.radio.ResponseState
 
 @Suppress("LongMethod")
 @Composable
-fun <T : MessageLite> RadioConfigScreenList(
+fun <T : Message<T, *>> RadioConfigScreenList(
     title: String,
     onBack: () -> Unit,
     responseState: ResponseState<Any>,

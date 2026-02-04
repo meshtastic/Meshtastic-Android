@@ -19,8 +19,8 @@ package org.meshtastic.feature.node.metrics
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.meshtastic.proto.TelemetryProtos.EnvironmentMetrics
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.Telemetry
 
 class EnvironmentMetricsStateTest {
 
@@ -29,18 +29,9 @@ class EnvironmentMetricsStateTest {
         val now = (System.currentTimeMillis() / 1000).toInt()
         val metrics =
             listOf(
-                Telemetry.newBuilder()
-                    .setTime(now - 100)
-                    .setEnvironmentMetrics(EnvironmentMetrics.newBuilder().setTemperature(20f))
-                    .build(),
-                Telemetry.newBuilder()
-                    .setTime(now - 50)
-                    .setEnvironmentMetrics(EnvironmentMetrics.newBuilder().setTemperature(22f))
-                    .build(),
-                Telemetry.newBuilder()
-                    .setTime(now)
-                    .setEnvironmentMetrics(EnvironmentMetrics.newBuilder().setTemperature(21f))
-                    .build(),
+                Telemetry(time = now - 100, environment_metrics = EnvironmentMetrics(temperature = 20f)),
+                Telemetry(time = now - 50, environment_metrics = EnvironmentMetrics(temperature = 22f)),
+                Telemetry(time = now, environment_metrics = EnvironmentMetrics(temperature = 21f)),
             )
         val state = EnvironmentMetricsState(metrics)
         val result = state.environmentMetricsForGraphing()
@@ -52,13 +43,7 @@ class EnvironmentMetricsStateTest {
     @Test
     fun `environmentMetricsForGraphing handles valid zero temperatures`() {
         val now = (System.currentTimeMillis() / 1000).toInt()
-        val metrics =
-            listOf(
-                Telemetry.newBuilder()
-                    .setTime(now)
-                    .setEnvironmentMetrics(EnvironmentMetrics.newBuilder().setTemperature(0.0f))
-                    .build(),
-            )
+        val metrics = listOf(Telemetry(time = now, environment_metrics = EnvironmentMetrics(temperature = 0.0f)))
         val state = EnvironmentMetricsState(metrics)
         val result = state.environmentMetricsForGraphing()
 

@@ -27,10 +27,10 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.MyNodeInfo
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Telemetry
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
@@ -55,74 +55,39 @@ constructor(
         .conflate()
 
     private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
-        Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
-            .toBuilder()
-            .apply {
-                if (hasEnvironmentMetrics()) {
-                    // Handle float metrics that default to 0.0f when not explicitly set or when 0.0f means no
-                    // data
-                    if (!environmentMetrics.hasTemperature()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setTemperature(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasRelativeHumidity()) {
-                        environmentMetrics =
-                            environmentMetrics.toBuilder().setRelativeHumidity(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasSoilTemperature()) {
-                        environmentMetrics =
-                            environmentMetrics.toBuilder().setSoilTemperature(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasBarometricPressure()) {
-                        environmentMetrics =
-                            environmentMetrics.toBuilder().setBarometricPressure(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasGasResistance()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setGasResistance(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasVoltage()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setVoltage(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasCurrent()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setCurrent(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasLux()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setLux(Float.NaN).build()
-                    }
-                    if (!environmentMetrics.hasUvLux()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setUvLux(Float.NaN).build()
-                    }
-
-                    // Handle uint32 metrics that default to 0 when not explicitly set or when 0 means no data
-                    if (!environmentMetrics.hasIaq()) {
-                        environmentMetrics = environmentMetrics.toBuilder().setIaq(Int.MIN_VALUE).build()
-                    }
-                    if (!environmentMetrics.hasSoilMoisture()) {
-                        environmentMetrics =
-                            environmentMetrics.toBuilder().setSoilMoisture(Int.MIN_VALUE).build()
-                    }
-                }
-                // Leaving in case we have need of nulling any in device metrics.
-                //                if (hasDeviceMetrics()) {
-                //                    deviceMetrics =
-                // deviceMetrics.toBuilder().setBatteryLevel(Int.MIN_VALUE).build()
-                //                }
-            }
-            .setTime((log.received_date / MILLIS_TO_SECONDS).toInt())
-            .build()
+        val payload = log.fromRadio.packet?.decoded?.payload ?: return@runCatching null
+        val telemetry = Telemetry.ADAPTER.decode(payload)
+        telemetry.copy(
+            time = (log.received_date / MILLIS_TO_SECONDS).toInt(),
+            environment_metrics =
+            telemetry.environment_metrics?.let { metrics ->
+                metrics.copy(
+                    temperature = metrics.temperature ?: Float.NaN,
+                    relative_humidity = metrics.relative_humidity ?: Float.NaN,
+                    soil_temperature = metrics.soil_temperature ?: Float.NaN,
+                    barometric_pressure = metrics.barometric_pressure ?: Float.NaN,
+                    gas_resistance = metrics.gas_resistance ?: Float.NaN,
+                    voltage = metrics.voltage ?: Float.NaN,
+                    current = metrics.current ?: Float.NaN,
+                    lux = metrics.lux ?: Float.NaN,
+                    uv_lux = metrics.uv_lux ?: Float.NaN,
+                    iaq = metrics.iaq ?: Int.MIN_VALUE,
+                    soil_moisture = metrics.soil_moisture ?: Int.MIN_VALUE,
+                )
+            },
+        )
     }
         .getOrNull()
 
     fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = dbManager.currentDb
-        .flatMapLatest {
-            it.meshLogDao().getLogsFrom(nodeNum, Portnums.PortNum.TELEMETRY_APP_VALUE, MAX_MESH_PACKETS)
-        }
+        .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, PortNum.TELEMETRY_APP.value, MAX_MESH_PACKETS) }
         .distinctUntilChanged()
         .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
         .flowOn(dispatchers.io)
 
     fun getLogsFrom(
         nodeNum: Int,
-        portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE,
+        portNum: Int = PortNum.UNKNOWN_APP.value,
         maxItem: Int = MAX_MESH_PACKETS,
     ): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, portNum, maxItem) }
@@ -133,10 +98,12 @@ constructor(
      * Retrieves MeshPackets matching 'nodeNum' and 'portNum'.
      * If 'portNum' is not specified, returns all MeshPackets. Otherwise, filters by 'portNum'.
      */
-    fun getMeshPacketsFrom(nodeNum: Int, portNum: Int = Portnums.PortNum.UNKNOWN_APP_VALUE): Flow<List<MeshPacket>> =
-        getLogsFrom(nodeNum, portNum).mapLatest { list -> list.map { it.fromRadio.packet } }.flowOn(dispatchers.io)
+    fun getMeshPacketsFrom(nodeNum: Int, portNum: Int = PortNum.UNKNOWN_APP.value): Flow<List<MeshPacket>> =
+        getLogsFrom(nodeNum, portNum)
+            .mapLatest { list -> list.mapNotNull { it.fromRadio.packet } }
+            .flowOn(dispatchers.io)
 
-    fun getMyNodeInfo(): Flow<MeshProtos.MyNodeInfo?> = getLogsFrom(0, 0)
+    fun getMyNodeInfo(): Flow<MyNodeInfo?> = getLogsFrom(0, 0)
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
         .flowOn(dispatchers.io)
 

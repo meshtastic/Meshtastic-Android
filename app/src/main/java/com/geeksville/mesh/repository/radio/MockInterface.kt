@@ -19,39 +19,40 @@ package com.geeksville.mesh.repository.radio
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.getInitials
-import com.google.protobuf.ByteString
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
+import okio.ByteString.Companion.encodeUtf8
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Position
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigKt
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.ModuleConfigProtos
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.channel
-import org.meshtastic.proto.config
-import org.meshtastic.proto.deviceMetadata
-import org.meshtastic.proto.fromRadio
-import org.meshtastic.proto.moduleConfig
-import org.meshtastic.proto.queueStatus
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.FromRadio
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.Neighbor
+import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.proto.NodeInfo
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.Routing
+import org.meshtastic.proto.StatusMessage
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.ToRadio
+import org.meshtastic.proto.User
 import kotlin.random.Random
+import org.meshtastic.proto.Channel as ProtoChannel
+import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
+import org.meshtastic.proto.Position as ProtoPosition
 
-private val defaultLoRaConfig =
-    ConfigKt.loRaConfig {
-        usePreset = true
-        region = ConfigProtos.Config.LoRaConfig.RegionCode.TW
-    }
+private val defaultLoRaConfig = Config.LoRaConfig(use_preset = true, region = Config.LoRaConfig.RegionCode.TW)
 
-private val defaultChannel = channel {
-    settings = Channel.default.settings
-    role = ChannelProtos.Channel.Role.PRIMARY
-}
+private val defaultChannel = ProtoChannel(settings = Channel.default.settings, role = ProtoChannel.Role.PRIMARY)
 
 /** A simulated interface that is used for testing in the simulator */
 @Suppress("detekt:TooManyFunctions", "detekt:MagicNumber")
@@ -77,46 +78,57 @@ constructor(
     }
 
     override fun handleSendToRadio(p: ByteArray) {
-        val pr = MeshProtos.ToRadio.parseFrom(p)
-        sendQueueStatus(pr.packet.id)
+        val pr = ToRadio.ADAPTER.decode(p)
+        val packet = pr.packet
+        if (packet != null) {
+            sendQueueStatus(packet.id)
+        }
 
-        val data = if (pr.hasPacket()) pr.packet.decoded else null
+        val data = packet?.decoded
 
         when {
-            pr.wantConfigId != 0 -> sendConfigResponse(pr.wantConfigId)
-            data != null && data.portnum == Portnums.PortNum.ADMIN_APP ->
-                handleAdminPacket(pr, AdminProtos.AdminMessage.parseFrom(data.payload))
-            pr.hasPacket() && pr.packet.wantAck -> sendFakeAck(pr)
+            (pr.want_config_id ?: 0) != 0 -> sendConfigResponse(pr.want_config_id ?: 0)
+            data != null && data.portnum == PortNum.ADMIN_APP ->
+                handleAdminPacket(pr, AdminMessage.ADAPTER.decode(data.payload))
+            packet != null && packet.want_ack == true -> sendFakeAck(pr)
             else -> Logger.i { "Ignoring data sent to mock interface $pr" }
         }
     }
 
-    private fun handleAdminPacket(pr: MeshProtos.ToRadio, d: AdminProtos.AdminMessage) {
+    private fun handleAdminPacket(pr: ToRadio, d: AdminMessage) {
+        val packet = pr.packet ?: return
         when {
-            d.getConfigRequest == AdminProtos.AdminMessage.ConfigType.LORA_CONFIG ->
-                sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                    getConfigResponse = config { lora = defaultLoRaConfig }
+            d.get_config_request == AdminMessage.ConfigType.LORA_CONFIG ->
+                sendAdmin(packet.to, packet.from, packet.id) {
+                    copy(get_config_response = Config(lora = defaultLoRaConfig))
                 }
 
-            d.getChannelRequest != 0 ->
-                sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                    getChannelResponse = channel {
-                        index = d.getChannelRequest - 1 // 0 based on the response
-                        if (d.getChannelRequest == 1) {
-                            settings = Channel.default.settings
-                            role = ChannelProtos.Channel.Role.PRIMARY
-                        }
-                    }
+            (d.get_channel_request ?: 0) != 0 ->
+                sendAdmin(packet.to, packet.from, packet.id) {
+                    copy(
+                        get_channel_response =
+                        ProtoChannel(
+                            index = (d.get_channel_request ?: 0) - 1, // 0 based on the response
+                            settings = if (d.get_channel_request == 1) Channel.default.settings else null,
+                            role =
+                            if (d.get_channel_request == 1) {
+                                ProtoChannel.Role.PRIMARY
+                            } else {
+                                ProtoChannel.Role.DISABLED
+                            },
+                        ),
+                    )
                 }
 
-            d.getModuleConfigRequest == AdminProtos.AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG ->
-                sendAdmin(pr.packet.to, pr.packet.from, pr.packet.id) {
-                    getModuleConfigResponse = moduleConfig {
-                        statusmessage =
-                            ModuleConfigProtos.ModuleConfig.StatusMessageConfig.newBuilder()
-                                .setNodeStatus("Going to the farm.. to grow wheat.")
-                                .build()
-                    }
+            d.get_module_config_request == AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG ->
+                sendAdmin(packet.to, packet.from, packet.id) {
+                    copy(
+                        get_module_config_response =
+                        ModuleConfig(
+                            statusmessage =
+                            ModuleConfig.StatusMessageConfig(node_status = "Going to the farm.. to grow wheat."),
+                        ),
+                    )
                 }
 
             else -> Logger.i { "Ignoring admin sent to mock interface $d" }
@@ -128,207 +140,169 @@ constructor(
     }
 
     // / Generate a fake text message from a node
-    private fun makeTextMessage(numIn: Int) = MeshProtos.FromRadio.newBuilder().apply {
+    private fun makeTextMessage(numIn: Int) = FromRadio(
         packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = packetIdSequence.next()
-                    from = numIn
-                    to = 0xffffffff.toInt() // ugly way of saying broadcast
-                    rxTime = (System.currentTimeMillis() / 1000).toInt()
-                    rxSnr = 1.5f
-                    decoded =
-                        MeshProtos.Data.newBuilder()
-                            .apply {
-                                portnum = Portnums.PortNum.TEXT_MESSAGE_APP
-                                payload = ByteString.copyFromUtf8("This simulated node sends Hi!")
-                            }
-                            .build()
-                }
-                .build()
-    }
+        MeshPacket(
+            id = packetIdSequence.next(),
+            from = numIn,
+            to = 0xffffffff.toInt(), // broadcast
+            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_snr = 1.5f,
+            decoded =
+            Data(
+                portnum = PortNum.TEXT_MESSAGE_APP,
+                payload = "This simulated node sends Hi!".encodeUtf8(),
+            ),
+        ),
+    )
 
-    private fun makeNeighborInfo(numIn: Int) = MeshProtos.FromRadio.newBuilder().apply {
+    private fun makeNeighborInfo(numIn: Int) = FromRadio(
         packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = packetIdSequence.next()
-                    from = numIn
-                    to = 0xffffffff.toInt() // broadcast
-                    rxTime = (System.currentTimeMillis() / 1000).toInt()
-                    rxSnr = 1.5f
-                    decoded =
-                        MeshProtos.Data.newBuilder()
-                            .apply {
-                                portnum = Portnums.PortNum.NEIGHBORINFO_APP
-                                payload =
-                                    MeshProtos.NeighborInfo.newBuilder()
-                                        .setNodeId(numIn)
-                                        .setLastSentById(numIn)
-                                        .setNodeBroadcastIntervalSecs(60)
-                                        .addNeighbors(
-                                            MeshProtos.Neighbor.newBuilder()
-                                                .setNodeId(numIn + 1)
-                                                .setSnr(10.0f)
-                                                .setLastRxTime((System.currentTimeMillis() / 1000).toInt())
-                                                .setNodeBroadcastIntervalSecs(60)
-                                                .build(),
-                                        )
-                                        .addNeighbors(
-                                            MeshProtos.Neighbor.newBuilder()
-                                                .setNodeId(numIn + 2)
-                                                .setSnr(12.0f)
-                                                .setLastRxTime((System.currentTimeMillis() / 1000).toInt())
-                                                .setNodeBroadcastIntervalSecs(60)
-                                                .build(),
-                                        )
-                                        .build()
-                                        .toByteString()
-                            }
-                            .build()
-                }
-                .build()
-    }
+        MeshPacket(
+            id = packetIdSequence.next(),
+            from = numIn,
+            to = 0xffffffff.toInt(), // broadcast
+            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_snr = 1.5f,
+            decoded =
+            Data(
+                portnum = PortNum.NEIGHBORINFO_APP,
+                payload =
+                NeighborInfo(
+                    node_id = numIn,
+                    last_sent_by_id = numIn,
+                    node_broadcast_interval_secs = 60,
+                    neighbors =
+                    listOf(
+                        Neighbor(
+                            node_id = numIn + 1,
+                            snr = 10.0f,
+                            last_rx_time = (System.currentTimeMillis() / 1000).toInt(),
+                            node_broadcast_interval_secs = 60,
+                        ),
+                        Neighbor(
+                            node_id = numIn + 2,
+                            snr = 12.0f,
+                            last_rx_time = (System.currentTimeMillis() / 1000).toInt(),
+                            node_broadcast_interval_secs = 60,
+                        ),
+                    ),
+                )
+                    .encode()
+                    .toByteString(),
+            ),
+        ),
+    )
 
-    private fun makePosition(numIn: Int) = MeshProtos.FromRadio.newBuilder().apply {
+    private fun makePosition(numIn: Int) = FromRadio(
         packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = packetIdSequence.next()
-                    from = numIn
-                    to = 0xffffffff.toInt() // ugly way of saying broadcast
-                    rxTime = (System.currentTimeMillis() / 1000).toInt()
-                    rxSnr = 1.5f
-                    decoded =
-                        MeshProtos.Data.newBuilder()
-                            .apply {
-                                portnum = Portnums.PortNum.POSITION_APP
-                                payload =
-                                    MeshProtos.Position.newBuilder()
-                                        .setLatitudeI(Position.degI(32.776665))
-                                        .setLongitudeI(Position.degI(-96.796989))
-                                        .setAltitude(150)
-                                        .setTime((System.currentTimeMillis() / 1000).toInt())
-                                        .setPrecisionBits(15)
-                                        .build()
-                                        .toByteString()
-                            }
-                            .build()
-                }
-                .build()
-    }
+        MeshPacket(
+            id = packetIdSequence.next(),
+            from = numIn,
+            to = 0xffffffff.toInt(), // broadcast
+            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_snr = 1.5f,
+            decoded =
+            Data(
+                portnum = PortNum.POSITION_APP,
+                payload =
+                ProtoPosition(
+                    latitude_i = org.meshtastic.core.model.Position.degI(32.776665),
+                    longitude_i = org.meshtastic.core.model.Position.degI(-96.796989),
+                    altitude = 150,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    precision_bits = 15,
+                )
+                    .encode()
+                    .toByteString(),
+            ),
+        ),
+    )
 
-    private fun makeTelemetry(numIn: Int) = MeshProtos.FromRadio.newBuilder().apply {
+    private fun makeTelemetry(numIn: Int) = FromRadio(
         packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = packetIdSequence.next()
-                    from = numIn
-                    to = 0xffffffff.toInt() // broadcast
-                    rxTime = (System.currentTimeMillis() / 1000).toInt()
-                    rxSnr = 1.5f
-                    decoded =
-                        MeshProtos.Data.newBuilder()
-                            .apply {
-                                portnum = Portnums.PortNum.TELEMETRY_APP
-                                payload =
-                                    TelemetryProtos.Telemetry.newBuilder()
-                                        .setTime((System.currentTimeMillis() / 1000).toInt())
-                                        .setDeviceMetrics(
-                                            TelemetryProtos.DeviceMetrics.newBuilder()
-                                                .setBatteryLevel(85)
-                                                .setVoltage(4.1f)
-                                                .setChannelUtilization(0.12f)
-                                                .setAirUtilTx(0.05f)
-                                                .setUptimeSeconds(123456)
-                                                .build(),
-                                        )
-                                        .build()
-                                        .toByteString()
-                            }
-                            .build()
-                }
-                .build()
-    }
+        MeshPacket(
+            id = packetIdSequence.next(),
+            from = numIn,
+            to = 0xffffffff.toInt(), // broadcast
+            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_snr = 1.5f,
+            decoded =
+            Data(
+                portnum = PortNum.TELEMETRY_APP,
+                payload =
+                Telemetry(
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    device_metrics =
+                    DeviceMetrics(
+                        battery_level = 85,
+                        voltage = 4.1f,
+                        channel_utilization = 0.12f,
+                        air_util_tx = 0.05f,
+                        uptime_seconds = 123456,
+                    ),
+                )
+                    .encode()
+                    .toByteString(),
+            ),
+        ),
+    )
 
-    private fun makeNodeStatus(numIn: Int) = MeshProtos.FromRadio.newBuilder().apply {
+    private fun makeNodeStatus(numIn: Int) = FromRadio(
         packet =
-            MeshProtos.MeshPacket.newBuilder()
-                .apply {
-                    id = packetIdSequence.next()
-                    from = numIn
-                    to = 0xffffffff.toInt() // broadcast
-                    rxTime = (System.currentTimeMillis() / 1000).toInt()
-                    rxSnr = 1.5f
-                    decoded =
-                        MeshProtos.Data.newBuilder()
-                            .apply {
-                                portnum = Portnums.PortNum.NODE_STATUS_APP
-                                payload =
-                                    MeshProtos.StatusMessage.newBuilder()
-                                        .setStatus("Going to the farm.. to grow wheat.")
-                                        .build()
-                                        .toByteString()
-                            }
-                            .build()
-                }
-                .build()
-    }
+        MeshPacket(
+            id = packetIdSequence.next(),
+            from = numIn,
+            to = 0xffffffff.toInt(), // broadcast
+            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_snr = 1.5f,
+            decoded =
+            Data(
+                portnum = PortNum.NODE_STATUS_APP,
+                payload =
+                StatusMessage(status = "Going to the farm.. to grow wheat.").encode().toByteString(),
+            ),
+        ),
+    )
 
-    private fun makeDataPacket(fromIn: Int, toIn: Int, data: MeshProtos.Data.Builder) =
-        MeshProtos.FromRadio.newBuilder().apply {
-            packet =
-                MeshProtos.MeshPacket.newBuilder()
-                    .apply {
-                        id = packetIdSequence.next()
-                        from = fromIn
-                        to = toIn
-                        rxTime = (System.currentTimeMillis() / 1000).toInt()
-                        rxSnr = 1.5f
-                        decoded = data.build()
-                    }
-                    .build()
-        }
+    private fun makeDataPacket(fromIn: Int, toIn: Int, data: Data) = FromRadio(
+        packet =
+        MeshPacket(
+            id = packetIdSequence.next(),
+            from = fromIn,
+            to = toIn,
+            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_snr = 1.5f,
+            decoded = data,
+        ),
+    )
 
     private fun makeAck(fromIn: Int, toIn: Int, msgId: Int) = makeDataPacket(
         fromIn,
         toIn,
-        MeshProtos.Data.newBuilder().apply {
-            portnum = Portnums.PortNum.ROUTING_APP
-            payload = MeshProtos.Routing.newBuilder().apply {}.build().toByteString()
-            requestId = msgId
-        },
+        Data(portnum = PortNum.ROUTING_APP, payload = Routing().encode().toByteString(), request_id = msgId),
     )
 
     private fun sendQueueStatus(msgId: Int) = service.handleFromRadio(
-        fromRadio {
-            queueStatus = queueStatus {
-                res = 0
-                free = 16
-                meshPacketId = msgId
-            }
-        }
-            .toByteArray(),
+        FromRadio(queueStatus = QueueStatus(res = 0, free = 16, mesh_packet_id = msgId)).encode(),
     )
 
-    private fun sendAdmin(fromIn: Int, toIn: Int, reqId: Int, initFn: AdminProtos.AdminMessage.Builder.() -> Unit) {
+    private fun sendAdmin(fromIn: Int, toIn: Int, reqId: Int, initFn: AdminMessage.() -> AdminMessage) {
+        val adminMsg = AdminMessage().initFn()
         val p =
             makeDataPacket(
                 fromIn,
                 toIn,
-                MeshProtos.Data.newBuilder().apply {
-                    portnum = Portnums.PortNum.ADMIN_APP
-                    payload = AdminProtos.AdminMessage.newBuilder().also { initFn(it) }.build().toByteString()
-                    requestId = reqId
-                },
+                Data(portnum = PortNum.ADMIN_APP, payload = adminMsg.encode().toByteString(), request_id = reqId),
             )
-        service.handleFromRadio(p.build().toByteArray())
+        service.handleFromRadio(p.encode())
     }
 
     // / Send a fake ack packet back if the sender asked for want_ack
-    private fun sendFakeAck(pr: MeshProtos.ToRadio) = service.serviceScope.handledLaunch {
+    private fun sendFakeAck(pr: ToRadio) = service.serviceScope.handledLaunch {
+        val packet = pr.packet ?: return@handledLaunch
         delay(2000)
-        service.handleFromRadio(makeAck(MY_NODE + 1, pr.packet.from, pr.packet.id).build().toByteArray())
+        service.handleFromRadio(makeAck(MY_NODE + 1, packet.from ?: 0, packet.id).encode())
     }
 
     private fun sendConfigResponse(configId: Int) {
@@ -336,57 +310,45 @@ constructor(
 
         // / Generate a fake node info entry
         @Suppress("MagicNumber")
-        fun makeNodeInfo(numIn: Int, lat: Double, lon: Double) = MeshProtos.FromRadio.newBuilder().apply {
-            nodeInfo =
-                MeshProtos.NodeInfo.newBuilder()
-                    .apply {
-                        num = numIn
-                        user =
-                            MeshProtos.User.newBuilder()
-                                .apply {
-                                    id = DataPacket.nodeNumToDefaultId(numIn)
-                                    longName = "Sim " + Integer.toHexString(num)
-                                    shortName = getInitials(longName)
-                                    hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-                                }
-                                .build()
-                        position =
-                            MeshProtos.Position.newBuilder()
-                                .apply {
-                                    latitudeI = Position.degI(lat)
-                                    longitudeI = Position.degI(lon)
-                                    altitude = 35
-                                    time = (System.currentTimeMillis() / 1000).toInt()
-                                    precisionBits = Random.nextInt(10, 19)
-                                }
-                                .build()
-                    }
-                    .build()
-        }
+        fun makeNodeInfo(numIn: Int, lat: Double, lon: Double) = FromRadio(
+            node_info =
+            NodeInfo(
+                num = numIn,
+                user =
+                User(
+                    id = DataPacket.nodeNumToDefaultId(numIn),
+                    long_name = "Sim " + Integer.toHexString(numIn),
+                    short_name = getInitials("Sim " + Integer.toHexString(numIn)),
+                    hw_model = HardwareModel.ANDROID_SIM,
+                ),
+                position =
+                ProtoPosition(
+                    latitude_i = org.meshtastic.core.model.Position.degI(lat),
+                    longitude_i = org.meshtastic.core.model.Position.degI(lon),
+                    altitude = 35,
+                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    precision_bits = Random.nextInt(10, 19),
+                ),
+            ),
+        )
 
         // Simulated network data to feed to our app
         val packets =
             arrayOf(
                 // MyNodeInfo
-                MeshProtos.FromRadio.newBuilder().apply {
-                    myInfo = MeshProtos.MyNodeInfo.newBuilder().apply { myNodeNum = MY_NODE }.build()
-                },
-                MeshProtos.FromRadio.newBuilder().apply {
-                    metadata = deviceMetadata {
-                        firmwareVersion = "9.9.9.abcdefg"
-                        hwModel = MeshProtos.HardwareModel.ANDROID_SIM
-                    }
-                },
+                FromRadio(my_info = ProtoMyNodeInfo(my_node_num = MY_NODE)),
+                FromRadio(
+                    metadata = DeviceMetadata(firmware_version = "9.9.9.abcdefg", hw_model = HardwareModel.ANDROID_SIM),
+                ),
 
                 // Fake NodeDB
                 makeNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas
                 makeNodeInfo(MY_NODE + 1, 32.960758, -96.733521), // richardson
-                MeshProtos.FromRadio.newBuilder().apply { config = config { lora = defaultLoRaConfig } },
-                MeshProtos.FromRadio.newBuilder().apply { channel = defaultChannel },
-                MeshProtos.FromRadio.newBuilder().apply { configCompleteId = configId },
+                FromRadio(config = Config(lora = defaultLoRaConfig)),
+                FromRadio(channel = defaultChannel),
+                FromRadio(config_complete_id = configId),
 
                 // Done with config response, now pretend to receive some text messages
-
                 makeTextMessage(MY_NODE + 1),
                 makeNeighborInfo(MY_NODE + 1),
                 makePosition(MY_NODE + 1),
@@ -394,6 +356,6 @@ constructor(
                 makeNodeStatus(MY_NODE + 1),
             )
 
-        packets.forEach { p -> service.handleFromRadio(p.build().toByteArray()) }
+        packets.forEach { p -> service.handleFromRadio(p.encode()) }
     }
 }

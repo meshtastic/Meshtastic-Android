@@ -54,7 +54,7 @@ fun NodeActionDialogs(
             text =
             stringResource(
                 if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
-                node.user.longName,
+                node.user.long_name ?: "",
             ),
             onConfirm = {
                 onDismissMenuRequest()
@@ -69,7 +69,7 @@ fun NodeActionDialogs(
             text =
             stringResource(
                 if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
-                node.user.longName,
+                node.user.long_name ?: "",
             ),
             onConfirm = {
                 onDismissMenuRequest()
@@ -82,7 +82,10 @@ fun NodeActionDialogs(
         SimpleAlertDialog(
             title = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
             text =
-            stringResource(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.user.longName),
+            stringResource(
+                if (node.isMuted) Res.string.mute_remove else Res.string.mute_add,
+                node.user.long_name ?: "",
+            ),
             onConfirm = {
                 onDismissMenuRequest()
                 onConfirmMute(node)
@@ -93,7 +96,7 @@ fun NodeActionDialogs(
     if (displayRemoveDialog) {
         SimpleAlertDialog(
             title = Res.string.remove,
-            text = Res.string.remove_node_text,
+            text = stringResource(Res.string.remove_node_text),
             onConfirm = {
                 onDismissMenuRequest()
                 onConfirmRemove(node)

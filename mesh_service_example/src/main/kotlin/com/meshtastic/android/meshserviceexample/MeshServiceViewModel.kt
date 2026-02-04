@@ -25,14 +25,14 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.PortNum
 import kotlin.random.Random
 
 private const val TAG = "MeshServiceViewModel"
@@ -105,8 +105,8 @@ class MeshServiceViewModel : ViewModel() {
                 val packet =
                     DataPacket(
                         to = DataPacket.ID_BROADCAST,
-                        bytes = text.toByteArray(),
-                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                        bytes = text.encodeToByteArray().toByteString(),
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
                         from = DataPacket.ID_LOCAL,
                         time = System.currentTimeMillis(),
                         id = service.packetId, // Correctly sync with radio's ID
@@ -173,7 +173,8 @@ class MeshServiceViewModel : ViewModel() {
     fun requestTelemetry(nodeNum: Int) {
         meshService?.let {
             try {
-                it.requestTelemetry(Random.nextInt(), nodeNum, TelemetryProtos.Telemetry.DEVICE_METRICS_FIELD_NUMBER)
+                // DEVICE_METRICS_FIELD_NUMBER = 1
+                it.requestTelemetry(Random.nextInt(), nodeNum, 1)
                 Log.i(TAG, "Telemetry requested for node $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request telemetry", e)
@@ -274,8 +275,8 @@ class MeshServiceViewModel : ViewModel() {
 
     private fun handleReceivedPacket(action: String, intent: Intent) {
         val packet = intent.getParcelableCompat("com.geeksville.mesh.Payload", DataPacket::class.java) ?: return
-        if (packet.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
-            val receivedText = packet.bytes?.let { bytes -> String(bytes) } ?: ""
+        if (packet.dataType == PortNum.TEXT_MESSAGE_APP.value) {
+            val receivedText = packet.bytes?.utf8() ?: ""
             _message.value = "From ${packet.from}: $receivedText"
         } else {
             _message.value = "Received port ${action.substringAfterLast(".")} packet"

@@ -43,8 +43,7 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.AppOnlyProtos
-import org.meshtastic.proto.channelSet
+import org.meshtastic.proto.ChannelSet
 import javax.inject.Inject
 import kotlin.collections.map as collectionsMap
 
@@ -61,7 +60,7 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = channelSet {})
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
     // Combine node info and myId to reduce argument count in subsequent combines
     private val identityFlow: Flow<Pair<MyNodeEntity?, String?>> =
@@ -86,7 +85,7 @@ constructor(
             val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val placeholder =
-                (0 until channelSet.settingsCount).associate { ch ->
+                (0 until channelSet.settings.size).associate { ch ->
                     val contactKey = "$ch${DataPacket.ID_BROADCAST}"
                     val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
                     contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
@@ -104,12 +103,12 @@ constructor(
                 val user = getUser(if (fromLocal) data.to else data.from)
                 val node = getNode(if (fromLocal) data.to else data.from)
 
-                val shortName = user.shortName
+                val shortName = user.short_name ?: ""
                 val longName =
                     if (toBroadcast) {
                         channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
                     } else {
-                        user.longName
+                        user.long_name ?: ""
                     }
 
                 Contact(
@@ -121,7 +120,7 @@ constructor(
                     unreadCount = packetRepository.getUnreadCount(contactKey),
                     messageCount = packetRepository.getMessageCount(contactKey),
                     isMuted = settings[contactKey]?.isMuted == true,
-                    isUnmessageable = user.isUnmessagable,
+                    isUnmessageable = user.is_unmessagable ?: false,
                     nodeColors =
                     if (!toBroadcast) {
                         node.colors
@@ -157,12 +156,12 @@ constructor(
                         val user = getUser(if (fromLocal) data.to else data.from)
                         val node = getNode(if (fromLocal) data.to else data.from)
 
-                        val shortName = user.shortName
+                        val shortName = user.short_name ?: ""
                         val longName =
                             if (toBroadcast) {
                                 channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
                             } else {
-                                user.longName
+                                user.long_name ?: ""
                             }
 
                         Contact(
@@ -174,7 +173,7 @@ constructor(
                             unreadCount = packetRepository.getUnreadCount(contactKey),
                             messageCount = packetRepository.getMessageCount(contactKey),
                             isMuted = settings[contactKey]?.isMuted == true,
-                            isUnmessageable = user.isUnmessagable,
+                            isUnmessageable = user.is_unmessagable ?: false,
                             nodeColors =
                             if (!toBroadcast) {
                                 node.colors
@@ -215,7 +214,7 @@ constructor(
 
     private data class ContactsPagedParams(
         val myNodeNum: Int?,
-        val channelSet: AppOnlyProtos.ChannelSet,
+        val channelSet: ChannelSet,
         val settings: Map<String, ContactSettings>,
         val myId: String?,
     )

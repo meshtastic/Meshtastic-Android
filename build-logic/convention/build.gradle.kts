@@ -60,6 +60,7 @@ dependencies {
     compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.test.retry.gradlePlugin)
+    compileOnly("com.dropbox.dependency-guard:dependency-guard:0.5.0")
     compileOnly(libs.truth)
 
     detektPlugins(libs.detekt.formatting)

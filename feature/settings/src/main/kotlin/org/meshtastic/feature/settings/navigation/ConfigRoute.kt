@@ -18,15 +18,15 @@ package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.CellTower
-import androidx.compose.material.icons.rounded.DisplaySettings
-import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.Power
-import androidx.compose.material.icons.rounded.Router
-import androidx.compose.material.icons.rounded.Security
-import androidx.compose.material.icons.rounded.Wifi
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.CellTower
+import androidx.compose.material.icons.filled.DisplaySettings
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Power
+import androidx.compose.material.icons.filled.Router
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.navigation.Route
@@ -42,59 +42,44 @@ import org.meshtastic.core.strings.position
 import org.meshtastic.core.strings.power
 import org.meshtastic.core.strings.security
 import org.meshtastic.core.strings.user
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.MeshProtos.DeviceMetadata
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.DeviceMetadata
 
 enum class ConfigRoute(val title: StringResource, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    USER(Res.string.user, SettingsRoutes.User, Icons.Rounded.Person, 0),
+    USER(Res.string.user, SettingsRoutes.User, Icons.Default.Person, 0),
     CHANNELS(Res.string.channels, SettingsRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
-    DEVICE(
-        Res.string.device,
-        SettingsRoutes.Device,
-        Icons.Rounded.Router,
-        AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG_VALUE,
-    ),
+    DEVICE(Res.string.device, SettingsRoutes.Device, Icons.Default.Router, AdminMessage.ConfigType.DEVICE_CONFIG.value),
     POSITION(
         Res.string.position,
         SettingsRoutes.Position,
-        Icons.Rounded.LocationOn,
-        AdminProtos.AdminMessage.ConfigType.POSITION_CONFIG_VALUE,
+        Icons.Default.LocationOn,
+        AdminMessage.ConfigType.POSITION_CONFIG.value,
     ),
-    POWER(
-        Res.string.power,
-        SettingsRoutes.Power,
-        Icons.Rounded.Power,
-        AdminProtos.AdminMessage.ConfigType.POWER_CONFIG_VALUE,
-    ),
+    POWER(Res.string.power, SettingsRoutes.Power, Icons.Default.Power, AdminMessage.ConfigType.POWER_CONFIG.value),
     NETWORK(
         Res.string.network,
         SettingsRoutes.Network,
-        Icons.Rounded.Wifi,
-        AdminProtos.AdminMessage.ConfigType.NETWORK_CONFIG_VALUE,
+        Icons.Default.Wifi,
+        AdminMessage.ConfigType.NETWORK_CONFIG.value,
     ),
     DISPLAY(
         Res.string.display,
         SettingsRoutes.Display,
-        Icons.Rounded.DisplaySettings,
-        AdminProtos.AdminMessage.ConfigType.DISPLAY_CONFIG_VALUE,
+        Icons.Default.DisplaySettings,
+        AdminMessage.ConfigType.DISPLAY_CONFIG.value,
     ),
-    LORA(
-        Res.string.lora,
-        SettingsRoutes.LoRa,
-        Icons.Rounded.CellTower,
-        AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE,
-    ),
+    LORA(Res.string.lora, SettingsRoutes.LoRa, Icons.Default.CellTower, AdminMessage.ConfigType.LORA_CONFIG.value),
     BLUETOOTH(
         Res.string.bluetooth,
         SettingsRoutes.Bluetooth,
-        Icons.Rounded.Bluetooth,
-        AdminProtos.AdminMessage.ConfigType.BLUETOOTH_CONFIG_VALUE,
+        Icons.Default.Bluetooth,
+        AdminMessage.ConfigType.BLUETOOTH_CONFIG.value,
     ),
     SECURITY(
         Res.string.security,
         SettingsRoutes.Security,
-        Icons.Rounded.Security,
-        AdminProtos.AdminMessage.ConfigType.SECURITY_CONFIG_VALUE,
+        Icons.Default.Security,
+        AdminMessage.ConfigType.SECURITY_CONFIG.value,
     ),
     ;
 
@@ -102,8 +87,8 @@ enum class ConfigRoute(val title: StringResource, val route: Route, val icon: Im
         private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
                 metadata == null -> true // Include all routes if metadata is null
-                it == BLUETOOTH -> metadata.hasBluetooth
-                it == NETWORK -> metadata.hasWifi || metadata.hasEthernet
+                it == BLUETOOTH -> metadata.hasBluetooth == true
+                it == NETWORK -> metadata.hasWifi == true || metadata.hasEthernet == true
                 else -> true // Include all other routes by default
             }
         }

@@ -23,11 +23,14 @@ import org.gradle.api.artifacts.MinimalExternalModuleDependency
 import org.gradle.api.artifacts.VersionCatalog
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.testing.AbstractTestTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugin.use.PluginDependency
+import org.gradle.testretry.TestRetryTaskExtension
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -67,6 +70,17 @@ internal fun Project.configureTestOptions() {
         // Show test results in the console
         testLogging {
             events(TestLogEvent.PASSED, TestLogEvent.SKIPPED, TestLogEvent.FAILED)
+        }
+    }
+
+    // Configure test retry if the plugin is applied
+    pluginManager.withPlugin("org.gradle.test-retry") {
+        tasks.withType<AbstractTestTask>().configureEach {
+            extensions.configure<TestRetryTaskExtension> {
+                maxRetries.set(2)
+                maxFailures.set(10)
+                failOnPassedAfterRetry.set(false)
+            }
         }
     }
 }

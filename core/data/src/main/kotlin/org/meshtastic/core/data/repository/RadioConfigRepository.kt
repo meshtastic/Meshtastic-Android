@@ -22,15 +22,14 @@ import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.ChannelProtos.Channel
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.LocalOnlyProtos.LocalModuleConfig
-import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig
-import org.meshtastic.proto.deviceProfile
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfig
 import javax.inject.Inject
 
 /**
@@ -83,7 +82,7 @@ constructor(
      */
     suspend fun setLocalConfig(config: Config) {
         localConfigDataSource.setLocalConfig(config)
-        if (config.hasLora()) channelSetDataSource.setLoraConfig(config.lora)
+        config.lora?.let { channelSetDataSource.setLoraConfig(it) }
     }
 
     /** Flow representing the [LocalModuleConfig] data store. */
@@ -111,17 +110,18 @@ constructor(
                 localConfig,
                 localModuleConfig,
             ->
-            deviceProfile {
-                node?.user?.let {
-                    longName = it.longName
-                    shortName = it.shortName
-                }
-                channelUrl = channels.getChannelUrl().toString()
-                config = localConfig
-                moduleConfig = localModuleConfig
-                if (node != null && localConfig.position.fixedPosition) {
-                    fixedPosition = node.position
-                }
-            }
+            DeviceProfile(
+                long_name = node?.user?.long_name,
+                short_name = node?.user?.short_name,
+                channel_url = channels.getChannelUrl().toString(),
+                config = localConfig,
+                module_config = localModuleConfig,
+                fixed_position =
+                if (node != null && localConfig.position?.fixed_position == true) {
+                    node.position
+                } else {
+                    null
+                },
+            )
         }
 }

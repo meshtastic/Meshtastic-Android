@@ -20,9 +20,9 @@ import androidx.datastore.core.DataStore
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import java.io.IOException
+import okio.IOException
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,28 +34,28 @@ class LocalConfigDataSource @Inject constructor(private val localConfigStore: Da
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
                 Logger.e { "Error reading LocalConfig settings: ${exception.message}" }
-                emit(LocalConfig.getDefaultInstance())
+                emit(LocalConfig())
             } else {
                 throw exception
             }
         }
 
     suspend fun clearLocalConfig() {
-        localConfigStore.updateData { preference -> preference.toBuilder().clear().build() }
+        localConfigStore.updateData { LocalConfig() }
     }
 
     /** Updates [LocalConfig] from each [Config] oneOf. */
-    suspend fun setLocalConfig(config: Config) = localConfigStore.updateData {
-        val builder = it.toBuilder()
-        config.allFields.forEach { (field, value) ->
-            val localField = it.descriptorForType.findFieldByName(field.name)
-            if (localField != null) {
-                builder.setField(localField, value)
-            } else {
-                // Some fields like SESSIONKEY are not intended to be persisted in LocalConfig
-                Logger.d { "Skipping non-persistent LocalConfig field: ${field.name}" }
-            }
+    suspend fun setLocalConfig(config: Config) = localConfigStore.updateData { current ->
+        when {
+            config.device != null -> current.copy(device = config.device)
+            config.position != null -> current.copy(position = config.position)
+            config.power != null -> current.copy(power = config.power)
+            config.network != null -> current.copy(network = config.network)
+            config.display != null -> current.copy(display = config.display)
+            config.lora != null -> current.copy(lora = config.lora)
+            config.bluetooth != null -> current.copy(bluetooth = config.bluetooth)
+            config.security != null -> current.copy(security = config.security)
+            else -> current
         }
-        builder.build()
     }
 }

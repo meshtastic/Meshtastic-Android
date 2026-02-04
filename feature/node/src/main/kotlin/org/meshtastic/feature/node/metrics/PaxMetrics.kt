@@ -85,10 +85,10 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.PortNum
 import java.text.DateFormat
 import java.util.Date
+import org.meshtastic.proto.Paxcount as ProtoPaxcount
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     PAX(Color.Gray, Res.string.pax),
@@ -137,7 +137,7 @@ private fun PaxMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(1f)) {
+                    when (color.copy(alpha = 1f)) {
                         bleColor -> "BLE: %.0f".format(value)
                         wifiColor -> "WiFi: %.0f".format(value)
                         paxColor -> "PAX: %.0f".format(value)
@@ -210,7 +210,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     }
 
     val dateFormat = DateFormat.getDateTimeInstance()
-    // Only show logs that can be decoded as PaxcountProtos.Paxcount
+    // Only show logs that can be decoded as ProtoPaxcount
     val paxMetrics =
         state.paxMetrics.mapNotNull { log ->
             val pax = decodePaxFromLog(log)
@@ -225,7 +225,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         paxMetrics
             .map {
                 val t = (it.first.received_date / 1000).toInt()
-                Triple(t, it.second.ble, it.second.wifi)
+                Triple(t, it.second.ble ?: 0, it.second.wifi ?: 0)
             }
             .sortedBy { it.first }
     val totalSeries = graphData.map { it.first to (it.second + it.third) }
@@ -235,7 +235,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle =
                 stringResource(Res.string.pax_metrics_log) +
                     " (${paxMetrics.size} ${stringResource(Res.string.logs)})",
@@ -324,19 +324,18 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
 }
 
 @Suppress("MagicNumber", "CyclomaticComplexMethod")
-fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
-    var result: PaxcountProtos.Paxcount? = null
+fun decodePaxFromLog(log: MeshLog): ProtoPaxcount? {
+    var result: ProtoPaxcount? = null
     // First, try to parse from the binary fromRadio field (robust, like telemetry)
     try {
         val packet = log.fromRadio.packet
-        if (packet != null && packet.hasDecoded() && packet.decoded.portnumValue == PortNum.PAXCOUNTER_APP_VALUE) {
-            val pax = PaxcountProtos.Paxcount.parseFrom(packet.decoded.payload)
-            if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) result = pax
+        val decoded = packet?.decoded
+        if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
+            val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
+            if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) result = pax
         }
-    } catch (e: com.google.protobuf.InvalidProtocolBufferException) {
+    } catch (e: Exception) {
         android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from binary data", e)
-    } catch (e: IllegalArgumentException) {
-        android.util.Log.e("PaxMetrics", "Invalid argument while parsing Paxcount from binary data", e)
     }
     // Fallback: Try direct base64 or bytes from raw_message
     if (result == null) {
@@ -344,16 +343,14 @@ fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
             val base64 = log.raw_message.trim()
             if (base64.matches(Regex("^[A-Za-z0-9+/=\r\n]+$"))) {
                 val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
-                val pax = PaxcountProtos.Paxcount.parseFrom(bytes)
+                val pax = ProtoPaxcount.ADAPTER.decode(bytes)
                 result = pax
             } else if (base64.matches(Regex("^[0-9a-fA-F]+$")) && base64.length % 2 == 0) {
                 val bytes = base64.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-                val pax = PaxcountProtos.Paxcount.parseFrom(bytes)
+                val pax = ProtoPaxcount.ADAPTER.decode(bytes)
                 result = pax
             }
-        } catch (e: IllegalArgumentException) {
-            android.util.Log.e("PaxMetrics", "Invalid Base64 or hex input", e)
-        } catch (e: com.google.protobuf.InvalidProtocolBufferException) {
+        } catch (e: Exception) {
             android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from decoded data", e)
         }
     }
@@ -395,13 +392,7 @@ fun PaxcountInfo(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PaxMetricsItem(
-    log: MeshLog,
-    pax: PaxcountProtos.Paxcount,
-    dateFormat: DateFormat,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-) {
+fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, dateFormat: DateFormat, isSelected: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -429,19 +420,19 @@ fun PaxMetricsItem(
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     MetricIndicator(PaxSeries.PAX.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(text = "PAX: ${pax.ble + pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "PAX: ${(pax.ble ?: 0) + (pax.wifi ?: 0)}", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.width(8.dp))
                     MetricIndicator(PaxSeries.BLE.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(text = "B:${pax.ble}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "B:${pax.ble ?: 0}", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.width(8.dp))
                     MetricIndicator(PaxSeries.WIFI.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(text = "W:${pax.wifi}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "W:${pax.wifi ?: 0}", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Text(
-                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
+                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime ?: 0),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )

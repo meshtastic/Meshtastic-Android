@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.ByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add
@@ -48,10 +46,8 @@ import org.meshtastic.core.strings.gpio_pin
 import org.meshtastic.core.strings.ignore_incoming
 import org.meshtastic.core.strings.name
 import org.meshtastic.core.strings.type
-import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePin
-import org.meshtastic.proto.ModuleConfigProtos.RemoteHardwarePinType
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.remoteHardwarePin
+import org.meshtastic.proto.RemoteHardwarePin
+import org.meshtastic.proto.RemoteHardwarePinType
 
 @Suppress("LongMethod")
 @Composable
@@ -110,7 +106,7 @@ inline fun <reified T> EditListPreference(
                         trailingIcon = trailingIcon,
                     )
                 }
-                is ByteString -> {
+                is okio.ByteString -> {
                     EditBase64Preference(
                         title = "${index + 1}/$maxCount",
                         value = value,
@@ -126,12 +122,13 @@ inline fun <reified T> EditListPreference(
                 is RemoteHardwarePin -> {
                     EditTextPreference(
                         title = stringResource(Res.string.gpio_pin),
-                        value = value.gpioPin,
+                        value = value.gpio_pin,
                         enabled = enabled,
                         keyboardActions = keyboardActions,
-                        onValueChanged = {
+                        onValueChanged = { newValue ->
+                            val it = newValue as Int
                             if (it in 0..255) {
-                                listState[index] = value.copy { gpioPin = it } as T
+                                listState[index] = value.copy(gpio_pin = it) as T
                                 onValuesChanged(listState)
                             }
                         },
@@ -145,8 +142,9 @@ inline fun <reified T> EditListPreference(
                         keyboardOptions =
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                         keyboardActions = keyboardActions,
-                        onValueChanged = {
-                            listState[index] = value.copy { name = it } as T
+                        onValueChanged = { newValue ->
+                            val it = newValue as String
+                            listState[index] = value.copy(name = it) as T
                             onValuesChanged(listState)
                         },
                         trailingIcon = trailingIcon,
@@ -156,11 +154,11 @@ inline fun <reified T> EditListPreference(
                         enabled = enabled,
                         items =
                         RemoteHardwarePinType.entries
-                            .filter { it != RemoteHardwarePinType.UNRECOGNIZED }
+                            .filter { it != RemoteHardwarePinType.UNKNOWN }
                             .map { it to it.name },
                         selectedItem = value.type,
                         onItemSelected = {
-                            listState[index] = value.copy { type = it } as T
+                            listState[index] = value.copy(type = it) as T
                             onValuesChanged(listState)
                         },
                     )
@@ -174,8 +172,8 @@ inline fun <reified T> EditListPreference(
                 val newElement =
                     when (T::class) {
                         Int::class -> 0 as T
-                        ByteString::class -> ByteString.EMPTY as T
-                        RemoteHardwarePin::class -> remoteHardwarePin {} as T
+                        okio.ByteString::class -> okio.ByteString.EMPTY as T
+                        RemoteHardwarePin::class -> RemoteHardwarePin() as T
                         else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
                     }
                 listState.add(listState.size, newElement)
@@ -204,11 +202,7 @@ private fun EditListPreferencePreview() {
             title = "Available pins",
             list =
             listOf(
-                remoteHardwarePin {
-                    gpioPin = 12
-                    name = "Front door"
-                    type = RemoteHardwarePinType.DIGITAL_READ
-                },
+                RemoteHardwarePin(gpio_pin = 12, name = "Front door", type = RemoteHardwarePinType.DIGITAL_READ),
             ),
             maxCount = 4,
             enabled = true,

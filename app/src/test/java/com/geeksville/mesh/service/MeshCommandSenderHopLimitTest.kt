@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -31,9 +32,9 @@ import org.junit.Test
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.MeshPacket
 
 class MeshCommandSenderHopLimitTest {
 
@@ -42,7 +43,7 @@ class MeshCommandSenderHopLimitTest {
     private val connectionStateHolder: ConnectionStateHandler = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
 
-    private val localConfigFlow = MutableStateFlow(LocalConfig.getDefaultInstance())
+    private val localConfigFlow = MutableStateFlow(LocalConfig())
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = CoroutineScope(testDispatcher)
 
@@ -64,42 +65,41 @@ class MeshCommandSenderHopLimitTest {
         val packet =
             DataPacket(
                 to = DataPacket.ID_BROADCAST,
-                bytes = byteArrayOf(1, 2, 3),
+                bytes = byteArrayOf(1, 2, 3).toByteString(),
                 dataType = 1, // PortNum.TEXT_MESSAGE_APP
             )
 
         val meshPacketSlot = slot<MeshPacket>()
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
 
-        // Ensure localConfig has lora.hopLimit = 0
-        localConfigFlow.value =
-            LocalConfig.newBuilder().setLora(Config.LoRaConfig.newBuilder().setHopLimit(0)).build()
+        // Ensure localConfig has lora.hop_limit = 0
+        localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 0))
 
         commandSender.sendData(packet)
 
         verify(exactly = 1) { packetHandler.sendToRadio(any<MeshPacket>()) }
 
-        val capturedHopLimit = meshPacketSlot.captured.hopLimit
+        val capturedHopLimit = meshPacketSlot.captured.hop_limit ?: 0
         assertTrue("Hop limit should be greater than 0, but was $capturedHopLimit", capturedHopLimit > 0)
         assertEquals(3, capturedHopLimit)
-        assertEquals(3, meshPacketSlot.captured.hopStart)
+        assertEquals(3, meshPacketSlot.captured.hop_start)
     }
 
     @Test
     fun `sendData respects non-zero hop limit from config`() = runTest(testDispatcher) {
-        val packet = DataPacket(to = DataPacket.ID_BROADCAST, bytes = byteArrayOf(1, 2, 3), dataType = 1)
+        val packet =
+            DataPacket(to = DataPacket.ID_BROADCAST, bytes = byteArrayOf(1, 2, 3).toByteString(), dataType = 1)
 
         val meshPacketSlot = slot<MeshPacket>()
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
 
-        localConfigFlow.value =
-            LocalConfig.newBuilder().setLora(Config.LoRaConfig.newBuilder().setHopLimit(7)).build()
+        localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 7))
 
         commandSender.sendData(packet)
 
         verify { packetHandler.sendToRadio(any<MeshPacket>()) }
-        assertEquals(7, meshPacketSlot.captured.hopLimit)
-        assertEquals(7, meshPacketSlot.captured.hopStart)
+        assertEquals(7, meshPacketSlot.captured.hop_limit)
+        assertEquals(7, meshPacketSlot.captured.hop_start)
     }
 
     @Test
@@ -108,8 +108,7 @@ class MeshCommandSenderHopLimitTest {
         val meshPacketSlot = slot<MeshPacket>()
         every { packetHandler.sendToRadio(capture(meshPacketSlot)) } returns Unit
 
-        localConfigFlow.value =
-            LocalConfig.newBuilder().setLora(Config.LoRaConfig.newBuilder().setHopLimit(6)).build()
+        localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 6))
 
         // Mock node manager interactions
         nodeManager.nodeDBbyNodeNum.remove(destNum)
@@ -117,7 +116,7 @@ class MeshCommandSenderHopLimitTest {
         commandSender.requestUserInfo(destNum)
 
         verify { packetHandler.sendToRadio(any<MeshPacket>()) }
-        assertEquals("Hop Limit should be 6", 6, meshPacketSlot.captured.hopLimit)
-        assertEquals("Hop Start should be 6", 6, meshPacketSlot.captured.hopStart)
+        assertEquals("Hop Limit should be 6", 6, meshPacketSlot.captured.hop_limit)
+        assertEquals("Hop Start should be 6", 6, meshPacketSlot.captured.hop_start)
     }
 }

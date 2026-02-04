@@ -46,14 +46,14 @@ import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.protobuf.ByteString
-import com.google.protobuf.Descriptors
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.strings.Res
@@ -62,8 +62,8 @@ import org.meshtastic.core.strings.scan_qr_code
 import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.ui.R
 import org.meshtastic.core.ui.share.SharedContactDialog
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.SharedContact
+import org.meshtastic.proto.User
 import java.net.MalformedURLException
 
 /**
@@ -76,9 +76,9 @@ import java.net.MalformedURLException
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun AddContactFAB(
-    sharedContact: AdminProtos.SharedContact?,
+    sharedContact: SharedContact?,
     modifier: Modifier = Modifier,
-    onSharedContactRequested: (AdminProtos.SharedContact?) -> Unit,
+    onSharedContactRequested: (SharedContact?) -> Unit,
 ) {
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
@@ -161,13 +161,13 @@ private fun SharedContact(contactUri: Uri) {
 @Composable
 fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     if (contact == null) return
-    val sharedContact = AdminProtos.SharedContact.newBuilder().setUser(contact.user).setNodeNum(contact.num).build()
+    val sharedContact = SharedContact(user = contact.user, node_num = contact.num)
     val uri = sharedContact.getSharedContactUrl()
     SimpleAlertDialog(
         title = Res.string.share_contact,
         text = {
             Column {
-                Text(contact.user.longName)
+                Text(contact.user.long_name)
                 SharedContact(contactUri = uri)
             }
         },
@@ -204,43 +204,41 @@ internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$CONTACT_SHARE_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 private const val CAMERA_ID = 0
 
-/**
- * Converts a URI to a [AdminProtos.SharedContact].
- *
- * @throws MalformedURLException if the URI is not a valid Meshtastic contact sharing URL.
- */
 @Suppress("MagicNumber")
 @Throws(MalformedURLException::class)
-fun Uri.toSharedContact(): AdminProtos.SharedContact {
+fun Uri.toSharedContact(): SharedContact {
     if (fragment.isNullOrBlank() || !host.equals(MESHTASTIC_HOST, true) || !path.equals(CONTACT_SHARE_PATH, true)) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
-    val url = AdminProtos.SharedContact.parseFrom(Base64.decode(fragment!!, BASE64FLAGS))
-    return url.toBuilder().build()
+    return SharedContact.ADAPTER.decode(Base64.decode(fragment!!, BASE64FLAGS).toByteString())
 }
 
-/** Converts a [AdminProtos.SharedContact] to its corresponding URI representation. */
-fun AdminProtos.SharedContact.getSharedContactUrl(): Uri {
-    val bytes = this.toByteArray() ?: ByteArray(0)
+/** Converts a [SharedContact] to its corresponding URI representation. */
+fun SharedContact.getSharedContactUrl(): Uri {
+    val bytes = SharedContact.ADAPTER.encode(this)
     val enc = Base64.encodeToString(bytes, BASE64FLAGS)
     return "$URL_PREFIX$enc".toUri()
 }
 
-/** Compares two [MeshProtos.User] objects and returns a string detailing the differences. */
-fun compareUsers(oldUser: MeshProtos.User, newUser: MeshProtos.User): String {
+/** Compares two [User] objects and returns a string detailing the differences. */
+fun compareUsers(oldUser: User, newUser: User): String {
     val changes = mutableListOf<String>()
 
-    // Iterate over all fields in the User message descriptor
-    for (fieldDescriptor: Descriptors.FieldDescriptor in MeshProtos.User.getDescriptor().fields) {
-        val fieldName = fieldDescriptor.name
-        val oldValue = if (oldUser.hasField(fieldDescriptor)) oldUser.getField(fieldDescriptor) else null
-        val newValue = if (newUser.hasField(fieldDescriptor)) newUser.getField(fieldDescriptor) else null
-
-        if (oldValue != newValue) {
-            val oldValueString = valueToString(oldValue, fieldDescriptor)
-            val newValueString = valueToString(newValue, fieldDescriptor)
-            changes.add("$fieldName: $oldValueString -> $newValueString")
-        }
+    if (oldUser.id != newUser.id) changes.add("id: ${oldUser.id} -> ${newUser.id}")
+    if (oldUser.long_name != newUser.long_name) changes.add("long_name: ${oldUser.long_name} -> ${newUser.long_name}")
+    if (oldUser.short_name != newUser.short_name) {
+        changes.add("short_name: ${oldUser.short_name} -> ${newUser.short_name}")
+    }
+    if (oldUser.macaddr != newUser.macaddr) {
+        changes.add("macaddr: ${oldUser.macaddr?.base64()} -> ${newUser.macaddr?.base64()}")
+    }
+    if (oldUser.hw_model != newUser.hw_model) changes.add("hw_model: ${oldUser.hw_model} -> ${newUser.hw_model}")
+    if (oldUser.is_licensed != newUser.is_licensed) {
+        changes.add("is_licensed: ${oldUser.is_licensed} -> ${newUser.is_licensed}")
+    }
+    if (oldUser.role != newUser.role) changes.add("role: ${oldUser.role} -> ${newUser.role}")
+    if (oldUser.public_key != newUser.public_key) {
+        changes.add("public_key: ${oldUser.public_key?.base64()} -> ${newUser.public_key?.base64()}")
     }
 
     return if (changes.isEmpty()) {
@@ -250,52 +248,20 @@ fun compareUsers(oldUser: MeshProtos.User, newUser: MeshProtos.User): String {
     }
 }
 
-/** Converts a [MeshProtos.User] object to a string representation of its fields and values. */
-fun userFieldsToString(user: MeshProtos.User): String {
+/** Converts a [User] object to a string representation of its fields and values. */
+fun userFieldsToString(user: User): String {
     val fieldLines = mutableListOf<String>()
 
-    for (fieldDescriptor: Descriptors.FieldDescriptor in MeshProtos.User.getDescriptor().fields) {
-        val fieldName = fieldDescriptor.name
-        if (user.hasField(fieldDescriptor)) {
-            val value = user.getField(fieldDescriptor)
-            val valueString = valueToString(value, fieldDescriptor) // Using the helper from previous example
-            fieldLines.add("$fieldName: $valueString")
-        } else if (fieldDescriptor.isRepeated || fieldDescriptor.hasDefaultValue() || fieldDescriptor.hasPresence()) {
-            val defaultValue = fieldDescriptor.defaultValue
-            val valueString =
-                if (fieldDescriptor.isRepeated) {
-                    "[]" // Empty list
-                } else if (user.hasField(fieldDescriptor)) {
-                    valueToString(user.getField(fieldDescriptor), fieldDescriptor)
-                } else {
-                    valueToString(defaultValue, fieldDescriptor)
-                }
+    fieldLines.add("id: ${user.id}")
+    fieldLines.add("long_name: ${user.long_name}")
+    fieldLines.add("short_name: ${user.short_name}")
+    fieldLines.add("macaddr: ${user.macaddr?.base64()}")
+    fieldLines.add("hw_model: ${user.hw_model}")
+    fieldLines.add("is_licensed: ${user.is_licensed}")
+    fieldLines.add("role: ${user.role}")
+    fieldLines.add("public_key: ${user.public_key?.base64()}")
 
-            fieldLines.add("$fieldName: $valueString")
-        }
-    }
-    return if (fieldLines.isEmpty()) {
-        "User object has no fields set."
-    } else {
-        fieldLines.joinToString("\n")
-    }
+    return fieldLines.joinToString("\n")
 }
 
-private fun valueToString(value: Any?, fieldDescriptor: Descriptors.FieldDescriptor): String {
-    if (value == null) {
-        return "null"
-    }
-    return when (fieldDescriptor.type) {
-        Descriptors.FieldDescriptor.Type.BYTES -> {
-            // For ByteString, you might want to display it as hex or Base64
-            // For simplicity, here we'll just show its size.
-            if (value is ByteString) {
-                Base64.encodeToString(value.toByteArray(), Base64.DEFAULT).trim()
-            } else {
-                value.toString().trim()
-            }
-        }
-        // Add more custom formatting for other types if needed
-        else -> value.toString().trim()
-    }
-}
+private fun ByteString.base64(): String = Base64.encodeToString(this.toByteArray(), Base64.DEFAULT).trim()

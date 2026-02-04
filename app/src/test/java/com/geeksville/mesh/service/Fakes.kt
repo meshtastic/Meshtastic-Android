@@ -17,60 +17,15 @@
 package com.geeksville.mesh.service
 
 import android.app.Notification
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
-import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
-import org.meshtastic.core.database.entity.MetadataEntity
-import org.meshtastic.core.database.entity.MyNodeEntity
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import io.mockk.mockk
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.database.entity.NodeWithRelations
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.ClientNotification
+import org.meshtastic.proto.Telemetry
 
-class FakeNodeInfoReadDataSource : NodeInfoReadDataSource {
-    val myNodeInfo = MutableStateFlow<MyNodeEntity?>(null)
-    val nodes = MutableStateFlow<Map<Int, NodeWithRelations>>(emptyMap())
-
-    override fun myNodeInfoFlow(): Flow<MyNodeEntity?> = myNodeInfo
-
-    override fun nodeDBbyNumFlow(): Flow<Map<Int, NodeWithRelations>> = nodes
-
-    override fun getNodesFlow(
-        sort: String,
-        filter: String,
-        includeUnknown: Boolean,
-        hopsAwayMax: Int,
-        lastHeardMin: Int,
-    ): Flow<List<NodeWithRelations>> = flowOf(emptyList())
-
-    override suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> = emptyList()
-
-    override suspend fun getUnknownNodes(): List<NodeEntity> = emptyList()
-}
-
-class FakeNodeInfoWriteDataSource : NodeInfoWriteDataSource {
-    override suspend fun upsert(node: NodeEntity) {}
-
-    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {}
-
-    override suspend fun clearMyNodeInfo() {}
-
-    override suspend fun clearNodeDB(preserveFavorites: Boolean) {}
-
-    override suspend fun deleteNode(num: Int) {}
-
-    override suspend fun deleteNodes(nodeNums: List<Int>) {}
-
-    override suspend fun deleteMetadata(num: Int) {}
-
-    override suspend fun upsert(metadata: MetadataEntity) {}
-
-    override suspend fun setNodeNotes(num: Int, notes: String) {}
-
-    override suspend fun backfillDenormalizedNames() {}
+class Fakes {
+    val service: RadioInterfaceService = mockk(relaxed = true)
 }
 
 class FakeMeshServiceNotifications : MeshServiceNotifications {
@@ -78,10 +33,8 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun initChannels() {}
 
-    override fun updateServiceStateNotification(
-        summaryString: String?,
-        telemetry: TelemetryProtos.Telemetry?,
-    ): Notification = null as Notification
+    override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification =
+        mockk(relaxed = true)
 
     override suspend fun updateMessageNotification(
         contactKey: String,
@@ -115,11 +68,11 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {}
 
-    override fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {}
+    override fun showClientNotification(clientNotification: ClientNotification) {}
 
     override fun cancelMessageNotification(contactKey: String) {}
 
     override fun cancelLowBatteryNotification(node: NodeEntity) {}
 
-    override fun clearClientNotification(notification: MeshProtos.ClientNotification) {}
+    override fun clearClientNotification(notification: ClientNotification) {}
 }

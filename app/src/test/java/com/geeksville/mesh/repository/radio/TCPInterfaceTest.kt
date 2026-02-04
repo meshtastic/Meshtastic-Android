@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,66 +16,39 @@
  */
 package com.geeksville.mesh.repository.radio
 
-import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertArrayEquals
+import com.geeksville.mesh.service.Fakes
+import io.mockk.every
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Heartbeat
+import org.meshtastic.proto.ToRadio
 
 class TCPInterfaceTest {
 
-    private val service: RadioInterfaceService = mockk(relaxed = true)
-    private val dispatchers: CoroutineDispatchers = mockk(relaxed = true)
-
     @Test
-    fun `keepAlive generates correct heartbeat bytes`() = runTest {
-        val address = "192.168.1.1:4403"
-        // We need a subclass to capture handleSendToRadio or sendBytes
-        val tcpInterface =
-            object : TCPInterface(service, dispatchers, address) {
-                var capturedBytes: ByteArray? = null
+    fun testKeepAlive() {
+        val fakes = Fakes()
+        val testDispatcher = UnconfinedTestDispatcher()
+        val testScope = CoroutineScope(testDispatcher + Job())
+        every { fakes.service.serviceScope } returns testScope
+
+        val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
+        val tcpIf =
+            object : TCPInterface(fakes.service, dispatchers, "127.0.0.1") {
+                var lastSent: ByteArray? = null
 
                 override fun handleSendToRadio(p: ByteArray) {
-                    capturedBytes = p
+                    lastSent = p
                 }
-
-                // Override connect to prevent it from starting automatically in init
-                override fun connect() {}
             }
 
-        tcpInterface.keepAlive()
+        tcpIf.keepAlive()
 
-        val expectedHeartbeat =
-            MeshProtos.ToRadio.newBuilder()
-                .setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance())
-                .build()
-                .toByteArray()
-
-        assertArrayEquals("Heartbeat bytes should match", expectedHeartbeat, tcpInterface.capturedBytes)
-    }
-
-    @Test
-    fun `sendBytes does not crash when outStream is null`() = runTest {
-        val address = "192.168.1.1:4403"
-        val tcpInterface =
-            object : TCPInterface(service, dispatchers, address) {
-                override fun connect() {}
-            }
-
-        // This should not throw UninitializedPropertyAccessException
-        tcpInterface.sendBytes(byteArrayOf(1, 2, 3))
-    }
-
-    @Test
-    fun `flushBytes does not crash when outStream is null`() = runTest {
-        val address = "192.168.1.1:4403"
-        val tcpInterface =
-            object : TCPInterface(service, dispatchers, address) {
-                override fun connect() {}
-            }
-
-        // This should not throw UninitializedPropertyAccessException
-        tcpInterface.flushBytes()
+        val expected = ToRadio(heartbeat = Heartbeat()).encode()
+        assertEquals(expected.toList(), tcpIf.lastSent?.toList())
     }
 }

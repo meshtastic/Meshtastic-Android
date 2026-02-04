@@ -29,18 +29,18 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.locked
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Waypoint
 
 private const val DEG_D = 1e-7
 
 @Composable
 fun WaypointMarkers(
-    displayableWaypoints: List<MeshProtos.Waypoint>,
+    displayableWaypoints: List<Waypoint>,
     mapFilterState: BaseMapViewModel.MapFilterState,
     myNodeNum: Int,
     isConnected: Boolean,
     unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,
-    onEditWaypointRequest: (MeshProtos.Waypoint) -> Unit,
+    onEditWaypointRequest: (Waypoint) -> Unit,
     selectedWaypointId: Int? = null,
 ) {
     val scope = rememberCoroutineScope()
@@ -48,7 +48,9 @@ fun WaypointMarkers(
     if (mapFilterState.showWaypoints) {
         displayableWaypoints.forEach { waypoint ->
             val markerState =
-                rememberUpdatedMarkerState(position = LatLng(waypoint.latitudeI * DEG_D, waypoint.longitudeI * DEG_D))
+                rememberUpdatedMarkerState(
+                    position = LatLng((waypoint.latitude_i ?: 0) * DEG_D, (waypoint.longitude_i ?: 0) * DEG_D),
+                )
 
             LaunchedEffect(selectedWaypointId) {
                 if (selectedWaypointId == waypoint.id) {
@@ -59,16 +61,16 @@ fun WaypointMarkers(
             Marker(
                 state = markerState,
                 icon =
-                if (waypoint.icon == 0) {
+                if ((waypoint.icon ?: 0) == 0) {
                     unicodeEmojiToBitmapProvider(PUSHPIN) // Default icon (Round Pushpin)
                 } else {
-                    unicodeEmojiToBitmapProvider(waypoint.icon)
+                    unicodeEmojiToBitmapProvider(waypoint.icon!!)
                 },
-                title = waypoint.name.replace('\n', ' ').replace('\b', ' '),
-                snippet = waypoint.description.replace('\n', ' ').replace('\b', ' '),
+                title = (waypoint.name ?: "").replace('\n', ' ').replace('\b', ' '),
+                snippet = (waypoint.description ?: "").replace('\n', ' ').replace('\b', ' '),
                 visible = true,
                 onInfoWindowClick = {
-                    if (waypoint.lockedTo == 0 || waypoint.lockedTo == myNodeNum || !isConnected) {
+                    if ((waypoint.locked_to ?: 0) == 0 || waypoint.locked_to == myNodeNum || !isConnected) {
                         onEditWaypointRequest(waypoint)
                     } else {
                         scope.launch { context.showToast(Res.string.locked) }

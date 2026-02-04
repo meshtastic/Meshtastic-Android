@@ -23,13 +23,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
-import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.Flow
+import okio.ByteString
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.HardwareModel
 
 @Suppress("TooManyFunctions")
 @Dao
@@ -47,13 +47,13 @@ interface NodeInfoDao {
     private suspend fun getVerifiedNodeForUpsert(incomingNode: NodeEntity): NodeEntity {
         // Populate the NodeEntity.publicKey field from the User.publicKey for consistency
         // and to support lazy migration.
-        incomingNode.publicKey = incomingNode.user.publicKey
+        incomingNode.publicKey = incomingNode.user.public_key
 
         // Populate denormalized name columns from the User protobuf for search functionality
         // Only populate if the user is not a placeholder (hwModel != UNSET); otherwise keep them null
-        if (incomingNode.user.hwModel != MeshProtos.HardwareModel.UNSET) {
-            incomingNode.longName = incomingNode.user.longName
-            incomingNode.shortName = incomingNode.user.shortName
+        if (incomingNode.user.hw_model != HardwareModel.UNSET) {
+            incomingNode.longName = incomingNode.user.long_name
+            incomingNode.shortName = incomingNode.user.short_name
         } else {
             incomingNode.longName = null
             incomingNode.shortName = null
@@ -72,7 +72,7 @@ interface NodeInfoDao {
     private suspend fun handleNewNodeUpsertValidation(newNode: NodeEntity): NodeEntity {
         // Check if the new node's public key (if present and not empty)
         // is already claimed by another existing node.
-        if (newNode.publicKey?.isEmpty == false) {
+        if ((newNode.publicKey?.size ?: 0) > 0) {
             val nodeWithSamePK = findNodeByPublicKey(newNode.publicKey)
             if (nodeWithSamePK != null && nodeWithSamePK.num != newNode.num) {
                 // This is a potential impersonation attempt.
@@ -85,9 +85,9 @@ interface NodeInfoDao {
     }
 
     private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
-        val isPlaceholder = incomingNode.user.hwModel == MeshProtos.HardwareModel.UNSET
-        val hasExistingUser = existingNode.user.hwModel != MeshProtos.HardwareModel.UNSET
-        val isDefaultName = incomingNode.user.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
+        val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
+        val isDefaultName = incomingNode.user.long_name?.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$")) == true
 
         val shouldPreserve = hasExistingUser && isPlaceholder && isDefaultName
 
@@ -115,7 +115,7 @@ interface NodeInfoDao {
 
         // A public key is considered matching if the incoming key equals the existing key,
         // OR if the existing key is empty (allowing a new key to be set or an update to proceed).
-        val existingResolvedKey = existingNode.publicKey ?: existingNode.user.publicKey
+        val existingResolvedKey = existingNode.publicKey ?: existingNode.user.public_key
         val isPublicKeyMatchingOrExistingIsEmpty = existingResolvedKey == incomingNode.publicKey || !existingNode.hasPKC
 
         val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
@@ -129,7 +129,7 @@ interface NodeInfoDao {
             // We allow the name and user info to update, but we clear the public key
             // to indicate that this node is no longer "verified" against the previous key.
             incomingNode.copy(
-                user = incomingNode.user.toBuilder().setPublicKey(NodeEntity.ERROR_BYTE_STRING).build(),
+                user = incomingNode.user.copy(public_key = NodeEntity.ERROR_BYTE_STRING),
                 publicKey = NodeEntity.ERROR_BYTE_STRING,
                 notes = resolvedNotes,
             )
@@ -289,10 +289,9 @@ interface NodeInfoDao {
             nodes
                 .filter { node ->
                     // Only backfill if columns are NULL AND the user is not a placeholder (hwModel != UNSET)
-                    (node.longName == null || node.shortName == null) &&
-                        node.user.hwModel != MeshProtos.HardwareModel.UNSET
+                    (node.longName == null || node.shortName == null) && node.user.hw_model != HardwareModel.UNSET
                 }
-                .map { node -> node.copy(longName = node.user.longName, shortName = node.user.shortName) }
+                .map { node -> node.copy(longName = node.user.long_name, shortName = node.user.short_name) }
         if (nodesToUpdate.isNotEmpty()) {
             putAll(nodesToUpdate)
         }

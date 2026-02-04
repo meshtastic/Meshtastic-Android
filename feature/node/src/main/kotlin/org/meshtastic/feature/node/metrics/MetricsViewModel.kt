@@ -62,11 +62,11 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.proto.ConfigProtos.Config
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.User
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -76,8 +76,9 @@ import javax.inject.Inject
 
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
-private fun MeshPacket.hasValidSignal(): Boolean =
-    rxTime > 0 && (rxSnr != 0f && rxRssi != 0) && (hopStart > 0 && hopStart - hopLimit == 0)
+private fun MeshPacket.hasValidSignal(): Boolean = (rx_time ?: 0) > 0 &&
+    ((rx_snr ?: 0f) != 0f && (rx_rssi ?: 0) != 0) &&
+    ((hop_start ?: 0) > 0 && (hop_start ?: 0) - (hop_limit ?: 0) == 0)
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -104,10 +105,10 @@ constructor(
     private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
 
     private fun MeshLog.hasValidTraceroute(): Boolean =
-        with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
+        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == destNum }
 
     private fun MeshLog.hasValidNeighborInfo(): Boolean =
-        with(fromRadio.packet) { hasDecoded() && decoded.wantResponse && from == 0 && to == destNum }
+        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == destNum }
 
     /**
      * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
@@ -118,12 +119,7 @@ constructor(
         val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
         val longName = getString(Res.string.fallback_node_name) + "  $safeUserId"
         val defaultUser =
-            MeshProtos.User.newBuilder()
-                .setId(userId)
-                .setLongName(longName)
-                .setShortName(safeUserId)
-                .setHwModel(MeshProtos.HardwareModel.UNSET)
-                .build()
+            User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
 
         return Node(num = nodeNum, user = defaultUser)
     }
@@ -189,7 +185,7 @@ constructor(
     }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
-        destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE) }
+        destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value) }
     }
 
     fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
@@ -209,28 +205,28 @@ constructor(
         nodeRequestActions.lastRequestNeighborTimes.map { it[destNum] }.stateInWhileSubscribed(null)
 
     fun requestUserInfo() {
-        destNum?.let { nodeRequestActions.requestUserInfo(viewModelScope, it, state.value.node?.user?.longName ?: "") }
+        destNum?.let { nodeRequestActions.requestUserInfo(viewModelScope, it, state.value.node?.user?.long_name ?: "") }
     }
 
     fun requestPosition() {
-        destNum?.let { nodeRequestActions.requestPosition(viewModelScope, it, state.value.node?.user?.longName ?: "") }
+        destNum?.let { nodeRequestActions.requestPosition(viewModelScope, it, state.value.node?.user?.long_name ?: "") }
     }
 
     fun requestTelemetry(type: TelemetryType) {
         destNum?.let {
-            nodeRequestActions.requestTelemetry(viewModelScope, it, state.value.node?.user?.longName ?: "", type)
+            nodeRequestActions.requestTelemetry(viewModelScope, it, state.value.node?.user?.long_name ?: "", type)
         }
     }
 
     fun requestTraceroute() {
         destNum?.let {
-            nodeRequestActions.requestTraceroute(viewModelScope, it, state.value.node?.user?.longName ?: "")
+            nodeRequestActions.requestTraceroute(viewModelScope, it, state.value.node?.user?.long_name ?: "")
         }
     }
 
     fun requestNeighborInfo() {
         destNum?.let {
-            nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.longName ?: "")
+            nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.long_name ?: "")
         }
     }
 
@@ -262,10 +258,10 @@ constructor(
                                 // Create a fallback node if not found in database (for hidden clients, etc.)
                                 val actualNode = node ?: createFallbackNode(currentDestNum)
                                 val pioEnv = if (currentDestNum == ourNodeNum) myInfo?.pioEnv else null
+                                val hwModel = actualNode.user.hw_model?.value ?: 0
                                 val deviceHardware =
-                                    actualNode.user.hwModel.safeNumber().let {
-                                        deviceHardwareRepository.getDeviceHardwareByModel(it, target = pioEnv)
-                                    }
+                                    deviceHardwareRepository.getDeviceHardwareByModel(hwModel, target = pioEnv)
+
                                 _state.update { state ->
                                     state.copy(
                                         node = actualNode,
@@ -279,15 +275,15 @@ constructor(
 
                     launch {
                         radioConfigRepository.deviceProfileFlow.collect { profile ->
-                            val moduleConfig = profile.moduleConfig
-                            val displayUnits = profile.config.display.units
+                            val moduleConfig = profile.module_config
+                            val displayUnits = profile.config?.display?.units
                             _state.update { state ->
                                 state.copy(
-                                    isManaged = profile.config.security.isManaged,
+                                    isManaged = profile.config?.security?.is_managed ?: false,
                                     isFahrenheit =
-                                    moduleConfig.telemetry.environmentDisplayFahrenheit ||
+                                    moduleConfig?.telemetry?.environment_display_fahrenheit == true ||
                                         (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
-                                    displayUnits = displayUnits,
+                                    displayUnits = displayUnits ?: Config.DisplayConfig.DisplayUnits.METRIC,
                                 )
                             }
                         }
@@ -297,19 +293,19 @@ constructor(
                         meshLogRepository.getTelemetryFrom(currentDestNum).collect { telemetry ->
                             _state.update { state ->
                                 state.copy(
-                                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                                    powerMetrics = telemetry.filter { it.hasPowerMetrics() },
-                                    hostMetrics = telemetry.filter { it.hasHostMetrics() },
+                                    deviceMetrics = telemetry.filter { it.device_metrics != null },
+                                    powerMetrics = telemetry.filter { it.power_metrics != null },
+                                    hostMetrics = telemetry.filter { it.host_metrics != null },
                                 )
                             }
                             _environmentState.update { state ->
                                 state.copy(
                                     environmentMetrics =
                                     telemetry.filter {
-                                        it.hasEnvironmentMetrics() &&
-                                            it.environmentMetrics.hasRelativeHumidity() &&
-                                            it.environmentMetrics.hasTemperature() &&
-                                            !it.environmentMetrics.temperature.isNaN()
+                                        it.environment_metrics != null &&
+                                            it.environment_metrics?.relative_humidity != null &&
+                                            it.environment_metrics?.temperature != null &&
+                                            it.environment_metrics?.temperature?.isNaN()?.not() == true
                                     },
                                 )
                             }
@@ -326,8 +322,8 @@ constructor(
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP_VALUE),
+                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP.value),
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP.value),
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(
@@ -341,8 +337,8 @@ constructor(
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP_VALUE),
-                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP_VALUE),
+                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP.value),
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP.value),
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(
@@ -357,7 +353,7 @@ constructor(
                     launch {
                         meshLogRepository.getMeshPacketsFrom(
                             currentDestNum,
-                            PortNum.POSITION_APP_VALUE,
+                            PortNum.POSITION_APP.value,
                         ).collect { packets ->
                             val distinctPositions =
                                 packets
@@ -365,7 +361,7 @@ constructor(
                                     .asFlow()
                                     .distinctUntilChanged { old, new ->
                                         old.time == new.time ||
-                                            (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
+                                            (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
                                     }
                                     .toList()
                             _state.update { state -> state.copy(positionLogs = distinctPositions) }
@@ -373,10 +369,7 @@ constructor(
                     }
 
                     launch {
-                        meshLogRepository.getLogsFrom(
-                            currentDestNum,
-                            Portnums.PortNum.PAXCOUNTER_APP_VALUE,
-                        ).collect { logs ->
+                        meshLogRepository.getLogsFrom(currentDestNum, PortNum.PAXCOUNTER_APP.value).collect { logs ->
                             _state.update { state -> state.copy(paxMetrics = logs) }
                         }
                     }
@@ -396,7 +389,7 @@ constructor(
                     launch {
                         meshLogRepository
                             .getMyNodeInfo()
-                            .map { it?.firmwareEdition }
+                            .map { it?.firmware_edition }
                             .distinctUntilChanged()
                             .collect { firmwareEdition ->
                                 _state.update { state -> state.copy(firmwareEdition = firmwareEdition) }
@@ -426,13 +419,13 @@ constructor(
             val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
 
             positions.forEach { position ->
-                val rxDateTime = dateFormat.format(position.time * 1000L)
-                val latitude = position.latitudeI * 1e-7
-                val longitude = position.longitudeI * 1e-7
+                val rxDateTime = dateFormat.format((position.time ?: 0).toLong() * 1000L)
+                val latitude = (position.latitude_i ?: 0) * 1e-7
+                val longitude = (position.longitude_i ?: 0) * 1e-7
                 val altitude = position.altitude
-                val satsInView = position.satsInView
-                val speed = position.groundSpeed
-                val heading = "%.2f".format(position.groundTrack * 1e-5)
+                val satsInView = position.sats_in_view
+                val speed = position.ground_speed
+                val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
 
                 // date,time,latitude,longitude,altitude,satsInView,speed,heading
                 writer.appendLine(

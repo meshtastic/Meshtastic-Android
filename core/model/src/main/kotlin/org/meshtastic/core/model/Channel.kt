@@ -16,20 +16,16 @@
  */
 package org.meshtastic.core.model
 
-import com.google.protobuf.ByteString
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.util.byteArrayOfInts
 import org.meshtastic.core.model.util.xorHash
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigKt.loRaConfig
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
-import org.meshtastic.proto.channelSettings
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
 import java.security.SecureRandom
 
-data class Channel(
-    val settings: ChannelProtos.ChannelSettings = default.settings,
-    val loraConfig: ConfigProtos.Config.LoRaConfig = default.loraConfig,
-) {
+data class Channel(val settings: ChannelSettings = default.settings, val loraConfig: LoRaConfig = default.loraConfig) {
     companion object {
         // These bytes must match the well known and not secret bytes used the default channel AES128 key device code
         private val channelDefaultKey =
@@ -58,21 +54,16 @@ data class Channel(
         // The default channel that devices ship with
         val default =
             Channel(
-                channelSettings { psk = ByteString.copyFrom(defaultPSK) },
+                ChannelSettings(psk = defaultPSK.toByteString()),
                 // references: NodeDB::installDefaultConfig / Channels::initDefaultChannel
-                loRaConfig {
-                    usePreset = true
-                    modemPreset = ModemPreset.LONG_FAST
-                    hopLimit = 3
-                    txEnabled = true
-                },
+                LoRaConfig(use_preset = true, modem_preset = ModemPreset.LONG_FAST, hop_limit = 3, tx_enabled = true),
             )
 
         fun getRandomKey(size: Int = 32): ByteString {
             val bytes = ByteArray(size)
             val random = SecureRandom()
             random.nextBytes(bytes)
-            return ByteString.copyFrom(bytes)
+            return bytes.toByteString()
         }
     }
 
@@ -82,8 +73,8 @@ data class Channel(
             settings.name.ifEmpty {
                 // We have a new style 'empty' channel name.  Use the same logic from the device to convert that to a
                 // human readable name
-                if (loraConfig.usePreset) {
-                    when (loraConfig.modemPreset) {
+                if (loraConfig.use_preset) {
+                    when (loraConfig.modem_preset) {
                         ModemPreset.SHORT_TURBO -> "ShortTurbo"
                         ModemPreset.SHORT_FAST -> "ShortFast"
                         ModemPreset.SHORT_SLOW -> "ShortSlow"
@@ -103,11 +94,11 @@ data class Channel(
 
     val psk: ByteString
         get() =
-            if (settings.psk.size() != 1) {
+            if (settings.psk.size != 1) {
                 settings.psk // A standard PSK
             } else {
                 // One of our special 1 byte PSKs, see mesh.proto for docs.
-                val pskIndex = settings.psk.byteAt(0).toInt()
+                val pskIndex = settings.psk[0].toInt()
 
                 if (pskIndex == 0) {
                     cleartextPSK
@@ -115,7 +106,7 @@ data class Channel(
                     // Treat an index of 1 as the old channelDefaultKey and work up from there
                     val bytes = channelDefaultKey.clone()
                     bytes[bytes.size - 1] = (0xff and (bytes[bytes.size - 1] + pskIndex - 1)).toByte()
-                    ByteString.copyFrom(bytes)
+                    bytes.toByteString()
                 }
             }
 

@@ -37,15 +37,20 @@ constructor(
             is NodeMenuAction.Mute -> nodeManagementActions.muteNode(scope, action.node)
             is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(scope, action.node)
             is NodeMenuAction.RequestUserInfo ->
-                nodeRequestActions.requestUserInfo(scope, action.node.num, action.node.user.longName)
+                nodeRequestActions.requestUserInfo(scope, action.node.num, action.node.user.long_name ?: "")
             is NodeMenuAction.RequestNeighborInfo ->
-                nodeRequestActions.requestNeighborInfo(scope, action.node.num, action.node.user.longName)
+                nodeRequestActions.requestNeighborInfo(scope, action.node.num, action.node.user.long_name ?: "")
             is NodeMenuAction.RequestPosition ->
-                nodeRequestActions.requestPosition(scope, action.node.num, action.node.user.longName)
+                nodeRequestActions.requestPosition(scope, action.node.num, action.node.user.long_name ?: "")
             is NodeMenuAction.RequestTelemetry ->
-                nodeRequestActions.requestTelemetry(scope, action.node.num, action.node.user.longName, action.type)
+                nodeRequestActions.requestTelemetry(
+                    scope,
+                    action.node.num,
+                    action.node.user.long_name ?: "",
+                    action.type,
+                )
             is NodeMenuAction.TraceRoute ->
-                nodeRequestActions.requestTraceroute(scope, action.node.num, action.node.user.longName)
+                nodeRequestActions.requestTraceroute(scope, action.node.num, action.node.user.long_name ?: "")
             else -> {}
         }
     }

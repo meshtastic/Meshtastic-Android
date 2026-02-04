@@ -19,13 +19,13 @@ package com.geeksville.mesh.service
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.FromRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Dispatches non-packet [MeshProtos.FromRadio] variants to their respective handlers. This class is stateless and
- * handles routing for config, metadata, and specialized system messages.
+ * Dispatches non-packet [FromRadio] variants to their respective handlers. This class is stateless and handles routing
+ * for config, metadata, and specialized system messages.
  */
 @Singleton
 class FromRadioPacketHandler
@@ -38,41 +38,47 @@ constructor(
     private val serviceNotifications: MeshServiceNotifications,
 ) {
     @Suppress("CyclomaticComplexMethod")
-    fun handleFromRadio(proto: MeshProtos.FromRadio) {
-        when (proto.payloadVariantCase) {
-            MeshProtos.FromRadio.PayloadVariantCase.MY_INFO -> router.configFlowManager.handleMyInfo(proto.myInfo)
-            MeshProtos.FromRadio.PayloadVariantCase.METADATA ->
-                router.configFlowManager.handleLocalMetadata(proto.metadata)
-            MeshProtos.FromRadio.PayloadVariantCase.NODE_INFO -> {
-                router.configFlowManager.handleNodeInfo(proto.nodeInfo)
+    fun handleFromRadio(proto: FromRadio) {
+        val myInfo = proto.my_info
+        val metadata = proto.metadata
+        val nodeInfo = proto.node_info
+        val configCompleteId = proto.config_complete_id
+        val mqttProxyMessage = proto.mqttClientProxyMessage
+        val queueStatus = proto.queueStatus
+        val config = proto.config
+        val moduleConfig = proto.moduleConfig
+        val channel = proto.channel
+        val clientNotification = proto.clientNotification
+
+        when {
+            myInfo != null -> router.configFlowManager.handleMyInfo(myInfo)
+            metadata != null -> router.configFlowManager.handleLocalMetadata(metadata)
+            nodeInfo != null -> {
+                router.configFlowManager.handleNodeInfo(nodeInfo)
                 serviceRepository.setStatusMessage("Nodes (${router.configFlowManager.newNodeCount})")
             }
-            MeshProtos.FromRadio.PayloadVariantCase.CONFIG_COMPLETE_ID ->
-                router.configFlowManager.handleConfigComplete(proto.configCompleteId)
-            MeshProtos.FromRadio.PayloadVariantCase.MQTTCLIENTPROXYMESSAGE ->
-                mqttManager.handleMqttProxyMessage(proto.mqttClientProxyMessage)
-            MeshProtos.FromRadio.PayloadVariantCase.QUEUESTATUS -> packetHandler.handleQueueStatus(proto.queueStatus)
-            MeshProtos.FromRadio.PayloadVariantCase.CONFIG -> router.configHandler.handleDeviceConfig(proto.config)
-            MeshProtos.FromRadio.PayloadVariantCase.MODULECONFIG ->
-                router.configHandler.handleModuleConfig(proto.moduleConfig)
-            MeshProtos.FromRadio.PayloadVariantCase.CHANNEL -> router.configHandler.handleChannel(proto.channel)
-            MeshProtos.FromRadio.PayloadVariantCase.CLIENTNOTIFICATION -> {
-                serviceRepository.setClientNotification(proto.clientNotification)
-                serviceNotifications.showClientNotification(proto.clientNotification)
-                packetHandler.removeResponse(proto.clientNotification.replyId, complete = false)
+            configCompleteId != null -> router.configFlowManager.handleConfigComplete(configCompleteId)
+            mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
+            queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
+            config != null -> router.configHandler.handleDeviceConfig(config)
+            moduleConfig != null -> router.configHandler.handleModuleConfig(moduleConfig)
+            channel != null -> router.configHandler.handleChannel(channel)
+            clientNotification != null -> {
+                serviceRepository.setClientNotification(clientNotification)
+                serviceNotifications.showClientNotification(clientNotification)
+                packetHandler.removeResponse(clientNotification.reply_id ?: 0, complete = false)
             }
             // Logging-only variants are handled by MeshMessageProcessor before dispatching here
-            MeshProtos.FromRadio.PayloadVariantCase.PACKET,
-            MeshProtos.FromRadio.PayloadVariantCase.LOG_RECORD,
-            MeshProtos.FromRadio.PayloadVariantCase.REBOOTED,
-            MeshProtos.FromRadio.PayloadVariantCase.XMODEMPACKET,
-            MeshProtos.FromRadio.PayloadVariantCase.DEVICEUICONFIG,
-            MeshProtos.FromRadio.PayloadVariantCase.FILEINFO,
-            -> {
+            proto.packet != null ||
+                proto.log_record != null ||
+                proto.rebooted != null ||
+                proto.xmodemPacket != null ||
+                proto.deviceuiConfig != null ||
+                proto.fileInfo != null -> {
                 /* No specialized routing needed here */
             }
 
-            else -> Logger.d { "Dispatcher ignoring ${proto.payloadVariantCase}" }
+            else -> Logger.d { "Dispatcher ignoring FromRadio variant" }
         }
     }
 }

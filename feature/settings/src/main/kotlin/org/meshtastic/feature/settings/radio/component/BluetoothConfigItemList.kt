@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -37,14 +36,12 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.ConfigProtos.Config.BluetoothConfig
-import org.meshtastic.proto.config
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.Config
 
 @Composable
 fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val bluetoothConfig = state.radioConfig.bluetooth
+    val bluetoothConfig = state.radioConfig.bluetooth ?: Config.BluetoothConfig()
     val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
 
@@ -56,7 +53,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = config { bluetooth = it }
+            val config = Config(bluetooth = it)
             viewModel.setConfig(config)
         },
     ) {
@@ -66,7 +63,7 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(Res.string.bluetooth_enabled),
                     checked = formState.value.enabled,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
@@ -74,21 +71,23 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onB
                     title = stringResource(Res.string.pairing_mode),
                     enabled = state.connected,
                     items =
-                    BluetoothConfig.PairingMode.entries
-                        .filter { it != BluetoothConfig.PairingMode.UNRECOGNIZED }
+                    Config.BluetoothConfig.PairingMode.entries
+                        .filter { it.name != "UNRECOGNIZED" }
                         .map { it to it.name },
-                    selectedItem = formState.value.mode,
-                    onItemSelected = { formState.value = formState.value.copy { mode = it } },
+                    selectedItem =
+                    formState.value.mode?.takeUnless { it.name == "UNRECOGNIZED" }
+                        ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
+                    onItemSelected = { formState.value = formState.value.copy(mode = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.fixed_pin),
-                    value = formState.value.fixedPin,
+                    value = formState.value.fixed_pin ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {
                         if (it.toString().length == 6) { // ensure 6 digits
-                            formState.value = formState.value.copy { fixedPin = it }
+                            formState.value = formState.value.copy(fixed_pin = it)
                         }
                     },
                 )

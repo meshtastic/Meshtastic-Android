@@ -1,0 +1,196 @@
+name: Reusable Android Check
+
+on:
+  workflow_call:
+    inputs:
+      run_lint:
+        type: boolean
+        default: true
+      run_unit_tests:
+        type: boolean
+        default: true
+      run_instrumented_tests:
+        type: boolean
+        default: true
+      flavors:
+        type: string
+        default: '["google"]'
+      api_levels:
+        type: string
+        default: '[35]'
+      num_shards:
+        type: number
+        default: 1
+      upload_artifacts:
+        type: boolean
+        default: true
+    secrets:
+      GRADLE_ENCRYPTION_KEY:
+        required: false
+      CODECOV_TOKEN:
+        required: false
+      DATADOG_APPLICATION_ID:
+        required: false
+      DATADOG_CLIENT_TOKEN:
+        required: false
+      GOOGLE_MAPS_API_KEY:
+        required: false
+      GRADLE_CACHE_URL:
+        required: false
+      GRADLE_CACHE_USERNAME:
+        required: false
+      GRADLE_CACHE_PASSWORD:
+        required: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      matrix:
+        api_level: ${{ fromJson(inputs.api_levels) }}
+        flavor: ${{ fromJson(inputs.flavors) }}
+    env:
+      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+      MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'jetbrains'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
+
+      - name: Calculate Version Code
+        id: calculate_version_code
+        uses: ./.github/actions/calculate-version-code
+
+      - name: Determine Tasks
+        id: tasks
+        run: |
+          TASKS=""
+          # Only run Lint and Unit Tests on the first API level and first flavor in the matrix to save time and resources
+          IS_FIRST_API=$(echo '${{ inputs.api_levels }}' | jq -r '.[0] == ${{ matrix.api_level }}')
+          IS_FIRST_FLAVOR=$(echo '${{ inputs.flavors }}' | jq -r '.[0] == "${{ matrix.flavor }}"')
+          
+          if [ "${{ inputs.run_lint }}" = "true" ] && [ "$IS_FIRST_API" = "true" ] && [ "$IS_FIRST_FLAVOR" = "true" ]; then
+            TASKS="$TASKS spotlessCheck detekt "
+          fi
+          
+          FLAVOR="${{ matrix.flavor }}"
+          if [ "$IS_FIRST_API" = "true" ]; then
+            if [ "$FLAVOR" = "google" ]; then
+              TASKS="$TASKS assembleGoogleDebug "
+              [ "${{ inputs.run_unit_tests }}" = "true" ] && TASKS="$TASKS testGoogleDebugUnitTest "
+            elif [ "$FLAVOR" = "fdroid" ]; then
+              TASKS="$TASKS assembleFdroidDebug "
+              [ "${{ inputs.run_unit_tests }}" = "true" ] && TASKS="$TASKS testFdroidDebugUnitTest "
+            fi
+          fi
+          
+          # Instrumented Test Tasks
+          if [ "${{ inputs.run_instrumented_tests }}" = "true" ]; then
+            if [ "$FLAVOR" = "google" ]; then
+              TASKS="$TASKS connectedGoogleDebugAndroidTest "
+            elif [ "$FLAVOR" = "fdroid" ]; then
+              TASKS="$TASKS connectedFdroidDebugAndroidTest "
+            fi
+          fi
+          
+          # Run coverage report if any tests were executed
+          if [[ $TASKS == *"test"* ]]; then
+             TASKS="$TASKS koverXmlReport"
+          fi
+          
+          echo "tasks=$TASKS" >> $GITHUB_OUTPUT
+          echo "is_first_api=$IS_FIRST_API" >> $GITHUB_OUTPUT
+
+      - name: Enable KVM group perms
+        if: inputs.run_instrumented_tests == true
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Check (with Emulator)
+        if: inputs.run_instrumented_tests == true
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
+        with:
+          api-level: ${{ matrix.api_level }}
+          arch: x86_64
+          force-avd-creation: false
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --continue --scan
+
+      - name: Run Check (no Emulator)
+        if: inputs.run_instrumented_tests == false
+        env:
+          VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
+        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --continue --scan
+
+      - name: Upload coverage results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          files: "**/build/reports/kover/report.xml"
+
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
+          files: "**/build/test-results/**/*.xml,**/build/outputs/androidTest-results/**/*.xml"
+
+      - name: Upload debug artifact
+        if: ${{ steps.tasks.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.flavor }}Debug
+          path: app/build/outputs/apk/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug.apk
+          retention-days: 14
+
+      - name: Report App Size
+        if: always() && steps.tasks.outputs.is_first_api == 'true'
+        run: |
+          echo "### 📦 App Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload reports
+        if: ${{ always() && inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: reports-${{ matrix.flavor }}-api-${{ matrix.api_level }}
+          path: |
+            **/build/reports
+            **/build/test-results
+            **/build/outputs/androidTest-results
+          retention-days: 7

@@ -16,36 +16,43 @@
  */
 package org.meshtastic.core.model
 
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.RouteDiscovery
-import org.meshtastic.proto.Portnums
+import co.touchlab.kermit.Logger
+import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.RouteDiscovery
 
-val MeshProtos.MeshPacket.fullRouteDiscovery: RouteDiscovery?
-    get() =
-        with(decoded) {
-            if (hasDecoded() && !wantResponse && portnum == Portnums.PortNum.TRACEROUTE_APP) {
-                runCatching { RouteDiscovery.parseFrom(payload).toBuilder() }
-                    .getOrNull()
-                    ?.apply {
-                        val destinationId = dest.takeIf { it != 0 } ?: this@fullRouteDiscovery.to
-                        val sourceId = source.takeIf { it != 0 } ?: this@fullRouteDiscovery.from
-                        val fullRoute = listOf(destinationId) + routeList + sourceId
-                        clearRoute()
-                        addAllRoute(fullRoute)
+val MeshPacket.fullRouteDiscovery: RouteDiscovery?
+    get() {
+        val d = decoded
+        if (d != null && !d.want_response && d.portnum == PortNum.TRACEROUTE_APP) {
+            val originalRd = RouteDiscovery.ADAPTER.decodeOrNull(d.payload, Logger) ?: return null
 
-                        val fullRouteBack = listOf(sourceId) + routeBackList + destinationId
-                        clearRouteBack()
-                        // hopStart was not populated prior to 2.3.0. The bitfield was added in 2.5.0 and
-                        // is used to detect versions where hopStart can be trusted to have been set.
-                        if ((hopStart > 0 || hasBitfield()) && snrBackCount > 0) { // otherwise back route is invalid
-                            addAllRouteBack(fullRouteBack)
-                        }
-                    }
-                    ?.build()
-            } else {
-                null
-            }
+            val destinationId = if (d.dest != 0) d.dest else this.to
+            val sourceId = if (d.source != 0) d.source else this.from
+
+            // Note: Wire lists are immutable
+            val fullRoute = listOf(destinationId) + originalRd.route + sourceId
+            val fullRouteBack = listOf(sourceId) + originalRd.route_back + destinationId
+
+            // hopStart was not populated prior to 2.3.0. The bitfield was added in 2.5.0 and
+            // is used to detect versions where hopStart can be trusted to have been set.
+            // Assuming default integer values of 0 for hop_start and snr_back_count if unset.
+            val hopStartVal = hop_start
+            val hasBitfield = (d.bitfield ?: 0) != 0
+
+            return originalRd.copy(
+                route = fullRoute,
+                route_back =
+                if ((hopStartVal > 0 || hasBitfield) && originalRd.snr_back.isNotEmpty()) {
+                    fullRouteBack
+                } else {
+                    originalRd.route_back
+                },
+            )
         }
+        return null
+    }
 
 @Suppress("MagicNumber")
 private fun formatTraceroutePath(nodesList: List<String>, snrList: List<Int>): String {
@@ -74,30 +81,30 @@ private fun RouteDiscovery.getTracerouteResponse(
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
 ): String = buildString {
-    if (routeList.isNotEmpty()) {
+    if (route.isNotEmpty()) {
         append(headerTowards)
-        append(formatTraceroutePath(routeList.map(getUser), snrTowardsList))
+        append(formatTraceroutePath(route.map(getUser), snr_towards))
     }
-    if (routeBackList.isNotEmpty()) {
+    if (route_back.isNotEmpty()) {
         append("\n\n")
         append(headerBack)
-        append(formatTraceroutePath(routeBackList.map(getUser), snrBackList))
+        append(formatTraceroutePath(route_back.map(getUser), snr_back))
     }
 }
 
-fun MeshProtos.MeshPacket.getTracerouteResponse(
+fun MeshPacket.getTracerouteResponse(
     getUser: (nodeNum: Int) -> String,
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
 ): String? = fullRouteDiscovery?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 /** Returns a traceroute response string only when the result is complete (both directions). */
-fun MeshProtos.MeshPacket.getFullTracerouteResponse(
+fun MeshPacket.getFullTracerouteResponse(
     getUser: (nodeNum: Int) -> String,
     headerTowards: String = "Route traced toward destination:\n\n",
     headerBack: String = "Route traced back to us:\n\n",
 ): String? = fullRouteDiscovery
-    ?.takeIf { it.routeList.isNotEmpty() && it.routeBackList.isNotEmpty() }
+    ?.takeIf { it.route.isNotEmpty() && it.route_back.isNotEmpty() }
     ?.getTracerouteResponse(getUser, headerTowards, headerBack)
 
 enum class TracerouteMapAvailability {

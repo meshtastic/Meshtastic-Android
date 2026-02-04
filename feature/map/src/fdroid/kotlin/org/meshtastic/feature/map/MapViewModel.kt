@@ -31,7 +31,7 @@ import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
 
 @Suppress("LongParameterList")
@@ -57,8 +57,7 @@ constructor(
             mapPrefs.mapStyle = value
         }
 
-    val localConfig =
-        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
+    val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
     val config
         get() = localConfig.value

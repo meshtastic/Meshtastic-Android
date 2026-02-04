@@ -58,6 +58,9 @@ fun Project.configureDokka() {
     }
 }
 
+/**
+ * Configure Dokka aggregation in a way that is compatible with Gradle Isolated Projects.
+ */
 fun Project.configureDokkaAggregation() {
     extensions.configure<DokkaExtension> {
         moduleName.set("Meshtastic App")

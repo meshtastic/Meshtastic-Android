@@ -62,13 +62,13 @@ fun SignalInfo(
                 IconInfo(
                     icon = MeshtasticIcons.ChannelUtilization,
                     contentDescription = stringResource(Res.string.channel_utilization),
-                    text = "%.1f%%".format(node.deviceMetrics.channelUtilization),
+                    text = "%.1f%%".format(node.deviceMetrics.channel_utilization),
                     contentColor = contentColor,
                 )
                 IconInfo(
                     icon = MeshtasticIcons.AirUtilization,
                     contentDescription = stringResource(Res.string.air_utilization),
-                    text = "%.1f%%".format(node.deviceMetrics.airUtilTx),
+                    text = "%.1f%%".format(node.deviceMetrics.air_util_tx),
                     contentColor = contentColor,
                 )
             }

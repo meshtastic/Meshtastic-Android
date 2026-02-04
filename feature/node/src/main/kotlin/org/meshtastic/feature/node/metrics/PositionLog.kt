@@ -83,8 +83,8 @@ import org.meshtastic.core.ui.icon.Save
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.proto.ConfigProtos.Config.DisplayConfig.DisplayUnits
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.Position
 
 @Composable
 private fun RowScope.PositionText(text: String, weight: Float) {
@@ -121,18 +121,18 @@ const val DEG_D = 1e-7
 const val HEADING_DEG = 1e-5
 
 @Composable
-fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, system: DisplayUnits) {
+fun PositionItem(compactWidth: Boolean, position: Position, system: Config.DisplayConfig.DisplayUnits) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        PositionText("%.5f".format(position.latitudeI * DEG_D), WEIGHT_20)
-        PositionText("%.5f".format(position.longitudeI * DEG_D), WEIGHT_20)
-        PositionText(position.satsInView.toString(), WEIGHT_10)
-        PositionText(position.altitude.metersIn(system).toString(system), WEIGHT_15)
+        PositionText("%.5f".format((position.latitude_i ?: 0) * DEG_D), WEIGHT_20)
+        PositionText("%.5f".format((position.longitude_i ?: 0) * DEG_D), WEIGHT_20)
+        PositionText(position.sats_in_view.toString(), WEIGHT_10)
+        PositionText((position.altitude ?: 0).metersIn(system).toString(system), WEIGHT_15)
         if (!compactWidth) {
-            PositionText("${position.groundSpeed} Km/h", WEIGHT_15)
-            PositionText("%.0f°".format(position.groundTrack * HEADING_DEG), WEIGHT_15)
+            PositionText("${position.ground_speed ?: 0} Km/h", WEIGHT_15)
+            PositionText("%.0f°".format((position.ground_track ?: 0) * HEADING_DEG), WEIGHT_15)
         }
         PositionText(position.formatPositionTime(), WEIGHT_40)
     }
@@ -199,7 +199,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateU
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -255,8 +255,8 @@ fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateU
 @Composable
 private fun ColumnScope.PositionList(
     compactWidth: Boolean,
-    positions: List<MeshProtos.Position>,
-    displayUnits: DisplayUnits,
+    positions: List<Position>,
+    displayUnits: Config.DisplayConfig.DisplayUnits,
 ) {
     LazyColumn(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
         items(positions) { position -> PositionItem(compactWidth, position, displayUnits) }
@@ -265,20 +265,20 @@ private fun ColumnScope.PositionList(
 
 @Suppress("MagicNumber")
 private val testPosition =
-    MeshProtos.Position.newBuilder()
-        .apply {
-            latitudeI = 297604270
-            longitudeI = -953698040
-            altitude = 1230
-            satsInView = 7
-            time = (System.currentTimeMillis() / 1000).toInt()
-        }
-        .build()
+    Position(
+        latitude_i = 297604270,
+        longitude_i = -953698040,
+        altitude = 1230,
+        sats_in_view = 7,
+        time = (System.currentTimeMillis() / 1000).toInt(),
+    )
 
 @Preview(showBackground = true)
 @Composable
 private fun PositionItemPreview() {
-    AppTheme { PositionItem(compactWidth = false, position = testPosition, system = DisplayUnits.METRIC) }
+    AppTheme {
+        PositionItem(compactWidth = false, position = testPosition, system = Config.DisplayConfig.DisplayUnits.METRIC)
+    }
 }
 
 @PreviewScreenSizes

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
@@ -40,14 +39,12 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
-import org.meshtastic.proto.ModuleConfigProtos.ModuleConfig.SerialConfig
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.moduleConfig
+import org.meshtastic.proto.ModuleConfig
 
 @Composable
 fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val serialConfig = state.moduleConfig.serial
+    val serialConfig = state.moduleConfig.serial ?: ModuleConfig.SerialConfig()
     val formState = rememberConfigState(initialValue = serialConfig)
     val focusManager = LocalFocusManager.current
 
@@ -59,7 +56,7 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         responseState = state.responseState,
         onDismissPacketResponse = viewModel::clearPacketResponse,
         onSave = {
-            val config = moduleConfig { serial = it }
+            val config = ModuleConfig(serial = it)
             viewModel.setModuleConfig(config)
         },
     ) {
@@ -67,71 +64,65 @@ fun SerialConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
             TitledCard(title = stringResource(Res.string.serial_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.serial_enabled),
-                    checked = formState.value.enabled,
+                    checked = formState.value.enabled ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.echo_enabled),
-                    checked = formState.value.echo,
+                    checked = formState.value.echo ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { echo = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(echo = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = "RX",
-                    value = formState.value.rxd,
+                    value = formState.value.rxd ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { rxd = it } },
+                    onValueChanged = { formState.value = formState.value.copy(rxd = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = "TX",
-                    value = formState.value.txd,
+                    value = formState.value.txd ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { txd = it } },
+                    onValueChanged = { formState.value = formState.value.copy(txd = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.serial_baud_rate),
                     enabled = state.connected,
-                    items =
-                    SerialConfig.Serial_Baud.entries
-                        .filter { it != SerialConfig.Serial_Baud.UNRECOGNIZED }
-                        .map { it to it.name },
-                    selectedItem = formState.value.baud,
-                    onItemSelected = { formState.value = formState.value.copy { baud = it } },
+                    items = ModuleConfig.SerialConfig.Serial_Baud.entries.map { it to it.name },
+                    selectedItem = formState.value.baud ?: ModuleConfig.SerialConfig.Serial_Baud.BAUD_DEFAULT,
+                    onItemSelected = { formState.value = formState.value.copy(baud = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.timeout),
-                    value = formState.value.timeout,
+                    value = formState.value.timeout ?: 0,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy { timeout = it } },
+                    onValueChanged = { formState.value = formState.value.copy(timeout = it) },
                 )
                 HorizontalDivider()
                 DropDownPreference(
                     title = stringResource(Res.string.serial_mode),
                     enabled = state.connected,
-                    items =
-                    SerialConfig.Serial_Mode.entries
-                        .filter { it != SerialConfig.Serial_Mode.UNRECOGNIZED }
-                        .map { it to it.name },
-                    selectedItem = formState.value.mode,
-                    onItemSelected = { formState.value = formState.value.copy { mode = it } },
+                    items = ModuleConfig.SerialConfig.Serial_Mode.entries.map { it to it.name },
+                    selectedItem = formState.value.mode ?: ModuleConfig.SerialConfig.Serial_Mode.DEFAULT,
+                    onItemSelected = { formState.value = formState.value.copy(mode = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.override_console_serial_port),
-                    checked = formState.value.overrideConsoleSerialPort,
+                    checked = formState.value.override_console_serial_port ?: false,
                     enabled = state.connected,
-                    onCheckedChange = { formState.value = formState.value.copy { overrideConsoleSerialPort = it } },
+                    onCheckedChange = { formState.value = formState.value.copy(override_console_serial_port = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
             }
