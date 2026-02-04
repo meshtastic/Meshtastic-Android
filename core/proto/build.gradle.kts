@@ -46,6 +46,8 @@ wire {
         boxOneOfsMinSize = 5000
     }
     root("meshtastic.*")
+    prune("meshtastic.MeshPacket#delayed")
+    prune("meshtastic.MeshPacket.Delayed")
 }
 
 // Modern KMP publication uses the project name as the artifactId by default.
