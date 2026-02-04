@@ -38,7 +38,7 @@ jobs:
     uses: ./.github/workflows/reusable-check.yml
     with:
       api_levels: '[35]' # Only test latest API on PRs for speed
-      flavors: '["google"]'
+      flavors: '["google","fdroid"]'
     secrets: inherit
 
   skip-notice:
