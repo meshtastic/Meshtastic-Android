@@ -1,7 +1,7 @@
 jdk:
   - openjdk17
 before_install:
-  - ./gradlew :core:proto:generateGoogleReleaseProto
+  - ./gradlew :core:proto:generateProtos
 install:
-  - ./gradlew :core:api:publishToMavenLocal :core:model:publishToMavenLocal :core:proto:publishToMavenLocal -Pgoogle
+  - ./gradlew :core:proto:publishToMavenLocal :core:model:publishToMavenLocal :core:api:publishToMavenLocal
 group: org.meshtastic
