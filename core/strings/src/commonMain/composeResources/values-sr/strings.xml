@@ -457,4 +457,5 @@
     <!-- Compass -->
     <string name="add_channels_title">Додај канале</string>
     <!-- Message Filter -->
+    <string name="channel_url">Линк канала</string>
 </resources>
