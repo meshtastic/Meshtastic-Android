@@ -153,12 +153,12 @@
     <string name="position_packet">Asukoha pakett</string>
     <string name="broadcast_interval">Saateintervall</string>
     <string name="smart_position">Nutikas asukoht</string>
-    <string name="minimum_interval">Minimaalne intervall</string>
-    <string name="minimum_distance">Suurim kaugus</string>
+    <string name="minimum_interval">Nutikas intervall</string>
+    <string name="minimum_distance">Nutikas kaugus</string>
     <string name="device_gps">Seadme GPS</string>
     <string name="fixed_position">Määratud asukoht</string>
     <string name="altitude">Kõrgus</string>
-    <string name="update_interval">Värskendusintervall</string>
+    <string name="update_interval">GPS-i küsimise intervall</string>
     <string name="advanced_device_gps">Täiustatud seadme GPS</string>
     <string name="gps_receive_gpio">GPS vastuvõtu GPIO</string>
     <string name="gps_transmit_gpio">GPS saatmise GPIO</string>
@@ -1120,4 +1120,5 @@
     <string name="filter_message_label">Filtreeritud</string>
     <string name="filter_enable_for_contact">Luba filtreerimine</string>
     <string name="filter_disable_for_contact">Keela filtreerimine</string>
+    <string name="channel_url">Kanali URL</string>
 </resources>

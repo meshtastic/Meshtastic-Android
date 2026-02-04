@@ -112,12 +112,9 @@
     <string name="position_packet">Пакети позиција</string>
     <string name="broadcast_interval">Интервал емитовања</string>
     <string name="smart_position">Паметно позиционирање</string>
-    <string name="minimum_interval">Минимални интервал</string>
-    <string name="minimum_distance">Минимум раздаљине</string>
     <string name="device_gps">GPS уређај</string>
     <string name="fixed_position">Фиксна локација</string>
     <string name="altitude">Висина</string>
-    <string name="update_interval">Интервал ажурирања</string>
     <string name="advanced_device_gps">Напредне поставке GPS уређаја</string>
     <string name="gps_receive_gpio">GPS пријем GPIO</string>
     <string name="gps_transmit_gpio">GPS предаја GPIO</string>

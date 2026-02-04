@@ -153,12 +153,12 @@
     <string name="position_packet">Sijainti Paketti</string>
     <string name="broadcast_interval">Lähetyksen aikaväli</string>
     <string name="smart_position">Älykäs sijainti</string>
-    <string name="minimum_interval">Vähimmäisaikaväli</string>
-    <string name="minimum_distance">Pienin etäisyys</string>
+    <string name="minimum_interval">Älykäs aikaväli</string>
+    <string name="minimum_distance">Älykäs etäisyys</string>
     <string name="device_gps">Laitteen GPS</string>
     <string name="fixed_position">Kiinteä sijainti</string>
     <string name="altitude">Korkeus</string>
-    <string name="update_interval">Päivitysväli</string>
+    <string name="update_interval">GPS-kyselyn aikaväli</string>
     <string name="advanced_device_gps">Laitteen GPS:n lisäasetukset</string>
     <string name="gps_receive_gpio">GPS vastaanoton GPIO-pinni</string>
     <string name="gps_transmit_gpio">GPS lähetyksen GPIO-pinni</string>
@@ -1121,4 +1121,5 @@
     <string name="filter_message_label">Suodatettu</string>
     <string name="filter_enable_for_contact">Ota suodatus käyttöön</string>
     <string name="filter_disable_for_contact">Poista suodatus käytöstä</string>
+    <string name="channel_url">Kanavan URL-osoite</string>
 </resources>
