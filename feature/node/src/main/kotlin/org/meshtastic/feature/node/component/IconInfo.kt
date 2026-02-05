@@ -40,6 +40,7 @@ fun IconInfo(
     icon: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    label: String? = null,
     text: String? = null,
     style: TextStyle = MaterialTheme.typography.labelMedium,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -56,6 +57,7 @@ fun IconInfo(
             contentDescription = contentDescription,
             tint = contentColor,
         )
+        label?.let { Text(text = it, style = style, color = contentColor) }
         text?.let { Text(text = it, style = style, color = contentColor) }
         content()
     }

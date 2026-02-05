@@ -98,13 +98,15 @@ fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
             maxLines = 1,
         )
         Icon(
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(SIZE_ICON_DP.dp),
             imageVector = quality.imageVector,
             contentDescription = stringResource(Res.string.signal_quality),
             tint = quality.color.invoke(),
         )
     }
 }
+
+private const val SIZE_ICON_DP = 16
 
 /** Displays the `snr` and `rssi` with color depending on the values respectively. */
 @Composable
@@ -125,7 +127,7 @@ fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialThe
         modifier = Modifier.fillMaxSize().padding(8.dp),
     ) {
         Icon(
-            modifier = Modifier.size(20.dp),
+            modifier = Modifier.size(SIZE_ICON_DP.dp),
             imageVector = quality.imageVector,
             contentDescription = stringResource(Res.string.signal_quality),
             tint = quality.color.invoke(),
@@ -139,7 +141,7 @@ fun LoraSignalIndicator(snr: Float, rssi: Int, contentColor: Color = MaterialThe
 }
 
 @Composable
-fun Snr(snr: Float) {
+fun Snr(snr: Float, modifier: Modifier = Modifier) {
     val color: Color =
         if (snr > SNR_GOOD_THRESHOLD) {
             Quality.GOOD.color.invoke()
@@ -150,6 +152,7 @@ fun Snr(snr: Float) {
         }
 
     Text(
+        modifier = modifier,
         text = "%s %.2fdB".format(stringResource(Res.string.snr), snr),
         color = color,
         style = MaterialTheme.typography.labelSmall,
@@ -157,7 +160,7 @@ fun Snr(snr: Float) {
 }
 
 @Composable
-fun Rssi(rssi: Int) {
+fun Rssi(rssi: Int, modifier: Modifier = Modifier) {
     val color: Color =
         if (rssi > RSSI_GOOD_THRESHOLD) {
             Quality.GOOD.color.invoke()
@@ -167,6 +170,7 @@ fun Rssi(rssi: Int) {
             Quality.BAD.color.invoke()
         }
     Text(
+        modifier = modifier,
         text = "%s %ddBm".format(stringResource(Res.string.rssi), rssi),
         color = color,
         style = MaterialTheme.typography.labelSmall,

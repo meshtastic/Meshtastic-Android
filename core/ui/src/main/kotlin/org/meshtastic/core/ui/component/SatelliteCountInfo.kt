@@ -38,6 +38,7 @@ fun SatelliteCountInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Satellites,
         contentDescription = stringResource(Res.string.sats),
+        label = stringResource(Res.string.sats),
         text = "$satCount",
         contentColor = contentColor,
     )

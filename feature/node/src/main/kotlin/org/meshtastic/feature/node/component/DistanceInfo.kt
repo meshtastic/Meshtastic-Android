@@ -39,6 +39,7 @@ fun DistanceInfo(
         modifier = modifier,
         icon = Icons.Rounded.SocialDistance,
         contentDescription = stringResource(Res.string.distance),
+        label = stringResource(Res.string.distance),
         text = distance,
         contentColor = contentColor,
     )

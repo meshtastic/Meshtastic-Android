@@ -39,6 +39,7 @@ fun SatelliteCountInfo(
         modifier = modifier,
         icon = Icons.TwoTone.SatelliteAlt,
         contentDescription = stringResource(Res.string.sats),
+        label = stringResource(Res.string.sats),
         text = "$satCount",
         contentColor = contentColor,
     )

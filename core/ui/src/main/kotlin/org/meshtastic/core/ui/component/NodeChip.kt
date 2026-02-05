@@ -50,7 +50,7 @@ fun NodeChip(modifier: Modifier = Modifier, node: Node, onClick: ((Node) -> Unit
         Box(
             modifier =
             Modifier.width(IntrinsicSize.Min)
-                .defaultMinSize(minWidth = 72.dp, minHeight = 32.dp)
+                .defaultMinSize(minWidth = 64.dp, minHeight = 28.dp)
                 .padding(horizontal = 8.dp)
                 .semantics { contentDescription = node.user.short_name.ifEmpty { "Node" } },
             contentAlignment = Alignment.Center,

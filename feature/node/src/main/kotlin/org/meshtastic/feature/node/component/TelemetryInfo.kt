@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.feature.node.component
 
 import androidx.compose.material.icons.Icons
@@ -33,9 +35,15 @@ import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.env_metrics_log
+import org.meshtastic.core.strings.humidity
+import org.meshtastic.core.strings.iaq
 import org.meshtastic.core.strings.node_id
+import org.meshtastic.core.strings.pax
 import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.soil_moisture
+import org.meshtastic.core.strings.soil_temperature
+import org.meshtastic.core.strings.temperature
 
 @Composable
 fun TemperatureInfo(
@@ -47,6 +55,7 @@ fun TemperatureInfo(
         modifier = modifier,
         icon = Icons.Rounded.Thermostat,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.temperature),
         text = temp,
         contentColor = contentColor,
     )
@@ -62,6 +71,7 @@ fun HumidityInfo(
         modifier = modifier,
         icon = Icons.Rounded.WaterDrop,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.humidity),
         text = humidity,
         contentColor = contentColor,
     )
@@ -77,6 +87,7 @@ fun SoilTemperatureInfo(
         modifier = modifier,
         icon = Icons.Rounded.Grass,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.soil_temperature),
         text = temp,
         contentColor = contentColor,
     )
@@ -92,6 +103,7 @@ fun SoilMoistureInfo(
         modifier = modifier,
         icon = Icons.Rounded.Grass,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.soil_moisture),
         text = moisture,
         contentColor = contentColor,
     )
@@ -107,6 +119,7 @@ fun PaxcountInfo(
         modifier = modifier,
         icon = Icons.Rounded.People,
         contentDescription = stringResource(Res.string.pax_metrics_log),
+        label = stringResource(Res.string.pax),
         text = pax,
         contentColor = contentColor,
     )
@@ -122,17 +135,19 @@ fun AirQualityInfo(
         modifier = modifier,
         icon = Icons.Rounded.Air,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.iaq),
         text = iaq,
         contentColor = contentColor,
     )
 }
 
 @Composable
-fun PowerInfo(value: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
+fun PowerInfo(value: String, modifier: Modifier = Modifier, label: String? = null, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
     IconInfo(
         modifier = modifier,
         icon = Icons.Rounded.ElectricBolt,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = label,
         text = value,
         contentColor = contentColor,
     )

@@ -33,10 +33,12 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.unknown
@@ -49,7 +51,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 private const val FORMAT = "%d%%"
-private const val SIZE_ICON = 20
+private const val SIZE_ICON = 16
 
 @Suppress("MagicNumber", "LongMethod")
 @Composable
@@ -64,24 +66,28 @@ fun MaterialBatteryInfo(
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
     ) {
         if (level == null || level < 0) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp),
                 imageVector = MeshtasticIcons.BatteryUnknown,
-                tint = contentColor,
+                tint = contentColor.copy(alpha = 0.65f),
                 contentDescription = stringResource(Res.string.unknown),
             )
         } else if (level > 100) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp).rotate(90f),
                 imageVector = Icons.Rounded.Power,
-                tint = contentColor,
+                tint = contentColor.copy(alpha = 0.65f),
                 contentDescription = levelString,
             )
 
-            Text(text = "PWD", color = contentColor, style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = "PWR",
+                color = contentColor.copy(alpha = 0.95f),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+            )
         } else {
             // Map battery percentage to color
             val fillColor =
@@ -111,16 +117,24 @@ fun MaterialBatteryInfo(
                     )
                 },
                 imageVector = MeshtasticIcons.BatteryEmpty,
-                tint = contentColor,
+                tint = contentColor.copy(alpha = 0.65f),
                 contentDescription = levelString,
             )
 
-            Text(text = levelString, color = contentColor, style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = levelString,
+                color = contentColor.copy(alpha = 0.95f),
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+            )
         }
         voltage
             ?.takeIf { it > 0 }
             ?.let {
-                Text(text = "%.2fV".format(it), color = contentColor, style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = "%.2fV".format(it),
+                    color = contentColor.copy(alpha = 0.8f),
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp)
+                )
             }
     }
 }

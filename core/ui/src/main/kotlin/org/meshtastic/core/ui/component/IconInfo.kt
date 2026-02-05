@@ -28,18 +28,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 
-private const val SIZE_ICON = 20
+private const val SIZE_ICON = 14
 
 @Composable
 fun IconInfo(
     icon: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    label: String? = null,
     text: String? = null,
     style: TextStyle = MaterialTheme.typography.labelMedium,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -54,9 +58,34 @@ fun IconInfo(
             modifier = Modifier.size(SIZE_ICON.dp),
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = contentColor,
+            tint = contentColor.copy(alpha = 0.65f),
         )
-        text?.let { Text(text = it, style = style, color = contentColor) }
+        if (label != null || text != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                label?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.sp),
+                        color = contentColor.copy(alpha = 0.55f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Clip,
+                        softWrap = false,
+                    )
+                }
+                text?.let {
+                    Text(
+                        text = it,
+                        style = style.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                        color = contentColor.copy(alpha = 0.95f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
         content()
     }
 }
@@ -65,6 +94,11 @@ fun IconInfo(
 @Preview
 private fun IconInfoPreview() {
     MaterialTheme {
-        IconInfo(icon = MeshtasticIcons.Elevation, contentDescription = "Elevation", content = { Text(text = "100") })
+        IconInfo(
+            icon = MeshtasticIcons.Elevation,
+            contentDescription = "Elevation",
+            label = "Elevation",
+            text = "100m"
+        )
     }
 }
