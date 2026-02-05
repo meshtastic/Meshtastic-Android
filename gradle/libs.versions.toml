@@ -107,7 +107,7 @@ compose-multiplatform-resources = { module = "org.jetbrains.compose.components:c
 
 # Google
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.8.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.9.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
