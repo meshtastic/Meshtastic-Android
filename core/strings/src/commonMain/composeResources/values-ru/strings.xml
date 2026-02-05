@@ -153,9 +153,12 @@
     <string name="position_packet">Пакет позиции</string>
     <string name="broadcast_interval">Период трансляции</string>
     <string name="smart_position">Умная позиция</string>
+    <string name="minimum_interval">Умный интервал</string>
+    <string name="minimum_distance">Умное расстояние</string>
     <string name="device_gps">GPS устройства</string>
     <string name="fixed_position">Фиксированное положение</string>
     <string name="altitude">Высота</string>
+    <string name="update_interval">Интервал опроса GPS</string>
     <string name="advanced_device_gps">Расширенное GPS устройство</string>
     <string name="gps_receive_gpio">GPIO приёма GPS</string>
     <string name="gps_transmit_gpio">GPIO передачи GPS</string>
@@ -1133,4 +1136,5 @@
     <string name="filter_message_label">Отфильтрованные</string>
     <string name="filter_enable_for_contact">Включить фильтрацию</string>
     <string name="filter_disable_for_contact">Отключить фильтрацию</string>
+    <string name="channel_url">URL канала</string>
 </resources>
