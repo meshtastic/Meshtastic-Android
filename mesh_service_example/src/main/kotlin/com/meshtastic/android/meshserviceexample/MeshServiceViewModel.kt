@@ -267,6 +267,7 @@ class MeshServiceViewModel : ViewModel() {
             "com.geeksville.mesh.MESH_CONNECTED",
             "com.geeksville.mesh.MESH_DISCONNECTED",
             -> updateConnectionState()
+
             "com.geeksville.mesh.MESSAGE_STATUS" -> handleMessageStatus(intent)
             else ->
                 if (action.startsWith("com.geeksville.mesh.RECEIVED.")) {
@@ -318,6 +319,7 @@ class MeshServiceViewModel : ViewModel() {
         val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
         val logEntry = "[$timestamp] $entry"
         Log.d(TAG, "Log: $logEntry")
+        @Suppress("MagicNumber")
         _packetLog.value = (listOf(logEntry) + _packetLog.value).take(50)
     }
 

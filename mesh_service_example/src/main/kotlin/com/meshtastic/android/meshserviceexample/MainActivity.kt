@@ -101,11 +101,7 @@ class MainActivity : ComponentActivity() {
             registerReceiver(meshtasticReceiver, intentFilter)
         }
 
-        setContent {
-            ExampleTheme {
-                MainScreen(viewModel)
-            }
-        }
+        setContent { ExampleTheme { MainScreen(viewModel) } }
     }
 
     override fun onDestroy() {
@@ -159,21 +155,16 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun ExampleTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val colorScheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+fun ExampleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    val colorScheme =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                val context = LocalContext.current
+                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            }
+            darkTheme -> darkColorScheme()
+            else -> lightColorScheme()
         }
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
-    }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        content = content
-    )
+    MaterialTheme(colorScheme = colorScheme, content = content)
 }

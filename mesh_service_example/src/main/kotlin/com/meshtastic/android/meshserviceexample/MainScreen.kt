@@ -122,26 +122,17 @@ fun TitledCard(title: String, content: @Composable () -> Unit) {
 }
 
 @Composable
-fun SectionHeader(
-    title: String,
-    expanded: Boolean,
-    onExpandClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun SectionHeader(title: String, expanded: Boolean, onExpandClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth().clickable { onExpandClick() },
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary,
-            )
+            Text(text = title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
             Icon(
                 imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
                 contentDescription = if (expanded) "Collapse" else "Expand",
@@ -215,6 +206,7 @@ private fun TopBarTitle(isConnected: Boolean, connectionState: String) {
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun MainContent(
     viewModel: MeshServiceViewModel,
     innerPadding: PaddingValues,
@@ -237,15 +229,15 @@ private fun MainContent(
     ) {
         item { MyInfoSection(myId, myNodeInfo) }
         item { TitledCard(title = "Messaging") { MessagingSection(viewModel, lastMessage) } }
-        
+
         item {
             SectionHeader(
                 title = "Mesh Nodes (${nodes.size})",
                 expanded = nodesExpanded,
-                onExpandClick = { nodesExpanded = !nodesExpanded }
+                onExpandClick = { nodesExpanded = !nodesExpanded },
             )
         }
-        
+
         if (nodesExpanded) {
             if (nodes.isEmpty()) {
                 item { EmptyNodeState() }
@@ -289,19 +281,13 @@ private fun MainContent(
         }
 
         item {
-            SectionHeader(
-                title = "Packet Log",
-                expanded = logExpanded,
-                onExpandClick = { logExpanded = !logExpanded }
-            )
+            SectionHeader(title = "Packet Log", expanded = logExpanded, onExpandClick = { logExpanded = !logExpanded })
         }
-        
+
         if (logExpanded) {
             item {
                 Card(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.padding(16.dp)) {
-                        PacketLogContent(packetLog)
-                    }
+                    Box(modifier = Modifier.padding(16.dp)) { PacketLogContent(packetLog) }
                 }
             }
         }
@@ -313,18 +299,13 @@ private fun MainContent(
 
 @Composable
 private fun PacketLogContent(log: List<String>) {
-    Column(
-        modifier =
-        Modifier.fillMaxWidth()
-            .heightIn(max = 300.dp)
-            .verticalScroll(rememberScrollState()),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp).verticalScroll(rememberScrollState())) {
         if (log.isEmpty()) {
             Text(
                 text = "No packets yet.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             )
         } else {
             log.forEach { entry ->
