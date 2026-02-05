@@ -57,9 +57,17 @@ object UnitConversions {
         return (b * alpha) / (a - alpha)
     }
 
-    fun numberToHuman(number: Flaot, units: Map<String, String> = emptyMap<String, String>()): String {
-        val unitsMap = mapOf("Nano" to -9, "Micro" to -6, "Milli" to -3 , "Unit" to 0,
-                             "Thousand" to 3, "Million" to 6, "Billion" to 9)
+    fun numberToHuman(number: Float, units: Map<String, String> = emptyMap<String, String>()): String {
+        val unitsMap =
+            mapOf(
+                "Nano" to -9,
+                "Micro" to -6,
+                "Milli" to -3,
+                "Unit" to 0,
+                "Thousand" to 3,
+                "Million" to 6,
+                "Billion" to 9,
+            )
         var exponent = floor(log10(number)).toInt()
 
         if (exponent.mod(3) != 0) {
@@ -73,13 +81,13 @@ object UnitConversions {
         }
 
         var exponentsMap = unitsMap.entries.associate { (k, v) -> v to k }.toMutableMap()
-        units.forEach { (unit_key, custom_v) ->
-            val lookup_key = exponentsMap.filterValues { it == unit_key }.keys;
-            if (lookup_key.iterator().hasNext()) exponentsMap.put(lookup_key.iterator().next(), custom_v)
+        units.forEach { (unitKey, customUnit) ->
+            val lookupKey = exponentsMap.filterValues { it == unitKey }.keys
+            if (lookupKey.iterator().hasNext()) exponentsMap.put(lookupKey.iterator().next(), customUnit)
         }
 
-        val unit =  unitsMap.entries.associate{(k,v)-> v to k}.get(exponent)
-        val value = (number/10.0.pow(exponent))
+        val unit = unitsMap.entries.associate { (k, v) -> v to k }.get(exponent)
+        val value = (number / 10.0.pow(exponent))
 
         return "$value $unit"
     }
