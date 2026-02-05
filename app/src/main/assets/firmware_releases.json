@@ -241,6 +241,12 @@
       "title": "fix(PortduinoGlue): spi_dev_int packing",
       "page_url": "https://github.com/meshtastic/firmware/pull/9319",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9238",
+      "title": "Change I2C pins to NFC pads for XIAO nRF52840",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9238",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
