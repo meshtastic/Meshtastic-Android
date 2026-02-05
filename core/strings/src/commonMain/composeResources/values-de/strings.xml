@@ -153,9 +153,12 @@
     <string name="position_packet">Standortnachricht</string>
     <string name="broadcast_interval">Übertragungsintervall</string>
     <string name="smart_position">Intelligente Position</string>
+    <string name="minimum_interval">Intelligentes Intervall</string>
+    <string name="minimum_distance">Intelligente Entfernung</string>
     <string name="device_gps">Geräte-GPS</string>
     <string name="fixed_position">Fester Standort</string>
     <string name="altitude">Höhe</string>
+    <string name="update_interval">GPS Abfrageintervall</string>
     <string name="advanced_device_gps">Erweitertes GPS Gerät</string>
     <string name="gps_receive_gpio">GPIO GPS Empfangen</string>
     <string name="gps_transmit_gpio">GPIO GPS Senden</string>
@@ -1117,4 +1120,5 @@
     <string name="filter_message_label">Gefiltert</string>
     <string name="filter_enable_for_contact">Filter aktivieren</string>
     <string name="filter_disable_for_contact">Filter deaktivieren</string>
+    <string name="channel_url">Kanal URL</string>
 </resources>
