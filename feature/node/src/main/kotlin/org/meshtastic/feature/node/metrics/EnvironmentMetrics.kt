@@ -373,9 +373,12 @@ private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
             }
             if (hasCurrent) {
                 val current = envMetrics.current!!
+                val ampereUnits = mapOf("Nano" to "nA", "Micro" to "μA", "Milli" to "mA" ,
+                                        "Unit" to "A", "Thousand" to "kA", "Million" to "MA",
+                                        "Billion" to "GA")
                 Text(
                     text = "%s %s".format(stringResource(Res.string.current),
-                                          numberToHuman(current)),
+                                          numberToHuman(current, ampereUnits)),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
