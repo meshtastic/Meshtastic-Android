@@ -56,9 +56,9 @@ publishing {
     publications.withType<MavenPublication>().configureEach {
         val baseId = artifactId
         if (baseId == "proto") {
-            artifactId = "core-proto"
+            artifactId = "meshtastic-android-proto"
         } else if (baseId.startsWith("proto-")) {
-            artifactId = baseId.replace("proto-", "core-proto-")
+            artifactId = baseId.replace("proto-", "meshtastic-android-proto-")
         }
     }
 }

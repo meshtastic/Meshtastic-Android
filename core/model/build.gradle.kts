@@ -47,7 +47,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
-                artifactId = "core-model"
+                artifactId = "meshtastic-android-model"
             }
         }
     }
