@@ -24,7 +24,7 @@ import okio.ByteString.Companion.toByteString
 
 @Suppress("unused") // These are extension functions meant to be imported elsewhere
 fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteString?, logger: Logger? = null): T? {
-    if (bytes == null || bytes.size == 0) return null
+    if (bytes == null) return null
     return runCatching { decode(bytes) }
         .onFailure { exception -> logger?.e(exception) { "Failed to decode proto message" } }
         .getOrNull()
@@ -40,7 +40,7 @@ fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteString?, logger:
  * @return The decoded message, or null if bytes is null or decoding fails
  */
 fun <T : Message<T, *>> ProtoAdapter<T>.decodeOrNull(bytes: ByteArray?, logger: Logger? = null): T? {
-    if (bytes == null || bytes.isEmpty()) return null
+    if (bytes == null) return null
     return decodeOrNull(bytes.toByteString(), logger)
 }
 
