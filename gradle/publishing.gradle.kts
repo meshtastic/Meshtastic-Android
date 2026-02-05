@@ -29,4 +29,6 @@ if (project.version == "unspecified") {
         ?: System.getenv("VERSION_NAME")
         ?: props.getProperty("VERSION_NAME_BASE")
         ?: "0.0.0-SNAPSHOT"
+
+    println("Configured publication version for project ${project.name}: ${project.version}")
 }

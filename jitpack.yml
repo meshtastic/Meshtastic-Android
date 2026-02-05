@@ -1,7 +1,5 @@
 jdk:
   - openjdk17
-before_install:
-  - ./gradlew :core:proto:generateProtos
 install:
-  - ./gradlew :core:proto:publishToMavenLocal :core:model:publishToMavenLocal :core:api:publishToMavenLocal
+  - ./gradlew publishToMavenLocal
 group: org.meshtastic
