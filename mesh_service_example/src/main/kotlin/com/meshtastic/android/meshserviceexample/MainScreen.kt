@@ -19,6 +19,7 @@
 package com.meshtastic.android.meshserviceexample
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,16 +29,22 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.BatteryUnknown
 import androidx.compose.material.icons.automirrored.rounded.Message
 import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.icons.rounded.ExpandLess
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material.icons.rounded.GpsFixed
 import androidx.compose.material.icons.rounded.GpsOff
 import androidx.compose.material.icons.rounded.Hub
@@ -77,6 +84,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -109,6 +117,36 @@ fun TitledCard(title: String, content: @Composable () -> Unit) {
                 modifier = Modifier.padding(bottom = 12.dp),
             )
             content()
+        }
+    }
+}
+
+@Composable
+fun SectionHeader(
+    title: String,
+    expanded: Boolean,
+    onExpandClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth().clickable { onExpandClick() },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Rounded.ExpandLess else Icons.Rounded.ExpandMore,
+                contentDescription = if (expanded) "Collapse" else "Expand",
+                tint = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
@@ -186,6 +224,11 @@ private fun MainContent(
     val myId by viewModel.myId.collectAsState()
     val nodes by viewModel.nodes.collectAsState()
     val lastMessage by viewModel.message.collectAsState()
+    val packetLog by viewModel.packetLog.collectAsState()
+
+    var nodesExpanded by remember { mutableStateOf(false) }
+    var logExpanded by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = Modifier.padding(innerPadding).fillMaxSize(),
@@ -194,17 +237,106 @@ private fun MainContent(
     ) {
         item { MyInfoSection(myId, myNodeInfo) }
         item { TitledCard(title = "Messaging") { MessagingSection(viewModel, lastMessage) } }
-        if (nodes.isNotEmpty()) {
-            item {
-                TitledCard(title = "Mesh Nodes (${nodes.size})") {
-                    NodeListContent(nodes, viewModel, snackbarHostState)
+        
+        item {
+            SectionHeader(
+                title = "Mesh Nodes (${nodes.size})",
+                expanded = nodesExpanded,
+                onExpandClick = { nodesExpanded = !nodesExpanded }
+            )
+        }
+        
+        if (nodesExpanded) {
+            if (nodes.isEmpty()) {
+                item { EmptyNodeState() }
+            } else {
+                items(nodes) { node ->
+                    Card(modifier = Modifier.fillMaxWidth()) {
+                        val nodeLabel = node.user?.longName ?: node.user?.id ?: "Unknown Node"
+                        NodeItem(node) { action ->
+                            scope.launch {
+                                when (action) {
+                                    "traceroute" -> {
+                                        viewModel.requestTraceroute(node.num)
+                                        snackbarHostState.showSnackbar("Traceroute requested for $nodeLabel")
+                                    }
+                                    "telemetry" -> {
+                                        viewModel.requestTelemetry(node.num)
+                                        snackbarHostState.showSnackbar("Telemetry requested for $nodeLabel")
+                                    }
+                                    "neighbors" -> {
+                                        viewModel.requestNeighborInfo(node.num)
+                                        snackbarHostState.showSnackbar("Neighbor info requested for $nodeLabel")
+                                    }
+                                    "position" -> {
+                                        viewModel.requestPosition(node.num)
+                                        snackbarHostState.showSnackbar("Position requested for $nodeLabel")
+                                    }
+                                    "userinfo" -> {
+                                        viewModel.requestUserInfo(node.num)
+                                        snackbarHostState.showSnackbar("User info requested for $nodeLabel")
+                                    }
+                                    "connstatus" -> {
+                                        viewModel.requestDeviceConnectionStatus(node.num)
+                                        snackbarHostState.showSnackbar("Connection status requested for $nodeLabel")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-        } else {
-            item { EmptyNodeState() }
         }
+
+        item {
+            SectionHeader(
+                title = "Packet Log",
+                expanded = logExpanded,
+                onExpandClick = { logExpanded = !logExpanded }
+            )
+        }
+        
+        if (logExpanded) {
+            item {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.padding(16.dp)) {
+                        PacketLogContent(packetLog)
+                    }
+                }
+            }
+        }
+
         item { ActionButtons(viewModel, snackbarHostState) }
         item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+private fun PacketLogContent(log: List<String>) {
+    Column(
+        modifier =
+        Modifier.fillMaxWidth()
+            .heightIn(max = 300.dp)
+            .verticalScroll(rememberScrollState()),
+    ) {
+        if (log.isEmpty()) {
+            Text(
+                text = "No packets yet.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        } else {
+            log.forEach { entry ->
+                Text(
+                    text = entry,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.padding(vertical = 2.dp),
+                )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
+            }
+        }
     }
 }
 
@@ -235,54 +367,6 @@ private fun EmptyNodeState() {
         modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp),
         textAlign = TextAlign.Center,
     )
-}
-
-@Composable
-private fun NodeListContent(
-    nodes: List<NodeInfo>,
-    viewModel: MeshServiceViewModel,
-    snackbarHostState: SnackbarHostState,
-) {
-    val scope = rememberCoroutineScope()
-    nodes.forEachIndexed { index, node ->
-        val nodeLabel = node.user?.longName ?: node.user?.id ?: "Unknown Node"
-        NodeItem(node) { action ->
-            scope.launch {
-                when (action) {
-                    "traceroute" -> {
-                        viewModel.requestTraceroute(node.num)
-                        snackbarHostState.showSnackbar("Traceroute requested for $nodeLabel")
-                    }
-                    "telemetry" -> {
-                        viewModel.requestTelemetry(node.num)
-                        snackbarHostState.showSnackbar("Telemetry requested for $nodeLabel")
-                    }
-                    "neighbors" -> {
-                        viewModel.requestNeighborInfo(node.num)
-                        snackbarHostState.showSnackbar("Neighbor info requested for $nodeLabel")
-                    }
-                    "position" -> {
-                        viewModel.requestPosition(node.num)
-                        snackbarHostState.showSnackbar("Position requested for $nodeLabel")
-                    }
-                    "userinfo" -> {
-                        viewModel.requestUserInfo(node.num)
-                        snackbarHostState.showSnackbar("User info requested for $nodeLabel")
-                    }
-                    "connstatus" -> {
-                        viewModel.requestDeviceConnectionStatus(node.num)
-                        snackbarHostState.showSnackbar("Connection status requested for $nodeLabel")
-                    }
-                }
-            }
-        }
-        if (index < nodes.size - 1) {
-            HorizontalDivider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
-            )
-        }
-    }
 }
 
 @Composable

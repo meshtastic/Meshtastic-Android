@@ -74,12 +74,14 @@ class WireExtensionsTest {
     }
 
     @Test
-    fun `decodeOrNull with empty ByteString returns null`() {
+    fun `decodeOrNull with empty ByteString returns empty message`() {
         // Act
         val result = Position.ADAPTER.decodeOrNull(ByteString.EMPTY, testLogger)
 
         // Assert
-        assertNull(result)
+        assertNotNull(result)
+        // An empty position should have null/default values
+        assertNull(result!!.latitude_i)
     }
 
     @Test
@@ -107,18 +109,20 @@ class WireExtensionsTest {
     }
 
     @Test
-    fun `decodeOrNull with empty ByteArray returns null`() {
+    fun `decodeOrNull with empty ByteArray returns empty message`() {
         // Act
         val result = Position.ADAPTER.decodeOrNull(ByteArray(0), testLogger)
 
         // Assert
-        assertNull(result)
+        assertNotNull(result)
+        assertNull(result!!.latitude_i)
     }
 
     @Test
     fun `decodeOrNull with invalid data returns null`() {
         // Arrange
-        val invalidBytes = byteArrayOfInts(0xFF, 0xFF, 0xFF, 0xFF).toByteString()
+        // A single byte 0xFF is an invalid field tag (field 0 is reserved and tags are varints)
+        val invalidBytes = ByteString.of(0xFF.toByte())
 
         // Act - should not throw, should return null
         val result = Position.ADAPTER.decodeOrNull(invalidBytes, testLogger)
