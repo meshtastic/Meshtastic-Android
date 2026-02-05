@@ -1,5 +1,7 @@
 jdk:
   - openjdk17
+before_install:
+  - ./gradlew --stop
 install:
-  - ./gradlew publishToMavenLocal
+  - ./gradlew :core:proto:publishToMavenLocal :core:model:publishToMavenLocal :core:api:publishToMavenLocal --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseParallelGC"
 group: org.meshtastic

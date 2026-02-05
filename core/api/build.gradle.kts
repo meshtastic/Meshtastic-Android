@@ -39,7 +39,7 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
-                artifactId = "core-api"
+                artifactId = "meshtastic-android-api"
             }
         }
     }

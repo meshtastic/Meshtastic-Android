@@ -28,13 +28,13 @@ dependencies {
     val meshtasticVersion = "v2.7.13" 
 
     // The core AIDL interface
-    implementation("com.github.meshtastic.Meshtastic-Android:core-api:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-api:$meshtasticVersion")
     
     // Data models (DataPacket, MeshUser, NodeInfo, etc.)
-    implementation("com.github.meshtastic.Meshtastic-Android:core-model:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:$meshtasticVersion")
     
     // Protobuf definitions (PortNum, Telemetry, etc.)
-    implementation("com.github.meshtastic.Meshtastic-Android:core-proto:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-proto:$meshtasticVersion")
 }
 ```
 
