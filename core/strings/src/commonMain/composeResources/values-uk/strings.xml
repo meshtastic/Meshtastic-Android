@@ -119,7 +119,7 @@
     <string name="send">Надіслати</string>
     <string name="warning_not_paired">Ви ще не підєднали пристрій, сумісний з Meshtastic. Будьласка приєднайте пристрій і введіть ім’я користувача.\n\nЦя програма з відкритим вихідним кодом знаходиться в розробці, якщо ви виявите проблеми, опублікуйте їх на нашому форумі: https://github.com/orgs/meshtastic/discussions\n\nДля отримання додаткової інформації відвідайте нашу веб-сторінку - www.meshtastic.org.</string>
     <string name="you">Ви</string>
-    <string name="analytics_okay">Дозволити аналітику і звіти про збої.</string>
+    <string name="analytics_okay">Дозволити аналітику і звіти про збої</string>
     <string name="accept">Прийняти</string>
     <string name="cancel">Скасувати</string>
     <string name="discard_changes">Відхилити</string>
@@ -309,6 +309,7 @@
     <string name="more_details">Докладніше</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
     <string name="device_metrics_log">Показники пристрою</string>
     <string name="node_map">Мапа вузлів</string>
     <string name="env_metrics_log">Показники довкілля</string>
@@ -413,10 +414,16 @@
     <string name="compass_orientation">Орієнтація компаса</string>
     <string name="external_notification_config">Налаштування зовнішніх сповіщень</string>
     <string name="external_notification_enabled">Зовнішні сповіщення увімкнено</string>
+    <string name="notifications_on_message_receipt">Сповіщення про отримання повідомлень</string>
+    <string name="output_led_gpio">Вихідний LED (GPIO)</string>
+    <string name="output_buzzer_gpio">Вихідний гудок (GPIO)</string>
+    <string name="output_duration_milliseconds">Тривалість виводу (мілісекунд)</string>
     <string name="ringtone">Мелодія</string>
+    <string name="use_i2s_as_buzzer">Використовувати I2S як гудок</string>
     <string name="lora_config">LoRa</string>
     <string name="options">Налаштування</string>
     <string name="advanced">Розширені</string>
+    <string name="use_modem_preset">Використовувати пресет</string>
     <string name="modem_preset">Пресети</string>
     <string name="coding_rate">Швидкість кодування</string>
     <string name="frequency_offset_mhz">Зсув частоти (МГц)</string>
@@ -434,7 +441,9 @@
     <string name="encryption_enabled">Шифрування увімкнено</string>
     <string name="json_output_enabled">Вивід JSON увімкнено</string>
     <string name="tls_enabled">TLS увімкнений</string>
+    <string name="proxy_to_client_enabled">Proxy для клієнта увімкнуто</string>
     <string name="update_interval_seconds">Інтервал оновлення (секунд)</string>
+    <string name="transmit_over_lora">Передавати через LoRa</string>
     <string name="network_config">Мережа</string>
     <string name="wifi_config">Налаштування WiFi</string>
     <string name="enabled">Увімкнено</string>
@@ -450,6 +459,7 @@
     <string name="gateway">Шлюз</string>
     <string name="subnet">Підмережа</string>
     <string name="wifi_rssi_threshold_defaults_to_80">RSSI поріг WiFi (за замовчуванням -80)</string>
+    <string name="ble_rssi_threshold_defaults_to_80">RSSI поріг BLE (за замовчуванням -80)</string>
     <string name="latitude">Широта</string>
     <string name="longitude">Довгота</string>
     <string name="altitude_meters">Висота (метри)</string>
@@ -476,6 +486,7 @@
     <string name="serial_baud_rate">Швидкість послідовного порту</string>
     <string name="timeout">Таймаут</string>
     <string name="override_console_serial_port">Перевизначити послідовний порт</string>
+    <string name="store_forward_enabled"><![CDATA[Збереження та перенаправлення увімкнено]]></string>
     <string name="number_of_records">Кількість записів</string>
     <string name="server">Сервер</string>
     <string name="telemetry_config">Налаштування телеметрії</string>
@@ -502,6 +513,7 @@
     <string name="wind">Вітер</string>
     <string name="weight">Вага</string>
     <string name="radiation">Радіація</string>
+    <string name="store_forward_config"><![CDATA[Налаштування збереження та пересилання]]></string>
     <string name="indoor_air_quality_iaq">Якість повітря в приміщенні (IAQ)</string>
     <string name="url">URL</string>
     <string name="backup_restore"><![CDATA[Резервна копія & Відновлення]]></string>
@@ -538,14 +550,16 @@
     <string name="request_device_metrics">Показники пристрою</string>
     <string name="request_environment_metrics">Екологічні показники</string>
     <string name="request_air_quality_metrics">Показники якості повітря</string>
-    <string name="request_power_metrics">Метрики живлення</string>
+    <string name="request_power_metrics">Показники живлення</string>
     <string name="request_local_stats">Локальна статистика</string>
+    <string name="request_host_metrics">Показники хоста</string>
     <string name="request_pax_metrics">Показники Pax</string>
     <string name="request_metadata">Метадані</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="use_12h_format">Використовувати 12-г формат часу</string>
     <string name="display_time_in_12h_format">Якщо увімкнено, пристрій буде показувати час у 12-годинному форматі на екрані.</string>
+    <string name="host_metrics_log">Показники хоста</string>
     <string name="host">Хост</string>
     <string name="free_memory">Вільна пам'ять</string>
     <string name="disk_free">Вільне місце</string>
@@ -566,7 +580,7 @@
     <string name="time">Час</string>
     <string name="date">Дата</string>
     <string name="only_favorites">Лише обрані</string>
-    <string name="regenerate_private_key">Згенерувати новий закритий ключ</string>
+    <string name="regenerate_private_key">Згенерувати закритий ключ</string>
     <string name="regenerate_keys_confirmation">Ви впевнені, що хочете новий закритий ключ?\n\nВузли, які, можливо, раніше обмінялись ключами з цим вузлом, повинні будуть видалити даний вузол і знову обмінятись ключами щоб відновити безпечний зв'язок.</string>
     <string name="export_keys">Експортувати ключі</string>
     <string name="node_count_template">(%1$d онлайн / %2$d показані / %3$d загалом)</string>
@@ -701,7 +715,7 @@
     <string name="firmware_update_almost_there">Майже готово...</string>
     <string name="firmware_update_taking_a_while">Це може зайняти хвилинку...</string>
     <string name="firmware_update_select_file">Вибрати локальний файл</string>
-    <string name="firmware_update_local_file">Локальний файл</string>
+    <string name="firmware_update_local_file">Файл</string>
     <string name="firmware_update_source_local">Джерело: локальний файл</string>
     <string name="firmware_update_unknown_release">Невідомий віддалений реліз</string>
     <string name="firmware_update_disclaimer_title">Попередження про оновлення</string>
@@ -715,7 +729,7 @@
     <string name="firmware_update_method_usb">Передача файлів через USB</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_wifi">WiFi OTA</string>
-    <string name="firmware_update_method_detail">Оновлення через %1$с</string>
+    <string name="firmware_update_method_detail">Оновлення через %1$s</string>
     <string name="firmware_update_usb_instruction_title">Оберіть USB DFU накопичувач</string>
     <string name="firmware_update_usb_instruction_text">Ваш пристрій перезавантажився в режим DFU і повинен з'явитися як USB накопичувач (наприклад, RAK4631).\n\nУ вікні \"Зберегти як\", виберіть кореневу теку цього диску, щоб зберегти файл прошивки.</string>
     <string name="firmware_update_verifying">Перевірка оновлення...</string>
@@ -750,7 +764,13 @@
     <string name="add_channels_title">Додайте канали</string>
     <string name="loading">Завантаження</string>
     <!-- Message Filter -->
+    <string name="filter_settings">Фільтр повідомлень</string>
+    <string name="filter_enable">Увімкнути фільтрацію</string>
+    <string name="filter_enable_summary">Приховати повідомлення, які містять слова для фільтрації</string>
+    <string name="filter_words">Слова для фільтрації</string>
+    <string name="filter_words_summary">Повідомлення, які містять ці слова, будуть приховані</string>
     <string name="filter_add_placeholder">Додати слово або regex:pattern</string>
+    <string name="filter_no_words">Жодного фільтра не налаштовано</string>
     <string name="filter_regex_pattern">Шаблон регулярного виразу</string>
     <string name="filter_filtered_count">%1$d відфільтровано</string>
     <string name="filter_enable_for_contact">Увімкнути фільтрацію</string>
