@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -65,7 +65,6 @@
     <string name="rebroadcast_mode_none_desc">Lejohet vetëm për rolet SENSOR, TRACKER dhe TAK_TRACKER, kjo do të pengojë të gjitha ritransmetimet, jo ndryshe nga roli CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Injoron paketat nga portnumra jo standardë si: TAK, RangeTest, PaxCounter, etj. Vetëm ritransmeton paketat me portnumra standard: NodeInfo, Text, Position, Telemetry, dhe Routing.</string>
     <!-- Position Config -->
-    <string name="channel">Kanal</string>
     <string name="channel_name">Emri i kanalit radio</string>
     <string name="qr_code">Kodi QR</string>
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
@@ -187,10 +186,6 @@
     <string name="wifi_qr_code_error">Formati i gabuar i kodit QR të kredencialeve WiFi</string>
     <string name="navigate_back">Kthehu pas</string>
     <string name="battery">Bateria</string>
-    <string name="channel_utilization">Përdorimi i kanalit</string>
-    <string name="air_utilization">Përdorimi i ajrit</string>
-    <string name="temperature">Temperatura</string>
-    <string name="humidity">Lagështia</string>
     <string name="logs">Loget</string>
     <string name="hops_away">Hops larg</string>
     <string name="info">Informacion</string>

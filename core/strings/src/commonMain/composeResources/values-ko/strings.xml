@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -81,7 +81,6 @@
     <!-- Position Config -->
     <string name="broadcast_interval">전송 간격</string>
     <string name="debug">Debug</string>
-    <string name="channel">채널</string>
     <string name="channel_name">채널명</string>
     <string name="qr_code">QR코드</string>
     <string name="unknown_username">미확인 유저</string>
@@ -214,10 +213,6 @@
     <string name="wifi_qr_code_error">WiFi QR코드 형식이 잘못됨</string>
     <string name="navigate_back">뒤로 가기</string>
     <string name="battery">배터리</string>
-    <string name="channel_utilization">채널 사용</string>
-    <string name="air_utilization">전파 사용</string>
-    <string name="temperature">온도</string>
-    <string name="humidity">습도</string>
     <string name="logs">로그</string>
     <string name="hops_away">Hops 수</string>
     <string name="hops_away_template">%1$d Hops 떨어짐</string>
@@ -278,7 +273,6 @@
     <string name="meshtastic_low_battery_notifications">배터리 부족 알림</string>
     <string name="low_battery_title">배터리  부족: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">배터리 부족 알림 (즐겨찾기 노드)</string>
-    <string name="baro_pressure">기압</string>
     <string name="udp_enabled">활성화</string>
     <string name="udp_config">UDP 설정</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>최근 수신: %2$s<br>최근 위치: %3$s<br>배터리: %4$s]]></string>

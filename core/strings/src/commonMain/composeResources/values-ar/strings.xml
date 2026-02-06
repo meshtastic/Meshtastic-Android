@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -51,7 +51,6 @@
     <string name="routing_error_admin_public_key_unauthorized">المفتاح العام غير مسموح</string>
     <string name="rebroadcast_mode_none">لا يوجد</string>
     <!-- Position Config -->
-    <string name="channel">عربي</string>
     <string name="channel_name">اسم القناة</string>
     <string name="qr_code">رمز الاستجابة السريع</string>
     <string name="unknown_username">اسم المستخدم غير معروف</string>
@@ -114,9 +113,6 @@
     <string name="replace">استبدال</string>
     <string name="navigate_back">العودة إلى الخلف</string>
     <string name="battery">البطارية</string>
-    <string name="channel_utilization">استخدام القناة</string>
-    <string name="temperature">الحرارة</string>
-    <string name="humidity">الرطوبة</string>
     <string name="logs">سجلات</string>
     <string name="info">معلومات</string>
     <string name="iaq">معدل جودة الهواء الداخلي</string>
@@ -156,7 +152,6 @@
     <string name="i_know_what_i_m_doing">أنا أعرف ما أفعله.</string>
     <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
     <string name="low_battery_title">البطارية منخفضه: %1$s</string>
-    <string name="baro_pressure">الضغط الجوي</string>
     <string name="user">اسم المستخدم</string>
     <string name="channels">القنوات</string>
     <string name="device">الجهاز</string>

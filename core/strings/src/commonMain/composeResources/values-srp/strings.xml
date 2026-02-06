@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -119,7 +119,6 @@
     <string name="gps_receive_gpio">GPS пријем GPIO</string>
     <string name="gps_transmit_gpio">GPS предаја GPIO</string>
     <string name="debug">Дебагуј</string>
-    <string name="channel">Канал</string>
     <string name="channel_name">Назив канала</string>
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Непознато корисничко име</string>
@@ -247,9 +246,7 @@
     <string name="wifi_qr_code_error">Неважећи формат QR кода за ВајФАј податке</string>
     <string name="navigate_back">Иди назад</string>
     <string name="battery">Батерија</string>
-    <string name="channel_utilization">Искоришћеност канала</string>
-    <string name="air_utilization">Искоришћеност ваздуха</string>
-    <string name="temperature">Температура</string>
+    <string name="temperature">Темп.</string>
     <string name="humidity">Влажност</string>
     <string name="logs">Дневници</string>
     <string name="hops_away">Скокова удаљено</string>
@@ -317,7 +314,6 @@
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
     <string name="low_battery_title">Низак ниво батерије: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
-    <string name="baro_pressure">Барометарски притисак</string>
     <string name="udp_enabled">Омогућено</string>
     <string name="udp_config">UDP конфигурација</string>
     <string name="user">Корисник</string>
@@ -455,4 +451,5 @@
     <string name="add_channels_title">Додај канале</string>
     <!-- Message Filter -->
     <string name="channel_url">Линк канала</string>
+    <string name="generate_qr_code">Генерисање QR кода</string>
 </resources>

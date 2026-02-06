@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -117,7 +117,6 @@
     <string name="altitude">Nadmorská výška</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladenie</string>
-    <string name="channel">Kanál</string>
     <string name="channel_name">Názov kanála</string>
     <string name="qr_code">QR kód</string>
     <string name="unknown_username">Neznáme užívateľské meno</string>
@@ -274,10 +273,6 @@
     <string name="wifi_qr_code_error">Neplatný formát QR kódu poverenia WiFi</string>
     <string name="navigate_back">Navigovať späť</string>
     <string name="battery">Batéria</string>
-    <string name="channel_utilization">Využitie kanálu</string>
-    <string name="air_utilization">Využitie éteru</string>
-    <string name="temperature">Teplota</string>
-    <string name="humidity">Vlhkosť</string>
     <string name="logs">Záznamy</string>
     <string name="hops_away">Počet skokov</string>
     <string name="info">Informácia</string>
@@ -339,7 +334,6 @@
     <string name="meshtastic_low_battery_notifications">Upozornenia o slabej batérii</string>
     <string name="low_battery_title">Slabá batéria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornenia o slabej batérii (obľúbene uzle)</string>
-    <string name="baro_pressure">Barometrický tlak</string>
     <string name="udp_config">Konfigurácia UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Naposledy počutý: %2$s<br>Posledná pozícia: %3$s<br>Batéria: %4$s]]></string>
     <string name="toggle_my_position">Zapnúť lokalizáciu</string>

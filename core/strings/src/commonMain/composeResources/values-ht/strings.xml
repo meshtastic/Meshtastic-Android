@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -65,7 +65,6 @@
     <string name="rebroadcast_mode_none_desc">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
     <!-- Position Config -->
-    <string name="channel">kanal</string>
     <string name="channel_name">Non kanal</string>
     <string name="qr_code">Kòd QR</string>
     <string name="unknown_username">Non itilizatè enkoni</string>
@@ -187,10 +186,6 @@
     <string name="wifi_qr_code_error">Fòma QR Kòd Kredi WiFi Invalid</string>
     <string name="navigate_back">Navige Tounen</string>
     <string name="battery">Batri</string>
-    <string name="channel_utilization">Itilizasyon Kanal</string>
-    <string name="air_utilization">Itilizasyon Ay</string>
-    <string name="temperature">Tanperati</string>
-    <string name="humidity">Imidite</string>
     <string name="logs">Jounal</string>
     <string name="hops_away">Hops Lwen</string>
     <string name="info">Enfòmasyon</string>

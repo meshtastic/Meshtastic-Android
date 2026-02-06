@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Nome do nó de alternativo</string>
@@ -102,7 +102,6 @@
     <string name="fixed_position">Posição fixa</string>
     <string name="altitude">Altitude</string>
     <string name="debug">Depuração</string>
-    <string name="channel">Canal</string>
     <string name="channel_name">Nome do Canal</string>
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nome de utilizador desconhecido</string>
@@ -231,10 +230,6 @@
     <string name="wifi_qr_code_error">Código QR do Wi-Fi com formato inválido</string>
     <string name="navigate_back">Retroceder</string>
     <string name="battery">Bateria</string>
-    <string name="channel_utilization">Utilização do canal</string>
-    <string name="air_utilization">Utilização do ar</string>
-    <string name="temperature">Temperatura</string>
-    <string name="humidity">Humidade</string>
     <string name="logs">Registo de eventos</string>
     <string name="hops_away">Saltos</string>
     <string name="info">Informações</string>
@@ -294,7 +289,6 @@
     <string name="meshtastic_low_battery_notifications">Notificação de bateria fraca</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nodes favoritos)</string>
-    <string name="baro_pressure">Pressão atmosférica</string>
     <string name="udp_config">Configuração UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Ouvido última vez: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
     <string name="user">Utilizador</string>
