@@ -12,7 +12,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 
 <resources>
@@ -1026,10 +1026,10 @@
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
-    <plurals name="relays">
+    <string name="relays">
         <item quantity="one">Heard %1$d Relay</item>
         <item quantity="other">Heard %1$d Relays</item>
-    </plurals>
+    </string>
 
     <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
     <string name="learn_more">Learn more</string>
@@ -1169,4 +1169,14 @@
     <string name="filter_enable_for_contact">Enable filtering</string>
     <string name="filter_disable_for_contact">Disable filtering</string>
     <string name="channel_url">Channel URL</string>
+    <string name="scan_nfc">Scan NFC</string>
+    <string name="scan_shared_contact_nfc">Scan Shared Contact NFC</string>
+    <string name="scan_shared_contact_qr">Scan Shared Contact QR Code</string>
+    <string name="input_shared_contact_url">Input Shared Contact URL</string>
+    <string name="scan_channels_nfc">Scan Channels NFC</string>
+    <string name="scan_channels_qr">Scan Channels QR Code</string>
+    <string name="input_channel_url">Input Channel URL</string>
+    <string name="share_channels_qr">Share Channels QR Code</string>
+    <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
+    <string name="generate_qr_code">Generate QR Code</string>
 </resources>

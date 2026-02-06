@@ -70,8 +70,11 @@
     <!-- Needed to open our bluetooth connection to our paired device (after reboot) -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- zxing library for QR Code scanning using camera -->
+    <!-- Camera permission for QR Code scanning -->
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- NFC permission for sharing channels and contacts -->
+    <uses-permission android:name="android.permission.NFC" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -79,6 +82,10 @@
 
     <uses-feature
         android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <uses-feature
+        android:name="android.hardware.nfc"
         android:required="false" />
 
     <!-- for USB serial access -->
@@ -94,7 +101,6 @@
         </intent>
     </queries>
 
-    <!-- hardware acceleration is required for zxing barcode lib -->
     <application
         android:name="com.geeksville.mesh.MeshUtilApplication"
         android:allowBackup="false"
@@ -141,11 +147,6 @@
         </service>
 
         <activity
-            android:name="com.journeyapps.barcodescanner.CaptureActivity"
-            android:screenOrientation="unspecified"
-            tools:replace="screenOrientation" />
-
-        <activity
             android:name="com.geeksville.mesh.MainActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
@@ -182,6 +183,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="https" />
+                <data android:host="meshtastic.org" />
+                <data android:pathPrefix="/e/" />
+                <data android:pathPrefix="/E/" />
+                <data android:pathPrefix="/v/" />
+                <data android:pathPrefix="/V/" />
+            </intent-filter>
+
+            <!-- Support NFC NDEF Discovery for the same URLs -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
+                <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="https" />
                 <data android:host="meshtastic.org" />
                 <data android:pathPrefix="/e/" />

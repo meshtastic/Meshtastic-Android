@@ -32,14 +32,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -53,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
@@ -62,8 +61,11 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.geeksville.mesh.model.Contact
+import com.geeksville.mesh.model.UIViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.ContactSettings
@@ -71,6 +73,7 @@ import org.meshtastic.core.model.util.formatMuteRemainingTime
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.channel_invalid
 import org.meshtastic.core.strings.close_selection
 import org.meshtastic.core.strings.conversations
 import org.meshtastic.core.strings.currently
@@ -87,33 +90,36 @@ import org.meshtastic.core.strings.mute_status_muted_for_hours
 import org.meshtastic.core.strings.mute_status_unmuted
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.select_all
-import org.meshtastic.core.strings.share_contact
 import org.meshtastic.core.strings.unmute
+import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
 import org.meshtastic.core.ui.icon.VolumeUpTwoTone
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ChannelSet
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("LongMethod")
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalPermissionsApi::class)
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ContactsScreen(
     onNavigateToShare: () -> Unit,
     viewModel: ContactsViewModel = hiltViewModel(),
+    uIViewModel: UIViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeContactKey: String? = null,
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var showMuteDialog by remember { mutableStateOf(false) }
@@ -171,6 +177,8 @@ fun ContactsScreen(
     }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
+    val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->
         if (isSelectionModeActive) {
@@ -210,6 +218,7 @@ fun ContactsScreen(
             }
         }
     }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -223,15 +232,17 @@ fun ContactsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                modifier =
-                Modifier.animateFloatingActionButton(
-                    visible = connectionState.isConnected(),
-                    alignment = Alignment.BottomEnd,
-                ),
-                onClick = onNavigateToShare,
-            ) {
-                Icon(MeshtasticIcons.QrCode2, contentDescription = stringResource(Res.string.share_contact))
+            if (connectionState.isConnected()) {
+                AddContactFAB(
+                    sharedContact = sharedContactRequested,
+                    onResult = { uri ->
+                        uIViewModel.handleScannedUri(uri) {
+                            scope.launch { context.showToast(Res.string.channel_invalid) }
+                        }
+                    },
+                    onShareChannels = onNavigateToShare,
+                    onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
+                )
             }
         },
     ) { paddingValues ->

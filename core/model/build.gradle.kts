@@ -59,7 +59,6 @@ dependencies {
     api(libs.androidx.annotation)
     api(libs.kotlinx.serialization.json)
     implementation(libs.kermit)
-    implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
 
     testImplementation(libs.androidx.core.ktx)

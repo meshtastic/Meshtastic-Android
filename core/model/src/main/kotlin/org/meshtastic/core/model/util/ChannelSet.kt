@@ -17,12 +17,13 @@
 package org.meshtastic.core.model.util
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.net.Uri
 import android.util.Base64
 import co.touchlab.kermit.Logger
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
-import com.journeyapps.barcodescanner.BarcodeEncoder
+import com.google.zxing.common.BitMatrix
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSet
@@ -93,9 +94,23 @@ fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
     val multiFormatWriter = MultiFormatWriter()
     val bitMatrix =
         multiFormatWriter.encode(getChannelUrl(false, shouldAdd).toString(), BarcodeFormat.QR_CODE, 960, 960)
-    val barcodeEncoder = BarcodeEncoder()
-    barcodeEncoder.createBitmap(bitMatrix)
+    bitMatrix.toBitmap()
 } catch (ex: Throwable) {
     Logger.e { "URL was too complex to render as barcode" }
     null
+}
+
+private fun BitMatrix.toBitmap(): Bitmap {
+    val width = width
+    val height = height
+    val pixels = IntArray(width * height)
+    for (y in 0 until height) {
+        val offset = y * width
+        for (x in 0 until width) {
+            pixels[offset + x] = if (get(x, y)) Color.BLACK else Color.WHITE
+        }
+    }
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
+    return bitmap
 }
