@@ -21,16 +21,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -45,6 +48,7 @@ import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.advanced
+import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.config_network_eth_enabled_summary
 import org.meshtastic.core.strings.config_network_udp_enabled_summary
 import org.meshtastic.core.strings.config_network_wifi_enabled_summary
@@ -57,9 +61,12 @@ import org.meshtastic.core.strings.gateway
 import org.meshtastic.core.strings.ip
 import org.meshtastic.core.strings.ipv4_mode
 import org.meshtastic.core.strings.network
+import org.meshtastic.core.strings.nfc_disabled
 import org.meshtastic.core.strings.ntp_server
+import org.meshtastic.core.strings.open_settings
 import org.meshtastic.core.strings.password
 import org.meshtastic.core.strings.rsyslog_server
+import org.meshtastic.core.strings.scan_nfc
 import org.meshtastic.core.strings.ssid
 import org.meshtastic.core.strings.subnet
 import org.meshtastic.core.strings.udp_enabled
@@ -76,6 +83,7 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.util.openNfcSettings
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
@@ -88,10 +96,33 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val networkConfig = state.radioConfig.network ?: Config.NetworkConfig()
     val formState = rememberConfigState(initialValue = networkConfig)
+    val context = LocalContext.current
 
     var showScanErrorDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     if (showScanErrorDialog) {
         ScanErrorDialog { showScanErrorDialog = false }
+    }
+
+    var showNfcDisabledDialog: Boolean by rememberSaveable { mutableStateOf(false) }
+    if (showNfcDisabledDialog) {
+        AlertDialog(
+            onDismissRequest = { showNfcDisabledDialog = false },
+            title = { Text(stringResource(Res.string.scan_nfc)) },
+            text = { Text(stringResource(Res.string.nfc_disabled)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        context.openNfcSettings()
+                        showNfcDisabledDialog = false
+                    },
+                ) {
+                    Text(stringResource(Res.string.open_settings))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNfcDisabledDialog = false }) { Text(stringResource(Res.string.cancel)) }
+            },
+        )
     }
 
     val onResult: (String?) -> Unit = { contents ->
@@ -115,7 +146,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
     }
 
     val barcodeScanner = rememberBarcodeScanner(onResult = onResult)
-    NfcScannerEffect(onResult = onResult)
+    NfcScannerEffect(onResult = onResult, onNfcDisabled = { showNfcDisabledDialog = true })
 
     val focusManager = LocalFocusManager.current
 
