@@ -433,7 +433,7 @@ constructor(
                     "Uptime: ${uptime}ms, " +
                     "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                     "Packets TX: $packetsSent ($bytesSent bytes)"
-                }
+            }
             connectionScope.cancel()
             peripheral?.disconnect()
             service.onDisconnect(true)
