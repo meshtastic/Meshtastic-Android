@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPS EN GPIO-pinni</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Vianetsintä</string>
+    <string name="channel">Kanava</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="qr_code">QR-koodi</string>
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
@@ -364,6 +365,12 @@
     <string name="wifi_qr_code_error">WiFi-verkon käyttöoikeustiedoissa on virheellinen QR-koodin muoto</string>
     <string name="navigate_back">Siirry takaisin</string>
     <string name="battery">Akku</string>
+    <string name="channel_utilization">Kanavan käyttöaste</string>
+    <string name="air_utilization">Lähetysajan käyttöaste</string>
+    <string name="temperature">Lämpötila</string>
+    <string name="humidity">Kosteus</string>
+    <string name="soil_temperature">Maaperän lämpötila</string>
+    <string name="soil_moisture">Maaperän kosteus</string>
     <string name="logs">Lokitiedot</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="hops_away_template">Hyppyjä: %1$d</string>
@@ -445,6 +452,7 @@
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
     <string name="low_battery_title">Akku vähissä: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
+    <string name="baro_pressure">Barometri</string>
     <string name="udp_enabled">Käytössä</string>
     <string name="udp_broadcast">UDP-lähetys</string>
     <string name="udp_config">UDP asetukset</string>
@@ -1114,5 +1122,15 @@
     <string name="filter_enable_for_contact">Ota suodatus käyttöön</string>
     <string name="filter_disable_for_contact">Poista suodatus käytöstä</string>
     <string name="channel_url">Kanavan URL-osoite</string>
+    <string name="scan_nfc">Skannaa NFC</string>
+    <string name="scan_shared_contact_nfc">Skannaa jaettu yhteystieto NFC:llä</string>
+    <string name="scan_shared_contact_qr">Skannaa jaetun yhteystiedon QR-koodi</string>
+    <string name="input_shared_contact_url">Syötä jaetun yhteystiedon URL-osoite</string>
+    <string name="scan_channels_nfc">Skannaa kanavat NFC:llä</string>
+    <string name="scan_channels_qr">Skannaa kanavien QR-koodi</string>
+    <string name="input_channel_url">Syötä kanavan URL-osoite</string>
+    <string name="share_channels_qr">Jaa kanavien QR-koodi</string>
+    <string name="scan_nfc_text">Pidä laite NFC-tunnisteen lähellä skannausta varten.</string>
     <string name="generate_qr_code">Generoi QR-koodi</string>
+    <string name="nfc_disabled">NFC on poistettu käytöstä. Ota se käyttöön järjestelmäasetuksista.</string>
 </resources>
