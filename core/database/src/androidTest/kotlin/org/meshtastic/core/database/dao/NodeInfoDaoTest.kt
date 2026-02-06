@@ -22,6 +22,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -338,10 +339,77 @@ class NodeInfoDaoTest {
 
     @Test
     fun testPkcMismatch() = runBlocking {
-        val newNode = testNodes[1].copy(user = testNodes[1].user.copy(public_key = ByteArray(32) { 99 }.toByteString()))
-        nodeInfoDao.putAll(listOf(newNode))
-        val nodes = getNodes()
-        val containsMismatchNode = nodes.any { it.mismatchKey }
-        assertTrue(containsMismatchNode)
+        // First, ensure the node is in the DB with Key A
+        val nodeA = testNodes[10].copy(publicKey = ByteArray(32) { 1 }.toByteString())
+        nodeInfoDao.upsert(nodeA)
+
+        // Now upsert with Key B (mismatch)
+        val nodeB =
+            nodeA.copy(
+                publicKey = ByteArray(32) { 2 }.toByteString(),
+                user = nodeA.user.copy(public_key = ByteArray(32) { 2 }.toByteString()),
+            )
+        nodeInfoDao.upsert(nodeB)
+
+        val stored = nodeInfoDao.getNodeByNum(nodeA.num)!!.node
+        assertEquals(NodeEntity.ERROR_BYTE_STRING, stored.publicKey)
+        assertTrue(stored.toModel().mismatchKey)
+    }
+
+    @Test
+    fun testRoutineUpdatePreservesKey() = runBlocking {
+        // First, ensure the node is in the DB with Key A
+        val keyA = ByteArray(32) { 1 }.toByteString()
+        val nodeA = testNodes[10].copy(publicKey = keyA, user = testNodes[10].user.copy(public_key = keyA))
+        nodeInfoDao.upsert(nodeA)
+
+        // Now upsert with an empty key (common in position/telemetry updates)
+        val nodeEmpty = nodeA.copy(publicKey = null, user = nodeA.user.copy(public_key = ByteString.EMPTY))
+        nodeInfoDao.upsert(nodeEmpty)
+
+        val stored = nodeInfoDao.getNodeByNum(nodeA.num)!!.node
+        assertEquals(keyA, stored.publicKey)
+        assertFalse(stored.toModel().mismatchKey)
+    }
+
+    @Test
+    fun testRecoveryFromErrorState() = runBlocking {
+        // Start in Error state
+        val nodeError =
+            testNodes[10].copy(
+                publicKey = NodeEntity.ERROR_BYTE_STRING,
+                user = testNodes[10].user.copy(public_key = NodeEntity.ERROR_BYTE_STRING),
+            )
+        nodeInfoDao.doUpsert(nodeError)
+        assertTrue(nodeInfoDao.getNodeByNum(nodeError.num)!!.toModel().mismatchKey)
+
+        // Now upsert with a valid Key C
+        val keyC = ByteArray(32) { 3 }.toByteString()
+        val nodeC = nodeError.copy(publicKey = keyC, user = nodeError.user.copy(public_key = keyC))
+        nodeInfoDao.upsert(nodeC)
+
+        val stored = nodeInfoDao.getNodeByNum(nodeError.num)!!.node
+        assertEquals(keyC, stored.publicKey)
+        assertFalse(stored.toModel().mismatchKey)
+    }
+
+    @Test
+    fun testLicensedUserClearsKey() = runBlocking {
+        // Start with a key
+        val keyA = ByteArray(32) { 1 }.toByteString()
+        val nodeA = testNodes[10].copy(publicKey = keyA, user = testNodes[10].user.copy(public_key = keyA))
+        nodeInfoDao.upsert(nodeA)
+
+        // Upsert as licensed user
+        val nodeLicensed =
+            nodeA.copy(
+                user = nodeA.user.copy(is_licensed = true, public_key = ByteString.EMPTY),
+                publicKey = ByteString.EMPTY,
+            )
+        nodeInfoDao.upsert(nodeLicensed)
+
+        val stored = nodeInfoDao.getNodeByNum(nodeA.num)!!.node
+        assertTrue(stored.publicKey == null || (stored.publicKey?.size ?: 0) == 0)
+        assertFalse(stored.toModel().mismatchKey)
     }
 }

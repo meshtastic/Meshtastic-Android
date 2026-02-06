@@ -59,6 +59,7 @@ import org.meshtastic.core.strings.copy
 import org.meshtastic.core.strings.details
 import org.meshtastic.core.strings.encryption_error
 import org.meshtastic.core.strings.encryption_error_text
+import org.meshtastic.core.strings.error
 import org.meshtastic.core.strings.hops_away
 import org.meshtastic.core.strings.node_id
 import org.meshtastic.core.strings.node_number
@@ -289,11 +290,18 @@ private fun MqttAndVerificationRow(node: Node) {
 }
 
 @OptIn(ExperimentalFoundationApi::class)
+@Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun PublicKeyItem(publicKeyBytes: ByteArray) {
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
-    val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.DEFAULT).trim()
+    val isMismatch = publicKeyBytes.all { it == 0.toByte() } && publicKeyBytes.size == 32
+    val publicKeyBase64 =
+        if (isMismatch) {
+            stringResource(Res.string.error)
+        } else {
+            Base64.encodeToString(publicKeyBytes, Base64.DEFAULT).trim()
+        }
     val label = stringResource(Res.string.public_key)
     val copyLabel = stringResource(Res.string.copy)
 
@@ -303,8 +311,10 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
             .defaultMinSize(minHeight = 48.dp)
             .combinedClickable(
                 onLongClick = {
-                    coroutineScope.launch {
-                        clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, publicKeyBase64)))
+                    if (!isMismatch) {
+                        coroutineScope.launch {
+                            clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(label, publicKeyBase64)))
+                        }
                     }
                 },
                 onLongClickLabel = copyLabel,
@@ -319,13 +329,18 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
                 imageVector = MeshtasticIcons.Lock,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                tint =
+                if (isMismatch) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                },
             )
             Spacer(Modifier.width(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = if (isMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -333,7 +348,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
         Text(
             text = publicKeyBase64,
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            color = MaterialTheme.colorScheme.onSurface,
+            color = if (isMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
     }
 }
