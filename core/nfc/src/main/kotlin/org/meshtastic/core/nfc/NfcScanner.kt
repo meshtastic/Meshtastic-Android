@@ -28,7 +28,7 @@ import co.touchlab.kermit.Logger
 import java.io.IOException
 
 @Composable
-fun NfcScannerEffect(onResult: (String?) -> Unit) {
+fun NfcScannerEffect(onResult: (String?) -> Unit, onNfcDisabled: (() -> Unit)? = null) {
     val context = LocalContext.current
     val activity = context as? Activity ?: return
 
@@ -36,6 +36,9 @@ fun NfcScannerEffect(onResult: (String?) -> Unit) {
 
     DisposableEffect(nfcAdapter) {
         if (nfcAdapter == null) {
+            onDispose {}
+        } else if (!nfcAdapter.isEnabled) {
+            onNfcDisabled?.invoke()
             onDispose {}
         } else {
             val readerCallback = NfcAdapter.ReaderCallback { tag: Tag -> handleNfcTag(tag, onResult) }

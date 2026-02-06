@@ -12,7 +12,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  See <https://www.gnu.org/licenses/>.
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
 <resources>
@@ -1179,4 +1179,5 @@
     <string name="share_channels_qr">Share Channels QR Code</string>
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
     <string name="generate_qr_code">Generate QR Code</string>
+    <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
 </resources>

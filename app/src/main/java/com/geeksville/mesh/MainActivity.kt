@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh
 
 import android.app.PendingIntent
@@ -23,6 +22,8 @@ import android.content.Intent
 import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.nfc.NdefMessage
+import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.SystemBarStyle
@@ -46,6 +47,7 @@ import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.channel_invalid
@@ -111,28 +113,24 @@ class MainActivity : AppCompatActivity() {
         handleIntent(intent)
     }
 
+    @Suppress("NestedBlockDepth")
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
 
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
-                appLinkData?.let {
-                    Logger.d { "App link data: $it" }
-                    if (it.path?.startsWith("/e/") == true || it.path?.startsWith("/E/") == true) {
-                        Logger.d { "App link data is a channel set" }
-                        model.requestChannelUrl(
-                            url = it,
-                            onFailure = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
-                        )
-                    } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
-                        Logger.d { "App link data is a shared contact" }
-                        model.setSharedContactRequested(
-                            url = it,
-                            onFailure = { lifecycleScope.launch { showToast(Res.string.contact_invalid) } },
-                        )
-                    } else {
-                        Logger.d { "App link data is not a channel set" }
+                appLinkData?.let { handleMeshtasticUri(it) }
+            }
+
+            NfcAdapter.ACTION_NDEF_DISCOVERED -> {
+                val rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+                if (rawMessages != null) {
+                    for (rawMsg in rawMessages) {
+                        val msg = rawMsg as NdefMessage
+                        for (record in msg.records) {
+                            record.toUri()?.let { handleMeshtasticUri(it) }
+                        }
                     }
                 }
             }
@@ -155,6 +153,25 @@ class MainActivity : AppCompatActivity() {
                 Logger.w { "Unexpected action $appLinkAction" }
             }
         }
+    }
+
+    private fun handleMeshtasticUri(uri: Uri) {
+        Logger.d { "Handling Meshtastic URI: $uri" }
+        handleMeshtasticUri(
+            uri = uri,
+            onChannel = {
+                model.requestChannelUrl(
+                    url = it,
+                    onFailure = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
+                )
+            },
+            onContact = {
+                model.setSharedContactRequested(
+                    url = it,
+                    onFailure = { lifecycleScope.launch { showToast(Res.string.contact_invalid) } },
+                )
+            },
+        )
     }
 
     private fun createShareIntent(message: String): PendingIntent {

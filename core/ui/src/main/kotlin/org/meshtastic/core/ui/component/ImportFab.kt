@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
@@ -41,7 +42,9 @@ import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.input_shared_contact_url
+import org.meshtastic.core.strings.nfc_disabled
 import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.open_settings
 import org.meshtastic.core.strings.scan_channels_nfc
 import org.meshtastic.core.strings.scan_channels_qr
 import org.meshtastic.core.strings.scan_nfc
@@ -52,6 +55,7 @@ import org.meshtastic.core.strings.share_channels_qr
 import org.meshtastic.core.strings.url
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode2
+import org.meshtastic.core.ui.util.openNfcSettings
 
 /**
  * Unified Floating Action Button for importing Meshtastic data (Contacts, Channels, etc.) via NFC, QR, or URL.
@@ -72,6 +76,8 @@ fun ImportFab(
     var expanded by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var isNfcScanning by remember { mutableStateOf(false) }
+    var showNfcDisabledDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val barcodeScanner =
         rememberBarcodeScanner(
@@ -91,8 +97,33 @@ fun ImportFab(
                     isNfcScanning = false
                 }
             },
+            onNfcDisabled = {
+                isNfcScanning = false
+                showNfcDisabledDialog = true
+            },
         )
         NfcScanningDialog(onDismiss = { isNfcScanning = false })
+    }
+
+    if (showNfcDisabledDialog) {
+        AlertDialog(
+            onDismissRequest = { showNfcDisabledDialog = false },
+            title = { Text(stringResource(Res.string.scan_nfc)) },
+            text = { Text(stringResource(Res.string.nfc_disabled)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        context.openNfcSettings()
+                        showNfcDisabledDialog = false
+                    },
+                ) {
+                    Text(stringResource(Res.string.open_settings))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showNfcDisabledDialog = false }) { Text(stringResource(Res.string.cancel)) }
+            },
+        )
     }
 
     if (showUrlDialog) {

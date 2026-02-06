@@ -19,6 +19,8 @@ package org.meshtastic.core.ui.util
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
+import android.content.Intent
+import android.provider.Settings
 import android.widget.Toast
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
@@ -40,4 +42,9 @@ fun Context.findActivity(): Activity? = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> null
+}
+
+fun Context.openNfcSettings() {
+    val intent = Intent(Settings.ACTION_NFC_SETTINGS)
+    startActivity(intent)
 }
