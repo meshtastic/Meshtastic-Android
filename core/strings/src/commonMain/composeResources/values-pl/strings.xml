@@ -743,6 +743,12 @@
     <string name="two_days">48 Godzin</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <string name="no_local_stats">Statystyki niedostępne</string>
+    <plurals name="relays">
+        <item quantity="one">Usłyszano %1$d przekaźnik</item>
+        <item quantity="few">Usłyszano %1$d przekaźników</item>
+        <item quantity="many">Usłyszano %1$d przekaźników</item>
+        <item quantity="other">Usłyszano %1$d przekaźników</item>
+    </plurals>
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="usb_devices">Urządzenia USB</string>
     <!-- Firmware Update -->

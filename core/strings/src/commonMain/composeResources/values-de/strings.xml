@@ -984,8 +984,8 @@
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Empfange %1$d Relais</item>
-        <item quantity="other">Empfange %1$d Relais</item>
+        <item quantity="one">Höre %1$d Relais</item>
+        <item quantity="other">Höre %1$d Relais</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="learn_more">Mehr erfahren</string>

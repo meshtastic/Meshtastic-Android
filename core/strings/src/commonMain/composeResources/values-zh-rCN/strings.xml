@@ -969,6 +969,9 @@
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <string name="unset">未设定 - 0</string>
     <string name="relayed_by">由: %1$s</string>
+    <plurals name="relays">
+        <item quantity="other">连接到的 %1$d 中继节点</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="learn_more">更多信息</string>
     <string name="firmware_update_rak4631_bootloader_hint">对于RAK WisBlock RAK4631，请使用供应商的串行DFU工具（例如，搭配提供的引导加载程序.zip文件使用adafruit-nrfutil dfu serial）。仅复制.uf2文件无法更新引导加载程序。</string>
