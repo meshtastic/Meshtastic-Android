@@ -496,4 +496,10 @@ interface PacketDao {
 
     @Query("SELECT * FROM packet WHERE port_num = 1")
     suspend fun getAllUserPacketsForMigration(): List<Packet>
+
+    @Suppress("MaxLineLength")
+    @Query(
+        "UPDATE packet SET filtered = :filtered WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node)) AND data LIKE :senderIdPattern",
+    )
+    suspend fun updateFilteredBySender(senderIdPattern: String, filtered: Boolean)
 }

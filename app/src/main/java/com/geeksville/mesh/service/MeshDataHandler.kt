@@ -702,7 +702,11 @@ constructor(
         }
     }
 
+    @Suppress("ReturnCount")
     private suspend fun PacketRepository.shouldFilterMessage(dataPacket: DataPacket, contactKey: String): Boolean {
+        val isIgnored = nodeManager.nodeDBbyID[dataPacket.from]?.isIgnored == true
+        if (isIgnored) return true
+
         if (dataPacket.dataType != PortNum.TEXT_MESSAGE_APP.value) return false
         val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
         return messageFilterService.shouldFilter(dataPacket.text.orEmpty(), isFilteringDisabled)

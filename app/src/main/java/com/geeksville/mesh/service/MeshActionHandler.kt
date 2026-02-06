@@ -105,14 +105,16 @@ constructor(
 
     private fun handleIgnore(action: ServiceAction.Ignore, myNodeNum: Int) {
         val node = action.node
+        val newIgnoredStatus = !node.isIgnored
         commandSender.sendAdmin(myNodeNum) {
-            if (node.isIgnored) {
-                AdminMessage(remove_ignored_node = node.num)
-            } else {
+            if (newIgnoredStatus) {
                 AdminMessage(set_ignored_node = node.num)
+            } else {
+                AdminMessage(remove_ignored_node = node.num)
             }
         }
-        nodeManager.updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
+        nodeManager.updateNodeInfo(node.num) { it.isIgnored = newIgnoredStatus }
+        scope.handledLaunch { packetRepository.get().updateFilteredBySender(node.user.id, newIgnoredStatus) }
     }
 
     private fun handleMute(action: ServiceAction.Mute, myNodeNum: Int) {
