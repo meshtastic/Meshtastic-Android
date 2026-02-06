@@ -22,20 +22,7 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.net.Uri
 import android.util.Base64
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.Nfc
-import androidx.compose.material.icons.twotone.QrCodeScanner
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
 import co.touchlab.kermit.Logger
@@ -46,21 +33,12 @@ import com.google.zxing.common.BitMatrix
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.nfc.NfcScannerEffect
+import org.meshtastic.core.model.util.CONTACT_SHARE_PATH
+import org.meshtastic.core.model.util.CONTACT_URL_PREFIX
+import org.meshtastic.core.model.util.MESHTASTIC_HOST
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.input_shared_contact_url
-import org.meshtastic.core.strings.okay
-import org.meshtastic.core.strings.scan_nfc_text
-import org.meshtastic.core.strings.scan_shared_contact_nfc
-import org.meshtastic.core.strings.scan_shared_contact_qr
-import org.meshtastic.core.strings.share_channels_qr
 import org.meshtastic.core.strings.share_contact
-import org.meshtastic.core.strings.url
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import java.net.MalformedURLException
@@ -80,106 +58,9 @@ fun AddContactFAB(
     onShareChannels: (() -> Unit)? = null,
     onDismissSharedContact: () -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    var showUrlDialog by remember { mutableStateOf(false) }
-    var isNfcScanning by remember { mutableStateOf(false) }
-
-    val barcodeScanner =
-        rememberBarcodeScanner(
-            onResult = { contents ->
-                contents?.toUri()?.let {
-                    onResult(it)
-                    isNfcScanning = false
-                }
-            },
-        )
-
-    if (isNfcScanning) {
-        NfcScannerEffect(
-            onResult = { contents ->
-                contents?.toUri()?.let {
-                    onResult(it)
-                    isNfcScanning = false
-                }
-            },
-        )
-        NfcScanningDialog(onDismiss = { isNfcScanning = false })
-    }
-
     sharedContact?.let { SharedContactImportDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
 
-    if (showUrlDialog) {
-        InputUrlDialog(
-            title = stringResource(Res.string.input_shared_contact_url),
-            onDismiss = { showUrlDialog = false },
-            onConfirm = { contents ->
-                onResult(contents.toUri())
-                showUrlDialog = false
-            },
-        )
-    }
-
-    val items =
-        mutableListOf(
-            MenuFABItem(
-                label = stringResource(Res.string.scan_shared_contact_nfc),
-                icon = Icons.Rounded.Nfc,
-                onClick = { isNfcScanning = true },
-            ),
-            MenuFABItem(
-                label = stringResource(Res.string.scan_shared_contact_qr),
-                icon = Icons.TwoTone.QrCodeScanner,
-                onClick = { barcodeScanner.startScan() },
-            ),
-            MenuFABItem(
-                label = stringResource(Res.string.input_shared_contact_url),
-                icon = Icons.Rounded.Link,
-                onClick = { showUrlDialog = true },
-            ),
-        )
-
-    onShareChannels?.let {
-        items.add(
-            MenuFABItem(
-                label = stringResource(Res.string.share_channels_qr),
-                icon = MeshtasticIcons.QrCode2,
-                onClick = it,
-            ),
-        )
-    }
-
-    MenuFAB(expanded = expanded, onExpandedChange = { expanded = it }, items = items, modifier = modifier)
-}
-
-@Composable
-fun NfcScanningDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.scan_shared_contact_nfc)) },
-        text = { Text(stringResource(Res.string.scan_nfc_text)) },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-    )
-}
-
-@Composable
-fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
-    var urlText by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = urlText,
-                onValueChange = { urlText = it },
-                label = { Text(stringResource(Res.string.url)) },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 4,
-            )
-        },
-        confirmButton = { TextButton(onClick = { onConfirm(urlText) }) { Text(stringResource(Res.string.okay)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-    )
+    ImportFab(onImport = onResult, modifier = modifier, onShareChannels = onShareChannels, isContactContext = true)
 }
 
 /**
@@ -236,11 +117,6 @@ private fun BitMatrix.toBitmap(): Bitmap {
     return bitmap
 }
 
-private const val MESHTASTIC_HOST = "meshtastic.org"
-private const val CONTACT_SHARE_PATH = "/v/"
-
-/** Prefix for Meshtastic contact sharing URLs. */
-internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$CONTACT_SHARE_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 @Suppress("MagicNumber")
@@ -256,7 +132,7 @@ fun Uri.toSharedContact(): SharedContact {
 fun SharedContact.getSharedContactUrl(): Uri {
     val bytes = SharedContact.ADAPTER.encode(this)
     val enc = Base64.encodeToString(bytes, BASE64FLAGS)
-    return "$URL_PREFIX$enc".toUri()
+    return "$CONTACT_URL_PREFIX$enc".toUri()
 }
 
 /** Compares two [User] objects and returns a string detailing the differences. */

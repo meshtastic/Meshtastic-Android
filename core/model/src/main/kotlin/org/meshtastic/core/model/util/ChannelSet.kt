@@ -30,9 +30,6 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig
 import java.net.MalformedURLException
 
-private const val MESHTASTIC_HOST = "meshtastic.org"
-private const val CHANNEL_PATH = "/e/"
-const val URL_PREFIX = "https://$MESHTASTIC_HOST$CHANNEL_PATH"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
@@ -42,7 +39,7 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
  */
 @Throws(MalformedURLException::class)
 fun Uri.toChannelSet(): ChannelSet {
-    if (fragment.isNullOrBlank() || !host.equals(MESHTASTIC_HOST, true) || !path.equals(CHANNEL_PATH, true)) {
+    if (fragment.isNullOrBlank() || !host.equals(MESHTASTIC_HOST, true) || !path.equals(CHANNEL_SHARE_PATH, true)) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
 
@@ -85,7 +82,7 @@ fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): Uri {
     val channelBytes = ChannelSet.ADAPTER.encode(this)
     val enc = Base64.encodeToString(channelBytes, BASE64FLAGS)
-    val p = if (upperCasePrefix) URL_PREFIX.uppercase() else URL_PREFIX
+    val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""
     return Uri.parse("$p$query#$enc")
 }

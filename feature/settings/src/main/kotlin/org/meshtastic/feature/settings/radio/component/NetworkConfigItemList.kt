@@ -35,11 +35,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.barcode.extractWifiCredentials
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.advanced
@@ -94,11 +96,20 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
 
     val onResult: (String?) -> Unit = { contents ->
         if (contents != null) {
-            val (ssid, psk) = extractWifiCredentials(contents)
-            if (ssid != null && psk != null) {
-                formState.value = formState.value.copy(wifi_ssid = ssid, wifi_psk = psk)
-            } else {
-                showScanErrorDialog = true
+            val handled =
+                handleMeshtasticUri(
+                    uri = contents.toUri(),
+                    onChannel = {}, // No-op, not supported in network config
+                    onContact = {}, // No-op, not supported in network config
+                )
+
+            if (!handled) {
+                val (ssid, psk) = extractWifiCredentials(contents)
+                if (ssid != null && psk != null) {
+                    formState.value = formState.value.copy(wifi_ssid = ssid, wifi_psk = psk)
+                } else {
+                    showScanErrorDialog = true
+                }
             }
         }
     }
