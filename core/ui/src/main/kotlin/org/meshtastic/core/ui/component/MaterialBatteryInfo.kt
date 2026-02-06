@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -86,7 +85,7 @@ fun MaterialBatteryInfo(
             Text(
                 text = "PWR",
                 color = contentColor.copy(alpha = 0.95f),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
             )
         } else {
             // Map battery percentage to color
@@ -124,7 +123,7 @@ fun MaterialBatteryInfo(
             Text(
                 text = levelString,
                 color = contentColor.copy(alpha = 0.95f),
-                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
             )
         }
         voltage
@@ -133,7 +132,7 @@ fun MaterialBatteryInfo(
                 Text(
                     text = "%.2fV".format(it),
                     color = contentColor.copy(alpha = 0.8f),
-                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp)
+                    style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
                 )
             }
     }

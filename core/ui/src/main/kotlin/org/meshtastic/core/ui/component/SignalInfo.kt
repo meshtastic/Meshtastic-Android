@@ -54,28 +54,25 @@ fun SignalInfo(
         Row(
             modifier = modifier,
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Icon(
                 imageVector = quality.imageVector,
                 contentDescription = stringResource(Res.string.signal_quality),
                 modifier = Modifier.size(16.dp),
-                tint = signalColor
+                tint = signalColor,
             )
             Text(
-                text = "%.1fdB · %ddBm · %s".format(
-                    node.snr, 
-                    node.rssi, 
-                    stringResource(quality.nameRes)
-                ),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold, 
+                text = "%.1fdB · %ddBm · %s".format(node.snr, node.rssi, stringResource(quality.nameRes)),
+                style =
+                MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
                     fontSize = 10.sp,
-                    letterSpacing = 0.sp
+                    letterSpacing = 0.sp,
                 ),
                 color = signalColor,
                 maxLines = 1,
-                softWrap = false
+                softWrap = false,
             )
         }
     }
@@ -84,11 +81,7 @@ fun SignalInfo(
 @Composable
 @Preview(showBackground = true)
 fun SignalInfoSimplePreview() {
-    AppTheme {
-        SignalInfo(
-            node = Node(num = 1, lastHeard = 0, channel = 0, snr = 12.5F, rssi = -42, hopsAway = 0),
-        )
-    }
+    AppTheme { SignalInfo(node = Node(num = 1, lastHeard = 0, channel = 0, snr = 12.5F, rssi = -42, hopsAway = 0)) }
 }
 
 @PreviewLightDark

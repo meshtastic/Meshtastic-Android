@@ -182,7 +182,12 @@ fun AirQualityInfo(
 }
 
 @Composable
-fun PowerInfo(value: String, modifier: Modifier = Modifier, label: String? = null, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
+fun PowerInfo(
+    value: String,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Power,

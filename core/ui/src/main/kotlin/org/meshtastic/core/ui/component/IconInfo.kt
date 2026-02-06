@@ -61,10 +61,7 @@ fun IconInfo(
             tint = contentColor.copy(alpha = 0.65f),
         )
         if (label != null || text != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                 label?.let {
                     Text(
                         text = it,
@@ -94,11 +91,6 @@ fun IconInfo(
 @Preview
 private fun IconInfoPreview() {
     MaterialTheme {
-        IconInfo(
-            icon = MeshtasticIcons.Elevation,
-            contentDescription = "Elevation",
-            label = "Elevation",
-            text = "100m"
-        )
+        IconInfo(icon = MeshtasticIcons.Elevation, contentDescription = "Elevation", label = "Elevation", text = "100m")
     }
 }

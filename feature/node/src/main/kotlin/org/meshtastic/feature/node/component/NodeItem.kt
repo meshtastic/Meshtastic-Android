@@ -12,8 +12,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.feature.node.component
 
 import android.content.res.Configuration
@@ -92,10 +94,11 @@ import org.meshtastic.proto.Config
 
 private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
+private const val GRID_COLUMNS = 3
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalLayoutApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
+@Suppress("LongMethod")
 fun NodeItem(
     thisNode: Node?,
     thatNode: Node,
@@ -168,74 +171,15 @@ fun NodeItem(
                 contentColor = contentColor,
             )
 
-            // Row 1: Battery | Position
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                MaterialBatteryInfo(level = thatNode.batteryLevel ?: 0, voltage = thatNode.voltage ?: 0f, contentColor = contentColor)
-                
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    if (distance != null) {
-                        DistanceInfo(distance = distance, contentColor = contentColor)
-                    }
-                    thatNode.validPosition?.let { position ->
-                        ElevationInfo(altitude = position.altitude ?: 0, system = system, suffix = stringResource(Res.string.elevation_suffix), contentColor = contentColor)
-                    }
-                }
-            }
+            NodeBatteryPositionRow(
+                thatNode = thatNode,
+                distance = distance,
+                system = system,
+                contentColor = contentColor,
+            )
 
-            // Row 2: Signal/Util | Sats
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                if (isThisNode) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        IconInfo(
-                            icon = MeshtasticIcons.ChannelUtilization,
-                            contentDescription = stringResource(Res.string.channel_utilization),
-                            label = stringResource(Res.string.channel_utilization),
-                            text = "%.1f%%".format(thatNode.deviceMetrics.channel_utilization),
-                            contentColor = contentColor,
-                        )
-                        IconInfo(
-                            icon = MeshtasticIcons.AirUtilization,
-                            contentDescription = stringResource(Res.string.air_utilization),
-                            label = stringResource(Res.string.air_utilization),
-                            text = "%.1f%%".format(thatNode.deviceMetrics.air_util_tx),
-                            contentColor = contentColor,
-                        )
-                    }
-                } else {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        if (thatNode.hopsAway > 0) {
-                            HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor)
-                        } else {
-                            // SNR/RSSI/Quality grouped (no wrap)
-                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                if (thatNode.snr < 100f) Snr(thatNode.snr)
-                                if (thatNode.rssi < 0) Rssi(thatNode.rssi)
-                                if (thatNode.snr < 100f && thatNode.rssi < 0) {
-                                    val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
-                                    IconInfo(
-                                        icon = quality.imageVector,
-                                        contentDescription = stringResource(Res.string.signal_quality),
-                                        contentColor = quality.color.invoke(),
-                                        text = stringResource(quality.nameRes),
-                                    )
-                                }
-                            }
-                        }
-                        if (thatNode.channel > 0) {
-                            ChannelInfo(channel = thatNode.channel, contentColor = contentColor)
-                        }
-                    }
-                }
-                
-                val satCount = thatNode.validPosition?.sats_in_view ?: 0
-                if (satCount > 0) {
-                    SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
-                } else {
-                    Spacer(Modifier)
-                }
-            }
+            NodeSignalRow(thatNode = thatNode, isThisNode = isThisNode, contentColor = contentColor)
 
-            // Environment Grid
             val sensorItems = gatherSensors(thatNode, tempInFahrenheit, contentColor)
             if (sensorItems.isNotEmpty()) {
                 MetricsGrid(sensorItems)
@@ -247,11 +191,103 @@ fun NodeItem(
 }
 
 @Composable
-private fun gatherSensors(
-    node: Node,
-    tempInFahrenheit: Boolean,
-    contentColor: Color
-): List<@Composable () -> Unit> {
+private fun NodeBatteryPositionRow(
+    thatNode: Node,
+    distance: String?,
+    system: Config.DisplayConfig.DisplayUnits,
+    contentColor: Color,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        MaterialBatteryInfo(
+            level = thatNode.batteryLevel ?: 0,
+            voltage = thatNode.voltage ?: 0f,
+            contentColor = contentColor,
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (distance != null) {
+                DistanceInfo(distance = distance, contentColor = contentColor)
+            }
+            thatNode.validPosition?.let { position ->
+                ElevationInfo(
+                    altitude = position.altitude ?: 0,
+                    system = system,
+                    suffix = stringResource(Res.string.elevation_suffix),
+                    contentColor = contentColor,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        if (isThisNode) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                IconInfo(
+                    icon = MeshtasticIcons.ChannelUtilization,
+                    contentDescription = stringResource(Res.string.channel_utilization),
+                    label = stringResource(Res.string.channel_utilization),
+                    text = "%.1f%%".format(thatNode.deviceMetrics.channel_utilization),
+                    contentColor = contentColor,
+                )
+                IconInfo(
+                    icon = MeshtasticIcons.AirUtilization,
+                    contentDescription = stringResource(Res.string.air_utilization),
+                    label = stringResource(Res.string.air_utilization),
+                    text = "%.1f%%".format(thatNode.deviceMetrics.air_util_tx),
+                    contentColor = contentColor,
+                )
+            }
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (thatNode.hopsAway > 0) {
+                    HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor)
+                } else {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (thatNode.snr < 100f) Snr(thatNode.snr)
+                        if (thatNode.rssi < 0) Rssi(thatNode.rssi)
+                        if (thatNode.snr < 100f && thatNode.rssi < 0) {
+                            val quality = determineSignalQuality(thatNode.snr, thatNode.rssi)
+                            IconInfo(
+                                icon = quality.imageVector,
+                                contentDescription = stringResource(Res.string.signal_quality),
+                                contentColor = quality.color.invoke(),
+                                text = stringResource(quality.nameRes),
+                            )
+                        }
+                    }
+                }
+                if (thatNode.channel > 0) {
+                    ChannelInfo(channel = thatNode.channel, contentColor = contentColor)
+                }
+            }
+        }
+
+        val satCount = thatNode.validPosition?.sats_in_view ?: 0
+        if (satCount > 0) {
+            SatelliteCountInfo(satCount = satCount, contentColor = contentColor)
+        } else {
+            Spacer(Modifier)
+        }
+    }
+}
+
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Composable
+private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: Color): List<@Composable () -> Unit> {
     val items = mutableListOf<@Composable () -> Unit>()
     val env = node.environmentMetrics
     val pax = node.paxcounter
@@ -260,27 +296,51 @@ private fun gatherSensors(
         items.add { PaxcountInfo(pax = "B:${pax.ble ?: 0} W:${pax.wifi ?: 0}", contentColor = contentColor) }
     }
     if ((env.temperature ?: 0f) != 0f) {
-        val temp = if (tempInFahrenheit) "%.1f°F".format(celsiusToFahrenheit(env.temperature ?: 0f)) else "%.1f°C".format(env.temperature ?: 0f)
+        val temp =
+            if (tempInFahrenheit) {
+                "%.1f°F".format(celsiusToFahrenheit(env.temperature ?: 0f))
+            } else {
+                "%.1f°C".format(env.temperature ?: 0f)
+            }
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.relative_humidity ?: 0f) != 0f) {
         items.add { HumidityInfo(humidity = "%.0f%%".format(env.relative_humidity ?: 0f), contentColor = contentColor) }
     }
     if ((env.barometric_pressure ?: 0f) != 0f) {
-        items.add { PressureInfo(pressure = "%.1fhPa".format(env.barometric_pressure ?: 0f), contentColor = contentColor) }
+        items.add {
+            PressureInfo(pressure = "%.1fhPa".format(env.barometric_pressure ?: 0f), contentColor = contentColor)
+        }
     }
     if ((env.soil_temperature ?: 0f) != 0f) {
-        val temp = if (tempInFahrenheit) "%.1f°F".format(celsiusToFahrenheit(env.soil_temperature ?: 0f)) else "%.1f°C".format(env.soil_temperature ?: 0f)
+        val temp =
+            if (tempInFahrenheit) {
+                "%.1f°F".format(celsiusToFahrenheit(env.soil_temperature ?: 0f))
+            } else {
+                "%.1f°C".format(env.soil_temperature ?: 0f)
+            }
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.soil_moisture ?: 0) != 0 && (env.soil_temperature ?: 0f) != 0f) {
         items.add { SoilMoistureInfo(moisture = "${env.soil_moisture}%", contentColor = contentColor) }
     }
     if ((env.voltage ?: 0f) != 0f) {
-        items.add { PowerInfo(value = "%.2fV".format(env.voltage ?: 0f), label = stringResource(Res.string.voltage), contentColor = contentColor) }
+        items.add {
+            PowerInfo(
+                value = "%.2fV".format(env.voltage ?: 0f),
+                label = stringResource(Res.string.voltage),
+                contentColor = contentColor,
+            )
+        }
     }
     if ((env.current ?: 0f) != 0f) {
-        items.add { PowerInfo(value = "%.1fmA".format(env.current ?: 0f), label = stringResource(Res.string.current), contentColor = contentColor) }
+        items.add {
+            PowerInfo(
+                value = "%.1fmA".format(env.current ?: 0f),
+                label = stringResource(Res.string.current),
+                contentColor = contentColor,
+            )
+        }
     }
     if ((env.iaq ?: 0) != 0) {
         items.add { AirQualityInfo(iaq = "${env.iaq}", contentColor = contentColor) }
@@ -294,18 +354,14 @@ private fun gatherSensors(
 private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        maxItemsInEachRow = 3,
+        maxItemsInEachRow = GRID_COLUMNS,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        val remainder = items.size % 3
-        items.forEach { item ->
-            Box(Modifier.weight(1f)) { item() }
-        }
+        val remainder = items.size % GRID_COLUMNS
+        items.forEach { item -> Box(Modifier.weight(1f)) { item() } }
         if (remainder != 0) {
-            repeat(3 - remainder) {
-                Spacer(Modifier.weight(1f))
-            }
+            repeat(GRID_COLUMNS - remainder) { Spacer(Modifier.weight(1f)) }
         }
     }
 }
@@ -327,7 +383,7 @@ private fun NodeItemHeader(
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         NodeChip(node = thatNode)
 
@@ -388,11 +444,7 @@ fun NodeInfoSimplePreview() {
 fun NodeInfoSignalPreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
-        val thatNode = NodePreviewParameterProvider().values.last().copy(
-            hopsAway = 0,
-            snr = 5.5f,
-            rssi = -100
-        )
+        val thatNode = NodePreviewParameterProvider().values.last().copy(hopsAway = 0, snr = 5.5f, rssi = -100)
         NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, connectionState = ConnectionState.Connected)
     }
 }
