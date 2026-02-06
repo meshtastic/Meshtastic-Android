@@ -65,7 +65,7 @@ import javax.inject.Singleton
  */
 @Suppress("LongParameterList")
 @Singleton
-class RadioInterfaceService
+open class RadioInterfaceService
 @Inject
 constructor(
     private val context: Application,
@@ -224,7 +224,7 @@ constructor(
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
-    fun handleFromRadio(p: ByteArray) {
+    open fun handleFromRadio(p: ByteArray) {
         if (logReceives) {
             try {
                 receivedPacketsLog.write(p)

@@ -65,7 +65,7 @@ dependencies {
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kermit)
 
-    implementation(libs.nordic)
+    implementation(libs.nordic.client.android)
     implementation(libs.nordic.dfu)
     implementation(libs.coil)
     implementation(libs.coil.network.okhttp)
@@ -77,5 +77,9 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.nordic.client.android.mock)
+    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.core.android.mock)
+    testImplementation(libs.nordic.core.mock)
     testImplementation(libs.mockk)
 }
