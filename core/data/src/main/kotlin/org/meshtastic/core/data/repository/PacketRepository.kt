@@ -344,6 +344,11 @@ constructor(
             dbManager.currentDb.value.packetDao().migrateChannelsByPSK(oldSettings, newSettings)
         }
 
+    suspend fun updateFilteredBySender(senderId: String, filtered: Boolean) {
+        val pattern = "%\"from\":\"${senderId}\"%"
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateFilteredBySender(pattern, filtered) }
+    }
+
     private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<Packet>> =
         getAllPackets(PortNum.WAYPOINT_APP.value)
 
