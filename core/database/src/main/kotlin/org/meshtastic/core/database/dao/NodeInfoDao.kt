@@ -84,6 +84,7 @@ interface NodeInfoDao {
         return newNode
     }
 
+    @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
         val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
@@ -113,27 +114,40 @@ interface NodeInfoDao {
             )
         }
 
-        // A public key is considered matching if the incoming key equals the existing key,
-        // OR if the existing key is empty (allowing a new key to be set or an update to proceed).
-        val existingResolvedKey = existingNode.publicKey ?: existingNode.user.public_key
-        val isPublicKeyMatchingOrExistingIsEmpty = existingResolvedKey == incomingNode.publicKey || !existingNode.hasPKC
+        val existingKey = existingNode.publicKey ?: existingNode.user.public_key
+        val incomingKey = incomingNode.publicKey
+
+        val incomingHasKey = (incomingKey?.size ?: 0) == 32
+        val existingHasKey = (existingKey?.size ?: 0) == 32 && existingKey != NodeEntity.ERROR_BYTE_STRING
+
+        val resolvedKey =
+            when {
+                incomingHasKey -> {
+                    if (existingHasKey && incomingKey != existingKey) {
+                        // Actual mismatch between two non-empty keys
+                        NodeEntity.ERROR_BYTE_STRING
+                    } else {
+                        // New key, same key, or recovery from Error state
+                        incomingKey
+                    }
+                }
+                incomingNode.user.is_licensed -> {
+                    // Explicitly clear key for licensed (HAM) users
+                    ByteString.EMPTY
+                }
+                else -> {
+                    // Routine update without key: preserve what we have (even if it's currently Error)
+                    existingKey
+                }
+            }
 
         val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
 
-        return if (isPublicKeyMatchingOrExistingIsEmpty) {
-            // Keys match or existing key was empty: trust the incoming node data completely.
-            // This allows for legitimate updates to user info and other fields.
-            incomingNode.copy(notes = resolvedNotes)
-        } else {
-            // Public key mismatch: This could be a factory reset or a hardware ID collision.
-            // We allow the name and user info to update, but we clear the public key
-            // to indicate that this node is no longer "verified" against the previous key.
-            incomingNode.copy(
-                user = incomingNode.user.copy(public_key = NodeEntity.ERROR_BYTE_STRING),
-                publicKey = NodeEntity.ERROR_BYTE_STRING,
-                notes = resolvedNotes,
-            )
-        }
+        return incomingNode.copy(
+            user = incomingNode.user.copy(public_key = resolvedKey ?: ByteString.EMPTY),
+            publicKey = resolvedKey,
+            notes = resolvedNotes,
+        )
     }
 
     @Query("SELECT * FROM my_node")

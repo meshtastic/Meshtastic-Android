@@ -51,7 +51,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.error
 import org.meshtastic.core.strings.reset
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 @Composable
 fun EditBase64Preference(
     modifier: Modifier = Modifier,
@@ -65,14 +65,16 @@ fun EditBase64Preference(
     onGenerateKey: (() -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-    var valueState by remember { mutableStateOf(value.encodeToString()) }
-    val isError = value.encodeToString() != valueState
+    val isMismatch = value.size == 32 && value.toByteArray().all { it == 0.toByte() }
+    val errorString = stringResource(Res.string.error)
+    var valueState by remember { mutableStateOf(if (isMismatch) errorString else value.encodeToString()) }
+    val isError = value.encodeToString() != valueState || isMismatch
 
     // don't update values while the user is editing
     var isFocused by remember { mutableStateOf(false) }
     LaunchedEffect(value) {
         if (!isFocused) {
-            valueState = value.encodeToString()
+            valueState = if (isMismatch) errorString else value.encodeToString()
         }
     }
 
