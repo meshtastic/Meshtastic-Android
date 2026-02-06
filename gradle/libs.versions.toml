@@ -58,7 +58,7 @@ dependency-guard = "0.5.0"
 
 [libraries]
 # AndroidX
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.10.0" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.3" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
@@ -66,7 +66,7 @@ androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.r
 androidx-camera-lifecycle = { module = "androidx.camera:camera-lifecycle", version.ref = "camerax" }
 androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "camerax" }
 androidx-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
-androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.0.0-alpha02" }
+androidx-camera-viewfinder-compose = { module = "androidx.camera.viewfinder:viewfinder-compose", version = "1.5.3" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version = "1.17.0" }
 androidx-core-location-altitude = { module = "androidx.core:core-location-altitude", version = "1.0.0-beta01" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.2.0" }
