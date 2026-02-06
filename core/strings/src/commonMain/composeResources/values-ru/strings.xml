@@ -983,9 +983,10 @@
     <string name="for_more_information_see_our_privacy_policy">Дополнительная информация доступна в нашей политике конфиденциальности.</string>
     <string name="unset">Не задано - 0</string>
     <string name="relayed_by">Ретранслировано: %1$s</string>
-    <string name="relays">        <item quantity="one">Принял %1$d ретранслятор</item>
+    <plurals name="relays">
+        <item quantity="one">Принял %1$d ретранслятор</item>
         <item quantity="other">Приняли %1$d ретранслятора</item>
-    </string>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="learn_more">Подробности</string>
     <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631, используйте прошивальщик от производителя (например, adafruit-nrfutil с предоставленным .zip файлом загрузчика). Копирование файла .uf2 само по себе не обновит загрузчик.</string>

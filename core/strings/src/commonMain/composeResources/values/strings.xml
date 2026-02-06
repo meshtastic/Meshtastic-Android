@@ -1026,10 +1026,10 @@
     <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
-    <string name="relays">
+    <plurals name="relays">
         <item quantity="one">Heard %1$d Relay</item>
         <item quantity="other">Heard %1$d Relays</item>
-    </string>
+    </plurals>
 
     <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
     <string name="learn_more">Learn more</string>
