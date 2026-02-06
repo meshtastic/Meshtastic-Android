@@ -49,6 +49,7 @@ import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -116,6 +117,10 @@ constructor(
             val packet =
                 try {
                     fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
+                } catch (e: InvalidAttributeException) {
+                    Logger.e(e) { "[$address] Attribute invalidated during read, clearing characteristics" }
+                    handleInvalidAttribute(e)
+                    null
                 } catch (e: Exception) {
                     Logger.w(e) { "[$address] Error reading fromRadioCharacteristic (likely disconnected)" }
                     null
@@ -226,10 +231,7 @@ constructor(
                 .onEach { state ->
                     Logger.i { "[$address] BLE connection state changed to $state" }
                     if (state is ConnectionState.Disconnected) {
-                        toRadioCharacteristic = null
-                        fromNumCharacteristic = null
-                        fromRadioCharacteristic = null
-                        logRadioCharacteristic = null
+                        clearCharacteristics()
 
                         val uptime =
                             if (connectionStartTime > 0) {
@@ -398,6 +400,9 @@ constructor(
                             characteristic.write(p, writeType = writeType)
                         }
                         drainPacketQueueAndDispatch()
+                    } catch (e: InvalidAttributeException) {
+                        Logger.e(e) { "[$address] Attribute invalidated during write, clearing characteristics" }
+                        handleInvalidAttribute(e)
                     } catch (e: Exception) {
                         Logger.e(e) {
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
@@ -428,11 +433,23 @@ constructor(
                     "Uptime: ${uptime}ms, " +
                     "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                     "Packets TX: $packetsSent ($bytesSent bytes)"
-            }
+                }
             connectionScope.cancel()
             peripheral?.disconnect()
             service.onDisconnect(true)
         }
+    }
+
+    private fun handleInvalidAttribute(e: InvalidAttributeException) {
+        clearCharacteristics()
+        service.onDisconnect(BleError.from(e))
+    }
+
+    private fun clearCharacteristics() {
+        toRadioCharacteristic = null
+        fromNumCharacteristic = null
+        fromRadioCharacteristic = null
+        logRadioCharacteristic = null
     }
 
     companion object {

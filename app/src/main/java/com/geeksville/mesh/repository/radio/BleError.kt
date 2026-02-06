@@ -86,9 +86,12 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
     class OperationFailed(exception: OperationFailedException) :
         BleError("Operation failed: ${exception.message}", shouldReconnect = true)
 
-    /** An invalid attribute was used. This is a non-recoverable error. */
+    /**
+     * An invalid attribute was used. This usually happens when the GATT handles become stale (e.g. after a service
+     * change or an unexpected disconnect). This is recoverable via a fresh connection and discovery.
+     */
     class InvalidAttribute(exception: InvalidAttributeException) :
-        BleError("Invalid attribute: ${exception.message}", shouldReconnect = false)
+        BleError("Invalid attribute: ${exception.message}", shouldReconnect = true)
 
     /** An error occurred while scanning for devices. This may be recoverable. */
     class Scanning(exception: ScanningException) :
