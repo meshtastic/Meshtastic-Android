@@ -209,10 +209,11 @@ constructor(
                 Logger.i { "Bonding complete for ${entry.peripheral.address.anonymize}, selecting device..." }
                 changeDeviceAddress(entry.fullAddress)
             } catch (ex: SecurityException) {
-                Logger.e(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
+                Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
                 serviceRepository.setErrorMessage("Bonding failed: ${ex.message} Permissions not granted")
             } catch (ex: Exception) {
-                Logger.e(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
+                // Bonding is often flaky and can fail for many reasons (timeout, user cancel, etc)
+                Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
                 serviceRepository.setErrorMessage("Bonding failed: ${ex.message}")
             }
         }
