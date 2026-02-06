@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Kärgvõrgustik</string>
@@ -366,11 +366,11 @@
     <string name="navigate_back">Liigu tagasi</string>
     <string name="battery">Aku</string>
     <string name="channel_utilization">Kanali kasutus</string>
-    <string name="air_utilization">Eetri kasutus</string>
+    <string name="air_utilization">Saate kasutus</string>
     <string name="temperature">Temperatuur</string>
     <string name="humidity">Niiskus</string>
-    <string name="soil_temperature">Mulla temperatuur</string>
-    <string name="soil_moisture">Maapinna niiskus</string>
+    <string name="soil_temperature">Pinnase temperatuur</string>
+    <string name="soil_moisture">Pinnase niiskus</string>
     <string name="logs">Logi kirjet</string>
     <string name="hops_away">Hüppe kaugusel</string>
     <string name="hops_away_template">%1$d hüppe kaugusel</string>
@@ -452,7 +452,7 @@
     <string name="meshtastic_low_battery_notifications">Madala akupinge hoiatus</string>
     <string name="low_battery_title">Madal akupinge: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Madala akupinge teated (lemmik sõlmed)</string>
-    <string name="baro_pressure">Baromeetri rõhk</string>
+    <string name="baro_pressure">Õhurõhk</string>
     <string name="udp_enabled">Lubatud</string>
     <string name="udp_broadcast">UDP edastus</string>
     <string name="udp_config">UDP sätted</string>
@@ -984,8 +984,8 @@
     <string name="unset">Tühistatud - 0</string>
     <string name="relayed_by">Vahendab: %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Kuulsin %1$d vahendajat</item>
-        <item quantity="other">Kuuldi %1$d vahendajat</item>
+        <item quantity="one">Kuuldud %1$d vahesõlm</item>
+        <item quantity="other">Kuuldud %1$d vahesõlme</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="learn_more">Lisateave</string>
@@ -1121,4 +1121,14 @@
     <string name="filter_enable_for_contact">Luba filtreerimine</string>
     <string name="filter_disable_for_contact">Keela filtreerimine</string>
     <string name="channel_url">Kanali URL</string>
+    <string name="scan_nfc">NFC lugemine</string>
+    <string name="scan_shared_contact_nfc">Loe jagatud kontakt NFC-ga</string>
+    <string name="scan_shared_contact_qr">Skanneeri jagatud kontakt QR kood</string>
+    <string name="input_shared_contact_url">Sisesta jagatud kontakti URL</string>
+    <string name="scan_channels_nfc">Kanalite lugemine NFC-ga</string>
+    <string name="scan_channels_qr">Kanalite skanneerimine QR koodiga</string>
+    <string name="input_channel_url">Sisesta kanali URL</string>
+    <string name="share_channels_qr">Jaga kanalite QR koodi</string>
+    <string name="scan_nfc_text">Lugemiseks vii seade NFC-sildi lähedale.</string>
+    <string name="generate_qr_code">Genereeri QR kood</string>
 </resources>

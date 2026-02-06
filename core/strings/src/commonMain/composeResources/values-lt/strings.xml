@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -64,7 +64,6 @@
     <string name="rebroadcast_mode_none">Nėra</string>
     <string name="rebroadcast_mode_none_desc">Leidžiama tik SENSOR, TRACKER ar TAK_TRACKER rolių įtaisams. Tai užblokuos visas retransliacijas, ne taip kaip CLIENT_MUTE atveju.</string>
     <!-- Position Config -->
-    <string name="channel">Kanalas</string>
     <string name="channel_name">Kanalo pavadinimas</string>
     <string name="qr_code">QR kodas</string>
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
@@ -190,10 +189,6 @@
     <string name="wifi_qr_code_error">Neteisingas WiFi prisijungimo QR kodo formatas</string>
     <string name="navigate_back">Grįžti atgal</string>
     <string name="battery">Baterija</string>
-    <string name="channel_utilization">Kanalo panaudojimas</string>
-    <string name="air_utilization">Eterio panaudojimas</string>
-    <string name="temperature">Temperatūra</string>
-    <string name="humidity">Drėgmė</string>
     <string name="logs">Log`ai</string>
     <string name="hops_away">Persiuntimų kiekis</string>
     <string name="info">Informacija</string>

@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -70,7 +70,6 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Kontrollerer blinking av LED på enheten. For de fleste enheter vil dette kontrollere en av de opp til 4 lysdiodene. Laderen og GPS-lysene er ikke kontrollerbare.</string>
     <string name="config_device_transmitOverLora_summary">Hvorvidt det i tillegg for å sende det til MQTT og til telefonen, skal vår Naboinfo overføres over LoRa. Ikke tilgjengelig på en kanal med standardnøkkel og standardnavn.</string>
     <!-- Position Config -->
-    <string name="channel">Kanal</string>
     <string name="channel_name">Kanal Navn</string>
     <string name="qr_code">QR kode</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
@@ -193,10 +192,6 @@
     <string name="wifi_qr_code_error">Ugyldig WiFi legitimasjon QR-kode format</string>
     <string name="navigate_back">Gå tilbake</string>
     <string name="battery">Batteri</string>
-    <string name="channel_utilization">Kanalutnyttelse</string>
-    <string name="air_utilization">Luftutnyttelse</string>
-    <string name="temperature">Temperatur</string>
-    <string name="humidity">Luftfuktighet</string>
     <string name="logs">Logger</string>
     <string name="hops_away">Hopp Unna</string>
     <string name="info">Informasjon</string>

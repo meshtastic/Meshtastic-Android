@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -162,7 +162,6 @@
     <string name="gps_en_gpio">GPS 使能 GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">调试</string>
-    <string name="channel">频道</string>
     <string name="channel_name">频道名称</string>
     <string name="qr_code">QR 码</string>
     <string name="unknown_username">未知的使用者名称</string>
@@ -361,12 +360,6 @@
     <string name="wifi_qr_code_error">WiFi凭据二维码格式无效</string>
     <string name="navigate_back">回溯导航</string>
     <string name="battery">电池</string>
-    <string name="channel_utilization">频道使用</string>
-    <string name="air_utilization">无线信道利用率</string>
-    <string name="temperature">温度</string>
-    <string name="humidity">湿度</string>
-    <string name="soil_temperature">土壤温度</string>
-    <string name="soil_moisture">土壤湿度</string>
     <string name="logs">日志</string>
     <string name="hops_away">跃点数</string>
     <string name="hops_away_template">越点数: %1$d</string>
@@ -447,7 +440,6 @@
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
     <string name="low_battery_title">电池电量低: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
-    <string name="baro_pressure">气压</string>
     <string name="udp_enabled">启用</string>
     <string name="udp_broadcast">UDP 广播</string>
     <string name="udp_config">UDP 设置</string>
@@ -977,9 +969,6 @@
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <string name="unset">未设定 - 0</string>
     <string name="relayed_by">由: %1$s</string>
-    <plurals name="relays">
-        <item quantity="other">连接到的 %1$d 中继节点</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="learn_more">更多信息</string>
     <string name="firmware_update_rak4631_bootloader_hint">对于RAK WisBlock RAK4631，请使用供应商的串行DFU工具（例如，搭配提供的引导加载程序.zip文件使用adafruit-nrfutil dfu serial）。仅复制.uf2文件无法更新引导加载程序。</string>
@@ -1116,4 +1105,5 @@
     <string name="filter_message_label">已过滤</string>
     <string name="filter_enable_for_contact">启用过滤</string>
     <string name="filter_disable_for_contact">禁用过滤</string>
+    <string name="generate_qr_code">生成二维码</string>
 </resources>

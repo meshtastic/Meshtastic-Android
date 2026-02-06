@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -149,7 +149,6 @@
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Felsökning</string>
-    <string name="channel">Kanal</string>
     <string name="channel_name">Kanalnamn</string>
     <string name="qr_code">QR-kod</string>
     <string name="unknown_username">Okänt användarnamn</string>
@@ -343,12 +342,6 @@
     <string name="wifi_qr_code_error">Felaktigt QR-kodformat eller inloggningsinformation</string>
     <string name="navigate_back">Tillbaka</string>
     <string name="battery">Batteri</string>
-    <string name="channel_utilization">Kanalutnyttjande</string>
-    <string name="air_utilization">Luftrumsutnyttjande</string>
-    <string name="temperature">Temperatur</string>
-    <string name="humidity">Luftfuktighet</string>
-    <string name="soil_temperature">Temperaturen i jord</string>
-    <string name="soil_moisture">Fukthalt i jord</string>
     <string name="logs">Loggar</string>
     <string name="hops_away">Hopp bort</string>
     <string name="hops_away_template">Antal hop: %1$d</string>
@@ -421,7 +414,6 @@
     <string name="meshtastic_low_battery_notifications">Avisering vid låg batterinivå</string>
     <string name="low_battery_title">Lågt batteri: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Meddelanden om lågt batteri (favoritnoder)</string>
-    <string name="baro_pressure">Lufttryck</string>
     <string name="udp_enabled">Aktiverad</string>
     <string name="udp_broadcast">UDP-sändning</string>
     <string name="udp_config">UDP-konfiguration</string>
@@ -960,4 +952,5 @@
     <string name="now">Nu</string>
     <string name="add_channels_title">Lägg till kanaler</string>
     <!-- Message Filter -->
+    <string name="generate_qr_code">Generera QR-kod</string>
 </resources>

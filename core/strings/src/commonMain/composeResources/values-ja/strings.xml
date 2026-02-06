@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -76,7 +76,6 @@
     <string name="config_device_transmitOverLora_summary">近隣ノード情報(NeighborInfo)をMQTTやPhoneAPIへ送信することに加えて、LoRa無線経由でも送信すべきかどうかを設定します。デフォルトの名前とキーが設定されたチャンネルでは利用できません。</string>
     <!-- Position Config -->
     <string name="gpio">GPIO</string>
-    <string name="channel">チャンネル</string>
     <string name="channel_name">チャンネル名</string>
     <string name="qr_code">QRコード</string>
     <string name="unknown_username">ユーザー名不明</string>
@@ -202,10 +201,6 @@
     <string name="wifi_qr_code_error">WiFi認証のQRコードの形式が無効です</string>
     <string name="navigate_back">前に戻る</string>
     <string name="battery">バッテリー</string>
-    <string name="channel_utilization">チャンネル全体の利用率</string>
-    <string name="air_utilization">無線通信時間占有率</string>
-    <string name="temperature">温度</string>
-    <string name="humidity">湿度</string>
     <string name="logs">ログ</string>
     <string name="hops_away">ホップ数</string>
     <string name="info">情報</string>
@@ -264,7 +259,6 @@
     <string name="meshtastic_low_battery_notifications">バッテリー残量低下通知</string>
     <string name="low_battery_title">バッテリー低残量: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">バッテリー残量低下通知 (お気に入りノード)</string>
-    <string name="baro_pressure">大気圧</string>
     <string name="udp_config">UDP Config</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>最終受信: %2$s<br>最終位置: %3$s<br>バッテリー: %4$s]]></string>
     <string name="toggle_my_position">自分の位置を切り替え</string>

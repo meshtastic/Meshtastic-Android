@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -165,7 +165,6 @@
     <string name="gps_en_gpio">GPIO EN GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
-    <string name="channel">Канал</string>
     <string name="channel_name">Имя канала</string>
     <string name="qr_code">QR-код</string>
     <string name="unknown_username">Неизвестное имя пользователя</string>
@@ -371,12 +370,6 @@
     <string name="wifi_qr_code_error">Неверный формат QR-кода WiFi</string>
     <string name="navigate_back">Вернуться</string>
     <string name="battery">Батарея</string>
-    <string name="channel_utilization">Использование канала</string>
-    <string name="air_utilization">Использование эфира</string>
-    <string name="temperature">Температура</string>
-    <string name="humidity">Влажность</string>
-    <string name="soil_temperature">Температура почвы</string>
-    <string name="soil_moisture">Влажность почвы</string>
     <string name="logs">Журналы</string>
     <string name="hops_away">Прыжков</string>
     <string name="hops_away_template">Количество ретрансляций %1$d</string>
@@ -460,7 +453,6 @@
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
     <string name="low_battery_title">Низкий заряд батареи: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные ноды)</string>
-    <string name="baro_pressure">Давление на барометре</string>
     <string name="udp_enabled">Включено</string>
     <string name="udp_broadcast">Трансляция UDP</string>
     <string name="udp_config">UDP Config</string>
@@ -992,10 +984,8 @@
     <string name="unset">Не задано - 0</string>
     <string name="relayed_by">Ретранслировано: %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Принято %1$d ретранслятором</item>
-        <item quantity="few">Принято %1$d ретрансляторами</item>
-        <item quantity="many">Принято %1$d ретрансляторами</item>
-        <item quantity="other">Принято %1$d ретрансляторами</item>
+        <item quantity="one">Принял %1$d ретранслятор</item>
+        <item quantity="other">Приняли %1$d ретранслятора</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="learn_more">Подробности</string>
@@ -1137,4 +1127,14 @@
     <string name="filter_enable_for_contact">Включить фильтрацию</string>
     <string name="filter_disable_for_contact">Отключить фильтрацию</string>
     <string name="channel_url">URL канала</string>
+    <string name="scan_nfc">Сканировать NFC</string>
+    <string name="scan_shared_contact_nfc">Сканировать NFC контакта</string>
+    <string name="scan_shared_contact_qr">Сканировать QR-код контакта</string>
+    <string name="input_shared_contact_url">Введите URL контакта</string>
+    <string name="scan_channels_nfc">Сканировать NFC каналов</string>
+    <string name="scan_channels_qr">Сканировать QR-код каналов</string>
+    <string name="input_channel_url">URL входящего канала</string>
+    <string name="share_channels_qr">Поделиться QR-кодом каналов</string>
+    <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>
+    <string name="generate_qr_code">Сгенерировать QR-код</string>
 </resources>

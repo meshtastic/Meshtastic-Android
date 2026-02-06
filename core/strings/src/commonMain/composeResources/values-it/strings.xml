@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -141,7 +141,6 @@
     <string name="gps_en_gpio">GPIO EN del GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
-    <string name="channel">Canale</string>
     <string name="channel_name">Nome del canale</string>
     <string name="qr_code">Codice QR</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
@@ -317,12 +316,6 @@
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
     <string name="navigate_back">Torna Indietro</string>
     <string name="battery">Batteria</string>
-    <string name="channel_utilization">Utilizzo Canale</string>
-    <string name="air_utilization">Tempo di Trasmissione Utilizzato</string>
-    <string name="temperature">Temperatura</string>
-    <string name="humidity">Umidità</string>
-    <string name="soil_temperature">Temperatura del suolo</string>
-    <string name="soil_moisture">Umidità del suolo</string>
     <string name="logs">Registri</string>
     <string name="hops_away">Distanza in Hop</string>
     <string name="hops_away_template">Distanza in Hop: %1$d</string>
@@ -391,7 +384,6 @@
     <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
     <string name="low_battery_title">Poca energia rimanente nella batteria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
-    <string name="baro_pressure">Pressione barometrica</string>
     <string name="udp_enabled">Abilitato</string>
     <string name="udp_broadcast">Trasmissione UDP</string>
     <string name="udp_config">Configurazione UDP</string>
@@ -954,4 +946,5 @@
     <string name="now">Adesso</string>
     <string name="add_channels_title">Aggiungi canali</string>
     <!-- Message Filter -->
+    <string name="generate_qr_code">Genera codice QR</string>
 </resources>

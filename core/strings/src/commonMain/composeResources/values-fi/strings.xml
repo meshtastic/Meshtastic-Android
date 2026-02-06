@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -165,7 +165,6 @@
     <string name="gps_en_gpio">GPS EN GPIO-pinni</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Vianetsintä</string>
-    <string name="channel">Kanava</string>
     <string name="channel_name">Kanavan nimi</string>
     <string name="qr_code">QR-koodi</string>
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
@@ -365,12 +364,6 @@
     <string name="wifi_qr_code_error">WiFi-verkon käyttöoikeustiedoissa on virheellinen QR-koodin muoto</string>
     <string name="navigate_back">Siirry takaisin</string>
     <string name="battery">Akku</string>
-    <string name="channel_utilization">Kanavan Käyttö</string>
-    <string name="air_utilization">Ilmantien käyttöaste</string>
-    <string name="temperature">Lämpötila</string>
-    <string name="humidity">Kosteus</string>
-    <string name="soil_temperature">Maaperän lämpötila</string>
-    <string name="soil_moisture">Maaperän kosteus</string>
     <string name="logs">Lokitiedot</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="hops_away_template">Hyppyjä: %1$d</string>
@@ -452,7 +445,6 @@
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
     <string name="low_battery_title">Akku vähissä: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
-    <string name="baro_pressure">Barometrinen paine</string>
     <string name="udp_enabled">Käytössä</string>
     <string name="udp_broadcast">UDP-lähetys</string>
     <string name="udp_config">UDP asetukset</string>
@@ -983,10 +975,6 @@
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Kuultu %1$d kautta</item>
-        <item quantity="other">Kuultu %1$d kautta</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="learn_more">Lue lisää</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
@@ -1122,4 +1110,5 @@
     <string name="filter_enable_for_contact">Ota suodatus käyttöön</string>
     <string name="filter_disable_for_contact">Poista suodatus käytöstä</string>
     <string name="channel_url">Kanavan URL-osoite</string>
+    <string name="generate_qr_code">Generoi QR-koodi</string>
 </resources>

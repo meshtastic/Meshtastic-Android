@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -36,7 +36,6 @@
     <string name="role_client">Cliente</string>
     <string name="role_client_desc">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <!-- Position Config -->
-    <string name="channel">Canle</string>
     <string name="channel_name">Nome de canle</string>
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nome de usuario descoñecido</string>
