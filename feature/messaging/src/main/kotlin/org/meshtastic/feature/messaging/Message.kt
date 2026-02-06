@@ -178,6 +178,7 @@ fun MessageScreen(
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val pagedMessages = viewModel.getMessagesFromPaged(contactKey).collectAsLazyPagingItems()
     val contactSettings by viewModel.contactSettings.collectAsStateWithLifecycle(initialValue = emptyMap())
+    val homoglyphEncodingEnabled by viewModel.homoglyphEncodingEnabled.collectAsStateWithLifecycle(initialValue = false)
 
     // UI State managed within this Composable
     var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -469,6 +470,7 @@ fun MessageScreen(
             )
             MessageInput(
                 isEnabled = connectionState.isConnected(),
+                isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
                 textFieldState = messageInputState,
                 onSendMessage = {
                     val messageText = messageInputState.text.toString().trim()
@@ -938,12 +940,21 @@ private const val MAX_LINES = 3
 @Composable
 private fun MessageInput(
     isEnabled: Boolean,
+    isHomoglyphEncodingEnabled: Boolean,
     textFieldState: TextFieldState,
     modifier: Modifier = Modifier,
     maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
     onSendMessage: () -> Unit,
 ) {
-    val currentText = textFieldState.text.toString()
+    val currentTextRaw = textFieldState.text.toString()
+
+    val currentText =
+        if (isHomoglyphEncodingEnabled) {
+            HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(currentTextRaw)
+        } else {
+            currentTextRaw
+        }
+
     val currentByteLength =
         remember(currentText) {
             // Recalculate only when text changes
@@ -1000,12 +1011,23 @@ private fun MessageInputPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(8.dp)) {
-                MessageInput(isEnabled = true, textFieldState = rememberTextFieldState("Hello"), onSendMessage = {})
+                MessageInput(
+                    isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
+                    textFieldState = rememberTextFieldState("Hello"),
+                    onSendMessage = {},
+                )
                 Spacer(Modifier.size(16.dp))
-                MessageInput(isEnabled = false, textFieldState = rememberTextFieldState("Disabled"), onSendMessage = {})
+                MessageInput(
+                    isEnabled = false,
+                    isHomoglyphEncodingEnabled = false,
+                    textFieldState = rememberTextFieldState("Disabled"),
+                    onSendMessage = {},
+                )
                 Spacer(Modifier.size(16.dp))
                 MessageInput(
                     isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
                     textFieldState =
                     rememberTextFieldState(
                         "A very long message that might exceed the byte limit " +
@@ -1018,6 +1040,7 @@ private fun MessageInputPreview() {
                 // Test Japanese characters (multi-byte)
                 MessageInput(
                     isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
                     textFieldState = rememberTextFieldState("こんにちは世界"), // Hello World in Japanese
                     onSendMessage = {},
                     maxByteSize = 10,
