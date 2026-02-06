@@ -186,4 +186,387 @@ class NordicBleInterfaceTest {
 
         nordicInterface.close()
     }
+
+    @Test
+    fun `handleSendToRadio writes to toRadioCharacteristic`() = runTest(testDispatcher) {
+        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val service = mockk<RadioInterfaceService>(relaxed = true)
+
+        var toRadioHandle: Int = -1
+        var writtenValue: ByteArray? = null
+
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(
+                    preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
+                ): ConnectionResult = ConnectionResult.Accept
+
+                override fun onWriteRequest(
+                    characteristic: MockRemoteCharacteristic,
+                    value: ByteArray,
+                ): WriteResponse {
+                    // Keep this for WITH_RESPONSE
+                    println("onWriteRequest: charId=${characteristic.instanceId}, toRadioHandle=$toRadioHandle")
+                    if (characteristic.instanceId == toRadioHandle) {
+                        writtenValue = value
+                    }
+                    return WriteResponse.Success
+                }
+
+                override fun onWriteCommand(characteristic: MockRemoteCharacteristic, value: ByteArray) {
+                    // This is for WITHOUT_RESPONSE
+                    println("onWriteCommand: charId=${characteristic.instanceId}, toRadioHandle=$toRadioHandle")
+                    if (characteristic.instanceId == toRadioHandle) {
+                        println("onWriteCommand matched! value=${value.toHexString()}")
+                        writtenValue = value
+                    } else {
+                        println("onWriteCommand mismatch.")
+                    }
+                }
+
+                override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
+                    ReadResponse.Success(byteArrayOf())
+            }
+
+        val peripheralSpec =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("Meshtastic_1234")
+                }
+                connectable(
+                    name = "Meshtastic_1234",
+                    isBonded = true,
+                    eventHandler = eventHandler,
+                    cachedServices = {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                            toRadioHandle =
+                                Characteristic(
+                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    properties =
+                                    setOf(
+                                        CharacteristicProperty.WRITE,
+                                        CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                                    ),
+                                    permission = Permission.WRITE,
+                                )
+                                    .also {
+                                        println("Captured toRadioHandle: $it")
+                                        // toRadioHandle is assigned by the expression itself
+                                    }
+                            // Add other required chars to avoid discovery failure
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.READ),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                        }
+                    },
+                )
+            }
+
+        centralManager.simulatePeripherals(listOf(peripheralSpec))
+        delay(100.milliseconds)
+
+        val nordicInterface =
+            NordicBleInterface(
+                serviceScope = this,
+                centralManager = centralManager,
+                service = service,
+                address = address,
+            )
+
+        // Wait for connection
+        delay(1000.milliseconds)
+        verify(timeout = 2000) { service.onConnect() }
+
+        // Test writing
+        val dataToSend = byteArrayOf(0x01, 0x02, 0x03)
+        nordicInterface.handleSendToRadio(dataToSend)
+
+        // Give it time to process
+        delay(500.milliseconds)
+
+        assert(writtenValue != null) { "Value should have been written" }
+        assert(writtenValue!!.contentEquals(dataToSend)) {
+            "Written value ${writtenValue?.contentToString()} does not match expected ${dataToSend.contentToString()}"
+        }
+
+        nordicInterface.close()
+    }
+
+    @Test
+    fun `disconnection triggers onDisconnect`() = runTest(testDispatcher) {
+        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+
+        // Mock service
+        val service = mockk<RadioInterfaceService>(relaxed = true)
+        // Explicitly stub handleFromRadio just in case
+        io.mockk.every { service.handleFromRadio(any()) } returns Unit
+
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(
+                    preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
+                ): ConnectionResult = ConnectionResult.Accept
+
+                // Minimal implementation for connection test
+                override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
+                    ReadResponse.Success(byteArrayOf())
+            }
+
+        val peripheralSpec =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("Meshtastic_1234")
+                }
+                connectable(
+                    name = "Meshtastic_1234",
+                    isBonded = true,
+                    eventHandler = eventHandler,
+                    cachedServices = {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                            Characteristic(
+                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                properties =
+                                setOf(
+                                    CharacteristicProperty.WRITE,
+                                    CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                                ),
+                                permission = Permission.WRITE,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.READ),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                        }
+                    },
+                )
+            }
+
+        centralManager.simulatePeripherals(listOf(peripheralSpec))
+        delay(100.milliseconds)
+
+        val nordicInterface =
+            NordicBleInterface(
+                serviceScope = this,
+                centralManager = centralManager,
+                service = service,
+                address = address,
+            )
+
+        // Wait for connection
+        delay(1000.milliseconds)
+        verify(timeout = 2000) { service.onConnect() }
+
+        // Find the connected peripheral from CentralManager to trigger disconnect
+        val connectedPeripheral = centralManager.getBondedPeripherals().first { it.address == address }
+
+        println("Simulating disconnect via peripheral.disconnect()")
+        connectedPeripheral.disconnect()
+
+        // Wait for disconnect event propagation
+        delay(1000.milliseconds)
+
+        // Verify onDisconnect was called on the service
+        // NordicBleInterface calls onDisconnect(BleError.Disconnected)
+        verify { service.onDisconnect(any<BleError.Disconnected>()) }
+
+        nordicInterface.close()
+    }
+
+    @Test
+    fun `discovery fails if required characteristic missing`() = runTest(testDispatcher) {
+        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+
+        // Mock service
+        val service = mockk<RadioInterfaceService>(relaxed = true)
+        io.mockk.every { service.handleFromRadio(any()) } returns Unit
+
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(
+                    preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
+                ): ConnectionResult = ConnectionResult.Accept
+
+                override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
+                    ReadResponse.Success(byteArrayOf())
+            }
+
+        val peripheralSpec =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("Meshtastic_1234")
+                }
+                connectable(
+                    name = "Meshtastic_1234",
+                    isBonded = true,
+                    eventHandler = eventHandler,
+                    cachedServices = {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                            // OMIT toRadio characteristic to force failure
+                                /*
+                                Characteristic(
+                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    properties = setOf(CharacteristicProperty.WRITE, CharacteristicProperty.WRITE_WITHOUT_RESPONSE),
+                                    permission = Permission.WRITE
+                                )
+                                 */
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.READ),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                        }
+                    },
+                )
+            }
+
+        centralManager.simulatePeripherals(listOf(peripheralSpec))
+        delay(100.milliseconds)
+
+        val nordicInterface =
+            NordicBleInterface(
+                serviceScope = this,
+                centralManager = centralManager,
+                service = service,
+                address = address,
+            )
+
+        // Wait for connection and eventual failure
+        delay(1000.milliseconds)
+
+        // Verify that discovery failed
+        verify { service.onDisconnect(any<BleError.DiscoveryFailed>()) }
+
+        nordicInterface.close()
+    }
+
+    @Test
+    fun `write exception triggers disconnect`() = runTest(testDispatcher) {
+        val uniqueAddress = "11:22:33:44:55:66"
+        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+
+        // Mock service
+        val service = mockk<RadioInterfaceService>(relaxed = true)
+        io.mockk.every { service.handleFromRadio(any()) } returns Unit
+
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(
+                    preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
+                ): ConnectionResult = ConnectionResult.Accept
+
+                override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
+                    ReadResponse.Success(byteArrayOf())
+
+                // Throw exception on write
+                override fun onWriteCommand(characteristic: MockRemoteCharacteristic, value: ByteArray): Unit =
+                    throw RuntimeException("Simulated write failure")
+            }
+
+        val peripheralSpec =
+            PeripheralSpec.simulatePeripheral(identifier = uniqueAddress, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("Meshtastic_1234")
+                }
+                connectable(
+                    name = "Meshtastic_1234",
+                    isBonded = true,
+                    eventHandler = eventHandler,
+                    cachedServices = {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                            Characteristic(
+                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                properties =
+                                setOf(
+                                    CharacteristicProperty.WRITE,
+                                    CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                                ),
+                                permission = Permission.WRITE,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.READ),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                        }
+                    },
+                )
+            }
+
+        centralManager.simulatePeripherals(listOf(peripheralSpec))
+        delay(1000.milliseconds)
+
+        val nordicInterface =
+            NordicBleInterface(
+                serviceScope = this,
+                centralManager = centralManager,
+                service = service,
+                address = uniqueAddress,
+            )
+
+        // Wait for connection
+        delay(1000.milliseconds)
+        verify(timeout = 2000) { service.onConnect() }
+
+        // Trigger write which will fail
+        nordicInterface.handleSendToRadio(byteArrayOf(0x01))
+
+        // Wait for error propagation
+        delay(500.milliseconds)
+
+        // Verify onDisconnect was called with error
+        verify { service.onDisconnect(any<BleError>()) }
+
+        nordicInterface.close()
+    }
 }
