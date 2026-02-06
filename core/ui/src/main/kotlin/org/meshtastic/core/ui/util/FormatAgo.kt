@@ -20,6 +20,7 @@ import android.text.format.DateUtils
 import com.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.now
+import org.meshtastic.core.strings.unknown
 import java.lang.System.currentTimeMillis
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
@@ -36,6 +37,8 @@ import kotlin.time.Duration.Companion.seconds
  * @return A [String] representing the relative time that has passed.
  */
 fun formatAgo(lastSeenUnixSeconds: Int): String {
+    if (lastSeenUnixSeconds <= 0) return getString(Res.string.unknown)
+
     val lastSeenDuration = lastSeenUnixSeconds.seconds
     val currentDuration = currentTimeMillis().milliseconds
     val diff = (currentDuration - lastSeenDuration).absoluteValue

@@ -43,6 +43,7 @@ fun ElevationInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Elevation,
         contentDescription = stringResource(Res.string.altitude),
+        label = stringResource(Res.string.altitude),
         text = altitude.metersIn(system).toString(system) + " " + suffix,
         contentColor = contentColor,
     )

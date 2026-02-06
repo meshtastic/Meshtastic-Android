@@ -34,13 +34,23 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.baro_pressure
 import org.meshtastic.core.strings.env_metrics_log
+import org.meshtastic.core.strings.humidity
+import org.meshtastic.core.strings.iaq
 import org.meshtastic.core.strings.node_id
+import org.meshtastic.core.strings.pax
 import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.role
+import org.meshtastic.core.strings.soil_moisture
+import org.meshtastic.core.strings.soil_temperature
+import org.meshtastic.core.strings.temperature
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.ArrowCircleUp
@@ -55,7 +65,7 @@ import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Soil
 import org.meshtastic.core.ui.icon.Temperature
 
-private const val SIZE_ICON = 20
+private const val SIZE_ICON = 14
 
 @Composable
 fun TemperatureInfo(
@@ -67,6 +77,7 @@ fun TemperatureInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Temperature,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.temperature),
         text = temp,
         contentColor = contentColor,
     )
@@ -82,6 +93,7 @@ fun HumidityInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Humidity,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.humidity),
         text = humidity,
         contentColor = contentColor,
     )
@@ -97,6 +109,7 @@ fun PressureInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Pressure,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.baro_pressure),
         text = pressure,
         contentColor = contentColor,
     )
@@ -113,6 +126,7 @@ fun SoilTemperatureInfo(
         icon = MeshtasticIcons.Soil,
         overlayIcon = MeshtasticIcons.Temperature,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.soil_temperature),
         text = temp,
         contentColor = contentColor,
     )
@@ -129,6 +143,7 @@ fun SoilMoistureInfo(
         icon = MeshtasticIcons.Soil,
         overlayIcon = MeshtasticIcons.Humidity,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.soil_moisture),
         text = moisture,
         contentColor = contentColor,
     )
@@ -144,6 +159,7 @@ fun PaxcountInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Paxcount,
         contentDescription = stringResource(Res.string.pax_metrics_log),
+        label = stringResource(Res.string.pax),
         text = pax,
         contentColor = contentColor,
     )
@@ -159,17 +175,24 @@ fun AirQualityInfo(
         modifier = modifier,
         icon = MeshtasticIcons.AirQuality,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = stringResource(Res.string.iaq),
         text = iaq,
         contentColor = contentColor,
     )
 }
 
 @Composable
-fun PowerInfo(value: String, modifier: Modifier = Modifier, contentColor: Color = MaterialTheme.colorScheme.onSurface) {
+fun PowerInfo(
+    value: String,
+    modifier: Modifier = Modifier,
+    label: String? = null,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
     IconInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Power,
         contentDescription = stringResource(Res.string.env_metrics_log),
+        label = label,
         text = value,
         contentColor = contentColor,
     )
@@ -185,6 +208,7 @@ fun UptimeInfo(
         modifier = modifier,
         icon = MeshtasticIcons.ArrowCircleUp,
         contentDescription = stringResource(Res.string.uptime),
+        label = stringResource(Res.string.uptime),
         text = uptime,
         contentColor = contentColor,
     )
@@ -237,6 +261,7 @@ fun OverlayIconInfo(
     overlayIcon: ImageVector,
     contentDescription: String,
     modifier: Modifier = Modifier,
+    label: String? = null,
     text: String? = null,
     style: TextStyle = MaterialTheme.typography.labelMedium,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
@@ -250,7 +275,7 @@ fun OverlayIconInfo(
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
-            tint = contentColor,
+            tint = contentColor.copy(alpha = 0.65f),
             modifier =
             Modifier.size(SIZE_ICON.dp).drawWithContent {
                 drawContent()
@@ -260,6 +285,24 @@ fun OverlayIconInfo(
                 }
             },
         )
-        text?.let { Text(text = it, style = style, color = contentColor) }
+        label?.let {
+            Text(
+                text = it,
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, letterSpacing = 0.sp),
+                color = contentColor.copy(alpha = 0.55f),
+                maxLines = 1,
+                overflow = TextOverflow.Clip,
+                softWrap = false,
+            )
+        }
+        text?.let {
+            Text(
+                text = it,
+                style = style.copy(fontWeight = FontWeight.SemiBold, fontSize = 12.sp),
+                color = contentColor.copy(alpha = 0.95f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
     }
 }

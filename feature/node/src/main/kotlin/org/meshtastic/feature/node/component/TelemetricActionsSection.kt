@@ -56,7 +56,7 @@ import org.meshtastic.core.strings.request_telemetry
 import org.meshtastic.core.strings.telemetry
 import org.meshtastic.core.strings.userinfo
 import org.meshtastic.core.ui.icon.AirQuality
-import org.meshtastic.core.ui.icon.Chart
+import org.meshtastic.core.ui.icon.LineAxis
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Refresh
@@ -232,7 +232,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                                 },
                             ) {
                                 Icon(
-                                    MeshtasticIcons.Chart,
+                                    MeshtasticIcons.LineAxis,
                                     contentDescription = logsDescription,
                                     modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
                                     tint = MaterialTheme.colorScheme.primary,

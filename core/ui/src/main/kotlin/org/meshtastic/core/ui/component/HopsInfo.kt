@@ -34,6 +34,7 @@ fun HopsInfo(hops: Int, modifier: Modifier = Modifier, contentColor: Color = Mat
         modifier = modifier,
         icon = MeshtasticIcons.Hops,
         contentDescription = stringResource(Res.string.hops_away),
+        label = stringResource(Res.string.hops_away),
         text = hops.toString(),
         contentColor = contentColor,
     )

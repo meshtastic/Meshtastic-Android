@@ -21,6 +21,7 @@ import androidx.compose.material.icons.rounded.Air
 import androidx.compose.material.icons.rounded.DataArray
 import androidx.compose.material.icons.rounded.ElectricBolt
 import androidx.compose.material.icons.rounded.Grass
+import androidx.compose.material.icons.rounded.LineAxis
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.material.icons.rounded.SocialDistance
 import androidx.compose.material.icons.rounded.Speed
@@ -54,3 +55,6 @@ val MeshtasticIcons.Speed: ImageVector
     get() = Icons.Rounded.Speed
 val MeshtasticIcons.Chart: ImageVector
     get() = Icons.Rounded.StackedLineChart
+
+val MeshtasticIcons.LineAxis: ImageVector
+    get() = Icons.Rounded.LineAxis

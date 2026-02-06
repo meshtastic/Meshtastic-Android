@@ -190,7 +190,7 @@
     <string name="elevation_suffix" translatable="false">MSL</string>
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
-    <string name="channel">Channel</string>
+    <string name="channel">Ch</string>
     <string name="channel_name">Channel Name</string>
     <string name="qr_code">QR code</string>
     <string name="unknown_username">Unknown Username</string>
@@ -392,12 +392,12 @@
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
     <string name="navigate_back">Navigate Back</string>
     <string name="battery">Battery</string>
-    <string name="channel_utilization">Channel Utilization</string>
-    <string name="air_utilization">Air Utilization</string>
-    <string name="temperature">Temperature</string>
-    <string name="humidity">Humidity</string>
-    <string name="soil_temperature">Soil Temperature</string>
-    <string name="soil_moisture">Soil Moisture</string>
+    <string name="channel_utilization">ChUtil</string>
+    <string name="air_utilization">AirUtil</string>
+    <string name="temperature">Temp</string>
+    <string name="humidity">Hum</string>
+    <string name="soil_temperature">Soil Temp</string>
+    <string name="soil_moisture">Soil Moist</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Hops Away</string>
     <string name="hops_away_template">Hops Away: %1$d</string>
@@ -479,7 +479,7 @@
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="low_battery_title">Low battery: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
-    <string name="baro_pressure">Barometric Pressure</string>
+    <string name="baro_pressure">Baro</string>
     <string name="udp_enabled">Enabled</string>
     <string name="udp_broadcast">UDP Broadcast</string>
     <string name="udp_config">UDP Config</string>
