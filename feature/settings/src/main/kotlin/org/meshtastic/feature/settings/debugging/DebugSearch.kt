@@ -64,7 +64,7 @@ import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
 
 @Composable
-internal fun DebugSearchNavigation(
+fun DebugSearchNavigation(
     searchState: SearchState,
     onNextMatch: () -> Unit,
     onPreviousMatch: () -> Unit,
@@ -98,7 +98,7 @@ internal fun DebugSearchNavigation(
 }
 
 @Composable
-internal fun DebugSearchBar(
+fun DebugSearchBar(
     searchState: SearchState,
     onSearchTextChange: (String) -> Unit,
     onNextMatch: () -> Unit,
@@ -147,7 +147,7 @@ internal fun DebugSearchBar(
 }
 
 @Composable
-internal fun DebugSearchState(
+fun DebugSearchState(
     modifier: Modifier = Modifier,
     searchState: SearchState,
     filterTexts: List<String>,

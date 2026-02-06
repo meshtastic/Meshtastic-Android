@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.node
 
 import androidx.activity.compose.BackHandler
@@ -47,6 +46,7 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.nodes
@@ -121,6 +121,7 @@ fun AdaptiveNodeListScreen(
                     navigateToNodeDetails = { nodeId ->
                         scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, nodeId) }
                     },
+                    onNavigateToChannels = { navController.navigate(ChannelsRoutes.ChannelsGraph) },
                     scrollToTopEvents = scrollToTopEvents,
                     activeNodeId = navigator.currentDestination?.contentKey,
                 )

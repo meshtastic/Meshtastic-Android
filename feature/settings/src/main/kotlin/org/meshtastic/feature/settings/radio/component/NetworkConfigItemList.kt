@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,11 +35,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.journeyapps.barcodescanner.ScanContract
-import com.journeyapps.barcodescanner.ScanOptions
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.barcode.extractWifiCredentials
+import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.model.util.handleMeshtasticUri
+import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.advanced
 import org.meshtastic.core.strings.config_network_eth_enabled_summary
@@ -92,10 +94,17 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
         ScanErrorDialog { showScanErrorDialog = false }
     }
 
-    val barcodeLauncher =
-        rememberLauncherForActivityResult(ScanContract()) { result ->
-            if (result.contents != null) {
-                val (ssid, psk) = extractWifiCredentials(result.contents)
+    val onResult: (String?) -> Unit = { contents ->
+        if (contents != null) {
+            val handled =
+                handleMeshtasticUri(
+                    uri = contents.toUri(),
+                    onChannel = {}, // No-op, not supported in network config
+                    onContact = {}, // No-op, not supported in network config
+                )
+
+            if (!handled) {
+                val (ssid, psk) = extractWifiCredentials(contents)
                 if (ssid != null && psk != null) {
                     formState.value = formState.value.copy(wifi_ssid = ssid, wifi_psk = psk)
                 } else {
@@ -103,17 +112,11 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                 }
             }
         }
-
-    fun zxingScan() {
-        val zxingScan =
-            ScanOptions().apply {
-                setCameraId(0)
-                setPrompt("")
-                setBeepEnabled(false)
-                setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            }
-        barcodeLauncher.launch(zxingScan)
     }
+
+    val barcodeScanner = rememberBarcodeScanner(onResult = onResult)
+    NfcScannerEffect(onResult = onResult)
+
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
@@ -191,7 +194,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
                     )
                     HorizontalDivider()
                     Button(
-                        onClick = { zxingScan() },
+                        onClick = { barcodeScanner.startScan() },
                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
                         enabled = state.connected,
                     ) {
@@ -306,10 +309,6 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
         }
     }
 }
-
-private fun extractWifiCredentials(qrCode: String) =
-    Regex("""WIFI:S:(.*?);.*?P:(.*?);""").find(qrCode)?.destructured?.let { (ssid, password) -> ssid to password }
-        ?: (null to null)
 
 @Suppress("detekt:MagicNumber")
 private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}." +

@@ -246,6 +246,15 @@ constructor(
                 onFailure()
             }
 
+    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
+    fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
+        if (uri.path?.contains("/v/") == true) {
+            setSharedContactRequested(uri, onInvalid)
+        } else {
+            requestChannelUrl(uri, onInvalid)
+        }
+    }
+
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
     /** Called immediately after activity observes requestChannelUrl */

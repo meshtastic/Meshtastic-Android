@@ -16,9 +16,12 @@
  */
 package org.meshtastic.feature.node.list
 
+import android.net.Uri
+import android.os.RemoteException
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,9 +35,12 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
+import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
@@ -45,7 +51,7 @@ class NodeListViewModel
 constructor(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
-    radioConfigRepository: RadioConfigRepository,
+    private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     val nodeActions: NodeActions,
     val nodeFilterPreferences: NodeFilterPreferences,
@@ -61,6 +67,9 @@ constructor(
 
     private val _sharedContactRequested: MutableStateFlow<SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
+
+    private val _requestChannelSet = MutableStateFlow<ChannelSet?>(null)
+    val requestChannelSet = _requestChannelSet.asStateFlow()
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
@@ -153,6 +162,38 @@ constructor(
 
     fun setSharedContactRequested(sharedContact: SharedContact?) {
         _sharedContactRequested.value = sharedContact
+    }
+
+    fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
+        if (uri.path?.contains("/v/") == true) {
+            runCatching { _sharedContactRequested.value = uri.toSharedContact() }
+                .onFailure { ex ->
+                    Logger.e(ex) { "Shared contact error" }
+                    onInvalid()
+                }
+        } else {
+            runCatching { _requestChannelSet.value = uri.toChannelSet() }
+                .onFailure { ex ->
+                    Logger.e(ex) { "Channel url error" }
+                    onInvalid()
+                }
+        }
+    }
+
+    fun clearRequestChannelSet() {
+        _requestChannelSet.value = null
+    }
+
+    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+        radioConfigRepository.replaceAllSettings(channelSet.settings)
+        val newLoraConfig = channelSet.lora_config
+        if (newLoraConfig != null) {
+            try {
+                serviceRepository.meshService?.setConfig(Config(lora = newLoraConfig).encode())
+            } catch (ex: RemoteException) {
+                Logger.e(ex) { "Set config error" }
+            }
+        }
     }
 
     fun favoriteNode(node: Node) = viewModelScope.launch { nodeActions.favoriteNode(node) }

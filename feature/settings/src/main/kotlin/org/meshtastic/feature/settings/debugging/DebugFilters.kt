@@ -110,7 +110,7 @@ fun DebugCustomFilterInput(
 }
 
 @Composable
-internal fun DebugPresetFilters(
+fun DebugPresetFilters(
     presetFilters: List<String>,
     filterTexts: List<String>,
     logs: List<UiMeshLog>,
@@ -164,7 +164,7 @@ internal fun DebugPresetFilters(
 }
 
 @Composable
-internal fun DebugFilterBar(
+fun DebugFilterBar(
     filterTexts: List<String>,
     onFilterTextsChange: (List<String>) -> Unit,
     customFilterText: String,
@@ -223,7 +223,7 @@ internal fun DebugFilterBar(
 
 @Suppress("LongMethod")
 @Composable
-internal fun DebugActiveFilters(
+fun DebugActiveFilters(
     filterTexts: List<String>,
     onFilterTextsChange: (List<String>) -> Unit,
     filterMode: FilterMode,
