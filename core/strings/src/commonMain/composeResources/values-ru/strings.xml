@@ -984,8 +984,10 @@
     <string name="unset">Не задано - 0</string>
     <string name="relayed_by">Ретранслировано: %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Принял %1$d ретранслятор</item>
-        <item quantity="other">Приняли %1$d ретранслятора</item>
+        <item quantity="one">Принято %1$d ретранслятором</item>
+        <item quantity="few">Принято %1$d ретрансляторами</item>
+        <item quantity="many">Принято %1$d ретрансляторами</item>
+        <item quantity="other">Принято %1$d ретрансляторами</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="learn_more">Подробности</string>

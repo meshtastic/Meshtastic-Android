@@ -975,6 +975,10 @@
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Kuultu %1$d kautta</item>
+        <item quantity="other">Kuultu %1$d kautta</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="learn_more">Lue lisää</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>

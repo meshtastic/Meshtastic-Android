@@ -984,8 +984,8 @@
     <string name="unset">Tühistatud - 0</string>
     <string name="relayed_by">Vahendab: %1$s</string>
     <plurals name="relays">
-        <item quantity="one">Kuuldud %1$d vahesõlm</item>
-        <item quantity="other">Kuuldud %1$d vahesõlme</item>
+        <item quantity="one">Kuulsin %1$d vahendajat</item>
+        <item quantity="other">Kuuldi %1$d vahendajat</item>
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="learn_more">Lisateave</string>

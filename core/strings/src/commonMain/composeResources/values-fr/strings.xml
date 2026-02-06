@@ -969,6 +969,10 @@
     <string name="for_more_information_see_our_privacy_policy">Pour plus d'informations, consultez notre politique de confidentialité.</string>
     <string name="unset">Non défini - 0</string>
     <string name="relayed_by">Relayé par : %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Entendu par %1$d relai</item>
+        <item quantity="other">Entendu par %1$d relais</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>
     <string name="learn_more">En savoir plus</string>
     <string name="firmware_update_rak4631_bootloader_hint">Pour le RAK WisBlock RAK4631, utilisez l'outil DFU série du fournisseur (par exemple, adafruit-nrfutil dfu serial avec le fichier .zip du bootloader fourni). La copie du fichier .uf2 seul ne permettra pas de mettre à jour le bootloader.</string>
