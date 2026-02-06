@@ -76,7 +76,7 @@ internal fun ZonedDateTime.timeZoneShortName(): String {
     return if (shortName.startsWith("GMT")) "GMT" else shortName
 }
 
-internal fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
+fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
 
 internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
     val transition = rule.createTransition(Year.now().value)
@@ -84,7 +84,7 @@ internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionR
 }
 
 @Suppress("MagicNumber")
-internal fun formatPosixOffset(offset: ZoneOffset): String {
+fun formatPosixOffset(offset: ZoneOffset): String {
     val offsetSeconds = -offset.totalSeconds
     val hours = offsetSeconds / 3600
     val remainingSeconds = abs(offsetSeconds) % 3600
