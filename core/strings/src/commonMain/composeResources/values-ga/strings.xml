@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -64,7 +64,6 @@
     <string name="rebroadcast_mode_none_desc">Ceadaítear é seo ach amháin do na róil SENSOR, TRACKER agus TAK_TRACKER, agus cuirfidh sé bac ar gach athdháileadh, cosúil leis an róil CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Cuireann sé bac ar phacáistí ó phortníomhaíochtaí neamhchaighdeánacha mar: TAK, RangeTest, PaxCounter, srl. Ní athdháileann ach pacáistí le portníomhaíochtaí caighdeánacha: NodeInfo, Text, Position, Telemetry, agus Routing.</string>
     <!-- Position Config -->
-    <string name="channel">Cainéal</string>
     <string name="channel_name">Ainm Cainéal</string>
     <string name="qr_code">Cód QR</string>
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
@@ -190,10 +189,6 @@
     <string name="wifi_qr_code_error">Formáid QR cód Creidiúnachtaí WiFi neamhbhailí</string>
     <string name="navigate_back">Súil Siar</string>
     <string name="battery">Cúis leictreachais</string>
-    <string name="channel_utilization">Úsáid cainéil</string>
-    <string name="air_utilization">Úsáid aeir</string>
-    <string name="temperature">Teocht</string>
-    <string name="humidity">Laige</string>
     <string name="logs">Lógáil</string>
     <string name="hops_away">Céimeanna uaidh</string>
     <string name="info">Eolas</string>

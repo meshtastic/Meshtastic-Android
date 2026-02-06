@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -33,7 +33,6 @@
     <string name="routing_error_too_large">Paket je prevelik</string>
     <string name="routing_error_no_response">Nema odgovora</string>
     <!-- Position Config -->
-    <string name="channel">Kanal</string>
     <string name="channel_name">Naziv kanala</string>
     <string name="qr_code">QR kod</string>
     <string name="unknown_username">Nepoznati korisnik</string>

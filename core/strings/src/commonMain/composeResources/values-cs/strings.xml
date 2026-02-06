@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -120,7 +120,6 @@
     <string name="advanced_device_gps">Pokročilé nastavení GPS zařízení</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladění</string>
-    <string name="channel">Kanál</string>
     <string name="channel_name">Název kanálu</string>
     <string name="qr_code">QR kód</string>
     <string name="unknown_username">Neznámé uživatelské jméno</string>
@@ -291,10 +290,6 @@
     <string name="wifi_qr_code_error">Neplatný formát QR kódu WiFi</string>
     <string name="navigate_back">Přejít zpět</string>
     <string name="battery">Baterie</string>
-    <string name="channel_utilization">Využití kanálu</string>
-    <string name="air_utilization">Využití přenosu</string>
-    <string name="temperature">Teplota</string>
-    <string name="humidity">Vlhkost</string>
     <string name="logs">Logy</string>
     <string name="hops_away">Počet skoků</string>
     <string name="hops_away_template">Počet skoků: %1$d</string>
@@ -373,7 +368,6 @@
     <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
     <string name="low_battery_title">Nízký stav baterie: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
-    <string name="baro_pressure">Barometrický tlak</string>
     <string name="udp_enabled">Povoleno</string>
     <string name="udp_config">UDP Konfigurace</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Naposledy slyšen: %2$s<br>Poslední pozice: %3$s<br>Baterie: %4$s]]></string>

@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -136,7 +136,6 @@
     <string name="gps_en_gpio">GPIO de habilitación GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Depuración</string>
-    <string name="channel">Canal</string>
     <string name="channel_name">Nombre del canal</string>
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nombre de usuario desconocido</string>
@@ -324,12 +323,6 @@
     <string name="wifi_qr_code_error">Formato de código QR de credencial wifi inválido</string>
     <string name="navigate_back">Ir atrás</string>
     <string name="battery">Batería</string>
-    <string name="channel_utilization">Utilización del canal</string>
-    <string name="air_utilization">Tiempo de Transmisión</string>
-    <string name="temperature">Temperatura:</string>
-    <string name="humidity">Humedad</string>
-    <string name="soil_temperature">Temperatura del suelo/tierra</string>
-    <string name="soil_moisture">Humedad del suelo/tierra</string>
     <string name="logs">Registros</string>
     <string name="hops_away">Saltos de distancia</string>
     <string name="hops_away_template">Número de saltos: %1$d</string>
@@ -402,7 +395,6 @@ Rango de Valores 0 - 500.</string>
     <string name="meshtastic_low_battery_notifications">Notificaciones de batería baja</string>
     <string name="low_battery_title">Batería baja: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificaciones de batería baja (nodos favoritos)</string>
-    <string name="baro_pressure">Presión Barométrica</string>
     <string name="udp_enabled">Habilitado</string>
     <string name="udp_broadcast">Transmisión UDP</string>
     <string name="udp_config">Configuración UDP</string>

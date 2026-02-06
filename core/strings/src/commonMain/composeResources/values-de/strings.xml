@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <string name="meshtastic_app_name">Meshtastic</string>
@@ -366,11 +366,11 @@
     <string name="navigate_back">Zurück navigieren</string>
     <string name="battery">Akku</string>
     <string name="channel_utilization">Kanalauslastung</string>
-    <string name="air_utilization">Luftauslastung</string>
+    <string name="air_utilization">Sendezeit</string>
     <string name="temperature">Temperatur</string>
-    <string name="humidity">Luftfeuchte</string>
+    <string name="humidity">Feuchtigkeit</string>
     <string name="soil_temperature">Bodentemperatur</string>
-    <string name="soil_moisture">Bodenfeuchtigkeit</string>
+    <string name="soil_moisture">Bodenfeuchte</string>
     <string name="logs">Protokolle</string>
     <string name="hops_away">Zwischenschritte entfernt</string>
     <string name="hops_away_template">Entfernung: %1$d Knoten</string>
@@ -983,10 +983,9 @@
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Höre %1$d Relais</item>
-        <item quantity="other">Höre %1$d Relais</item>
-    </plurals>
+    <string name="relays">        <item quantity="one">Empfange %1$d Relais</item>
+        <item quantity="other">Empfange %1$d Relais</item>
+    </string>
     <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="learn_more">Mehr erfahren</string>
     <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
@@ -1121,4 +1120,14 @@
     <string name="filter_enable_for_contact">Filter aktivieren</string>
     <string name="filter_disable_for_contact">Filter deaktivieren</string>
     <string name="channel_url">Kanal URL</string>
+    <string name="scan_nfc">NFC suchen</string>
+    <string name="scan_shared_contact_nfc">Geteilten Kontakt mit NFC scannen</string>
+    <string name="scan_shared_contact_qr">Geteilten QR-Code scannen</string>
+    <string name="input_shared_contact_url">Geteilte Kontakt URL eingeben</string>
+    <string name="scan_channels_nfc">Kanäle mit NFC scannen</string>
+    <string name="scan_channels_qr">QR-Code für Kanäle Scannen</string>
+    <string name="input_channel_url">Kanal URL eingeben</string>
+    <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
+    <string name="scan_nfc_text">Bringen Sie Ihr Gerät in die Nähe des NFC-Tags zum Scannen.</string>
+    <string name="generate_qr_code">QR Code Erzeugen</string>
 </resources>

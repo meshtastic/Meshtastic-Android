@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -25,7 +25,6 @@
     <string name="node_sort_distance">מרחק</string>
     <string name="node_sort_hops_away">דלג קדימה</string>
     <!-- Position Config -->
-    <string name="channel">ערוץ</string>
     <string name="channel_name">שם הערוץ</string>
     <string name="qr_code">קוד QR</string>
     <string name="unknown_username">שם המשתמש אינו מוכר</string>

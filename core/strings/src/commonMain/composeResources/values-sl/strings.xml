@@ -13,7 +13,7 @@
   ~ GNU General Public License for more details.
   ~
   ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  ~ along with this program.  See <https://www.gnu.org/licenses/>.
   -->
 <resources>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
@@ -70,7 +70,6 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Upravlja utripajočo LED na napravi. Pri večini naprav bo to krmililo eno od največ 4 LED diod, LED napajanja in GPS ni mogoče nadzorovati.</string>
     <string name="config_device_transmitOverLora_summary">Izbira ali je treba naš NeighborInfo poleg pošiljanja v MQTT in PhoneAPI posredovati tudi prek LoRa. Ni na voljo na kanalu s privzetim ključem in imenom.</string>
     <!-- Position Config -->
-    <string name="channel">Kanal</string>
     <string name="channel_name">Ime kanala</string>
     <string name="qr_code">QR koda</string>
     <string name="unknown_username">Neznano uporabniško ime</string>
@@ -195,10 +194,6 @@
     <string name="wifi_qr_code_error">Neveljavna oblika WiFi QR kode</string>
     <string name="navigate_back">Pojdi nazaj</string>
     <string name="battery">Baterija</string>
-    <string name="channel_utilization">Uporaba kanala</string>
-    <string name="air_utilization">Uporaba oddaje</string>
-    <string name="temperature">Temperatura</string>
-    <string name="humidity">Vlaga</string>
     <string name="logs">Dnevniki</string>
     <string name="hops_away">Skokov stran</string>
     <string name="info">Informacije</string>
