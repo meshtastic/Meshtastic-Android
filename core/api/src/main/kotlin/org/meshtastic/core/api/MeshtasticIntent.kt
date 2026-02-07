@@ -21,7 +21,6 @@ import org.meshtastic.core.api.MeshtasticIntent.EXTRA_NODEINFO
 import org.meshtastic.core.api.MeshtasticIntent.EXTRA_PACKET_ID
 import org.meshtastic.core.api.MeshtasticIntent.EXTRA_STATUS
 
-
 /**
  * Constants for Meshtastic Android Intents. These are used by external applications to communicate with the Meshtastic
  * service.
