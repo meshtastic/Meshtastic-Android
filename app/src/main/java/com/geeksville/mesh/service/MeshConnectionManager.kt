@@ -134,7 +134,10 @@ constructor(
     }
 
     private fun handleConnected() {
-        connectionStateHolder.setState(ConnectionState.Connecting)
+        // The service state remains 'Connecting' until config is fully loaded
+        if (connectionStateHolder.connectionState.value == ConnectionState.Disconnected) {
+            connectionStateHolder.setState(ConnectionState.Connecting)
+        }
         serviceBroadcasts.broadcastConnection()
         Logger.d { "Starting connect" }
         connectTimeMsec = System.currentTimeMillis()
