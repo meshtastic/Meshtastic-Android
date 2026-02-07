@@ -270,6 +270,7 @@
     <string name="theme_system">По умолчанию</string>
     <string name="choose_theme">Выберите тему</string>
     <string name="provide_location_to_mesh">Предоставление местоположения для сети</string>
+    <string name="use_homoglyph_characters_encoding">Компактное кодирование для Кириллицы</string>
     <plurals name="delete_messages">
         <item quantity="one">Удалить сообщение?</item>
         <item quantity="few">Удалить %1$s сообщения?</item>
@@ -1139,4 +1140,5 @@
     <string name="share_channels_qr">Поделиться QR-кодом каналов</string>
     <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>
     <string name="generate_qr_code">Сгенерировать QR-код</string>
+    <string name="nfc_disabled">NFC отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
 </resources>

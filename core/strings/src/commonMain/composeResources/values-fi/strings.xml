@@ -267,6 +267,7 @@
     <string name="theme_system">Järjestelmän oletus</string>
     <string name="choose_theme">Valitse teema</string>
     <string name="provide_location_to_mesh">Jaa puhelimen sijaintitietoa mesh-verkkoon</string>
+    <string name="use_homoglyph_characters_encoding">Kyrillisten merkkien tiivis koodaus</string>
     <plurals name="delete_messages">
         <item quantity="one">Poistetaanko viesti?</item>
         <item quantity="other">Poistetaanko %1$s viestiä?</item>
