@@ -267,6 +267,8 @@ dependencies {
     testImplementation(libs.nordic.client.mock)
     testImplementation(libs.nordic.core.mock)
     testImplementation(libs.nordic.core.android.mock)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }
 
 aboutLibraries {

@@ -26,6 +26,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ServiceRepository
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -75,9 +76,22 @@ constructor(
     /** Broadcast our current connection status */
     fun broadcastConnection() {
         val connectionState = connectionStateHolder.connectionState.value
-        val intent = Intent(ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, connectionState.toString())
+        // ATAK expects a String: "CONNECTED" or "DISCONNECTED"
+        // It uses equalsIgnoreCase, but we'll use uppercase to be specific.
+        val stateStr = connectionState.toString().uppercase(Locale.ROOT)
+
+        val intent = Intent(ACTION_MESH_CONNECTED).apply { putExtra(EXTRA_CONNECTED, stateStr) }
         serviceRepository.setConnectionState(connectionState)
         explicitBroadcast(intent)
+
+        // Restore legacy action for other consumers (e.g. mesh_service_example)
+        val legacyIntent =
+            Intent(ACTION_CONNECTION_CHANGED).apply {
+                putExtra(EXTRA_CONNECTED, stateStr)
+                // Legacy boolean extra often expected by older implementations
+                putExtra("connected", connectionState == org.meshtastic.core.service.ConnectionState.Connected)
+            }
+        explicitBroadcast(legacyIntent)
     }
 
     /**

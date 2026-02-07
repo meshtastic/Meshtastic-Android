@@ -199,9 +199,17 @@ constructor(
         packetHandler.sendToRadio(ToRadio(want_config_id = NODE_INFO_NONCE))
     }
 
-    fun onHasSettings() {
+    fun onRadioConfigLoaded() {
         commandSender.processQueuedPackets()
 
+        val myNodeNum = nodeManager.myNodeNum ?: 0
+        // Set time
+        commandSender.sendAdmin(myNodeNum) {
+            AdminMessage(set_time_only = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt())
+        }
+    }
+
+    fun onNodeDbReady() {
         // Start MQTT if enabled
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
@@ -219,14 +227,10 @@ constructor(
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
             moduleConfig.store_forward?.let {
-                historyManager.requestHistoryReplay("onHasSettings", myNodeNum, it, "Unknown")
+                historyManager.requestHistoryReplay("onNodeDbReady", myNodeNum, it, "Unknown")
             }
         }
 
-        // Set time
-        commandSender.sendAdmin(myNodeNum) {
-            AdminMessage(set_time_only = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt())
-        }
         updateStatusNotification()
     }
 
