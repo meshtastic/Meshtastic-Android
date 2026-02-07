@@ -19,17 +19,10 @@ package org.meshtastic.feature.messaging
 /**
  * This util class allows you to optimize the binary size of the transmitted text message strings. It replaces certain
  * characters from national alphabets with the characters from the latin alphabet that have an identical appearance
- * (homoglyphs)
- *
- * In UTF8 unicode the characters of the latin alphabet occupy only 1 byte each. In national alphabets each character
- * occupy at least 2 bytes. This reduces the maximum transmitted message size by almost half, to about 115-120
- * characters (200/2 = 100 + some characters are spaces and special signs that occupy only 1 byte)
- *
- * For instance, in cyrillic alphabets many characters have exactly the same visual appearance as latin characters.
- * These are fairly common symbols - half of the vowels and frequently used consonants. According to statistics, they
- * contain about 20-25% of all letters in the average text. Replacing them with Latin characters will save the same
- * proportion of available message space. The average transmitted message volume can then be increased from ~115-120
- * characters to ~140-145
+ * (homoglyphs), for example: cyrillic "А", "С", "у" -> latin "A", "C", "y", etc. According to statistics, such letters
+ * can make up about 20-25% of the total number of letters in the average text. Replacing them with Latin characters
+ * reduces the binary size of the transmitted message. The average transmitted message volume can then fit around
+ * ~140-145 characters instead of ~115-120
  */
 internal object HomoglyphCharacterStringTransformer {
 
