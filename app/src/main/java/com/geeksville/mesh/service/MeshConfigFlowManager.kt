@@ -87,8 +87,7 @@ constructor(
             Logger.i { "myNodeInfo committed successfully" }
             connectionStateHolder.setState(ConnectionState.Connected)
             serviceBroadcasts.broadcastConnection()
-            connectionManager.onHasSettings()
-            commandSender.processQueuedPackets()
+            connectionManager.onRadioConfigLoaded()
         }
 
         scope.handledLaunch {
@@ -124,6 +123,7 @@ constructor(
             }
             nodeManager.isNodeDbReady.value = true
             nodeManager.allowNodeDbWrites.value = true
+            connectionManager.onNodeDbReady()
         }
     }
 
