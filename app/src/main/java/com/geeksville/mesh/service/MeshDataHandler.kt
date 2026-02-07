@@ -181,12 +181,25 @@ constructor(
                 shouldBroadcast = true
             }
 
+            PortNum.ATAK_PLUGIN,
+            PortNum.ATAK_FORWARDER,
+            PortNum.PRIVATE_APP,
+            -> {
+                shouldBroadcast = true
+            }
+
             PortNum.RANGE_TEST_APP,
             PortNum.DETECTION_SENSOR_APP,
             -> {
                 handleRangeTest(dataPacket, myNodeNum)
+                shouldBroadcast = true
             }
-            else -> {}
+
+            else -> {
+                // By default, if we don't know what it is, we should probably broadcast it
+                // so that external apps can handle it.
+                shouldBroadcast = true
+            }
         }
         return shouldBroadcast
     }
@@ -420,7 +433,7 @@ constructor(
         }
         if (shouldDisplay) {
             val now = System.currentTimeMillis() / MILLISECONDS_IN_SECOND
-            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
+            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0L
             if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
                 batteryPercentCooldowns[fromNum] = now
                 return true
