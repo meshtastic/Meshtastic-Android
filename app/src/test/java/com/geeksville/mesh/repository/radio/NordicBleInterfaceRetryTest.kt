@@ -266,7 +266,9 @@ class NordicBleInterfaceRetryTest {
         // Wait for all 3 attempts + delays (500ms * 2)
         delay(2500.milliseconds)
 
-        assert(writeAttempts == 3) { "Should have attempted write 3 times (initial + 2 retries), but was $writeAttempts" }
+        assert(writeAttempts == 3) {
+            "Should have attempted write 3 times (initial + 2 retries), but was $writeAttempts"
+        }
 
         // Verify onDisconnect was called after retries exhausted
         // Nordic BLE wraps RuntimeException in BluetoothException
