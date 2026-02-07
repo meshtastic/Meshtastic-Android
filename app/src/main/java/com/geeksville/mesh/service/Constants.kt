@@ -20,6 +20,7 @@ const val PREFIX = "com.geeksville.mesh"
 
 const val ACTION_NODE_CHANGE = "$PREFIX.NODE_CHANGE"
 const val ACTION_MESH_CONNECTED = "$PREFIX.MESH_CONNECTED"
+const val ACTION_CONNECTION_CHANGED = "$PREFIX.CONNECTION_CHANGED"
 const val ACTION_MESSAGE_STATUS = "$PREFIX.MESSAGE_STATUS"
 
 fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
