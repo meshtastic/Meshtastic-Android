@@ -57,6 +57,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
+import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
@@ -117,6 +118,7 @@ constructor(
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
+    private val homoglyphEncodingPrefs: HomoglyphPrefs,
 ) : ViewModel() {
     private val meshService: IMeshService?
         get() = serviceRepository.meshService
@@ -125,6 +127,12 @@ constructor(
 
     fun toggleAnalyticsAllowed() {
         analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
+    }
+
+    val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
+
+    fun toggleHomoglyphCharactersEncodingEnabled() {
+        homoglyphEncodingPrefs.homoglyphEncodingEnabled = !homoglyphEncodingPrefs.homoglyphEncodingEnabled
     }
 
     private val destNum =

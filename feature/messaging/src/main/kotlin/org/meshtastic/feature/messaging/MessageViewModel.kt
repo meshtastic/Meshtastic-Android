@@ -44,6 +44,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
+import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
@@ -67,6 +68,7 @@ constructor(
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
+    private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
@@ -121,6 +123,8 @@ constructor(
                 ?.sortedByDescending { it.second }
                 ?.map { it.first }
                 ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
+
+    val homoglyphEncodingEnabled = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
 
     init {
         val contactKey = savedStateHandle.get<String>("contactKey")
@@ -204,8 +208,20 @@ constructor(
                 }
             }
         }
+
+        // Applying homoglyph encoding to the transmitted string if user has activated the feature
+        // In most cases the value in "str" parameter will already contain the correct
+        // transformed string from the text input. This call here added to make sure that
+        // the feature is effective across all possible message paths (quick-chat, reply, etc.)
+        val dataPacketText: String =
+            if (homoglyphEncodingPrefs.homoglyphEncodingEnabled) {
+                HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(str)
+            } else {
+                str
+            }
+
         val p =
-            DataPacket(dest, channel ?: 0, str, replyId).apply {
+            DataPacket(dest, channel ?: 0, dataPacketText, replyId).apply {
                 from = ourNodeInfo.value?.user?.id ?: DataPacket.ID_LOCAL
             }
         sendDataPacket(p)

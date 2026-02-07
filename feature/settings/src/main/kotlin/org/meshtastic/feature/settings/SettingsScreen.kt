@@ -36,6 +36,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.FormatPaint
@@ -102,6 +103,7 @@ import org.meshtastic.core.strings.theme
 import org.meshtastic.core.strings.theme_dark
 import org.meshtastic.core.strings.theme_light
 import org.meshtastic.core.strings.theme_system
+import org.meshtastic.core.strings.use_homoglyph_characters_encoding
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
@@ -313,6 +315,15 @@ fun SettingsScreen(
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
                     onClick = { settingsViewModel.setProvideLocation(!provideLocation) },
+                )
+
+                val homoglyphEncodingEnabled by
+                    viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
+                SwitchListItem(
+                    text = stringResource(Res.string.use_homoglyph_characters_encoding),
+                    checked = homoglyphEncodingEnabled,
+                    leadingIcon = Icons.Default.Abc,
+                    onClick = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                 )
 
                 val settingsLauncher =

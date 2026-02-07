@@ -294,6 +294,7 @@
     <string name="theme_system">System default</string>
     <string name="choose_theme">Choose theme</string>
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
+    <string name="use_homoglyph_characters_encoding">Compact encoding for Cyrillic</string>
     <plurals name="delete_messages">
         <item quantity="one">Delete message?</item>
         <item quantity="other">Delete %1$s messages?</item>

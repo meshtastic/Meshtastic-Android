@@ -30,6 +30,8 @@ import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
 import org.meshtastic.core.prefs.filter.FilterPrefs
 import org.meshtastic.core.prefs.filter.FilterPrefsImpl
+import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
+import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefsImpl
 import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefsImpl
 import org.meshtastic.core.prefs.map.MapPrefs
@@ -53,6 +55,10 @@ import javax.inject.Singleton
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 internal annotation class AnalyticsSharedPreferences
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+internal annotation class HomoglyphEncodingSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -101,6 +107,8 @@ interface PrefsModule {
 
     @Binds fun bindAnalyticsPrefs(analyticsPrefsImpl: AnalyticsPrefsImpl): AnalyticsPrefs
 
+    @Binds fun bindHomoglyphEncodingPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): HomoglyphPrefs
+
     @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
 
     @Binds fun bindMapConsentPrefs(mapConsentPrefsImpl: MapConsentPrefsImpl): MapConsentPrefs
@@ -126,6 +134,12 @@ interface PrefsModule {
         @AnalyticsSharedPreferences
         fun provideAnalyticsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
             context.getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
+
+        @Provides
+        @Singleton
+        @HomoglyphEncodingSharedPreferences
+        fun provideHomoglyphEncodingSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("homoglyph-encoding-prefs", Context.MODE_PRIVATE)
 
         @Provides
         @Singleton
