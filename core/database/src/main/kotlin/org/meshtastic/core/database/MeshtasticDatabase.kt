@@ -115,6 +115,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     companion object {
         fun getDatabase(context: Context): MeshtasticDatabase =
             Room.databaseBuilder(context.applicationContext, MeshtasticDatabase::class.java, "meshtastic_database")
+                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
                 .fallbackToDestructiveMigration(false)
                 .build()
     }
