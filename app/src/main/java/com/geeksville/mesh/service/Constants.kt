@@ -16,12 +16,24 @@
  */
 package com.geeksville.mesh.service
 
+import org.meshtastic.core.api.MeshtasticIntent
+
 const val PREFIX = "com.geeksville.mesh"
 
-const val ACTION_NODE_CHANGE = "$PREFIX.NODE_CHANGE"
-const val ACTION_MESH_CONNECTED = "$PREFIX.MESH_CONNECTED"
-const val ACTION_CONNECTION_CHANGED = "$PREFIX.CONNECTION_CHANGED"
-const val ACTION_MESSAGE_STATUS = "$PREFIX.MESSAGE_STATUS"
+const val ACTION_NODE_CHANGE = MeshtasticIntent.ACTION_NODE_CHANGE
+const val ACTION_MESH_CONNECTED = MeshtasticIntent.ACTION_MESH_CONNECTED
+const val ACTION_MESH_DISCONNECTED = MeshtasticIntent.ACTION_MESH_DISCONNECTED
+const val ACTION_CONNECTION_CHANGED = MeshtasticIntent.ACTION_CONNECTION_CHANGED
+const val ACTION_MESSAGE_STATUS = MeshtasticIntent.ACTION_MESSAGE_STATUS
+
+const val ACTION_RECEIVED_TEXT_MESSAGE_APP = MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP
+const val ACTION_RECEIVED_POSITION_APP = MeshtasticIntent.ACTION_RECEIVED_POSITION_APP
+const val ACTION_RECEIVED_NODEINFO_APP = MeshtasticIntent.ACTION_RECEIVED_NODEINFO_APP
+const val ACTION_RECEIVED_TELEMETRY_APP = MeshtasticIntent.ACTION_RECEIVED_TELEMETRY_APP
+const val ACTION_RECEIVED_ATAK_PLUGIN = MeshtasticIntent.ACTION_RECEIVED_ATAK_PLUGIN
+const val ACTION_RECEIVED_ATAK_FORWARDER = MeshtasticIntent.ACTION_RECEIVED_ATAK_FORWARDER
+const val ACTION_RECEIVED_DETECTION_SENSOR_APP = MeshtasticIntent.ACTION_RECEIVED_DETECTION_SENSOR_APP
+const val ACTION_RECEIVED_PRIVATE_APP = MeshtasticIntent.ACTION_RECEIVED_PRIVATE_APP
 
 fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 
@@ -29,14 +41,11 @@ fun actionReceived(portNum: String) = "$PREFIX.RECEIVED.$portNum"
 // standard EXTRA bundle definitions
 //
 
-// a bool true means now connected, false means not
-const val EXTRA_CONNECTED = "$PREFIX.Connected"
+const val EXTRA_CONNECTED = MeshtasticIntent.EXTRA_CONNECTED
 const val EXTRA_PROGRESS = "$PREFIX.Progress"
-
-// / a bool true means we expect this condition to continue until, false means device might come back
 const val EXTRA_PERMANENT = "$PREFIX.Permanent"
 
-const val EXTRA_PAYLOAD = "$PREFIX.Payload"
-const val EXTRA_NODEINFO = "$PREFIX.NodeInfo"
-const val EXTRA_PACKET_ID = "$PREFIX.PacketId"
-const val EXTRA_STATUS = "$PREFIX.Status"
+const val EXTRA_PAYLOAD = MeshtasticIntent.EXTRA_PAYLOAD
+const val EXTRA_NODEINFO = MeshtasticIntent.EXTRA_NODEINFO
+const val EXTRA_PACKET_ID = MeshtasticIntent.EXTRA_PACKET_ID
+const val EXTRA_STATUS = MeshtasticIntent.EXTRA_STATUS

@@ -36,5 +36,5 @@ This module contains the Parcelable data classes used by the Meshtastic Android 
 This module is typically used as a dependency of `core:api` but can be used independently if you need to work with Meshtastic data structures.
 
 ```kotlin
-implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:v2.7.12")
+implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:v2.7.13")
 ```

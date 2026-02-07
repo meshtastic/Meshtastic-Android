@@ -118,7 +118,7 @@ constructor(
     }
 
     private fun onConnectionChanged(c: ConnectionState) {
-        if (connectionStateHolder.connectionState.value == c && c !is ConnectionState.Connected) return
+        if (connectionStateHolder.connectionState.value == c) return
         Logger.d { "onConnectionChanged: ${connectionStateHolder.connectionState.value} -> $c" }
 
         sleepTimeout?.cancel()
@@ -134,7 +134,10 @@ constructor(
     }
 
     private fun handleConnected() {
-        connectionStateHolder.setState(ConnectionState.Connecting)
+        // The service state remains 'Connecting' until config is fully loaded
+        if (connectionStateHolder.connectionState.value == ConnectionState.Disconnected) {
+            connectionStateHolder.setState(ConnectionState.Connecting)
+        }
         serviceBroadcasts.broadcastConnection()
         Logger.d { "Starting connect" }
         connectTimeMsec = System.currentTimeMillis()
