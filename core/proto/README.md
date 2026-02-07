@@ -19,3 +19,21 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 
 ```
 <!--endregion-->
+
+## Meshtastic Protobuf Definitions
+
+This module contains the generated Kotlin and Java code from the Meshtastic Protobuf definitions. It uses the [Wire](https://github.com/square/wire) library for efficient and clean model generation.
+
+### Key Components
+
+*   **Port Numbers**: Defines the `PortNum` enum for identifying different types of data payloads.
+*   **Mesh Protocol**: Contains the core `MeshPacket` and protocol message definitions.
+*   **Modules**: Includes definitions for telemetry, position, administration, and more.
+
+### Usage
+
+This module is typically used as a dependency of `core:api` and `core:model`.
+
+```kotlin
+implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-proto:v2.7.13")
+```

@@ -27,7 +27,7 @@ dependencies {
     // Replace 'v2.7.13' with the specific version you need
     val meshtasticVersion = "v2.7.13" 
 
-    // The core AIDL interface
+    // The core AIDL interface and Intent constants
     implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-api:$meshtasticVersion")
     
     // Data models (DataPacket, MeshUser, NodeInfo, etc.)
@@ -77,15 +77,17 @@ override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
 
 ### 3. Register a BroadcastReceiver
 
-To receive packets and status updates, register a `BroadcastReceiver`. 
+To receive packets and status updates, register a `BroadcastReceiver`. Use `MeshtasticIntent` constants for the actions.
 
 **Important:** On Android 13+ (API 33), you **must** use `RECEIVER_EXPORTED` since you are receiving broadcasts from a different application.
 
 ```kotlin
+// Using constants from org.meshtastic.core.api.MeshtasticIntent
 val intentFilter = IntentFilter().apply {
-    addAction("com.geeksville.mesh.RECEIVED.TEXT_MESSAGE_APP")
-    addAction("com.geeksville.mesh.NODE_CHANGE")
-    addAction("com.geeksville.mesh.CONNECTION_CHANGED")
+    addAction(MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP)
+    addAction(MeshtasticIntent.ACTION_NODE_CHANGE)
+    addAction(MeshtasticIntent.ACTION_CONNECTION_CHANGED)
+    addAction(MeshtasticIntent.ACTION_MESH_DISCONNECTED)
 }
 
 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -97,6 +99,6 @@ if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 
 ## Modules
 
-*   **`core:api`**: Contains `IMeshService.aidl`.
+*   **`core:api`**: Contains `IMeshService.aidl` and `MeshtasticIntent`.
 *   **`core:model`**: Contains Parcelable data classes like `DataPacket`, `MeshUser`, `NodeInfo`.
 *   **`core:proto`**: Contains the generated Protobuf code (Wire).
