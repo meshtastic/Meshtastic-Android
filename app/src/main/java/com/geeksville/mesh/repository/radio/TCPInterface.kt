@@ -134,7 +134,8 @@ constructor(
                         } else {
                             0
                         }
-                    Logger.e(ex) { "[$address] TCP IOException after ${uptime}ms - ${ex.message}" }
+                    // Connection failures are common when the radio is offline or out of range
+                    Logger.w(ex) { "[$address] TCP connection error after ${uptime}ms - ${ex.message}" }
                     onDeviceDisconnect(false)
                 } catch (ex: Throwable) {
                     val uptime =

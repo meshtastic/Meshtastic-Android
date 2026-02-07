@@ -135,25 +135,46 @@ class MeshService : Service() {
 
         val notification = connectionManager.updateStatusNotification()
 
+        val foregroundServiceType =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                if (hasLocationPermission()) {
+                    types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                }
+                types
+            } else {
+                0
+            }
+
+        @Suppress("TooGenericExceptionCaught")
         try {
-            ServiceCompat.startForeground(
-                this,
-                SERVICE_NOTIFY_ID,
-                notification,
+            ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, foregroundServiceType)
+        } catch (ex: SecurityException) {
+            // On Android 14+ starting a location FGS from the background can fail with SecurityException
+            // if the app is not in an allowed state. Retry without the location type if that was requested.
+            val connectedDeviceOnly =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                    if (hasLocationPermission()) {
-                        types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                    }
-                    types
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                 } else {
                     0
-                },
-            )
+                }
+            if (foregroundServiceType != connectedDeviceOnly) {
+                Logger.w(ex) {
+                    "Failed to start foreground service with location type, retrying with connectedDevice only"
+                }
+                try {
+                    ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, connectedDeviceOnly)
+                } catch (retryEx: Exception) {
+                    Logger.e(retryEx) { "Failed to start foreground service even after retry" }
+                }
+            } else {
+                Logger.e(ex) { "SecurityException starting foreground service" }
+            }
         } catch (ex: Exception) {
             Logger.e(ex) { "Error starting foreground service" }
             return START_NOT_STICKY
         }
+
         return if (!wantForeground) {
             Logger.i { "Stopping mesh service because no device is selected" }
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)

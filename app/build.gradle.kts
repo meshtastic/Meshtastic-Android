@@ -245,7 +245,7 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
-    implementation(libs.nordic)
+    implementation(libs.nordic.client.android)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -263,6 +263,10 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.nordic.client.android.mock)
+    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.core.mock)
+    testImplementation(libs.nordic.core.android.mock)
 }
 
 aboutLibraries {
