@@ -92,6 +92,10 @@ class MainActivity : ComponentActivity() {
                 addAction("com.geeksville.mesh.RECEIVED.POSITION_APP")
                 addAction("com.geeksville.mesh.RECEIVED.TELEMETRY_APP")
                 addAction("com.geeksville.mesh.RECEIVED.NODEINFO_APP")
+                addAction("com.geeksville.mesh.RECEIVED.ATAK_PLUGIN")
+                addAction("com.geeksville.mesh.RECEIVED.ATAK_FORWARDER")
+                addAction("com.geeksville.mesh.RECEIVED.DETECTION_SENSOR_APP")
+                addAction("com.geeksville.mesh.RECEIVED.PRIVATE_APP")
             }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

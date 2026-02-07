@@ -90,6 +90,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.proto.PortNum
 
 @Composable
 fun ListItem(
@@ -229,6 +230,7 @@ private fun MainContent(
     ) {
         item { MyInfoSection(myId, myNodeInfo) }
         item { TitledCard(title = "Messaging") { MessagingSection(viewModel, lastMessage) } }
+        item { TitledCard(title = "Test Special PortNums") { SpecialAppSection(viewModel) } }
 
         item {
             SectionHeader(
@@ -294,6 +296,28 @@ private fun MainContent(
 
         item { ActionButtons(viewModel, snackbarHostState) }
         item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+fun SpecialAppSection(viewModel: MeshServiceViewModel) {
+    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { viewModel.sendSpecialPacket(PortNum.ATAK_PLUGIN) }, modifier = Modifier.weight(1f)) {
+                Text("Send ATAK")
+            }
+            Button(
+                onClick = { viewModel.sendSpecialPacket(PortNum.DETECTION_SENSOR_APP) },
+                modifier = Modifier.weight(1f),
+            ) {
+                Text("Send Sensor")
+            }
+        }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { viewModel.sendSpecialPacket(PortNum.PRIVATE_APP) }, modifier = Modifier.weight(1f)) {
+                Text("Send Private")
+            }
+        }
     }
 }
 

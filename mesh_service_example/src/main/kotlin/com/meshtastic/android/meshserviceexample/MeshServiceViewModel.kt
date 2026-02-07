@@ -135,6 +135,31 @@ class MeshServiceViewModel : ViewModel() {
         } ?: Log.w(TAG, "MeshService is not bound, cannot send message")
     }
 
+    fun sendSpecialPacket(portNum: PortNum) {
+        meshService?.let { service ->
+            try {
+                val packet =
+                    DataPacket(
+                        to = DataPacket.ID_BROADCAST,
+                        bytes = "Special Payload for ${portNum.name}".encodeToByteArray().toByteString(),
+                        dataType = portNum.value,
+                        from = DataPacket.ID_LOCAL,
+                        time = System.currentTimeMillis(),
+                        id = service.packetId,
+                        status = MessageStatus.UNKNOWN,
+                        hopLimit = 3,
+                        channel = 0,
+                        wantAck = true,
+                    )
+                service.send(packet)
+                addToLog("Sent ${portNum.name} Packet (ID: ${packet.id})")
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Failed to send special packet", e)
+                addToLog("Failed to send ${portNum.name} packet: ${e.message}")
+            }
+        }
+    }
+
     fun requestMyNodeInfo() {
         meshService?.let {
             try {
