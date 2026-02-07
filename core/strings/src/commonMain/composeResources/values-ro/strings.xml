@@ -191,7 +191,6 @@
     <string name="new_messages_below">Mesaje noi mai jos</string>
     <string name="meshtastic_messages_notifications">Notificări mesaje directe</string>
     <string name="meshtastic_broadcast_notifications">Notificări mesaje difuzate</string>
-    <string name="meshtastic_waypoints_notifications">Notificări puncte de referință</string>
     <string name="meshtastic_alerts_notifications">Notificări alerte</string>
     <string name="firmware_too_old">Este necesară actualizarea firmware-ului.</string>
     <string name="firmware_old">Firmware-ul radioului este prea vechi pentru a putea comunica cu această aplicație. Pentru mai multe informații despre acest proces, consultați <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Ghidul nostru de instalare pentru firmware</a>.</string>
@@ -349,7 +348,6 @@
     <string name="fair">Acceptabil</string>
     <string name="good">Bun</string>
     <string name="none_quality">Niciunul</string>
-    <string name="share_to">Distribuie către…</string>
     <string name="signal">Semnal</string>
     <string name="signal_quality">Calitatea semnalului</string>
     <string name="traceroute_log">Traceroute</string>
