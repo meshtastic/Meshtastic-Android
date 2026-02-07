@@ -113,7 +113,7 @@ constructor(
      *     NODE_CHANGE  for new IDs appearing or disappearing
      *     ACTION_MESH_CONNECTED for losing/gaining connection to the packet radio
      *         Note: this is not the same as RadioInterfaceService.RADIO_CONNECTED_ACTION,
-     *         because it implies we have assembled a warehouse valid node db.
+     *         because it implies we have assembled a valid node db.
      */
     private fun explicitBroadcast(intent: Intent) {
         context.sendBroadcast(

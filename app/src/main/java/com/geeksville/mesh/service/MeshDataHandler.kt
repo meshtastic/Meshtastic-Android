@@ -137,7 +137,9 @@ constructor(
             PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
             PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
             PortNum.TELEMETRY_APP -> handleTelemetry(packet, dataPacket, myNodeNum)
-            else -> shouldBroadcast = handleSpecializedDataPacket(packet, dataPacket, myNodeNum, logUuid, logInsertJob)
+            else ->
+                shouldBroadcast =
+                    handleSpecializedDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
         }
         return shouldBroadcast
     }
@@ -146,14 +148,16 @@ constructor(
         packet: MeshPacket,
         dataPacket: DataPacket,
         myNodeNum: Int,
+        fromUs: Boolean,
         logUuid: String?,
         logInsertJob: Job?,
     ): Boolean {
-        var shouldBroadcast = false
+        var shouldBroadcast = !fromUs
         val decoded = packet.decoded ?: return shouldBroadcast
         when (decoded.portnum) {
             PortNum.TRACEROUTE_APP -> {
                 tracerouteHandler.handleTraceroute(packet, logUuid, logInsertJob)
+                shouldBroadcast = false
             }
             PortNum.ROUTING_APP -> {
                 handleRouting(packet, dataPacket)

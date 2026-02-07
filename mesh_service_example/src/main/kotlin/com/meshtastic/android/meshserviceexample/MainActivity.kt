@@ -39,6 +39,7 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import org.meshtastic.core.api.MeshtasticIntent
 import org.meshtastic.core.service.IMeshService
 
 private const val TAG: String = "MeshServiceExample"
@@ -83,19 +84,19 @@ class MainActivity : ComponentActivity() {
 
         val intentFilter =
             IntentFilter().apply {
-                addAction("com.geeksville.mesh.NODE_CHANGE")
-                addAction("com.geeksville.mesh.CONNECTION_CHANGED")
-                addAction("com.geeksville.mesh.MESH_CONNECTED")
-                addAction("com.geeksville.mesh.MESH_DISCONNECTED")
-                addAction("com.geeksville.mesh.MESSAGE_STATUS")
-                addAction("com.geeksville.mesh.RECEIVED.TEXT_MESSAGE_APP")
-                addAction("com.geeksville.mesh.RECEIVED.POSITION_APP")
-                addAction("com.geeksville.mesh.RECEIVED.TELEMETRY_APP")
-                addAction("com.geeksville.mesh.RECEIVED.NODEINFO_APP")
-                addAction("com.geeksville.mesh.RECEIVED.ATAK_PLUGIN")
-                addAction("com.geeksville.mesh.RECEIVED.ATAK_FORWARDER")
-                addAction("com.geeksville.mesh.RECEIVED.DETECTION_SENSOR_APP")
-                addAction("com.geeksville.mesh.RECEIVED.PRIVATE_APP")
+                addAction(MeshtasticIntent.ACTION_NODE_CHANGE)
+                addAction(MeshtasticIntent.ACTION_CONNECTION_CHANGED)
+                addAction(MeshtasticIntent.ACTION_MESH_CONNECTED)
+                addAction(MeshtasticIntent.ACTION_MESH_DISCONNECTED)
+                addAction(MeshtasticIntent.ACTION_MESSAGE_STATUS)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_POSITION_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_TELEMETRY_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_NODEINFO_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_ATAK_PLUGIN)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_ATAK_FORWARDER)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_DETECTION_SENSOR_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_PRIVATE_APP)
             }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
