@@ -1075,7 +1075,7 @@
     <string name="interval_always_on">Alati sees</string>
     <plurals name="plurals_seconds">
         <item quantity="one">1 sekund</item>
-        <item quantity="other">%d sekundit</item>
+        <item quantity="other">%1$d sekundit</item>
     </plurals>
     <plurals name="plurals_minutes">
         <item quantity="one">1 minut</item>
@@ -1131,4 +1131,5 @@
     <string name="share_channels_qr">Jaga kanalite QR koodi</string>
     <string name="scan_nfc_text">Lugemiseks vii seade NFC-sildi lähedale.</string>
     <string name="generate_qr_code">Genereeri QR kood</string>
+    <string name="nfc_disabled">NFC on keelatud. Luba see süsteemiseadetes.</string>
 </resources>
