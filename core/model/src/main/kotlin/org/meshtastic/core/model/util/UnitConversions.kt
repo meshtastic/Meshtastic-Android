@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.model.util
 
+import java.lang.String.format
 import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.log10
@@ -73,26 +74,17 @@ object UnitConversions {
     @Suppress("MagicNumber")
     fun numberToHuman(number: Float, units: Map<String, String> = emptyMap<String, String>()): String {
         var exponent = floor(log10(number)).toInt()
-
-        if (exponent.mod(3) != 0) {
-            if ((-12..-9).contains(exponent)) exponent = -9
-            if ((-8..-6).contains(exponent)) exponent = -6
-            if ((-5..-3).contains(exponent)) exponent = -3
-            if ((-2..2).contains(exponent)) exponent = 0
-            if ((3..5).contains(exponent)) exponent = 3
-            if ((6..8).contains(exponent)) exponent = 6
-            if ((9..12).contains(exponent)) exponent = 9
-        }
+        if (exponent.mod(3) != 0 && exponent in -11..11) exponent = (exponent / 3) * 3
 
         var exponentsMap = BASE_UNITS.entries.associate { (k, v) -> v to k }.toMutableMap()
         units.forEach { (unitKey, customUnit) ->
             val lookupKey = exponentsMap.filterValues { it == unitKey }.keys
-            if (lookupKey.iterator().hasNext()) exponentsMap.put(lookupKey.iterator().next(), customUnit)
+            if (lookupKey.iterator().hasNext()) exponentsMap[lookupKey.iterator().next()] = customUnit
         }
 
-        val unit = BASE_UNITS.entries.associate { (k, v) -> v to k }.get(exponent)
+        val unit = exponentsMap[exponent]
         val value = (number / 10.0.pow(exponent))
 
-        return "$value $unit"
+        return "${"%.2f".format(value)} $unit"
     }
 }
