@@ -101,7 +101,6 @@ data class RadioConfigState(
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = false,
-    val homoglyphCharactersEncodingEnabled: Boolean = false,
     val nodeDbResetPreserveFavorites: Boolean = false,
 )
 
@@ -130,7 +129,7 @@ constructor(
         analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
     }
 
-    var homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
+    val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
 
     fun toggleHomoglyphCharactersEncodingEnabled() {
         homoglyphEncodingPrefs.homoglyphEncodingEnabled = !homoglyphEncodingPrefs.homoglyphEncodingEnabled
