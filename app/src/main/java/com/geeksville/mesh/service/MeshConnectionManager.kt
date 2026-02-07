@@ -118,7 +118,7 @@ constructor(
     }
 
     private fun onConnectionChanged(c: ConnectionState) {
-        if (connectionStateHolder.connectionState.value == c && c !is ConnectionState.Connected) return
+        if (connectionStateHolder.connectionState.value == c) return
         Logger.d { "onConnectionChanged: ${connectionStateHolder.connectionState.value} -> $c" }
 
         sleepTimeout?.cancel()
