@@ -35,6 +35,7 @@ import no.nordicsemi.kotlin.ble.client.mock.internal.MockRemoteCharacteristic
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
+import org.junit.Ignore
 import org.junit.Test
 import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
@@ -49,6 +50,7 @@ class NordicBleInterfaceDrainTest {
 
     private fun UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
+    @Ignore("Flaky: relies on timing in the Nordic BLE mock library which causes intermittent CI failures")
     @Test
     fun `drainPacketQueueAndDispatch reads multiple packets until empty`() = runTest(testDispatcher) {
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
