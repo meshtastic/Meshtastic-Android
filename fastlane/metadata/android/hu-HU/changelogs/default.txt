@@ -1,1 +1,1 @@
-For detailed release notes, please visit: https://github.com/meshtastic/Meshtastic-Android/releases/
+A részletes kiadási megjegyzésekért látogasd meg az alábbi oldalt: https://github.com/meshtastic/Meshtastic-Android/releases/
