@@ -21,14 +21,46 @@ import org.junit.Test
 class HomoglyphCharacterTransformTest {
 
     @Test
-    fun `optimizeUtf8StringWithHomoglyphs shrinks cyrillic text message binary size`() {
+    fun `optimizeUtf8StringWithHomoglyphs shrinks binary size of cyrillic text containing some homoglyphs`() {
         val testString = "Мештастик - это проект с открытым исходным кодом"
-        val optimizedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
-
+        val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
         val testStringBytes = testString.toByteArray(charset = Charsets.UTF_8)
-        val optimizedTestStringBytes = optimizedTestString.toByteArray(charset = Charsets.UTF_8)
+        val transformedTestStringBytes = transformedTestString.toByteArray(charset = Charsets.UTF_8)
+        val transformedStringBinarySizeShrinked = transformedTestStringBytes.size < testStringBytes.size
+        assert(transformedStringBinarySizeShrinked)
+    }
 
-        val optimizedStringBinarySizeShrinked = optimizedTestStringBytes.size < testStringBytes.size
-        assert(optimizedStringBinarySizeShrinked)
+    @Test
+    fun `optimizeUtf8StringWithHomoglyphs shrinks binary size in half of cyrillic text containing only homoglyphs`() {
+        val testString = "Косуха"
+        val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
+        val testStringBytes = testString.toByteArray(charset = Charsets.UTF_8)
+        val transformedTestStringBytes = transformedTestString.toByteArray(charset = Charsets.UTF_8)
+        val transformedStringBinarySizeShrinksInHalf = transformedTestStringBytes.size == (testStringBytes.size / 2)
+        assert(transformedStringBinarySizeShrinksInHalf)
+    }
+
+    @Test
+    fun `optimizeUtf8StringWithHomoglyphs does not transform cyrillic text without any homoglyphs`() {
+        val testString = "Близкий"
+        val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
+        val stringObjectsContentsAreEqual = transformedTestString == testString
+        assert(stringObjectsContentsAreEqual)
+    }
+
+    @Test
+    fun `optimizeUtf8StringWithHomoglyphs does not transform latin text message`() {
+        val testString = "Meshtastic is an open source, off-grid, decentralized mesh network"
+        val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
+        val stringObjectsContentsAreEqual = transformedTestString == testString
+        assert(stringObjectsContentsAreEqual)
+    }
+
+    @Test
+    fun `optimizeUtf8StringWithHomoglyphs does not transform characters impossible to present by latin letters`() {
+        val testString = "ميشتاستيك هو مصدر مفتوح ، خارج الشبكة ، شبكة شبكة"
+        val transformedTestString = HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(testString)
+        val stringObjectsContentsAreEqual = transformedTestString == testString
+        assert(stringObjectsContentsAreEqual)
     }
 }
