@@ -41,6 +41,8 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.ToRadio
 
 class MeshConnectionManagerTest {
@@ -61,6 +63,7 @@ class MeshConnectionManagerTest {
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val localConfigFlow = MutableStateFlow(LocalConfig())
+    private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig())
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -74,6 +77,7 @@ class MeshConnectionManagerTest {
 
         every { radioInterfaceService.connectionState } returns radioConnectionState
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
+        every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeEntity?>(null)
 
         manager =
@@ -175,5 +179,28 @@ class MeshConnectionManagerTest {
             ConnectionState.DeviceSleep,
             connectionStateHolder.connectionState.value,
         )
+    }
+
+    @Test
+    fun `onRadioConfigLoaded processes queued packets and sets time`() = runTest(testDispatcher) {
+        manager.onRadioConfigLoaded()
+
+        verify { commandSender.processQueuedPackets() }
+        verify { commandSender.sendAdmin(any(), initFn = any()) }
+    }
+
+    @Test
+    fun `onNodeDbReady starts MQTT and requests history`() = runTest(testDispatcher) {
+        val moduleConfig = mockk<LocalModuleConfig>(relaxed = true)
+        every { moduleConfig.mqtt } returns ModuleConfig.MQTTConfig(enabled = true)
+        every { moduleConfig.store_forward } returns ModuleConfig.StoreForwardConfig(enabled = true)
+        moduleConfigFlow.value = moduleConfig
+
+        manager.start(backgroundScope)
+        manager.onNodeDbReady()
+        advanceUntilIdle()
+
+        verify { mqttManager.start(any(), true, any()) }
+        verify { historyManager.requestHistoryReplay("onNodeDbReady", any(), any(), "Unknown") }
     }
 }
