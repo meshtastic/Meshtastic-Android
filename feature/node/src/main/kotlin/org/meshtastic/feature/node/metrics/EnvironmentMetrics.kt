@@ -64,7 +64,9 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.UnitConversions.AMPERE_UNITS
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
+import org.meshtastic.core.model.util.UnitConversions.numberToHuman
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.current
 import org.meshtastic.core.strings.env_metrics_log
@@ -376,7 +378,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
             if (hasCurrent) {
                 val current = envMetrics.current!!
                 Text(
-                    text = "%s %.2f mA".format(stringResource(Res.string.current), current),
+                    text = "%s %s".format(stringResource(Res.string.current), numberToHuman(current, AMPERE_UNITS)),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
