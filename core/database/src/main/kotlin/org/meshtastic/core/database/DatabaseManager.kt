@@ -20,6 +20,7 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -272,6 +273,7 @@ private fun anonymizeDbName(name: String): String =
 
 private fun buildRoomDb(app: Application, dbName: String): MeshtasticDatabase =
     Room.databaseBuilder(app.applicationContext, MeshtasticDatabase::class.java, dbName)
+        .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
         .fallbackToDestructiveMigration(false)
         .build()
 
