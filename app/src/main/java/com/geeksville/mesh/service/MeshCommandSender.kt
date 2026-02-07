@@ -76,7 +76,15 @@ constructor(
     @Volatile var lastNeighborInfo: NeighborInfo? = null
 
     private val rememberDataType =
-        setOf(PortNum.TEXT_MESSAGE_APP.value, PortNum.ALERT_APP.value, PortNum.WAYPOINT_APP.value)
+        setOf(
+            PortNum.TEXT_MESSAGE_APP.value,
+            PortNum.ALERT_APP.value,
+            PortNum.WAYPOINT_APP.value,
+            PortNum.ATAK_PLUGIN.value,
+            PortNum.ATAK_FORWARDER.value,
+            PortNum.DETECTION_SENSOR_APP.value,
+            PortNum.PRIVATE_APP.value,
+        )
 
     fun start(scope: CoroutineScope) {
         this.scope = scope
