@@ -44,7 +44,6 @@ internal object HomoglyphCharacterStringTransformer {
             '\u0410' to 'A', // https://www.compart.com/en/unicode/U+0410 - Cyrillic Capital Letter A
             '\u0412' to 'B', // https://www.compart.com/en/unicode/U+0412 - Cyrillic Capital Letter Ve
             '\u0415' to 'E', // https://www.compart.com/en/unicode/U+0415 - Cyrillic Capital Letter Ie
-            '\u0417' to '3', // https://www.compart.com/en/unicode/U+0417 - Cyrillic Capital Letter Ze
             '\u041A' to 'K', // https://www.compart.com/en/unicode/U+041A - Cyrillic Capital Letter Ka
             '\u041C' to 'M', // https://www.compart.com/en/unicode/U+041C - Cyrillic Capital Letter Em
             '\u041D' to 'H', // https://www.compart.com/en/unicode/U+041D - Cyrillic Capital Letter En
@@ -65,6 +64,12 @@ internal object HomoglyphCharacterStringTransformer {
                 'i', // https://www.compart.com/en/unicode/U+0456 - Cyrillic Small Letter Byelorussian-Ukrainian I
             '\u0458' to 'j', // https://www.compart.com/en/unicode/U+0458 - Cyrillic Small Letter Je
             '\u04AE' to 'Y', // https://www.compart.com/en/unicode/U+04AE - Cyrillic Capital Letter Straight U
+            '\u0417' to '3', // https://www.compart.com/en/unicode/U+0417 - Cyrillic Capital Letter Ze
+            // Note that capital "ze" here is a bit special - it technically transforms to a digit "three"
+            // The visuals are all the same, across the different fonts etc& The core idea is the same:
+            // We are still replacing 2-byte unicode letter with a digit character that occupies 1 byte in Unicode
+            // But I have to point it out to avoid confusion
+
         )
 
     /**
