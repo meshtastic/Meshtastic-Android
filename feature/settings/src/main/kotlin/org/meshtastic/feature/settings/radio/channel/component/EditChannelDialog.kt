@@ -16,19 +16,11 @@
  */
 package org.meshtastic.feature.settings.radio.channel.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +43,7 @@ import org.meshtastic.core.strings.save
 import org.meshtastic.core.strings.uplink_enabled
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.PositionPrecisionPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.proto.ChannelSettings
@@ -70,9 +63,13 @@ fun EditChannelDialog(
 
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        shape = RoundedCornerShape(16.dp),
+    MeshtasticDialog(
+        onDismiss = onDismissRequest,
+        dismissText = stringResource(Res.string.cancel),
+        confirmText = stringResource(Res.string.save),
+        onConfirm = { onAddClick(channelInput) },
+        modifier = modifier,
+        title = "", // Title is handled internally by specific items if needed, or we could add one
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 EditTextPreference(
@@ -141,19 +138,6 @@ fun EditChannelDialog(
                         channelInput = channelInput.copy(module_settings = updatedModule)
                     },
                 )
-            }
-        },
-        confirmButton = {
-            FlowRow(
-                modifier = modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(modifier = modifier.weight(1f), onClick = onDismissRequest) {
-                    Text(stringResource(Res.string.cancel))
-                }
-                Button(modifier = modifier.weight(1f), onClick = { onAddClick(channelInput) }, enabled = true) {
-                    Text(stringResource(Res.string.save))
-                }
             }
         },
     )

@@ -28,10 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -46,13 +43,7 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -107,6 +98,7 @@ import org.meshtastic.core.strings.use_homoglyph_characters_encoding
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
@@ -501,14 +493,20 @@ private fun AppVersionButton(
 
 @Composable
 private fun LanguagePickerDialog(onDismiss: () -> Unit) {
-    SettingsDialog(title = stringResource(Res.string.preferences_language), onDismiss = onDismiss) {
-        languageMap().forEach { (languageTag, languageName) ->
-            ListItem(text = languageName, trailingIcon = null) {
-                LanguageUtils.setAppLocale(languageTag)
-                onDismiss()
+    MeshtasticDialog(
+        title = stringResource(Res.string.preferences_language),
+        onDismiss = onDismiss,
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                languageMap().forEach { (languageTag, languageName) ->
+                    ListItem(text = languageName, trailingIcon = null) {
+                        LanguageUtils.setAppLocale(languageTag)
+                        onDismiss()
+                    }
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 private enum class ThemeOption(val label: StringResource, val mode: Int) {
@@ -520,35 +518,18 @@ private enum class ThemeOption(val label: StringResource, val mode: Int) {
 
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    SettingsDialog(title = stringResource(Res.string.choose_theme), onDismiss = onDismiss) {
-        ThemeOption.entries.forEach { option ->
-            ListItem(text = stringResource(option.label), trailingIcon = null) {
-                onClickTheme(option.mode)
-                onDismiss()
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SettingsDialog(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-            shape = MaterialTheme.shapes.large,
-            color = AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-        ) {
+    MeshtasticDialog(
+        title = stringResource(Res.string.choose_theme),
+        onDismiss = onDismiss,
+        text = {
             Column {
-                Text(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
+                ThemeOption.entries.forEach { option ->
+                    ListItem(text = stringResource(option.label), trailingIcon = null) {
+                        onClickTheme(option.mode)
+                        onDismiss()
+                    }
+                }
             }
-        }
-    }
+        },
+    )
 }

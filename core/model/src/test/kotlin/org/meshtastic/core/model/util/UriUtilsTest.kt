@@ -21,6 +21,8 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.proto.SharedContact
+import org.meshtastic.proto.User
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -67,5 +69,60 @@ class UriUtilsTest {
         val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
         assertTrue("Should handle mixed case URI", handled)
         assertTrue("Should invoke onChannel callback", channelCalled)
+    }
+
+    @Test
+    fun `handleMeshtasticUri handles www host`() {
+        val uri = Uri.parse("https://www.meshtastic.org/e/somechannel")
+        var channelCalled = false
+        val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
+        assertTrue("Should handle www host", handled)
+        assertTrue("Should invoke onChannel callback", channelCalled)
+    }
+
+    @Test
+    fun `handleMeshtasticUri handles long channel path`() {
+        val uri = Uri.parse("https://meshtastic.org/channel/e/somechannel")
+        var channelCalled = false
+        val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
+        assertTrue("Should handle long channel path", handled)
+        assertTrue("Should invoke onChannel callback", channelCalled)
+    }
+
+    @Test
+    fun `handleMeshtasticUri handles long contact path`() {
+        val uri = Uri.parse("https://meshtastic.org/contact/v/somecontact")
+        var contactCalled = false
+        val handled = handleMeshtasticUri(uri, onContact = { contactCalled = true })
+        assertTrue("Should handle long contact path", handled)
+        assertTrue("Should invoke onContact callback", contactCalled)
+    }
+
+    @Test
+    fun `dispatchMeshtasticUri dispatches correctly`() {
+        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val uri = original.getSharedContactUrl()
+        var contactReceived: SharedContact? = null
+
+        uri.dispatchMeshtasticUri(onChannel = {}, onContact = { contactReceived = it }, onInvalid = {})
+
+        assertTrue("Contact should be received", contactReceived != null)
+        assertTrue("Name should match", contactReceived?.user?.long_name == "Suzume")
+    }
+
+    @Test
+    fun `dispatchMeshtasticUri handles invalid variants via fallback`() {
+        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        // Manual override to an "unknown" path that handleMeshtasticUri would reject
+        val urlStr = original.getSharedContactUrl().toString().replace("/v/", "/fallback/")
+        val uri = Uri.parse(urlStr)
+
+        var contactReceived: SharedContact? = null
+
+        uri.dispatchMeshtasticUri(onChannel = {}, onContact = { contactReceived = it }, onInvalid = {})
+
+        // This should fail both handleMeshtasticUri AND toSharedContact because of path validation
+        // So contactReceived should be null and onInvalid called (if provided)
+        assertTrue("Contact should NOT be received with invalid path", contactReceived == null)
     }
 }

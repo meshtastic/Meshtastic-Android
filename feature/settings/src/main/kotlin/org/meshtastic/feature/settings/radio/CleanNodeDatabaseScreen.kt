@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio
 
 import androidx.compose.foundation.layout.Arrangement
@@ -27,20 +26,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,9 +42,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.are_you_sure
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.clean_node_database_confirmation
 import org.meshtastic.core.strings.clean_node_database_description
 import org.meshtastic.core.strings.clean_node_database_title
 import org.meshtastic.core.strings.clean_nodes_older_than
@@ -68,20 +59,8 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
     val olderThanDays by viewModel.olderThanDays.collectAsState()
     val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsState()
     val nodesToDelete by viewModel.nodesToDelete.collectAsState()
-    var showConfirmationDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
-
-    if (showConfirmationDialog) {
-        ConfirmationDialog(
-            nodesToDeleteCount = nodesToDelete.size,
-            onConfirm = {
-                viewModel.cleanNodes()
-                showConfirmationDialog = false
-            },
-            onDismiss = { showConfirmationDialog = false },
-        )
-    }
 
     Column(modifier = Modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
         Text(stringResource(Res.string.clean_node_database_title))
@@ -105,7 +84,7 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { if (nodesToDelete.isNotEmpty()) showConfirmationDialog = true },
+            onClick = { if (nodesToDelete.isNotEmpty()) viewModel.requestCleanNodes() },
             modifier = Modifier.fillMaxWidth(),
             enabled = nodesToDelete.isNotEmpty(),
         ) {
@@ -185,22 +164,4 @@ private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
             NodeChip(node = node.toModel(), modifier = Modifier.padding(end = 8.dp, bottom = 8.dp))
         }
     }
-}
-
-/**
- * Composable for the confirmation dialog before deleting nodes.
- *
- * @param nodesToDeleteCount The number of nodes to be deleted.
- * @param onConfirm Callback for when the user confirms the deletion.
- * @param onDismiss Callback for when the user dismisses the dialog.
- */
-@Composable
-private fun ConfirmationDialog(nodesToDeleteCount: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.are_you_sure)) },
-        text = { Text(stringResource(Res.string.clean_node_database_confirmation, nodesToDeleteCount)) },
-        confirmButton = { Button(onClick = onConfirm) { Text(stringResource(Res.string.clean_now)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-    )
 }

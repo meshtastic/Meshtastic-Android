@@ -41,6 +41,10 @@ import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_clear
+import org.meshtastic.core.strings.debug_clear_logs_confirm
+import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
@@ -215,6 +219,7 @@ constructor(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
     private val meshLogPrefs: MeshLogPrefs,
+    private val alertManager: AlertManager,
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
@@ -392,6 +397,14 @@ constructor(
     }
 
     private fun Int.asNodeId(): String = "!%08x".format(Locale.getDefault(), this)
+
+    fun requestDeleteAllLogs() {
+        alertManager.showAlert(
+            titleRes = Res.string.debug_clear,
+            messageRes = Res.string.debug_clear_logs_confirm,
+            onConfirm = { deleteAllLogs() },
+        )
+    }
 
     fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) { meshLogRepository.deleteAll() }
 

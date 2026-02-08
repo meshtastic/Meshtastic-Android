@@ -23,12 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,6 +39,7 @@ import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.send
 import org.meshtastic.core.strings.shutdown_node_name
 import org.meshtastic.core.strings.shutdown_warning
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.User
 
@@ -57,22 +54,17 @@ fun ShutdownConfirmationDialog(
 ) {
     val nodeLongName = node?.user?.long_name ?: "Unknown Node"
 
-    AlertDialog(
-        onDismissRequest = {},
-        icon = { icon?.let { Icon(imageVector = it, contentDescription = null) } },
-        title = { Text(text = title) },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        icon = icon,
+        title = title,
         text = { ShutdownDialogContent(nodeLongName = nodeLongName, isShutdown = isShutdown) },
-        dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(Res.string.cancel)) } },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onDismiss()
-                    onConfirm()
-                },
-            ) {
-                Text(stringResource(Res.string.send))
-            }
+        confirmText = stringResource(Res.string.send),
+        onConfirm = {
+            onDismiss()
+            onConfirm()
         },
+        dismissText = stringResource(Res.string.cancel),
     )
 }
 

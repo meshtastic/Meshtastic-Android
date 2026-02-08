@@ -17,23 +17,25 @@
 package org.meshtastic.core.ui.component
 
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Nfc
 import androidx.compose.material.icons.twotone.QrCodeScanner
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
@@ -41,6 +43,8 @@ import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.import_label
+import org.meshtastic.core.strings.input_channel_url
 import org.meshtastic.core.strings.input_shared_contact_url
 import org.meshtastic.core.strings.nfc_disabled
 import org.meshtastic.core.strings.okay
@@ -55,39 +59,46 @@ import org.meshtastic.core.strings.share_channels_qr
 import org.meshtastic.core.strings.url
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode2
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.openNfcSettings
+import org.meshtastic.proto.SharedContact
 
 /**
- * Unified Floating Action Button for importing Meshtastic data (Contacts, Channels, etc.) via NFC, QR, or URL.
+ * Unified Floating Action Button for importing Meshtastic data (Contacts, Channels, etc.) via NFC, QR, or URL. Handles
+ * the [SharedContactImportDialog] if a contact is pending import.
  *
- * @param modifier Modifier for this composable.
  * @param onImport Callback when a valid Meshtastic URI is scanned or input.
+ * @param modifier Modifier for this composable.
+ * @param sharedContact Optional pending [SharedContact] to display an import dialog for.
+ * @param onDismissSharedContact Callback to clear the pending shared contact.
  * @param onShareChannels Optional callback to trigger sharing channels.
  * @param isContactContext Hint to customize UI strings for contact importing context.
+ * @param testTag Optional test tag for UI testing.
+ * @param importDialog Composable to display the import dialog. Defaults to [SharedContactImportDialog].
  */
 @Suppress("LongMethod")
 @Composable
-fun ImportFab(
+fun MeshtasticImportFAB(
     onImport: (Uri) -> Unit,
     modifier: Modifier = Modifier,
+    sharedContact: SharedContact? = null,
+    onDismissSharedContact: () -> Unit = {},
     onShareChannels: (() -> Unit)? = null,
-    isContactContext: Boolean = false,
+    isContactContext: Boolean = true,
+    testTag: String? = null,
+    importDialog: @Composable (SharedContact, () -> Unit) -> Unit = { contact, dismiss ->
+        SharedContactImportDialog(sharedContact = contact, onDismiss = dismiss)
+    },
 ) {
+    sharedContact?.let { importDialog(it, onDismissSharedContact) }
+
     var expanded by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var isNfcScanning by remember { mutableStateOf(false) }
     var showNfcDisabledDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    val barcodeScanner =
-        rememberBarcodeScanner(
-            onResult = { contents ->
-                contents?.toUri()?.let {
-                    onImport(it)
-                    isNfcScanning = false
-                }
-            },
-        )
+    val barcodeScanner = rememberBarcodeScanner(onResult = { contents -> contents?.toUri()?.let { onImport(it) } })
 
     if (isNfcScanning) {
         NfcScannerEffect(
@@ -106,29 +117,25 @@ fun ImportFab(
     }
 
     if (showNfcDisabledDialog) {
-        AlertDialog(
-            onDismissRequest = { showNfcDisabledDialog = false },
-            title = { Text(stringResource(Res.string.scan_nfc)) },
-            text = { Text(stringResource(Res.string.nfc_disabled)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        context.openNfcSettings()
-                        showNfcDisabledDialog = false
-                    },
-                ) {
-                    Text(stringResource(Res.string.open_settings))
-                }
+        MeshtasticDialog(
+            onDismiss = { showNfcDisabledDialog = false },
+            titleRes = Res.string.scan_nfc,
+            messageRes = Res.string.nfc_disabled,
+            onConfirm = {
+                context.openNfcSettings()
+                showNfcDisabledDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showNfcDisabledDialog = false }) { Text(stringResource(Res.string.cancel)) }
-            },
+            confirmTextRes = Res.string.open_settings,
+            dismissTextRes = Res.string.cancel,
         )
     }
 
     if (showUrlDialog) {
         InputUrlDialog(
-            title = stringResource(Res.string.input_shared_contact_url),
+            title =
+            stringResource(
+                if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+            ),
             onDismiss = { showUrlDialog = false },
             onConfirm = { contents ->
                 onImport(contents.toUri())
@@ -146,6 +153,7 @@ fun ImportFab(
                 ),
                 icon = Icons.Rounded.Nfc,
                 onClick = { isNfcScanning = true },
+                testTag = "nfc_import",
             ),
             MenuFABItem(
                 label =
@@ -154,11 +162,16 @@ fun ImportFab(
                 ),
                 icon = Icons.TwoTone.QrCodeScanner,
                 onClick = { barcodeScanner.startScan() },
+                testTag = "qr_import",
             ),
             MenuFABItem(
-                label = stringResource(Res.string.input_shared_contact_url),
+                label =
+                stringResource(
+                    if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+                ),
                 icon = Icons.Rounded.Link,
                 onClick = { showUrlDialog = true },
+                testTag = "url_import",
             ),
         )
 
@@ -168,6 +181,7 @@ fun ImportFab(
                 label = stringResource(Res.string.share_channels_qr),
                 icon = MeshtasticIcons.QrCode2,
                 onClick = it,
+                testTag = "share_channels",
             ),
         )
     }
@@ -177,26 +191,27 @@ fun ImportFab(
         onExpandedChange = { expanded = it },
         items = items,
         modifier = modifier.padding(bottom = 16.dp),
+        contentDescription = stringResource(Res.string.import_label),
+        testTag = testTag,
     )
 }
 
 @Composable
 private fun NfcScanningDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.scan_nfc)) },
-        text = { Text(stringResource(Res.string.scan_nfc_text)) },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        titleRes = Res.string.scan_nfc,
+        messageRes = Res.string.scan_nfc_text,
+        dismissTextRes = Res.string.cancel,
     )
 }
 
 @Composable
 private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var urlText by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = title,
         text = {
             OutlinedTextField(
                 value = urlText,
@@ -206,7 +221,33 @@ private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (Str
                 maxLines = 4,
             )
         },
-        confirmButton = { TextButton(onClick = { onConfirm(urlText) }) { Text(stringResource(Res.string.okay)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        onConfirm = { onConfirm(urlText) },
+        confirmTextRes = Res.string.okay,
+        dismissTextRes = Res.string.cancel,
     )
+}
+
+@Preview(showBackground = true, name = "Contact Context")
+@Composable
+fun PreviewImportFABContact() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            MeshtasticImportFAB(onImport = {}, modifier = Modifier.align(Alignment.BottomEnd), isContactContext = true)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Channel Context with Sharing")
+@Composable
+fun PreviewImportFABChannel() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            MeshtasticImportFAB(
+                onImport = {},
+                onShareChannels = {},
+                modifier = Modifier.align(Alignment.BottomEnd),
+                isContactContext = false,
+            )
+        }
+    }
 }

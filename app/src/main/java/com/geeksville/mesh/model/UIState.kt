@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -54,15 +55,17 @@ import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
-import org.meshtastic.core.model.util.toChannelSet
+import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
+import org.meshtastic.core.strings.compromised_keys
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.toSharedContact
+import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.util.ComposableContent
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
@@ -114,6 +117,7 @@ constructor(
     private val meshServiceNotifications: MeshServiceNotifications,
     private val analytics: PlatformAnalytics,
     packetRepository: PacketRepository,
+    private val alertManager: AlertManager,
 ) : ViewModel() {
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
@@ -142,17 +146,7 @@ constructor(
         _scrollToTopEventFlow.tryEmit(event)
     }
 
-    data class AlertData(
-        val title: String,
-        val message: String? = null,
-        val html: String? = null,
-        val onConfirm: (() -> Unit)? = null,
-        val onDismiss: (() -> Unit)? = null,
-        val choices: Map<String, () -> Unit> = emptyMap(),
-    )
-
-    private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
-    val currentAlert = _currentAlert.asStateFlow()
+    val currentAlert = alertManager.currentAlert
 
     fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
         evaluateTracerouteMapAvailability(
@@ -163,29 +157,39 @@ constructor(
         )
 
     fun showAlert(
-        title: String,
+        title: String? = null,
+        titleRes: StringResource? = null,
         message: String? = null,
+        messageRes: StringResource? = null,
+        composableMessage: ComposableContent? = null,
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
-        dismissable: Boolean = true,
+        onDismiss: (() -> Unit)? = null,
+        confirmText: String? = null,
+        confirmTextRes: StringResource? = null,
+        dismissText: String? = null,
+        dismissTextRes: StringResource? = null,
         choices: Map<String, () -> Unit> = emptyMap(),
     ) {
-        _currentAlert.value =
-            AlertData(
-                title = title,
-                message = message,
-                html = html,
-                onConfirm = {
-                    onConfirm?.invoke()
-                    dismissAlert()
-                },
-                onDismiss = { if (dismissable) dismissAlert() },
-                choices = choices,
-            )
+        alertManager.showAlert(
+            title = title,
+            titleRes = titleRes,
+            message = message,
+            messageRes = messageRes,
+            composableMessage = composableMessage,
+            html = html,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss,
+            confirmText = confirmText,
+            confirmTextRes = confirmTextRes,
+            dismissText = dismissText,
+            dismissTextRes = dismissTextRes,
+            choices = choices,
+        )
     }
 
-    private fun dismissAlert() {
-        _currentAlert.value = null
+    fun dismissAlert() {
+        alertManager.dismissAlert()
     }
 
     val meshService: IMeshService?
@@ -203,10 +207,25 @@ constructor(
             .filterNotNull()
             .onEach {
                 showAlert(
-                    title = getString(Res.string.client_notification),
+                    titleRes = Res.string.client_notification,
                     message = it,
                     onConfirm = { serviceRepository.clearErrorMessage() },
-                    dismissable = false,
+                )
+            }
+            .launchIn(viewModelScope)
+
+        serviceRepository.clientNotification
+            .filterNotNull()
+            .onEach { notification ->
+                val isCompromised = notification.low_entropy_key != null || notification.duplicated_public_key != null
+                showAlert(
+                    titleRes = Res.string.client_notification,
+                    message = if (isCompromised) getString(Res.string.compromised_keys) else notification.message,
+                    onConfirm = {
+                        // Action for compromised keys should be handled via a callback or event
+                        clearClientNotification(notification)
+                    },
+                    onDismiss = { clearClientNotification(notification) },
                 )
             }
             .launchIn(viewModelScope)
@@ -218,12 +237,8 @@ constructor(
     val sharedContactRequested: StateFlow<SharedContact?>
         get() = _sharedContactRequested.asStateFlow()
 
-    fun setSharedContactRequested(url: Uri, onFailure: () -> Unit) {
-        runCatching { _sharedContactRequested.value = url.toSharedContact() }
-            .onFailure { ex ->
-                Logger.e(ex) { "Shared contact error" }
-                onFailure()
-            }
+    fun setSharedContactRequested(contact: SharedContact?) {
+        _sharedContactRequested.value = contact
     }
 
     /** Called immediately after activity observes requestChannelUrl */
@@ -239,20 +254,17 @@ constructor(
     val requestChannelSet: StateFlow<ChannelSet?>
         get() = _requestChannelSet
 
-    fun requestChannelUrl(url: Uri, onFailure: () -> Unit) =
-        runCatching { _requestChannelSet.value = url.toChannelSet() }
-            .onFailure { ex ->
-                Logger.e(ex) { "Channel url error" }
-                onFailure()
-            }
+    fun setRequestChannelSet(channelSet: ChannelSet?) {
+        _requestChannelSet.value = channelSet
+    }
 
     /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
     fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
-        if (uri.path?.contains("/v/") == true) {
-            setSharedContactRequested(uri, onInvalid)
-        } else {
-            requestChannelUrl(uri, onInvalid)
-        }
+        uri.dispatchMeshtasticUri(
+            onContact = { setSharedContactRequested(it) },
+            onChannel = { setRequestChannelSet(it) },
+            onInvalid = onInvalid,
+        )
     }
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
@@ -267,8 +279,8 @@ constructor(
         Logger.d { "ViewModel cleared" }
     }
 
-    val tracerouteResponse: LiveData<TracerouteResponse?>
-        get() = serviceRepository.tracerouteResponse.asLiveData()
+    val tracerouteResponse: Flow<TracerouteResponse?>
+        get() = serviceRepository.tracerouteResponse
 
     fun clearTracerouteResponse() {
         serviceRepository.clearTracerouteResponse()

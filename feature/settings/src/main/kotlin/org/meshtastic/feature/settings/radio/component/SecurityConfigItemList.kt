@@ -24,12 +24,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,7 +46,6 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.admin_key
 import org.meshtastic.core.strings.admin_keys
 import org.meshtastic.core.strings.administration
-import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.config_security_admin_key
 import org.meshtastic.core.strings.config_security_debug_log_api_enabled
 import org.meshtastic.core.strings.config_security_is_managed
@@ -63,7 +59,6 @@ import org.meshtastic.core.strings.export_keys_confirmation
 import org.meshtastic.core.strings.legacy_admin_channel
 import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.managed_mode
-import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.private_key
 import org.meshtastic.core.strings.public_key
 import org.meshtastic.core.strings.regenerate_keys_confirmation
@@ -73,6 +68,7 @@ import org.meshtastic.core.strings.serial_console
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
@@ -116,28 +112,22 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
     )
     var showEditSecurityConfigDialog by rememberSaveable { mutableStateOf(false) }
     if (showEditSecurityConfigDialog) {
-        AlertDialog(
-            title = { Text(text = stringResource(Res.string.export_keys)) },
-            text = { Text(text = stringResource(Res.string.export_keys_confirmation)) },
-            onDismissRequest = { showEditSecurityConfigDialog = false },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showEditSecurityConfigDialog = false
-                        val intent =
-                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/*"
-                                putExtra(
-                                    Intent.EXTRA_TITLE,
-                                    "${node?.user?.short_name}_keys_${System.currentTimeMillis()}.json",
-                                )
-                            }
-                        exportConfigLauncher.launch(intent)
-                    },
-                ) {
-                    Text(stringResource(Res.string.okay))
-                }
+        MeshtasticResourceDialog(
+            titleRes = Res.string.export_keys,
+            messageRes = Res.string.export_keys_confirmation,
+            onDismiss = { showEditSecurityConfigDialog = false },
+            onConfirm = {
+                showEditSecurityConfigDialog = false
+                val intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/*"
+                        putExtra(
+                            Intent.EXTRA_TITLE,
+                            "${node?.user?.short_name}_keys_${System.currentTimeMillis()}.json",
+                        )
+                    }
+                exportConfigLauncher.launch(intent)
             },
         )
     }
@@ -268,30 +258,22 @@ fun PrivateKeyRegenerateDialog(
     onDismiss: () -> Unit = {},
 ) {
     if (showKeyGenerationDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(text = stringResource(Res.string.regenerate_private_key)) },
-            text = { Text(text = stringResource(Res.string.regenerate_keys_confirmation)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Generate a random "f" value
-                        val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
-                        // Adjust the value to make it valid as an "s" value for eval().
-                        // According to the specification we need to mask off the 3
-                        // right-most bits of f[0], mask off the left-most bit of f[31],
-                        // and set the second to left-most bit of f[31].
-                        f[0] = (f[0].toInt() and 0xF8).toByte()
-                        f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
-                        val securityInput =
-                            Config.SecurityConfig(private_key = f.toByteString(), public_key = ByteString.EMPTY)
-                        onConfirm(securityInput)
-                    },
-                ) {
-                    Text(stringResource(Res.string.okay))
-                }
+        MeshtasticResourceDialog(
+            onDismiss = onDismiss,
+            titleRes = Res.string.regenerate_private_key,
+            messageRes = Res.string.regenerate_keys_confirmation,
+            onConfirm = {
+                // Generate a random "f" value
+                val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+                // Adjust the value to make it valid as an "s" value for eval().
+                // According to the specification we need to mask off the 3
+                // right-most bits of f[0], mask off the left-most bit of f[31],
+                // and set the second to left-most bit of f[31].
+                f[0] = (f[0].toInt() and 0xF8).toByte()
+                f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
+                val securityInput = Config.SecurityConfig(private_key = f.toByteString(), public_key = ByteString.EMPTY)
+                onConfirm(securityInput)
             },
-            dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
         )
     }
 }

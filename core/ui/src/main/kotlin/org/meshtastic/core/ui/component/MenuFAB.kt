@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -38,9 +39,11 @@ fun MenuFAB(
     onExpandedChange: (Boolean) -> Unit,
     items: List<MenuFABItem>,
     modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    testTag: String? = null,
 ) {
     FloatingActionButtonMenu(
-        modifier = modifier,
+        modifier = modifier.then(if (testTag != null) Modifier.testTag(testTag) else Modifier),
         expanded = expanded,
         button = {
             ToggleFloatingActionButton(
@@ -48,7 +51,7 @@ fun MenuFAB(
                 onCheckedChange = onExpandedChange,
                 content = {
                     val imageVector = if (expanded) Icons.Filled.Close else Icons.AutoMirrored.Rounded.OfflineShare
-                    Icon(imageVector = imageVector, contentDescription = null)
+                    Icon(imageVector = imageVector, contentDescription = contentDescription)
                 },
                 containerColor = ToggleFloatingActionButtonDefaults.containerColor(),
             )
@@ -57,6 +60,7 @@ fun MenuFAB(
     ) {
         items.forEach { item ->
             FloatingActionButtonMenuItem(
+                modifier = if (item.testTag != null) Modifier.testTag(item.testTag) else Modifier,
                 onClick = {
                     item.onClick()
                     onExpandedChange(false)
@@ -68,4 +72,4 @@ fun MenuFAB(
     }
 }
 
-data class MenuFABItem(val label: String, val icon: ImageVector, val onClick: () -> Unit)
+data class MenuFABItem(val label: String, val icon: ImageVector, val onClick: () -> Unit, val testTag: String? = null)

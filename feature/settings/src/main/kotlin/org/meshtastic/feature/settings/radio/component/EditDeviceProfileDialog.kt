@@ -16,26 +16,14 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
@@ -49,6 +37,7 @@ import org.meshtastic.core.strings.module_settings
 import org.meshtastic.core.strings.radio_configuration
 import org.meshtastic.core.strings.save
 import org.meshtastic.core.strings.short_name
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.proto.DeviceProfile
 
@@ -61,8 +50,7 @@ private enum class ProfileField(val tag: Int, val labelRes: StringResource) {
     FIXED_POSITION(6, Res.string.fixed_position),
 }
 
-@Suppress("LongMethod")
-@OptIn(ExperimentalLayoutApi::class)
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun EditDeviceProfileDialog(
     title: String,
@@ -88,20 +76,36 @@ fun EditDeviceProfileDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(16.dp),
-        text = {
-            Column(modifier.fillMaxWidth()) {
-                Text(
-                    text = title,
-                    style =
-                    MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                    ),
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+    MeshtasticDialog(
+        title = title,
+        onDismiss = onDismiss,
+        dismissText = stringResource(Res.string.cancel),
+        confirmText = stringResource(Res.string.save),
+        onConfirm = {
+            val result =
+                DeviceProfile(
+                    long_name = if (state[ProfileField.LONG_NAME] == true) deviceProfile.long_name else null,
+                    short_name = if (state[ProfileField.SHORT_NAME] == true) deviceProfile.short_name else null,
+                    channel_url = if (state[ProfileField.CHANNEL_URL] == true) deviceProfile.channel_url else null,
+                    config = if (state[ProfileField.CONFIG] == true) deviceProfile.config else null,
+                    module_config =
+                    if (state[ProfileField.MODULE_CONFIG] == true) {
+                        deviceProfile.module_config
+                    } else {
+                        null
+                    },
+                    fixed_position =
+                    if (state[ProfileField.FIXED_POSITION] == true) {
+                        deviceProfile.fixed_position
+                    } else {
+                        null
+                    },
                 )
+            onConfirm(result)
+        },
+        modifier = modifier,
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 HorizontalDivider()
                 ProfileField.entries.forEach { field ->
                     val isAvailable =
@@ -122,47 +126,6 @@ fun EditDeviceProfileDialog(
                     )
                 }
                 HorizontalDivider()
-            }
-        },
-        confirmButton = {
-            FlowRow(
-                modifier = modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(modifier = modifier.weight(1f), onClick = onDismiss) {
-                    Text(stringResource(Res.string.cancel))
-                }
-                Button(
-                    modifier = modifier.weight(1f),
-                    onClick = {
-                        val result =
-                            DeviceProfile(
-                                long_name =
-                                if (state[ProfileField.LONG_NAME] == true) deviceProfile.long_name else null,
-                                short_name =
-                                if (state[ProfileField.SHORT_NAME] == true) deviceProfile.short_name else null,
-                                channel_url =
-                                if (state[ProfileField.CHANNEL_URL] == true) deviceProfile.channel_url else null,
-                                config = if (state[ProfileField.CONFIG] == true) deviceProfile.config else null,
-                                module_config =
-                                if (state[ProfileField.MODULE_CONFIG] == true) {
-                                    deviceProfile.module_config
-                                } else {
-                                    null
-                                },
-                                fixed_position =
-                                if (state[ProfileField.FIXED_POSITION] == true) {
-                                    deviceProfile.fixed_position
-                                } else {
-                                    null
-                                },
-                            )
-                        onConfirm(result)
-                    },
-                    enabled = state.values.any { it },
-                ) {
-                    Text(stringResource(Res.string.save))
-                }
             }
         },
     )

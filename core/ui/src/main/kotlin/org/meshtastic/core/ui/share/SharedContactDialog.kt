@@ -25,15 +25,15 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.compareUsers
+import org.meshtastic.core.model.util.userFieldsToString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.import_known_shared_contact_text
 import org.meshtastic.core.strings.import_label
 import org.meshtastic.core.strings.import_shared_contact
 import org.meshtastic.core.strings.public_key_changed
-import org.meshtastic.core.ui.component.SimpleAlertDialog
-import org.meshtastic.core.ui.component.compareUsers
-import org.meshtastic.core.ui.component.userFieldsToString
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
@@ -49,8 +49,8 @@ fun SharedContactDialog(
     val nodeNum = sharedContact.node_num
     val node = unfilteredNodes.find { it.num == nodeNum }
 
-    SimpleAlertDialog(
-        title = Res.string.import_shared_contact,
+    MeshtasticDialog(
+        titleRes = Res.string.import_shared_contact,
         text = {
             Column {
                 if (node != null) {

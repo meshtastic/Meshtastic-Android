@@ -34,7 +34,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.twotone.QrCodeScanner
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -45,7 +44,6 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -92,6 +90,7 @@ import org.meshtastic.core.strings.share_channels_qr
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
@@ -193,39 +192,22 @@ fun ChannelScreen(
     }
 
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = {
+        MeshtasticDialog(
+            onDismiss = {
                 channelSet = channels // throw away any edits
                 showResetDialog = false
             },
-            title = { Text(text = stringResource(Res.string.reset_to_defaults)) },
-            text = { Text(text = stringResource(Res.string.are_you_sure_change_default)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        Logger.d { "Switching back to default channel" }
-                        val lora =
-                            (Channel.default.loraConfig).copy(
-                                region = viewModel.region,
-                                tx_enabled = viewModel.txEnabled,
-                            )
-                        installSettings(Channel.default.settings, lora)
-                        showResetDialog = false
-                    },
-                ) {
-                    Text(text = stringResource(Res.string.apply))
-                }
+            titleRes = Res.string.reset_to_defaults,
+            messageRes = Res.string.are_you_sure_change_default,
+            onConfirm = {
+                Logger.d { "Switching back to default channel" }
+                val lora =
+                    (Channel.default.loraConfig).copy(region = viewModel.region, tx_enabled = viewModel.txEnabled)
+                installSettings(Channel.default.settings, lora)
+                showResetDialog = false
             },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        channelSet = channels // throw away any edits
-                        showResetDialog = false
-                    },
-                ) {
-                    Text(text = stringResource(Res.string.cancel))
-                }
-            },
+            confirmTextRes = Res.string.apply,
+            dismissTextRes = Res.string.cancel,
         )
     }
 

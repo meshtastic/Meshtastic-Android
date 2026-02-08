@@ -27,8 +27,6 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -54,7 +52,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
@@ -72,6 +69,7 @@ import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.model.util.formatMuteRemainingTime
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.are_you_sure
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.channel_invalid
 import org.meshtastic.core.strings.close_selection
@@ -91,8 +89,10 @@ import org.meshtastic.core.strings.mute_status_unmuted
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.select_all
 import org.meshtastic.core.strings.unmute
-import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
+import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Close
@@ -101,6 +101,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
 import org.meshtastic.core.ui.icon.VolumeUpTwoTone
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ChannelSet
 import java.util.concurrent.TimeUnit
@@ -178,6 +179,8 @@ fun ContactsScreen(
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
+    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { uIViewModel.clearRequestChannelUrl() }) }
 
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->
@@ -233,15 +236,16 @@ fun ContactsScreen(
         },
         floatingActionButton = {
             if (connectionState.isConnected()) {
-                AddContactFAB(
+                MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
-                    onResult = { uri ->
+                    onImport = { uri ->
                         uIViewModel.handleScannedUri(uri) {
                             scope.launch { context.showToast(Res.string.channel_invalid) }
                         }
                     },
                     onShareChannels = onNavigateToShare,
                     onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
+                    isContactContext = true,
                 )
             }
         },
@@ -277,168 +281,140 @@ fun ContactsScreen(
             )
         }
     }
-    DeleteConfirmationDialog(
-        showDialog = showDeleteDialog,
-        selectedCount = selectedCount,
-        onDismiss = { showDeleteDialog = false },
-        onConfirm = {
-            showDeleteDialog = false
-            viewModel.deleteContacts(selectedContactKeys.toList())
-            selectedContactKeys.clear()
-        },
-    )
+
+    if (showDeleteDialog) {
+        DeleteConfirmationDialog(
+            selectedCount = selectedCount,
+            onDismiss = { showDeleteDialog = false },
+            onConfirm = {
+                showDeleteDialog = false
+                viewModel.deleteContacts(selectedContactKeys.toList())
+                selectedContactKeys.clear()
+            },
+        )
+    }
 
     // Get contact settings for the dialog
     val contactSettings by viewModel.getContactSettings().collectAsStateWithLifecycle(initialValue = emptyMap())
 
-    MuteNotificationsDialog(
-        showDialog = showMuteDialog,
-        selectedContactKeys = selectedContactKeys.toList(),
-        contactSettings = contactSettings,
-        onDismiss = { showMuteDialog = false },
-        onConfirm = { muteUntil ->
-            showMuteDialog = false
-            viewModel.setMuteUntil(selectedContactKeys.toList(), muteUntil)
-            selectedContactKeys.clear()
-        },
-    )
+    if (showMuteDialog) {
+        MuteNotificationsDialog(
+            selectedContactKeys = selectedContactKeys.toList(),
+            contactSettings = contactSettings,
+            onDismiss = { showMuteDialog = false },
+            onConfirm = { muteUntil ->
+                showMuteDialog = false
+                viewModel.setMuteUntil(selectedContactKeys.toList(), muteUntil)
+                selectedContactKeys.clear()
+            },
+        )
+    }
 }
 
 @Suppress("LongMethod")
 @Composable
 private fun MuteNotificationsDialog(
-    showDialog: Boolean,
     selectedContactKeys: List<String>,
     contactSettings: Map<String, ContactSettings>,
     onDismiss: () -> Unit,
     onConfirm: (Long) -> Unit, // Lambda to handle the confirmed mute duration
 ) {
-    if (showDialog) {
-        // Options for mute duration
-        val muteOptions = remember {
-            listOf(
-                Res.string.unmute to 0L,
-                Res.string.mute_8_hours to TimeUnit.HOURS.toMillis(8),
-                Res.string.mute_1_week to TimeUnit.DAYS.toMillis(7),
-                Res.string.mute_always to Long.MAX_VALUE,
-            )
-        }
-
-        // State to hold the selected mute duration index
-        var selectedOptionIndex by remember { mutableStateOf(2) } // Default to "Always"
-
-        AlertDialog(
-            onDismissRequest = onDismiss, // Dismiss the dialog when clicked outside
-            title = { Text(text = stringResource(Res.string.mute_notifications)) },
-            text = {
-                Column {
-                    // Show current mute status
-                    selectedContactKeys.forEach { contactKey ->
-                        contactSettings[contactKey]?.let { settings ->
-                            val now = System.currentTimeMillis()
-                            val statusText =
-                                when {
-                                    settings.muteUntil > 0 && settings.muteUntil != Long.MAX_VALUE -> {
-                                        val remaining = settings.muteUntil - now
-                                        if (remaining > 0) {
-                                            val (days, hours) = formatMuteRemainingTime(remaining)
-                                            if (days >= 1) {
-                                                stringResource(Res.string.mute_status_muted_for_days, days, hours)
-                                            } else {
-                                                stringResource(Res.string.mute_status_muted_for_hours, hours)
-                                            }
-                                        } else {
-                                            stringResource(Res.string.mute_status_unmuted)
-                                        }
-                                    }
-                                    settings.muteUntil == Long.MAX_VALUE ->
-                                        stringResource(Res.string.mute_status_always)
-                                    else -> stringResource(Res.string.mute_status_unmuted)
-                                }
-                            Text(
-                                text = stringResource(Res.string.currently) + " " + statusText,
-                                modifier = Modifier.padding(bottom = 8.dp),
-                            )
-                        }
-                    }
-
-                    muteOptions.forEachIndexed { index, (stringRes, _) ->
-                        val isSelected = index == selectedOptionIndex
-                        val text = stringResource(stringRes)
-                        Row(
-                            modifier =
-                            Modifier.fillMaxWidth()
-                                .selectable(selected = isSelected, onClick = { selectedOptionIndex = index })
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            RadioButton(selected = isSelected, onClick = { selectedOptionIndex = index })
-                            Text(text = text, modifier = Modifier.padding(start = 8.dp))
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val selectedMuteDuration = muteOptions[selectedOptionIndex].second
-                        onConfirm(selectedMuteDuration)
-                        onDismiss() // Dismiss the dialog after confirming
-                    },
-                ) {
-                    Text(stringResource(Res.string.okay))
-                }
-            },
-            dismissButton = {
-                Button(
-                    onClick = onDismiss, // Dismiss the dialog on cancel
-                ) {
-                    Text(stringResource(Res.string.cancel))
-                }
-            },
+    // Options for mute duration
+    val muteOptions = remember {
+        listOf(
+            Res.string.unmute to 0L,
+            Res.string.mute_8_hours to TimeUnit.HOURS.toMillis(8),
+            Res.string.mute_1_week to TimeUnit.DAYS.toMillis(7),
+            Res.string.mute_always to Long.MAX_VALUE,
         )
     }
+
+    // State to hold the selected mute duration index
+    var selectedOptionIndex by remember { mutableStateOf(2) } // Default to "Always"
+
+    MeshtasticDialog(
+        onDismiss = onDismiss, // Dismiss the dialog when clicked outside
+        titleRes = Res.string.mute_notifications,
+        confirmTextRes = Res.string.okay,
+        onConfirm = {
+            val selectedMuteDuration = muteOptions[selectedOptionIndex].second
+            onConfirm(selectedMuteDuration)
+            onDismiss() // Dismiss the dialog after confirming
+        },
+        dismissTextRes = Res.string.cancel,
+        text = {
+            Column {
+                // Show current mute status
+                selectedContactKeys.forEach { contactKey ->
+                    contactSettings[contactKey]?.let { settings ->
+                        val now = System.currentTimeMillis()
+                        val statusText =
+                            when {
+                                settings.muteUntil > 0 && settings.muteUntil != Long.MAX_VALUE -> {
+                                    val remaining = settings.muteUntil - now
+                                    if (remaining > 0) {
+                                        val (days, hours) = formatMuteRemainingTime(remaining)
+                                        if (days >= 1) {
+                                            stringResource(Res.string.mute_status_muted_for_days, days, hours)
+                                        } else {
+                                            stringResource(Res.string.mute_status_muted_for_hours, hours)
+                                        }
+                                    } else {
+                                        stringResource(Res.string.mute_status_unmuted)
+                                    }
+                                }
+                                settings.muteUntil == Long.MAX_VALUE -> stringResource(Res.string.mute_status_always)
+                                else -> stringResource(Res.string.mute_status_unmuted)
+                            }
+                        Text(
+                            text = stringResource(Res.string.currently) + " " + statusText,
+                            modifier = Modifier.padding(bottom = 8.dp),
+                        )
+                    }
+                }
+
+                muteOptions.forEachIndexed { index, (stringRes, _) ->
+                    val isSelected = index == selectedOptionIndex
+                    val text = stringResource(stringRes)
+                    Row(
+                        modifier =
+                        Modifier.fillMaxWidth()
+                            .selectable(selected = isSelected, onClick = { selectedOptionIndex = index })
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        RadioButton(selected = isSelected, onClick = { selectedOptionIndex = index })
+                        Text(text = text, modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
+            }
+        },
+    )
 }
 
 @Composable
 private fun DeleteConfirmationDialog(
-    showDialog: Boolean,
     selectedCount: Int, // Number of items to be deleted
     onDismiss: () -> Unit,
     onConfirm: () -> Unit, // Lambda to handle the delete action
 ) {
-    if (showDialog) {
-        val deleteMessage =
-            pluralStringResource(
-                Res.plurals.delete_messages,
-                selectedCount,
-                selectedCount, // Pass the count as a format argument
-            )
-
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = {
-                // Optional: You could add a title here if needed, e.g., "Confirm Deletion"
-            },
-            text = { Text(text = deleteMessage) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        onConfirm()
-                        onDismiss() // Dismiss the dialog after confirming
-                    },
-                ) {
-                    Text(stringResource(Res.string.delete))
-                }
-            },
-            dismissButton = { Button(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
-            properties =
-            DialogProperties(
-                dismissOnClickOutside = true, // Allow dismissing by clicking outside
-                dismissOnBackPress = true, // Allow dismissing with the back button
-            ),
+    val deleteMessage =
+        pluralStringResource(
+            Res.plurals.delete_messages,
+            selectedCount,
+            selectedCount, // Pass the count as a format argument
         )
-    }
+
+    MeshtasticTextDialog(
+        titleRes = Res.string.are_you_sure,
+        message = deleteMessage,
+        confirmTextRes = Res.string.delete,
+        onConfirm = {
+            onConfirm()
+            onDismiss() // Dismiss the dialog after confirming
+        },
+        onDismiss = onDismiss,
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

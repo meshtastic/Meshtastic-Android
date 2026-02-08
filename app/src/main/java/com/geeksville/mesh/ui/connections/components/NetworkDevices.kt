@@ -26,7 +26,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Wifi
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -65,6 +64,7 @@ import org.meshtastic.core.strings.forget_connection
 import org.meshtastic.core.strings.ip_port
 import org.meshtastic.core.strings.no_network_devices
 import org.meshtastic.core.strings.recent_network_devices
+import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -237,21 +237,15 @@ private fun ConfirmDeleteDialog(
     onHideDialog: () -> Unit,
     onConfirm: (deviceFullAddress: String) -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onHideDialog,
-        title = { Text(stringResource(Res.string.forget_connection)) },
-        text = { Text(stringResource(Res.string.confirm_forget_connection)) },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onConfirm(fullAddressToDelete)
-                    onHideDialog()
-                },
-            ) {
-                Text(stringResource(Res.string.forget_connection))
-            }
+    MeshtasticResourceDialog(
+        onDismiss = onHideDialog,
+        titleRes = Res.string.forget_connection,
+        messageRes = Res.string.confirm_forget_connection,
+        confirmTextRes = Res.string.forget_connection,
+        onConfirm = {
+            onConfirm(fullAddressToDelete)
+            onHideDialog()
         },
-        dismissButton = { Button(onClick = { onHideDialog() }) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
