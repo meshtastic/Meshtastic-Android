@@ -17,9 +17,12 @@
 package org.meshtastic.core.model.util
 
 import android.net.Uri
+import co.touchlab.kermit.Logger
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.SharedContact
 
 /**
- * Dispatches an incoming Meshtastic URI to the appropriate handler.
+ * Dispatches an incoming Meshtastic URI to the appropriate handler based on its path.
  *
  * @param uri The URI to handle.
  * @param onChannel Callback if the URI is a Channel Set.
@@ -43,5 +46,46 @@ fun handleMeshtasticUri(uri: Uri, onChannel: (Uri) -> Unit = {}, onContact: (Uri
             true
         }
         else -> false
+    }
+}
+
+/**
+ * Tries to parse a Meshtastic URI as a Channel Set or Shared Contact, including fallback logic.
+ *
+ * @param onChannel Callback when successfully parsed as a [ChannelSet].
+ * @param onContact Callback when successfully parsed as a [SharedContact].
+ * @param onInvalid Callback when parsing fails or the URI is not a Meshtastic URL.
+ */
+fun Uri.dispatchMeshtasticUri(
+    onChannel: (ChannelSet) -> Unit,
+    onContact: (SharedContact) -> Unit,
+    onInvalid: () -> Unit,
+) {
+    val handled =
+        handleMeshtasticUri(
+            uri = this,
+            onChannel = { u ->
+                runCatching { u.toChannelSet() }
+                    .onSuccess(onChannel)
+                    .onFailure { ex ->
+                        Logger.e(ex) { "Channel parsing error" }
+                        onInvalid()
+                    }
+            },
+            onContact = { u ->
+                runCatching { u.toSharedContact() }
+                    .onSuccess(onContact)
+                    .onFailure { ex ->
+                        Logger.e(ex) { "Contact parsing error" }
+                        onInvalid()
+                    }
+            },
+        )
+
+    if (!handled) {
+        // Fallback: try as contact first, then as channel
+        runCatching { toSharedContact() }
+            .onSuccess(onContact)
+            .onFailure { runCatching { toChannelSet() }.onSuccess(onChannel).onFailure { onInvalid() } }
     }
 }

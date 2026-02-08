@@ -80,8 +80,8 @@ import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.remove_favorite
 import org.meshtastic.core.strings.remove_ignored
 import org.meshtastic.core.strings.unmute
-import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
@@ -149,18 +149,18 @@ fun NodeListScreen(
         floatingActionButton = {
             val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
             val sharedContact: SharedContact? by viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
-            AddContactFAB(
+            MeshtasticImportFAB(
                 sharedContact = sharedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
                     visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                onResult = { uri ->
+                onImport = { uri ->
                     viewModel.handleScannedUri(uri) { scope.launch { context.showToast(Res.string.channel_invalid) } }
                 },
                 onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
-                isSharedContactContext = true
+                isContactContext = true,
             )
         },
     ) { contentPadding ->

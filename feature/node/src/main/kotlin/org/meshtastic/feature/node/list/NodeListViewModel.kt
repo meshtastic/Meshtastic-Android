@@ -35,10 +35,8 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
-import org.meshtastic.core.model.util.handleMeshtasticUri
-import org.meshtastic.core.model.util.toChannelSet
+import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.ui.component.toSharedContact
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.ChannelSet
@@ -167,31 +165,11 @@ constructor(
 
     /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
     fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
-        val onContact = { u: Uri, onFail: () -> Unit ->
-            runCatching { _sharedContactRequested.value = u.toSharedContact() }
-                .onFailure { ex ->
-                    Logger.e(ex) { "Shared contact error" }
-                    onFail()
-                }
-        }
-        val onChannel = { u: Uri, onFail: () -> Unit ->
-            runCatching { _requestChannelSet.value = u.toChannelSet() }
-                .onFailure { ex ->
-                    Logger.e(ex) { "Channel url error" }
-                    onFail()
-                }
-        }
-
-        val handled =
-            handleMeshtasticUri(
-                uri = uri,
-                onContact = { onContact(it, onInvalid) },
-                onChannel = { onChannel(it, onInvalid) },
-            )
-        if (!handled) {
-            // Fallback: try as contact first, then as channel, reusing helpers for consistent logging
-            onContact(uri) { onChannel(uri) { onInvalid() } }
-        }
+        uri.dispatchMeshtasticUri(
+            onContact = { _sharedContactRequested.value = it },
+            onChannel = { _requestChannelSet.value = it },
+            onInvalid = onInvalid,
+        )
     }
 
     fun clearRequestChannelSet() {

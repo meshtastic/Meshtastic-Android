@@ -47,11 +47,10 @@ import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import org.meshtastic.core.model.util.handleMeshtasticUri
+import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.channel_invalid
-import org.meshtastic.core.strings.contact_invalid
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.showToast
@@ -157,20 +156,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
-        handleMeshtasticUri(
-            uri = uri,
-            onChannel = {
-                model.requestChannelUrl(
-                    url = it,
-                    onFailure = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
-                )
-            },
-            onContact = {
-                model.setSharedContactRequested(
-                    url = it,
-                    onFailure = { lifecycleScope.launch { showToast(Res.string.contact_invalid) } },
-                )
-            },
+        uri.dispatchMeshtasticUri(
+            onChannel = { model.setRequestChannelSet(it) },
+            onContact = { model.setSharedContactRequested(it) },
+            onInvalid = { lifecycleScope.launch { showToast(Res.string.channel_invalid) } },
         )
     }
 

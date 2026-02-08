@@ -57,23 +57,31 @@ import org.meshtastic.core.strings.url
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.util.openNfcSettings
+import org.meshtastic.proto.SharedContact
 
 /**
- * Unified Floating Action Button for importing Meshtastic data (Contacts, Channels, etc.) via NFC, QR, or URL.
+ * Unified Floating Action Button for importing Meshtastic data (Contacts, Channels, etc.) via NFC, QR, or URL. Handles
+ * the [SharedContactImportDialog] if a contact is pending import.
  *
- * @param modifier Modifier for this composable.
  * @param onImport Callback when a valid Meshtastic URI is scanned or input.
+ * @param modifier Modifier for this composable.
+ * @param sharedContact Optional pending [SharedContact] to display an import dialog for.
+ * @param onDismissSharedContact Callback to clear the pending shared contact.
  * @param onShareChannels Optional callback to trigger sharing channels.
- * @param isSharedContactContext Hint to customize UI strings for contact importing context.
+ * @param isContactContext Hint to customize UI strings for contact importing context.
  */
 @Suppress("LongMethod")
 @Composable
-fun ImportFab(
+fun MeshtasticImportFAB(
     onImport: (Uri) -> Unit,
     modifier: Modifier = Modifier,
+    sharedContact: SharedContact? = null,
+    onDismissSharedContact: () -> Unit = {},
     onShareChannels: (() -> Unit)? = null,
-    isSharedContactContext: Boolean = true,
+    isContactContext: Boolean = true,
 ) {
+    sharedContact?.let { SharedContactImportDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
+
     var expanded by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }
     var isNfcScanning by remember { mutableStateOf(false) }
@@ -123,7 +131,7 @@ fun ImportFab(
         InputUrlDialog(
             title =
             stringResource(
-                if (isSharedContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+                if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
             ),
             onDismiss = { showUrlDialog = false },
             onConfirm = { contents ->
@@ -138,7 +146,7 @@ fun ImportFab(
             MenuFABItem(
                 label =
                 stringResource(
-                    if (isSharedContactContext) Res.string.scan_shared_contact_nfc else Res.string.scan_channels_nfc,
+                    if (isContactContext) Res.string.scan_shared_contact_nfc else Res.string.scan_channels_nfc,
                 ),
                 icon = Icons.Rounded.Nfc,
                 onClick = { isNfcScanning = true },
@@ -146,7 +154,7 @@ fun ImportFab(
             MenuFABItem(
                 label =
                 stringResource(
-                    if (isSharedContactContext) Res.string.scan_shared_contact_qr else Res.string.scan_channels_qr,
+                    if (isContactContext) Res.string.scan_shared_contact_qr else Res.string.scan_channels_qr,
                 ),
                 icon = Icons.TwoTone.QrCodeScanner,
                 onClick = { barcodeScanner.startScan() },
@@ -154,7 +162,7 @@ fun ImportFab(
             MenuFABItem(
                 label =
                 stringResource(
-                    if (isSharedContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+                    if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
                 ),
                 icon = Icons.Rounded.Link,
                 onClick = { showUrlDialog = true },

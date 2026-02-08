@@ -91,8 +91,8 @@ import org.meshtastic.core.strings.mute_status_unmuted
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.select_all
 import org.meshtastic.core.strings.unmute
-import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Close
@@ -236,16 +236,16 @@ fun ContactsScreen(
         },
         floatingActionButton = {
             if (connectionState.isConnected()) {
-                AddContactFAB(
+                MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
-                    onResult = { uri ->
+                    onImport = { uri ->
                         uIViewModel.handleScannedUri(uri) {
                             scope.launch { context.showToast(Res.string.channel_invalid) }
                         }
                     },
                     onShareChannels = onNavigateToShare,
                     onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
-                    isSharedContactContext = false,
+                    isContactContext = true,
                 )
             }
         },
