@@ -39,7 +39,13 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
  */
 @Throws(MalformedURLException::class)
 fun Uri.toChannelSet(): ChannelSet {
-    if (fragment.isNullOrBlank() || !host.equals(MESHTASTIC_HOST, true) || !path.equals(CHANNEL_SHARE_PATH, true)) {
+    val h = host ?: ""
+    val p = path ?: ""
+    val isCorrectHost =
+        h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
+    val isCorrectPath = p.equals(CHANNEL_SHARE_PATH, ignoreCase = true) || p.equals("/e", ignoreCase = true)
+
+    if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
 

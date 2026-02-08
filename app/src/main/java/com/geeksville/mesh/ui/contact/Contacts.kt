@@ -101,6 +101,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
 import org.meshtastic.core.ui.icon.VolumeUpTwoTone
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ChannelSet
 import java.util.concurrent.TimeUnit
@@ -178,6 +179,8 @@ fun ContactsScreen(
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
+    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { uIViewModel.clearRequestChannelUrl() }) }
 
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->
@@ -242,6 +245,7 @@ fun ContactsScreen(
                     },
                     onShareChannels = onNavigateToShare,
                     onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
+                    isContactContext = false,
                 )
             }
         },

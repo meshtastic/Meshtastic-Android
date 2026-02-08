@@ -164,19 +164,31 @@ constructor(
         _sharedContactRequested.value = sharedContact
     }
 
+    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
     fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
-        if (uri.path?.contains("/v/") == true) {
-            runCatching { _sharedContactRequested.value = uri.toSharedContact() }
-                .onFailure { ex ->
-                    Logger.e(ex) { "Shared contact error" }
-                    onInvalid()
-                }
-        } else {
-            runCatching { _requestChannelSet.value = uri.toChannelSet() }
-                .onFailure { ex ->
-                    Logger.e(ex) { "Channel url error" }
-                    onInvalid()
-                }
+        val p = uri.path ?: ""
+        when {
+            p.contains("/v", ignoreCase = true) -> {
+                runCatching { _sharedContactRequested.value = uri.toSharedContact() }
+                    .onFailure { ex ->
+                        Logger.e(ex) { "Shared contact error" }
+                        onInvalid()
+                    }
+            }
+            p.contains("/e", ignoreCase = true) -> {
+                runCatching { _requestChannelSet.value = uri.toChannelSet() }
+                    .onFailure { ex ->
+                        Logger.e(ex) { "Channel url error" }
+                        onInvalid()
+                    }
+            }
+            else -> {
+                // Try both as fallback
+                runCatching { _sharedContactRequested.value = uri.toSharedContact() }
+                    .onFailure {
+                        runCatching { _requestChannelSet.value = uri.toChannelSet() }.onFailure { onInvalid() }
+                    }
+            }
         }
     }
 

@@ -57,10 +57,16 @@ fun AddContactFAB(
     onResult: (Uri) -> Unit,
     onShareChannels: (() -> Unit)? = null,
     onDismissSharedContact: () -> Unit,
+    isContactContext: Boolean = true,
 ) {
     sharedContact?.let { SharedContactImportDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
 
-    ImportFab(onImport = onResult, modifier = modifier, onShareChannels = onShareChannels, isContactContext = true)
+    ImportFab(
+        onImport = onResult,
+        modifier = modifier,
+        onShareChannels = onShareChannels,
+        isContactContext = isContactContext,
+    )
 }
 
 /**
@@ -122,7 +128,13 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
 @Suppress("MagicNumber")
 @Throws(MalformedURLException::class)
 fun Uri.toSharedContact(): SharedContact {
-    if (fragment.isNullOrBlank() || !host.equals(MESHTASTIC_HOST, true) || !path.equals(CONTACT_SHARE_PATH, true)) {
+    val h = host ?: ""
+    val p = path ?: ""
+    val isCorrectHost =
+        h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
+    val isCorrectPath = p.equals(CONTACT_SHARE_PATH, ignoreCase = true) || p.equals("/v", ignoreCase = true)
+
+    if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
     return SharedContact.ADAPTER.decode(Base64.decode(fragment!!, BASE64FLAGS).toByteString())
