@@ -73,7 +73,9 @@ object UnitConversions {
 
     @Suppress("MagicNumber")
     fun numberToHuman(number: Float, units: Map<String, String> = emptyMap<String, String>()): String {
-        var exponent = floor(log10(number)).toInt()
+        if (number <= 0) return "N/A"
+
+        var exponent = floor(log10(number / 1000.0)).toInt()
         if (exponent.mod(3) != 0 && exponent in -11..11) exponent = (exponent / 3) * 3
 
         var exponentsMap = BASE_UNITS.entries.associate { (k, v) -> v to k }.toMutableMap()
