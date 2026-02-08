@@ -74,6 +74,7 @@ import org.meshtastic.proto.SharedContact
  * @param onShareChannels Optional callback to trigger sharing channels.
  * @param isContactContext Hint to customize UI strings for contact importing context.
  * @param testTag Optional test tag for UI testing.
+ * @param importDialog Composable to display the import dialog. Defaults to [SharedContactImportDialog].
  */
 @Suppress("LongMethod")
 @Composable
@@ -85,8 +86,11 @@ fun MeshtasticImportFAB(
     onShareChannels: (() -> Unit)? = null,
     isContactContext: Boolean = true,
     testTag: String? = null,
+    importDialog: @Composable (SharedContact, () -> Unit) -> Unit = { contact, dismiss ->
+        SharedContactImportDialog(sharedContact = contact, onDismiss = dismiss)
+    },
 ) {
-    sharedContact?.let { SharedContactImportDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
+    sharedContact?.let { importDialog(it, onDismissSharedContact) }
 
     var expanded by remember { mutableStateOf(false) }
     var showUrlDialog by remember { mutableStateOf(false) }

@@ -16,9 +16,11 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.material3.Text
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
@@ -70,10 +72,15 @@ class ImportFabUiTest {
     fun importFab_showsSharedContactDialog_whenProvided() {
         val contact = SharedContact(user = User(long_name = "Suzume Goddess"), node_num = 1)
         composeTestRule.setContent {
-            MeshtasticImportFAB(onImport = {}, sharedContact = contact, onDismissSharedContact = {})
+            MeshtasticImportFAB(
+                onImport = {},
+                sharedContact = contact,
+                onDismissSharedContact = {},
+                importDialog = { shared, _ -> Text(text = "Importing ${shared.user?.long_name}") },
+            )
         }
 
         // Check if goddess is here
-        // composeTestRule.onNodeWithText("Suzume Goddess").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Importing Suzume Goddess").assertIsDisplayed()
     }
 }

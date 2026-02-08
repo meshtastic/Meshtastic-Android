@@ -39,20 +39,13 @@ fun AlertPreviewRenderer(data: AlertManager.AlertData) {
         messageRes = data.messageRes,
         html = data.html,
         icon = data.icon,
-        text = {
-            val composableMsg = data.composableMessage
-            if (composableMsg != null) {
-                composableMsg.Content()
-            } else {
-                // message is handled internally by MeshtasticDialog
-            }
-        },
+        text = data.composableMessage?.let { msg -> { msg.Content() } },
         confirmText = data.confirmText,
         confirmTextRes = data.confirmTextRes,
-        onConfirm = {},
+        onConfirm = data.onConfirm,
         dismissText = data.dismissText,
         dismissTextRes = data.dismissTextRes,
-        onDismiss = {},
+        onDismiss = data.onDismiss,
         choices = data.choices,
         dismissable = data.dismissable,
     )
