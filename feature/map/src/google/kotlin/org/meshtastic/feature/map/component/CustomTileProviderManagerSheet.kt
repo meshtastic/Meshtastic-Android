@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +27,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -37,7 +35,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,6 +64,7 @@ import org.meshtastic.core.strings.url_cannot_be_empty
 import org.meshtastic.core.strings.url_must_contain_placeholders
 import org.meshtastic.core.strings.url_template
 import org.meshtastic.core.strings.url_template_hint
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.MapViewModel
 
@@ -191,16 +189,13 @@ private fun AddEditCustomTileProviderDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                if (config == null) {
-                    stringResource(Res.string.add_custom_tile_source)
-                } else {
-                    stringResource(Res.string.edit_custom_tile_source)
-                },
-            )
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title =
+        if (config == null) {
+            stringResource(Res.string.add_custom_tile_source)
+        } else {
+            stringResource(Res.string.edit_custom_tile_source)
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -235,8 +230,9 @@ private fun AddEditCustomTileProviderDialog(
                 )
             }
         },
-        confirmButton = { Button(onClick = { validateAndSave() }) { Text(stringResource(Res.string.save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        onConfirm = { validateAndSave() },
+        confirmTextRes = Res.string.save,
+        dismissTextRes = Res.string.cancel,
     )
 }
 

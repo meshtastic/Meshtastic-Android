@@ -29,12 +29,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ContentCopy
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,7 +46,6 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
@@ -84,11 +81,11 @@ fun QrDialog(title: String, uri: Uri, qrCode: Bitmap?, onDismiss: () -> Unit) {
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier.padding(16.dp),
-        title = { Text(text = title) },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = title,
+        confirmText = stringResource(Res.string.okay),
+        onConfirm = onDismiss,
         text = {
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (qrCode != null) {
@@ -126,6 +123,5 @@ fun QrDialog(title: String, uri: Uri, qrCode: Bitmap?, onDismiss: () -> Unit) {
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(Res.string.okay)) } },
     )
 }

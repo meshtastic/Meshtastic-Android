@@ -85,7 +85,6 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_clear
-import org.meshtastic.core.strings.debug_clear_logs_confirm
 import org.meshtastic.core.strings.debug_decoded_payload
 import org.meshtastic.core.strings.debug_default_search
 import org.meshtastic.core.strings.debug_export_failed
@@ -103,7 +102,6 @@ import org.meshtastic.core.strings.log_retention_never
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
@@ -178,7 +176,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                     IconButton(onClick = { showSettings = !showSettings }) {
                         Icon(imageVector = Icons.Rounded.Settings, contentDescription = null)
                     }
-                    DebugMenuActions(deleteLogs = { viewModel.deleteAllLogs() })
+                    DebugMenuActions(deleteLogs = { viewModel.requestDeleteAllLogs() })
                 },
                 onClickChip = {},
             )
@@ -413,21 +411,8 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
 
 @Composable
 fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
-    var showDeleteLogsDialog by remember { mutableStateOf(false) }
-
-    IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
+    IconButton(onClick = deleteLogs, modifier = modifier.padding(4.dp)) {
         Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.debug_clear))
-    }
-    if (showDeleteLogsDialog) {
-        SimpleAlertDialog(
-            title = Res.string.debug_clear,
-            text = Res.string.debug_clear_logs_confirm,
-            onConfirm = {
-                showDeleteLogsDialog = false
-                deleteLogs()
-            },
-            onDismiss = { showDeleteLogsDialog = false },
-        )
     }
 }
 
@@ -487,7 +472,16 @@ private fun DecodedPayloadBlock(
     modifier: Modifier = Modifier,
 ) {
     val commonTextStyle =
-        TextStyle(fontSize = if (isSelected) 10.sp else 8.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+        TextStyle(
+            fontSize =
+            if (isSelected) {
+                10.sp
+            } else {
+                8.sp
+            },
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.primary,
+        )
 
     Column(modifier = modifier) {
         Text(

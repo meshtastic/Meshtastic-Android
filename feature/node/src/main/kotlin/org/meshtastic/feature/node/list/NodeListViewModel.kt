@@ -38,6 +38,7 @@ import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
@@ -52,7 +53,7 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    val nodeActions: NodeActions,
+    val nodeManagementActions: NodeManagementActions,
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
 
@@ -188,13 +189,13 @@ constructor(
         }
     }
 
-    fun favoriteNode(node: Node) = viewModelScope.launch { nodeActions.favoriteNode(node) }
+    fun favoriteNode(node: Node) = nodeManagementActions.requestFavoriteNode(viewModelScope, node)
 
-    fun ignoreNode(node: Node) = viewModelScope.launch { nodeActions.ignoreNode(node) }
+    fun ignoreNode(node: Node) = nodeManagementActions.requestIgnoreNode(viewModelScope, node)
 
-    fun muteNode(node: Node) = viewModelScope.launch { nodeActions.muteNode(node) }
+    fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
-    fun removeNode(nodeNum: Int) = viewModelScope.launch { nodeActions.removeNode(nodeNum) }
+    fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
 
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"

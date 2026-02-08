@@ -25,10 +25,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.Nfc
 import androidx.compose.material.icons.twotone.QrCodeScanner
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -115,23 +113,16 @@ fun MeshtasticImportFAB(
     }
 
     if (showNfcDisabledDialog) {
-        AlertDialog(
-            onDismissRequest = { showNfcDisabledDialog = false },
-            title = { Text(stringResource(Res.string.scan_nfc)) },
-            text = { Text(stringResource(Res.string.nfc_disabled)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        context.openNfcSettings()
-                        showNfcDisabledDialog = false
-                    },
-                ) {
-                    Text(stringResource(Res.string.open_settings))
-                }
+        MeshtasticDialog(
+            onDismiss = { showNfcDisabledDialog = false },
+            titleRes = Res.string.scan_nfc,
+            messageRes = Res.string.nfc_disabled,
+            onConfirm = {
+                context.openNfcSettings()
+                showNfcDisabledDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showNfcDisabledDialog = false }) { Text(stringResource(Res.string.cancel)) }
-            },
+            confirmTextRes = Res.string.open_settings,
+            dismissTextRes = Res.string.cancel,
         )
     }
 
@@ -158,6 +149,7 @@ fun MeshtasticImportFAB(
                 ),
                 icon = Icons.Rounded.Nfc,
                 onClick = { isNfcScanning = true },
+                testTag = "nfc_import",
             ),
             MenuFABItem(
                 label =
@@ -166,6 +158,7 @@ fun MeshtasticImportFAB(
                 ),
                 icon = Icons.TwoTone.QrCodeScanner,
                 onClick = { barcodeScanner.startScan() },
+                testTag = "qr_import",
             ),
             MenuFABItem(
                 label =
@@ -174,6 +167,7 @@ fun MeshtasticImportFAB(
                 ),
                 icon = Icons.Rounded.Link,
                 onClick = { showUrlDialog = true },
+                testTag = "url_import",
             ),
         )
 
@@ -183,6 +177,7 @@ fun MeshtasticImportFAB(
                 label = stringResource(Res.string.share_channels_qr),
                 icon = MeshtasticIcons.QrCode2,
                 onClick = it,
+                testTag = "share_channels",
             ),
         )
     }
@@ -199,21 +194,20 @@ fun MeshtasticImportFAB(
 
 @Composable
 private fun NfcScanningDialog(onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.scan_nfc)) },
-        text = { Text(stringResource(Res.string.scan_nfc_text)) },
-        confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        titleRes = Res.string.scan_nfc,
+        messageRes = Res.string.scan_nfc_text,
+        dismissTextRes = Res.string.cancel,
     )
 }
 
 @Composable
 private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var urlText by remember { mutableStateOf("") }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = title,
         text = {
             OutlinedTextField(
                 value = urlText,
@@ -223,8 +217,9 @@ private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (Str
                 maxLines = 4,
             )
         },
-        confirmButton = { TextButton(onClick = { onConfirm(urlText) }) { Text(stringResource(Res.string.okay)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+        onConfirm = { onConfirm(urlText) },
+        confirmTextRes = Res.string.okay,
+        dismissTextRes = Res.string.cancel,
     )
 }
 

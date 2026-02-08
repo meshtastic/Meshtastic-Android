@@ -61,7 +61,6 @@ import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.SpeakerNotesOff
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -74,7 +73,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -110,7 +108,6 @@ import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.alert_bell_text
-import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.cancel_reply
 import org.meshtastic.core.strings.clear_selection
 import org.meshtastic.core.strings.copy
@@ -135,6 +132,7 @@ import org.meshtastic.core.strings.send
 import org.meshtastic.core.strings.type_a_message
 import org.meshtastic.core.strings.unknown
 import org.meshtastic.core.strings.unknown_channel
+import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
@@ -241,11 +239,6 @@ fun MessageScreen(
 
     val listState = rememberLazyListState()
 
-    val lastReadMessageTimestamp by
-        remember(contactKey, contactSettings) {
-            derivedStateOf { contactSettings[contactKey]?.lastReadMessageTimestamp }
-        }
-
     // Track unread messages using lightweight metadata queries
     val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
     val firstUnreadMessageUuid by
@@ -307,7 +300,11 @@ fun MessageScreen(
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
                     is MessageScreenEvent.CopyToClipboard -> {
-                        clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text))
+                        coroutineScope.launch {
+                            clipboardManager.setClipEntry(
+                                androidx.compose.ui.platform.ClipEntry(ClipData.newPlainText(event.text, event.text)),
+                            )
+                        }
                         selectedMessageIds.value = emptySet()
                     }
                 }
@@ -644,13 +641,12 @@ private fun String.limitBytes(maxBytes: Int): String {
 private fun DeleteMessageDialog(count: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val deleteMessagesString = pluralStringResource(Res.plurals.delete_messages, count, count)
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(16.dp),
-        title = { Text(stringResource(Res.string.delete_messages_title)) },
-        text = { Text(text = deleteMessagesString) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.delete)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+    MeshtasticTextDialog(
+        titleRes = Res.string.delete_messages_title,
+        message = deleteMessagesString,
+        confirmTextRes = Res.string.delete,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
     )
 }
 

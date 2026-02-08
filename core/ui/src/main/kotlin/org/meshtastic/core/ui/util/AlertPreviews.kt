@@ -20,53 +20,42 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.okay
-import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.theme.AppTheme
 
 /** A helper component that renders an [AlertManager.AlertData] using the same logic as MainScreen. */
 @Composable
-@Suppress("CyclomaticComplexMethod")
 fun AlertPreviewRenderer(data: AlertManager.AlertData) {
-    val title = data.title ?: data.titleRes?.let { stringResource(it) } ?: ""
-    val message = data.message ?: data.messageRes?.let { stringResource(it) }
-    val confirmText = data.confirmText ?: data.confirmTextRes?.let { stringResource(it) }
-    val dismissText = data.dismissText ?: data.dismissTextRes?.let { stringResource(it) }
-
-    if (data.choices.isNotEmpty()) {
-        MultipleChoiceAlertDialog(title = title, message = message, choices = data.choices, onDismissRequest = {})
-    } else {
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text(text = title) },
-            text = {
-                val composableMsg = data.composableMessage
-                val htmlMsg = data.html
-                if (composableMsg != null) {
-                    composableMsg.Content()
-                } else if (htmlMsg != null) {
-                    Text(text = htmlMsg)
-                } else {
-                    Text(text = message.orEmpty())
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {}) { Text(text = confirmText ?: stringResource(Res.string.okay)) }
-            },
-            dismissButton = {
-                TextButton(onClick = {}) { Text(text = dismissText ?: stringResource(Res.string.cancel)) }
-            },
-        )
-    }
+    MeshtasticDialog(
+        title = data.title,
+        titleRes = data.titleRes,
+        message = data.message,
+        messageRes = data.messageRes,
+        html = data.html,
+        icon = data.icon,
+        text = {
+            val composableMsg = data.composableMessage
+            if (composableMsg != null) {
+                composableMsg.Content()
+            } else {
+                // message is handled internally by MeshtasticDialog
+            }
+        },
+        confirmText = data.confirmText,
+        confirmTextRes = data.confirmTextRes,
+        onConfirm = {},
+        dismissText = data.dismissText,
+        dismissTextRes = data.dismissTextRes,
+        onDismiss = {},
+        choices = data.choices,
+        dismissable = data.dismissable,
+    )
 }
 
 @Preview(showBackground = true, name = "Simple Text Alert")
@@ -78,6 +67,22 @@ fun PreviewTextAlert() {
                 AlertManager.AlertData(
                     title = "Firmware Update",
                     message = "A new version is available. Would you like to update now?",
+                ),
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Icon and Text Alert")
+@Composable
+fun PreviewIconAlert() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize()) {
+            AlertPreviewRenderer(
+                AlertManager.AlertData(
+                    title = "Warning",
+                    message = "This action cannot be undone.",
+                    icon = Icons.Rounded.Warning,
                 ),
             )
         }

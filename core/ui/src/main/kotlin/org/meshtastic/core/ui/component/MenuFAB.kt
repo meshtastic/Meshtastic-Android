@@ -60,6 +60,7 @@ fun MenuFAB(
     ) {
         items.forEach { item ->
             FloatingActionButtonMenuItem(
+                modifier = if (item.testTag != null) Modifier.testTag(item.testTag) else Modifier,
                 onClick = {
                     item.onClick()
                     onExpandedChange(false)
@@ -71,4 +72,4 @@ fun MenuFAB(
     }
 }
 
-data class MenuFABItem(val label: String, val icon: ImageVector, val onClick: () -> Unit)
+data class MenuFABItem(val label: String, val icon: ImageVector, val onClick: () -> Unit, val testTag: String? = null)

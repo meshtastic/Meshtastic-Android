@@ -87,7 +87,6 @@ import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.showToast
-import org.meshtastic.feature.node.component.NodeActionDialogs
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.proto.SharedContact
@@ -196,29 +195,6 @@ fun NodeListScreen(
                 }
 
                 items(nodes, key = { it.num }) { node ->
-                    var displayFavoriteDialog by remember { mutableStateOf(false) }
-                    var displayIgnoreDialog by remember { mutableStateOf(false) }
-                    var displayMuteDialog by remember { mutableStateOf(false) }
-                    var displayRemoveDialog by remember { mutableStateOf(false) }
-
-                    NodeActionDialogs(
-                        node = node,
-                        displayFavoriteDialog = displayFavoriteDialog,
-                        displayIgnoreDialog = displayIgnoreDialog,
-                        displayMuteDialog = displayMuteDialog,
-                        displayRemoveDialog = displayRemoveDialog,
-                        onDismissMenuRequest = {
-                            displayFavoriteDialog = false
-                            displayIgnoreDialog = false
-                            displayMuteDialog = false
-                            displayRemoveDialog = false
-                        },
-                        onConfirmFavorite = viewModel::favoriteNode,
-                        onConfirmIgnore = viewModel::ignoreNode,
-                        onConfirmMute = viewModel::muteNode,
-                        onConfirmRemove = { viewModel.removeNode(it.num) },
-                    )
-
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
@@ -247,10 +223,10 @@ fun NodeListScreen(
                             ContextMenu(
                                 expanded = expanded,
                                 node = node,
-                                onFavorite = { displayFavoriteDialog = true },
-                                onIgnore = { displayIgnoreDialog = true },
-                                onMute = { displayMuteDialog = true },
-                                onRemove = { displayRemoveDialog = true },
+                                onFavorite = { viewModel.favoriteNode(node) },
+                                onIgnore = { viewModel.ignoreNode(node) },
+                                onMute = { viewModel.muteNode(node) },
+                                onRemove = { viewModel.removeNode(node) },
                                 onDismiss = { expanded = false },
                             )
                         }

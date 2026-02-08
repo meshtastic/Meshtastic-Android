@@ -115,7 +115,6 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.app_too_old
 import org.meshtastic.core.strings.bottom_nav_settings
-import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.connected
 import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.connections
@@ -132,9 +131,8 @@ import org.meshtastic.core.strings.should_update
 import org.meshtastic.core.strings.should_update_firmware
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.view_on_map
-import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -145,8 +143,10 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.core.ui.util.toMessageRes
-import org.meshtastic.feature.node.metrics.annotateTraceroute
 
 enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -202,42 +202,26 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         val confirmText = state.confirmText ?: state.confirmTextRes?.let { stringResource(it) }
         val dismissText = state.dismissText ?: state.dismissTextRes?.let { stringResource(it) }
 
-        if (state.choices.isNotEmpty()) {
-            MultipleChoiceAlertDialog(
-                title = title,
-                message = message,
-                choices = state.choices,
-                onDismissRequest = { state.onDismiss?.invoke() },
-            )
-        } else {
-            androidx.compose.material3.AlertDialog(
-                onDismissRequest = { state.onDismiss?.invoke() },
-                title = { Text(text = title) },
-                text = {
-                    val composableMsg = state.composableMessage
-                    val htmlMsg = state.html
-                    if (composableMsg != null) {
-                        composableMsg.Content()
-                    } else if (htmlMsg != null) {
-                        Text(text = htmlMsg)
-                    } else {
-                        Text(text = message.orEmpty())
-                    }
-                },
-                confirmButton = {
-                    state.onConfirm?.let {
-                        androidx.compose.material3.TextButton(onClick = it) {
-                            Text(text = confirmText ?: stringResource(Res.string.okay))
-                        }
-                    }
-                },
-                dismissButton = {
-                    androidx.compose.material3.TextButton(onClick = { state.onDismiss?.invoke() }) {
-                        Text(text = dismissText ?: stringResource(Res.string.close))
-                    }
-                },
-            )
-        }
+        MeshtasticDialog(
+            title = title,
+            message = message,
+            html = state.html,
+            icon = state.icon,
+            text = {
+                val composableMsg = state.composableMessage
+                if (composableMsg != null) {
+                    composableMsg.Content()
+                } else {
+                    // message is handled internally by MeshtasticDialog
+                }
+            },
+            confirmText = confirmText,
+            onConfirm = state.onConfirm,
+            dismissText = dismissText,
+            onDismiss = state.onDismiss,
+            choices = state.choices,
+            dismissable = state.dismissable,
+        )
     }
 
     val traceRouteResponse by uIViewModel.tracerouteResponse.collectAsStateWithLifecycle(null)
@@ -245,14 +229,22 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     traceRouteResponse
         ?.takeIf { it.requestId != dismissedTracerouteRequestId }
         ?.let { response ->
-            SimpleAlertDialog(
-                title = Res.string.traceroute,
-                text = {
+            uIViewModel.showAlert(
+                titleRes = Res.string.traceroute,
+                composableMessage = {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        Text(text = annotateTraceroute(response.message))
+                        Text(
+                            text =
+                            annotateTraceroute(
+                                response.message,
+                                statusGreen = colorScheme.StatusGreen,
+                                statusYellow = colorScheme.StatusYellow,
+                                statusOrange = colorScheme.StatusOrange,
+                            ),
+                        )
                     }
                 },
-                confirmText = stringResource(Res.string.view_on_map),
+                confirmTextRes = Res.string.view_on_map,
                 onConfirm = {
                     val availability =
                         uIViewModel.tracerouteMapAvailability(
@@ -274,7 +266,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         uIViewModel.clearTracerouteResponse()
                     }
                 },
-                dismissText = stringResource(Res.string.okay),
+                dismissTextRes = Res.string.okay,
                 onDismiss = {
                     uIViewModel.clearTracerouteResponse()
                     dismissedTracerouteRequestId = null

@@ -19,8 +19,6 @@ package org.meshtastic.feature.messaging.component
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +40,7 @@ import org.meshtastic.core.strings.retry_dialog_confirm
 import org.meshtastic.core.strings.retry_dialog_message
 import org.meshtastic.core.strings.retry_dialog_reaction_message
 import org.meshtastic.core.strings.retry_dialog_title
+import org.meshtastic.core.ui.component.MeshtasticDialog
 
 private const val COUNTDOWN_DELAY_MS = 1000L
 private const val MESSAGE_PREVIEW_LENGTH = 50
@@ -120,22 +119,13 @@ fun RetryConfirmationDialog(
         onTimeout()
     }
 
-    AlertDialog(
-        onDismissRequest = { /* Prevent dismissal by clicking outside */ },
-        dismissButton = {
-            FilledTonalButton(onClick = onCancel) { Text(text = stringResource(Res.string.retry_dialog_cancel)) }
-        },
-        confirmButton = {
-            FilledTonalButton(onClick = onConfirm) { Text(text = stringResource(Res.string.retry_dialog_confirm)) }
-        },
-        title = {
-            Text(
-                text = stringResource(Res.string.retry_dialog_title),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.headlineSmall,
-            )
-        },
+    MeshtasticDialog(
+        onDismiss = onCancel,
+        dismissText = stringResource(Res.string.retry_dialog_cancel),
+        confirmText = stringResource(Res.string.retry_dialog_confirm),
+        onConfirm = onConfirm,
+        title = stringResource(Res.string.retry_dialog_title),
         text = { RetryDialogContent(retryEvent, timeRemaining) },
+        dismissable = false,
     )
 }

@@ -18,6 +18,9 @@ package org.meshtastic.feature.node.metrics
 
 import android.app.Application
 import android.net.Uri
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,11 +35,13 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -56,6 +61,11 @@ import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
+import org.meshtastic.core.strings.okay
+import org.meshtastic.core.strings.traceroute
+import org.meshtastic.core.strings.view_on_map
+import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
@@ -96,6 +106,7 @@ constructor(
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
+    private val alertManager: AlertManager,
 ) : ViewModel() {
     private var destNum: Int? =
         runCatching { savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum }.getOrNull()
@@ -227,6 +238,52 @@ constructor(
     fun requestNeighborInfo() {
         destNum?.let {
             nodeRequestActions.requestNeighborInfo(viewModelScope, it, state.value.node?.user?.long_name ?: "")
+        }
+    }
+
+    fun showLogDetail(titleRes: StringResource, annotatedMessage: AnnotatedString) {
+        alertManager.showAlert(
+            titleRes = titleRes,
+            composableMessage = { SelectionContainer { Text(text = annotatedMessage) } },
+        )
+    }
+
+    fun showTracerouteDetail(
+        annotatedMessage: AnnotatedString,
+        requestId: Int,
+        responseLogUuid: String,
+        overlay: TracerouteOverlay?,
+        onViewOnMap: (Int, String) -> Unit,
+        onShowError: (StringResource) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val snapshotPositions = tracerouteSnapshotRepository.getSnapshotPositions(responseLogUuid).first()
+            alertManager.showAlert(
+                titleRes = Res.string.traceroute,
+                composableMessage = { SelectionContainer { Text(text = annotatedMessage) } },
+                confirmTextRes = Res.string.view_on_map,
+                onConfirm = {
+                    val positionedNodeNums =
+                        if (snapshotPositions.isNotEmpty()) {
+                            snapshotPositions.keys
+                        } else {
+                            positionedNodeNums()
+                        }
+                    val availability =
+                        evaluateTracerouteMapAvailability(
+                            forwardRoute = overlay?.forwardRoute.orEmpty(),
+                            returnRoute = overlay?.returnRoute.orEmpty(),
+                            positionedNodeNums = positionedNodeNums,
+                        )
+                    val errorRes = availability.toMessageRes()
+                    if (errorRes != null) {
+                        onShowError(errorRes)
+                    } else {
+                        onViewOnMap(requestId, responseLogUuid)
+                    }
+                },
+                dismissTextRes = Res.string.okay,
+            )
         }
     }
 

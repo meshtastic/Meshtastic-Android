@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio
 
 import androidx.lifecycle.ViewModel
@@ -23,9 +22,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.are_you_sure
+import org.meshtastic.core.strings.clean_node_database_confirmation
+import org.meshtastic.core.strings.clean_now
+import org.meshtastic.core.ui.util.AlertManager
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
@@ -42,6 +47,7 @@ class CleanNodeDatabaseViewModel
 constructor(
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
+    private val alertManager: AlertManager,
 ) : ViewModel() {
     private val _olderThanDays = MutableStateFlow(30f)
     val olderThanDays = _olderThanDays.asStateFlow()
@@ -97,6 +103,19 @@ constructor(
                         node.isIgnored ||
                         node.isFavorite
                 }
+        }
+    }
+
+    fun requestCleanNodes() {
+        viewModelScope.launch {
+            val count = _nodesToDelete.value.size
+            val message = getString(Res.string.clean_node_database_confirmation, count)
+            alertManager.showAlert(
+                titleRes = Res.string.are_you_sure,
+                message = message,
+                confirmTextRes = Res.string.clean_now,
+                onConfirm = { cleanNodes() },
+            )
         }
     }
 

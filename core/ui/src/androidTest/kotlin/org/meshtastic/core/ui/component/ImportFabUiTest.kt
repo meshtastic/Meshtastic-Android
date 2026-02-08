@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ui.component
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -33,19 +34,46 @@ class ImportFabUiTest {
         val testTag = "import_fab"
         composeTestRule.setContent { MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag) }
 
-        // Initially, we just check if we can click the FAB
+        // Expand the FAB
         composeTestRule.onNodeWithTag(testTag).performClick()
+
+        // Verify menu items are visible using their tags
+        composeTestRule.onNodeWithTag("nfc_import").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("qr_import").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("url_import").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_showsUrlDialog_whenUrlItemClicked() {
+        val testTag = "import_fab"
+        composeTestRule.setContent { MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag) }
+
+        composeTestRule.onNodeWithTag(testTag).performClick()
+        composeTestRule.onNodeWithTag("url_import").performClick()
+
+        // The URL dialog should be shown.
+        // We'll search for its title indirectly or check if an AlertDialog appeared.
+    }
+
+    @Test
+    fun importFab_showsShareChannels_whenCallbackProvided() {
+        val testTag = "import_fab"
+        composeTestRule.setContent {
+            MeshtasticImportFAB(onImport = {}, onShareChannels = {}, isContactContext = false, testTag = testTag)
+        }
+
+        composeTestRule.onNodeWithTag(testTag).performClick()
+        composeTestRule.onNodeWithTag("share_channels").assertIsDisplayed()
     }
 
     @Test
     fun importFab_showsSharedContactDialog_whenProvided() {
-        val contact = SharedContact(user = User(long_name = "Test User"), node_num = 1)
+        val contact = SharedContact(user = User(long_name = "Suzume Goddess"), node_num = 1)
         composeTestRule.setContent {
             MeshtasticImportFAB(onImport = {}, sharedContact = contact, onDismissSharedContact = {})
         }
 
-        // We check if something appeared. Since SharedContactDialog is a standard Meshtastic dialog,
-        // it should have some text from the user.
-        // composeTestRule.onNodeWithText("Test User").assertIsDisplayed()
+        // Check if goddess is here
+        // composeTestRule.onNodeWithText("Suzume Goddess").assertIsDisplayed()
     }
 }

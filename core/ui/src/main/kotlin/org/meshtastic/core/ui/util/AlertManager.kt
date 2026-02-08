@@ -17,6 +17,7 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.StringResource
@@ -40,6 +41,7 @@ class AlertManager @Inject constructor() {
         val messageRes: StringResource? = null,
         val composableMessage: ComposableContent? = null,
         val html: String? = null,
+        val icon: ImageVector? = null,
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
         val confirmText: String? = null,
@@ -47,6 +49,7 @@ class AlertManager @Inject constructor() {
         val dismissText: String? = null,
         val dismissTextRes: StringResource? = null,
         val choices: Map<String, () -> Unit> = emptyMap(),
+        val dismissable: Boolean = true,
     )
 
     private val _currentAlert = MutableStateFlow<AlertData?>(null)
@@ -59,6 +62,7 @@ class AlertManager @Inject constructor() {
         messageRes: StringResource? = null,
         composableMessage: ComposableContent? = null,
         html: String? = null,
+        icon: ImageVector? = null,
         onConfirm: (() -> Unit)? = {},
         onDismiss: (() -> Unit)? = null,
         confirmText: String? = null,
@@ -66,6 +70,7 @@ class AlertManager @Inject constructor() {
         dismissText: String? = null,
         dismissTextRes: StringResource? = null,
         choices: Map<String, () -> Unit> = emptyMap(),
+        dismissable: Boolean = true,
     ) {
         _currentAlert.value =
             AlertData(
@@ -75,6 +80,7 @@ class AlertManager @Inject constructor() {
                 messageRes = messageRes,
                 composableMessage = composableMessage,
                 html = html,
+                icon = icon,
                 onConfirm = {
                     onConfirm?.invoke()
                     dismissAlert()
@@ -88,6 +94,7 @@ class AlertManager @Inject constructor() {
                 dismissText = dismissText,
                 dismissTextRes = dismissTextRes,
                 choices = choices,
+                dismissable = dismissable,
             )
     }
 

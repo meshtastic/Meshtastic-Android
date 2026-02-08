@@ -281,10 +281,10 @@ constructor(
 
     fun handleNodeMenuAction(action: NodeMenuAction) {
         when (action) {
-            is NodeMenuAction.Remove -> nodeManagementActions.removeNode(viewModelScope, action.node.num)
-            is NodeMenuAction.Ignore -> nodeManagementActions.ignoreNode(viewModelScope, action.node)
-            is NodeMenuAction.Mute -> nodeManagementActions.muteNode(viewModelScope, action.node)
-            is NodeMenuAction.Favorite -> nodeManagementActions.favoriteNode(viewModelScope, action.node)
+            is NodeMenuAction.Remove -> nodeManagementActions.requestRemoveNode(viewModelScope, action.node)
+            is NodeMenuAction.Ignore -> nodeManagementActions.requestIgnoreNode(viewModelScope, action.node)
+            is NodeMenuAction.Mute -> nodeManagementActions.requestMuteNode(viewModelScope, action.node)
+            is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
             is NodeMenuAction.RequestUserInfo ->
                 nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name ?: "")
             is NodeMenuAction.RequestNeighborInfo ->

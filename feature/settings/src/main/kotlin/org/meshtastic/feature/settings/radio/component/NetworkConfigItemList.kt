@@ -21,12 +21,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,7 +78,7 @@ import org.meshtastic.core.ui.component.EditIPv4Preference
 import org.meshtastic.core.ui.component.EditPasswordPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.SimpleAlertDialog
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.util.openNfcSettings
@@ -89,7 +87,7 @@ import org.meshtastic.proto.Config
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
-    SimpleAlertDialog(title = Res.string.error, text = Res.string.wifi_qr_code_error, onDismiss = onDismiss)
+    MeshtasticDialog(titleRes = Res.string.error, messageRes = Res.string.wifi_qr_code_error, onDismiss = onDismiss)
 
 @Composable
 fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
@@ -105,23 +103,16 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
 
     var showNfcDisabledDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     if (showNfcDisabledDialog) {
-        AlertDialog(
-            onDismissRequest = { showNfcDisabledDialog = false },
-            title = { Text(stringResource(Res.string.scan_nfc)) },
-            text = { Text(stringResource(Res.string.nfc_disabled)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        context.openNfcSettings()
-                        showNfcDisabledDialog = false
-                    },
-                ) {
-                    Text(stringResource(Res.string.open_settings))
-                }
+        MeshtasticDialog(
+            onDismiss = { showNfcDisabledDialog = false },
+            title = stringResource(Res.string.scan_nfc),
+            message = stringResource(Res.string.nfc_disabled),
+            confirmText = stringResource(Res.string.open_settings),
+            onConfirm = {
+                context.openNfcSettings()
+                showNfcDisabledDialog = false
             },
-            dismissButton = {
-                TextButton(onClick = { showNfcDisabledDialog = false }) { Text(stringResource(Res.string.cancel)) }
-            },
+            dismissText = stringResource(Res.string.cancel),
         )
     }
 
