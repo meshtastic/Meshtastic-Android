@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.model.util
 
-import java.lang.String.format
 import kotlin.math.floor
 import kotlin.math.ln
 import kotlin.math.log10
@@ -24,20 +23,6 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 
 object UnitConversions {
-
-    val BASE_UNITS =
-        mapOf("Nano" to -9, "Micro" to -6, "Milli" to -3, "Unit" to 0, "Thousand" to 3, "Million" to 6, "Billion" to 9)
-    val AMPERE_UNITS =
-        mapOf(
-            "Nano" to "nA",
-            "Micro" to "μA",
-            "Milli" to "mA",
-            "Unit" to "A",
-            "Thousand" to "kA",
-            "Million" to "MA",
-            "Billion" to "GA",
-        )
-
     @Suppress("MagicNumber")
     fun celsiusToFahrenheit(celsius: Float): Float = (celsius * 1.8F) + 32
 
@@ -72,21 +57,12 @@ object UnitConversions {
     }
 
     @Suppress("MagicNumber")
-    fun numberToHuman(number: Float, units: Map<String, String> = emptyMap<String, String>()): String {
-        if (number <= 0) return "N/A"
+    fun convertToBaseUnit(number: Float): Float {
+        if (number <= 0) return 0f
 
         var exponent = floor(log10(number / 1000.0)).toInt()
         if (exponent.mod(3) != 0 && exponent in -11..11) exponent = (exponent / 3) * 3
 
-        var exponentsMap = BASE_UNITS.entries.associate { (k, v) -> v to k }.toMutableMap()
-        units.forEach { (unitKey, customUnit) ->
-            val lookupKey = exponentsMap.filterValues { it == unitKey }.keys
-            if (lookupKey.iterator().hasNext()) exponentsMap[lookupKey.iterator().next()] = customUnit
-        }
-
-        val unit = exponentsMap[exponent]
-        val value = (number / 10.0.pow(exponent))
-
-        return "${"%.2f".format(value)} $unit"
+        return number / 10f.pow(exponent)
     }
 }
