@@ -41,6 +41,7 @@ import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.input_channel_url
 import org.meshtastic.core.strings.input_shared_contact_url
 import org.meshtastic.core.strings.nfc_disabled
 import org.meshtastic.core.strings.okay
@@ -79,15 +80,7 @@ fun ImportFab(
     var showNfcDisabledDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    val barcodeScanner =
-        rememberBarcodeScanner(
-            onResult = { contents ->
-                contents?.toUri()?.let {
-                    onImport(it)
-                    isNfcScanning = false
-                }
-            },
-        )
+    val barcodeScanner = rememberBarcodeScanner(onResult = { contents -> contents?.toUri()?.let { onImport(it) } })
 
     if (isNfcScanning) {
         NfcScannerEffect(
@@ -128,7 +121,10 @@ fun ImportFab(
 
     if (showUrlDialog) {
         InputUrlDialog(
-            title = stringResource(Res.string.input_shared_contact_url),
+            title =
+            stringResource(
+                if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+            ),
             onDismiss = { showUrlDialog = false },
             onConfirm = { contents ->
                 onImport(contents.toUri())
@@ -156,7 +152,10 @@ fun ImportFab(
                 onClick = { barcodeScanner.startScan() },
             ),
             MenuFABItem(
-                label = stringResource(Res.string.input_shared_contact_url),
+                label =
+                stringResource(
+                    if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+                ),
                 icon = Icons.Rounded.Link,
                 onClick = { showUrlDialog = true },
             ),
