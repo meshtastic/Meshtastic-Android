@@ -29,7 +29,9 @@ import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.QueueStatus
+import org.meshtastic.proto.ToRadio
 
 class PacketHandlerTest {
 
@@ -58,20 +60,17 @@ class PacketHandlerTest {
     }
 
     @Test
-    fun `sendToRadio with ToRadio Builder sends immediately`() {
-        val builder =
-            MeshProtos.ToRadio.newBuilder().apply { packet = MeshProtos.MeshPacket.newBuilder().setId(123).build() }
+    fun `sendToRadio with ToRadio sends immediately`() {
+        val toRadio = ToRadio(packet = MeshPacket(id = 123))
 
-        handler.sendToRadio(builder)
+        handler.sendToRadio(toRadio)
 
         verify { radioInterfaceService.sendToRadio(any()) }
-        // Verify broadcast status ENROUTE (via status mapping) is not directly testable easily without more mocks,
-        // but we verify the call to radio service occurred.
     }
 
     @Test
     fun `sendToRadio with MeshPacket queues and sends when connected`() = runTest(testDispatcher) {
-        val packet = MeshProtos.MeshPacket.newBuilder().setId(456).build()
+        val packet = MeshPacket(id = 456)
         every { connectionStateHolder.connectionState } returns MutableStateFlow(ConnectionState.Connected)
 
         handler.sendToRadio(packet)
@@ -82,25 +81,20 @@ class PacketHandlerTest {
 
     @Test
     fun `handleQueueStatus completes deferred`() = runTest(testDispatcher) {
-        val packet = MeshProtos.MeshPacket.newBuilder().setId(789).build()
+        val packet = MeshPacket(id = 789)
         every { connectionStateHolder.connectionState } returns MutableStateFlow(ConnectionState.Connected)
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()
 
         val status =
-            MeshProtos.QueueStatus.newBuilder()
-                .apply {
-                    meshPacketId = 789
-                    res = 0 // Success
-                    free = 1
-                }
-                .build()
+            QueueStatus(
+                mesh_packet_id = 789,
+                res = 0, // Success
+                free = 1,
+            )
 
         handler.handleQueueStatus(status)
         testScheduler.runCurrent()
-
-        // If it completed, the queue job should move to the next packet or finish.
-        // We can't easily check the deferred inside, but we can check if it cleared the internal wait.
     }
 }

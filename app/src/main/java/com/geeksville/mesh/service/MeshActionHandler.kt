@@ -18,11 +18,11 @@ package com.geeksville.mesh.service
 
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.util.ignoreException
-import com.google.protobuf.ByteString
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.PacketRepository
@@ -34,17 +34,17 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.ModuleConfigProtos
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.user
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.OTAMode
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.User
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Suppress("LongParameterList", "TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
 @Singleton
 class MeshActionHandler
 @Inject
@@ -80,10 +80,12 @@ constructor(
                 is ServiceAction.Reaction -> handleReaction(action, myNodeNum)
                 is ServiceAction.ImportContact -> handleImportContact(action, myNodeNum)
                 is ServiceAction.SendContact -> {
-                    commandSender.sendAdmin(myNodeNum) { addContact = action.contact }
+                    commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = action.contact) }
                 }
                 is ServiceAction.GetDeviceMetadata -> {
-                    commandSender.sendAdmin(action.destNum, wantResponse = true) { getDeviceMetadataRequest = true }
+                    commandSender.sendAdmin(action.destNum, wantResponse = true) {
+                        AdminMessage(get_device_metadata_request = true)
+                    }
                 }
             }
         }
@@ -92,22 +94,32 @@ constructor(
     private fun handleFavorite(action: ServiceAction.Favorite, myNodeNum: Int) {
         val node = action.node
         commandSender.sendAdmin(myNodeNum) {
-            if (node.isFavorite) removeFavoriteNode = node.num else setFavoriteNode = node.num
+            if (node.isFavorite) {
+                AdminMessage(remove_favorite_node = node.num)
+            } else {
+                AdminMessage(set_favorite_node = node.num)
+            }
         }
         nodeManager.updateNodeInfo(node.num) { it.isFavorite = !node.isFavorite }
     }
 
     private fun handleIgnore(action: ServiceAction.Ignore, myNodeNum: Int) {
         val node = action.node
+        val newIgnoredStatus = !node.isIgnored
         commandSender.sendAdmin(myNodeNum) {
-            if (node.isIgnored) removeIgnoredNode = node.num else setIgnoredNode = node.num
+            if (newIgnoredStatus) {
+                AdminMessage(set_ignored_node = node.num)
+            } else {
+                AdminMessage(remove_ignored_node = node.num)
+            }
         }
-        nodeManager.updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
+        nodeManager.updateNodeInfo(node.num) { it.isIgnored = newIgnoredStatus }
+        scope.handledLaunch { packetRepository.get().updateFilteredBySender(node.user.id, newIgnoredStatus) }
     }
 
     private fun handleMute(action: ServiceAction.Mute, myNodeNum: Int) {
         val node = action.node
-        commandSender.sendAdmin(myNodeNum) { toggleMutedNode = node.num }
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(toggle_muted_node = node.num) }
         nodeManager.updateNodeInfo(node.num) { it.isMuted = !node.isMuted }
     }
 
@@ -118,8 +130,8 @@ constructor(
             org.meshtastic.core.model
                 .DataPacket(
                     to = destId,
-                    dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                    bytes = action.emoji.encodeToByteArray(),
+                    dataType = PortNum.TEXT_MESSAGE_APP.value,
+                    bytes = action.emoji.encodeToByteArray().toByteString(),
                     channel = channel,
                     replyId = action.replyId,
                     wantAck = true,
@@ -131,9 +143,13 @@ constructor(
     }
 
     private fun handleImportContact(action: ServiceAction.ImportContact, myNodeNum: Int) {
-        val verifiedContact = action.contact.toBuilder().setManuallyVerified(true).build()
-        commandSender.sendAdmin(myNodeNum) { addContact = verifiedContact }
-        nodeManager.handleReceivedUser(verifiedContact.nodeNum, verifiedContact.user, manuallyVerified = true)
+        val verifiedContact = action.contact.copy(manually_verified = true)
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = verifiedContact) }
+        nodeManager.handleReceivedUser(
+            verifiedContact.node_num ?: 0,
+            verifiedContact.user ?: User(),
+            manuallyVerified = true,
+        )
     }
 
     private fun rememberReaction(action: ServiceAction.Reaction, packetId: Int, myNodeNum: Int) {
@@ -158,30 +174,16 @@ constructor(
     }
 
     fun handleSetOwner(u: org.meshtastic.core.model.MeshUser, myNodeNum: Int) {
-        commandSender.sendAdmin(myNodeNum) {
-            setOwner = user {
-                id = u.id
-                longName = u.longName
-                shortName = u.shortName
-                isLicensed = u.isLicensed
-            }
-        }
-        nodeManager.handleReceivedUser(
-            myNodeNum,
-            user {
-                id = u.id
-                longName = u.longName
-                shortName = u.shortName
-                isLicensed = u.isLicensed
-            },
-        )
+        val newUser = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_owner = newUser) }
+        nodeManager.handleReceivedUser(myNodeNum, newUser)
     }
 
     fun handleSend(p: DataPacket, myNodeNum: Int) {
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p)
         dataHandler.rememberDataPacket(p, myNodeNum, false)
-        val bytes = p.bytes ?: ByteArray(0)
+        val bytes = p.bytes ?: okio.ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }
 
@@ -200,79 +202,83 @@ constructor(
 
     fun handleRemoveByNodenum(nodeNum: Int, requestId: Int, myNodeNum: Int) {
         nodeManager.removeByNodenum(nodeNum)
-        commandSender.sendAdmin(myNodeNum, requestId) { removeByNodenum = nodeNum }
+        commandSender.sendAdmin(myNodeNum, requestId) { AdminMessage(remove_by_nodenum = nodeNum) }
     }
 
     fun handleSetRemoteOwner(id: Int, destNum: Int, payload: ByteArray) {
-        val u = MeshProtos.User.parseFrom(payload)
-        commandSender.sendAdmin(destNum, id) { setOwner = u }
+        val u = User.ADAPTER.decode(payload)
+        commandSender.sendAdmin(destNum, id) { AdminMessage(set_owner = u) }
     }
 
     fun handleGetRemoteOwner(id: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) { getOwnerRequest = true }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_owner_request = true) }
     }
 
     fun handleSetConfig(payload: ByteArray, myNodeNum: Int) {
-        val c = ConfigProtos.Config.parseFrom(payload)
-        commandSender.sendAdmin(myNodeNum) { setConfig = c }
+        val c = Config.ADAPTER.decode(payload)
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_config = c) }
     }
 
     fun handleSetRemoteConfig(id: Int, destNum: Int, payload: ByteArray) {
-        val c = ConfigProtos.Config.parseFrom(payload)
-        commandSender.sendAdmin(destNum, id) { setConfig = c }
+        val c = Config.ADAPTER.decode(payload)
+        commandSender.sendAdmin(destNum, id) { AdminMessage(set_config = c) }
     }
 
     fun handleGetRemoteConfig(id: Int, destNum: Int, config: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) {
-            if (config == AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE) {
-                getDeviceMetadataRequest = true
+            if (config == AdminMessage.ConfigType.SESSIONKEY_CONFIG.value) {
+                AdminMessage(get_device_metadata_request = true)
             } else {
-                getConfigRequestValue = config
+                AdminMessage(get_config_request = AdminMessage.ConfigType.fromValue(config))
             }
         }
     }
 
     fun handleSetModuleConfig(id: Int, destNum: Int, payload: ByteArray) {
-        val c = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
-        commandSender.sendAdmin(destNum, id) { setModuleConfig = c }
+        val c = ModuleConfig.ADAPTER.decode(payload)
+        commandSender.sendAdmin(destNum, id) { AdminMessage(set_module_config = c) }
     }
 
     fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) { getModuleConfigRequestValue = config }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) {
+            AdminMessage(get_module_config_request = AdminMessage.ModuleConfigType.fromValue(config))
+        }
     }
 
     fun handleSetRingtone(destNum: Int, ringtone: String) {
-        commandSender.sendAdmin(destNum) { setRingtoneMessage = ringtone }
+        commandSender.sendAdmin(destNum) { AdminMessage(set_ringtone_message = ringtone) }
     }
 
     fun handleGetRingtone(id: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) { getRingtoneRequest = true }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_ringtone_request = true) }
     }
 
     fun handleSetCannedMessages(destNum: Int, messages: String) {
-        commandSender.sendAdmin(destNum) { setCannedMessageModuleMessages = messages }
+        commandSender.sendAdmin(destNum) { AdminMessage(set_canned_message_module_messages = messages) }
     }
 
     fun handleGetCannedMessages(id: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) { getCannedMessageModuleMessagesRequest = true }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) {
+            AdminMessage(get_canned_message_module_messages_request = true)
+        }
     }
 
     fun handleSetChannel(payload: ByteArray?, myNodeNum: Int) {
         if (payload != null) {
-            val c = ChannelProtos.Channel.parseFrom(payload)
-            commandSender.sendAdmin(myNodeNum) { setChannel = c }
+            val c = Channel.ADAPTER.decode(payload)
+            commandSender.sendAdmin(myNodeNum) { AdminMessage(set_channel = c) }
         }
     }
 
     fun handleSetRemoteChannel(id: Int, destNum: Int, payload: ByteArray?) {
         if (payload != null) {
-            val c = ChannelProtos.Channel.parseFrom(payload)
-            commandSender.sendAdmin(destNum, id) { setChannel = c }
+            val c = Channel.ADAPTER.decode(payload)
+            commandSender.sendAdmin(destNum, id) { AdminMessage(set_channel = c) }
         }
     }
 
     fun handleGetRemoteChannel(id: Int, destNum: Int, index: Int) {
-        commandSender.sendAdmin(destNum, id, wantResponse = true) { getChannelRequest = index + 1 }
+        commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_channel_request = index + 1) }
     }
 
     fun handleRequestNeighborInfo(requestId: Int, destNum: Int) {
@@ -280,15 +286,15 @@ constructor(
     }
 
     fun handleBeginEditSettings(destNum: Int) {
-        commandSender.sendAdmin(destNum) { beginEditSettings = true }
+        commandSender.sendAdmin(destNum) { AdminMessage(begin_edit_settings = true) }
     }
 
     fun handleCommitEditSettings(destNum: Int) {
-        commandSender.sendAdmin(destNum) { commitEditSettings = true }
+        commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
     }
 
     fun handleRebootToDfu(destNum: Int) {
-        commandSender.sendAdmin(destNum) { enterDfuModeRequest = true }
+        commandSender.sendAdmin(destNum) { AdminMessage(enter_dfu_mode_request = true) }
     }
 
     fun handleRequestTelemetry(requestId: Int, destNum: Int, type: Int) {
@@ -296,33 +302,32 @@ constructor(
     }
 
     fun handleRequestShutdown(requestId: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, requestId) { shutdownSeconds = DEFAULT_REBOOT_DELAY }
+        commandSender.sendAdmin(destNum, requestId) { AdminMessage(shutdown_seconds = DEFAULT_REBOOT_DELAY) }
     }
 
     fun handleRequestReboot(requestId: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, requestId) { rebootSeconds = DEFAULT_REBOOT_DELAY }
+        commandSender.sendAdmin(destNum, requestId) { AdminMessage(reboot_seconds = DEFAULT_REBOOT_DELAY) }
     }
 
     fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
-        val otaMode = AdminProtos.OTAMode.forNumber(mode) ?: AdminProtos.OTAMode.NO_REBOOT_OTA
-        val otaEventBuilder = AdminProtos.AdminMessage.OTAEvent.newBuilder()
-        otaEventBuilder.rebootOtaMode = otaMode
-        if (hash != null) {
-            otaEventBuilder.otaHash = ByteString.copyFrom(hash)
-        }
-        commandSender.sendAdmin(destNum, requestId) { otaRequest = otaEventBuilder.build() }
+        val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
+        val otaEvent =
+            AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY)
+        commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }
     }
 
     fun handleRequestFactoryReset(requestId: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, requestId) { factoryResetDevice = 1 }
+        commandSender.sendAdmin(destNum, requestId) { AdminMessage(factory_reset_device = 1) }
     }
 
     fun handleRequestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) {
-        commandSender.sendAdmin(destNum, requestId) { nodedbReset = preserveFavorites }
+        commandSender.sendAdmin(destNum, requestId) { AdminMessage(nodedb_reset = preserveFavorites) }
     }
 
     fun handleGetDeviceConnectionStatus(requestId: Int, destNum: Int) {
-        commandSender.sendAdmin(destNum, requestId, wantResponse = true) { getDeviceConnectionStatusRequest = true }
+        commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
+            AdminMessage(get_device_connection_status_request = true)
+        }
     }
 
     fun handleUpdateLastAddress(deviceAddr: String?) {

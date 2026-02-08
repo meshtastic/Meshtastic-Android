@@ -25,30 +25,32 @@ plugins {
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["googleRelease"])
-                artifactId = "core-model"
-            }
-        }
-    }
-}
-
 configure<LibraryExtension> {
+    namespace = "org.meshtastic.core.model"
     buildFeatures {
         buildConfig = true
         aidl = true
     }
-    namespace = "org.meshtastic.core.model"
 
     defaultConfig {
         // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
         minSdk = 21
     }
 
-    publishing { singleVariant("googleRelease") { withSourcesJar() } }
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+
+    publishing { singleVariant("release") { withSourcesJar() } }
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "meshtastic-android-model"
+            }
+        }
+    }
 }
 
 dependencies {
@@ -57,11 +59,11 @@ dependencies {
     api(libs.androidx.annotation)
     api(libs.kotlinx.serialization.json)
     implementation(libs.kermit)
-    implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
 
     testImplementation(libs.androidx.core.ktx)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
 
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.runner)

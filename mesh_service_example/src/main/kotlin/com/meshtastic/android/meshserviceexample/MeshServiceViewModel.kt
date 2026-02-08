@@ -25,14 +25,17 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.PortNum
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.random.Random
 
 private const val TAG = "MeshServiceViewModel"
@@ -61,15 +64,20 @@ class MeshServiceViewModel : ViewModel() {
     private val _connectionState = MutableStateFlow("UNKNOWN")
     val connectionState: StateFlow<String> = _connectionState.asStateFlow()
 
+    private val _packetLog = MutableStateFlow<List<String>>(emptyList())
+    val packetLog: StateFlow<List<String>> = _packetLog.asStateFlow()
+
     fun onServiceConnected(service: IMeshService?) {
         meshService = service
         _serviceConnectionStatus.value = true
         updateAllData()
+        addToLog("Service Connected")
     }
 
     fun onServiceDisconnected() {
         meshService = null
         _serviceConnectionStatus.value = false
+        addToLog("Service Disconnected")
     }
 
     private fun updateAllData() {
@@ -92,7 +100,9 @@ class MeshServiceViewModel : ViewModel() {
     fun updateConnectionState() {
         meshService?.let {
             try {
-                _connectionState.value = it.connectionState() ?: "UNKNOWN"
+                val state = it.connectionState() ?: "UNKNOWN"
+                _connectionState.value = state
+                addToLog("Connection State: $state")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to get connection state", e)
             }
@@ -105,11 +115,11 @@ class MeshServiceViewModel : ViewModel() {
                 val packet =
                     DataPacket(
                         to = DataPacket.ID_BROADCAST,
-                        bytes = text.toByteArray(),
-                        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                        bytes = text.encodeToByteArray().toByteString(),
+                        dataType = PortNum.TEXT_MESSAGE_APP.value,
                         from = DataPacket.ID_LOCAL,
                         time = System.currentTimeMillis(),
-                        id = service.packetId, // Correctly sync with radio's ID
+                        id = service.packetId,
                         status = MessageStatus.UNKNOWN,
                         hopLimit = 3,
                         channel = 0,
@@ -117,10 +127,37 @@ class MeshServiceViewModel : ViewModel() {
                     )
                 service.send(packet)
                 Log.d(TAG, "Message sent successfully, assigned ID: ${packet.id}")
+                addToLog("Sent: $text (ID: ${packet.id})")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to send message", e)
+                addToLog("Failed to send message: ${e.message}")
             }
         } ?: Log.w(TAG, "MeshService is not bound, cannot send message")
+    }
+
+    fun sendSpecialPacket(portNum: PortNum) {
+        meshService?.let { service ->
+            try {
+                val packet =
+                    DataPacket(
+                        to = DataPacket.ID_BROADCAST,
+                        bytes = "Special Payload for ${portNum.name}".encodeToByteArray().toByteString(),
+                        dataType = portNum.value,
+                        from = DataPacket.ID_LOCAL,
+                        time = System.currentTimeMillis(),
+                        id = service.packetId,
+                        status = MessageStatus.UNKNOWN,
+                        hopLimit = 3,
+                        channel = 0,
+                        wantAck = true,
+                    )
+                service.send(packet)
+                addToLog("Sent ${portNum.name} Packet (ID: ${packet.id})")
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Failed to send special packet", e)
+                addToLog("Failed to send ${portNum.name} packet: ${e.message}")
+            }
+        }
     }
 
     fun requestMyNodeInfo() {
@@ -146,6 +183,7 @@ class MeshServiceViewModel : ViewModel() {
     fun startProvideLocation() {
         try {
             meshService?.startProvideLocation()
+            addToLog("Started GPS sharing")
         } catch (e: RemoteException) {
             Log.e(TAG, "Failed to start providing location", e)
         }
@@ -154,6 +192,7 @@ class MeshServiceViewModel : ViewModel() {
     fun stopProvideLocation() {
         try {
             meshService?.stopProvideLocation()
+            addToLog("Stopped GPS sharing")
         } catch (e: RemoteException) {
             Log.e(TAG, "Failed to stop providing location", e)
         }
@@ -164,6 +203,7 @@ class MeshServiceViewModel : ViewModel() {
             try {
                 it.requestTraceroute(Random.nextInt(), nodeNum)
                 Log.i(TAG, "Traceroute requested for node $nodeNum")
+                addToLog("Requested Traceroute for $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request traceroute", e)
             }
@@ -173,8 +213,9 @@ class MeshServiceViewModel : ViewModel() {
     fun requestTelemetry(nodeNum: Int) {
         meshService?.let {
             try {
-                it.requestTelemetry(Random.nextInt(), nodeNum, TelemetryProtos.Telemetry.DEVICE_METRICS_FIELD_NUMBER)
+                it.requestTelemetry(Random.nextInt(), nodeNum, 1)
                 Log.i(TAG, "Telemetry requested for node $nodeNum")
+                addToLog("Requested Telemetry for $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request telemetry", e)
             }
@@ -186,6 +227,7 @@ class MeshServiceViewModel : ViewModel() {
             try {
                 it.requestNeighborInfo(Random.nextInt(), nodeNum)
                 Log.i(TAG, "Neighbor info requested for node $nodeNum")
+                addToLog("Requested Neighbors for $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request neighbor info", e)
             }
@@ -197,6 +239,7 @@ class MeshServiceViewModel : ViewModel() {
             try {
                 it.requestPosition(nodeNum, Position(0.0, 0.0, 0))
                 Log.i(TAG, "Position requested for node $nodeNum")
+                addToLog("Requested Position for $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request position", e)
             }
@@ -208,6 +251,7 @@ class MeshServiceViewModel : ViewModel() {
             try {
                 it.requestUserInfo(nodeNum)
                 Log.i(TAG, "User info requested for node $nodeNum")
+                addToLog("Requested User Info for $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request user info", e)
             }
@@ -219,6 +263,7 @@ class MeshServiceViewModel : ViewModel() {
             try {
                 it.getDeviceConnectionStatus(Random.nextInt(), nodeNum)
                 Log.i(TAG, "Device connection status requested for node $nodeNum")
+                addToLog("Requested Connection Status for $nodeNum")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request device connection status", e)
             }
@@ -230,6 +275,7 @@ class MeshServiceViewModel : ViewModel() {
             try {
                 it.requestReboot(Random.nextInt(), 0)
                 Log.w(TAG, "Local reboot requested!")
+                addToLog("Requested Local Reboot")
             } catch (e: RemoteException) {
                 Log.e(TAG, "Failed to request reboot", e)
             }
@@ -246,6 +292,7 @@ class MeshServiceViewModel : ViewModel() {
             "com.geeksville.mesh.MESH_CONNECTED",
             "com.geeksville.mesh.MESH_DISCONNECTED",
             -> updateConnectionState()
+
             "com.geeksville.mesh.MESSAGE_STATUS" -> handleMessageStatus(intent)
             else ->
                 if (action.startsWith("com.geeksville.mesh.RECEIVED.")) {
@@ -270,16 +317,35 @@ class MeshServiceViewModel : ViewModel() {
         val id = intent.getIntExtra("com.geeksville.mesh.PacketId", 0)
         val status = intent.getParcelableCompat("com.geeksville.mesh.Status", MessageStatus::class.java)
         Log.d(TAG, "Message Status for ID $id: $status")
+        addToLog("Msg Status ID $id: $status")
     }
 
     private fun handleReceivedPacket(action: String, intent: Intent) {
-        val packet = intent.getParcelableCompat("com.geeksville.mesh.Payload", DataPacket::class.java) ?: return
-        if (packet.dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
-            val receivedText = packet.bytes?.let { bytes -> String(bytes) } ?: ""
-            _message.value = "From ${packet.from}: $receivedText"
-        } else {
-            _message.value = "Received port ${action.substringAfterLast(".")} packet"
+        val packet = intent.getParcelableCompat("com.geeksville.mesh.Payload", DataPacket::class.java)
+        if (packet == null) {
+            Log.e(TAG, "Received packet extra was NULL for action: $action")
+            addToLog("Error: Packet payload was null for $action")
+            return
         }
+
+        Log.d(TAG, "Packet received: $packet")
+
+        if (packet.dataType == PortNum.TEXT_MESSAGE_APP.value) {
+            val receivedText = packet.bytes?.utf8() ?: ""
+            _message.value = "From ${packet.from}: $receivedText"
+            addToLog("Received Text from ${packet.from}: $receivedText")
+        } else {
+            val type = action.substringAfterLast(".")
+            addToLog("Received $type from ${packet.from}. Check Logcat for details.")
+        }
+    }
+
+    private fun addToLog(entry: String) {
+        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        val logEntry = "[$timestamp] $entry"
+        Log.d(TAG, "Log: $logEntry")
+        @Suppress("MagicNumber")
+        _packetLog.value = (listOf(logEntry) + _packetLog.value).take(50)
     }
 
     private fun <T : Parcelable> Intent.getParcelableCompat(key: String, clazz: Class<T>): T? =

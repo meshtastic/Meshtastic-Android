@@ -91,9 +91,7 @@ import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.TelemetryProtos.Telemetry
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.Telemetry
 
 @Suppress("LongMethod")
 @Composable
@@ -123,15 +121,13 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val processedTelemetries: List<Telemetry> =
         if (state.isFahrenheit) {
             data.map { telemetry ->
-                val temperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
-                val soilTemperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
-                telemetry.copy {
-                    environmentMetrics =
-                        telemetry.environmentMetrics.copy {
-                            temperature = temperatureFahrenheit
-                            soilTemperature = soilTemperatureFahrenheit
-                        }
-                }
+                val em = telemetry.environment_metrics ?: return@map telemetry
+                val temperatureFahrenheit = em.temperature?.let { celsiusToFahrenheit(it) }
+                val soilTemperatureFahrenheit = em.soil_temperature?.let { celsiusToFahrenheit(it) }
+                telemetry.copy(
+                    environment_metrics =
+                    em.copy(temperature = temperatureFahrenheit, soil_temperature = soilTemperatureFahrenheit),
+                )
             }
         } else {
             data
@@ -142,7 +138,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle =
                 stringResource(Res.string.env_metrics_log) +
                     " (${processedTelemetries.size} ${stringResource(Res.string.logs)})",
@@ -186,7 +182,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                         selectedX = selectedX,
                         onPointSelected = { x ->
                             selectedX = x
-                            val index = processedTelemetries.indexOfFirst { it.time.toDouble() == x }
+                            val index = processedTelemetries.indexOfFirst { (it.time ?: 0).toDouble() == x }
                             if (index != -1) {
                                 coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
@@ -199,12 +195,12 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                             EnvironmentMetricsCard(
                                 telemetry = telemetry,
                                 environmentDisplayFahrenheit = state.isFahrenheit,
-                                isSelected = telemetry.time.toDouble() == selectedX,
+                                isSelected = (telemetry.time ?: 0).toDouble() == selectedX,
                                 onClick = {
-                                    selectedX = telemetry.time.toDouble()
+                                    selectedX = (telemetry.time ?: 0).toDouble()
                                     coroutineScope.launch {
                                         vicoScrollState.animateScroll(
-                                            Scroll.Absolute.x(telemetry.time.toDouble(), SCROLL_BIAS),
+                                            Scroll.Absolute.x((telemetry.time ?: 0).toDouble(), SCROLL_BIAS),
                                         )
                                     }
                                 },
@@ -218,7 +214,10 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
 }
 
 @Composable
-private fun TemperatureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, environmentDisplayFahrenheit: Boolean) {
+private fun TemperatureDisplay(
+    envMetrics: org.meshtastic.proto.EnvironmentMetrics,
+    environmentDisplayFahrenheit: Boolean,
+) {
     envMetrics.temperature?.let { temperature ->
         if (!temperature.isNaN()) {
             val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
@@ -236,9 +235,9 @@ private fun TemperatureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, e
 }
 
 @Composable
-private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val hasHumidity = envMetrics.relativeHumidity?.let { !it.isNaN() } == true
-    val hasPressure = envMetrics.barometricPressure?.let { !it.isNaN() && it > 0 } == true
+private fun HumidityAndBarometricPressureDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    val hasHumidity = envMetrics.relative_humidity?.let { !it.isNaN() } == true
+    val hasPressure = envMetrics.barometric_pressure?.let { !it.isNaN() && it > 0 } == true
 
     if (hasHumidity || hasPressure) {
         Row(
@@ -246,7 +245,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             if (hasHumidity) {
-                val humidity = envMetrics.relativeHumidity!!
+                val humidity = envMetrics.relative_humidity!!
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.HUMIDITY.color)
                     Spacer(Modifier.width(4.dp))
@@ -259,7 +258,7 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
                 }
             }
             if (hasPressure) {
-                val pressure = envMetrics.barometricPressure!!
+                val pressure = envMetrics.barometric_pressure!!
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.BAROMETRIC_PRESSURE.color)
                     Spacer(Modifier.width(4.dp))
@@ -276,15 +275,18 @@ private fun HumidityAndBarometricPressureDisplay(envMetrics: TelemetryProtos.Env
 }
 
 @Composable
-private fun SoilMetricsDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, environmentDisplayFahrenheit: Boolean) {
+private fun SoilMetricsDisplay(
+    envMetrics: org.meshtastic.proto.EnvironmentMetrics,
+    environmentDisplayFahrenheit: Boolean,
+) {
     if (
-        envMetrics.soilTemperature != null ||
-        (envMetrics.soilMoisture != null && envMetrics.soilMoisture != Int.MIN_VALUE)
+        envMetrics.soil_temperature != null ||
+        (envMetrics.soil_moisture != null && envMetrics.soil_moisture != Int.MIN_VALUE)
     ) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             val soilTemperatureTextFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
             val soilMoistureTextFormat = "%s %d%%"
-            envMetrics.soilMoisture?.let { soilMoistureValue ->
+            envMetrics.soil_moisture?.let { soilMoistureValue ->
                 if (soilMoistureValue != Int.MIN_VALUE) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MetricIndicator(Environment.SOIL_MOISTURE.color)
@@ -301,7 +303,7 @@ private fun SoilMetricsDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, e
                     }
                 }
             }
-            envMetrics.soilTemperature?.let { soilTemperature ->
+            envMetrics.soil_temperature?.let { soilTemperature ->
                 if (!soilTemperature.isNaN()) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         MetricIndicator(Environment.SOIL_TEMPERATURE.color)
@@ -323,9 +325,9 @@ private fun SoilMetricsDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics, e
 }
 
 @Composable
-private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val hasLux = envMetrics.lux != null && !envMetrics.lux.isNaN()
-    val hasUvLux = envMetrics.uvLux != null && !envMetrics.uvLux.isNaN()
+private fun LuxUVLuxDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    val hasLux = envMetrics.lux != null && !envMetrics.lux!!.isNaN()
+    val hasUvLux = envMetrics.uv_lux != null && !envMetrics.uv_lux!!.isNaN()
 
     if (hasLux || hasUvLux) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -342,7 +344,7 @@ private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
                 }
             }
             if (hasUvLux) {
-                val uvLuxValue = envMetrics.uvLux!!
+                val uvLuxValue = envMetrics.uv_lux!!
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     MetricIndicator(Environment.UV_LUX.color)
                     Spacer(Modifier.width(4.dp))
@@ -358,9 +360,9 @@ private fun LuxUVLuxDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
 }
 
 @Composable
-private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
-    val hasVoltage = envMetrics.voltage != null && !envMetrics.voltage.isNaN()
-    val hasCurrent = envMetrics.current != null && !envMetrics.current.isNaN()
+private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
+    val hasVoltage = envMetrics.voltage != null && !envMetrics.voltage!!.isNaN()
+    val hasCurrent = envMetrics.current != null && !envMetrics.current!!.isNaN()
 
     if (hasVoltage || hasCurrent) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -385,9 +387,9 @@ private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
 }
 
 @Composable
-private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
+private fun GasCompositionDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     val iaqValue = envMetrics.iaq
-    val gasResistance = envMetrics.gasResistance
+    val gasResistance = envMetrics.gas_resistance
 
     if ((iaqValue != null && iaqValue != Int.MIN_VALUE) || (gasResistance?.isFinite() == true)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -420,7 +422,7 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
 }
 
 @Composable
-private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
+private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics) {
     envMetrics.radiation?.let { radiation ->
         if (!radiation.isNaN() && radiation > 0f) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -442,8 +444,8 @@ private fun EnvironmentMetricsCard(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val envMetrics = telemetry.environmentMetrics
-    val time = telemetry.time * MS_PER_SEC
+    val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
+    val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -466,8 +468,8 @@ private fun EnvironmentMetricsCard(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
-    val envMetrics = telemetry.environmentMetrics
-    val time = telemetry.time * MS_PER_SEC
+    val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
+    val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -494,27 +496,23 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEnvironmentMetricsContent() {
-    // Build a fake EnvironmentMetrics using the generated proto builder APIs
     val fakeEnvMetrics =
-        TelemetryProtos.EnvironmentMetrics.newBuilder()
-            .setTemperature(22.5f)
-            .setRelativeHumidity(55.0f)
-            .setBarometricPressure(1013.25f)
-            .setSoilMoisture(33)
-            .setSoilTemperature(18.0f)
-            .setLux(100.0f)
-            .setUvLux(100.0f)
-            .setVoltage(3.7f)
-            .setCurrent(0.12f)
-            .setIaq(100)
-            .setRadiation(0.15f)
-            .setGasResistance(1200.0f)
-            .build()
+        org.meshtastic.proto.EnvironmentMetrics(
+            temperature = 22.5f,
+            relative_humidity = 55.0f,
+            barometric_pressure = 1013.25f,
+            soil_moisture = 33,
+            soil_temperature = 18.0f,
+            lux = 100.0f,
+            uv_lux = 100.0f,
+            voltage = 3.7f,
+            current = 0.12f,
+            iaq = 100,
+            radiation = 0.15f,
+            gas_resistance = 1200.0f,
+        )
     val fakeTelemetry =
-        TelemetryProtos.Telemetry.newBuilder()
-            .setTime((System.currentTimeMillis() / 1000).toInt())
-            .setEnvironmentMetrics(fakeEnvMetrics)
-            .build()
+        Telemetry(time = (System.currentTimeMillis() / 1000).toInt(), environment_metrics = fakeEnvMetrics)
     MaterialTheme {
         Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) }
     }

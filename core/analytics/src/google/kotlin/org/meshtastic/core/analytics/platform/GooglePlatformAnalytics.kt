@@ -240,16 +240,18 @@ constructor(
             // Filter out normal coroutine cancellations
             if (throwable is CancellationException) return
 
-            // Only record non-fatal exceptions for actual Errors (or if a throwable is provided)
-            if (throwable != null) {
-                Firebase.crashlytics.recordException(throwable)
-            } else if (severity >= Severity.Error) {
-                Firebase.crashlytics.setCustomKeys {
-                    key(KEY_PRIORITY, severity.ordinal)
-                    key(KEY_TAG, tag)
-                    key(KEY_MESSAGE, message)
+            // Only record non-fatal exceptions for actual Errors (Severity.Error or Severity.Assert)
+            if (severity >= Severity.Error) {
+                if (throwable != null) {
+                    Firebase.crashlytics.recordException(throwable)
+                } else {
+                    Firebase.crashlytics.setCustomKeys {
+                        key(KEY_PRIORITY, severity.ordinal)
+                        key(KEY_TAG, tag)
+                        key(KEY_MESSAGE, message)
+                    }
+                    Firebase.crashlytics.recordException(Exception(message))
                 }
-                Firebase.crashlytics.recordException(Exception(message))
             }
         }
     }

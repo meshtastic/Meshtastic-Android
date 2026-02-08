@@ -60,10 +60,7 @@ import org.meshtastic.core.strings.new_channel_rcvd
 import org.meshtastic.core.strings.replace
 import org.meshtastic.core.strings.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
-import org.meshtastic.proto.AppOnlyProtos.ChannelSet
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.ChannelSet
 
 @Composable
 fun ScannedQrCodeDialog(
@@ -91,7 +88,7 @@ fun ScannedQrCodeDialog(
     onDismiss: () -> Unit,
     onConfirm: (ChannelSet) -> Unit,
 ) {
-    var shouldReplace by remember { mutableStateOf(incoming.hasLoraConfig()) }
+    var shouldReplace by remember { mutableStateOf(incoming.lora_config != null) }
 
     val channelSet =
         remember(shouldReplace) {
@@ -99,67 +96,65 @@ fun ScannedQrCodeDialog(
                 // When replacing, apply the incoming LoRa configuration but preserve certain
                 // locally safe fields such as MQTT flags and TX power. This prevents QR codes
                 // from unintentionally overriding device-specific power limits (e.g. E22 caps).
-                incoming.copy {
-                    loraConfig =
-                        loraConfig.copy {
-                            configOkToMqtt = channels.loraConfig.configOkToMqtt
-                            txPower = channels.loraConfig.txPower
-                        }
-                }
+                incoming.copy(
+                    lora_config =
+                    incoming.lora_config?.copy(
+                        config_ok_to_mqtt = channels.lora_config?.config_ok_to_mqtt ?: false,
+                        tx_power = channels.lora_config?.tx_power ?: 0,
+                    ),
+                )
             } else {
-                channels.copy {
-                    // To guarantee consistent ordering, using a LinkedHashSet which iterates through
-                    // its entries according to the order an item was *first* inserted.
-                    // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
-                    val result = LinkedHashSet(settings + incoming.settingsList)
-                    settings.clear()
-                    settings.addAll(result)
-                }
+                // To guarantee consistent ordering, using a LinkedHashSet which iterates through
+                // its entries according to the order an item was *first* inserted.
+                val result = (channels.settings + incoming.settings).distinct()
+                channels.copy(settings = result)
             }
         }
 
-    val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
+    val modemPresetName = Channel(loraConfig = channelSet.lora_config ?: Channel.default.loraConfig).name
 
     /* Holds selections made by the user */
     val channelSelections =
-        remember(channelSet) { mutableStateListOf(elements = Array(size = channelSet.settingsCount, init = { true })) }
+        remember(channelSet) { mutableStateListOf(elements = Array(size = channelSet.settings.size, init = { true })) }
 
     val selectedChannelSet =
-        channelSet.copy {
-            // When adding (not replacing), include all previous channels + selected new channels.
-            // Since 'channelSet.settings' already contains the merged distinct list, we just filter it.
-            val result =
-                settings.filterIndexed { i, _ ->
-                    val isExisting = !shouldReplace && i < channels.settingsCount
+        if (shouldReplace) {
+            channelSet.copy(
+                settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true },
+            )
+        } else {
+            channelSet.copy(
+                settings =
+                channelSet.settings.filterIndexed { i, _ ->
+                    val isExisting = i < channels.settings.size
                     isExisting || channelSelections.getOrNull(i) == true
-                }
-            settings.clear()
-            settings.addAll(result)
+                },
+            )
         }
 
     // Compute LoRa configuration changes when in replace mode
     val loraChanges =
         remember(shouldReplace, channels, incoming) {
-            if (shouldReplace && incoming.hasLoraConfig()) {
-                val current = channels.loraConfig
-                val new = incoming.loraConfig
+            if (shouldReplace && incoming.lora_config != null) {
+                val current = channels.lora_config
+                val new = incoming.lora_config
                 val changes = mutableListOf<String>()
 
-                if (current.hopLimit != new.hopLimit) {
-                    changes.add("Hop Limit: ${current.hopLimit} -> ${new.hopLimit}")
+                if (current?.hop_limit != new?.hop_limit) {
+                    changes.add("Hop Limit: ${current?.hop_limit} -> ${new?.hop_limit}")
                 }
-                if (current.getRegion() != new.getRegion()) {
-                    val currentRegionDesc = current.getRegion()?.name ?: "Unknown"
-                    val newRegionDesc = new.getRegion()?.name ?: "Unknown"
+                if (current?.region != new?.region) {
+                    val currentRegionDesc = current?.region?.name ?: "Unknown"
+                    val newRegionDesc = new?.region?.name ?: "Unknown"
                     changes.add("Region: $currentRegionDesc -> $newRegionDesc")
                 }
-                if (current.modemPreset != new.modemPreset) {
-                    val currentPresetDesc = ModemPreset.forNumber(current.modemPreset.number)?.name ?: "Unknown"
-                    val newPresetDesc = ModemPreset.forNumber(new.modemPreset.number)?.name ?: "Unknown"
+                if (current?.modem_preset != new?.modem_preset) {
+                    val currentPresetDesc = current?.modem_preset?.name ?: "Unknown"
+                    val newPresetDesc = new?.modem_preset?.name ?: "Unknown"
                     changes.add("Modem Preset: $currentPresetDesc -> $newPresetDesc")
                 }
-                if (current.usePreset != new.usePreset) {
-                    changes.add("Use Preset: ${current.usePreset} -> ${new.usePreset}")
+                if (current?.use_preset != new?.use_preset) {
+                    changes.add("Use Preset: ${current?.use_preset} -> ${new?.use_preset}")
                 }
 
                 changes
@@ -204,16 +199,16 @@ fun ScannedQrCodeDialog(
                     )
                 }
 
-                itemsIndexed(channelSet.settingsList) { index, channel ->
-                    val isExisting = !shouldReplace && index < channels.settingsCount
-                    val channelObj = Channel(channel, channelSet.loraConfig)
+                itemsIndexed(channelSet.settings) { index, channel ->
+                    val isExisting = !shouldReplace && index < channels.settings.size
+                    val channelObj = Channel(channel, channelSet.lora_config ?: Channel.default.loraConfig)
                     ChannelSelection(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
                         enabled = !isExisting,
                         isSelected = if (isExisting) true else channelSelections[index],
                         onSelected = {
-                            if (it || selectedChannelSet.settingsCount > 1) {
+                            if (it || selectedChannelSet.settings.size > 1) {
                                 channelSelections[index] = it
                             }
                         },
@@ -256,7 +251,7 @@ fun ScannedQrCodeDialog(
                         OutlinedButton(
                             onClick = { shouldReplace = true },
                             modifier = Modifier.height(48.dp).weight(1f),
-                            enabled = incoming.hasLoraConfig(),
+                            enabled = incoming.lora_config != null,
                             colors = if (shouldReplace) selectedColors else unselectedColors,
                         ) {
                             Text(text = stringResource(Res.string.replace))
@@ -285,7 +280,7 @@ fun ScannedQrCodeDialog(
                                 onDismiss()
                                 onConfirm(selectedChannelSet)
                             },
-                            enabled = selectedChannelSet.settingsCount in 1..8,
+                            enabled = selectedChannelSet.settings.size in 1..8,
                         ) {
                             Text(
                                 text = stringResource(Res.string.accept),
@@ -306,16 +301,8 @@ fun ScannedQrCodeDialog(
 @Composable
 private fun ScannedQrCodeDialogPreview() {
     ScannedQrCodeDialog(
-        channels =
-        channelSet {
-            settings.add(Channel.default.settings)
-            loraConfig = Channel.default.loraConfig
-        },
-        incoming =
-        channelSet {
-            settings.add(Channel.default.settings)
-            loraConfig = Channel.default.loraConfig
-        },
+        channels = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+        incoming = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
         onDismiss = {},
         onConfirm = {},
     )

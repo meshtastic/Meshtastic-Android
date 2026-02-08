@@ -21,12 +21,13 @@ import androidx.annotation.VisibleForTesting
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
-import com.google.protobuf.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
-import org.meshtastic.proto.MeshProtos.MeshPacket
-import org.meshtastic.proto.ModuleConfigProtos
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.StoreAndForwardProtos
+import org.meshtastic.proto.Data
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.StoreAndForward
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,15 +48,14 @@ constructor(
             lastRequest: Int,
             historyReturnWindow: Int,
             historyReturnMax: Int,
-        ): StoreAndForwardProtos.StoreAndForward {
-            val historyBuilder = StoreAndForwardProtos.StoreAndForward.History.newBuilder()
-            if (lastRequest > 0) historyBuilder.lastRequest = lastRequest
-            if (historyReturnWindow > 0) historyBuilder.window = historyReturnWindow
-            if (historyReturnMax > 0) historyBuilder.historyMessages = historyReturnMax
-            return StoreAndForwardProtos.StoreAndForward.newBuilder()
-                .setRr(StoreAndForwardProtos.StoreAndForward.RequestResponse.CLIENT_HISTORY)
-                .setHistory(historyBuilder)
-                .build()
+        ): StoreAndForward {
+            val history =
+                StoreAndForward.History(
+                    last_request = lastRequest.coerceAtLeast(0),
+                    window = historyReturnWindow.coerceAtLeast(0),
+                    history_messages = historyReturnMax.coerceAtLeast(0),
+                )
+            return StoreAndForward(rr = StoreAndForward.RequestResponse.CLIENT_HISTORY, history = history)
         }
 
         @VisibleForTesting
@@ -86,7 +86,7 @@ constructor(
     fun requestHistoryReplay(
         trigger: String,
         myNodeNum: Int?,
-        storeForwardConfig: ModuleConfigProtos.ModuleConfig.StoreForwardConfig?,
+        storeForwardConfig: ModuleConfig.StoreForwardConfig?,
         transport: String,
     ) {
         val address = activeDeviceAddress()
@@ -99,8 +99,8 @@ constructor(
         val lastRequest = meshPrefs.getStoreForwardLastRequest(address)
         val (window, max) =
             resolveHistoryRequestParameters(
-                storeForwardConfig?.historyReturnWindow ?: 0,
-                storeForwardConfig?.historyReturnMax ?: 0,
+                storeForwardConfig?.history_return_window ?: 0,
+                storeForwardConfig?.history_return_max ?: 0,
             )
 
         val request = buildStoreForwardHistoryRequest(lastRequest, window, max)
@@ -112,19 +112,11 @@ constructor(
 
         runCatching {
             packetHandler.sendToRadio(
-                MeshPacket.newBuilder()
-                    .apply {
-                        to = myNodeNum
-                        decoded =
-                            org.meshtastic.proto.MeshProtos.Data.newBuilder()
-                                .apply {
-                                    portnumValue = Portnums.PortNum.STORE_FORWARD_APP_VALUE
-                                    payload = ByteString.copyFrom(request.toByteArray())
-                                }
-                                .build()
-                        priority = MeshPacket.Priority.BACKGROUND
-                    }
-                    .build(),
+                MeshPacket(
+                    to = myNodeNum,
+                    decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = request.encode().toByteString()),
+                    priority = MeshPacket.Priority.BACKGROUND,
+                ),
             )
         }
             .onFailure { ex -> historyLog(Log.WARN, ex) { "requestHistory failed" } }

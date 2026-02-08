@@ -1,7 +1,7 @@
 jdk:
   - openjdk17
 before_install:
-  - ./gradlew :core:proto:generateGoogleReleaseProto
+  - ./gradlew --stop
 install:
-  - ./gradlew :core:api:publishToMavenLocal :core:model:publishToMavenLocal :core:proto:publishToMavenLocal -Pgoogle
+  - ./gradlew :core:proto:publishToMavenLocal :core:model:publishToMavenLocal :core:api:publishToMavenLocal --no-daemon --stacktrace -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseParallelGC"
 group: org.meshtastic

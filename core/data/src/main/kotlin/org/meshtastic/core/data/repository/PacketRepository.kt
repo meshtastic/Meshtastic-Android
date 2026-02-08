@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
@@ -34,8 +35,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.Portnums.PortNum
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
 class PacketRepository
@@ -184,6 +185,8 @@ constructor(
                 DataPacket.nodeNumToDefaultId(to)
             }
 
+        val hashByteString = hash.toByteString()
+
         packets.forEach { packet ->
             // For sent messages, from is stored as ID_LOCAL, but SFPP packet has node number
             val fromMatches =
@@ -199,8 +202,8 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-                val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
-                dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+                val updatedData = packet.data.copy(status = status, sfppHash = hashByteString, time = newTime)
+                dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
             }
         }
 
@@ -222,7 +225,8 @@ constructor(
                     return@forEach
                 }
                 val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-                val updatedReaction = reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime)
+                val updatedReaction =
+                    reaction.copy(status = status, sfpp_hash = hashByteString, timestamp = newTime)
                 dao.update(updatedReaction)
             }
         }
@@ -234,22 +238,23 @@ constructor(
         rxTime: Long = 0,
     ) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        dao.findPacketBySfppHash(hash)?.let { packet ->
+        val hashByteString = hash.toByteString()
+        dao.findPacketBySfppHash(hashByteString)?.let { packet ->
             // If it's already confirmed, don't downgrade it
             if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-            val updatedData = packet.data.copy(status = status, sfppHash = hash, time = newTime)
-            dao.update(packet.copy(data = updatedData, sfpp_hash = hash, received_time = newTime))
+            val updatedData = packet.data.copy(status = status, sfppHash = hashByteString, time = newTime)
+            dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
         }
 
-        dao.findReactionBySfppHash(hash)?.let { reaction ->
+        dao.findReactionBySfppHash(hashByteString)?.let { reaction ->
             if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
                 return@let
             }
             val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-            val updatedReaction = reaction.copy(status = status, sfpp_hash = hash, timestamp = newTime)
+            val updatedReaction = reaction.copy(status = status, sfpp_hash = hashByteString, timestamp = newTime)
             dao.update(updatedReaction)
         }
     }
@@ -339,8 +344,13 @@ constructor(
             dbManager.currentDb.value.packetDao().migrateChannelsByPSK(oldSettings, newSettings)
         }
 
+    suspend fun updateFilteredBySender(senderId: String, filtered: Boolean) {
+        val pattern = "%\"from\":\"${senderId}\"%"
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateFilteredBySender(pattern, filtered) }
+    }
+
     private fun org.meshtastic.core.database.dao.PacketDao.getAllWaypointsFlow(): Flow<List<Packet>> =
-        getAllPackets(PortNum.WAYPOINT_APP_VALUE)
+        getAllPackets(PortNum.WAYPOINT_APP.value)
 
     companion object {
         private const val CONTACTS_PAGE_SIZE = 30

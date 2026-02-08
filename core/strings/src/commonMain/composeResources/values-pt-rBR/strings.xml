@@ -77,7 +77,6 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Controla o LED piscando no dispositivo. Para a maioria dos dispositivos, isto controlará um dos até 4 LEDs, os LEDs do carregador e GPS não são controláveis.</string>
     <string name="config_device_transmitOverLora_summary">Se além de enviá-lo para MQTT e PhoneAPI, nosso NeighborInfo deve ser transmitido por LoRa. Não disponível em um canal com chave e nome padrão.</string>
     <!-- Position Config -->
-    <string name="channel">Canal</string>
     <string name="channel_name">Nome do canal</string>
     <string name="qr_code">Código QR</string>
     <string name="unknown_username">Nome desconhecido</string>
@@ -232,12 +231,6 @@
     <string name="wifi_qr_code_error">Formato de código QR da Credencial do WiFi Inválido</string>
     <string name="navigate_back">Voltar</string>
     <string name="battery">Bateria</string>
-    <string name="channel_utilization">Utilização do Canal</string>
-    <string name="air_utilization">Utilização do Ar</string>
-    <string name="temperature">Temperatura</string>
-    <string name="humidity">Umidade</string>
-    <string name="soil_temperature">Temperatura do Solo</string>
-    <string name="soil_moisture">Umidade do Solo</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Qtd de saltos</string>
     <string name="hops_away_template">Distância em Saltos: %1$d</string>
@@ -299,7 +292,6 @@
     <string name="meshtastic_low_battery_notifications">Notificações de bateria fraca</string>
     <string name="low_battery_title">Bateria fraca: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nós favoritos)</string>
-    <string name="baro_pressure">Pressão Barométrica</string>
     <string name="udp_config">Configuração UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Última vez: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
     <string name="toggle_my_position">Habilitar minha posição</string>

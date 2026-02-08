@@ -40,6 +40,7 @@ fun LastHeardInfo(
         modifier = modifier,
         icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
         contentDescription = stringResource(Res.string.node_sort_last_heard),
+        label = stringResource(Res.string.node_sort_last_heard),
         text = formatAgo(lastHeard),
         contentColor = contentColor,
     )

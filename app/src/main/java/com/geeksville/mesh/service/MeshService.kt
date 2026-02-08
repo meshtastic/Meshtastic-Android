@@ -49,6 +49,7 @@ import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -89,7 +90,7 @@ class MeshService : Service() {
 
     companion object {
         fun actionReceived(portNum: Int): String {
-            val portType = org.meshtastic.proto.Portnums.PortNum.forNumber(portNum)
+            val portType = PortNum.fromValue(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
             return com.geeksville.mesh.service.actionReceived(portStr)
         }
@@ -134,25 +135,46 @@ class MeshService : Service() {
 
         val notification = connectionManager.updateStatusNotification()
 
+        val foregroundServiceType =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
+                if (hasLocationPermission()) {
+                    types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
+                }
+                types
+            } else {
+                0
+            }
+
+        @Suppress("TooGenericExceptionCaught")
         try {
-            ServiceCompat.startForeground(
-                this,
-                SERVICE_NOTIFY_ID,
-                notification,
+            ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, foregroundServiceType)
+        } catch (ex: SecurityException) {
+            // On Android 14+ starting a location FGS from the background can fail with SecurityException
+            // if the app is not in an allowed state. Retry without the location type if that was requested.
+            val connectedDeviceOnly =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    var types = ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
-                    if (hasLocationPermission()) {
-                        types = types or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION
-                    }
-                    types
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
                 } else {
                     0
-                },
-            )
+                }
+            if (foregroundServiceType != connectedDeviceOnly) {
+                Logger.w(ex) {
+                    "Failed to start foreground service with location type, retrying with connectedDevice only"
+                }
+                try {
+                    ServiceCompat.startForeground(this, SERVICE_NOTIFY_ID, notification, connectedDeviceOnly)
+                } catch (retryEx: Exception) {
+                    Logger.e(retryEx) { "Failed to start foreground service even after retry" }
+                }
+            } else {
+                Logger.e(ex) { "SecurityException starting foreground service" }
+            }
         } catch (ex: Exception) {
             Logger.e(ex) { "Error starting foreground service" }
             return START_NOT_STICKY
         }
+
         return if (!wantForeground) {
             Logger.i { "Stopping mesh service because no device is selected" }
             ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
@@ -217,9 +239,7 @@ class MeshService : Service() {
             override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
             override fun getConfig(): ByteArray = toRemoteExceptions {
-                runBlocking {
-                    radioConfigRepository.localConfigFlow.first().toByteArray() ?: throw NoDeviceConfigException()
-                }
+                runBlocking { radioConfigRepository.localConfigFlow.first().encode() }
             }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
@@ -279,7 +299,7 @@ class MeshService : Service() {
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.channelSetFlow.first().toByteArray() }
+                runBlocking { radioConfigRepository.channelSetFlow.first().encode() }
             }
 
             override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()

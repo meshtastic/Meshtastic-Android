@@ -46,28 +46,28 @@ import org.meshtastic.core.strings.routing_error_rate_limit_exceeded
 import org.meshtastic.core.strings.routing_error_timeout
 import org.meshtastic.core.strings.routing_error_too_large
 import org.meshtastic.core.strings.unrecognized
-import org.meshtastic.proto.MeshProtos.Routing
+import org.meshtastic.proto.Routing
 
 @Suppress("CyclomaticComplexMethod")
 fun getStringResFrom(routingError: Int): StringResource = when (routingError) {
-    Routing.Error.NONE_VALUE -> Res.string.routing_error_none
-    Routing.Error.NO_ROUTE_VALUE -> Res.string.routing_error_no_route
-    Routing.Error.GOT_NAK_VALUE -> Res.string.routing_error_got_nak
-    Routing.Error.TIMEOUT_VALUE -> Res.string.routing_error_timeout
-    Routing.Error.NO_INTERFACE_VALUE -> Res.string.routing_error_no_interface
-    Routing.Error.MAX_RETRANSMIT_VALUE -> Res.string.routing_error_max_retransmit
-    Routing.Error.NO_CHANNEL_VALUE -> Res.string.routing_error_no_channel
-    Routing.Error.TOO_LARGE_VALUE -> Res.string.routing_error_too_large
-    Routing.Error.NO_RESPONSE_VALUE -> Res.string.routing_error_no_response
-    Routing.Error.DUTY_CYCLE_LIMIT_VALUE -> Res.string.routing_error_duty_cycle_limit
-    Routing.Error.BAD_REQUEST_VALUE -> Res.string.routing_error_bad_request
-    Routing.Error.NOT_AUTHORIZED_VALUE -> Res.string.routing_error_not_authorized
-    Routing.Error.PKI_FAILED_VALUE -> Res.string.routing_error_pki_failed
-    Routing.Error.PKI_UNKNOWN_PUBKEY_VALUE -> Res.string.routing_error_pki_unknown_pubkey
-    Routing.Error.ADMIN_BAD_SESSION_KEY_VALUE -> Res.string.routing_error_admin_bad_session_key
-    Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED_VALUE -> Res.string.routing_error_admin_public_key_unauthorized
-    Routing.Error.RATE_LIMIT_EXCEEDED_VALUE -> Res.string.routing_error_rate_limit_exceeded
-    Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY_VALUE -> Res.string.routing_error_pki_send_fail_public_key
+    Routing.Error.NONE.value -> Res.string.routing_error_none
+    Routing.Error.NO_ROUTE.value -> Res.string.routing_error_no_route
+    Routing.Error.GOT_NAK.value -> Res.string.routing_error_got_nak
+    Routing.Error.TIMEOUT.value -> Res.string.routing_error_timeout
+    Routing.Error.NO_INTERFACE.value -> Res.string.routing_error_no_interface
+    Routing.Error.MAX_RETRANSMIT.value -> Res.string.routing_error_max_retransmit
+    Routing.Error.NO_CHANNEL.value -> Res.string.routing_error_no_channel
+    Routing.Error.TOO_LARGE.value -> Res.string.routing_error_too_large
+    Routing.Error.NO_RESPONSE.value -> Res.string.routing_error_no_response
+    Routing.Error.DUTY_CYCLE_LIMIT.value -> Res.string.routing_error_duty_cycle_limit
+    Routing.Error.BAD_REQUEST.value -> Res.string.routing_error_bad_request
+    Routing.Error.NOT_AUTHORIZED.value -> Res.string.routing_error_not_authorized
+    Routing.Error.PKI_FAILED.value -> Res.string.routing_error_pki_failed
+    Routing.Error.PKI_UNKNOWN_PUBKEY.value -> Res.string.routing_error_pki_unknown_pubkey
+    Routing.Error.ADMIN_BAD_SESSION_KEY.value -> Res.string.routing_error_admin_bad_session_key
+    Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED.value -> Res.string.routing_error_admin_public_key_unauthorized
+    Routing.Error.RATE_LIMIT_EXCEEDED.value -> Res.string.routing_error_rate_limit_exceeded
+    Routing.Error.PKI_SEND_FAIL_PUBLIC_KEY.value -> Res.string.routing_error_pki_send_fail_public_key
     else -> Res.string.unrecognized
 }
 

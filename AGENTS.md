@@ -41,6 +41,10 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
         Text(text = stringResource(Res.string.your_string_key))
         ```
+-   **Dialogs:**
+    -   Use the centralized `MeshtasticDialog` for all alerts and confirmation boxes.
+    -   **Specialized Overloads:** Use `MeshtasticResourceDialog` (for resource-only content) or `MeshtasticTextDialog` (for mixed resource/text content) to reduce boilerplate.
+    -   **Location:** Defined in `core/ui/src/main/kotlin/org/meshtastic/core/ui/component/AlertDialogs.kt`.
 -   **Previews:** Create `@Preview` functions for your Composables to ensure they render correctly.
 
 ### B. Architecture & State

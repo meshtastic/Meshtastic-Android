@@ -80,9 +80,9 @@ import org.meshtastic.core.ui.icon.Warning
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
-import org.meshtastic.proto.AppOnlyProtos
-import org.meshtastic.proto.ChannelProtos.ChannelSettings
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config.LoRaConfig
 
 private const val PRECISE_POSITION_BITS = 32
 
@@ -279,15 +279,15 @@ fun SecurityIcon(
 
 /** Extension property to check if the channel uses a low entropy PSK (not securely encrypted). */
 val Channel.isLowEntropyKey: Boolean
-    get() = settings.psk.size() <= 1
+    get() = settings.psk.size <= 1
 
 /** Extension property to check if the channel has precise location enabled. */
 val Channel.isPreciseLocation: Boolean
-    get() = settings.moduleSettings.positionPrecision == PRECISE_POSITION_BITS
+    get() = settings.module_settings?.position_precision == PRECISE_POSITION_BITS
 
 /** Extension property to check if MQTT is enabled for the channel. */
 val Channel.isMqttEnabled: Boolean
-    get() = settings.uplinkEnabled
+    get() = settings.uplink_enabled ?: false
 
 /**
  * Overload for [SecurityIcon] that takes a [Channel] object to determine its security state.
@@ -343,7 +343,7 @@ fun SecurityIcon(
  */
 @Composable
 fun SecurityIcon(
-    channelSet: AppOnlyProtos.ChannelSet,
+    channelSet: ChannelSet,
     channelIndex: Int,
     baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
@@ -369,17 +369,19 @@ fun SecurityIcon(
  */
 @Composable
 fun SecurityIcon(
-    channelSet: AppOnlyProtos.ChannelSet,
+    channelSet: ChannelSet,
     channelName: String,
     baseContentDescription: String = stringResource(Res.string.security_icon_description),
     externalOnClick: (() -> Unit)? = null,
 ) {
     val channelByNameMap =
-        remember(channelSet) { channelSet.settingsList.associateBy { Channel(it, channelSet.loraConfig).name } }
+        remember(channelSet) {
+            channelSet.settings.associateBy { Channel(it, channelSet.lora_config ?: Channel.default.loraConfig).name }
+        }
 
     channelByNameMap[channelName]?.let { channelSetting ->
         SecurityIcon(
-            channel = Channel(channelSetting, channelSet.loraConfig),
+            channel = Channel(channelSetting, channelSet.lora_config ?: Channel.default.loraConfig),
             baseContentDescription = baseContentDescription,
             externalOnClick = externalOnClick,
         )

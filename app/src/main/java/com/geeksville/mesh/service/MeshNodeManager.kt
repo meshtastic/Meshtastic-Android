@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import okio.ByteString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.NodeEntity
@@ -32,17 +33,19 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.TelemetryProtos
-import org.meshtastic.proto.copy
-import org.meshtastic.proto.telemetry
-import org.meshtastic.proto.user
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.StatusMessage
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.User
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
+import org.meshtastic.proto.Position as ProtoPosition
 
-@Suppress("TooManyFunctions")
+@Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
 @Singleton
 class MeshNodeManager
 @Inject
@@ -93,8 +96,8 @@ constructor(
         val myNode = nodeDBbyNodeNum[mi.myNodeNum]
         return MyNodeInfo(
             myNodeNum = mi.myNodeNum,
-            hasGPS = myNode?.position?.latitudeI != 0,
-            model = mi.model ?: myNode?.user?.hwModel?.name,
+            hasGPS = (myNode?.position?.latitude_i ?: 0) != 0,
+            model = mi.model ?: myNode?.user?.hw_model?.name,
             firmwareVersion = mi.firmwareVersion,
             couldUpdate = mi.couldUpdate,
             shouldUpdate = mi.shouldUpdate,
@@ -122,18 +125,19 @@ constructor(
 
     fun getOrCreateNodeInfo(n: Int, channel: Int = 0): NodeEntity = nodeDBbyNodeNum.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
-        val defaultUser = user {
-            id = userId
-            longName = "Meshtastic ${userId.takeLast(n = 4)}"
-            shortName = userId.takeLast(n = 4)
-            hwModel = MeshProtos.HardwareModel.UNSET
-        }
+        val defaultUser =
+            User(
+                id = userId,
+                long_name = "Meshtastic ${userId.takeLast(n = 4)}",
+                short_name = userId.takeLast(n = 4),
+                hw_model = HardwareModel.UNSET,
+            )
 
         NodeEntity(
             num = n,
             user = defaultUser,
-            longName = defaultUser.longName,
-            shortName = defaultUser.shortName,
+            longName = defaultUser.long_name,
+            shortName = defaultUser.short_name,
             channel = channel,
         )
     }
@@ -154,25 +158,25 @@ constructor(
         }
     }
 
-    fun insertMetadata(nodeNum: Int, metadata: MeshProtos.DeviceMetadata) {
+    fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) {
         scope.handledLaunch { nodeRepository?.insertMetadata(MetadataEntity(nodeNum, metadata)) }
     }
 
-    fun handleReceivedUser(fromNum: Int, p: MeshProtos.User, channel: Int = 0, manuallyVerified: Boolean = false) {
+    fun handleReceivedUser(fromNum: Int, p: User, channel: Int = 0, manuallyVerified: Boolean = false) {
         updateNodeInfo(fromNum) {
-            val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
+            val newNode = (it.isUnknownUser && p.hw_model != HardwareModel.UNSET)
             val shouldPreserve = shouldPreserveExistingUser(it.user, p)
 
             if (shouldPreserve) {
-                it.longName = it.user.longName
-                it.shortName = it.user.shortName
+                it.longName = it.user.long_name
+                it.shortName = it.user.short_name
                 it.channel = channel
                 it.manuallyVerified = manuallyVerified
             } else {
-                val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
-                it.user = if (keyMatch) p else p.copy { publicKey = NodeEntity.ERROR_BYTE_STRING }
-                it.longName = p.longName
-                it.shortName = p.shortName
+                val keyMatch = !it.hasPKC || it.user.public_key == p.public_key
+                it.user = if (keyMatch) p else p.copy(public_key = ByteString.EMPTY)
+                it.longName = p.long_name
+                it.shortName = p.short_name
                 it.channel = channel
                 it.manuallyVerified = manuallyVerified
                 if (newNode) {
@@ -185,72 +189,74 @@ constructor(
     fun handleReceivedPosition(
         fromNum: Int,
         myNodeNum: Int,
-        p: MeshProtos.Position,
+        p: ProtoPosition,
         defaultTime: Long = System.currentTimeMillis(),
     ) {
-        if (myNodeNum == fromNum && p.latitudeI == 0 && p.longitudeI == 0) {
+        if (myNodeNum == fromNum && (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0) {
             Logger.d { "Ignoring nop position update for the local node" }
         } else {
             updateNodeInfo(fromNum) { it.setPosition(p, (defaultTime / TIME_MS_TO_S).toInt()) }
         }
     }
 
-    fun handleReceivedTelemetry(fromNum: Int, telemetry: TelemetryProtos.Telemetry) {
+    fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry) {
         updateNodeInfo(fromNum) { nodeEntity ->
             when {
-                telemetry.hasDeviceMetrics() -> nodeEntity.deviceTelemetry = telemetry
-                telemetry.hasEnvironmentMetrics() -> nodeEntity.environmentTelemetry = telemetry
-                telemetry.hasPowerMetrics() -> nodeEntity.powerTelemetry = telemetry
+                telemetry.device_metrics != null -> nodeEntity.deviceTelemetry = telemetry
+                telemetry.environment_metrics != null -> nodeEntity.environmentTelemetry = telemetry
+                telemetry.power_metrics != null -> nodeEntity.powerTelemetry = telemetry
             }
         }
     }
 
-    fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
+    fun handleReceivedPaxcounter(fromNum: Int, p: Paxcount) {
         updateNodeInfo(fromNum) { it.paxcounter = p }
     }
 
-    fun handleReceivedNodeStatus(fromNum: Int, s: MeshProtos.StatusMessage) {
+    fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage) {
         updateNodeInfo(fromNum) { it.nodeStatus = s.status }
     }
 
-    fun installNodeInfo(info: MeshProtos.NodeInfo, withBroadcast: Boolean = true) {
+    fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true) {
         updateNodeInfo(info.num, withBroadcast = withBroadcast) { entity ->
-            if (info.hasUser()) {
-                if (shouldPreserveExistingUser(entity.user, info.user)) {
-                    entity.longName = entity.user.longName
-                    entity.shortName = entity.user.shortName
+            val user = info.user
+            if (user != null) {
+                if (shouldPreserveExistingUser(entity.user, user)) {
+                    entity.longName = entity.user.long_name
+                    entity.shortName = entity.user.short_name
                 } else {
-                    entity.user =
-                        info.user.copy {
-                            if (isLicensed) clearPublicKey()
-                            if (info.viaMqtt) longName = "$longName (MQTT)"
-                        }
-                    entity.longName = entity.user.longName
-                    entity.shortName = entity.user.shortName
+                    var newUser = user.let { if (it.is_licensed) it.copy(public_key = ByteString.EMPTY) else it }
+                    if (info.via_mqtt) {
+                        newUser = newUser.copy(long_name = "${newUser.long_name} (MQTT)")
+                    }
+                    entity.user = newUser
+                    entity.longName = newUser.long_name
+                    entity.shortName = newUser.short_name
                 }
             }
-            if (info.hasPosition()) {
-                entity.position = info.position
-                entity.latitude = Position.degD(info.position.latitudeI)
-                entity.longitude = Position.degD(info.position.longitudeI)
+            val position = info.position
+            if (position != null) {
+                entity.position = position
+                entity.latitude = Position.degD(position.latitude_i ?: 0)
+                entity.longitude = Position.degD(position.longitude_i ?: 0)
             }
-            entity.lastHeard = info.lastHeard
-            if (info.hasDeviceMetrics()) {
-                entity.deviceTelemetry = telemetry { deviceMetrics = info.deviceMetrics }
+            entity.lastHeard = info.last_heard
+            if (info.device_metrics != null) {
+                entity.deviceTelemetry = Telemetry(device_metrics = info.device_metrics)
             }
             entity.channel = info.channel
-            entity.viaMqtt = info.viaMqtt
-            entity.hopsAway = if (info.hasHopsAway()) info.hopsAway else -1
-            entity.isFavorite = info.isFavorite
-            entity.isIgnored = info.isIgnored
-            entity.isMuted = info.isMuted
+            entity.viaMqtt = info.via_mqtt
+            entity.hopsAway = info.hops_away ?: -1
+            entity.isFavorite = info.is_favorite
+            entity.isIgnored = info.is_ignored
+            entity.isMuted = info.is_muted
         }
     }
 
-    private fun shouldPreserveExistingUser(existing: MeshProtos.User, incoming: MeshProtos.User): Boolean {
-        val isDefaultName = incoming.longName.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
-        val isDefaultHwModel = incoming.hwModel == MeshProtos.HardwareModel.UNSET
-        val hasExistingUser = existing.id.isNotEmpty() && existing.hwModel != MeshProtos.HardwareModel.UNSET
+    private fun shouldPreserveExistingUser(existing: User, incoming: User): Boolean {
+        val isDefaultName = (incoming.long_name).matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
+        val isDefaultHwModel = incoming.hw_model == HardwareModel.UNSET
+        val hasExistingUser = (existing.id).isNotEmpty() && existing.hw_model != HardwareModel.UNSET
         return hasExistingUser && isDefaultName && isDefaultHwModel
     }
 

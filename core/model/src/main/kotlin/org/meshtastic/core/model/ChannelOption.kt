@@ -18,9 +18,9 @@
 
 package org.meshtastic.core.model
 
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.RegionCode
+import org.meshtastic.proto.Config.LoRaConfig
+import org.meshtastic.proto.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Config.LoRaConfig.RegionCode
 import kotlin.math.floor
 
 /** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
@@ -40,8 +40,8 @@ private val ModemPreset.bandwidth: Float
         return 0f
     }
 
-private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (usePreset) {
-    modemPreset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
+private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (use_preset) {
+    modem_preset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
 } else {
     when (bandwidth) {
         31 -> .03125f
@@ -69,13 +69,13 @@ val LoRaConfig.numChannels: Int
     }
 
 internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
-    channelNum != 0 -> channelNum
+    channel_num != 0 -> channel_num
     numChannels == 0 -> 0
     else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
 }
 
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
-    if (overrideFrequency != 0f) return overrideFrequency + frequencyOffset
+    if ((override_frequency ?: 0f) != 0f) return (override_frequency ?: 0f) + (frequency_offset ?: 0f)
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
         (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)

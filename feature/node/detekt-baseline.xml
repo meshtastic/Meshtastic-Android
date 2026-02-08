@@ -1,11 +1,16 @@
-<?xml version="1.0" ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CommentWrapping:SignalMetrics.kt$Metric.SNR$/* Selected 12 as the max to get 4 equal vertical sections. */</ID>
-    <ID>LongMethod:EnvironmentMetrics.kt$@Composable fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -&gt; Unit)</ID>
+    <ID>CyclomaticComplexMethod:CompassViewModel.kt$CompassViewModel$@Suppress("ReturnCount") private fun calculatePositionalAccuracyMeters(): Float?</ID>
+    <ID>CyclomaticComplexMethod:DeviceMetrics.kt$@Suppress("LongMethod") @Composable private fun DeviceMetricsChart( modifier: Modifier = Modifier, telemetries: List&lt;Telemetry>, legendData: List&lt;LegendData>, vicoScrollState: VicoScrollState, selectedX: Double?, onPointSelected: (Double) -> Unit, )</ID>
+    <ID>CyclomaticComplexMethod:NodeDetailActions.kt$NodeDetailActions$fun handleNodeMenuAction(scope: CoroutineScope, action: NodeMenuAction)</ID>
+    <ID>CyclomaticComplexMethod:NodeDetailViewModel.kt$NodeDetailViewModel$fun handleNodeMenuAction(action: NodeMenuAction)</ID>
+    <ID>CyclomaticComplexMethod:PowerMetrics.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit)</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1000L</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
     <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
+    <ID>TooGenericExceptionCaught:PaxMetrics.kt$e: Exception</ID>
+    <ID>UnusedPrivateProperty:NodeDetailScreen.kt$val loadingMessage = stringResource(Res.string.loading)</ID>
   </CurrentIssues>
 </SmellBaseline>

@@ -25,7 +25,6 @@
     <string name="node_sort_distance">מרחק</string>
     <string name="node_sort_hops_away">דלג קדימה</string>
     <!-- Position Config -->
-    <string name="channel">ערוץ</string>
     <string name="channel_name">שם הערוץ</string>
     <string name="qr_code">קוד QR</string>
     <string name="unknown_username">שם המשתמש אינו מוכר</string>

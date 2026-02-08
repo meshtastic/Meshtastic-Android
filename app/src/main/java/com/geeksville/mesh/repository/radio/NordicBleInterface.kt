@@ -37,7 +37,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
@@ -49,6 +48,7 @@ import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
+import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -78,12 +78,12 @@ constructor(
 ) : IRadioInterface {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
-        Logger.e(throwable) { "[$address] Uncaught exception in connectionScope" }
+        Logger.w(throwable) { "[$address] Uncaught exception in connectionScope" }
         serviceScope.launch {
             try {
                 peripheral?.disconnect()
             } catch (e: Exception) {
-                Logger.e(e) { "[$address] Failed to disconnect in exception handler" }
+                Logger.w(e) { "[$address] Failed to disconnect in exception handler" }
             }
         }
         service.onDisconnect(BleError.from(throwable))
@@ -116,6 +116,10 @@ constructor(
             val packet =
                 try {
                     fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
+                } catch (e: InvalidAttributeException) {
+                    Logger.w(e) { "[$address] Attribute invalidated during read, clearing characteristics" }
+                    handleInvalidAttribute(e)
+                    null
                 } catch (e: Exception) {
                     Logger.w(e) { "[$address] Error reading fromRadioCharacteristic (likely disconnected)" }
                     null
@@ -153,11 +157,6 @@ constructor(
                     dispatchPacket(packet)
                 }
                 .catch { ex -> Logger.w(ex) { "[$address] Exception while draining packet queue" } }
-                .onCompletion {
-                    if (drainedCount > 0) {
-                        Logger.d { "[$address] Drained $drainedCount packets from packet queue" }
-                    }
-                }
                 .collect()
         }
     }
@@ -184,7 +183,8 @@ constructor(
                 }
             } catch (e: Exception) {
                 val failureTime = System.currentTimeMillis() - connectionStartTime
-                Logger.e(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
+                // BLE connection errors are common and often transient
+                Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
                 service.onDisconnect(BleError.from(e))
             }
         }
@@ -226,10 +226,7 @@ constructor(
                 .onEach { state ->
                     Logger.i { "[$address] BLE connection state changed to $state" }
                     if (state is ConnectionState.Disconnected) {
-                        toRadioCharacteristic = null
-                        fromNumCharacteristic = null
-                        fromRadioCharacteristic = null
-                        logRadioCharacteristic = null
+                        clearCharacteristics()
 
                         val uptime =
                             if (connectionStartTime > 0) {
@@ -301,11 +298,11 @@ constructor(
                     }
                 }
                 .catch { e ->
-                    Logger.e(e) { "[$address] Service discovery failed" }
+                    Logger.w(e) { "[$address] Service discovery failed" }
                     try {
                         peripheral.disconnect()
                     } catch (e2: Exception) {
-                        Logger.e(e2) { "[$address] Failed to disconnect in discovery catch" }
+                        Logger.w(e2) { "[$address] Failed to disconnect in discovery catch" }
                     }
                     service.onDisconnect(BleError.from(e))
                 }
@@ -324,10 +321,9 @@ constructor(
                 connectionScope.launch { drainPacketQueueAndDispatch() }
             }
             ?.catch { e ->
-                Logger.e(e) { "[$address] Error subscribing to fromNumCharacteristic" }
+                Logger.w(e) { "[$address] Error subscribing to fromNumCharacteristic" }
                 service.onDisconnect(BleError.from(e))
             }
-            ?.onCompletion { cause -> Logger.d { "[$address] fromNum sub flow completed, cause=$cause" } }
             ?.launchIn(scope = connectionScope)
 
         retryCall { logRadioCharacteristic?.subscribe() }
@@ -337,10 +333,9 @@ constructor(
                 dispatchPacket(notifyBytes)
             }
             ?.catch { e ->
-                Logger.e(e) { "[$address] Error subscribing to logRadioCharacteristic" }
+                Logger.w(e) { "[$address] Error subscribing to logRadioCharacteristic" }
                 service.onDisconnect(BleError.from(e))
             }
-            ?.onCompletion { cause -> Logger.d { "[$address] logRadio sub flow completed, cause=$cause" } }
             ?.launchIn(scope = connectionScope)
     }
 
@@ -354,7 +349,7 @@ constructor(
             } catch (e: Exception) {
                 currentAttempt++
                 if (currentAttempt >= RETRY_COUNT) {
-                    Logger.e(e) { "[$address] BLE operation failed after $RETRY_COUNT attempts, giving up" }
+                    Logger.w(e) { "[$address] BLE operation failed after $RETRY_COUNT attempts, giving up" }
                     throw e
                 }
                 Logger.w(e) {
@@ -398,8 +393,11 @@ constructor(
                             characteristic.write(p, writeType = writeType)
                         }
                         drainPacketQueueAndDispatch()
+                    } catch (e: InvalidAttributeException) {
+                        Logger.w(e) { "[$address] Attribute invalidated during write, clearing characteristics" }
+                        handleInvalidAttribute(e)
                     } catch (e: Exception) {
-                        Logger.e(e) {
+                        Logger.w(e) {
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
                                 "$packetsSent successful writes"
                         }
@@ -433,6 +431,18 @@ constructor(
             peripheral?.disconnect()
             service.onDisconnect(true)
         }
+    }
+
+    private fun handleInvalidAttribute(e: InvalidAttributeException) {
+        clearCharacteristics()
+        service.onDisconnect(BleError.from(e))
+    }
+
+    private fun clearCharacteristics() {
+        toRadioCharacteristic = null
+        fromNumCharacteristic = null
+        fromRadioCharacteristic = null
+        logRadioCharacteristic = null
     }
 
     companion object {

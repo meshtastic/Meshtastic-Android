@@ -41,10 +41,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,13 +62,6 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 
-private enum class DialogType {
-    FAVORITE,
-    IGNORE,
-    MUTE,
-    REMOVE,
-}
-
 @Composable
 fun DeviceActions(
     node: Node,
@@ -84,38 +73,13 @@ fun DeviceActions(
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
 ) {
-    var displayedDialog by remember { mutableStateOf<DialogType?>(null) }
-
-    NodeActionDialogs(
-        node = node,
-        displayFavoriteDialog = displayedDialog == DialogType.FAVORITE,
-        displayIgnoreDialog = displayedDialog == DialogType.IGNORE,
-        displayMuteDialog = displayedDialog == DialogType.MUTE,
-        displayRemoveDialog = displayedDialog == DialogType.REMOVE,
-        onDismissMenuRequest = { displayedDialog = null },
-        onConfirmFavorite = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(it))) },
-        onConfirmIgnore = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(it))) },
-        onConfirmMute = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(it))) },
-        onConfirmRemove = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(it))) },
-    )
-
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SectionCard(title = Res.string.actions) {
-            PrimaryActionsRow(
-                node = node,
-                isLocal = isLocal,
-                onAction = onAction,
-                onFavoriteClick = { displayedDialog = DialogType.FAVORITE },
-            )
+            PrimaryActionsRow(node = node, isLocal = isLocal, onAction = onAction)
 
             if (!isLocal) {
                 SectionDivider(Modifier.padding(vertical = 8.dp))
-                ManagementActions(
-                    node = node,
-                    onIgnoreClick = { displayedDialog = DialogType.IGNORE },
-                    onMuteClick = { displayedDialog = DialogType.MUTE },
-                    onRemoveClick = { displayedDialog = DialogType.REMOVE },
-                )
+                ManagementActions(node = node, onAction = onAction)
             }
         }
 
@@ -132,12 +96,7 @@ fun DeviceActions(
 }
 
 @Composable
-private fun PrimaryActionsRow(
-    node: Node,
-    isLocal: Boolean,
-    onAction: (NodeDetailAction) -> Unit,
-    onFavoriteClick: () -> Unit,
-) {
+private fun PrimaryActionsRow(node: Node, isLocal: Boolean, onAction: (NodeDetailAction) -> Unit) {
     Row(
         modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -173,7 +132,10 @@ private fun PrimaryActionsRow(
         }
 
         if (!isLocal) {
-            IconToggleButton(checked = node.isFavorite, onCheckedChange = { onFavoriteClick() }) {
+            IconToggleButton(
+                checked = node.isFavorite,
+                onCheckedChange = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Favorite(node))) },
+            ) {
                 Icon(
                     imageVector = if (node.isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
                     contentDescription = stringResource(Res.string.favorite),
@@ -185,12 +147,7 @@ private fun PrimaryActionsRow(
 }
 
 @Composable
-private fun ManagementActions(
-    node: Node,
-    onIgnoreClick: () -> Unit,
-    onMuteClick: () -> Unit,
-    onRemoveClick: () -> Unit,
-) {
+private fun ManagementActions(node: Node, onAction: (NodeDetailAction) -> Unit) {
     Column {
         SwitchListItem(
             text = stringResource(Res.string.ignore),
@@ -201,7 +158,7 @@ private fun ManagementActions(
                 Icons.AutoMirrored.Default.VolumeUp
             },
             checked = node.isIgnored,
-            onClick = onIgnoreClick,
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Ignore(node))) },
         )
 
         if (node.capabilities.canMuteNode) {
@@ -214,7 +171,7 @@ private fun ManagementActions(
                     Icons.AutoMirrored.Default.VolumeUp
                 },
                 checked = node.isMuted,
-                onClick = onMuteClick,
+                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Mute(node))) },
             )
         }
 
@@ -224,7 +181,7 @@ private fun ManagementActions(
             trailingIcon = null,
             textColor = MaterialTheme.colorScheme.error,
             leadingIconTint = MaterialTheme.colorScheme.error,
-            onClick = onRemoveClick,
+            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.Remove(node))) },
         )
     }
 }

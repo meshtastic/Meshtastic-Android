@@ -14,52 +14,51 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.protobuf)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.wire)
     `maven-publish`
 }
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["googleRelease"])
-                artifactId = "core-proto"
-            }
+kotlin {
+    // Keep jvm() for desktop/server consumers
+    jvm()
+
+    // Override minSdk for ATAK compatibility (standard is 26)
+    androidLibrary { minSdk = 21 }
+
+    sourceSets { commonMain.dependencies { api(libs.wire.runtime) } }
+}
+
+wire {
+    sourcePath {
+        srcDir("src/main/proto")
+        srcDir("src/main/wire-includes")
+    }
+    kotlin {
+        // Flattens 'oneof' fields into nullable properties on the parent class.
+        // This removes the intermediate sealed classes, simplifying usage and reducing method count/binary size.
+        // Codebase is already written to use the nullable properties (e.g. packet.decoded vs
+        // packet.payload_variant.decoded).
+        boxOneOfsMinSize = 5000
+    }
+    root("meshtastic.*")
+    prune("meshtastic.MeshPacket#delayed")
+    prune("meshtastic.MeshPacket.Delayed")
+}
+
+// Modern KMP publication uses the project name as the artifactId by default.
+// We rename the publications to include the 'core-' prefix for consistency.
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        val baseId = artifactId
+        if (baseId == "proto") {
+            artifactId = "meshtastic-android-proto"
+        } else if (baseId.startsWith("proto-")) {
+            artifactId = baseId.replace("proto-", "meshtastic-android-proto-")
         }
     }
-}
-
-configure<LibraryExtension> {
-    namespace = "org.meshtastic.core.proto"
-
-    defaultConfig {
-        // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
-        minSdk = 21
-    }
-
-    publishing { singleVariant("googleRelease") { withSourcesJar() } }
-}
-
-// per protobuf-gradle-plugin docs, this is recommended for android
-protobuf {
-    protoc { artifact = libs.protobuf.protoc.get().toString() }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java") {}
-                create("kotlin") {}
-            }
-        }
-    }
-}
-
-dependencies {
-    // This needs to be API for consuming modules
-    api(libs.protobuf.kotlin)
 }

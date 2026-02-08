@@ -139,19 +139,15 @@
     <string name="position_packet">定位封包</string>
     <string name="broadcast_interval">Broadcast Interval</string>
     <string name="smart_position">智慧定位</string>
-    <string name="minimum_interval">最小間隔</string>
-    <string name="minimum_distance">最小距離</string>
     <string name="device_gps">裝置 GPS</string>
     <string name="fixed_position">固定位置</string>
     <string name="altitude">海拔高度</string>
-    <string name="update_interval">更新間隔</string>
     <string name="advanced_device_gps">裝置 GPS 進階功能設定</string>
     <string name="gps_receive_gpio">GPS 接收腳位</string>
     <string name="gps_transmit_gpio">GPS 傳送腳位</string>
     <string name="gps_en_gpio">GPS 啟用腳位</string>
     <string name="gpio">腳位</string>
     <string name="debug">调试</string>
-    <string name="channel">頻道</string>
     <string name="channel_name">頻道名稱</string>
     <string name="qr_code">QRCODE</string>
     <string name="unknown_username">未知的使用者名稱</string>
@@ -322,12 +318,6 @@
     <string name="wifi_qr_code_error">錯誤的 WiFi 驗證QR code格式</string>
     <string name="navigate_back">返回上一頁</string>
     <string name="battery">電池</string>
-    <string name="channel_utilization">頻道使用量</string>
-    <string name="air_utilization">無線通道利用率</string>
-    <string name="temperature">溫度</string>
-    <string name="humidity">濕度</string>
-    <string name="soil_temperature">環境溫度</string>
-    <string name="soil_moisture">環境濕度</string>
     <string name="logs">系統記錄</string>
     <string name="hops_away">節點距</string>
     <string name="hops_away_template">經過節點數:%1$d</string>
@@ -396,7 +386,6 @@
     <string name="meshtastic_low_battery_notifications">低電量通知</string>
     <string name="low_battery_title">低電量:%1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低電量通知(收藏節點)</string>
-    <string name="baro_pressure">氣壓</string>
     <string name="udp_enabled">已啟用</string>
     <string name="udp_broadcast">UDP 廣播</string>
     <string name="udp_config">UDP設置</string>
@@ -908,4 +897,5 @@
     <string name="interval_unset">取消設定</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="filter_show_count"></string>
 </resources>

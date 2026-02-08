@@ -17,8 +17,8 @@
 package org.meshtastic.core.model.util
 
 import org.meshtastic.core.model.BuildConfig
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.MeshPacket
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users or positions. But
@@ -35,28 +35,17 @@ fun Any?.anonymize(maxLen: Int = 3) = if (this != null) ("..." + this.toString()
 // A toString that makes sure all newlines are removed (for nice logging).
 fun Any.toOneLineString() = this.toString().replace('\n', ' ')
 
-fun ConfigProtos.Config.toOneLineString(): String {
-    val redactedFields = """(wifi_psk:|public_key:|private_key:|admin_key:)\s*".*"""
-    return this.toString()
-        .replace(redactedFields.toRegex()) { "${it.groupValues[1]} \"[REDACTED]\"" }
-        .replace('\n', ' ')
+fun Config.toOneLineString(): String {
+    // Wire toString uses field=value format
+    val redactedFields = """(wifi_psk|public_key|private_key|admin_key)=[^,}]+"""
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 
-fun MeshProtos.MeshPacket.toOneLineString(): String {
-    val redactedFields = """(public_key:|private_key:|admin_key:)\s*".*""" // Redact keys
-    return this.toString()
-        .replace(redactedFields.toRegex()) { "${it.groupValues[1]} \"[REDACTED]\"" }
-        .replace('\n', ' ')
+fun MeshPacket.toOneLineString(): String {
+    val redactedFields = """(public_key|private_key|admin_key)=[^,}]+""" // Redact keys
+    return this.toString().replace(redactedFields.toRegex()) { "${it.groupValues[1]}=[REDACTED]" }.replace('\n', ' ')
 }
 
-fun MeshProtos.toOneLineString(): String {
-    val redactedFields = """(public_key:|private_key:|admin_key:)\s*".*""" // Redact keys
-    return this.toString()
-        .replace(redactedFields.toRegex()) { "${it.groupValues[1]} \"[REDACTED]\"" }
-        .replace('\n', ' ')
-}
-
-// Return a one line string version of an object (but if a release build, just say 'might be PII)
 fun Any.toPIIString() = if (!BuildConfig.DEBUG) {
     "<PII?>"
 } else {

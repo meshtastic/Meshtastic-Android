@@ -26,8 +26,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.ToRadio
+import org.meshtastic.proto.MqttClientProxyMessage
+import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -48,9 +48,7 @@ constructor(
         if (enabled && proxyToClientEnabled) {
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
-                    .onEach { message ->
-                        packetHandler.sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
-                    }
+                    .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
                     .catch { throwable -> serviceRepository.setErrorMessage("MqttClientProxy failed: $throwable") }
                     .launchIn(scope)
         }
@@ -64,18 +62,18 @@ constructor(
         }
     }
 
-    fun handleMqttProxyMessage(message: MeshProtos.MqttClientProxyMessage) {
-        Logger.d { "[mqttClientProxyMessage] ${message.topic}" }
-        with(message) {
-            when (payloadVariantCase) {
-                MeshProtos.MqttClientProxyMessage.PayloadVariantCase.TEXT -> {
-                    mqttRepository.publish(topic, text.encodeToByteArray(), retained)
-                }
-                MeshProtos.MqttClientProxyMessage.PayloadVariantCase.DATA -> {
-                    mqttRepository.publish(topic, data.toByteArray(), retained)
-                }
-                else -> {}
+    fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
+        val topic = message.topic ?: ""
+        Logger.d { "[mqttClientProxyMessage] $topic" }
+        val retained = message.retained == true
+        when {
+            message.text != null -> {
+                mqttRepository.publish(topic, message.text!!.encodeToByteArray(), retained)
             }
+            message.data_ != null -> {
+                mqttRepository.publish(topic, message.data_!!.toByteArray(), retained)
+            }
+            else -> {}
         }
     }
 }

@@ -20,7 +20,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -30,12 +29,10 @@ import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +59,7 @@ import org.meshtastic.core.strings.secondary_no_telemetry
 import org.meshtastic.core.strings.security_icon_help_dismiss
 import org.meshtastic.core.strings.uplink_enabled
 import org.meshtastic.core.strings.uplink_feature_description
+import org.meshtastic.core.ui.component.MeshtasticDialog
 
 @Composable
 internal fun ChannelLegend(onClick: () -> Unit) {
@@ -109,10 +107,10 @@ internal enum class ChannelIcons(
 
 @Composable
 internal fun ChannelLegendDialog(capabilities: Capabilities, onDismiss: () -> Unit) {
-    AlertDialog(
-        modifier = Modifier.fillMaxSize(),
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.channel_features)) },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.channel_features),
+        dismissText = stringResource(Res.string.security_icon_help_dismiss),
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -150,15 +148,6 @@ internal fun ChannelLegendDialog(capabilities: Capabilities, onDismiss: () -> Un
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 IconDefinitions()
-            }
-        },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                TextButton(onClick = onDismiss) { Text(stringResource(Res.string.security_icon_help_dismiss)) }
             }
         },
     )

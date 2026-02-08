@@ -31,7 +31,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import org.meshtastic.core.api.MeshtasticIntent
 import org.meshtastic.core.service.IMeshService
 
 private const val TAG: String = "MeshServiceExample"
@@ -63,6 +71,7 @@ class MainActivity : ComponentActivity() {
     private val meshtasticReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
+                Log.d(TAG, "BroadcastReceiver onReceive: ${intent?.action}")
                 intent?.let { viewModel.handleIncomingIntent(it) }
             }
         }
@@ -75,22 +84,29 @@ class MainActivity : ComponentActivity() {
 
         val intentFilter =
             IntentFilter().apply {
-                addAction("com.geeksville.mesh.NODE_CHANGE")
-                addAction("com.geeksville.mesh.CONNECTION_CHANGED")
-                addAction("com.geeksville.mesh.MESH_CONNECTED")
-                addAction("com.geeksville.mesh.MESH_DISCONNECTED")
-                addAction("com.geeksville.mesh.MESSAGE_STATUS")
-                addAction("com.geeksville.mesh.RECEIVED.TEXT_MESSAGE_APP")
+                addAction(MeshtasticIntent.ACTION_NODE_CHANGE)
+                addAction(MeshtasticIntent.ACTION_CONNECTION_CHANGED)
+                addAction(MeshtasticIntent.ACTION_MESH_CONNECTED)
+                addAction(MeshtasticIntent.ACTION_MESH_DISCONNECTED)
+                addAction(MeshtasticIntent.ACTION_MESSAGE_STATUS)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_POSITION_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_TELEMETRY_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_NODEINFO_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_ATAK_PLUGIN)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_ATAK_FORWARDER)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_DETECTION_SENSOR_APP)
+                addAction(MeshtasticIntent.ACTION_RECEIVED_PRIVATE_APP)
             }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(meshtasticReceiver, intentFilter, RECEIVER_NOT_EXPORTED)
+            registerReceiver(meshtasticReceiver, intentFilter, RECEIVER_EXPORTED)
         } else {
             @Suppress("UnspecifiedRegisterReceiverFlag")
             registerReceiver(meshtasticReceiver, intentFilter)
         }
 
-        setContent { MaterialTheme { MainScreen(viewModel) } }
+        setContent { ExampleTheme { MainScreen(viewModel) } }
     }
 
     override fun onDestroy() {
@@ -104,8 +120,6 @@ class MainActivity : ComponentActivity() {
             Log.i(TAG, "Attempting to bind to Mesh Service...")
             val intent = Intent("com.geeksville.mesh.Service")
 
-            // Query the package manager to find an app that handles this service action.
-            // This is more resilient than hardcoding a package name, which might change with flavors.
             val resolveInfo =
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     packageManager.queryIntentServices(intent, PackageManager.ResolveInfoFlags.of(0))
@@ -143,4 +157,19 @@ class MainActivity : ComponentActivity() {
             meshService = null
         }
     }
+}
+
+@Composable
+fun ExampleTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    val colorScheme =
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+                val context = LocalContext.current
+                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            }
+            darkTheme -> darkColorScheme()
+            else -> lightColorScheme()
+        }
+
+    MaterialTheme(colorScheme = colorScheme, content = content)
 }

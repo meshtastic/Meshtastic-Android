@@ -58,7 +58,6 @@ import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -116,9 +115,6 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.app_too_old
 import org.meshtastic.core.strings.bottom_nav_settings
-import org.meshtastic.core.strings.client_notification
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.compromised_keys
 import org.meshtastic.core.strings.connected
 import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.connections
@@ -135,9 +131,8 @@ import org.meshtastic.core.strings.should_update
 import org.meshtastic.core.strings.should_update_firmware
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.view_on_map
-import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.Map
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -148,9 +143,10 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
+import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
+import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.core.ui.util.toMessageRes
-import org.meshtastic.feature.node.metrics.annotateTraceroute
-import org.meshtastic.proto.MeshProtos
 
 enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
     Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -198,63 +194,57 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     uIViewModel.AddNavigationTrackingEffect(navController)
 
     VersionChecks(uIViewModel)
+
     val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
     alertDialogState?.let { state ->
-        if (state.choices.isNotEmpty()) {
-            MultipleChoiceAlertDialog(
-                title = state.title,
-                message = state.message,
-                choices = state.choices,
-                onDismissRequest = { state.onDismiss?.let { it() } },
-            )
-        } else {
-            SimpleAlertDialog(
-                title = state.title,
-                message = state.message,
-                html = state.html,
-                onConfirmRequest = { state.onConfirm?.let { it() } },
-                onDismissRequest = { state.onDismiss?.let { it() } },
-            )
-        }
-    }
+        val title = state.title ?: state.titleRes?.let { stringResource(it) } ?: ""
+        val message = state.message ?: state.messageRes?.let { stringResource(it) }
+        val confirmText = state.confirmText ?: state.confirmTextRes?.let { stringResource(it) }
+        val dismissText = state.dismissText ?: state.dismissTextRes?.let { stringResource(it) }
 
-    val clientNotification by uIViewModel.clientNotification.collectAsStateWithLifecycle()
-    clientNotification?.let { notification ->
-        var message = notification.message
-        val compromisedKeys =
-            if (notification.hasLowEntropyKey() || notification.hasDuplicatedPublicKey()) {
-                message = stringResource(Res.string.compromised_keys)
-                true
-            } else {
-                false
-            }
-        SimpleAlertDialog(
-            title = Res.string.client_notification,
-            text = { Text(text = message) },
-            onConfirm = {
-                if (compromisedKeys) {
-                    navController.navigate(SettingsRoutes.Security)
+        MeshtasticDialog(
+            title = title,
+            message = message,
+            html = state.html,
+            icon = state.icon,
+            text = {
+                val composableMsg = state.composableMessage
+                if (composableMsg != null) {
+                    composableMsg.Content()
+                } else {
+                    // message is handled internally by MeshtasticDialog
                 }
-                uIViewModel.clearClientNotification(notification)
             },
-            onDismiss = { uIViewModel.clearClientNotification(notification) },
+            confirmText = confirmText,
+            onConfirm = state.onConfirm,
+            dismissText = dismissText,
+            onDismiss = state.onDismiss,
+            choices = state.choices,
+            dismissable = state.dismissable,
         )
     }
 
-    val traceRouteResponse by uIViewModel.tracerouteResponse.observeAsState()
-    var tracerouteMapError by remember { mutableStateOf<StringResource?>(null) }
+    val traceRouteResponse by uIViewModel.tracerouteResponse.collectAsStateWithLifecycle(null)
     var dismissedTracerouteRequestId by remember { mutableStateOf<Int?>(null) }
     traceRouteResponse
         ?.takeIf { it.requestId != dismissedTracerouteRequestId }
         ?.let { response ->
-            SimpleAlertDialog(
-                title = Res.string.traceroute,
-                text = {
+            uIViewModel.showAlert(
+                titleRes = Res.string.traceroute,
+                composableMessage = {
                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                        Text(text = annotateTraceroute(response.message))
+                        Text(
+                            text =
+                            annotateTraceroute(
+                                response.message,
+                                statusGreen = colorScheme.StatusGreen,
+                                statusYellow = colorScheme.StatusYellow,
+                                statusOrange = colorScheme.StatusOrange,
+                            ),
+                        )
                     }
                 },
-                confirmText = stringResource(Res.string.view_on_map),
+                confirmTextRes = Res.string.view_on_map,
                 onConfirm = {
                     val availability =
                         uIViewModel.tracerouteMapAvailability(
@@ -272,120 +262,17 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                             ),
                         )
                     } else {
-                        tracerouteMapError = errorRes
+                        uIViewModel.showAlert(titleRes = Res.string.traceroute, messageRes = errorRes)
                         uIViewModel.clearTracerouteResponse()
                     }
                 },
-                dismissText = stringResource(Res.string.okay),
+                dismissTextRes = Res.string.okay,
                 onDismiss = {
                     uIViewModel.clearTracerouteResponse()
                     dismissedTracerouteRequestId = null
                 },
             )
         }
-    tracerouteMapError?.let { res ->
-        SimpleAlertDialog(
-            title = Res.string.traceroute,
-            text = { Text(text = stringResource(res)) },
-            dismissText = stringResource(Res.string.close),
-            onDismiss = { tracerouteMapError = null },
-        )
-    }
-    // FIXME: uncomment and update Capabilities.kt when working better
-    //
-    //    val neighborInfoResponse by uIViewModel.neighborInfoResponse.observeAsState()
-    //    neighborInfoResponse?.let { response ->
-    //        SimpleAlertDialog(
-    //            title = Res.string.neighbor_info,
-    //            text = {
-    //                Column(modifier = Modifier.fillMaxWidth()) {
-    //                    fun tryParseNeighborInfo(input: String): MeshProtos.NeighborInfo? {
-    //                        // First, try parsing directly from raw bytes of the string
-    //                        var neighborInfo: MeshProtos.NeighborInfo? =
-    //                            runCatching { MeshProtos.NeighborInfo.parseFrom(input.toByteArray()) }.getOrNull()
-    //
-    //                        if (neighborInfo == null) {
-    //                            // Next, try to decode a hex dump embedded as text (e.g., "AA BB CC ...")
-    //                            val hexPairs = Regex("""\b[0-9A-Fa-f]{2}\b""").findAll(input).map { it.value
-    // }.toList()
-    //                            @Suppress("detekt:MagicNumber") // byte offsets
-    //                            if (hexPairs.size >= 4) {
-    //                                val bytes = hexPairs.map { it.toInt(16).toByte() }.toByteArray()
-    //                                neighborInfo = runCatching { MeshProtos.NeighborInfo.parseFrom(bytes)
-    // }.getOrNull()
-    //                            }
-    //                        }
-    //
-    //                        return neighborInfo
-    //                    }
-    //
-    //                    val parsed = tryParseNeighborInfo(response)
-    //                    if (parsed != null) {
-    //                        fun fmtNode(nodeNum: Int): String = "!%08x".format(nodeNum)
-    //                        Text(text = "NeighborInfo:", style = MaterialTheme.typography.bodyMedium)
-    //                        Text(
-    //                            text = "node_id: ${fmtNode(parsed.nodeId)}",
-    //                            style = MaterialTheme.typography.bodySmall,
-    //                            modifier = Modifier.padding(top = 8.dp),
-    //                        )
-    //                        Text(
-    //                            text = "last_sent_by_id: ${fmtNode(parsed.lastSentById)}",
-    //                            style = MaterialTheme.typography.bodySmall,
-    //                            modifier = Modifier.padding(top = 2.dp),
-    //                        )
-    //                        Text(
-    //                            text = "node_broadcast_interval_secs: ${parsed.nodeBroadcastIntervalSecs}",
-    //                            style = MaterialTheme.typography.bodySmall,
-    //                            modifier = Modifier.padding(top = 2.dp),
-    //                        )
-    //                        if (parsed.neighborsCount > 0) {
-    //                            Text(
-    //                                text = "neighbors:",
-    //                                style = MaterialTheme.typography.bodySmall,
-    //                                modifier = Modifier.padding(top = 4.dp),
-    //                            )
-    //                            parsed.neighborsList.forEach { n ->
-    //                                Text(
-    //                                    text = "  - node_id: ${fmtNode(n.nodeId)} snr: ${n.snr}",
-    //                                    style = MaterialTheme.typography.bodySmall,
-    //                                    modifier = Modifier.padding(start = 8.dp),
-    //                                )
-    //                            }
-    //                        }
-    //                    } else {
-    //                        val rawBytes = response.toByteArray()
-    //
-    //                        @Suppress("detekt:MagicNumber") // byte offsets
-    //                        val isBinary = response.any { it.code < 32 && it != '\n' && it != '\r' && it != '\t' }
-    //                        if (isBinary) {
-    //                            val hexString = rawBytes.joinToString(" ") { "%02X".format(it) }
-    //                            Text(
-    //                                text = "Binary data (hex view):",
-    //                                style = MaterialTheme.typography.bodyMedium,
-    //                                modifier = Modifier.padding(bottom = 4.dp),
-    //                            )
-    //                            Text(
-    //                                text = hexString,
-    //                                style =
-    //                                MaterialTheme.typography.bodyMedium.copy(
-    //                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-    //                                ),
-    //                                modifier = Modifier.padding(bottom = 8.dp).fillMaxWidth(),
-    //                            )
-    //                        } else {
-    //                            Text(
-    //                                text = response,
-    //                                style = MaterialTheme.typography.bodyMedium,
-    //                                modifier = Modifier.padding(bottom = 8.dp).fillMaxWidth(),
-    //                            )
-    //                        }
-    //                    }
-    //                }
-    //            },
-    //            dismissText = stringResource(Res.string.okay),
-    //            onDismiss = { uIViewModel.clearNeighborInfoResponse() },
-    //        )
-    //    }
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
@@ -605,18 +492,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
         viewModel.latestStableFirmwareRelease.collectAsStateWithLifecycle(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
         if (connectionState == ConnectionState.Connected) {
-            firmwareEdition?.let { edition ->
-                Logger.d { "FirmwareEdition: ${edition.name}" }
-                when (edition) {
-                    MeshProtos.FirmwareEdition.VANILLA -> {
-                        // Handle any specific logic for VANILLA firmware edition if needed
-                    }
-
-                    else -> {
-                        // Handle other firmware editions if needed
-                    }
-                }
-            }
+            firmwareEdition?.let { edition -> Logger.d { "FirmwareEdition: ${edition.name}" } }
         }
     }
 
@@ -639,9 +515,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
                 if (isOld) {
                     Logger.w { "[FW_CHECK] App too old - showing update prompt" }
                     viewModel.showAlert(
-                        getString(Res.string.app_too_old),
-                        getString(Res.string.must_update),
-                        dismissable = false,
+                        titleRes = Res.string.app_too_old,
+                        messageRes = Res.string.must_update,
                         onConfirm = {
                             val service = viewModel.meshService ?: return@showAlert
                             MeshService.changeDeviceAddress(context, service, "n")
@@ -667,7 +542,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
                             viewModel.showAlert(
                                 title = title,
                                 html = message,
-                                dismissable = false,
                                 onConfirm = {
                                     val service = viewModel.meshService ?: return@showAlert
                                     MeshService.changeDeviceAddress(context, service, "n")
@@ -680,7 +554,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                             }
                             val title = getString(Res.string.should_update_firmware)
                             val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
-                            viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                            viewModel.showAlert(title = title, message = message, onConfirm = {})
                         } else {
                             Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                         }

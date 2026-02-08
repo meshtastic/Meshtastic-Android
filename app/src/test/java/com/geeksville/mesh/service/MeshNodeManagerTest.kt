@@ -26,8 +26,9 @@ import org.junit.Test
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.user
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
 
 class MeshNodeManagerTest {
 
@@ -49,73 +50,51 @@ class MeshNodeManagerTest {
 
         assertNotNull(result)
         assertEquals(nodeNum, result.num)
-        assertTrue(result.user.longName.startsWith("Meshtastic"))
+        assertTrue(result.user.long_name?.startsWith("Meshtastic") == true)
         assertEquals(DataPacket.nodeNumToDefaultId(nodeNum), result.user.id)
     }
 
     @Test
     fun `handleReceivedUser preserves existing user if incoming is default`() {
         val nodeNum = 1234
-        val existingUser = user {
-            id = "!12345678"
-            longName = "My Custom Name"
-            shortName = "MCN"
-            hwModel = MeshProtos.HardwareModel.TLORA_V2
-        }
+        val existingUser =
+            User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
 
         // Setup existing node
         nodeManager.updateNodeInfo(nodeNum) { it.user = existingUser }
 
-        val incomingDefaultUser = user {
-            id = "!12345678"
-            longName = "Meshtastic 5678"
-            shortName = "5678"
-            hwModel = MeshProtos.HardwareModel.UNSET
-        }
+        val incomingDefaultUser =
+            User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
         nodeManager.handleReceivedUser(nodeNum, incomingDefaultUser)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals("My Custom Name", result!!.user.longName)
-        assertEquals(MeshProtos.HardwareModel.TLORA_V2, result.user.hwModel)
+        assertEquals("My Custom Name", result!!.user.long_name)
+        assertEquals(HardwareModel.TLORA_V2, result.user.hw_model)
     }
 
     @Test
     fun `handleReceivedUser updates user if incoming is higher detail`() {
         val nodeNum = 1234
-        val existingUser = user {
-            id = "!12345678"
-            longName = "Meshtastic 5678"
-            shortName = "5678"
-            hwModel = MeshProtos.HardwareModel.UNSET
-        }
+        val existingUser =
+            User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
         nodeManager.updateNodeInfo(nodeNum) { it.user = existingUser }
 
-        val incomingDetailedUser = user {
-            id = "!12345678"
-            longName = "Real User"
-            shortName = "RU"
-            hwModel = MeshProtos.HardwareModel.TLORA_V1
-        }
+        val incomingDetailedUser =
+            User(id = "!12345678", long_name = "Real User", short_name = "RU", hw_model = HardwareModel.TLORA_V1)
 
         nodeManager.handleReceivedUser(nodeNum, incomingDetailedUser)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
-        assertEquals("Real User", result!!.user.longName)
-        assertEquals(MeshProtos.HardwareModel.TLORA_V1, result.user.hwModel)
+        assertEquals("Real User", result!!.user.long_name)
+        assertEquals(HardwareModel.TLORA_V1, result.user.hw_model)
     }
 
     @Test
     fun `handleReceivedPosition updates node position`() {
         val nodeNum = 1234
-        val position =
-            MeshProtos.Position.newBuilder()
-                .apply {
-                    latitudeI = 450000000
-                    longitudeI = 900000000
-                }
-                .build()
+        val position = Position(latitude_i = 450000000, longitude_i = 900000000)
 
         nodeManager.handleReceivedPosition(nodeNum, 9999, position)
 

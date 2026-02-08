@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import org.meshtastic.proto.ConfigProtos.Config.LoRaConfig.ModemPreset
+import org.meshtastic.proto.Config
 
 class ChannelOptionTest {
 
@@ -33,12 +32,9 @@ class ChannelOptionTest {
      */
     @Test
     fun `ensure every ModemPreset is mapped in ChannelOption`() {
-        // Get all possible ModemPreset values, excluding the ones we expect to ignore.
+        // Get all possible ModemPreset values.
         val unmappedPresets =
-            ModemPreset.entries.filter {
-                // UNRECOGNIZED is a system-generated value for forward compatibility.
-                it != ModemPreset.UNRECOGNIZED
-            }
+            Config.LoRaConfig.ModemPreset.entries.filter { it.name != "UNSET" && it.name != "UNRECOGNIZED" }
 
         unmappedPresets.forEach { preset ->
             // Attempt to find the corresponding ChannelOption
@@ -62,7 +58,8 @@ class ChannelOptionTest {
      */
     @Test
     fun `ensure no extra mappings exist in ChannelOption`() {
-        val protoPresets = ModemPreset.entries.filter { it != ModemPreset.UNRECOGNIZED }.toSet()
+        val protoPresets =
+            Config.LoRaConfig.ModemPreset.entries.filter { it.name != "UNSET" && it.name != "UNRECOGNIZED" }.toSet()
         val mappedPresets = ChannelOption.entries.map { it.modemPreset }.toSet()
 
         assertEquals(

@@ -27,7 +27,6 @@
     <string name="routing_error_bad_request">Εσφαλμένο Αίτημα</string>
     <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
     <!-- Position Config -->
-    <string name="channel">Κανάλι</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="qr_code">Κώδικας QR</string>
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
@@ -135,8 +134,6 @@
     <string name="wifi_qr_code_scan">Σάρωση QR κωδικού WiFi</string>
     <string name="wifi_qr_code_error">Μη έγκυρη μορφή QR διαπιστευτηρίων WiFi</string>
     <string name="battery">Μπαταρία</string>
-    <string name="temperature">Θερμοκρασία</string>
-    <string name="humidity">Υγρασία</string>
     <string name="logs">Αρχεία καταγραφής</string>
     <string name="info">Πληροφορίες</string>
     <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
@@ -153,7 +150,6 @@
     <string name="channel_3">Κανάλι 3</string>
     <string name="voltage">Τάση</string>
     <string name="i_know_what_i_m_doing">Ξέρω τι κάνω.</string>
-    <string name="baro_pressure">Βαρομετρική Πίεση</string>
     <string name="user">Χρήστης</string>
     <string name="channels">Κανάλια</string>
     <string name="device">Συσκευή</string>

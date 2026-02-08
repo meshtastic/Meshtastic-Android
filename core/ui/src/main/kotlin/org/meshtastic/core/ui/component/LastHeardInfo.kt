@@ -34,12 +34,14 @@ import org.meshtastic.core.ui.util.formatAgo
 fun LastHeardInfo(
     modifier: Modifier = Modifier,
     lastHeard: Int,
+    showLabel: Boolean = true,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconInfo(
         modifier = modifier,
         icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
         contentDescription = stringResource(Res.string.node_sort_last_heard),
+        label = if (showLabel) stringResource(Res.string.node_sort_last_heard) else null,
         text = formatAgo(lastHeard),
         contentColor = contentColor,
     )

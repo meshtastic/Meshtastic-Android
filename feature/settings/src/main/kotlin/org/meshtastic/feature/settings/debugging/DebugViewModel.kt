@@ -20,7 +20,6 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import com.google.protobuf.InvalidProtocolBufferException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -39,14 +38,27 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
+import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.toReadableString
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.debug_clear
+import org.meshtastic.core.strings.debug_clear_logs_confirm
+import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.PaxcountProtos
-import org.meshtastic.proto.Portnums.PortNum
-import org.meshtastic.proto.StoreAndForwardProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.NeighborInfo
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.RouteDiscovery
+import org.meshtastic.proto.Routing
+import org.meshtastic.proto.StoreAndForward
+import org.meshtastic.proto.StoreForwardPlusPlus
+import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.User
+import org.meshtastic.proto.Waypoint
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
@@ -207,6 +219,7 @@ constructor(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
     private val meshLogPrefs: MeshLogPrefs,
+    private val alertManager: AlertManager,
 ) : ViewModel() {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> =
@@ -277,7 +290,7 @@ constructor(
             combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
                 searchManager.findSearchMatches(searchText, logs)
             }
-                .collect { matches ->
+                .collect {
                     searchManager.updateMatches(searchManager.searchText.value, filterManager.filteredLogs.value)
                 }
         }
@@ -302,32 +315,30 @@ constructor(
 
     /** Transform the input [MeshLog] by enhancing the raw message with annotations. */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String = when (meshLog.message_type) {
-        "LogRecord" -> meshLog.fromRadio.logRecord.toString().replace("\\n\"", "\"")
+        "LogRecord" -> meshLog.fromRadio.log_record.toString().replace("\\n\"", "\"")
         "Packet" -> meshLog.meshPacket?.let { packet -> annotatePacketLog(packet) } ?: meshLog.raw_message
         "NodeInfo" ->
             meshLog.nodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.num) }
                 ?: meshLog.raw_message
         "MyNodeInfo" ->
-            meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.myNodeNum) }
+            meshLog.myNodeInfo?.let { nodeInfo -> annotateRawMessage(meshLog.raw_message, nodeInfo.my_node_num) }
                 ?: meshLog.raw_message
         else -> meshLog.raw_message
     }
 
-    private fun annotatePacketLog(packet: MeshProtos.MeshPacket): String {
-        val builder = packet.toBuilder()
-        val hasDecoded = builder.hasDecoded()
-        val decoded = if (hasDecoded) builder.decoded else null
-        if (hasDecoded) builder.clearDecoded()
-        val baseText = builder.build().toString().trimEnd()
+    private fun annotatePacketLog(packet: MeshPacket): String {
+        val decoded = packet.decoded
+        val basePacket = packet.copy(decoded = null)
+        val baseText = basePacket.toString().trimEnd()
         var result =
-            if (hasDecoded && decoded != null) {
+            if (decoded != null) {
                 val decodedText = decoded.toString().trimEnd().prependIndent("  ")
                 "$baseText\ndecoded {\n$decodedText\n}"
             } else {
                 baseText
             }
 
-        val relayNode = packet.relayNode
+        val relayNode = packet.relay_node ?: 0
         var relayNodeAnnotation: String? = null
         val placeholder = "___RELAY_NODE___"
 
@@ -337,7 +348,7 @@ constructor(
 
             Packet.getRelayNode(relayNode, nodeList, myNodeNum)?.let { node ->
                 val relayId = node.user.id
-                val relayName = node.user.longName
+                val relayName = node.user.long_name
                 val regex = Regex("""\brelay_node: ${relayNode.toUInt()}\b""")
                 if (regex.containsMatchIn(result)) {
                     relayNodeAnnotation = "relay_node: $relayName ($relayId)"
@@ -364,7 +375,7 @@ constructor(
         var mutated = false
         nodeIds.toSet().forEach { nodeId -> mutated = mutated or msg.annotateNodeId(nodeId) }
         return if (mutated) {
-            return msg.toString()
+            msg.toString()
         } else {
             rawMessage
         }
@@ -375,12 +386,10 @@ constructor(
         val nodeIdStr = nodeId.toUInt().toString()
         // Only match if whitespace before and after
         val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
-        regex.find(this)?.let { matchResult ->
-            matchResult.groupValues.let { _ ->
-                regex.findAll(this).toList().asReversed().forEach { match ->
-                    val idx = match.range.last + 1
-                    insert(idx, " (${nodeId.asNodeId()})")
-                }
+        regex.find(this)?.let { _ ->
+            regex.findAll(this).toList().asReversed().forEach { match ->
+                val idx = match.range.last + 1
+                insert(idx, " (${nodeId.asNodeId()})")
             }
             return true
         }
@@ -388,6 +397,14 @@ constructor(
     }
 
     private fun Int.asNodeId(): String = "!%08x".format(Locale.getDefault(), this)
+
+    fun requestDeleteAllLogs() {
+        alertManager.showAlert(
+            titleRes = Res.string.debug_clear,
+            messageRes = Res.string.debug_clear_logs_confirm,
+            onConfirm = { deleteAllLogs() },
+        )
+    }
 
     fun deleteAllLogs() = viewModelScope.launch(Dispatchers.IO) { meshLogRepository.deleteAll() }
 
@@ -434,70 +451,82 @@ constructor(
      * @return A human-readable string representation of the decoded payload, or an error message if decoding fails, or
      *   null if the log does not contain a decodable packet.
      */
-    @Suppress("detekt:CyclomaticComplexMethod") // large switch that detekt doesn't parse well.
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     private fun decodePayloadFromMeshLog(log: MeshLog): String? {
-        var result: String? = null
         val packet = log.meshPacket
-        if (packet == null || !packet.hasDecoded()) {
-            result = null
-        } else {
-            val portnum = packet.decoded.portnumValue
-            val payload = packet.decoded.payload.toByteArray()
-            result =
-                try {
-                    when (portnum) {
-                        PortNum.TEXT_MESSAGE_APP_VALUE,
-                        PortNum.ALERT_APP_VALUE,
-                        -> payload.toString(Charsets.UTF_8)
-                        PortNum.POSITION_APP_VALUE -> MeshProtos.Position.parseFrom(payload).toString()
-                        PortNum.WAYPOINT_APP_VALUE -> MeshProtos.Waypoint.parseFrom(payload).toString()
-                        PortNum.NODEINFO_APP_VALUE -> MeshProtos.User.parseFrom(payload).toString()
-                        PortNum.TELEMETRY_APP_VALUE -> TelemetryProtos.Telemetry.parseFrom(payload).toString()
-                        PortNum.ROUTING_APP_VALUE -> MeshProtos.Routing.parseFrom(payload).toString()
-                        PortNum.ADMIN_APP_VALUE -> AdminProtos.AdminMessage.parseFrom(payload).toString()
-                        PortNum.PAXCOUNTER_APP_VALUE -> PaxcountProtos.Paxcount.parseFrom(payload).toString()
-                        PortNum.STORE_FORWARD_APP_VALUE ->
-                            StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
-                        PortNum.STORE_FORWARD_PLUSPLUS_APP_VALUE ->
-                            MeshProtos.StoreForwardPlusPlus.parseFrom(payload).toString()
-                        PortNum.NEIGHBORINFO_APP_VALUE -> decodeNeighborInfo(payload)
-                        PortNum.TRACEROUTE_APP_VALUE -> decodeTraceroute(packet, payload)
-                        else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
-                    }
-                } catch (e: InvalidProtocolBufferException) {
-                    "Failed to decode payload: ${e.message}"
-                }
+        val decoded = packet?.decoded ?: return null
+
+        val portnumValue = decoded.portnum.value
+        val payload = decoded.payload.toByteArray()
+        return try {
+            when (portnumValue) {
+                PortNum.TEXT_MESSAGE_APP.value,
+                PortNum.ALERT_APP.value,
+                -> payload.toString(Charsets.UTF_8)
+                PortNum.POSITION_APP.value ->
+                    Position.ADAPTER.decodeOrNull(payload)?.let { Position.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Position"
+                PortNum.WAYPOINT_APP.value ->
+                    Waypoint.ADAPTER.decodeOrNull(payload)?.let { Waypoint.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Waypoint"
+                PortNum.NODEINFO_APP.value ->
+                    User.ADAPTER.decodeOrNull(payload)?.let { User.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode User"
+                PortNum.TELEMETRY_APP.value ->
+                    Telemetry.ADAPTER.decodeOrNull(payload)?.let { Telemetry.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Telemetry"
+                PortNum.ROUTING_APP.value ->
+                    Routing.ADAPTER.decodeOrNull(payload)?.let { Routing.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Routing"
+                PortNum.ADMIN_APP.value ->
+                    AdminMessage.ADAPTER.decodeOrNull(payload)?.let { AdminMessage.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode AdminMessage"
+                PortNum.PAXCOUNTER_APP.value ->
+                    Paxcount.ADAPTER.decodeOrNull(payload)?.let { Paxcount.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode Paxcount"
+                PortNum.STORE_FORWARD_APP.value ->
+                    StoreAndForward.ADAPTER.decodeOrNull(payload)?.let { StoreAndForward.ADAPTER.toReadableString(it) }
+                        ?: "Failed to decode StoreAndForward"
+                PortNum.STORE_FORWARD_PLUSPLUS_APP.value ->
+                    StoreForwardPlusPlus.ADAPTER.decodeOrNull(payload)?.let {
+                        StoreForwardPlusPlus.ADAPTER.toReadableString(it)
+                    } ?: "Failed to decode StoreForwardPlusPlus"
+                PortNum.NEIGHBORINFO_APP.value -> decodeNeighborInfo(payload)
+                PortNum.TRACEROUTE_APP.value -> decodeTraceroute(packet, payload)
+                else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
+            }
+        } catch (e: Exception) {
+            "Failed to decode payload: ${e.message}"
         }
-        return result
     }
 
     private fun formatNodeWithShortName(nodeNum: Int): String {
         val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user
-        val shortName = user?.shortName?.takeIf { it.isNotEmpty() } ?: ""
+        val shortName = user?.short_name?.takeIf { it.isNotEmpty() } ?: ""
         val nodeId = "!%08x".format(nodeNum)
         return if (shortName.isNotEmpty()) "$nodeId ($shortName)" else nodeId
     }
 
     private fun decodeNeighborInfo(payload: ByteArray): String {
-        val info = MeshProtos.NeighborInfo.parseFrom(payload)
+        val info = NeighborInfo.ADAPTER.decode(payload)
         return buildString {
             appendLine("NeighborInfo:")
-            appendLine("  node_id: ${formatNodeWithShortName(info.nodeId)}")
-            appendLine("  last_sent_by_id: ${formatNodeWithShortName(info.lastSentById)}")
-            appendLine("  node_broadcast_interval_secs: ${info.nodeBroadcastIntervalSecs}")
-            if (info.neighborsCount > 0) {
+            appendLine("  node_id: ${formatNodeWithShortName(info.node_id ?: 0)}")
+            appendLine("  last_sent_by_id: ${formatNodeWithShortName(info.last_sent_by_id ?: 0)}")
+            appendLine("  node_broadcast_interval_secs: ${info.node_broadcast_interval_secs}")
+            if (info.neighbors.isNotEmpty()) {
                 appendLine("  neighbors:")
-                info.neighborsList.forEach { n ->
-                    appendLine("    - node_id: ${formatNodeWithShortName(n.nodeId)} snr: ${n.snr}")
+                info.neighbors.forEach { n ->
+                    appendLine("    - node_id: ${formatNodeWithShortName(n.node_id ?: 0)} snr: ${n.snr}")
                 }
             }
         }
     }
 
-    private fun decodeTraceroute(packet: MeshProtos.MeshPacket, payload: ByteArray): String {
+    private fun decodeTraceroute(packet: MeshPacket, payload: ByteArray): String {
         val getUsername: (Int) -> String = { nodeNum -> formatNodeWithShortName(nodeNum) }
         return packet.getTracerouteResponse(getUsername)
-            ?: runCatching { MeshProtos.RouteDiscovery.parseFrom(payload).toString() }.getOrNull()
+            ?: runCatching { RouteDiscovery.ADAPTER.decode(payload).toString() }.getOrNull()
             ?: payload.joinToString(" ") { HEX_FORMAT.format(it) }
     }
 }

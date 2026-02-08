@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("Wrapping", "UnusedImports", "SpacingAroundColon")
 
 package org.meshtastic.core.ui.timezone
@@ -76,7 +75,7 @@ internal fun ZonedDateTime.timeZoneShortName(): String {
     return if (shortName.startsWith("GMT")) "GMT" else shortName
 }
 
-internal fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
+fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isLetter() }) abbrev else "<$abbrev>"
 
 internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
     val transition = rule.createTransition(Year.now().value)
@@ -84,7 +83,7 @@ internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionR
 }
 
 @Suppress("MagicNumber")
-internal fun formatPosixOffset(offset: ZoneOffset): String {
+fun formatPosixOffset(offset: ZoneOffset): String {
     val offsetSeconds = -offset.totalSeconds
     val hours = offsetSeconds / 3600
     val remainingSeconds = abs(offsetSeconds) % 3600

@@ -24,8 +24,8 @@ import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.unknown_username
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.MeshProtos.MeshPacket
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.NeighborInfo
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -46,29 +46,31 @@ constructor(
     }
 
     fun handleNeighborInfo(packet: MeshPacket) {
-        val ni = MeshProtos.NeighborInfo.parseFrom(packet.decoded.payload)
+        val payload = packet.decoded?.payload ?: return
+        val ni = NeighborInfo.ADAPTER.decode(payload)
 
         // Store the last neighbor info from our connected radio
-        if (packet.from == nodeManager.myNodeNum) {
+        val from = packet.from ?: 0
+        if (from == nodeManager.myNodeNum) {
             commandSender.lastNeighborInfo = ni
             Logger.d { "Stored last neighbor info from connected radio" }
         }
 
         // Update Node DB
-        nodeManager.nodeDBbyNodeNum[packet.from]?.let { serviceBroadcasts.broadcastNodeChange(it.toNodeInfo()) }
+        nodeManager.nodeDBbyNodeNum[from]?.let { serviceBroadcasts.broadcastNodeChange(it.toNodeInfo()) }
 
         // Format for UI response
-        val requestId = packet.decoded.requestId
+        val requestId = packet.decoded?.request_id ?: 0
         val start = commandSender.neighborInfoStartTimes.remove(requestId)
 
         val neighbors =
-            ni.neighborsList.joinToString("\n") { n ->
-                val node = nodeManager.nodeDBbyNodeNum[n.nodeId]
+            ni.neighbors.joinToString("\n") { n ->
+                val node = nodeManager.nodeDBbyNodeNum[n.node_id]
                 val name = node?.let { "${it.longName} (${it.shortName})" } ?: getString(Res.string.unknown_username)
                 "• $name (SNR: ${n.snr})"
             }
 
-        val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[packet.from]?.longName ?: "Unknown"}:\n$neighbors"
+        val formatted = "Neighbors of ${nodeManager.nodeDBbyNodeNum[from]?.longName ?: "Unknown"}:\n$neighbors"
 
         val responseText =
             if (start != null) {

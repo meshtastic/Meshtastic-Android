@@ -42,7 +42,6 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -136,6 +135,7 @@ import org.meshtastic.core.strings.i_know_what_i_m_doing
 import org.meshtastic.core.strings.learn_more
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.save
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.CheckCircle
 import org.meshtastic.core.ui.icon.CloudDownload
@@ -208,24 +208,17 @@ fun FirmwareUpdateScreen(
     androidx.activity.compose.BackHandler(enabled = shouldKeepFirmwareScreenOn(state)) { showExitConfirmation = true }
 
     if (showExitConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showExitConfirmation = false },
-            title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
-            text = { Text(stringResource(Res.string.firmware_update_disconnect_warning)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showExitConfirmation = false
-                        viewModel.cancelUpdate()
-                        navController.navigateUp()
-                    },
-                ) {
-                    Text(stringResource(Res.string.firmware_update_retry)) // Use "Cancel & Exit" if available
-                }
+        MeshtasticDialog(
+            onDismiss = { showExitConfirmation = false },
+            title = stringResource(Res.string.firmware_update_disclaimer_title),
+            message = stringResource(Res.string.firmware_update_disconnect_warning),
+            confirmText = stringResource(Res.string.firmware_update_retry),
+            onConfirm = {
+                showExitConfirmation = false
+                viewModel.cancelUpdate()
+                navController.navigateUp()
             },
-            dismissButton = {
-                TextButton(onClick = { showExitConfirmation = false }) { Text(stringResource(Res.string.back)) }
-            },
+            dismissText = stringResource(Res.string.back),
         )
     }
 
@@ -387,7 +380,7 @@ private fun ReadyState(
     if (showDisclaimer) {
         DisclaimerDialog(
             updateMethod = state.updateMethod,
-            onDismissRequest = { showDisclaimer = false },
+            onDismiss = { showDisclaimer = false },
             onConfirm = {
                 showDisclaimer = false
                 if (selectedReleaseType == FirmwareReleaseType.LOCAL) {
@@ -450,10 +443,13 @@ private fun ReadyState(
 }
 
 @Composable
-private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissRequest: () -> Unit, onConfirm: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(Res.string.firmware_update_disclaimer_title)) },
+private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.firmware_update_disclaimer_title),
+        confirmText = stringResource(Res.string.i_know_what_i_m_doing),
+        onConfirm = onConfirm,
+        dismissText = stringResource(Res.string.cancel),
         text = {
             Column(modifier = Modifier.animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(Res.string.firmware_update_disclaimer_text))
@@ -478,8 +474,6 @@ private fun DisclaimerDialog(updateMethod: FirmwareUpdateMethod, onDismissReques
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.i_know_what_i_m_doing)) } },
-        dismissButton = { TextButton(onClick = onDismissRequest) { Text(stringResource(Res.string.cancel)) } },
     )
 }
 
@@ -757,20 +751,16 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
     var showDialog by remember { mutableStateOf(true) }
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { /* No-op to force user to acknowledge */ },
-            title = { Text(stringResource(Res.string.firmware_update_usb_instruction_title)) },
-            text = { Text(stringResource(Res.string.firmware_update_usb_instruction_text)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDialog = false
-                        onSaveFile(state.fileName)
-                    },
-                ) {
-                    Text(stringResource(Res.string.okay))
-                }
+        MeshtasticDialog(
+            onDismiss = { /* No-op to force user to acknowledge */ },
+            title = stringResource(Res.string.firmware_update_usb_instruction_title),
+            confirmText = stringResource(Res.string.okay),
+            onConfirm = {
+                showDialog = false
+                onSaveFile(state.fileName)
             },
+            text = { Text(stringResource(Res.string.firmware_update_usb_instruction_text)) },
+            dismissable = false,
         )
     }
 

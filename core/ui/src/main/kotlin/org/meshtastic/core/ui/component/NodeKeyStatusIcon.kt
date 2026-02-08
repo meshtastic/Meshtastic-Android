@@ -51,7 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.ByteString
+import okio.ByteString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
@@ -63,6 +63,7 @@ import org.meshtastic.core.strings.encryption_pkc
 import org.meshtastic.core.strings.encryption_pkc_text
 import org.meshtastic.core.strings.encryption_psk
 import org.meshtastic.core.strings.encryption_psk_text
+import org.meshtastic.core.strings.error
 import org.meshtastic.core.strings.security_icon_help_dismiss
 import org.meshtastic.core.strings.security_icon_help_show_all
 import org.meshtastic.core.strings.security_icon_help_show_less
@@ -170,6 +171,7 @@ enum class NodeKeySecurityState(
     ),
 }
 
+@Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun KeyStatusDialog(title: StringResource, text: StringResource, key: ByteString?, onDismiss: () -> Unit = {}) {
     var showAll by rememberSaveable { mutableStateOf(false) }
@@ -190,16 +192,30 @@ private fun KeyStatusDialog(title: StringResource, text: StringResource, key: By
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = stringResource(text), textAlign = TextAlign.Center)
                     Spacer(Modifier.height(16.dp))
-                    if (key != null && title == Res.string.encryption_pkc) {
-                        val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                    if (key != null && (title == Res.string.encryption_pkc || title == Res.string.encryption_error)) {
+                        val isMismatch = key.size == 32 && key.toByteArray().all { it == 0.toByte() }
+                        val keyString =
+                            if (isMismatch) {
+                                stringResource(Res.string.error)
+                            } else {
+                                Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                            }
                         Text(
                             text = stringResource(Res.string.config_security_public_key) + ":",
                             textAlign = TextAlign.Center,
                         )
                         Spacer(Modifier.height(8.dp))
-                        SelectionContainer { Text(text = keyString, textAlign = TextAlign.Center) }
-                        Spacer(Modifier.height(8.dp))
-                        CopyIconButton(valueToCopy = keyString, modifier = Modifier.padding(start = 8.dp))
+                        SelectionContainer {
+                            Text(
+                                text = keyString,
+                                textAlign = TextAlign.Center,
+                                color = if (isMismatch) MaterialTheme.colorScheme.error else Color.Unspecified,
+                            )
+                        }
+                        if (!isMismatch) {
+                            Spacer(Modifier.height(8.dp))
+                            CopyIconButton(valueToCopy = keyString, modifier = Modifier.padding(start = 8.dp))
+                        }
                         Spacer(Modifier.height(16.dp))
                     }
                 }

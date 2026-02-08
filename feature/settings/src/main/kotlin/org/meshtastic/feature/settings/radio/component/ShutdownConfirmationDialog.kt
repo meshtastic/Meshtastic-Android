@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.layout.Column
@@ -24,12 +23,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -44,8 +39,9 @@ import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.send
 import org.meshtastic.core.strings.shutdown_node_name
 import org.meshtastic.core.strings.shutdown_warning
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.User
 
 @Composable
 fun ShutdownConfirmationDialog(
@@ -56,24 +52,19 @@ fun ShutdownConfirmationDialog(
     icon: ImageVector? = Icons.Rounded.Warning,
     onConfirm: () -> Unit,
 ) {
-    val nodeLongName = node?.user?.longName ?: "Unknown Node"
+    val nodeLongName = node?.user?.long_name ?: "Unknown Node"
 
-    AlertDialog(
-        onDismissRequest = {},
-        icon = { icon?.let { Icon(imageVector = it, contentDescription = null) } },
-        title = { Text(text = title) },
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        icon = icon,
+        title = title,
         text = { ShutdownDialogContent(nodeLongName = nodeLongName, isShutdown = isShutdown) },
-        dismissButton = { TextButton(onClick = { onDismiss() }) { Text(stringResource(Res.string.cancel)) } },
-        confirmButton = {
-            Button(
-                onClick = {
-                    onDismiss()
-                    onConfirm()
-                },
-            ) {
-                Text(stringResource(Res.string.send))
-            }
+        confirmText = stringResource(Res.string.send),
+        onConfirm = {
+            onDismiss()
+            onConfirm()
         },
+        dismissText = stringResource(Res.string.cancel),
     )
 }
 
@@ -104,11 +95,7 @@ private fun ShutdownDialogContent(nodeLongName: String, isShutdown: Boolean) {
 @Preview
 @Composable
 private fun ShutdownConfirmationDialogPreview() {
-    val mockNode =
-        Node(
-            num = 123,
-            user = MeshProtos.User.newBuilder().setLongName("Rooftop Router Node").setShortName("ROOF").build(),
-        )
+    val mockNode = Node(num = 123, user = User(long_name = "Rooftop Router Node", short_name = "ROOF"))
 
     AppTheme { ShutdownConfirmationDialog(title = "Shutdown?", node = mockNode, onDismiss = {}, onConfirm = {}) }
 }

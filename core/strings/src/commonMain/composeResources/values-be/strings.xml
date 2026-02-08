@@ -87,7 +87,6 @@
     <string name="device_gps">GPS на прыладзе</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Адладка</string>
-    <string name="channel">Канал</string>
     <string name="channel_name">Назва канала</string>
     <string name="qr_code">QR-код</string>
     <string name="send">Адправіць</string>
@@ -147,8 +146,6 @@
     <string name="currently">Зараз:</string>
     <string name="replace">Замяніць</string>
     <string name="battery">Батарэя</string>
-    <string name="temperature">Тэмпература</string>
-    <string name="humidity">Вільготнасць</string>
     <string name="logs">Журнал</string>
     <string name="info">Звесткі</string>
     <string name="iaq">Якасць паветра</string>

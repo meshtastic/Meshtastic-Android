@@ -34,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
 fun <T : Enum<T>> DropDownPreference(
@@ -71,21 +70,7 @@ fun <T> DropDownPreference(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    val deprecatedItems: List<T> = remember {
-        if (selectedItem is ProtocolMessageEnum) {
-            val enum = (selectedItem as? Enum<*>)?.declaringJavaClass?.enumConstants
-            val descriptor = (selectedItem as ProtocolMessageEnum).descriptorForType
-
-            @Suppress("UNCHECKED_CAST")
-            (
-                enum?.filter { entries -> descriptor.values.any { it.name == entries.name && it.options.deprecated } }
-                    ?: emptyList()
-                )
-                as List<T>
-        } else {
-            emptyList()
-        }
-    }
+    val deprecatedItems: List<T> = emptyList() // Protobuf-Java specific deprecation check removed
     Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         ExposedDropdownMenuBox(
             expanded = expanded,

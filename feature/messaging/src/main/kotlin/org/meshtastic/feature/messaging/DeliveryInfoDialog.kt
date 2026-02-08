@@ -19,8 +19,6 @@ package org.meshtastic.feature.messaging
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +34,7 @@ import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.message_retry_count
 import org.meshtastic.core.strings.relays
 import org.meshtastic.core.strings.resend
+import org.meshtastic.core.ui.component.MeshtasticDialog
 
 @Suppress("UnusedParameter")
 @Composable
@@ -49,28 +48,12 @@ fun DeliveryInfo(
     maxRetries: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
-) = AlertDialog(
-    onDismissRequest = onDismiss,
-    dismissButton = {
-        FilledTonalButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
-            Text(text = stringResource(Res.string.close))
-        }
-    },
-    confirmButton = {
-        if (resendOption) {
-            FilledTonalButton(onClick = onConfirm, modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(text = stringResource(Res.string.resend))
-            }
-        }
-    },
-    title = {
-        Text(
-            text = stringResource(title),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineSmall,
-        )
-    },
+) = MeshtasticDialog(
+    title = stringResource(title),
+    onDismiss = onDismiss,
+    dismissText = stringResource(Res.string.close),
+    confirmText = if (resendOption) stringResource(Res.string.resend) else null,
+    onConfirm = if (resendOption) onConfirm else null,
     text = {
         Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             text?.let {
@@ -98,6 +81,4 @@ fun DeliveryInfo(
             }
         }
     },
-    shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
-    containerColor = MaterialTheme.colorScheme.surface,
 )

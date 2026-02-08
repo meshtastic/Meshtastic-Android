@@ -73,7 +73,6 @@
     <string name="config_device_ledHeartbeatEnabled_summary">Regelt de knipperende LED op het apparaat. Voor de meeste apparaten betreft dit een van de maximaal 4 LEDs; de LED's van de lader en GPS zijn niet regelbaar.</string>
     <!-- Position Config -->
     <string name="debug">Debug</string>
-    <string name="channel">Kanaal</string>
     <string name="channel_name">Kanaalnaam</string>
     <string name="qr_code">QR-code</string>
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
@@ -202,10 +201,6 @@
     <string name="wifi_qr_code_error">Ongeldige WiFi Credential QR-code formaat</string>
     <string name="navigate_back">Ga terug</string>
     <string name="battery">Batterij</string>
-    <string name="channel_utilization">Kanaalgebruik</string>
-    <string name="air_utilization">Luchtverbruik</string>
-    <string name="temperature">Temperatuur</string>
-    <string name="humidity">Vochtigheid</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Aantal sprongen</string>
     <string name="info">Informatie</string>
@@ -262,7 +257,6 @@
     <string name="i_know_what_i_m_doing">Ik weet waar ik mee bezig ben.</string>
     <string name="meshtastic_low_battery_notifications">Batterij bijna leeg</string>
     <string name="low_battery_title">Batterij bijna leeg: %1$s</string>
-    <string name="baro_pressure">Luchtdruk</string>
     <string name="udp_config">UDP Configuratie</string>
     <string name="toggle_my_position">Wissel mijn positie</string>
     <string name="user">Gebruiker</string>

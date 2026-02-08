@@ -77,7 +77,6 @@
     <!-- Position Config -->
     <string name="altitude">Rakım</string>
     <string name="debug">Hata Ayıklama</string>
-    <string name="channel">Kanal</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="qr_code">Karekod</string>
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
@@ -213,10 +212,6 @@
     <string name="wifi_qr_code_error">Geçersiz Wi-Fi Kimlik Bilgisi QR kodu formatı</string>
     <string name="navigate_back">Geri Dön</string>
     <string name="battery">Pil</string>
-    <string name="channel_utilization">Kanal Kullanımı</string>
-    <string name="air_utilization">Yayın Süresi Kullanımı</string>
-    <string name="temperature">Sıcaklık</string>
-    <string name="humidity">Nem</string>
     <string name="logs">Kayıtlar</string>
     <string name="hops_away">Atlama Üzerinden</string>
     <string name="info">Bilgi</string>
@@ -276,7 +271,6 @@
     <string name="meshtastic_low_battery_notifications">Düşük pil bildirimleri</string>
     <string name="low_battery_title">Düşük pil: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Düşük pil bildirimleri (favori düğümler)</string>
-    <string name="baro_pressure">Barometrik Basınç</string>
     <string name="udp_enabled">Açık</string>
     <string name="udp_config">UDP Ayarları</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Son duyulma: %2$s<br>Son konum: %3$s<br>Pil: %4$s]]></string>
@@ -580,4 +574,5 @@
     <string name="now">Şimdi</string>
     <string name="add_channels_title">Kanal Ekle</string>
     <!-- Message Filter -->
+    <string name="generate_qr_code">QR kod oluştur</string>
 </resources>

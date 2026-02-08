@@ -18,19 +18,17 @@ package org.meshtastic.core.model
 
 import android.os.Parcel
 import android.os.Parcelable
+import co.touchlab.kermit.Logger
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.Portnums
-
-/** Generic [Parcel.readParcelable] Android 13 compatibility extension. */
-private inline fun <reified T : Parcelable> Parcel.readParcelableCompat(loader: ClassLoader?): T? =
-    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
-        @Suppress("DEPRECATION")
-        readParcelable(loader)
-    } else {
-        readParcelable(loader, T::class.java)
-    }
+import okio.ByteString
+import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.util.ByteStringParceler
+import org.meshtastic.core.model.util.ByteStringSerializer
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Waypoint
 
 @Parcelize
 enum class MessageStatus : Parcelable {
@@ -46,11 +44,14 @@ enum class MessageStatus : Parcelable {
 
 /** A parcelable version of the protobuf MeshPacket + Data subpacket. */
 @Serializable
+@Parcelize
 data class DataPacket(
     var to: String? = ID_BROADCAST, // a nodeID string, or ID_BROADCAST for broadcast
-    val bytes: ByteArray?,
-    // A port number for this packet (formerly called DataType, see portnums.proto for new usage instructions)
-    val dataType: Int,
+    @Serializable(with = ByteStringSerializer::class)
+    @TypeParceler<ByteString?, ByteStringParceler>
+    var bytes: ByteString?,
+    // A port number for this packet
+    var dataType: Int,
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
     var time: Long = System.currentTimeMillis(), // msecs since 1970
     var id: Int = 0, // 0 means unassigned
@@ -67,11 +68,52 @@ data class DataPacket(
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
     var retryCount: Int = 0, // Number of automatic retry attempts
     var emoji: Int = 0,
-    var sfppHash: ByteArray? = null,
+    @Serializable(with = ByteStringSerializer::class)
+    @TypeParceler<ByteString?, ByteStringParceler>
+    var sfppHash: ByteString? = null,
 ) : Parcelable {
 
+    fun readFromParcel(parcel: Parcel) {
+        to = parcel.readString()
+        bytes = ByteStringParceler.create(parcel)
+        dataType = parcel.readInt()
+        from = parcel.readString()
+        time = parcel.readLong()
+        id = parcel.readInt()
+
+        // MessageStatus is a known Parcelable type (enum), so Parcelize writes it optimized:
+        // 1. Presence flag (Int: 1 or 0)
+        // 2. Content (Enum Name as String)
+        status =
+            if (parcel.readInt() != 0) {
+                val name = parcel.readString()
+                try {
+                    if (name != null) MessageStatus.valueOf(name) else MessageStatus.UNKNOWN
+                } catch (e: IllegalArgumentException) {
+                    Logger.w(e) { "Unknown MessageStatus: $name" }
+                    MessageStatus.UNKNOWN
+                }
+            } else {
+                null
+            }
+
+        hopLimit = parcel.readInt()
+        channel = parcel.readInt()
+        wantAck = parcel.readInt() != 0
+        hopStart = parcel.readInt()
+        snr = parcel.readFloat()
+        rssi = parcel.readInt()
+        replyId = if (parcel.readInt() == 0) null else parcel.readInt()
+        relayNode = if (parcel.readInt() == 0) null else parcel.readInt()
+        relays = parcel.readInt()
+        viaMqtt = parcel.readInt() != 0
+        retryCount = parcel.readInt()
+        emoji = parcel.readInt()
+        sfppHash = ByteStringParceler.create(parcel)
+    }
+
     /** If there was an error with this message, this string describes what was wrong. */
-    var errorMessage: String? = null
+    @IgnoredOnParcel var errorMessage: String? = null
 
     /** Syntactic sugar to make it easy to create text messages */
     constructor(
@@ -81,8 +123,8 @@ data class DataPacket(
         replyId: Int? = null,
     ) : this(
         to = to,
-        bytes = text.encodeToByteArray(),
-        dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        bytes = text.encodeToByteArray().toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
         channel = channel,
         replyId = replyId ?: 0,
     )
@@ -90,17 +132,16 @@ data class DataPacket(
     /** If this is a text message, return the string, otherwise null */
     val text: String?
         get() =
-            when (dataType) {
-                Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> bytes?.decodeToString()
-                //                Portnums.PortNum.NODE_STATUS_APP_VALUE ->
-                // MeshProtos.StatusMessage.parseFrom(bytes).status
-                else -> null
+            if (dataType == PortNum.TEXT_MESSAGE_APP.value) {
+                bytes?.utf8()
+            } else {
+                null
             }
 
     val alert: String?
         get() =
-            if (dataType == Portnums.PortNum.ALERT_APP_VALUE) {
-                bytes?.decodeToString()
+            if (dataType == PortNum.ALERT_APP.value) {
+                bytes?.utf8()
             } else {
                 null
             }
@@ -108,13 +149,22 @@ data class DataPacket(
     constructor(
         to: String?,
         channel: Int,
-        waypoint: MeshProtos.Waypoint,
-    ) : this(to = to, bytes = waypoint.toByteArray(), dataType = Portnums.PortNum.WAYPOINT_APP_VALUE, channel = channel)
+        waypoint: Waypoint,
+    ) : this(
+        to = to,
+        bytes = Waypoint.ADAPTER.encode(waypoint).toByteString(),
+        dataType = PortNum.WAYPOINT_APP.value,
+        channel = channel,
+    )
 
-    val waypoint: MeshProtos.Waypoint?
+    val waypoint: Waypoint?
         get() =
-            if (dataType == Portnums.PortNum.WAYPOINT_APP_VALUE) {
-                MeshProtos.Waypoint.parseFrom(bytes)
+            if (dataType == PortNum.WAYPOINT_APP.value) {
+                try {
+                    bytes?.let { Waypoint.ADAPTER.decode(it) }
+                } catch (e: Exception) {
+                    null
+                }
             } else {
                 null
             }
@@ -122,140 +172,7 @@ data class DataPacket(
     val hopsAway: Int
         get() = if (hopStart == 0 || hopLimit > hopStart) -1 else hopStart - hopLimit
 
-    // Autogenerated comparision, because we have a byte array
-
-    constructor(
-        parcel: Parcel,
-    ) : this(
-        parcel.readString(),
-        parcel.createByteArray(),
-        parcel.readInt(),
-        parcel.readString(),
-        parcel.readLong(),
-        parcel.readInt(),
-        parcel.readParcelableCompat(MessageStatus::class.java.classLoader),
-        parcel.readInt(),
-        parcel.readInt(),
-        parcel.readInt() == 1,
-        parcel.readInt(),
-        parcel.readFloat(),
-        parcel.readInt(),
-        parcel.readInt().let { if (it == 0) null else it },
-        parcel.readInt().let { if (it == -1) null else it },
-        parcel.readInt(), // relays
-        parcel.readInt() == 1, // viaMqtt
-        parcel.readInt(), // retryCount
-        parcel.readInt(), // emoji
-        parcel.createByteArray(), // sfppHash
-    )
-
-    @Suppress("CyclomaticComplexMethod")
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as DataPacket
-
-        if (from != other.from) return false
-        if (to != other.to) return false
-        if (channel != other.channel) return false
-        if (time != other.time) return false
-        if (id != other.id) return false
-        if (dataType != other.dataType) return false
-        if (!bytes.contentEquals(other.bytes)) return false
-        if (status != other.status) return false
-        if (hopLimit != other.hopLimit) return false
-        if (wantAck != other.wantAck) return false
-        if (hopStart != other.hopStart) return false
-        if (snr != other.snr) return false
-        if (rssi != other.rssi) return false
-        if (replyId != other.replyId) return false
-        if (relayNode != other.relayNode) return false
-        if (relays != other.relays) return false
-        if (viaMqtt != other.viaMqtt) return false
-        if (retryCount != other.retryCount) return false
-        if (emoji != other.emoji) return false
-        if (!sfppHash.contentEquals(other.sfppHash)) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = from?.hashCode() ?: 0
-        result = 31 * result + (to?.hashCode() ?: 0)
-        result = 31 * result + time.hashCode()
-        result = 31 * result + id
-        result = 31 * result + dataType
-        result = 31 * result + (bytes?.contentHashCode() ?: 0)
-        result = 31 * result + (status?.hashCode() ?: 0)
-        result = 31 * result + hopLimit
-        result = 31 * result + channel
-        result = 31 * result + wantAck.hashCode()
-        result = 31 * result + hopStart
-        result = 31 * result + snr.hashCode()
-        result = 31 * result + rssi
-        result = 31 * result + (replyId ?: 0)
-        result = 31 * result + (relayNode ?: -1)
-        result = 31 * result + relays
-        result = 31 * result + viaMqtt.hashCode()
-        result = 31 * result + retryCount
-        result = 31 * result + emoji
-        result = 31 * result + (sfppHash?.contentHashCode() ?: 0)
-        return result
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(to)
-        parcel.writeByteArray(bytes)
-        parcel.writeInt(dataType)
-        parcel.writeString(from)
-        parcel.writeLong(time)
-        parcel.writeInt(id)
-        parcel.writeParcelable(status, flags)
-        parcel.writeInt(hopLimit)
-        parcel.writeInt(channel)
-        parcel.writeInt(if (wantAck) 1 else 0)
-        parcel.writeInt(hopStart)
-        parcel.writeFloat(snr)
-        parcel.writeInt(rssi)
-        parcel.writeInt(replyId ?: 0)
-        parcel.writeInt(relayNode ?: -1)
-        parcel.writeInt(relays)
-        parcel.writeInt(if (viaMqtt) 1 else 0)
-        parcel.writeInt(retryCount)
-        parcel.writeInt(emoji)
-        parcel.writeByteArray(sfppHash)
-    }
-
-    override fun describeContents(): Int = 0
-
-    // Update our object from our parcel (used for inout parameters
-    fun readFromParcel(parcel: Parcel) {
-        to = parcel.readString()
-        // parcel.createByteArray() // Wait, this doesn't update bytes! bytes is a VAL.
-        // Actually this method is a bit broken because it can't update val fields.
-        // But it seems only to be used for inout parameters in some places.
-        // I won't touch it unless I have to.
-        from = parcel.readString()
-        time = parcel.readLong()
-        id = parcel.readInt()
-        status = parcel.readParcelableCompat(MessageStatus::class.java.classLoader)
-        hopLimit = parcel.readInt()
-        channel = parcel.readInt()
-        wantAck = parcel.readInt() == 1
-        hopStart = parcel.readInt()
-        snr = parcel.readFloat()
-        rssi = parcel.readInt()
-        replyId = parcel.readInt().let { if (it == 0) null else it }
-        relayNode = parcel.readInt().let { if (it == -1) null else it }
-        relays = parcel.readInt()
-        viaMqtt = parcel.readInt() == 1
-        retryCount = parcel.readInt()
-        emoji = parcel.readInt()
-        sfppHash = parcel.createByteArray()
-    }
-
-    companion object CREATOR : Parcelable.Creator<DataPacket> {
+    companion object {
         // Special node IDs that can be used for sending messages
 
         /** the Node ID for broadcast destinations */
@@ -274,9 +191,5 @@ data class DataPacket(
 
         @Suppress("MagicNumber")
         fun idToDefaultNodeNum(id: String?): Int? = runCatching { id?.toLong(16)?.toInt() }.getOrNull()
-
-        override fun createFromParcel(parcel: Parcel): DataPacket = DataPacket(parcel)
-
-        override fun newArray(size: Int): Array<DataPacket?> = arrayOfNulls(size)
     }
 }

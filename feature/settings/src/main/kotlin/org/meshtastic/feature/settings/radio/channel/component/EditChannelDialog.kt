@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.channel.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,17 +43,17 @@ import org.meshtastic.core.strings.save
 import org.meshtastic.core.strings.uplink_enabled
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.PositionPrecisionPreference
 import org.meshtastic.core.ui.component.SwitchPreference
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.channelSettings
-import org.meshtastic.proto.copy
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.ModuleSettings
 
 @Suppress("LongMethod")
 @Composable
 fun EditChannelDialog(
-    channelSettings: ChannelProtos.ChannelSettings,
-    onAddClick: (ChannelProtos.ChannelSettings) -> Unit,
+    channelSettings: ChannelSettings,
+    onAddClick: (ChannelSettings) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     modemPresetName: String = stringResource(Res.string.default_),
@@ -72,14 +63,23 @@ fun EditChannelDialog(
 
     var channelInput by remember(channelSettings) { mutableStateOf(channelSettings) }
 
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        shape = RoundedCornerShape(16.dp),
+    MeshtasticDialog(
+        onDismiss = onDismissRequest,
+        dismissText = stringResource(Res.string.cancel),
+        confirmText = stringResource(Res.string.save),
+        onConfirm = { onAddClick(channelInput) },
+        modifier = modifier,
+        title = "", // Title is handled internally by specific items if needed, or we could add one
         text = {
-            Column(modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 EditTextPreference(
                     title = stringResource(Res.string.channel_name),
-                    value = if (isFocused) channelInput.name else channelInput.name.ifEmpty { modemPresetName },
+                    value =
+                    if (isFocused) {
+                        (channelInput.name ?: "")
+                    } else {
+                        (channelInput.name ?: "").ifEmpty { modemPresetName }
+                    },
                     maxSize = 11, // name max_size:12
                     enabled = true,
                     isError = false,
@@ -87,66 +87,57 @@ fun EditChannelDialog(
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {
-                        channelInput =
-                            channelInput.copy {
-                                name = it.trim()
-                                if (psk == Channel.default.settings.psk) psk = Channel.getRandomKey()
+                        val defaultPsk = Channel.default.settings.psk
+                        val newPsk =
+                            if (channelInput.psk == defaultPsk) {
+                                Channel.getRandomKey()
+                            } else {
+                                (channelInput.psk ?: okio.ByteString.EMPTY)
                             }
+                        channelInput = channelInput.copy(name = it.trim(), psk = newPsk)
                     },
                     onFocusChanged = { isFocused = it.isFocused },
                 )
 
                 EditBase64Preference(
                     title = "PSK",
-                    value = channelInput.psk,
+                    value = channelInput.psk ?: okio.ByteString.EMPTY,
                     enabled = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = {
-                        val fullPsk = Channel(channelSettings { psk = it }).psk
-                        if (fullPsk.size() in setOf(0, 16, 32)) {
-                            channelInput = channelInput.copy { psk = it }
+                        val fullPsk = Channel(ChannelSettings(psk = it)).psk
+                        if (fullPsk.size in setOf(0, 16, 32)) {
+                            channelInput = channelInput.copy(psk = it)
                         }
                     },
-                    onGenerateKey = { channelInput = channelInput.copy { psk = Channel.getRandomKey() } },
+                    onGenerateKey = { channelInput = channelInput.copy(psk = Channel.getRandomKey()) },
                 )
 
                 SwitchPreference(
                     title = stringResource(Res.string.uplink_enabled),
-                    checked = channelInput.uplinkEnabled,
+                    checked = channelInput.uplink_enabled ?: false,
                     enabled = true,
-                    onCheckedChange = { channelInput = channelInput.copy { uplinkEnabled = it } },
+                    onCheckedChange = { channelInput = channelInput.copy(uplink_enabled = it) },
                     padding = PaddingValues(0.dp),
                 )
 
                 SwitchPreference(
                     title = stringResource(Res.string.downlink_enabled),
-                    checked = channelInput.downlinkEnabled,
+                    checked = channelInput.downlink_enabled ?: false,
                     enabled = true,
-                    onCheckedChange = { channelInput = channelInput.copy { downlinkEnabled = it } },
+                    onCheckedChange = { channelInput = channelInput.copy(downlink_enabled = it) },
                     padding = PaddingValues(0.dp),
                 )
 
+                val moduleSettings = channelInput.module_settings ?: ModuleSettings()
                 PositionPrecisionPreference(
                     enabled = true,
-                    value = channelInput.moduleSettings.positionPrecision,
+                    value = moduleSettings.position_precision ?: 0,
                     onValueChanged = {
-                        val module = channelInput.moduleSettings.copy { positionPrecision = it }
-                        channelInput = channelInput.copy { moduleSettings = module }
+                        val updatedModule = moduleSettings.copy(position_precision = it)
+                        channelInput = channelInput.copy(module_settings = updatedModule)
                     },
                 )
-            }
-        },
-        confirmButton = {
-            FlowRow(
-                modifier = modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(modifier = modifier.weight(1f), onClick = onDismissRequest) {
-                    Text(stringResource(Res.string.cancel))
-                }
-                Button(modifier = modifier.weight(1f), onClick = { onAddClick(channelInput) }, enabled = true) {
-                    Text(stringResource(Res.string.save))
-                }
             }
         },
     )
@@ -156,11 +147,7 @@ fun EditChannelDialog(
 @Composable
 private fun EditChannelDialogPreview() {
     EditChannelDialog(
-        channelSettings =
-        channelSettings {
-            psk = Channel.default.settings.psk
-            name = Channel.default.name
-        },
+        channelSettings = ChannelSettings(psk = Channel.default.settings.psk, name = Channel.default.name),
         onAddClick = {},
         onDismissRequest = {},
     )

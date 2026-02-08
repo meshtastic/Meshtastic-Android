@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.connections
 
 import androidx.lifecycle.ViewModel
@@ -30,7 +29,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.LocalOnlyProtos.LocalConfig
+import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,7 +44,7 @@ constructor(
 ) : ViewModel() {
 
     val localConfig: StateFlow<LocalConfig> =
-        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig.getDefaultInstance())
+        radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
     val connectionState = serviceRepository.connectionState
 

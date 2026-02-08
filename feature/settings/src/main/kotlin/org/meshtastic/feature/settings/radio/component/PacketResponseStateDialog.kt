@@ -18,14 +18,9 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +37,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.delivery_confirmed
 import org.meshtastic.core.strings.error
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val AUTO_DISMISS_DELAY_MS = 1500L
@@ -55,10 +51,11 @@ fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit
             onDismiss()
         }
     }
-    AlertDialog(
-        onDismissRequest = {},
-        shape = RoundedCornerShape(16.dp),
-        title = {
+
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = "", // Title is handled in the text block for more control
+        text = {
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (state is ResponseState.Loading) {
                     val progress by
@@ -86,24 +83,15 @@ fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit
                 }
             }
         },
-        confirmButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Button(
-                    onClick = {
-                        onDismiss()
-                        if (state is ResponseState.Success || state is ResponseState.Error) {
-                            backDispatcher?.onBackPressed()
-                        }
-                    },
-                    modifier = Modifier.padding(top = 16.dp),
-                ) {
-                    Text(stringResource(Res.string.close))
-                }
+        dismissable = false,
+        onConfirm = {
+            onDismiss()
+            if (state is ResponseState.Success || state is ResponseState.Error) {
+                backDispatcher?.onBackPressed()
             }
         },
+        confirmText = stringResource(Res.string.close),
+        dismissText = null, // Hide dismiss button, only show "Close" confirm button
     )
 }
 

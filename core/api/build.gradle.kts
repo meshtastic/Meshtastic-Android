@@ -21,17 +21,6 @@ plugins {
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["googleRelease"])
-                artifactId = "core-api"
-            }
-        }
-    }
-}
-
 configure<com.android.build.api.dsl.LibraryExtension> {
     namespace = "org.meshtastic.core.api"
     buildFeatures { aidl = true }
@@ -41,7 +30,19 @@ configure<com.android.build.api.dsl.LibraryExtension> {
         minSdk = 21
     }
 
-    publishing { singleVariant("googleRelease") { withSourcesJar() } }
+    publishing { singleVariant("release") { withSourcesJar() } }
+}
+
+// Map the Android component to a Maven publication
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "meshtastic-android-api"
+            }
+        }
+    }
 }
 
 dependencies { api(projects.core.model) }

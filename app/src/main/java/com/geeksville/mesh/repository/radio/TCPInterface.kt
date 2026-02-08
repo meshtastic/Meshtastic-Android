@@ -25,6 +25,8 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.proto.Heartbeat
+import org.meshtastic.proto.ToRadio
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.IOException
@@ -132,7 +134,8 @@ constructor(
                         } else {
                             0
                         }
-                    Logger.e(ex) { "[$address] TCP IOException after ${uptime}ms - ${ex.message}" }
+                    // Connection failures are common when the radio is offline or out of range
+                    Logger.w(ex) { "[$address] TCP connection error after ${uptime}ms - ${ex.message}" }
                     onDeviceDisconnect(false)
                 } catch (ex: Throwable) {
                     val uptime =
@@ -166,11 +169,8 @@ constructor(
 
     override fun keepAlive() {
         Logger.d { "[$address] TCP keepAlive" }
-        val heartbeat =
-            org.meshtastic.proto.MeshProtos.ToRadio.newBuilder()
-                .setHeartbeat(org.meshtastic.proto.MeshProtos.Heartbeat.getDefaultInstance())
-                .build()
-        handleSendToRadio(heartbeat.toByteArray())
+        val heartbeat = ToRadio(heartbeat = Heartbeat())
+        handleSendToRadio(heartbeat.encode())
     }
 
     // Create a socket to make the connection with the server

@@ -25,7 +25,9 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.toPIIString
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -46,7 +48,14 @@ constructor(
 
     /** Broadcast some received data Payload will be a DataPacket */
     fun broadcastReceivedData(payload: DataPacket) {
-        explicitBroadcast(Intent(MeshService.actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
+        val action = MeshService.actionReceived(payload.dataType)
+        explicitBroadcast(Intent(action).putExtra(EXTRA_PAYLOAD, payload))
+
+        // Also broadcast with the numeric port number for backwards compatibility with some apps
+        val numericAction = actionReceived(payload.dataType.toString())
+        if (numericAction != action) {
+            explicitBroadcast(Intent(numericAction).putExtra(EXTRA_PAYLOAD, payload))
+        }
     }
 
     fun broadcastNodeChange(info: NodeInfo) {
@@ -75,9 +84,26 @@ constructor(
     /** Broadcast our current connection status */
     fun broadcastConnection() {
         val connectionState = connectionStateHolder.connectionState.value
-        val intent = Intent(ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, connectionState.toString())
+        // ATAK expects a String: "CONNECTED" or "DISCONNECTED"
+        // It uses equalsIgnoreCase, but we'll use uppercase to be specific.
+        val stateStr = connectionState.toString().uppercase(Locale.ROOT)
+
+        val intent = Intent(ACTION_MESH_CONNECTED).apply { putExtra(EXTRA_CONNECTED, stateStr) }
         serviceRepository.setConnectionState(connectionState)
         explicitBroadcast(intent)
+
+        if (connectionState == ConnectionState.Disconnected) {
+            explicitBroadcast(Intent(ACTION_MESH_DISCONNECTED))
+        }
+
+        // Restore legacy action for other consumers (e.g. mesh_service_example)
+        val legacyIntent =
+            Intent(ACTION_CONNECTION_CHANGED).apply {
+                putExtra(EXTRA_CONNECTED, stateStr)
+                // Legacy boolean extra often expected by older implementations
+                putExtra("connected", connectionState == ConnectionState.Connected)
+            }
+        explicitBroadcast(legacyIntent)
     }
 
     /**

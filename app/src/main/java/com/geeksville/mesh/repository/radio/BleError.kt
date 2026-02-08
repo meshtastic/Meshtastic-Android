@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
 import com.geeksville.mesh.service.RadioNotConnectedException
@@ -67,8 +66,7 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
      *
      * @param exception The underlying GattException.
      */
-    class GattError(exception: GattException) :
-        BleError("Gatt exception: ${exception.message}", shouldReconnect = true)
+    class GattError(exception: GattException) : BleError("Gatt exception: ${exception.message}", shouldReconnect = true)
 
     /**
      * Wraps a generic BluetoothException. The reconnection strategy depends on the nature of the Bluetooth error.
@@ -86,9 +84,12 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
     class OperationFailed(exception: OperationFailedException) :
         BleError("Operation failed: ${exception.message}", shouldReconnect = true)
 
-    /** An invalid attribute was used. This is a non-recoverable error. */
+    /**
+     * An invalid attribute was used. This usually happens when the GATT handles become stale (e.g. after a service
+     * change or an unexpected disconnect). This is recoverable via a fresh connection and discovery.
+     */
     class InvalidAttribute(exception: InvalidAttributeException) :
-        BleError("Invalid attribute: ${exception.message}", shouldReconnect = false)
+        BleError("Invalid attribute: ${exception.message}", shouldReconnect = true)
 
     /** An error occurred while scanning for devices. This may be recoverable. */
     class Scanning(exception: ScanningException) :

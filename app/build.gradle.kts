@@ -134,6 +134,8 @@ configure<ApplicationExtension> {
             // Disables dependency metadata when building Android App Bundles (for Google Play)
             includeInBundle = false
         }
+
+        testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
     }
 
     // Configure existing product flavors (defined by convention plugin)
@@ -185,7 +187,11 @@ androidComponents {
     }
 }
 
-project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
+project.afterEvaluate {
+    logger.lifecycle(
+        "Version code is set to: ${extensions.getByType<ApplicationExtension>().defaultConfig.versionCode}",
+    )
+}
 
 dependencies {
     implementation(projects.core.analytics)
@@ -197,11 +203,13 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.navigation)
     implementation(projects.core.network)
+    implementation(projects.core.nfc)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
     implementation(projects.core.strings)
     implementation(projects.core.ui)
+    implementation(projects.core.barcode)
     implementation(projects.feature.intro)
     implementation(projects.feature.messaging)
     implementation(projects.feature.map)
@@ -227,11 +235,9 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
-    implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
-    implementation(libs.streamsupport.minifuture)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
@@ -239,7 +245,7 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
-    implementation(libs.nordic)
+    implementation(libs.nordic.client.android)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -257,6 +263,12 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.nordic.client.android.mock)
+    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.core.mock)
+    testImplementation(libs.nordic.core.android.mock)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }
 
 aboutLibraries {

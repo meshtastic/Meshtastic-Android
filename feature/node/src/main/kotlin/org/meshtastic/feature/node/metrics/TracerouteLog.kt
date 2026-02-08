@@ -25,14 +25,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,23 +42,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.routing_error_no_response
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.traceroute_diff
@@ -71,11 +63,7 @@ import org.meshtastic.core.strings.traceroute_log
 import org.meshtastic.core.strings.traceroute_route_back_to_us
 import org.meshtastic.core.strings.traceroute_route_towards_dest
 import org.meshtastic.core.strings.traceroute_time_and_text
-import org.meshtastic.core.strings.view_on_map
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
-import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
-import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
@@ -85,19 +73,12 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
-import org.meshtastic.core.ui.util.toMessageRes
+import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.proto.MeshProtos
-
-private data class TracerouteDialog(
-    val message: AnnotatedString,
-    val requestId: Int,
-    val responseLogUuid: String,
-    val overlay: TracerouteOverlay?,
-)
+import org.meshtastic.proto.RouteDiscovery
 
 @OptIn(ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -122,27 +103,19 @@ fun TracerouteLogScreen(
         }
     }
 
-    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
+    fun getUsername(nodeNum: Int): String =
+        with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
 
-    var showDialog by remember { mutableStateOf<TracerouteDialog?>(null) }
-    var errorMessageRes by remember { mutableStateOf<StringResource?>(null) }
     val context = LocalContext.current
-
-    TracerouteLogDialogs(
-        dialog = showDialog,
-        errorMessageRes = errorMessageRes,
-        viewModel = viewModel,
-        onViewOnMap = onViewOnMap,
-        onShowErrorMessageRes = { errorMessageRes = it },
-        onDismissDialog = { showDialog = null },
-        onDismissError = { errorMessageRes = null },
-    )
+    val statusGreen = MaterialTheme.colorScheme.StatusGreen
+    val statusYellow = MaterialTheme.colorScheme.StatusYellow
+    val statusOrange = MaterialTheme.colorScheme.StatusOrange
 
     Scaffold(
         topBar = {
             val lastTracerouteTime by viewModel.lastTraceRouteTime.collectAsState()
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle = stringResource(Res.string.traceroute_log),
                 ourNode = null,
                 showNodeChip = false,
@@ -169,9 +142,9 @@ fun TracerouteLogScreen(
         ) {
             items(state.tracerouteRequests, key = { it.uuid }) { log ->
                 val result =
-                    remember(state.tracerouteRequests, log.fromRadio.packet.id) {
+                    remember(state.tracerouteRequests, log.fromRadio.packet?.id) {
                         state.tracerouteResults.find {
-                            it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id
+                            it.fromRadio.packet?.decoded?.request_id == log.fromRadio.packet?.id
                         }
                     }
                 val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
@@ -187,16 +160,19 @@ fun TracerouteLogScreen(
 
                 val tracerouteDetailsAnnotated: AnnotatedString? =
                     result?.let { res ->
-                        if (route != null && route.routeList.isNotEmpty() && route.routeBackList.isNotEmpty()) {
+                        if (route != null && route.route.isNotEmpty() && route.route_back.isNotEmpty()) {
                             val seconds =
                                 (res.received_date - log.received_date).coerceAtLeast(0).toDouble() / MS_PER_SEC
                             val annotatedBase =
                                 annotateTraceroute(
-                                    res.fromRadio.packet.getTracerouteResponse(
+                                    res.fromRadio.packet?.getTracerouteResponse(
                                         ::getUsername,
                                         headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
                                         headerBack = stringResource(Res.string.traceroute_route_back_to_us),
                                     ),
+                                    statusGreen = statusGreen,
+                                    statusYellow = statusYellow,
+                                    statusOrange = statusOrange,
                                 )
                             val durationText = stringResource(Res.string.traceroute_duration, "%.1f".format(seconds))
                             buildAnnotatedString {
@@ -206,7 +182,7 @@ fun TracerouteLogScreen(
                         } else {
                             // For cases where there's a result but no full route, display plain text
                             res.fromRadio.packet
-                                .getTracerouteResponse(
+                                ?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
                                     headerBack = stringResource(Res.string.traceroute_route_back_to_us),
@@ -217,9 +193,9 @@ fun TracerouteLogScreen(
                 val overlay =
                     route?.let {
                         TracerouteOverlay(
-                            requestId = log.fromRadio.packet.id,
-                            forwardRoute = it.routeList,
-                            returnRoute = it.routeBackList,
+                            requestId = log.fromRadio.packet?.id ?: 0,
+                            forwardRoute = it.route,
+                            returnRoute = it.route_back,
                         )
                     }
 
@@ -240,16 +216,24 @@ fun TracerouteLogScreen(
                                             headerTowards = getString(Res.string.traceroute_route_towards_dest),
                                             headerBack = getString(Res.string.traceroute_route_back_to_us),
                                         )
-                                        ?.let { AnnotatedString(it) }
+                                        ?.let {
+                                            annotateTraceroute(
+                                                it,
+                                                statusGreen = statusGreen,
+                                                statusYellow = statusYellow,
+                                                statusOrange = statusOrange,
+                                            )
+                                        }
                             dialogMessage?.let {
                                 val responseLogUuid = result?.uuid ?: return@combinedClickable
-                                showDialog =
-                                    TracerouteDialog(
-                                        message = it,
-                                        requestId = log.fromRadio.packet.id,
-                                        responseLogUuid = responseLogUuid,
-                                        overlay = overlay,
-                                    )
+                                viewModel.showTracerouteDetail(
+                                    annotatedMessage = it,
+                                    requestId = log.fromRadio.packet?.id ?: 0,
+                                    responseLogUuid = responseLogUuid,
+                                    overlay = overlay,
+                                    onViewOnMap = onViewOnMap,
+                                    onShowError = { /* Handle error */ },
+                                )
                             }
                         },
                     )
@@ -265,114 +249,27 @@ fun TracerouteLogScreen(
     }
 }
 
-@Composable
-private fun TracerouteLogDialogs(
-    dialog: TracerouteDialog?,
-    errorMessageRes: StringResource?,
-    viewModel: MetricsViewModel,
-    onViewOnMap: (requestId: Int, responseLogUuid: String) -> Unit,
-    onShowErrorMessageRes: (StringResource) -> Unit,
-    onDismissDialog: () -> Unit,
-    onDismissError: () -> Unit,
-) {
-    dialog?.let { dialogState ->
-        val snapshotPositionsFlow =
-            remember(dialogState.responseLogUuid) { viewModel.tracerouteSnapshotPositions(dialogState.responseLogUuid) }
-        val snapshotPositions by snapshotPositionsFlow.collectAsStateWithLifecycle(emptyMap<Int, MeshProtos.Position>())
-        SimpleAlertDialog(
-            title = Res.string.traceroute,
-            text = { SelectionContainer { Text(text = dialogState.message) } },
-            confirmText = stringResource(Res.string.view_on_map),
-            onConfirm = {
-                val positionedNodeNums =
-                    if (snapshotPositions.isNotEmpty()) {
-                        snapshotPositions.keys
-                    } else {
-                        viewModel.positionedNodeNums()
-                    }
-                val availability =
-                    evaluateTracerouteMapAvailability(
-                        forwardRoute = dialogState.overlay?.forwardRoute.orEmpty(),
-                        returnRoute = dialogState.overlay?.returnRoute.orEmpty(),
-                        positionedNodeNums = positionedNodeNums,
-                    )
-                availability.toMessageRes()?.let(onShowErrorMessageRes)
-                    ?: onViewOnMap(dialogState.requestId, dialogState.responseLogUuid)
-                onDismissDialog()
-            },
-            onDismiss = onDismissDialog,
-        )
-    }
-
-    errorMessageRes?.let { res ->
-        SimpleAlertDialog(
-            title = Res.string.traceroute,
-            text = { Text(text = stringResource(res)) },
-            dismissText = stringResource(Res.string.close),
-            onDismiss = onDismissError,
-        )
-    }
-}
-
 /** Generates a display string and icon based on the route discovery information. */
 @Composable
-private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
+private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
     this == null -> {
         stringResource(Res.string.routing_error_no_response) to MeshtasticIcons.PersonOff
     }
     // A direct route means the sender and receiver are the only two nodes in the route.
-    routeCount <= 2 && routeBackCount <= 2 -> { // also check routeBackCount for direct to be more robust
+    route.size <= 2 && route_back.size <= 2 -> { // also check route_back size for direct to be more robust
         stringResource(Res.string.traceroute_direct) to MeshtasticIcons.Group
     }
 
-    routeCount == routeBackCount -> {
-        val hops = routeCount - 2
+    route.size == route_back.size -> {
+        val hops = route.size - 2
         pluralStringResource(Res.plurals.traceroute_hops, hops, hops) to MeshtasticIcons.Route
     }
 
     else -> {
         // Asymmetric route
-        val towards = maxOf(0, routeCount - 2)
-        val back = maxOf(0, routeBackCount - 2)
+        val towards = maxOf(0, route.size - 2)
+        val back = maxOf(0, route_back.size - 2)
         stringResource(Res.string.traceroute_diff, towards, back) to MeshtasticIcons.Route
-    }
-}
-
-/**
- * Converts a raw traceroute string into an [AnnotatedString] with SNR values highlighted according to their quality.
- *
- * @param inString The raw string output from a traceroute response.
- * @return An [AnnotatedString] with SNR values styled, or an empty [AnnotatedString] if input is null.
- */
-@Composable
-fun annotateTraceroute(inString: String?): AnnotatedString {
-    if (inString == null) return buildAnnotatedString { append("") }
-    return buildAnnotatedString {
-        inString.lines().forEachIndexed { i, line ->
-            if (i > 0) append("\n")
-            // Example line: "⇊ -8.75 dB SNR"
-            if (line.trimStart().startsWith("⇊")) {
-                val snrRegex = Regex("""⇊ ([\d\.\?-]+) dB""")
-                val snrMatch = snrRegex.find(line)
-                val snrValue = snrMatch?.groupValues?.getOrNull(1)?.toFloatOrNull()
-
-                if (snrValue != null) {
-                    val snrColor =
-                        when {
-                            snrValue >= SNR_GOOD_THRESHOLD -> MaterialTheme.colorScheme.StatusGreen
-                            snrValue >= SNR_FAIR_THRESHOLD -> MaterialTheme.colorScheme.StatusYellow
-                            else -> MaterialTheme.colorScheme.StatusOrange
-                        }
-                    withStyle(style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold)) { append(line) }
-                } else {
-                    // Append line as is if SNR value cannot be parsed
-                    append(line)
-                }
-            } else {
-                // Append non-SNR lines as is
-                append(line)
-            }
-        }
     }
 }
 

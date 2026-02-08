@@ -16,9 +16,12 @@
  */
 package org.meshtastic.feature.node.list
 
+import android.net.Uri
+import android.os.RemoteException
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,11 +35,14 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.ConfigProtos
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,9 +51,9 @@ class NodeListViewModel
 constructor(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
-    radioConfigRepository: RadioConfigRepository,
+    private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    val nodeActions: NodeActions,
+    val nodeManagementActions: NodeManagementActions,
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
 
@@ -59,8 +65,11 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
-    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
+    private val _sharedContactRequested: MutableStateFlow<SharedContact?> = MutableStateFlow(null)
     val sharedContactRequested = _sharedContactRequested.asStateFlow()
+
+    private val _requestChannelSet = MutableStateFlow<ChannelSet?>(null)
+    val requestChannelSet = _requestChannelSet.asStateFlow()
 
     private val nodeSortOption = nodeFilterPreferences.nodeSortOption
 
@@ -99,8 +108,8 @@ constructor(
             NodesUiState(
                 sort = sort,
                 filter = nodeFilter,
-                distanceUnits = profile.config.display.units.number,
-                tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+                distanceUnits = profile.config?.display?.units?.value ?: 0,
+                tempInFahrenheit = profile.module_config?.telemetry?.environment_display_fahrenheit ?: false,
             )
         }
             .stateInWhileSubscribed(initialValue = NodesUiState())
@@ -124,10 +133,10 @@ constructor(
                                     val role = node.user.role
                                     val infrastructureRoles =
                                         listOf(
-                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER,
-                                            ConfigProtos.Config.DeviceConfig.Role.REPEATER,
-                                            ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
-                                            ConfigProtos.Config.DeviceConfig.Role.CLIENT_BASE,
+                                            Config.DeviceConfig.Role.ROUTER,
+                                            Config.DeviceConfig.Role.REPEATER,
+                                            Config.DeviceConfig.Role.ROUTER_LATE,
+                                            Config.DeviceConfig.Role.CLIENT_BASE,
                                         )
                                     role !in infrastructureRoles && !node.isEffectivelyUnmessageable
                                 } else {
@@ -151,17 +160,42 @@ constructor(
         nodeFilterPreferences.setNodeSort(sort)
     }
 
-    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
+    fun setSharedContactRequested(sharedContact: SharedContact?) {
         _sharedContactRequested.value = sharedContact
     }
 
-    fun favoriteNode(node: Node) = viewModelScope.launch { nodeActions.favoriteNode(node) }
+    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
+    fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
+        uri.dispatchMeshtasticUri(
+            onContact = { _sharedContactRequested.value = it },
+            onChannel = { _requestChannelSet.value = it },
+            onInvalid = onInvalid,
+        )
+    }
 
-    fun ignoreNode(node: Node) = viewModelScope.launch { nodeActions.ignoreNode(node) }
+    fun clearRequestChannelSet() {
+        _requestChannelSet.value = null
+    }
 
-    fun muteNode(node: Node) = viewModelScope.launch { nodeActions.muteNode(node) }
+    fun setChannels(channelSet: ChannelSet) = viewModelScope.launch {
+        radioConfigRepository.replaceAllSettings(channelSet.settings)
+        val newLoraConfig = channelSet.lora_config
+        if (newLoraConfig != null) {
+            try {
+                serviceRepository.meshService?.setConfig(Config(lora = newLoraConfig).encode())
+            } catch (ex: RemoteException) {
+                Logger.e(ex) { "Set config error" }
+            }
+        }
+    }
 
-    fun removeNode(nodeNum: Int) = viewModelScope.launch { nodeActions.removeNode(nodeNum) }
+    fun favoriteNode(node: Node) = nodeManagementActions.requestFavoriteNode(viewModelScope, node)
+
+    fun ignoreNode(node: Node) = nodeManagementActions.requestIgnoreNode(viewModelScope, node)
+
+    fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
+
+    fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
 
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"

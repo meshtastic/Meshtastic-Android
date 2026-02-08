@@ -43,7 +43,9 @@ import org.meshtastic.core.strings.one_hour
 import org.meshtastic.core.strings.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
+import org.meshtastic.proto.Waypoint
 import java.util.concurrent.TimeUnit
 
 @Suppress("MagicNumber")
@@ -93,7 +95,8 @@ abstract class BaseMapViewModel(
                 list
                     .associateBy { packet -> packet.data.waypoint!!.id }
                     .filterValues {
-                        it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
+                        val expire = it.data.waypoint!!.expire ?: 0
+                        expire == 0 || expire > System.currentTimeMillis() / 1000
                     }
             }
             .stateInWhileSubscribed(initialValue = emptyMap())
@@ -122,9 +125,9 @@ abstract class BaseMapViewModel(
 
     fun getNodeByNum(nodeNum: Int): Node? = nodeRepository.nodeDBbyNum.value[nodeNum]
 
-    open fun getUser(userId: String?): MeshProtos.User = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+    open fun getUser(userId: String?): User = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 
-    fun getUser(nodeNum: Int): MeshProtos.User = nodeRepository.getUser(nodeNum)
+    fun getUser(nodeNum: Int): User = nodeRepository.getUser(nodeNum)
 
     fun getNodeOrFallback(nodeNum: Int): Node = getNodeByNum(nodeNum) ?: Node(num = nodeNum, user = getUser(nodeNum))
 
@@ -160,7 +163,7 @@ abstract class BaseMapViewModel(
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
-    fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
@@ -215,7 +218,7 @@ data class TracerouteNodeSelection(
 
 fun BaseMapViewModel.tracerouteNodeSelection(
     tracerouteOverlay: TracerouteOverlay?,
-    tracerouteNodePositions: Map<Int, MeshProtos.Position>,
+    tracerouteNodePositions: Map<Int, Position>,
     nodes: List<Node>,
 ): TracerouteNodeSelection {
     val overlayNodeNums = tracerouteOverlay?.relatedNodeNums ?: emptySet()

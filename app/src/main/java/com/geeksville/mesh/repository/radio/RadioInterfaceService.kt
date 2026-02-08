@@ -49,7 +49,8 @@ import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Heartbeat
+import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -64,7 +65,7 @@ import javax.inject.Singleton
  */
 @Suppress("LongParameterList")
 @Singleton
-class RadioInterfaceService
+open class RadioInterfaceService
 @Inject
 constructor(
     private val context: Application,
@@ -149,9 +150,8 @@ constructor(
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             if (radioIf is SerialInterface) {
                 Logger.i { "Sending ToRadio heartbeat" }
-                val heartbeat =
-                    MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
-                handleSendToRadio(heartbeat.toByteArray())
+                val heartbeat = ToRadio(heartbeat = Heartbeat())
+                handleSendToRadio(heartbeat.encode())
             } else {
                 // For BLE and TCP this will check if the connection is still alive
                 radioIf.keepAlive()
@@ -224,7 +224,7 @@ constructor(
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
-    fun handleFromRadio(p: ByteArray) {
+    open fun handleFromRadio(p: ByteArray) {
         if (logReceives) {
             try {
                 receivedPacketsLog.write(p)
@@ -233,8 +233,6 @@ constructor(
                 Logger.w(t) { "Failed to write receive log in handleFromRadio" }
             }
         }
-
-        // ignoreException { Logger.d { "FromRadio: ${MeshProtos.FromRadio.parseFrom(p }}" } }
 
         try {
             processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.share
 
 import androidx.compose.foundation.layout.Column
@@ -26,45 +25,48 @@ import androidx.compose.runtime.getValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.compareUsers
+import org.meshtastic.core.model.util.userFieldsToString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.import_known_shared_contact_text
 import org.meshtastic.core.strings.import_label
 import org.meshtastic.core.strings.import_shared_contact
 import org.meshtastic.core.strings.public_key_changed
-import org.meshtastic.core.ui.component.SimpleAlertDialog
-import org.meshtastic.core.ui.component.compareUsers
-import org.meshtastic.core.ui.component.userFieldsToString
-import org.meshtastic.proto.AdminProtos
+import org.meshtastic.core.ui.component.MeshtasticDialog
+import org.meshtastic.proto.SharedContact
+import org.meshtastic.proto.User
 
 /** A dialog for importing a shared contact that was scanned from a QR code. */
 @Composable
 fun SharedContactDialog(
-    sharedContact: AdminProtos.SharedContact,
+    sharedContact: SharedContact,
     onDismiss: () -> Unit,
     viewModel: SharedContactViewModel = hiltViewModel(),
 ) {
     val unfilteredNodes by viewModel.unfilteredNodes.collectAsStateWithLifecycle()
 
-    val nodeNum = sharedContact.nodeNum
+    val nodeNum = sharedContact.node_num
     val node = unfilteredNodes.find { it.num == nodeNum }
 
-    SimpleAlertDialog(
-        title = Res.string.import_shared_contact,
+    MeshtasticDialog(
+        titleRes = Res.string.import_shared_contact,
         text = {
             Column {
                 if (node != null) {
                     Text(text = stringResource(Res.string.import_known_shared_contact_text))
-                    if (node.user.publicKey.size() > 0 && node.user.publicKey != sharedContact.user?.publicKey) {
+                    if (
+                        (node.user.public_key?.size ?: 0) > 0 && node.user.public_key != sharedContact.user?.public_key
+                    ) {
                         Text(
                             text = stringResource(Res.string.public_key_changed),
                             color = MaterialTheme.colorScheme.error,
                         )
                     }
                     HorizontalDivider()
-                    Text(text = compareUsers(node.user, sharedContact.user))
+                    Text(text = compareUsers(node.user, sharedContact.user ?: User()))
                 } else {
-                    Text(text = userFieldsToString(sharedContact.user))
+                    Text(text = userFieldsToString(sharedContact.user ?: User()))
                 }
             }
         },

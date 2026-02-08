@@ -31,8 +31,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
-import com.google.protobuf.MessageLite
-import com.meshtastic.core.strings.getString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -59,30 +57,31 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
+import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cant_shutdown
-import org.meshtastic.core.strings.fetching_channel_indexed
-import org.meshtastic.core.strings.fetching_config
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.util.UiText
-import org.meshtastic.proto.AdminProtos
-import org.meshtastic.proto.ChannelProtos
-import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.ConfigProtos.Config.SecurityConfig
-import org.meshtastic.proto.ConnStatusProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.ModuleConfigProtos
-import org.meshtastic.proto.Portnums
-import org.meshtastic.proto.config
-import org.meshtastic.proto.deviceProfile
-import org.meshtastic.proto.moduleConfig
+import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Channel
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceConnectionStatus
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.ModuleConfig
+import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Routing
+import org.meshtastic.proto.User
 import java.io.FileOutputStream
 import javax.inject.Inject
 
@@ -91,14 +90,14 @@ data class RadioConfigState(
     val isLocal: Boolean = false,
     val connected: Boolean = false,
     val route: String = "",
-    val metadata: MeshProtos.DeviceMetadata? = null,
-    val userConfig: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
-    val channelList: List<ChannelProtos.ChannelSettings> = emptyList(),
-    val radioConfig: ConfigProtos.Config = config {},
-    val moduleConfig: ModuleConfigProtos.ModuleConfig = moduleConfig {},
+    val metadata: DeviceMetadata? = null,
+    val userConfig: User = User(),
+    val channelList: List<ChannelSettings> = emptyList(),
+    val radioConfig: Config = Config(),
+    val moduleConfig: LocalModuleConfig = LocalModuleConfig(),
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
-    val deviceConnectionStatus: ConnStatusProtos.DeviceConnectionStatus? = null,
+    val deviceConnectionStatus: DeviceConnectionStatus? = null,
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
     val analyticsAvailable: Boolean = true,
     val analyticsEnabled: Boolean = false,
@@ -119,6 +118,7 @@ constructor(
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
+    private val homoglyphEncodingPrefs: HomoglyphPrefs,
 ) : ViewModel() {
     private val meshService: IMeshService?
         get() = serviceRepository.meshService
@@ -129,12 +129,21 @@ constructor(
         analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
     }
 
-    private val destNum = savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum
+    val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
+
+    fun toggleHomoglyphCharactersEncodingEnabled() {
+        homoglyphEncodingPrefs.homoglyphEncodingEnabled = !homoglyphEncodingPrefs.homoglyphEncodingEnabled
+    }
+
+    private val destNum =
+        savedStateHandle.get<Int>("destNum")
+            ?: runCatching { savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum }.getOrNull()
+
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>
         get() = _destNode
 
-    private val requestIds = MutableStateFlow(emptySet<Int>())
+    private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
@@ -142,7 +151,7 @@ constructor(
         viewModelScope.launch { _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) } }
     }
 
-    private val _currentDeviceProfile = MutableStateFlow(deviceProfile {})
+    private val _currentDeviceProfile = MutableStateFlow(DeviceProfile())
     val currentDeviceProfile
         get() = _currentDeviceProfile.value
 
@@ -195,14 +204,13 @@ constructor(
 
     val hasPaFan: Boolean
         get() =
-            destNode.value?.user?.hwModel in
+            destNode.value?.user?.hw_model in
                 setOf(
                     null,
-                    MeshProtos.HardwareModel.UNRECOGNIZED,
-                    MeshProtos.HardwareModel.UNSET,
-                    MeshProtos.HardwareModel.BETAFPV_2400_TX,
-                    MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT_NANO,
-                    MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT,
+                    HardwareModel.UNSET,
+                    HardwareModel.BETAFPV_2400_TX,
+                    HardwareModel.RADIOMASTER_900_BANDIT_NANO,
+                    HardwareModel.RADIOMASTER_900_BANDIT,
                 )
 
     override fun onCleared() {
@@ -216,12 +224,11 @@ constructor(
                 val packetId = service.packetId
                 try {
                     requestAction(service, packetId, destNum)
-                    requestIds.update { it + packetId }
+                    requestIds.update { it.apply { add(packetId) } }
                     _radioConfigState.update { state ->
-                        val currentState = state.responseState
-                        if (currentState is ResponseState.Loading) {
-                            val total = maxOf(currentState.total, requestIds.value.size)
-                            state.copy(responseState = currentState.copy(total = total))
+                        if (state.responseState is ResponseState.Loading) {
+                            val total = maxOf(requestIds.value.size, state.responseState.total)
+                            state.copy(responseState = state.responseState.copy(total = total))
                         } else {
                             state.copy(
                                 route = "", // setter (response is PortNum.ROUTING_APP)
@@ -235,25 +242,15 @@ constructor(
             }
         }
 
-    fun setOwner(user: MeshProtos.User) {
-        val targetNode = destNode.value ?: return
-        // Ensure we are setting the owner for the intended target node
-        // This prevents accidentally updating the local node if the user object has the wrong ID
-        val fixedUser =
-            if (targetNode.user.id.isNotEmpty() && targetNode.user.id != user.id) {
-                Logger.w { "Fixing user ID mismatch in setOwner: form=${user.id} target=${targetNode.user.id}" }
-                user.toBuilder().setId(targetNode.user.id).build()
-            } else {
-                user
-            }
-        setRemoteOwner(targetNode.num, fixedUser)
+    fun setOwner(user: User) {
+        setRemoteOwner(destNode.value?.num ?: return, user)
     }
 
-    private fun setRemoteOwner(destNum: Int, user: MeshProtos.User) = request(
+    private fun setRemoteOwner(destNum: Int, user: User) = request(
         destNum,
         { service, packetId, _ ->
             _radioConfigState.update { it.copy(userConfig = user) }
-            service.setRemoteOwner(packetId, destNum, user.toByteArray())
+            service.setRemoteOwner(packetId, destNum, user.encode())
         },
         "Request setOwner error",
     )
@@ -264,7 +261,7 @@ constructor(
         "Request getOwner error",
     )
 
-    fun updateChannels(new: List<ChannelProtos.ChannelSettings>, old: List<ChannelProtos.ChannelSettings>) {
+    fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { setRemoteChannel(destNum, it) }
 
@@ -280,12 +277,12 @@ constructor(
     private fun setChannels(channelUrl: String) = viewModelScope.launch {
         val new = channelUrl.toUri().toChannelSet()
         val old = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launch
-        updateChannels(new.settingsList, old.settingsList)
+        updateChannels(new.settings, old.settings)
     }
 
-    private fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) = request(
+    private fun setRemoteChannel(destNum: Int, channel: Channel) = request(
         destNum,
-        { service, packetId, dest -> service.setRemoteChannel(packetId, dest, channel.toByteArray()) },
+        { service, packetId, dest -> service.setRemoteChannel(packetId, dest, channel.encode()) },
         "Request setRemoteChannel error",
     )
 
@@ -295,15 +292,29 @@ constructor(
         "Request getChannel error",
     )
 
-    fun setConfig(config: ConfigProtos.Config) {
+    fun setConfig(config: Config) {
         setRemoteConfig(destNode.value?.num ?: return, config)
     }
 
-    private fun setRemoteConfig(destNum: Int, config: ConfigProtos.Config) = request(
+    private fun setRemoteConfig(destNum: Int, config: Config) = request(
         destNum,
         { service, packetId, dest ->
-            _radioConfigState.update { it.copy(radioConfig = config) }
-            service.setRemoteConfig(packetId, dest, config.toByteArray())
+            _radioConfigState.update { state ->
+                state.copy(
+                    radioConfig =
+                    state.radioConfig.copy(
+                        device = config.device ?: state.radioConfig.device,
+                        position = config.position ?: state.radioConfig.position,
+                        power = config.power ?: state.radioConfig.power,
+                        network = config.network ?: state.radioConfig.network,
+                        display = config.display ?: state.radioConfig.display,
+                        lora = config.lora ?: state.radioConfig.lora,
+                        bluetooth = config.bluetooth ?: state.radioConfig.bluetooth,
+                        security = config.security ?: state.radioConfig.security,
+                    ),
+                )
+            }
+            service.setRemoteConfig(packetId, dest, config.encode())
         },
         "Request setConfig error",
     )
@@ -314,17 +325,38 @@ constructor(
         "Request getConfig error",
     )
 
-    fun setModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
-        setModuleConfig(destNode.value?.num ?: return, config)
+    fun setModuleConfig(config: ModuleConfig) {
+        setRemoteModuleConfig(destNode.value?.num ?: return, config)
     }
 
-    private fun setModuleConfig(destNum: Int, config: ModuleConfigProtos.ModuleConfig) = request(
+    private fun setRemoteModuleConfig(destNum: Int, config: ModuleConfig) = request(
         destNum,
         { service, packetId, dest ->
-            _radioConfigState.update { it.copy(moduleConfig = config) }
-            service.setModuleConfig(packetId, dest, config.toByteArray())
+            _radioConfigState.update { state ->
+                state.copy(
+                    moduleConfig =
+                    state.moduleConfig.copy(
+                        mqtt = config.mqtt ?: state.moduleConfig.mqtt,
+                        serial = config.serial ?: state.moduleConfig.serial,
+                        external_notification =
+                        config.external_notification ?: state.moduleConfig.external_notification,
+                        store_forward = config.store_forward ?: state.moduleConfig.store_forward,
+                        range_test = config.range_test ?: state.moduleConfig.range_test,
+                        telemetry = config.telemetry ?: state.moduleConfig.telemetry,
+                        canned_message = config.canned_message ?: state.moduleConfig.canned_message,
+                        audio = config.audio ?: state.moduleConfig.audio,
+                        remote_hardware = config.remote_hardware ?: state.moduleConfig.remote_hardware,
+                        neighbor_info = config.neighbor_info ?: state.moduleConfig.neighbor_info,
+                        ambient_lighting = config.ambient_lighting ?: state.moduleConfig.ambient_lighting,
+                        detection_sensor = config.detection_sensor ?: state.moduleConfig.detection_sensor,
+                        paxcounter = config.paxcounter ?: state.moduleConfig.paxcounter,
+                        statusmessage = config.statusmessage ?: state.moduleConfig.statusmessage,
+                    ),
+                )
+            }
+            service.setModuleConfig(packetId, dest, config.encode())
         },
-        "Request setConfig error",
+        "Request setModuleConfig error",
     )
 
     private fun getModuleConfig(destNum: Int, configType: Int) = request(
@@ -418,7 +450,7 @@ constructor(
             AdminRoute.REBOOT.name -> requestReboot(destNum)
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
-                    if (metadata != null && !metadata.canShutdown) {
+                    if (metadata != null && metadata.canShutdown != true) {
                         sendError(Res.string.cant_shutdown)
                     } else {
                         requestShutdown(destNum)
@@ -444,8 +476,8 @@ constructor(
     fun importProfile(uri: Uri, onResult: (DeviceProfile) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
             app.contentResolver.openInputStream(uri).use { inputStream ->
-                val bytes = inputStream?.readBytes()
-                val protobuf = DeviceProfile.parseFrom(bytes)
+                val bytes = inputStream?.readBytes() ?: ByteArray(0)
+                val protobuf = DeviceProfile.ADAPTER.decode(bytes)
                 onResult(protobuf)
             }
         } catch (ex: Exception) {
@@ -456,11 +488,11 @@ constructor(
 
     fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch { writeToUri(uri, profile) }
 
-    private suspend fun writeToUri(uri: Uri, message: MessageLite) = withContext(Dispatchers.IO) {
+    private suspend fun writeToUri(uri: Uri, message: com.squareup.wire.Message<*, *>) = withContext(Dispatchers.IO) {
         try {
             app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
                 FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
-                    message.writeTo(outputStream)
+                    outputStream.write(message.encode())
                 }
             }
             setResponseStateSuccess()
@@ -470,16 +502,16 @@ constructor(
         }
     }
 
-    fun exportSecurityConfig(uri: Uri, securityConfig: SecurityConfig) =
+    fun exportSecurityConfig(uri: Uri, securityConfig: Config.SecurityConfig) =
         viewModelScope.launch { writeSecurityKeysJsonToUri(uri, securityConfig) }
 
     private val indentSpaces = 4
 
-    private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: SecurityConfig) =
+    private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: Config.SecurityConfig) =
         withContext(Dispatchers.IO) {
             try {
-                val publicKeyBytes = securityConfig.publicKey.toByteArray()
-                val privateKeyBytes = securityConfig.privateKey.toByteArray()
+                val publicKeyBytes = securityConfig.public_key?.toByteArray() ?: ByteArray(0)
+                val privateKeyBytes = securityConfig.private_key?.toByteArray() ?: ByteArray(0)
 
                 // Convert byte arrays to Base64 strings for human readability in JSON
                 val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
@@ -509,73 +541,56 @@ constructor(
             }
         }
 
-    @Suppress("CyclomaticComplexMethod")
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNode.value?.num ?: return
         with(protobuf) {
             meshService?.beginEditSettings(destNum)
-            if (hasLongName() || hasShortName()) {
+            if (long_name != null || short_name != null) {
                 destNode.value?.user?.let {
-                    val user =
-                        MeshProtos.User.newBuilder()
-                            .setId(it.id)
-                            .setLongName(if (hasLongName()) longName else it.longName)
-                            .setShortName(if (hasShortName()) shortName else it.shortName)
-                            .setIsLicensed(it.isLicensed)
-                            .build()
+                    val user = it.copy(long_name = long_name ?: it.long_name, short_name = short_name ?: it.short_name)
                     setOwner(user)
                 }
             }
-            if (hasChannelUrl()) {
-                try {
-                    setChannels(channelUrl)
-                } catch (ex: Exception) {
-                    Logger.e(ex) { "DeviceProfile channel import error" }
-                    sendError(ex.customMessage)
-                }
+            config?.let { lc ->
+                lc.device?.let { setConfig(Config(device = it)) }
+                lc.position?.let { setConfig(Config(position = it)) }
+                lc.power?.let { setConfig(Config(power = it)) }
+                lc.network?.let { setConfig(Config(network = it)) }
+                lc.display?.let { setConfig(Config(display = it)) }
+                lc.lora?.let { setConfig(Config(lora = it)) }
+                lc.bluetooth?.let { setConfig(Config(bluetooth = it)) }
+                lc.security?.let { setConfig(Config(security = it)) }
             }
-            if (hasConfig()) {
-                val descriptor = ConfigProtos.Config.getDescriptor()
-                config.allFields.forEach { (field, value) ->
-                    val newConfig =
-                        ConfigProtos.Config.newBuilder().setField(descriptor.findFieldByName(field.name), value).build()
-                    setConfig(newConfig)
-                }
+            if (fixed_position != null) {
+                setFixedPosition(Position(fixed_position!!))
             }
-            if (hasFixedPosition()) {
-                setFixedPosition(Position(fixedPosition))
-            }
-            if (hasModuleConfig()) {
-                val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()
-                moduleConfig.allFields.forEach { (field, value) ->
-                    val newConfig =
-                        ModuleConfigProtos.ModuleConfig.newBuilder()
-                            .setField(descriptor.findFieldByName(field.name), value)
-                            .build()
-                    setModuleConfig(newConfig)
-                }
+            module_config?.let { lmc ->
+                lmc.mqtt?.let { setModuleConfig(ModuleConfig(mqtt = it)) }
+                lmc.serial?.let { setModuleConfig(ModuleConfig(serial = it)) }
+                lmc.external_notification?.let { setModuleConfig(ModuleConfig(external_notification = it)) }
+                lmc.store_forward?.let { setModuleConfig(ModuleConfig(store_forward = it)) }
+                lmc.range_test?.let { setModuleConfig(ModuleConfig(range_test = it)) }
+                lmc.telemetry?.let { setModuleConfig(ModuleConfig(telemetry = it)) }
+                lmc.canned_message?.let { setModuleConfig(ModuleConfig(canned_message = it)) }
+                lmc.audio?.let { setModuleConfig(ModuleConfig(audio = it)) }
+                lmc.remote_hardware?.let { setModuleConfig(ModuleConfig(remote_hardware = it)) }
+                lmc.neighbor_info?.let { setModuleConfig(ModuleConfig(neighbor_info = it)) }
+                lmc.ambient_lighting?.let { setModuleConfig(ModuleConfig(ambient_lighting = it)) }
+                lmc.detection_sensor?.let { setModuleConfig(ModuleConfig(detection_sensor = it)) }
+                lmc.paxcounter?.let { setModuleConfig(ModuleConfig(paxcounter = it)) }
+                lmc.statusmessage?.let { setModuleConfig(ModuleConfig(statusmessage = it)) }
             }
             meshService?.commitEditSettings(destNum)
         }
     }
 
     fun clearPacketResponse() {
-        requestIds.value = emptySet()
+        requestIds.value = hashSetOf()
         _radioConfigState.update { it.copy(responseState = ResponseState.Empty) }
     }
 
-    private fun getTitleForRoute(route: Enum<*>) = when (route) {
-        is ConfigRoute -> route.title
-        is ModuleRoute -> route.title
-        is AdminRoute -> route.title
-        else -> null
-    }
-
-    @Suppress("CyclomaticComplexMethod")
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNode.value?.num ?: return
-
-        val title = getTitleForRoute(route)
 
         _radioConfigState.update {
             RadioConfigState(
@@ -584,10 +599,7 @@ constructor(
                 route = route.name,
                 metadata = it.metadata,
                 nodeDbResetPreserveFavorites = it.nodeDbResetPreserveFavorites,
-                responseState =
-                ResponseState.Loading(
-                    status = title?.let { t -> getString(Res.string.fetching_config, getString(t)) },
-                ),
+                responseState = ResponseState.Loading(),
             )
         }
 
@@ -602,7 +614,7 @@ constructor(
             }
 
             is AdminRoute -> {
-                getConfig(destNum, AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE)
+                getConfig(destNum, AdminMessage.ConfigType.SESSIONKEY_CONFIG.value)
                 setResponseStateTotal(2)
             }
 
@@ -634,11 +646,10 @@ constructor(
         mapConsentPrefs.setShouldReportLocation(nodeNum, shouldReportLocation)
     }
 
-    private fun setResponseStateTotal(newTotal: Int) {
+    private fun setResponseStateTotal(total: Int) {
         _radioConfigState.update { state ->
-            val currentState = state.responseState
-            if (currentState is ResponseState.Loading) {
-                state.copy(responseState = currentState.copy(total = newTotal))
+            if (state.responseState is ResponseState.Loading) {
+                state.copy(responseState = state.responseState.copy(total = total))
             } else {
                 state // Return the unchanged state for other response states
             }
@@ -666,35 +677,32 @@ constructor(
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }
     }
 
-    private fun incrementCompleted(status: String? = null) {
+    private fun incrementCompleted() {
         _radioConfigState.update { state ->
             if (state.responseState is ResponseState.Loading) {
                 val increment = state.responseState.completed + 1
-                state.copy(
-                    responseState =
-                    state.responseState.copy(completed = increment, status = status ?: state.responseState.status),
-                )
+                state.copy(responseState = state.responseState.copy(completed = increment))
             } else {
                 state // Return the unchanged state for other response states
             }
         }
     }
 
-    private fun processPacketResponse(packet: MeshProtos.MeshPacket) {
-        val data = packet.decoded
-        if (data.requestId !in requestIds.value) return
+    private fun processPacketResponse(packet: MeshPacket) {
+        val data = packet.decoded ?: return
+        if (data.request_id !in requestIds.value) return
         val route = radioConfigState.value.route
 
         val destNum = destNode.value?.num ?: return
-        val debugMsg = "requestId: ${data.requestId.toUInt()} to: ${destNum.toUInt()} received %s"
+        val debugMsg = "requestId: ${data.request_id.toUInt()} to: ${destNum.toUInt()} received %s"
 
-        if (data?.portnumValue == Portnums.PortNum.ROUTING_APP_VALUE) {
-            val parsed = MeshProtos.Routing.parseFrom(data.payload)
-            Logger.d { debugMsg.format(parsed.errorReason.name) }
-            if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
-                sendError(getStringResFrom(parsed.errorReasonValue))
+        if (data.portnum == PortNum.ROUTING_APP) {
+            val parsed = Routing.ADAPTER.decode(data.payload)
+            Logger.d { debugMsg.format(parsed.error_reason?.name) }
+            if (parsed.error_reason != Routing.Error.NONE) {
+                sendError(getStringResFrom(parsed.error_reason?.value ?: 0))
             } else if (packet.from == destNum && route.isEmpty()) {
-                requestIds.update { it - data.requestId }
+                requestIds.update { it.apply { remove(data.request_id) } }
                 if (requestIds.value.isEmpty()) {
                     setResponseStateSuccess()
                 } else {
@@ -702,91 +710,125 @@ constructor(
                 }
             }
         }
-        if (data?.portnumValue == Portnums.PortNum.ADMIN_APP_VALUE) {
-            val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
-            Logger.d { debugMsg.format(parsed.payloadVariantCase.name) }
+        if (data.portnum == PortNum.ADMIN_APP) {
+            val parsed = AdminMessage.ADAPTER.decode(data.payload)
+            // Explicitly log the non-null field name for clarity
+            val variant =
+                when {
+                    parsed.get_device_metadata_response != null -> "get_device_metadata_response"
+                    parsed.get_channel_response != null -> "get_channel_response"
+                    parsed.get_owner_response != null -> "get_owner_response"
+                    parsed.get_config_response != null -> "get_config_response"
+                    parsed.get_module_config_response != null -> "get_module_config_response"
+                    parsed.get_canned_message_module_messages_response != null ->
+                        "get_canned_message_module_messages_response"
+                    parsed.get_ringtone_response != null -> "get_ringtone_response"
+                    parsed.get_device_connection_status_response != null -> "get_device_connection_status_response"
+                    else -> "unknown"
+                }
+            Logger.d { debugMsg.format(variant) }
             if (destNum != packet.from) {
                 sendError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
                 return
             }
-            when (parsed.payloadVariantCase) {
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_METADATA_RESPONSE -> {
-                    _radioConfigState.update { it.copy(metadata = parsed.getDeviceMetadataResponse) }
+            when {
+                parsed.get_device_metadata_response != null -> {
+                    _radioConfigState.update { it.copy(metadata = parsed.get_device_metadata_response) }
                     incrementCompleted()
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
-                    val response = parsed.getChannelResponse
+                parsed.get_channel_response != null -> {
+                    val response = parsed.get_channel_response!!
                     // Stop once we get to the first disabled entry
-                    if (response.role != ChannelProtos.Channel.Role.DISABLED) {
+                    if (response.role != Channel.Role.DISABLED) {
                         _radioConfigState.update { state ->
                             state.copy(
                                 channelList =
-                                state.channelList.toMutableList().apply { add(response.index, response.settings) },
+                                state.channelList.toMutableList().apply {
+                                    val index = response.index ?: 0
+                                    val settings = response.settings ?: ChannelSettings()
+                                    // Make sure list is large enough
+                                    while (size <= index) add(ChannelSettings())
+                                    set(index, settings)
+                                },
                             )
                         }
-                        incrementCompleted(
-                            getString(Res.string.fetching_channel_indexed, response.index + 1, maxChannels),
-                        )
-                        if (response.index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
+                        incrementCompleted()
+                        val index = response.index ?: 0
+                        if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                             // Not done yet, request next channel
-                            getChannel(destNum, response.index + 1)
+                            getChannel(destNum, index + 1)
                         }
                     } else {
                         // Received last channel, update total and start channel editor
-                        setResponseStateTotal(response.index + 1)
+                        setResponseStateTotal((response.index ?: 0) + 1)
                     }
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_OWNER_RESPONSE -> {
-                    _radioConfigState.update { it.copy(userConfig = parsed.getOwnerResponse) }
+                parsed.get_owner_response != null -> {
+                    _radioConfigState.update { it.copy(userConfig = parsed.get_owner_response!!) }
                     incrementCompleted()
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
-                    val response = parsed.getConfigResponse
-                    if (response.payloadVariantCase.number == 0) { // PAYLOADVARIANT_NOT_SET
-                        sendError(response.payloadVariantCase.name)
-                    }
+                parsed.get_config_response != null -> {
+                    val response = parsed.get_config_response!!
                     _radioConfigState.update { it.copy(radioConfig = response) }
                     incrementCompleted()
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
-                    val response = parsed.getModuleConfigResponse
-                    if (response.payloadVariantCase.number == 0) { // PAYLOADVARIANT_NOT_SET
-                        sendError(response.payloadVariantCase.name)
+                parsed.get_module_config_response != null -> {
+                    val response = parsed.get_module_config_response!!
+                    _radioConfigState.update { state ->
+                        state.copy(
+                            moduleConfig =
+                            state.moduleConfig.copy(
+                                mqtt = response.mqtt ?: state.moduleConfig.mqtt,
+                                serial = response.serial ?: state.moduleConfig.serial,
+                                external_notification =
+                                response.external_notification ?: state.moduleConfig.external_notification,
+                                store_forward = response.store_forward ?: state.moduleConfig.store_forward,
+                                range_test = response.range_test ?: state.moduleConfig.range_test,
+                                telemetry = response.telemetry ?: state.moduleConfig.telemetry,
+                                canned_message = response.canned_message ?: state.moduleConfig.canned_message,
+                                audio = response.audio ?: state.moduleConfig.audio,
+                                remote_hardware = response.remote_hardware ?: state.moduleConfig.remote_hardware,
+                                neighbor_info = response.neighbor_info ?: state.moduleConfig.neighbor_info,
+                                ambient_lighting = response.ambient_lighting ?: state.moduleConfig.ambient_lighting,
+                                detection_sensor = response.detection_sensor ?: state.moduleConfig.detection_sensor,
+                                paxcounter = response.paxcounter ?: state.moduleConfig.paxcounter,
+                                statusmessage = response.statusmessage ?: state.moduleConfig.statusmessage,
+                            ),
+                        )
                     }
-                    _radioConfigState.update { it.copy(moduleConfig = response) }
                     incrementCompleted()
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CANNED_MESSAGE_MODULE_MESSAGES_RESPONSE -> {
+                parsed.get_canned_message_module_messages_response != null -> {
                     _radioConfigState.update {
-                        it.copy(cannedMessageMessages = parsed.getCannedMessageModuleMessagesResponse)
+                        it.copy(cannedMessageMessages = parsed.get_canned_message_module_messages_response!!)
                     }
                     incrementCompleted()
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_RINGTONE_RESPONSE -> {
-                    _radioConfigState.update { it.copy(ringtone = parsed.getRingtoneResponse) }
+                parsed.get_ringtone_response != null -> {
+                    _radioConfigState.update { it.copy(ringtone = parsed.get_ringtone_response!!) }
                     incrementCompleted()
                 }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_CONNECTION_STATUS_RESPONSE -> {
+                parsed.get_device_connection_status_response != null -> {
                     _radioConfigState.update {
-                        it.copy(deviceConnectionStatus = parsed.getDeviceConnectionStatusResponse)
+                        it.copy(deviceConnectionStatus = parsed.get_device_connection_status_response)
                     }
                     incrementCompleted()
                 }
 
-                else -> Logger.d { "No custom processing needed for ${parsed.payloadVariantCase}" }
+                else -> Logger.d { "No custom processing needed for $parsed" }
             }
 
             if (AdminRoute.entries.any { it.name == route }) {
                 sendAdminRequest(destNum)
             }
-            requestIds.update { it - data.requestId }
+            requestIds.update { it.apply { remove(data.request_id) } }
         }
     }
 }

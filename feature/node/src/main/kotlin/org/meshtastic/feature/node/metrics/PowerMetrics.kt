@@ -92,7 +92,7 @@ import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.proto.TelemetryProtos.Telemetry
+import org.meshtastic.proto.Telemetry
 
 private enum class PowerMetric(val color: Color) {
     CURRENT(InfantryBlue),
@@ -149,7 +149,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle =
                 stringResource(Res.string.power_metrics_log) + " (${data.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
@@ -192,7 +192,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                         selectedX = selectedX,
                         onPointSelected = { x ->
                             selectedX = x
-                            val index = data.indexOfFirst { it.time.toDouble() == x }
+                            val index = data.indexOfFirst { (it.time ?: 0).toDouble() == x }
                             if (index != -1) {
                                 coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
@@ -204,12 +204,12 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                         itemsIndexed(data) { _, telemetry ->
                             PowerMetricsCard(
                                 telemetry = telemetry,
-                                isSelected = telemetry.time.toDouble() == selectedX,
+                                isSelected = (telemetry.time ?: 0).toDouble() == selectedX,
                                 onClick = {
-                                    selectedX = telemetry.time.toDouble()
+                                    selectedX = (telemetry.time ?: 0).toDouble()
                                     coroutineScope.launch {
                                         vicoScrollState.animateScroll(
-                                            Scroll.Absolute.x(telemetry.time.toDouble(), 0.5f),
+                                            Scroll.Absolute.x((telemetry.time ?: 0).toDouble(), 0.5f),
                                         )
                                     }
                                 },
@@ -255,14 +255,14 @@ private fun PowerMetricsChart(
                 lineSeries {
                     val currentData = telemetries.filter { !retrieveCurrent(selectedChannel, it).isNaN() }
                     series(
-                        x = currentData.map { it.time },
+                        x = currentData.map { it.time ?: 0 },
                         y = currentData.map { retrieveCurrent(selectedChannel, it) },
                     )
                 }
                 lineSeries {
                     val voltageData = telemetries.filter { !retrieveVoltage(selectedChannel, it).isNaN() }
                     series(
-                        x = voltageData.map { it.time },
+                        x = voltageData.map { it.time ?: 0 },
                         y = voltageData.map { retrieveVoltage(selectedChannel, it) },
                     )
                 }
@@ -319,7 +319,7 @@ private fun PowerMetricsChart(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
-    val time = telemetry.time * MS_PER_SEC
+    val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -348,26 +348,17 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
                         Spacer(modifier = Modifier.height(8.dp))
 
                         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                            if (telemetry.powerMetrics.hasCh1Current() || telemetry.powerMetrics.hasCh1Voltage()) {
-                                PowerChannelColumn(
-                                    Res.string.channel_1,
-                                    telemetry.powerMetrics.ch1Voltage,
-                                    telemetry.powerMetrics.ch1Current,
-                                )
-                            }
-                            if (telemetry.powerMetrics.hasCh2Current() || telemetry.powerMetrics.hasCh2Voltage()) {
-                                PowerChannelColumn(
-                                    Res.string.channel_2,
-                                    telemetry.powerMetrics.ch2Voltage,
-                                    telemetry.powerMetrics.ch2Current,
-                                )
-                            }
-                            if (telemetry.powerMetrics.hasCh3Current() || telemetry.powerMetrics.hasCh3Voltage()) {
-                                PowerChannelColumn(
-                                    Res.string.channel_3,
-                                    telemetry.powerMetrics.ch3Voltage,
-                                    telemetry.powerMetrics.ch3Current,
-                                )
+                            val pm = telemetry.power_metrics
+                            if (pm != null) {
+                                if (pm.ch1_current != null || pm.ch1_voltage != null) {
+                                    PowerChannelColumn(Res.string.channel_1, pm.ch1_voltage ?: 0f, pm.ch1_current ?: 0f)
+                                }
+                                if (pm.ch2_current != null || pm.ch2_voltage != null) {
+                                    PowerChannelColumn(Res.string.channel_2, pm.ch2_voltage ?: 0f, pm.ch2_current ?: 0f)
+                                }
+                                if (pm.ch3_current != null || pm.ch3_voltage != null) {
+                                    PowerChannelColumn(Res.string.channel_3, pm.ch3_voltage ?: 0f, pm.ch3_current ?: 0f)
+                                }
                             }
                         }
                     }
@@ -408,14 +399,14 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
 
 /** Retrieves the appropriate voltage depending on `channelSelected`. */
 private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.powerMetrics.ch1Voltage
-    PowerChannel.TWO -> telemetry.powerMetrics.ch2Voltage
-    PowerChannel.THREE -> telemetry.powerMetrics.ch3Voltage
+    PowerChannel.ONE -> telemetry.power_metrics?.ch1_voltage ?: Float.NaN
+    PowerChannel.TWO -> telemetry.power_metrics?.ch2_voltage ?: Float.NaN
+    PowerChannel.THREE -> telemetry.power_metrics?.ch3_voltage ?: Float.NaN
 }
 
 /** Retrieves the appropriate current depending on `channelSelected`. */
 private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float = when (channelSelected) {
-    PowerChannel.ONE -> telemetry.powerMetrics.ch1Current
-    PowerChannel.TWO -> telemetry.powerMetrics.ch2Current
-    PowerChannel.THREE -> telemetry.powerMetrics.ch3Current
+    PowerChannel.ONE -> telemetry.power_metrics?.ch1_current ?: Float.NaN
+    PowerChannel.TWO -> telemetry.power_metrics?.ch2_current ?: Float.NaN
+    PowerChannel.THREE -> telemetry.power_metrics?.ch3_current ?: Float.NaN
 }

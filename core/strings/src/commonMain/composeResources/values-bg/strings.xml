@@ -112,16 +112,12 @@
     <!-- Position Config -->
     <string name="broadcast_interval">Интервал на излъчване</string>
     <string name="smart_position">Интелигентна позиция</string>
-    <string name="minimum_interval">Минимален интервал</string>
-    <string name="minimum_distance">Минимално разстояние</string>
     <string name="fixed_position">Фиксирана позиция</string>
     <string name="altitude">Надморска височина</string>
-    <string name="update_interval">Интервал на актуализиране</string>
     <string name="gps_receive_gpio">GPIO за приемане от GPS</string>
     <string name="gps_transmit_gpio">GPIO за предаване от GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Отстраняване на грешки</string>
-    <string name="channel">Канал</string>
     <string name="channel_name">Име на канал</string>
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Неизвестен потребител</string>
@@ -309,12 +305,6 @@
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
     <string name="battery">Батерия</string>
-    <string name="channel_utilization">Използване на канала</string>
-    <string name="air_utilization">Използване на ефира</string>
-    <string name="temperature">Температура</string>
-    <string name="humidity">Влажност</string>
-    <string name="soil_temperature">Температура на почвата</string>
-    <string name="soil_moisture">Влажност на почвата</string>
     <string name="logs">записа</string>
     <string name="hops_away">Брой отскоци</string>
     <string name="hops_away_template">Брой отскоци: %1$d</string>
@@ -385,7 +375,6 @@
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
     <string name="low_battery_title">Батерията е изтощена: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
-    <string name="baro_pressure">Барометрично налягане</string>
     <string name="udp_enabled">Активиран</string>
     <string name="udp_config">Конфигуриране на UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Последно чут: %2$s<br>Последна позиция: %3$s<br>Батерия: %4$s]]></string>
@@ -887,4 +876,5 @@
     <string name="filter_message_label">Филтрирани</string>
     <string name="filter_enable_for_contact">Активиране на филтрирането</string>
     <string name="filter_disable_for_contact">Дезактивиране на филтрирането</string>
+    <string name="generate_qr_code">Генериране на QR код</string>
 </resources>

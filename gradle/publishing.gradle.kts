@@ -29,4 +29,26 @@ if (project.version == "unspecified") {
         ?: System.getenv("VERSION_NAME")
         ?: props.getProperty("VERSION_NAME_BASE")
         ?: "0.0.0-SNAPSHOT"
+
+    println("Configured publication version for project ${project.name}: ${project.version}")
+}
+
+val GITHUB_ACTOR = System.getenv("GITHUB_ACTOR")
+val GITHUB_TOKEN = System.getenv("GITHUB_TOKEN")
+
+if (!GITHUB_ACTOR.isNullOrEmpty() && !GITHUB_TOKEN.isNullOrEmpty()) {
+    configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/meshtastic/Meshtastic-Android")
+                credentials {
+                    username = GITHUB_ACTOR
+                    password = GITHUB_TOKEN
+                }
+            }
+        }
+    }
+} else {
+    println("Skipping GitHub Packages repository configuration: GITHUB_ACTOR or GITHUB_TOKEN not set.")
 }

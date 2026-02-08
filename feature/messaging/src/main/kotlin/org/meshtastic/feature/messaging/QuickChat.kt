@@ -16,11 +16,9 @@
  */
 package org.meshtastic.feature.messaging
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,8 +36,6 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DragHandle
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.FastForward
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -63,8 +59,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -84,6 +78,7 @@ import org.meshtastic.core.strings.quick_chat_instant
 import org.meshtastic.core.strings.quick_chat_new
 import org.meshtastic.core.strings.save
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
@@ -185,20 +180,17 @@ private fun EditQuickChatDialog(
         }
     }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = stringResource(title),
+        confirmText = stringResource(Res.string.save),
+        onConfirm = {
+            onSave(actionInput)
+            onDismiss()
+        },
+        dismissText = stringResource(Res.string.cancel),
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(title),
-                    modifier = Modifier.fillMaxWidth(),
-                    style =
-                    MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextFieldWithCounter(
@@ -257,38 +249,18 @@ private fun EditQuickChatDialog(
                         },
                     )
                 }
-            }
-        },
-        confirmButton = {
-            FlowRow(
-                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(modifier = Modifier.weight(1f), onClick = onDismiss) {
-                    Text(stringResource(Res.string.cancel))
-                }
 
                 if (!newQuickChat) {
-                    Button(
-                        modifier = Modifier.weight(1f),
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextButton(
+                        modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             onDelete(actionInput)
                             onDismiss()
                         },
                     ) {
-                        Text(text = stringResource(Res.string.delete))
+                        Text(text = stringResource(Res.string.delete), color = MaterialTheme.colorScheme.error)
                     }
-                }
-
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        onSave(actionInput)
-                        onDismiss()
-                    },
-                    enabled = actionInput.name.isNotEmpty() && actionInput.message.isNotEmpty(),
-                ) {
-                    Text(text = stringResource(Res.string.save))
                 }
             }
         },

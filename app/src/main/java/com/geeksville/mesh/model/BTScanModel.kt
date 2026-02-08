@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.model
 
 import android.app.Application
@@ -209,10 +208,11 @@ constructor(
                 Logger.i { "Bonding complete for ${entry.peripheral.address.anonymize}, selecting device..." }
                 changeDeviceAddress(entry.fullAddress)
             } catch (ex: SecurityException) {
-                Logger.e(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
+                Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
                 serviceRepository.setErrorMessage("Bonding failed: ${ex.message} Permissions not granted")
             } catch (ex: Exception) {
-                Logger.e(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
+                // Bonding is often flaky and can fail for many reasons (timeout, user cancel, etc)
+                Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
                 serviceRepository.setErrorMessage("Bonding failed: ${ex.message}")
             }
         }

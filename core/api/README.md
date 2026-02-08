@@ -24,51 +24,81 @@ Add the dependencies to your module's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    // Replace 'v2.7.12' with the specific version you need
-    val meshtasticVersion = "v2.7.12" 
+    // Replace 'v2.7.13' with the specific version you need
+    val meshtasticVersion = "v2.7.13" 
 
-    // The core AIDL interface
-    implementation("com.github.meshtastic.Meshtastic-Android:core-api:$meshtasticVersion")
+    // The core AIDL interface and Intent constants
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-api:$meshtasticVersion")
     
     // Data models (DataPacket, MeshUser, NodeInfo, etc.)
-    implementation("com.github.meshtastic.Meshtastic-Android:core-model:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:$meshtasticVersion")
     
-    // Protobuf definitions (Portnums, Telemetry, etc.)
-    implementation("com.github.meshtastic.Meshtastic-Android:core-proto:$meshtasticVersion")
+    // Protobuf definitions (PortNum, Telemetry, etc.)
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-proto:$meshtasticVersion")
 }
 ```
 
 ## Usage
 
-1.  **Bind to the Service:**
-    Use the `IMeshService` interface to bind to the Meshtastic service.
+### 1. Bind to the Service
 
-    ```kotlin
-    val intent = Intent("com.geeksville.mesh.Service")
-    intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
-    bindService(intent, serviceConnection, BIND_AUTO_CREATE)
-    ```
+Use the `IMeshService` interface to bind to the Meshtastic service. It is recommended to query the package manager to find the correct service component, as the package name may vary between build flavors (e.g., Play Store vs. F-Droid).
 
-2.  **Interact with the API:**
-    Once bound, cast the `IBinder` to `IMeshService`:
+```kotlin
+val intent = Intent("com.geeksville.mesh.Service")
+val resolveInfo = packageManager.queryIntentServices(intent, 0)
 
-    ```kotlin
-    override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-        val meshService = IMeshService.Stub.asInterface(service)
-        
-        // Example: Send a text message
-        val packet = DataPacket(
-            to = DataPacket.ID_BROADCAST,
-            bytes = "Hello Meshtastic!".toByteArray(),
-            dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-            // ... other fields
-        )
-        meshService.send(packet)
-    }
-    ```
+if (resolveInfo.isNotEmpty()) {
+    val serviceInfo = resolveInfo[0].serviceInfo
+    intent.setClassName(serviceInfo.packageName, serviceInfo.name)
+    bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
+}
+```
+
+### 2. Interact with the API
+
+Once bound, cast the `IBinder` to `IMeshService`:
+
+```kotlin
+override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+    val meshService = IMeshService.Stub.asInterface(service)
+    
+    // Example: Send a broadcast text message
+    val packet = DataPacket(
+        to = DataPacket.ID_BROADCAST,
+        bytes = "Hello Meshtastic!".encodeToByteArray().toByteString(),
+        dataType = PortNum.TEXT_MESSAGE_APP.value,
+        id = meshService.packetId,
+        wantAck = true
+    )
+    meshService.send(packet)
+}
+```
+
+### 3. Register a BroadcastReceiver
+
+To receive packets and status updates, register a `BroadcastReceiver`. Use `MeshtasticIntent` constants for the actions.
+
+**Important:** On Android 13+ (API 33), you **must** use `RECEIVER_EXPORTED` since you are receiving broadcasts from a different application.
+
+```kotlin
+// Using constants from org.meshtastic.core.api.MeshtasticIntent
+val intentFilter = IntentFilter().apply {
+    addAction(MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP)
+    addAction(MeshtasticIntent.ACTION_NODE_CHANGE)
+    addAction(MeshtasticIntent.ACTION_CONNECTION_CHANGED)
+    addAction(MeshtasticIntent.ACTION_MESH_DISCONNECTED)
+}
+
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    registerReceiver(meshtasticReceiver, intentFilter, Context.RECEIVER_EXPORTED)
+} else {
+    registerReceiver(meshtasticReceiver, intentFilter)
+}
+```
 
 ## Modules
 
-*   **`core:api`**: Contains `IMeshService.aidl`.
+*   **`core:api`**: Contains `IMeshService.aidl` and `MeshtasticIntent`.
 *   **`core:model`**: Contains Parcelable data classes like `DataPacket`, `MeshUser`, `NodeInfo`.
-*   **`core:proto`**: Contains the generated Protobuf code from `meshtastic/protobufs`.
+*   **`core:proto`**: Contains the generated Protobuf code (Wire).

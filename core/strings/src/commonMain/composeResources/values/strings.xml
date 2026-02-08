@@ -174,12 +174,12 @@
     <string name="position_packet">Position Packet</string>
     <string name="broadcast_interval">Broadcast Interval</string>
     <string name="smart_position">Smart Position</string>
-    <string name="minimum_interval">Minimum Interval</string>
-    <string name="minimum_distance">Minimum Distance</string>
+    <string name="minimum_interval">Smart Interval</string>
+    <string name="minimum_distance">Smart Distance</string>
     <string name="device_gps">Device GPS</string>
     <string name="fixed_position">Fixed Position</string>
     <string name="altitude">Altitude</string>
-    <string name="update_interval">Update Interval</string>
+    <string name="update_interval">GPS Polling Interval</string>
     <string name="advanced_device_gps">Advanced Device GPS</string>
     <string name="gps_receive_gpio">GPS Receive GPIO</string>
     <string name="gps_transmit_gpio">GPS Transmit GPIO</string>
@@ -190,7 +190,7 @@
     <string name="elevation_suffix" translatable="false">MSL</string>
     <string name="channel_air_util" translatable="false">ChUtil %.1f%% AirUtilTX %.1f%%</string>
 
-    <string name="channel">Channel</string>
+    <string name="channel">Ch</string>
     <string name="channel_name">Channel Name</string>
     <string name="qr_code">QR code</string>
     <string name="unknown_username">Unknown Username</string>
@@ -294,6 +294,7 @@
     <string name="theme_system">System default</string>
     <string name="choose_theme">Choose theme</string>
     <string name="provide_location_to_mesh">Provide phone location to mesh</string>
+    <string name="use_homoglyph_characters_encoding">Compact encoding for Cyrillic</string>
     <plurals name="delete_messages">
         <item quantity="one">Delete message?</item>
         <item quantity="other">Delete %1$s messages?</item>
@@ -392,12 +393,12 @@
     <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
     <string name="navigate_back">Navigate Back</string>
     <string name="battery">Battery</string>
-    <string name="channel_utilization">Channel Utilization</string>
-    <string name="air_utilization">Air Utilization</string>
-    <string name="temperature">Temperature</string>
-    <string name="humidity">Humidity</string>
-    <string name="soil_temperature">Soil Temperature</string>
-    <string name="soil_moisture">Soil Moisture</string>
+    <string name="channel_utilization">ChUtil</string>
+    <string name="air_utilization">AirUtil</string>
+    <string name="temperature">Temp</string>
+    <string name="humidity">Hum</string>
+    <string name="soil_temperature">Soil Temp</string>
+    <string name="soil_moisture">Soil Moist</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Hops Away</string>
     <string name="hops_away_template">Hops Away: %1$d</string>
@@ -479,7 +480,7 @@
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="low_battery_title">Low battery: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
-    <string name="baro_pressure">Barometric Pressure</string>
+    <string name="baro_pressure">Baro</string>
     <string name="udp_enabled">Enabled</string>
     <string name="udp_broadcast">UDP Broadcast</string>
     <string name="udp_config">UDP Config</string>
@@ -1168,4 +1169,16 @@
     <string name="filter_message_label">Filtered</string>
     <string name="filter_enable_for_contact">Enable filtering</string>
     <string name="filter_disable_for_contact">Disable filtering</string>
+    <string name="channel_url">Channel URL</string>
+    <string name="scan_nfc">Scan NFC</string>
+    <string name="scan_shared_contact_nfc">Scan Shared Contact NFC</string>
+    <string name="scan_shared_contact_qr">Scan Shared Contact QR Code</string>
+    <string name="input_shared_contact_url">Input Shared Contact URL</string>
+    <string name="scan_channels_nfc">Scan Channels NFC</string>
+    <string name="scan_channels_qr">Scan Channels QR Code</string>
+    <string name="input_channel_url">Input Channel URL</string>
+    <string name="share_channels_qr">Share Channels QR Code</string>
+    <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
+    <string name="generate_qr_code">Generate QR Code</string>
+    <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
 </resources>

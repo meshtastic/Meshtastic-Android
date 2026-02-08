@@ -147,7 +147,7 @@ class MessageItemTest {
 
         // Verify that the node containing the message text exists and matches the text
         composeTestRule
-            .onNodeWithContentDescription("Message from ${testNode.user?.longName}: Hello World")
+            .onNodeWithContentDescription("Message from ${testNode.user.long_name}: Hello World")
             .assertIsDisplayed()
     }
 }

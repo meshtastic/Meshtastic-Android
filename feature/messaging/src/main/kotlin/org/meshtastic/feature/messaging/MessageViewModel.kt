@@ -44,14 +44,15 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
+import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.proto.ConfigProtos.Config.DeviceConfig.Role
-import org.meshtastic.proto.channelSet
-import org.meshtastic.proto.sharedContact
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config.DeviceConfig.Role
+import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -67,6 +68,7 @@ constructor(
     private val packetRepository: PacketRepository,
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
+    private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
@@ -78,7 +80,7 @@ constructor(
 
     val nodeList: StateFlow<List<Node>> = nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
-    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(channelSet {})
+    val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
@@ -121,6 +123,8 @@ constructor(
                 ?.sortedByDescending { it.second }
                 ?.map { it.first }
                 ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
+
+    val homoglyphEncodingEnabled = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
 
     init {
         val contactKey = savedStateHandle.get<String>("contactKey")
@@ -190,7 +194,7 @@ constructor(
         // if the destination is a node, we need to ensure it's a
         // favorite so it does not get removed from the on-device node database.
         if (channel == null) { // no channel specified, so we assume it's a direct message
-            val fwVersion = ourNodeInfo.value?.metadata?.firmwareVersion
+            val fwVersion = ourNodeInfo.value?.metadata?.firmware_version
             val destNode = nodeRepository.getNode(dest)
             val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
 
@@ -204,8 +208,20 @@ constructor(
                 }
             }
         }
+
+        // Applying homoglyph encoding to the transmitted string if user has activated the feature
+        // In most cases the value in "str" parameter will already contain the correct
+        // transformed string from the text input. This call here added to make sure that
+        // the feature is effective across all possible message paths (quick-chat, reply, etc.)
+        val dataPacketText: String =
+            if (homoglyphEncodingPrefs.homoglyphEncodingEnabled) {
+                HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(str)
+            } else {
+                str
+            }
+
         val p =
-            DataPacket(dest, channel ?: 0, str, replyId).apply {
+            DataPacket(dest, channel ?: 0, dataPacketText, replyId).apply {
                 from = ourNodeInfo.value?.user?.id ?: DataPacket.ID_LOCAL
             }
         sendDataPacket(p)
@@ -239,11 +255,8 @@ constructor(
 
     private fun sendSharedContact(node: Node) = viewModelScope.launch {
         try {
-            val contact = sharedContact {
-                nodeNum = node.num
-                user = node.user
-                manuallyVerified = node.manuallyVerified
-            }
+            val contact =
+                SharedContact(node_num = node.num, user = node.user, manually_verified = node.manuallyVerified)
             serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
         } catch (ex: RemoteException) {
             Logger.e(ex) { "Send shared contact error" }

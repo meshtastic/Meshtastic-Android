@@ -38,6 +38,7 @@ fun DistanceInfo(
         modifier = modifier,
         icon = MeshtasticIcons.Distance,
         contentDescription = stringResource(Res.string.distance),
+        label = stringResource(Res.string.distance),
         text = distance,
         contentColor = contentColor,
     )

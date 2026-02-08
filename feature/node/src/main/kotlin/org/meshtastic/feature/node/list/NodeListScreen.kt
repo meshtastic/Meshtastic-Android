@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("detekt:ALL")
+
 package org.meshtastic.feature.node.list
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -57,16 +59,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.add_favorite
+import org.meshtastic.core.strings.channel_invalid
 import org.meshtastic.core.strings.ignore
 import org.meshtastic.core.strings.mute_always
 import org.meshtastic.core.strings.node_count_template
@@ -75,25 +80,29 @@ import org.meshtastic.core.strings.remove
 import org.meshtastic.core.strings.remove_favorite
 import org.meshtastic.core.strings.remove_ignored
 import org.meshtastic.core.strings.unmute
-import org.meshtastic.core.ui.component.AddContactFAB
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
-import org.meshtastic.feature.node.component.NodeActionDialogs
+import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
-import org.meshtastic.proto.AdminProtos
+import org.meshtastic.proto.SharedContact
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeListScreen(
     navigateToNodeDetails: (Int) -> Unit,
+    onNavigateToChannels: () -> Unit = {},
     viewModel: NodeListViewModel = hiltViewModel(),
     scrollToTopEvents: Flow<ScrollToTopEvent>? = null,
     activeNodeId: Int? = null,
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
@@ -119,6 +128,10 @@ fun NodeListScreen(
     val isScrollInProgress by remember {
         derivedStateOf { listState.isScrollInProgress && (listState.canScrollForward || listState.canScrollBackward) }
     }
+
+    val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
+    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { viewModel.clearRequestChannelSet() }) }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -134,16 +147,19 @@ fun NodeListScreen(
         },
         floatingActionButton = {
             val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
-            val sharedContact: AdminProtos.SharedContact? by
-                viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
-            AddContactFAB(
+            val sharedContact: SharedContact? by viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
+            MeshtasticImportFAB(
                 sharedContact = sharedContact,
                 modifier =
                 Modifier.animateFloatingActionButton(
                     visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                onSharedContactRequested = { contact -> viewModel.setSharedContactRequested(contact) },
+                onImport = { uri ->
+                    viewModel.handleScannedUri(uri) { scope.launch { context.showToast(Res.string.channel_invalid) } }
+                },
+                onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
+                isContactContext = true,
             )
         },
     ) { contentPadding ->
@@ -179,29 +195,6 @@ fun NodeListScreen(
                 }
 
                 items(nodes, key = { it.num }) { node ->
-                    var displayFavoriteDialog by remember { mutableStateOf(false) }
-                    var displayIgnoreDialog by remember { mutableStateOf(false) }
-                    var displayMuteDialog by remember { mutableStateOf(false) }
-                    var displayRemoveDialog by remember { mutableStateOf(false) }
-
-                    NodeActionDialogs(
-                        node = node,
-                        displayFavoriteDialog = displayFavoriteDialog,
-                        displayIgnoreDialog = displayIgnoreDialog,
-                        displayMuteDialog = displayMuteDialog,
-                        displayRemoveDialog = displayRemoveDialog,
-                        onDismissMenuRequest = {
-                            displayFavoriteDialog = false
-                            displayIgnoreDialog = false
-                            displayMuteDialog = false
-                            displayRemoveDialog = false
-                        },
-                        onConfirmFavorite = viewModel::favoriteNode,
-                        onConfirmIgnore = viewModel::ignoreNode,
-                        onConfirmMute = viewModel::muteNode,
-                        onConfirmRemove = { viewModel.removeNode(it.num) },
-                    )
-
                     var expanded by remember { mutableStateOf(false) }
 
                     Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
@@ -230,10 +223,10 @@ fun NodeListScreen(
                             ContextMenu(
                                 expanded = expanded,
                                 node = node,
-                                onFavorite = { displayFavoriteDialog = true },
-                                onIgnore = { displayIgnoreDialog = true },
-                                onMute = { displayMuteDialog = true },
-                                onRemove = { displayRemoveDialog = true },
+                                onFavorite = { viewModel.favoriteNode(node) },
+                                onIgnore = { viewModel.ignoreNode(node) },
+                                onMute = { viewModel.muteNode(node) },
+                                onRemove = { viewModel.removeNode(node) },
                                 onDismiss = { expanded = false },
                             )
                         }

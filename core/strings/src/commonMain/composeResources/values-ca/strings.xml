@@ -73,7 +73,6 @@
     <string name="rebroadcast_mode_none_desc">Només permès per als rols SENSOR, TRACKER i TAK_TRACKER; això inhibirà tots els reenviaments, de manera similar al rol CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only_desc">Ignora paquets amb ports no estàndard com: TAK, RangeTest, PaxCounter, etc. Només reenvia paquets amb ports estàndard: NodeInfo, Text, Position, Telemetry i Routing.</string>
     <!-- Position Config -->
-    <string name="channel">Canal</string>
     <string name="channel_name">Nom del canal</string>
     <string name="qr_code">Codi QR</string>
     <string name="unknown_username">Nom d'usuari desconegut</string>

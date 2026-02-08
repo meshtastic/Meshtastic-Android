@@ -141,19 +141,15 @@
     <string name="position_packet">Pakiet lokalizacji</string>
     <string name="broadcast_interval">Interwał transmisji</string>
     <string name="smart_position">Inteligentne Pozycjonowanie</string>
-    <string name="minimum_interval">Minimalny interwał</string>
-    <string name="minimum_distance">Minimalna Odległość</string>
     <string name="device_gps">Ustawienia GPS</string>
     <string name="fixed_position">Położenie stałe</string>
     <string name="altitude">Wysokość</string>
-    <string name="update_interval">Częstotliwość aktualizacji</string>
     <string name="advanced_device_gps">Zaawansowanie ustawienia GPS</string>
     <string name="gps_receive_gpio">GPS Rx GPIO</string>
     <string name="gps_transmit_gpio">GPS Tx GPIO</string>
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debugowanie</string>
-    <string name="channel">Kanał</string>
     <string name="channel_name">Nazwa Kanału</string>
     <string name="qr_code">Kod QR</string>
     <string name="unknown_username">Nieznana nazwa użytkownika</string>
@@ -359,12 +355,6 @@
     <string name="wifi_qr_code_error">Nieprawidłowy format kodu QR</string>
     <string name="navigate_back">Przejdź wstecz</string>
     <string name="battery">Bateria</string>
-    <string name="channel_utilization">Wykorzystanie kanału</string>
-    <string name="air_utilization">Wykorzystanie eteru</string>
-    <string name="temperature">Temperatura</string>
-    <string name="humidity">Wilgotność</string>
-    <string name="soil_temperature">Temperatura gleby</string>
-    <string name="soil_moisture">Wilgotność gleby</string>
     <string name="logs">Rejestry zdarzeń (logs)</string>
     <string name="hops_away">Skoków</string>
     <string name="hops_away_template">Skoków: %1$d</string>
@@ -447,7 +437,6 @@
     <string name="meshtastic_low_battery_notifications">Powiadomienia o niskim poziomie baterii</string>
     <string name="low_battery_title">Niski poziom baterii: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Powiadomienia o niskim poziomie baterii (ulubione węzły)</string>
-    <string name="baro_pressure">Ciśnienie barometryczne</string>
     <string name="udp_enabled">Włączony</string>
     <string name="udp_broadcast">Transmisja UDP</string>
     <string name="udp_config">Ustawienia UDP</string>
@@ -845,4 +834,5 @@
     <string name="filter_enable">Włącz filtrowanie</string>
     <string name="filter_enable_summary">Ukryj wiadomości zawierające filtrowane słowa</string>
     <string name="filter_words">Filtruj słowa</string>
+    <string name="generate_qr_code">Generuj Kod QR</string>
 </resources>

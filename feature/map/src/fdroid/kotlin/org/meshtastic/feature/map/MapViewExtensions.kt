@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
 import android.graphics.Color
@@ -26,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import org.meshtastic.core.ui.R
-import org.meshtastic.proto.MeshProtos
+import org.meshtastic.proto.Position
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
@@ -125,15 +124,15 @@ fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: ()
     return polyline
 }
 
-fun MapView.addPositionMarkers(positions: List<MeshProtos.Position>, onClick: () -> Unit): List<Marker> {
+fun MapView.addPositionMarkers(positions: List<Position>, onClick: () -> Unit): List<Marker> {
     val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation_24)
     val markers =
         positions.map {
             Marker(this).apply {
                 icon = navIcon
-                rotation = (it.groundTrack * 1e-5).toFloat()
+                rotation = ((it.ground_track ?: 0) * 1e-5).toFloat()
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
+                position = GeoPoint((it.latitude_i ?: 0) * 1e-7, (it.longitude_i ?: 0) * 1e-7)
                 setOnMarkerClickListener { _, _ ->
                     onClick()
                     true

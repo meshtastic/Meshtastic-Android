@@ -25,14 +25,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,13 +39,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,9 +50,6 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.routing_error_no_response
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.SNR_FAIR_THRESHOLD
-import org.meshtastic.core.ui.component.SNR_GOOD_THRESHOLD
-import org.meshtastic.core.ui.component.SimpleAlertDialog
 import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.PersonOff
@@ -68,6 +57,7 @@ import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
+import org.meshtastic.core.ui.util.annotateNeighborInfo
 import org.meshtastic.feature.node.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 
@@ -93,29 +83,20 @@ fun NeighborInfoLogScreen(
         }
     }
 
-    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
+    fun getUsername(nodeNum: Int): String =
+        with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
 
-    var showDialog by remember { mutableStateOf<AnnotatedString?>(null) }
     val context = LocalContext.current
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
 
-    showDialog?.let { message ->
-        SimpleAlertDialog(
-            title = Res.string.neighbor_info,
-            text = { SelectionContainer { Text(text = message) } },
-            onConfirm = { showDialog = null },
-            onDismiss = { showDialog = null },
-        )
-    }
-
     Scaffold(
         topBar = {
             val lastRequestNeighborsTime by viewModel.lastRequestNeighborsTime.collectAsState()
             MainAppBar(
-                title = state.node?.user?.longName ?: "",
+                title = state.node?.user?.long_name ?: "",
                 subtitle = stringResource(Res.string.neighbor_info),
                 ourNode = null,
                 showNodeChip = false,
@@ -142,9 +123,9 @@ fun NeighborInfoLogScreen(
         ) {
             items(state.neighborInfoRequests, key = { it.uuid }) { log ->
                 val result =
-                    remember(state.neighborInfoResults, log.fromRadio.packet.id) {
+                    remember(state.neighborInfoResults, log.fromRadio.packet?.id) {
                         state.neighborInfoResults.find {
-                            it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id
+                            it.fromRadio.packet?.decoded?.request_id == log.fromRadio.packet?.id
                         }
                     }
 
@@ -173,13 +154,14 @@ fun NeighborInfoLogScreen(
                                     header = getString(Res.string.neighbor_info),
                                 )
                                 ?.let {
-                                    showDialog =
+                                    val message =
                                         annotateNeighborInfo(
                                             it,
                                             statusGreen = statusGreen,
                                             statusYellow = statusYellow,
                                             statusOrange = statusOrange,
                                         )
+                                    viewModel.showLogDetail(Res.string.neighbor_info, message)
                                 }
                         },
                     )
@@ -190,46 +172,6 @@ fun NeighborInfoLogScreen(
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-/**
- * Converts a raw neighbor info string into an [AnnotatedString] with SNR values highlighted according to their quality.
- */
-fun annotateNeighborInfo(
-    inString: String?,
-    statusGreen: Color,
-    statusYellow: Color,
-    statusOrange: Color,
-): AnnotatedString {
-    if (inString == null) return buildAnnotatedString { append("") }
-    return buildAnnotatedString {
-        inString.lines().forEachIndexed { i, line ->
-            if (i > 0) append("\n")
-            // Example line: "• NodeName (SNR: 5.5)"
-            if (line.contains("(SNR: ")) {
-                val snrRegex = Regex("""\(SNR: ([\d.?-]+)\)""")
-                val snrMatch = snrRegex.find(line)
-                val snrValue = snrMatch?.groupValues?.getOrNull(1)?.toFloatOrNull()
-
-                if (snrValue != null) {
-                    val snrColor =
-                        when {
-                            snrValue >= SNR_GOOD_THRESHOLD -> statusGreen
-                            snrValue >= SNR_FAIR_THRESHOLD -> statusYellow
-                            else -> statusOrange
-                        }
-                    val snrPrefix = "(SNR: "
-                    append(line.substring(0, line.indexOf(snrPrefix) + snrPrefix.length))
-                    withStyle(style = SpanStyle(color = snrColor, fontWeight = FontWeight.Bold)) { append("$snrValue") }
-                    append(")")
-                } else {
-                    append(line)
-                }
-            } else {
-                append(line)
             }
         }
     }

@@ -61,7 +61,6 @@ import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.SpeakerNotesOff
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -74,7 +73,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -110,7 +108,6 @@ import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.alert_bell_text
-import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.cancel_reply
 import org.meshtastic.core.strings.clear_selection
 import org.meshtastic.core.strings.copy
@@ -135,13 +132,14 @@ import org.meshtastic.core.strings.send
 import org.meshtastic.core.strings.type_a_message
 import org.meshtastic.core.strings.unknown
 import org.meshtastic.core.strings.unknown_channel
+import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.messaging.component.RetryConfirmationDialog
-import org.meshtastic.proto.AppOnlyProtos
+import org.meshtastic.proto.ChannelSet
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
@@ -178,6 +176,7 @@ fun MessageScreen(
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val pagedMessages = viewModel.getMessagesFromPaged(contactKey).collectAsLazyPagingItems()
     val contactSettings by viewModel.contactSettings.collectAsStateWithLifecycle(initialValue = emptyMap())
+    val homoglyphEncodingEnabled by viewModel.homoglyphEncodingEnabled.collectAsStateWithLifecycle(initialValue = false)
 
     // UI State managed within this Composable
     var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -227,7 +226,7 @@ fun MessageScreen(
         remember(nodeId, channelName, viewModel) {
             when (nodeId) {
                 DataPacket.ID_BROADCAST -> channelName
-                else -> viewModel.getUser(nodeId).longName
+                else -> viewModel.getUser(nodeId).long_name
             }
         }
 
@@ -239,11 +238,6 @@ fun MessageScreen(
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
     val listState = rememberLazyListState()
-
-    val lastReadMessageTimestamp by
-        remember(contactKey, contactSettings) {
-            derivedStateOf { contactSettings[contactKey]?.lastReadMessageTimestamp }
-        }
 
     // Track unread messages using lightweight metadata queries
     val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
@@ -306,7 +300,11 @@ fun MessageScreen(
                     is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
                     is MessageScreenEvent.CopyToClipboard -> {
-                        clipboardManager.nativeClipboard.setPrimaryClip(ClipData.newPlainText(event.text, event.text))
+                        coroutineScope.launch {
+                            clipboardManager.setClipEntry(
+                                androidx.compose.ui.platform.ClipEntry(ClipData.newPlainText(event.text, event.text)),
+                            )
+                        }
                         selectedMessageIds.value = emptySet()
                     }
                 }
@@ -469,6 +467,7 @@ fun MessageScreen(
             )
             MessageInput(
                 isEnabled = connectionState.isConnected(),
+                isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
                 textFieldState = messageInputState,
                 onSendMessage = {
                     val messageText = messageInputState.text.toString().trim()
@@ -535,7 +534,7 @@ private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ou
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.shortName ?: unknownUserText),
+                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.short_name ?: unknownUserText),
                     style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
@@ -642,13 +641,12 @@ private fun String.limitBytes(maxBytes: Int): String {
 private fun DeleteMessageDialog(count: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val deleteMessagesString = pluralStringResource(Res.plurals.delete_messages, count, count)
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(16.dp),
-        title = { Text(stringResource(Res.string.delete_messages_title)) },
-        text = { Text(text = deleteMessagesString) },
-        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(Res.string.delete)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
+    MeshtasticTextDialog(
+        titleRes = Res.string.delete_messages_title,
+        message = deleteMessagesString,
+        confirmTextRes = Res.string.delete,
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
     )
 }
 
@@ -711,7 +709,7 @@ private fun MessageTopBar(
     channelIndex: Int?,
     mismatchKey: Boolean,
     onNavigateBack: () -> Unit,
-    channels: AppOnlyProtos.ChannelSet?,
+    channels: ChannelSet?,
     channelIndexParam: Int?,
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
@@ -938,12 +936,21 @@ private const val MAX_LINES = 3
 @Composable
 private fun MessageInput(
     isEnabled: Boolean,
+    isHomoglyphEncodingEnabled: Boolean,
     textFieldState: TextFieldState,
     modifier: Modifier = Modifier,
     maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
     onSendMessage: () -> Unit,
 ) {
-    val currentText = textFieldState.text.toString()
+    val currentTextRaw = textFieldState.text.toString()
+
+    val currentText =
+        if (isHomoglyphEncodingEnabled) {
+            HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(currentTextRaw)
+        } else {
+            currentTextRaw
+        }
+
     val currentByteLength =
         remember(currentText) {
             // Recalculate only when text changes
@@ -1000,12 +1007,23 @@ private fun MessageInputPreview() {
     AppTheme {
         Surface {
             Column(modifier = Modifier.padding(8.dp)) {
-                MessageInput(isEnabled = true, textFieldState = rememberTextFieldState("Hello"), onSendMessage = {})
+                MessageInput(
+                    isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
+                    textFieldState = rememberTextFieldState("Hello"),
+                    onSendMessage = {},
+                )
                 Spacer(Modifier.size(16.dp))
-                MessageInput(isEnabled = false, textFieldState = rememberTextFieldState("Disabled"), onSendMessage = {})
+                MessageInput(
+                    isEnabled = false,
+                    isHomoglyphEncodingEnabled = false,
+                    textFieldState = rememberTextFieldState("Disabled"),
+                    onSendMessage = {},
+                )
                 Spacer(Modifier.size(16.dp))
                 MessageInput(
                     isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
                     textFieldState =
                     rememberTextFieldState(
                         "A very long message that might exceed the byte limit " +
@@ -1018,6 +1036,7 @@ private fun MessageInputPreview() {
                 // Test Japanese characters (multi-byte)
                 MessageInput(
                     isEnabled = true,
+                    isHomoglyphEncodingEnabled = false,
                     textFieldState = rememberTextFieldState("こんにちは世界"), // Hello World in Japanese
                     onSendMessage = {},
                     maxByteSize = 10,

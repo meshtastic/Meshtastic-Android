@@ -19,6 +19,7 @@ import com.android.build.api.dsl.LibraryExtension
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.android.library.flavors)
     alias(libs.plugins.meshtastic.hilt)
 }
 
@@ -31,11 +32,13 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
+    implementation(projects.core.nfc)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
     implementation(projects.core.strings)
     implementation(projects.core.ui)
+    implementation(projects.core.barcode)
 
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.accompanist.permissions)
@@ -47,7 +50,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kermit)
-    implementation(libs.zxing.android.embedded)
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)

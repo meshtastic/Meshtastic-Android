@@ -28,18 +28,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.AppSettingsAlt
-import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Language
@@ -47,16 +43,9 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
-import androidx.compose.material3.AlertDialogDefaults
-import androidx.compose.material3.BasicAlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -105,9 +94,11 @@ import org.meshtastic.core.strings.theme
 import org.meshtastic.core.strings.theme_dark
 import org.meshtastic.core.strings.theme_light
 import org.meshtastic.core.strings.theme_system
+import org.meshtastic.core.strings.use_homoglyph_characters_encoding
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
@@ -119,7 +110,7 @@ import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
-import org.meshtastic.proto.ClientOnlyProtos.DeviceProfile
+import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -139,7 +130,7 @@ fun SettingsScreen(
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
-    val destNode by viewModel.destNode.collectAsState()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
     if (isWaiting) {
@@ -192,7 +183,7 @@ fun SettingsScreen(
                     viewModel.installProfile(it)
                 } else {
                     deviceProfile = it
-                    val nodeName = it.shortName.ifBlank { "node" }
+                    val nodeName = (it.short_name ?: "").ifBlank { "node" }
                     val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
                     val dateStr = dateFormat.format(java.util.Date())
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
@@ -231,9 +222,9 @@ fun SettingsScreen(
                 title = stringResource(Res.string.bottom_nav_settings),
                 subtitle =
                 if (state.isLocal) {
-                    ourNode?.user?.longName
+                    ourNode?.user?.long_name
                 } else {
-                    val remoteName = destNode?.user?.longName ?: ""
+                    val remoteName = destNode?.user?.long_name ?: ""
                     stringResource(Res.string.remotely_administrating, remoteName)
                 },
                 ourNode = ourNode,
@@ -248,7 +239,7 @@ fun SettingsScreen(
         Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
             RadioConfigItemList(
                 state = state,
-                isManaged = localConfig.security.isManaged,
+                isManaged = localConfig.security?.is_managed ?: false,
                 node = destNode,
                 excludedModulesUnlocked = excludedModulesUnlocked,
                 isOtaCapable = isOtaCapable,
@@ -277,180 +268,178 @@ fun SettingsScreen(
 
             val context = LocalContext.current
 
-            if (state.isLocal) {
-                TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
-                    if (state.analyticsAvailable) {
-                        val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
-                        SwitchListItem(
-                            text = stringResource(Res.string.analytics_okay),
-                            checked = allowed,
-                            leadingIcon = Icons.Rounded.BugReport,
-                            onClick = { viewModel.toggleAnalyticsAllowed() },
-                        )
-                    }
-
-                    val locationPermissionsState =
-                        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
-                    val isGpsDisabled = context.gpsDisabled()
-                    val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
-
-                    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
-                        if (provideLocation) {
-                            if (locationPermissionsState.allPermissionsGranted) {
-                                if (!isGpsDisabled) {
-                                    settingsViewModel.meshService?.startProvideLocation()
-                                } else {
-                                    context.showToast(Res.string.location_disabled)
-                                }
-                            } else {
-                                // Request permissions if not granted and user wants to provide location
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }
-                        } else {
-                            settingsViewModel.meshService?.stopProvideLocation()
-                        }
-                    }
-
+            TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
+                if (state.analyticsAvailable) {
+                    val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
                     SwitchListItem(
-                        text = stringResource(Res.string.provide_location_to_mesh),
-                        leadingIcon = Icons.Rounded.LocationOn,
-                        enabled = !isGpsDisabled,
-                        checked = provideLocation,
-                        onClick = { settingsViewModel.setProvideLocation(!provideLocation) },
+                        text = stringResource(Res.string.analytics_okay),
+                        checked = allowed,
+                        leadingIcon = Icons.Default.BugReport,
+                        onClick = { viewModel.toggleAnalyticsAllowed() },
                     )
+                }
 
-                    val settingsLauncher =
-                        rememberLauncherForActivityResult(
-                            contract = ActivityResultContracts.StartActivityForResult(),
-                        ) {}
+                val locationPermissionsState =
+                    rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+                val isGpsDisabled = context.gpsDisabled()
+                val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
 
-                    // On Android 12 and below, system app settings for language are not available. Use the in-app
-                    // language
-                    // picker for these devices.
-                    val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
-                    ListItem(
-                        text = stringResource(Res.string.preferences_language),
-                        leadingIcon = Icons.Rounded.Language,
-                        trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                    ) {
-                        if (useInAppLangPicker) {
-                            showLanguagePickerDialog = true
-                        } else {
-                            val intent = Intent(ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
-                            if (intent.resolveActivity(context.packageManager) != null) {
-                                settingsLauncher.launch(intent)
+                LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+                    if (provideLocation) {
+                        if (locationPermissionsState.allPermissionsGranted) {
+                            if (!isGpsDisabled) {
+                                settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                // Fall back to the in-app picker
-                                showLanguagePickerDialog = true
+                                context.showToast(Res.string.location_disabled)
                             }
+                        } else {
+                            // Request permissions if not granted and user wants to provide location
+                            locationPermissionsState.launchMultiplePermissionRequest()
+                        }
+                    } else {
+                        settingsViewModel.meshService?.stopProvideLocation()
+                    }
+                }
+
+                SwitchListItem(
+                    text = stringResource(Res.string.provide_location_to_mesh),
+                    leadingIcon = Icons.Rounded.LocationOn,
+                    enabled = !isGpsDisabled,
+                    checked = provideLocation,
+                    onClick = { settingsViewModel.setProvideLocation(!provideLocation) },
+                )
+
+                val homoglyphEncodingEnabled by
+                    viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
+                SwitchListItem(
+                    text = stringResource(Res.string.use_homoglyph_characters_encoding),
+                    checked = homoglyphEncodingEnabled,
+                    leadingIcon = Icons.Default.Abc,
+                    onClick = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                )
+
+                val settingsLauncher =
+                    rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
+
+                // On Android 12 and below, system app settings for language are not available. Use the in-app language
+                // picker for these devices.
+                val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                ListItem(
+                    text = stringResource(Res.string.preferences_language),
+                    leadingIcon = Icons.Rounded.Language,
+                    trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                ) {
+                    if (useInAppLangPicker) {
+                        showLanguagePickerDialog = true
+                    } else {
+                        val intent = Intent(ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            settingsLauncher.launch(intent)
+                        } else {
+                            // Fall back to the in-app picker
+                            showLanguagePickerDialog = true
                         }
                     }
+                }
 
-                    ListItem(
-                        text = stringResource(Res.string.theme),
-                        leadingIcon = Icons.Rounded.FormatPaint,
-                        trailingIcon = null,
-                    ) {
-                        showThemePickerDialog = true
+                ListItem(
+                    text = stringResource(Res.string.theme),
+                    leadingIcon = Icons.Rounded.FormatPaint,
+                    trailingIcon = null,
+                ) {
+                    showThemePickerDialog = true
+                }
+
+                // Node DB cache limit (App setting)
+                val cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value
+                val cacheItems = remember {
+                    (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
+                        it.toLong() to it.toString()
                     }
+                }
+                DropDownPreference(
+                    title = stringResource(Res.string.device_db_cache_limit),
+                    enabled = true,
+                    items = cacheItems,
+                    selectedItem = cacheLimit.toLong(),
+                    onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
+                    summary = stringResource(Res.string.device_db_cache_limit_summary),
+                )
 
-                    ListItem(
-                        text = "Message Filter",
-                        leadingIcon = Icons.Rounded.FilterList,
-                        trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                    ) {
-                        onNavigate(SettingsRoutes.FilterSettings)
-                    } // Node DB cache limit (App setting)
-                    val cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value
-                    val cacheItems = remember {
-                        (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
-                            it.toLong() to it.toString()
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val nodeName = ourNode?.user?.short_name ?: ""
+
+                val exportRangeTestLauncher =
+                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                        if (it.resultCode == RESULT_OK) {
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
-                    DropDownPreference(
-                        title = stringResource(Res.string.device_db_cache_limit),
-                        enabled = true,
-                        items = cacheItems,
-                        selectedItem = cacheLimit.toLong(),
-                        onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
-                        summary = stringResource(Res.string.device_db_cache_limit_summary),
-                    )
-
-                    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                    val nodeName = ourNode?.user?.shortName ?: ""
-
-                    val exportRangeTestLauncher =
-                        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                            if (it.resultCode == RESULT_OK) {
-                                it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
-                            }
+                ListItem(
+                    text = stringResource(Res.string.save_rangetest),
+                    leadingIcon = Icons.Rounded.Output,
+                    trailingIcon = null,
+                ) {
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/csv"
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeName}_$timestamp.csv")
                         }
-                    ListItem(
-                        text = stringResource(Res.string.save_rangetest),
-                        leadingIcon = Icons.Rounded.Output,
-                        trailingIcon = null,
-                    ) {
-                        val intent =
-                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/csv"
-                                putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeName}_$timestamp.csv")
-                            }
-                        exportRangeTestLauncher.launch(intent)
-                    }
+                    exportRangeTestLauncher.launch(intent)
+                }
 
-                    val exportDataLauncher =
-                        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                            if (it.resultCode == RESULT_OK) {
-                                it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
-                            }
+                val exportDataLauncher =
+                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                        if (it.resultCode == RESULT_OK) {
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
-                    ListItem(
-                        text = stringResource(Res.string.export_data_csv),
-                        leadingIcon = Icons.Rounded.Output,
-                        trailingIcon = null,
-                    ) {
-                        val intent =
-                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/csv"
-                                putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeName}_$timestamp.csv")
-                            }
-                        exportDataLauncher.launch(intent)
                     }
+                ListItem(
+                    text = stringResource(Res.string.export_data_csv),
+                    leadingIcon = Icons.Rounded.Output,
+                    trailingIcon = null,
+                ) {
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/csv"
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeName}_$timestamp.csv")
+                        }
+                    exportDataLauncher.launch(intent)
+                }
 
-                    ListItem(
-                        text = stringResource(Res.string.intro_show),
-                        leadingIcon = Icons.Rounded.WavingHand,
-                        trailingIcon = null,
-                    ) {
-                        settingsViewModel.showAppIntro()
-                    }
+                ListItem(
+                    text = stringResource(Res.string.intro_show),
+                    leadingIcon = Icons.Rounded.WavingHand,
+                    trailingIcon = null,
+                ) {
+                    settingsViewModel.showAppIntro()
+                }
 
-                    ListItem(
-                        text = stringResource(Res.string.system_settings),
-                        leadingIcon = Icons.Rounded.AppSettingsAlt,
-                        trailingIcon = null,
-                    ) {
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        intent.data = Uri.fromParts("package", context.packageName, null)
-                        settingsLauncher.launch(intent)
-                    }
+                ListItem(
+                    text = stringResource(Res.string.system_settings),
+                    leadingIcon = Icons.Rounded.AppSettingsAlt,
+                    trailingIcon = null,
+                ) {
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                    intent.data = Uri.fromParts("package", context.packageName, null)
+                    settingsLauncher.launch(intent)
+                }
 
-                    ListItem(
-                        text = stringResource(Res.string.acknowledgements),
-                        leadingIcon = Icons.Rounded.Info,
-                        trailingIcon = null,
-                    ) {
-                        onNavigate(SettingsRoutes.About)
-                    }
+                ListItem(
+                    text = stringResource(Res.string.acknowledgements),
+                    leadingIcon = Icons.Rounded.Info,
+                    trailingIcon = null,
+                ) {
+                    onNavigate(SettingsRoutes.About)
+                }
 
-                    AppVersionButton(
-                        excludedModulesUnlocked = excludedModulesUnlocked,
-                        appVersionName = settingsViewModel.appVersionName,
-                    ) {
-                        settingsViewModel.unlockExcludedModules()
-                    }
+                AppVersionButton(
+                    excludedModulesUnlocked = excludedModulesUnlocked,
+                    appVersionName = settingsViewModel.appVersionName,
+                ) {
+                    settingsViewModel.unlockExcludedModules()
                 }
             }
         }
@@ -504,14 +493,20 @@ private fun AppVersionButton(
 
 @Composable
 private fun LanguagePickerDialog(onDismiss: () -> Unit) {
-    SettingsDialog(title = stringResource(Res.string.preferences_language), onDismiss = onDismiss) {
-        languageMap().forEach { (languageTag, languageName) ->
-            ListItem(text = languageName, trailingIcon = null) {
-                LanguageUtils.setAppLocale(languageTag)
-                onDismiss()
+    MeshtasticDialog(
+        title = stringResource(Res.string.preferences_language),
+        onDismiss = onDismiss,
+        text = {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                languageMap().forEach { (languageTag, languageName) ->
+                    ListItem(text = languageName, trailingIcon = null) {
+                        LanguageUtils.setAppLocale(languageTag)
+                        onDismiss()
+                    }
+                }
             }
-        }
-    }
+        },
+    )
 }
 
 private enum class ThemeOption(val label: StringResource, val mode: Int) {
@@ -523,35 +518,18 @@ private enum class ThemeOption(val label: StringResource, val mode: Int) {
 
 @Composable
 private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
-    SettingsDialog(title = stringResource(Res.string.choose_theme), onDismiss = onDismiss) {
-        ThemeOption.entries.forEach { option ->
-            ListItem(text = stringResource(option.label), trailingIcon = null) {
-                onClickTheme(option.mode)
-                onDismiss()
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SettingsDialog(title: String, onDismiss: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
-    BasicAlertDialog(onDismissRequest = onDismiss) {
-        Surface(
-            modifier = Modifier.wrapContentWidth().wrapContentHeight(),
-            shape = MaterialTheme.shapes.large,
-            color = AlertDialogDefaults.containerColor,
-            tonalElevation = AlertDialogDefaults.TonalElevation,
-        ) {
+    MeshtasticDialog(
+        title = stringResource(Res.string.choose_theme),
+        onDismiss = onDismiss,
+        text = {
             Column {
-                Text(
-                    modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp),
-                    text = title,
-                    style = MaterialTheme.typography.titleLarge,
-                )
-
-                Column(modifier = Modifier.verticalScroll(rememberScrollState())) { content() }
+                ThemeOption.entries.forEach { option ->
+                    ListItem(text = stringResource(option.label), trailingIcon = null) {
+                        onClickTheme(option.mode)
+                        onDismiss()
+                    }
+                }
             }
-        }
-    }
+        },
+    )
 }

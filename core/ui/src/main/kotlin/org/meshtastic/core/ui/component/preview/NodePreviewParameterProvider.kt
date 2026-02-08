@@ -17,16 +17,16 @@
 package org.meshtastic.core.ui.component.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.google.protobuf.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics.Companion.currentTime
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.deviceMetrics
-import org.meshtastic.proto.environmentMetrics
-import org.meshtastic.proto.paxcount
-import org.meshtastic.proto.position
-import org.meshtastic.proto.user
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.EnvironmentMetrics
+import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.Paxcount
+import org.meshtastic.proto.Position
+import org.meshtastic.proto.User
 import kotlin.random.Random
 
 class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
@@ -34,32 +34,26 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
         Node(
             num = 1955,
             user =
-            user {
-                id = "mickeyMouseId"
-                longName = "Mickey Mouse"
-                shortName = "MM"
-                hwModel = MeshProtos.HardwareModel.TBEAM
-                role = ConfigProtos.Config.DeviceConfig.Role.ROUTER
-            },
-            position =
-            position {
-                latitudeI = 338125110
-                longitudeI = -1179189760
-                altitude = 138
-                satsInView = 4
-            },
+            User(
+                id = "mickeyMouseId",
+                long_name = "Mickey Mouse",
+                short_name = "MM",
+                hw_model = HardwareModel.TBEAM,
+                role = Config.DeviceConfig.Role.ROUTER,
+            ),
+            position = Position(latitude_i = 338125110, longitude_i = -1179189760, altitude = 138, sats_in_view = 4),
             lastHeard = currentTime(),
             channel = 0,
             snr = 12.5F,
             rssi = -42,
             deviceMetrics =
-            deviceMetrics {
-                channelUtilization = 2.4F
-                airUtilTx = 3.5F
-                batteryLevel = 85
-                voltage = 3.7F
-                uptimeSeconds = 3600
-            },
+            DeviceMetrics(
+                channel_utilization = 2.4F,
+                air_util_tx = 3.5F,
+                battery_level = 85,
+                voltage = 3.7F,
+                uptime_seconds = 3600,
+            ),
             isFavorite = true,
             hopsAway = 0,
         )
@@ -68,67 +62,55 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
         mickeyMouse.copy(
             num = Random.nextInt(),
             user =
-            user {
-                longName = "Minnie Mouse"
-                shortName = "MiMo"
-                id = "minnieMouseId"
-                hwModel = MeshProtos.HardwareModel.HELTEC_V3
-            },
+            User(
+                long_name = "Minnie Mouse",
+                short_name = "MiMo",
+                id = "minnieMouseId",
+                hw_model = HardwareModel.HELTEC_V3,
+            ),
             snr = 12.5F,
             rssi = -42,
-            position = position {},
+            position = Position(),
             hopsAway = 1,
         )
 
     private val donaldDuck =
         Node(
             num = Random.nextInt(),
-            position =
-            position {
-                latitudeI = 338052347
-                longitudeI = -1179208460
-                altitude = 121
-                satsInView = 66
-            },
+            position = Position(latitude_i = 338052347, longitude_i = -1179208460, altitude = 121, sats_in_view = 66),
             lastHeard = currentTime() - 300,
             channel = 0,
             snr = 12.5F,
             rssi = -42,
             deviceMetrics =
-            deviceMetrics {
-                channelUtilization = 2.4F
-                airUtilTx = 3.5F
-                batteryLevel = 85
-                voltage = 3.7F
-                uptimeSeconds = 3600
-            },
+            DeviceMetrics(
+                channel_utilization = 2.4F,
+                air_util_tx = 3.5F,
+                battery_level = 85,
+                voltage = 3.7F,
+                uptime_seconds = 3600,
+            ),
             user =
-            user {
-                id = "donaldDuckId"
-                longName = "Donald Duck, the Grand Duck of the Ducks"
-                shortName = "DoDu"
-                hwModel = MeshProtos.HardwareModel.HELTEC_V3
-                publicKey = ByteString.copyFrom(ByteArray(32) { 1 })
-            },
+            User(
+                id = "donaldDuckId",
+                long_name = "Donald Duck, the Grand Duck of the Ducks",
+                short_name = "DoDu",
+                hw_model = HardwareModel.HELTEC_V3,
+                public_key = ByteArray(32) { 1 }.toByteString(),
+            ),
             environmentMetrics =
-            environmentMetrics {
-                temperature = 28.0F
-                relativeHumidity = 50.0F
-                barometricPressure = 1013.25F
-                gasResistance = 0.0F
-                voltage = 3.7F
-                current = 0.0F
-                iaq = 100
-                barometricPressure = 1013.25F
-                soilTemperature = 28.0F
-                soilMoisture = 50
-            },
-            paxcounter =
-            paxcount {
-                wifi = 30
-                ble = 39
-                uptime = 420
-            },
+            EnvironmentMetrics(
+                temperature = 28.0F,
+                relative_humidity = 50.0F,
+                barometric_pressure = 1013.25F,
+                gas_resistance = 0.0F,
+                voltage = 3.7F,
+                current = 0.0F,
+                iaq = 100,
+                soil_temperature = 28.0F,
+                soil_moisture = 50,
+            ),
+            paxcounter = Paxcount(wifi = 30, ble = 39, uptime = 420),
             isFavorite = true,
             hopsAway = 2,
         )
@@ -136,14 +118,9 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
     private val unknown =
         donaldDuck.copy(
             user =
-            user {
-                id = "myId"
-                longName = "Meshtastic myId"
-                shortName = "myId"
-                hwModel = MeshProtos.HardwareModel.UNSET
-            },
-            environmentMetrics = environmentMetrics {},
-            paxcounter = paxcount {},
+            User(id = "myId", long_name = "Meshtastic myId", short_name = "myId", hw_model = HardwareModel.UNSET),
+            environmentMetrics = EnvironmentMetrics(),
+            paxcounter = Paxcount(),
         )
 
     private val almostNothing = Node(num = Random.nextInt())

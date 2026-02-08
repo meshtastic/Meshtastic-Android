@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model
 
 import android.graphics.Color
@@ -24,9 +23,8 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
-import org.meshtastic.proto.ConfigProtos
-import org.meshtastic.proto.MeshProtos
-import org.meshtastic.proto.TelemetryProtos
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.HardwareModel
 
 //
 // model objects that directly map to the corresponding protobufs
@@ -37,7 +35,7 @@ data class MeshUser(
     val id: String,
     val longName: String,
     val shortName: String,
-    val hwModel: MeshProtos.HardwareModel,
+    val hwModel: HardwareModel,
     val isLicensed: Boolean = false,
     val role: Int = 0,
 ) : Parcelable {
@@ -50,7 +48,9 @@ data class MeshUser(
         "role=$role)"
 
     /** Create our model object from a protobuf. */
-    constructor(p: MeshProtos.User) : this(p.id, p.longName, p.shortName, p.hwModel, p.isLicensed, p.roleValue)
+    constructor(
+        p: org.meshtastic.proto.User,
+    ) : this(p.id, p.long_name ?: "", p.short_name ?: "", p.hw_model, p.is_licensed, p.role.value)
 
     /**
      * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null
@@ -58,7 +58,7 @@ data class MeshUser(
      */
     val hwModelString: String?
         get() =
-            if (hwModel == MeshProtos.HardwareModel.UNSET) {
+            if (hwModel == HardwareModel.UNSET) {
                 null
             } else {
                 hwModel.name.replace('_', '-').replace('p', '.').lowercase()
@@ -92,18 +92,18 @@ data class Position(
      * be used.
      */
     constructor(
-        position: MeshProtos.Position,
+        position: org.meshtastic.proto.Position,
         defaultTime: Int = currentTime(),
     ) : this(
         // We prefer the int version of lat/lon but if not available use the depreciated legacy version
-        degD(position.latitudeI),
-        degD(position.longitudeI),
-        position.altitude,
+        degD(position.latitude_i ?: 0),
+        degD(position.longitude_i ?: 0),
+        position.altitude ?: 0,
         if (position.time != 0) position.time else defaultTime,
-        position.satsInView,
-        position.groundSpeed,
-        position.groundTrack,
-        position.precisionBits,
+        position.sats_in_view ?: 0,
+        position.ground_speed ?: 0,
+        position.ground_track ?: 0,
+        position.precision_bits ?: 0,
     )
 
     // / @return distance in meters to some other node (or null if unknown)
@@ -139,9 +139,16 @@ data class DeviceMetrics(
 
     /** Create our model object from a protobuf. */
     constructor(
-        p: TelemetryProtos.DeviceMetrics,
+        p: org.meshtastic.proto.DeviceMetrics,
         telemetryTime: Int = currentTime(),
-    ) : this(telemetryTime, p.batteryLevel, p.voltage, p.channelUtilization, p.airUtilTx, p.uptimeSeconds)
+    ) : this(
+        telemetryTime,
+        p.battery_level ?: 0,
+        p.voltage ?: 0f,
+        p.channel_utilization ?: 0f,
+        p.air_util_tx ?: 0f,
+        p.uptime_seconds ?: 0,
+    )
 }
 
 @Parcelize
@@ -163,20 +170,19 @@ data class EnvironmentMetrics(
     companion object {
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
 
-        fun fromTelemetryProto(proto: TelemetryProtos.EnvironmentMetrics, time: Int): EnvironmentMetrics =
+        fun fromTelemetryProto(proto: org.meshtastic.proto.EnvironmentMetrics, time: Int): EnvironmentMetrics =
             EnvironmentMetrics(
-                temperature = proto.temperature.takeIf { proto.hasTemperature() && !it.isNaN() },
-                relativeHumidity =
-                proto.relativeHumidity.takeIf { proto.hasRelativeHumidity() && !it.isNaN() && it != 0.0f },
-                soilTemperature = proto.soilTemperature.takeIf { proto.hasSoilTemperature() && !it.isNaN() },
-                soilMoisture = proto.soilMoisture.takeIf { proto.hasSoilMoisture() && it != Int.MIN_VALUE },
-                barometricPressure = proto.barometricPressure.takeIf { proto.hasBarometricPressure() && !it.isNaN() },
-                gasResistance = proto.gasResistance.takeIf { proto.hasGasResistance() && !it.isNaN() },
-                voltage = proto.voltage.takeIf { proto.hasVoltage() && !it.isNaN() },
-                current = proto.current.takeIf { proto.hasCurrent() && !it.isNaN() },
-                iaq = proto.iaq.takeIf { proto.hasIaq() && it != Int.MIN_VALUE },
-                lux = proto.lux.takeIf { proto.hasLux() && !it.isNaN() },
-                uvLux = proto.uvLux.takeIf { proto.hasUvLux() && !it.isNaN() },
+                temperature = proto.temperature?.takeIf { !it.isNaN() },
+                relativeHumidity = proto.relative_humidity?.takeIf { !it.isNaN() && it != 0.0f },
+                soilTemperature = proto.soil_temperature?.takeIf { !it.isNaN() },
+                soilMoisture = proto.soil_moisture?.takeIf { it != Int.MIN_VALUE },
+                barometricPressure = proto.barometric_pressure?.takeIf { !it.isNaN() },
+                gasResistance = proto.gas_resistance?.takeIf { !it.isNaN() },
+                voltage = proto.voltage?.takeIf { !it.isNaN() },
+                current = proto.current?.takeIf { !it.isNaN() },
+                iaq = proto.iaq?.takeIf { it != Int.MIN_VALUE },
+                lux = proto.lux?.takeIf { !it.isNaN() },
+                uvLux = proto.uv_lux?.takeIf { !it.isNaN() },
                 time = time,
             )
     }
@@ -247,13 +253,13 @@ data class NodeInfo(
     fun distanceStr(o: NodeInfo?, prefUnits: Int = 0) = distance(o)?.let { dist ->
         when {
             dist == 0 -> null // same point
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE && dist < 1000 ->
+            prefUnits == Config.DisplayConfig.DisplayUnits.METRIC.value && dist < 1000 ->
                 "%.0f m".format(dist.toDouble())
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE && dist >= 1000 ->
+            prefUnits == Config.DisplayConfig.DisplayUnits.METRIC.value && dist >= 1000 ->
                 "%.1f km".format(dist / 1000.0)
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE && dist < 1609 ->
+            prefUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL.value && dist < 1609 ->
                 "%.0f ft".format(dist.toDouble() * 3.281)
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE && dist >= 1609 ->
+            prefUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL.value && dist >= 1609 ->
                 "%.1f mi".format(dist / 1609.34)
             else -> null
         }
