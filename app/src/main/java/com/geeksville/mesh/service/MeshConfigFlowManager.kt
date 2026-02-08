@@ -85,8 +85,6 @@ constructor(
         } else {
             myNodeInfo = newMyNodeInfo
             Logger.i { "myNodeInfo committed successfully" }
-            connectionStateHolder.setState(ConnectionState.Connected)
-            serviceBroadcasts.broadcastConnection()
             connectionManager.onRadioConfigLoaded()
         }
 
@@ -123,6 +121,8 @@ constructor(
             }
             nodeManager.isNodeDbReady.value = true
             nodeManager.allowNodeDbWrites.value = true
+            connectionStateHolder.setState(ConnectionState.Connected)
+            serviceBroadcasts.broadcastConnection()
             connectionManager.onNodeDbReady()
         }
     }
