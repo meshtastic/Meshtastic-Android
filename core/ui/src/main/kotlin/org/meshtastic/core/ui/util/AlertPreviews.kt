@@ -33,10 +33,9 @@ import org.meshtastic.core.strings.okay
 import org.meshtastic.core.ui.component.MultipleChoiceAlertDialog
 import org.meshtastic.core.ui.theme.AppTheme
 
-/**
- * A helper component that renders an [AlertManager.AlertData] using the same logic as MainScreen.
- */
+/** A helper component that renders an [AlertManager.AlertData] using the same logic as MainScreen. */
 @Composable
+@Suppress("CyclomaticComplexMethod")
 fun AlertPreviewRenderer(data: AlertManager.AlertData) {
     val title = data.title ?: data.titleRes?.let { stringResource(it) } ?: ""
     val message = data.message ?: data.messageRes?.let { stringResource(it) }
@@ -44,15 +43,10 @@ fun AlertPreviewRenderer(data: AlertManager.AlertData) {
     val dismissText = data.dismissText ?: data.dismissTextRes?.let { stringResource(it) }
 
     if (data.choices.isNotEmpty()) {
-        MultipleChoiceAlertDialog(
-            title = title,
-            message = message,
-            choices = data.choices,
-            onDismissRequest = { },
-        )
+        MultipleChoiceAlertDialog(title = title, message = message, choices = data.choices, onDismissRequest = {})
     } else {
         AlertDialog(
-            onDismissRequest = { },
+            onDismissRequest = {},
             title = { Text(text = title) },
             text = {
                 val composableMsg = data.composableMessage
@@ -66,15 +60,11 @@ fun AlertPreviewRenderer(data: AlertManager.AlertData) {
                 }
             },
             confirmButton = {
-                TextButton(onClick = { }) {
-                    Text(text = confirmText ?: stringResource(Res.string.okay))
-                }
+                TextButton(onClick = {}) { Text(text = confirmText ?: stringResource(Res.string.okay)) }
             },
             dismissButton = {
-                TextButton(onClick = { }) {
-                    Text(text = dismissText ?: stringResource(Res.string.cancel))
-                }
-            }
+                TextButton(onClick = {}) { Text(text = dismissText ?: stringResource(Res.string.cancel)) }
+            },
         )
     }
 }
@@ -87,8 +77,8 @@ fun PreviewTextAlert() {
             AlertPreviewRenderer(
                 AlertManager.AlertData(
                     title = "Firmware Update",
-                    message = "A new version is available. Would you like to update now?"
-                )
+                    message = "A new version is available. Would you like to update now?",
+                ),
             )
         }
     }
@@ -100,10 +90,7 @@ fun PreviewHtmlAlert() {
     AppTheme {
         Box(modifier = Modifier.fillMaxSize()) {
             AlertPreviewRenderer(
-                AlertManager.AlertData(
-                    title = "Release Notes",
-                    html = "Enhanced range and better battery life"
-                )
+                AlertManager.AlertData(title = "Release Notes", html = "Enhanced range and better battery life"),
             )
         }
     }
@@ -118,12 +105,8 @@ fun PreviewMultipleChoiceAlert() {
                 AlertManager.AlertData(
                     title = "Select Channel",
                     message = "Pick a channel to join:",
-                    choices = mapOf(
-                        "Public" to {},
-                        "Private" to {},
-                        "Emergency" to {}
-                    )
-                )
+                    choices = mapOf("Public" to {}, "Private" to {}, "Emergency" to {}),
+                ),
             )
         }
     }
@@ -142,8 +125,8 @@ fun PreviewComposableAlert() {
                             Text("This is a custom composable")
                             Text("With multiple lines and styles")
                         }
-                    }
-                )
+                    },
+                ),
             )
         }
     }

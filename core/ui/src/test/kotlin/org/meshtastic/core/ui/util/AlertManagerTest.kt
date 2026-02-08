@@ -29,9 +29,9 @@ class AlertManagerTest {
     fun `showAlert updates currentAlert flow`() {
         val title = "Test Title"
         val message = "Test Message"
-        
+
         alertManager.showAlert(title = title, message = message)
-        
+
         val alertData = alertManager.currentAlert.value
         assertNotNull(alertData)
         assertEquals(title, alertData?.title)
@@ -42,7 +42,7 @@ class AlertManagerTest {
     fun `dismissAlert clears currentAlert flow`() {
         alertManager.showAlert(title = "Title")
         assertNotNull(alertManager.currentAlert.value)
-        
+
         alertManager.dismissAlert()
         assertNull(alertManager.currentAlert.value)
     }
@@ -50,13 +50,10 @@ class AlertManagerTest {
     @Test
     fun `onConfirm triggers and dismisses alert`() {
         var confirmClicked = false
-        alertManager.showAlert(
-            title = "Confirm Test",
-            onConfirm = { confirmClicked = true }
-        )
-        
+        alertManager.showAlert(title = "Confirm Test", onConfirm = { confirmClicked = true })
+
         alertManager.currentAlert.value?.onConfirm?.invoke()
-        
+
         assertEquals(true, confirmClicked)
         assertNull(alertManager.currentAlert.value)
     }
@@ -64,13 +61,10 @@ class AlertManagerTest {
     @Test
     fun `onDismiss triggers and dismisses alert`() {
         var dismissClicked = false
-        alertManager.showAlert(
-            title = "Dismiss Test",
-            onDismiss = { dismissClicked = true }
-        )
-        
+        alertManager.showAlert(title = "Dismiss Test", onDismiss = { dismissClicked = true })
+
         alertManager.currentAlert.value?.onDismiss?.invoke()
-        
+
         assertEquals(true, dismissClicked)
         assertNull(alertManager.currentAlert.value)
     }

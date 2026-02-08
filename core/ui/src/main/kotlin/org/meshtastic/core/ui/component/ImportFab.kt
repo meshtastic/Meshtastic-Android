@@ -17,6 +17,8 @@
 package org.meshtastic.core.ui.component
 
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -32,8 +34,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
@@ -41,6 +45,7 @@ import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
+import org.meshtastic.core.strings.import_label
 import org.meshtastic.core.strings.input_channel_url
 import org.meshtastic.core.strings.input_shared_contact_url
 import org.meshtastic.core.strings.nfc_disabled
@@ -56,6 +61,7 @@ import org.meshtastic.core.strings.share_channels_qr
 import org.meshtastic.core.strings.url
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode2
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.openNfcSettings
 import org.meshtastic.proto.SharedContact
 
@@ -69,6 +75,7 @@ import org.meshtastic.proto.SharedContact
  * @param onDismissSharedContact Callback to clear the pending shared contact.
  * @param onShareChannels Optional callback to trigger sharing channels.
  * @param isContactContext Hint to customize UI strings for contact importing context.
+ * @param testTag Optional test tag for UI testing.
  */
 @Suppress("LongMethod")
 @Composable
@@ -79,6 +86,7 @@ fun MeshtasticImportFAB(
     onDismissSharedContact: () -> Unit = {},
     onShareChannels: (() -> Unit)? = null,
     isContactContext: Boolean = true,
+    testTag: String? = null,
 ) {
     sharedContact?.let { SharedContactImportDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
 
@@ -184,6 +192,8 @@ fun MeshtasticImportFAB(
         onExpandedChange = { expanded = it },
         items = items,
         modifier = modifier.padding(bottom = 16.dp),
+        contentDescription = stringResource(Res.string.import_label),
+        testTag = testTag,
     )
 }
 
@@ -216,4 +226,29 @@ private fun InputUrlDialog(title: String, onDismiss: () -> Unit, onConfirm: (Str
         confirmButton = { TextButton(onClick = { onConfirm(urlText) }) { Text(stringResource(Res.string.okay)) } },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.cancel)) } },
     )
+}
+
+@Preview(showBackground = true, name = "Contact Context")
+@Composable
+fun PreviewImportFABContact() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            MeshtasticImportFAB(onImport = {}, modifier = Modifier.align(Alignment.BottomEnd), isContactContext = true)
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Channel Context with Sharing")
+@Composable
+fun PreviewImportFABChannel() {
+    AppTheme {
+        Box(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+            MeshtasticImportFAB(
+                onImport = {},
+                onShareChannels = {},
+                modifier = Modifier.align(Alignment.BottomEnd),
+                isContactContext = false,
+            )
+        }
+    }
 }

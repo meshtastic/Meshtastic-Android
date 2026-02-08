@@ -184,7 +184,7 @@ constructor(
             confirmTextRes = confirmTextRes,
             dismissText = dismissText,
             dismissTextRes = dismissTextRes,
-            choices = choices
+            choices = choices,
         )
     }
 
@@ -225,7 +225,7 @@ constructor(
                         // Action for compromised keys should be handled via a callback or event
                         clearClientNotification(notification)
                     },
-                    onDismiss = { clearClientNotification(notification) }
+                    onDismiss = { clearClientNotification(notification) },
                 )
             }
             .launchIn(viewModelScope)
@@ -263,7 +263,7 @@ constructor(
         uri.dispatchMeshtasticUri(
             onContact = { setSharedContactRequested(it) },
             onChannel = { setRequestChannelSet(it) },
-            onInvalid = onInvalid
+            onInvalid = onInvalid,
         )
     }
 

@@ -24,8 +24,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 fun interface ComposableContent {
-    @Composable
-    fun Content()
+    @Composable fun Content()
 }
 
 /**

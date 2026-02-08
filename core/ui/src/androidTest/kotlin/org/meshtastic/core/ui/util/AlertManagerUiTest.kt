@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,7 @@ import org.junit.Test
 
 class AlertManagerUiTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     private val alertManager = AlertManager()
 
@@ -36,14 +35,12 @@ class AlertManagerUiTest {
     fun alertManager_showsAlert_whenRequested() {
         composeTestRule.setContent {
             val alertData by alertManager.currentAlert.collectAsState()
-            alertData?.let { data ->
-                AlertPreviewRenderer(data)
-            }
+            alertData?.let { data -> AlertPreviewRenderer(data) }
         }
 
         val title = "UI Test Alert"
         val message = "This is a message from a UI test."
-        
+
         alertManager.showAlert(title = title, message = message)
 
         composeTestRule.onNodeWithText(title).assertIsDisplayed()
@@ -55,28 +52,19 @@ class AlertManagerUiTest {
         var confirmClicked = false
         composeTestRule.setContent {
             val alertData by alertManager.currentAlert.collectAsState()
-            alertData?.let { data ->
-                AlertPreviewRenderer(data)
-            }
+            alertData?.let { data -> AlertPreviewRenderer(data) }
         }
 
-        alertManager.showAlert(
-            title = "Confirm Title",
-            onConfirm = { confirmClicked = true }
-        )
+        alertManager.showAlert(title = "Confirm Title", onConfirm = { confirmClicked = true })
 
         // Default confirm text is "Okay" from resources, but AlertPreviewRenderer uses it
         // We'll search for the text "Okay" (assuming it matches the resource value)
         // Since we are in a test, we might need to use a hardcoded string or a resource
         // But for this test, let's just use the confirmText parameter to be sure
-        alertManager.showAlert(
-            title = "Confirm Title",
-            confirmText = "Yes",
-            onConfirm = { confirmClicked = true }
-        )
+        alertManager.showAlert(title = "Confirm Title", confirmText = "Yes", onConfirm = { confirmClicked = true })
 
         composeTestRule.onNodeWithText("Yes").performClick()
-        
+
         assert(confirmClicked)
         composeTestRule.onNodeWithText("Confirm Title").assertDoesNotExist()
     }

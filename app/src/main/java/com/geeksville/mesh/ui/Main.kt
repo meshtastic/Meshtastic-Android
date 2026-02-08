@@ -235,7 +235,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                     androidx.compose.material3.TextButton(onClick = { state.onDismiss?.invoke() }) {
                         Text(text = dismissText ?: stringResource(Res.string.close))
                     }
-                }
+                },
             )
         }
     }
