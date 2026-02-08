@@ -34,7 +34,6 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.CONTACT_SHARE_PATH
 import org.meshtastic.core.model.util.CONTACT_URL_PREFIX
 import org.meshtastic.core.model.util.MESHTASTIC_HOST
 import org.meshtastic.core.strings.Res
@@ -57,7 +56,7 @@ fun AddContactFAB(
     onResult: (Uri) -> Unit,
     onShareChannels: (() -> Unit)? = null,
     onDismissSharedContact: () -> Unit,
-    isContactContext: Boolean = true,
+    isSharedContactContext: Boolean,
 ) {
     sharedContact?.let { SharedContactImportDialog(sharedContact = it, onDismiss = onDismissSharedContact) }
 
@@ -65,7 +64,7 @@ fun AddContactFAB(
         onImport = onResult,
         modifier = modifier,
         onShareChannels = onShareChannels,
-        isContactContext = isContactContext,
+        isSharedContactContext = isSharedContactContext,
     )
 }
 
@@ -129,10 +128,10 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
 @Throws(MalformedURLException::class)
 fun Uri.toSharedContact(): SharedContact {
     val h = host ?: ""
-    val p = path ?: ""
     val isCorrectHost =
         h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
-    val isCorrectPath = p.equals(CONTACT_SHARE_PATH, ignoreCase = true) || p.equals("/v", ignoreCase = true)
+    val segments = pathSegments
+    val isCorrectPath = segments.any { it.equals("v", ignoreCase = true) }
 
     if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")

@@ -68,4 +68,31 @@ class UriUtilsTest {
         assertTrue("Should handle mixed case URI", handled)
         assertTrue("Should invoke onChannel callback", channelCalled)
     }
+
+    @Test
+    fun `handleMeshtasticUri handles www host`() {
+        val uri = Uri.parse("https://www.meshtastic.org/e/somechannel")
+        var channelCalled = false
+        val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
+        assertTrue("Should handle www host", handled)
+        assertTrue("Should invoke onChannel callback", channelCalled)
+    }
+
+    @Test
+    fun `handleMeshtasticUri handles long channel path`() {
+        val uri = Uri.parse("https://meshtastic.org/channel/e/somechannel")
+        var channelCalled = false
+        val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
+        assertTrue("Should handle long channel path", handled)
+        assertTrue("Should invoke onChannel callback", channelCalled)
+    }
+
+    @Test
+    fun `handleMeshtasticUri handles long contact path`() {
+        val uri = Uri.parse("https://meshtastic.org/contact/v/somecontact")
+        var contactCalled = false
+        val handled = handleMeshtasticUri(uri, onContact = { contactCalled = true })
+        assertTrue("Should handle long contact path", handled)
+        assertTrue("Should invoke onContact callback", contactCalled)
+    }
 }

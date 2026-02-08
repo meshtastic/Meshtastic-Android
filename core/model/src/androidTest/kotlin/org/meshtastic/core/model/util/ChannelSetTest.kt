@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model.util
 
 import android.net.Uri
@@ -61,5 +60,26 @@ class ChannelSetTest {
         val cs = url.toChannelSet()
         Assert.assertEquals("Custom", cs.primaryChannel!!.name)
         Assert.assertFalse(cs.hasLoraConfig())
+    }
+
+    /** validate that www.meshtastic.org host is accepted */
+    @Test
+    fun parseWwwHost() {
+        val url = Uri.parse("https://www.meshtastic.org/e/#CgMSAQESBggBQANIAQ")
+        Assert.assertEquals("LongFast", url.toChannelSet().primaryChannel!!.name)
+    }
+
+    /** validate that short /e path is accepted */
+    @Test
+    fun parseShortPath() {
+        val url = Uri.parse("https://meshtastic.org/e#CgMSAQESBggBQANIAQ")
+        Assert.assertEquals("LongFast", url.toChannelSet().primaryChannel!!.name)
+    }
+
+    /** validate that long /channel/e path is accepted */
+    @Test
+    fun parseLongPath() {
+        val url = Uri.parse("https://meshtastic.org/channel/e/#CgMSAQESBggBQANIAQ")
+        Assert.assertEquals("LongFast", url.toChannelSet().primaryChannel!!.name)
     }
 }

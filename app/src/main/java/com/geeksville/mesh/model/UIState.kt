@@ -54,6 +54,7 @@ import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -248,17 +249,15 @@ constructor(
 
     /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
     fun handleScannedUri(uri: Uri, onInvalid: () -> Unit) {
-        val p = uri.path ?: ""
-        when {
-            p.contains("/v", ignoreCase = true) -> setSharedContactRequested(uri, onInvalid)
-            p.contains("/e", ignoreCase = true) -> requestChannelUrl(uri, onInvalid)
-            else -> {
-                // Try both as fallback
-                runCatching { _sharedContactRequested.value = uri.toSharedContact() }
-                    .onFailure {
-                        runCatching { _requestChannelSet.value = uri.toChannelSet() }.onFailure { onInvalid() }
-                    }
-            }
+        val handled =
+            handleMeshtasticUri(
+                uri = uri,
+                onContact = { setSharedContactRequested(it, onInvalid) },
+                onChannel = { requestChannelUrl(it, onInvalid) },
+            )
+        if (!handled) {
+            // Fallback: try as contact first, then as channel, reusing helpers for consistent logging
+            setSharedContactRequested(uri) { requestChannelUrl(uri) { onInvalid() } }
         }
     }
 

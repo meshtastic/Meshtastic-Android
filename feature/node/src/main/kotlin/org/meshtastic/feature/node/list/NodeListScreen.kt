@@ -160,6 +160,7 @@ fun NodeListScreen(
                     viewModel.handleScannedUri(uri) { scope.launch { context.showToast(Res.string.channel_invalid) } }
                 },
                 onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
+                isSharedContactContext = true
             )
         },
     ) { contentPadding ->

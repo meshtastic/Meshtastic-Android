@@ -22,23 +22,23 @@ import android.net.Uri
  * Dispatches an incoming Meshtastic URI to the appropriate handler.
  *
  * @param uri The URI to handle.
- * @param onChannel Callback if the URI is a Channel Set (path starts with /e/).
- * @param onContact Callback if the URI is a Shared Contact (path starts with /v/).
+ * @param onChannel Callback if the URI is a Channel Set.
+ * @param onContact Callback if the URI is a Shared Contact.
  * @return True if the URI was handled (matched a supported path), false otherwise.
  */
 fun handleMeshtasticUri(uri: Uri, onChannel: (Uri) -> Unit = {}, onContact: (Uri) -> Unit = {}): Boolean {
-    val path = uri.path
-    // Only handle meshtastic.org URLs
-    if (uri.host?.equals(MESHTASTIC_HOST, ignoreCase = true) != true || path == null) {
-        return false
-    }
+    val h = uri.host ?: ""
+    val isCorrectHost =
+        h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
+    if (!isCorrectHost) return false
 
+    val segments = uri.pathSegments
     return when {
-        path.startsWith(CHANNEL_SHARE_PATH, ignoreCase = true) -> {
+        segments.any { it.equals("e", ignoreCase = true) } -> {
             onChannel(uri)
             true
         }
-        path.startsWith(CONTACT_SHARE_PATH, ignoreCase = true) -> {
+        segments.any { it.equals("v", ignoreCase = true) } -> {
             onContact(uri)
             true
         }

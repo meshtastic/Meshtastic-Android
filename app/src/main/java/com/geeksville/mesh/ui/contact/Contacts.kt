@@ -245,7 +245,7 @@ fun ContactsScreen(
                     },
                     onShareChannels = onNavigateToShare,
                     onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
-                    isContactContext = false,
+                    isSharedContactContext = false,
                 )
             }
         },
