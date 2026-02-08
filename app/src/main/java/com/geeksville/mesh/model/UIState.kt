@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
@@ -61,8 +62,10 @@ import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
+import org.meshtastic.core.strings.compromised_keys
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.util.AlertManager
+import org.meshtastic.core.ui.util.ComposableContent
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
@@ -154,14 +157,35 @@ constructor(
         )
 
     fun showAlert(
-        title: String,
+        title: String? = null,
+        titleRes: StringResource? = null,
         message: String? = null,
+        messageRes: StringResource? = null,
+        composableMessage: ComposableContent? = null,
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
-        dismissable: Boolean = true,
+        onDismiss: (() -> Unit)? = null,
+        confirmText: String? = null,
+        confirmTextRes: StringResource? = null,
+        dismissText: String? = null,
+        dismissTextRes: StringResource? = null,
         choices: Map<String, () -> Unit> = emptyMap(),
     ) {
-        alertManager.showAlert(title, message, html, onConfirm, dismissable, choices)
+        alertManager.showAlert(
+            title = title,
+            titleRes = titleRes,
+            message = message,
+            messageRes = messageRes,
+            composableMessage = composableMessage,
+            html = html,
+            onConfirm = onConfirm,
+            onDismiss = onDismiss,
+            confirmText = confirmText,
+            confirmTextRes = confirmTextRes,
+            dismissText = dismissText,
+            dismissTextRes = dismissTextRes,
+            choices = choices
+        )
     }
 
     fun dismissAlert() {
@@ -183,10 +207,25 @@ constructor(
             .filterNotNull()
             .onEach {
                 showAlert(
-                    title = getString(Res.string.client_notification),
+                    titleRes = Res.string.client_notification,
                     message = it,
                     onConfirm = { serviceRepository.clearErrorMessage() },
-                    dismissable = false,
+                )
+            }
+            .launchIn(viewModelScope)
+
+        serviceRepository.clientNotification
+            .filterNotNull()
+            .onEach { notification ->
+                val isCompromised = notification.low_entropy_key != null || notification.duplicated_public_key != null
+                showAlert(
+                    titleRes = Res.string.client_notification,
+                    message = if (isCompromised) getString(Res.string.compromised_keys) else notification.message,
+                    onConfirm = {
+                        // Action for compromised keys should be handled via a callback or event
+                        clearClientNotification(notification)
+                    },
+                    onDismiss = { clearClientNotification(notification) }
                 )
             }
             .launchIn(viewModelScope)
@@ -224,7 +263,7 @@ constructor(
         uri.dispatchMeshtasticUri(
             onContact = { setSharedContactRequested(it) },
             onChannel = { setRequestChannelSet(it) },
-            onInvalid = onInvalid,
+            onInvalid = onInvalid
         )
     }
 
@@ -240,8 +279,8 @@ constructor(
         Logger.d { "ViewModel cleared" }
     }
 
-    val tracerouteResponse: LiveData<TracerouteResponse?>
-        get() = serviceRepository.tracerouteResponse.asLiveData()
+    val tracerouteResponse: Flow<TracerouteResponse?>
+        get() = serviceRepository.tracerouteResponse
 
     fun clearTracerouteResponse() {
         serviceRepository.clearTracerouteResponse()

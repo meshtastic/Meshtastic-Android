@@ -16,10 +16,17 @@
  */
 package org.meshtastic.core.ui.util
 
+import androidx.compose.runtime.Composable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.jetbrains.compose.resources.StringResource
 import javax.inject.Inject
 import javax.inject.Singleton
+
+fun interface ComposableContent {
+    @Composable
+    fun Content()
+}
 
 /**
  * A global manager for displaying alerts across the application. This allows ViewModels to trigger alerts without
@@ -28,11 +35,18 @@ import javax.inject.Singleton
 @Singleton
 class AlertManager @Inject constructor() {
     data class AlertData(
-        val title: String,
+        val title: String? = null,
+        val titleRes: StringResource? = null,
         val message: String? = null,
+        val messageRes: StringResource? = null,
+        val composableMessage: ComposableContent? = null,
         val html: String? = null,
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
+        val confirmText: String? = null,
+        val confirmTextRes: StringResource? = null,
+        val dismissText: String? = null,
+        val dismissTextRes: StringResource? = null,
         val choices: Map<String, () -> Unit> = emptyMap(),
     )
 
@@ -40,23 +54,40 @@ class AlertManager @Inject constructor() {
     val currentAlert = _currentAlert.asStateFlow()
 
     fun showAlert(
-        title: String,
+        title: String? = null,
+        titleRes: StringResource? = null,
         message: String? = null,
+        messageRes: StringResource? = null,
+        composableMessage: ComposableContent? = null,
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
-        dismissable: Boolean = true,
+        onDismiss: (() -> Unit)? = null,
+        confirmText: String? = null,
+        confirmTextRes: StringResource? = null,
+        dismissText: String? = null,
+        dismissTextRes: StringResource? = null,
         choices: Map<String, () -> Unit> = emptyMap(),
     ) {
         _currentAlert.value =
             AlertData(
                 title = title,
+                titleRes = titleRes,
                 message = message,
+                messageRes = messageRes,
+                composableMessage = composableMessage,
                 html = html,
                 onConfirm = {
                     onConfirm?.invoke()
                     dismissAlert()
                 },
-                onDismiss = { if (dismissable) dismissAlert() },
+                onDismiss = {
+                    onDismiss?.invoke()
+                    dismissAlert()
+                },
+                confirmText = confirmText,
+                confirmTextRes = confirmTextRes,
+                dismissText = dismissText,
+                dismissTextRes = dismissTextRes,
                 choices = choices,
             )
     }
