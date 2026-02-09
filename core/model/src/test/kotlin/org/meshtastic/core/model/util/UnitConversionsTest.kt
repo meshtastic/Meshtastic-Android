@@ -115,4 +115,16 @@ class UnitConversionsTest {
         val zeroHumidity = UnitConversions.calculateDewPoint(20.0f, 0.0f)
         assertTrue("Expected NaN for 0% humidity", zeroHumidity.isNaN())
     }
+
+    @Test
+    fun `convertToBaseUnit converts correctly`() {
+        mapOf(
+            18200f to 18.2f,
+            -4f to 0.004f,
+            0f to 0f,
+            -9f to 0f,
+        ).forEach { (number, expectedvalue) ->
+            assertEquals(expectedvalue, UnitConversions.convertToBaseUnit(number))
+        }
+    }
 }
