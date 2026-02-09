@@ -100,6 +100,7 @@ private enum class Device(val color: Color) {
     abstract fun getValue(telemetry: Telemetry): Float
 }
 
+private const val Y_AXIS_WEIGHT = 0.1f
 private val LEGEND_DATA =
     listOf(
         LegendData(nameRes = Res.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),

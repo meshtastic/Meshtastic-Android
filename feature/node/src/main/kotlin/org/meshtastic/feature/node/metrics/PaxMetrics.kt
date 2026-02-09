@@ -96,6 +96,8 @@ private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     WIFI(Orange, Res.string.wifi_devices),
 }
 
+private const val Y_AXIS_WEIGHT = 0.1f
+
 private val LEGEND_DATA =
     listOf(
         LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
