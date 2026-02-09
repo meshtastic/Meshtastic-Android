@@ -137,9 +137,7 @@ constructor(
             PortNum.POSITION_APP -> handlePosition(packet, dataPacket, myNodeNum)
             PortNum.NODEINFO_APP -> if (!fromUs) handleNodeInfo(packet)
             PortNum.TELEMETRY_APP -> handleTelemetry(packet, dataPacket, myNodeNum)
-            else ->
-                shouldBroadcast =
-                    handleSpecializedDataPacket(packet, dataPacket, myNodeNum, fromUs, logUuid, logInsertJob)
+            else -> shouldBroadcast = handleSpecializedDataPacket(packet, dataPacket, myNodeNum, logUuid, logInsertJob)
         }
         return shouldBroadcast
     }
@@ -148,11 +146,10 @@ constructor(
         packet: MeshPacket,
         dataPacket: DataPacket,
         myNodeNum: Int,
-        fromUs: Boolean,
         logUuid: String?,
         logInsertJob: Job?,
     ): Boolean {
-        var shouldBroadcast = !fromUs
+        var shouldBroadcast = false
         val decoded = packet.decoded ?: return shouldBroadcast
         when (decoded.portnum) {
             PortNum.TRACEROUTE_APP -> {
@@ -199,11 +196,7 @@ constructor(
                 shouldBroadcast = true
             }
 
-            else -> {
-                // By default, if we don't know what it is, we should probably broadcast it
-                // so that external apps can handle it.
-                shouldBroadcast = true
-            }
+            else -> {}
         }
         return shouldBroadcast
     }

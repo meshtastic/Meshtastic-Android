@@ -50,11 +50,7 @@ fun Position.formatPositionTime(): String {
 
 fun MeshPacket.toPosition(): Position? {
     val decoded = decoded ?: return null
-    return if (decoded.want_response != true) {
-        decoded.payload.let { runCatching { Position.ADAPTER.decode(it) }.getOrNull() }
-    } else {
-        null
-    }
+    return decoded.payload.let { runCatching { Position.ADAPTER.decode(it) }.getOrNull() }
 }
 
 /**
