@@ -56,6 +56,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.rssi
@@ -64,10 +65,13 @@ import org.meshtastic.core.strings.signal_quality
 import org.meshtastic.core.strings.snr
 import org.meshtastic.core.strings.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.MeshPacket
 
 private enum class SignalMetric(val color: Color) {
@@ -86,7 +90,8 @@ private val LEGEND_DATA =
 @Composable
 fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val data = state.signalMetrics
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val data = state.signalMetrics.filter { (it.rx_time ?: 0).toLong() >= timeFrame.timeThreshold() }
 
     BaseMetricScreen(
         viewModel = viewModel,
@@ -100,6 +105,16 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             InfoDialogData(Res.string.snr, Res.string.snr_definition, SignalMetric.SNR.color),
             InfoDialogData(Res.string.rssi, Res.string.rssi_definition, SignalMetric.RSSI.color),
         ),
+        controlPart = {
+            SlidingSelector(
+                options = TimeFrame.entries,
+                selectedOption = timeFrame,
+                onOptionSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
+        },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             SignalMetricsChart(
                 modifier = modifier,

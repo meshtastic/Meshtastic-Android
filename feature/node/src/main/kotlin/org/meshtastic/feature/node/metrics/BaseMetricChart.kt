@@ -156,6 +156,7 @@ fun <T> BaseMetricScreen(
     infoData: List<InfoDialogData> = emptyList(),
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, (Double) -> Unit) -> Unit,
+    controlPart: @Composable () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -207,6 +208,8 @@ fun <T> BaseMetricScreen(
             if (displayInfoDialog) {
                 LegendInfoDialog(infoData = infoData, onDismiss = { displayInfoDialog = false })
             }
+
+            controlPart()
 
             AdaptiveMetricLayout(
                 chartPart = { modifier ->

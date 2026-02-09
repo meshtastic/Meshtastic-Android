@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -79,12 +80,15 @@ import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
+import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PortNum
 import java.text.DateFormat
 import java.util.Date
@@ -193,6 +197,7 @@ private fun PaxMetricsChart(
 @Suppress("MagicNumber", "LongMethod")
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
+    val timeFrame by metricsViewModel.timeFrame.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val lazyListState = rememberLazyListState()
@@ -214,7 +219,9 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val dateFormat = DateFormat.getDateTimeInstance()
     // Only show logs that can be decoded as ProtoPaxcount
     val paxMetrics =
-        state.paxMetrics.mapNotNull { log ->
+        state.paxMetrics
+            .filter { (it.received_date / 1000) >= timeFrame.timeThreshold() }
+            .mapNotNull { log ->
             val pax = decodePaxFromLog(log)
             if (pax != null) {
                 Pair(log, pax)
@@ -258,6 +265,15 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            SlidingSelector(
+                options = TimeFrame.entries,
+                selectedOption = timeFrame,
+                onOptionSelected = metricsViewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             // Graph
             if (graphData.isNotEmpty()) {
                 AdaptiveMetricLayout(

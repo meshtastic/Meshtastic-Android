@@ -74,6 +74,8 @@ import org.meshtastic.core.strings.device_metrics_log
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
@@ -81,6 +83,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
+import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Telemetry
 
 private enum class Device(val color: Color) {
@@ -123,7 +126,8 @@ private val LEGEND_DATA =
 @Composable
 fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val data = state.deviceMetrics
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val data = state.deviceMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
     val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
@@ -175,6 +179,16 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         data = data,
         timeProvider = { (it.time ?: 0).toDouble() },
         infoData = infoItems,
+        controlPart = {
+            SlidingSelector(
+                options = TimeFrame.entries,
+                selectedOption = timeFrame,
+                onOptionSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
+        },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             DeviceMetricsChart(
                 modifier = modifier,

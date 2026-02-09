@@ -72,6 +72,7 @@ import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
+import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
@@ -206,6 +207,13 @@ constructor(
 
     private val _environmentState = MutableStateFlow(EnvironmentMetricsState())
     val environmentState: StateFlow<EnvironmentMetricsState> = _environmentState
+
+    private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+    val timeFrame: StateFlow<TimeFrame> = _timeFrame
+
+    fun setTimeFrame(timeFrame: TimeFrame) {
+        _timeFrame.value = timeFrame
+    }
 
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 

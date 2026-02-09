@@ -84,12 +84,15 @@ import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.OptionLabel
+import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
+import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Telemetry
 
 @Suppress("LongMethod")
@@ -97,6 +100,7 @@ import org.meshtastic.proto.Telemetry
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val graphData = environmentState.environmentMetricsForGraphing(state.isFahrenheit)
     val data = graphData.metrics
@@ -132,6 +136,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
             data
         }
 
+    val filteredTelemetries = processedTelemetries.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
+
     var displayInfoDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -140,7 +146,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 title = state.node?.user?.long_name ?: "",
                 subtitle =
                 stringResource(Res.string.env_metrics_log) +
-                    " (${processedTelemetries.size} ${stringResource(Res.string.logs)})",
+                    " (${filteredTelemetries.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -171,17 +177,26 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 )
             }
 
+            SlidingSelector(
+                options = TimeFrame.entries,
+                selectedOption = timeFrame,
+                onOptionSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) {
+                OptionLabel(stringResource(it.strRes))
+            }
+
             AdaptiveMetricLayout(
                 chartPart = { modifier ->
                     EnvironmentMetricsChart(
                         modifier = modifier,
-                        telemetries = processedTelemetries.reversed(),
+                        telemetries = filteredTelemetries.reversed(),
                         graphData = graphData,
                         vicoScrollState = vicoScrollState,
                         selectedX = selectedX,
                         onPointSelected = { x ->
                             selectedX = x
-                            val index = processedTelemetries.indexOfFirst { (it.time ?: 0).toDouble() == x }
+                            val index = filteredTelemetries.indexOfFirst { (it.time ?: 0).toDouble() == x }
                             if (index != -1) {
                                 coroutineScope.launch { lazyListState.animateScrollToItem(index) }
                             }
@@ -190,7 +205,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 },
                 listPart = { modifier ->
                     LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
-                        itemsIndexed(processedTelemetries) { _, telemetry ->
+                        itemsIndexed(filteredTelemetries) { _, telemetry ->
                             EnvironmentMetricsCard(
                                 telemetry = telemetry,
                                 environmentDisplayFahrenheit = state.isFahrenheit,
