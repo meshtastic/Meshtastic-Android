@@ -57,10 +57,9 @@ object UnitConversions {
     }
 
     /**
-     * Converts numbers from milli to unit.
-     *  examples:
-     *      - 1000 milliamperes will be converted into 1 ampere,
-     *      - 100 millimeters to 0.1 meters
+     * Converts numbers from milli to unit. examples:
+     * - 1000 milliamperes will be converted into 1 ampere,
+     * - 100 millimeters to 0.1 meters
      */
     @Suppress("MagicNumber")
     fun convertToBaseUnit(number: Float): Float {

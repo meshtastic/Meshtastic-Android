@@ -118,12 +118,7 @@ class UnitConversionsTest {
 
     @Test
     fun `convertToBaseUnit converts correctly`() {
-        mapOf(
-            18200f to 18.2f,
-            -4f to 0.004f,
-            0f to 0f,
-            -9f to 0f,
-        ).forEach { (number, expectedvalue) ->
+        mapOf(18200f to 18.2f, -4f to 0.004f, 0f to 0f, -9f to 0f).forEach { (number, expectedvalue) ->
             assertEquals(expectedvalue, UnitConversions.convertToBaseUnit(number))
         }
     }
