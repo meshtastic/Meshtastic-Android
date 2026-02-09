@@ -1181,4 +1181,5 @@
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
     <string name="generate_qr_code">Generate QR Code</string>
     <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
+    <string name="all_time">All</string>
 </resources>

@@ -80,15 +80,12 @@ import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PortNum
 import java.text.DateFormat
 import java.util.Date
@@ -265,14 +262,11 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-            SlidingSelector(
-                options = TimeFrame.entries,
-                selectedOption = timeFrame,
-                onOptionSelected = metricsViewModel::setTimeFrame,
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                onTimeFrameSelected = metricsViewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
+            )
             Spacer(modifier = Modifier.height(8.dp))
             // Graph
             if (graphData.isNotEmpty()) {

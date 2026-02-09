@@ -87,14 +87,11 @@ import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.power_metrics_log
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Telemetry
 
 private enum class PowerMetric(val color: Color) {
@@ -175,14 +172,11 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            SlidingSelector(
-                options = TimeFrame.entries,
-                selectedOption = timeFrame,
-                onOptionSelected = viewModel::setTimeFrame,
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
+            )
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),

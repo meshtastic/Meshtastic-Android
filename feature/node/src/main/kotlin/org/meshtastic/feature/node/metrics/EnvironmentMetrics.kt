@@ -84,15 +84,12 @@ import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.MainAppBar
-import org.meshtastic.core.ui.component.OptionLabel
-import org.meshtastic.core.ui.component.SlidingSelector
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
-import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Telemetry
 
 @Suppress("LongMethod")
@@ -177,14 +174,11 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 )
             }
 
-            SlidingSelector(
-                options = TimeFrame.entries,
-                selectedOption = timeFrame,
-                onOptionSelected = viewModel::setTimeFrame,
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
-            ) {
-                OptionLabel(stringResource(it.strRes))
-            }
+            )
 
             AdaptiveMetricLayout(
                 chartPart = { modifier ->
