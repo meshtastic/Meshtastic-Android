@@ -87,6 +87,7 @@ private val LEGEND_DATA =
 fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.signalMetrics.filter { (it.rx_time ?: 0).toLong() >= timeFrame.timeThreshold() }
 
     BaseMetricScreen(
@@ -104,6 +105,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )

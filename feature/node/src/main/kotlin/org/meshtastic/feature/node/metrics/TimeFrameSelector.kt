@@ -31,14 +31,17 @@ import org.meshtastic.feature.node.model.TimeFrame
 @Composable
 fun TimeFrameSelector(
     selectedTimeFrame: TimeFrame,
+    availableTimeFrames: List<TimeFrame>,
     onTimeFrameSelected: (TimeFrame) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (availableTimeFrames.size <= 1) return
+
     SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
-        TimeFrame.entries.forEachIndexed { index, timeFrame ->
+        availableTimeFrames.forEachIndexed { index, timeFrame ->
             val text = stringResource(timeFrame.strRes)
             SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(index, TimeFrame.entries.size),
+                shape = SegmentedButtonDefaults.itemShape(index, availableTimeFrames.size),
                 onClick = { onTimeFrameSelected(timeFrame) },
                 selected = timeFrame == selectedTimeFrame,
                 label = { Text(text = text, maxLines = 1, overflow = TextOverflow.Ellipsis) },

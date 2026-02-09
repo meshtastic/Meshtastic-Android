@@ -195,6 +195,7 @@ private fun PaxMetricsChart(
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val timeFrame by metricsViewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by metricsViewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val lazyListState = rememberLazyListState()
@@ -264,6 +265,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
                 onTimeFrameSelected = metricsViewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )

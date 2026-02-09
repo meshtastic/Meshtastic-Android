@@ -124,6 +124,7 @@ private val LEGEND_DATA =
 fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.deviceMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
@@ -179,6 +180,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )

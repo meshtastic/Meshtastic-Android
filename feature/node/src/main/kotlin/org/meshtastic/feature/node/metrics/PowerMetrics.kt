@@ -129,6 +129,7 @@ private val LEGEND_DATA =
 fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val data = state.powerMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
@@ -174,6 +175,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
         Column(modifier = Modifier.padding(innerPadding)) {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )

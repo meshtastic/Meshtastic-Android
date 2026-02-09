@@ -98,6 +98,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val graphData = environmentState.environmentMetricsForGraphing(state.isFahrenheit)
     val data = graphData.metrics
@@ -176,6 +177,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
 
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
                 onTimeFrameSelected = viewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )

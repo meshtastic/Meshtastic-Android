@@ -211,6 +211,11 @@ constructor(
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
+    val availableTimeFrames: StateFlow<List<TimeFrame>> = _state.map { state ->
+        val oldest = state.oldestTimestampSeconds() ?: (System.currentTimeMillis() / 1000L)
+        TimeFrame.entries.filter { it.isAvailable(oldest) }
+    }.stateInWhileSubscribed(TimeFrame.entries)
+
     fun setTimeFrame(timeFrame: TimeFrame) {
         _timeFrame.value = timeFrame
     }
