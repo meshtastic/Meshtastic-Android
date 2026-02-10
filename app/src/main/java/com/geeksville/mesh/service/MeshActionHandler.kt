@@ -68,6 +68,7 @@ constructor(
 
     companion object {
         private const val DEFAULT_REBOOT_DELAY = 5
+        private const val EMOJI_INDICATOR = 1
     }
 
     fun onServiceAction(action: ServiceAction) {
@@ -127,16 +128,15 @@ constructor(
         val channel = action.contactKey[0].digitToInt()
         val destId = action.contactKey.substring(1)
         val dataPacket =
-            org.meshtastic.core.model
-                .DataPacket(
-                    to = destId,
-                    dataType = PortNum.TEXT_MESSAGE_APP.value,
-                    bytes = action.emoji.encodeToByteArray().toByteString(),
-                    channel = channel,
-                    replyId = action.replyId,
-                    wantAck = true,
-                    emoji = action.emoji.codePointAt(0),
-                )
+            DataPacket(
+                to = destId,
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                bytes = action.emoji.encodeToByteArray().toByteString(),
+                channel = channel,
+                replyId = action.replyId,
+                wantAck = true,
+                emoji = EMOJI_INDICATOR,
+            )
                 .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL }
         commandSender.sendData(dataPacket)
         rememberReaction(action, dataPacket.id, myNodeNum)

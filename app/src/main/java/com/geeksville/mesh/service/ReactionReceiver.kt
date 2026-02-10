@@ -52,6 +52,7 @@ class ReactionReceiver : BroadcastReceiver() {
         const val EXTRA_CONTACT_KEY = "contactKey"
         const val EXTRA_TO_ID = "toId"
         const val EXTRA_CHANNEL_INDEX = "channelIndex"
+        private const val EMOJI_INDICATOR = 1
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -80,7 +81,7 @@ class ReactionReceiver : BroadcastReceiver() {
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                         replyId = packetId,
                         wantAck = true,
-                        emoji = emoji.codePointAt(0),
+                        emoji = EMOJI_INDICATOR,
                     )
                 commandSender.sendData(reactionPacket)
 
