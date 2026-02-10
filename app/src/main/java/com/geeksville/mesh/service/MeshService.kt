@@ -195,7 +195,6 @@ class MeshService : Service() {
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
-        serviceRepository.cancelPendingRetries()
         serviceJob.cancel()
         super.onDestroy()
     }

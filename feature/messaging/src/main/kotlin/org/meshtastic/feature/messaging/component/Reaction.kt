@@ -232,8 +232,6 @@ internal fun ReactionDialog(
             onDismiss = { showStatusDialog = null },
             relayNodeName = relayNodeName,
             relays = reaction.relays,
-            retryCount = reaction.retryCount,
-            maxRetries = 2,
         )
     }
 
