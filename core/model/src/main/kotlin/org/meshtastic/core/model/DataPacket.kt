@@ -66,7 +66,6 @@ data class DataPacket(
     var relayNode: Int? = null,
     var relays: Int = 0,
     var viaMqtt: Boolean = false, // True if this packet passed via MQTT somewhere along its path
-    var retryCount: Int = 0, // Number of automatic retry attempts
     var emoji: Int = 0,
     @Serializable(with = ByteStringSerializer::class)
     @TypeParceler<ByteString?, ByteStringParceler>
@@ -107,7 +106,6 @@ data class DataPacket(
         relayNode = if (parcel.readInt() == 0) null else parcel.readInt()
         relays = parcel.readInt()
         viaMqtt = parcel.readInt() != 0
-        retryCount = parcel.readInt()
         emoji = parcel.readInt()
         sfppHash = ByteStringParceler.create(parcel)
     }

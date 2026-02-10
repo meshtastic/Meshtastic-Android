@@ -91,7 +91,6 @@ data class Message(
     val viaMqtt: Boolean = false,
     val relayNode: Int? = null,
     val relays: Int = 0,
-    val retryCount: Int = 0,
     val filtered: Boolean = false,
 ) {
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
