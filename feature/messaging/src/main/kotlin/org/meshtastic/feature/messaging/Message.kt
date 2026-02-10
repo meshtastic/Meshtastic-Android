@@ -105,7 +105,6 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
-import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.alert_bell_text
 import org.meshtastic.core.strings.cancel_reply
@@ -138,7 +137,6 @@ import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.messaging.component.RetryConfirmationDialog
 import org.meshtastic.proto.ChannelSet
 import java.nio.charset.StandardCharsets
 
@@ -188,24 +186,6 @@ fun MessageScreen(
     val filteredCount by viewModel.getFilteredCount(contactKey).collectAsStateWithLifecycle(initialValue = 0)
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
-
-    // Retry dialog state
-    var currentRetryEvent by remember { mutableStateOf<RetryEvent?>(null) }
-
-    // Observe retry events from the service
-    // Key on contactKey to restart collection when navigating between conversations
-    LaunchedEffect(contactKey) {
-        android.util.Log.d("MessageScreen", "Starting retry event collection for contact: $contactKey")
-        viewModel.retryEvents.collect { event ->
-            if (event != null) {
-                android.util.Log.d("MessageScreen", "Received retry event: ${event.packetId}")
-                currentRetryEvent = event
-            } else {
-                android.util.Log.d("MessageScreen", "Retry event cleared")
-                currentRetryEvent = null
-            }
-        }
-    }
 
     // Prevent the message TextField from stealing focus when the screen opens
     LaunchedEffect(contactKey) { focusManager.clearFocus() }
@@ -322,29 +302,6 @@ fun MessageScreen(
     }
 
     sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
-
-    // Show retry confirmation dialog
-    currentRetryEvent?.let { event ->
-        RetryConfirmationDialog(
-            retryEvent = event,
-            countdownSeconds = 5,
-            onConfirm = {
-                // User clicked "Retry Now" - proceed immediately
-                viewModel.respondToRetry(event.packetId, shouldRetry = true)
-                currentRetryEvent = null
-            },
-            onCancel = {
-                // User clicked "Cancel Retry" - stop retrying
-                viewModel.respondToRetry(event.packetId, shouldRetry = false)
-                currentRetryEvent = null
-            },
-            onTimeout = {
-                // Countdown reached 0 - auto-retry
-                viewModel.respondToRetry(event.packetId, shouldRetry = true)
-                currentRetryEvent = null
-            },
-        )
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),

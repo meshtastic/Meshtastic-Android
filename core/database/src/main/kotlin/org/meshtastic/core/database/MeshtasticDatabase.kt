@@ -91,7 +91,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 30, to = 31),
         AutoMigration(from = 31, to = 32),
         AutoMigration(from = 32, to = 33),
-        AutoMigration(from = 33, to = 34),
+        AutoMigration(from = 33, to = 34, spec = AutoMigration33to34::class),
     ],
     version = 34,
     exportSchema = true,
@@ -126,3 +126,7 @@ class AutoMigration12to13 : AutoMigrationSpec
 
 @DeleteColumn.Entries(DeleteColumn(tableName = "packet", columnName = "reply_id"))
 class AutoMigration29to30 : AutoMigrationSpec
+
+@DeleteColumn(tableName = "packet", columnName = "retry_count")
+@DeleteColumn(tableName = "reactions", columnName = "retry_count")
+class AutoMigration33to34 : AutoMigrationSpec

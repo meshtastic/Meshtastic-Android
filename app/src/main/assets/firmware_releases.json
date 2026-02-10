@@ -189,9 +189,21 @@
   },
   "pullRequests": [
     {
-      "id": "9520",
-      "title": "Add SHT21 sensor support and related configurations",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9520",
+      "id": "9594",
+      "title": "Round telemetry precision",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9594",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9590",
+      "title": "Fix seeed_xiao_nrf52840_kit_i2c build",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9590",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9586",
+      "title": "feat(esp32): add support for Native ESP32 Ethernet and WT32-ETH01 variant",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9586",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {

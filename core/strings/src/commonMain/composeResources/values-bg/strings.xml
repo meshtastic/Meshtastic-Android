@@ -42,11 +42,6 @@
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
-    <string name="message_retry_count">Повторни опити: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Съобщението не е изпратено</string>
-    <string name="retry_dialog_message">Повторен опит след %1$d секунди… (Опит %2$d от %3$d)</string>
-    <string name="retry_dialog_reaction_message">Повторен опит за реакция след %1$d секунди… (Опит %2$d от %3$d)</string>
-    <string name="retry_dialog_confirm">Опитайте отново сега</string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
@@ -209,6 +204,7 @@
     <string name="theme_system">По подразбиране на системата</string>
     <string name="choose_theme">Избор на тема</string>
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
+    <string name="use_homoglyph_characters_encoding">Компактно кодиране за Кирилица</string>
     <plurals name="delete_messages">
         <item quantity="one">Изтриване на съобщението?</item>
         <item quantity="other">Изтриване на %1$s съобщения?</item>
@@ -486,7 +482,6 @@
     <string name="ipv4_mode">Режим на IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Шлюз</string>
-    <string name="subnet">Подмрежа</string>
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Праг на WiFi RSSI (по подразбиране -80)</string>
@@ -701,7 +696,6 @@
     <string name="notifications_for_newly_discovered_nodes">Известия за новооткрити възли.</string>
     <string name="low_battery">Изтощена батерия</string>
     <string name="notifications_for_low_battery_alerts">Известия за изтощена батерия на свързаното устройство.</string>
-    <string name="critical_alerts_description">Избраните пакети, изпратени като критични, ще игнорират превключвателя за изключване на звука и настройките \"Не безпокойте\" в центъра за известия на операционната система.</string>
     <string name="configure_notification_permissions">Конфигуриране на разрешенията за известия</string>
     <string name="phone_location">Местоположение на телефона</string>
     <string name="phone_location_description">Meshtastic използва местоположението на телефона ви, за да активира редица функции. Можете да актуализирате разрешенията си за местоположение по всяко време от настройките.</string>
@@ -876,5 +870,6 @@
     <string name="filter_message_label">Филтрирани</string>
     <string name="filter_enable_for_contact">Активиране на филтрирането</string>
     <string name="filter_disable_for_contact">Дезактивиране на филтрирането</string>
+    <string name="scan_nfc">Сканиране на NFC</string>
     <string name="generate_qr_code">Генериране на QR код</string>
 </resources>

@@ -555,7 +555,6 @@
     <string name="ipv4_mode">第四代IP模式</string>
     <string name="ip">IP</string>
     <string name="gateway">網閘</string>
-    <string name="subnet">子網</string>
     <string name="paxcounter_config">Paxcount設置</string>
     <string name="paxcounter_enabled">啟用Paxcount</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 閾值(預設為-80)</string>
@@ -806,7 +805,6 @@
     <string name="notifications_for_newly_discovered_nodes">發現新節點的通知。</string>
     <string name="low_battery">電量不足</string>
     <string name="notifications_for_low_battery_alerts">已連線裝置的低電量通知。</string>
-    <string name="critical_alerts_description">將選取的封包以『關鍵』優先等級送出時，其通知會忽略作業系統通知中心的靜音與『請勿打擾』設定。</string>
     <string name="configure_notification_permissions">設定通知權限</string>
     <string name="phone_location">手機定位</string>
     <string name="phone_location_description">Meshtastic 會使用您手機的定位資訊來啟用多項功能。您隨時可以在設定中修改定位權限。</string>

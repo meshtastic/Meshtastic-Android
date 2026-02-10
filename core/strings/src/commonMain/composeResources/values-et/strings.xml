@@ -44,12 +44,6 @@
     <string name="message_status_queued">Saatmise järjekorras</string>
     <string name="message_status_sfpp_routing">Marsruutimine SF++ ahela kaudu…</string>
     <string name="message_status_sfpp_confirmed">Kinnitatud SF++ ahel</string>
-    <string name="message_retry_count">Proovimist: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Sõnumi saatmine ebaõnnestus</string>
-    <string name="retry_dialog_message">Proovin uuesti %1$d sekundi pärast… (Katse %2$d %3$d st)</string>
-    <string name="retry_dialog_reaction_message">Proovin reaktsiooni uuesti %1$d sekundi pärast… (Katse %2$d %3$d st)</string>
-    <string name="retry_dialog_confirm">Proovi kohe uuesti</string>
-    <string name="retry_dialog_cancel">Tühista uuesti proovimine</string>
     <string name="routing_error_none">Kinnitatud</string>
     <string name="routing_error_no_route">Marsruuti pole</string>
     <string name="routing_error_got_nak">Negatiivne kinnitus</string>
@@ -267,6 +261,7 @@
     <string name="theme_system">Süsteemi vaikesäte</string>
     <string name="choose_theme">Vali teema</string>
     <string name="provide_location_to_mesh">Jaga telefoni asukohta mesh-võrku</string>
+    <string name="use_homoglyph_characters_encoding">Kompaktne kodeering kirillitsa jaoks</string>
     <plurals name="delete_messages">
         <item quantity="one">Kustuta sõnum?</item>
         <item quantity="other">Kustuta %1$s sõnumit?</item>
@@ -902,7 +897,7 @@
     <string name="notifications_for_newly_discovered_nodes">Uue avastatud sõlme märguanded.</string>
     <string name="low_battery">Madal akutase</string>
     <string name="notifications_for_low_battery_alerts">Ühendatud seadme madala akutaseme märguanded.</string>
-    <string name="critical_alerts_description">Kriitilistena saadetud pakettide saatmisel ignoreeritakse operatsioonisüsteemi teavituskeskuse vaigistust ja režiimi „Ära sega” sätteid.</string>
+    <string name="critical_alerts_description">Kriitilisena saadetud paketid kuvatakse ka telefoni „Ära sega” reziimis.</string>
     <string name="configure_notification_permissions">Määra märguannete load</string>
     <string name="phone_location">Telefoni asukoht</string>
     <string name="phone_location_description">Meshtastic kasutab teie telefoni asukohta mitmete funktsioonide lubamiseks. Saate oma asukohalubasid igal ajal seadetes muuta.</string>

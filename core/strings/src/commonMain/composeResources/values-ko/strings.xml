@@ -418,7 +418,6 @@
     <string name="ipv4_mode">IPv4 모드</string>
     <string name="ip">IP</string>
     <string name="gateway">게이트웨이</string>
-    <string name="subnet">서브넷</string>
     <string name="paxcounter_config">팍스카운터 설정</string>
     <string name="paxcounter_enabled">팍스카운터 활성화</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 임계값 (기본값 -80)</string>

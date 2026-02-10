@@ -44,12 +44,6 @@
     <string name="message_status_queued">发送队列中</string>
     <string name="message_status_sfpp_routing">通过 SF++ 链路路由…</string>
     <string name="message_status_sfpp_confirmed">已在 SF++ 链上确认</string>
-    <string name="message_retry_count">重试: %1$d / %2$d</string>
-    <string name="retry_dialog_title">消息发送失败</string>
-    <string name="retry_dialog_message">将在 %1$d 秒后重试反应…（第 %2$d 次尝试，共 %3$d 次）</string>
-    <string name="retry_dialog_reaction_message">将在 %1$d 秒后重试反应…（第 %2$d 次尝试，共 %3$d 次）</string>
-    <string name="retry_dialog_confirm">重试</string>
-    <string name="retry_dialog_cancel">撤回</string>
     <string name="routing_error_none">已确认</string>
     <string name="routing_error_no_route">无路径</string>
     <string name="routing_error_got_nak">接收到否定确认</string>
@@ -616,7 +610,6 @@
     <string name="ipv4_mode">IPv4模式</string>
     <string name="ip">IP</string>
     <string name="gateway">网关</string>
-    <string name="subnet">子网</string>
     <string name="paxcounter_config">Paxcount 配置</string>
     <string name="paxcounter_enabled">启用 Paxcount</string>
     <string name="status_message">状态消息</string>
@@ -889,7 +882,6 @@
     <string name="notifications_for_newly_discovered_nodes">新发现节点通知。</string>
     <string name="low_battery">电池电量低</string>
     <string name="notifications_for_low_battery_alerts">已连接设备的低电量警报通知。</string>
-    <string name="critical_alerts_description">标记为“重要”的发送包将忽略操作系统通知中心中的静音开关和勿扰设置。</string>
     <string name="configure_notification_permissions">配置通知权限</string>
     <string name="phone_location">手机位置</string>
     <string name="phone_location_description">Meshtastic 通过使用您的手机定位功能来实现多项功能。您可随时通过设置菜单调整定位权限。</string>

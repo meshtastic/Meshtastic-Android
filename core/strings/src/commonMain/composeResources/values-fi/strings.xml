@@ -44,12 +44,6 @@
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
     <string name="message_status_sfpp_routing">Reititetään SF++ ketjun kautta…</string>
     <string name="message_status_sfpp_confirmed">Vahvistettu SF++-ketjussa</string>
-    <string name="message_retry_count">Uudelleenyritykset: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Viestin lähetys epäonnistui</string>
-    <string name="retry_dialog_message">Yritetään uudelleen %1$d sekunnin kuluttua… (yritys %2$d / %3$d)</string>
-    <string name="retry_dialog_reaction_message">Yritetään vastausta uudelleen %1$d sekunnin kuluttua… (yritys %2$d / %3$d)</string>
-    <string name="retry_dialog_confirm">Yritä uudelleen nyt</string>
-    <string name="retry_dialog_cancel">Peruuta uudelleenyritys</string>
     <string name="routing_error_none">Vahvistettu</string>
     <string name="routing_error_no_route">Ei reittiä</string>
     <string name="routing_error_got_nak">Vastaanotettu kielteinen vahvistus</string>
@@ -903,7 +897,7 @@
     <string name="notifications_for_newly_discovered_nodes">Ilmoitukset uusista löydetyistä laitteista.</string>
     <string name="low_battery">Akku lähes tyhjä</string>
     <string name="notifications_for_low_battery_alerts">Ilmoitukset yhdistetyn laitteen vähäisestä akun varauksesta.</string>
-    <string name="critical_alerts_description">Kriittiset paketit toimitetaan ilmoituksina, vaikka puhelin olisi äänettömällä tai älä häiritse -tilassa.</string>
+    <string name="critical_alerts_description">Kriittiset paketit toimitetaan ilmoituksina, vaikka puhelin olisi Älä häiritse -tilassa.</string>
     <string name="configure_notification_permissions">Määritä ilmoitusten käyttöoikeudet</string>
     <string name="phone_location">Puhelimen sijainti</string>
     <string name="phone_location_description">Meshtastic hyödyntää puhelimen sijaintia tarjotakseen erilaisia toimintoja. Voit muuttaa sijaintioikeuksia koska tahansa asetuksista.</string>

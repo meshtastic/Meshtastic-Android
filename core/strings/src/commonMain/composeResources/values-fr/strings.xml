@@ -44,12 +44,6 @@
     <string name="message_status_queued">En file d'attente pour l'envoi</string>
     <string name="message_status_sfpp_routing">Routage via chaîne SF++…</string>
     <string name="message_status_sfpp_confirmed">Confirmé via chaîne SF++</string>
-    <string name="message_retry_count">Tentative : %1$d / %2$d</string>
-    <string name="retry_dialog_title">Échec de l’envoi du message</string>
-    <string name="retry_dialog_message">Nouvelle tentative dans %1$d secondes… (tentative %2$d de %3$d)</string>
-    <string name="retry_dialog_reaction_message">Réaction en %1$d secondes… (tentative %2$d de %3$d)</string>
-    <string name="retry_dialog_confirm">Réessayer maintenant</string>
-    <string name="retry_dialog_cancel">Annuler le nouvel essai</string>
     <string name="routing_error_none">Entendu par un autre nœud (mais dans le cas d'un message direct, nous n'avons pas reçu la confirmation de réception par le destinataire : soit il n'a pas reçu le message, soit sa confirmation ne nous est pas parvenue)</string>
     <string name="routing_error_no_route">Pas de routage</string>
     <string name="routing_error_got_nak">Accusé de réception négatif</string>
@@ -618,7 +612,6 @@
     <string name="ipv4_mode">Mode IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Passerelle</string>
-    <string name="subnet">Sous-réseau</string>
     <string name="paxcounter_config">Configuration du Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activé</string>
     <string name="status_message">Statut du message</string>
@@ -891,7 +884,6 @@
     <string name="notifications_for_newly_discovered_nodes">Notifications pour les nouveaux nœuds découverts.</string>
     <string name="low_battery">Batterie faible</string>
     <string name="notifications_for_low_battery_alerts">Notifications d'alertes de batterie faible pour l'appareil connecté.</string>
-    <string name="critical_alerts_description">Sélectionnez les paquets envoyés comme critiques ignorera le commutateur muet et les paramètres Ne pas déranger dans le centre de notification du système d'exploitation.</string>
     <string name="configure_notification_permissions">Configurer les autorisations de notification</string>
     <string name="phone_location">Localisation du téléphone</string>
     <string name="phone_location_description">Meshtastic utilise la localisation de votre téléphone pour activer un certain nombre de fonctionnalités. Vous pouvez mettre à jour vos autorisations de localisation à tout moment à partir des paramètres.</string>

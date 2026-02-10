@@ -21,7 +21,7 @@ kotlin = "2.3.10"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
-kover = "0.9.6"
+kover = "0.9.7"
 mockk = "1.14.9"
 testRetry = "1.6.4"
 
@@ -30,7 +30,7 @@ compose-multiplatform = "1.10.0"
 
 # Google
 hilt = "2.59.1"
-maps-compose = "8.0.1"
+maps-compose = "8.1.0"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"

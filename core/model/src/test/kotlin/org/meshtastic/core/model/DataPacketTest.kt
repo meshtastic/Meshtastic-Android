@@ -102,7 +102,6 @@ class DataPacketTest {
                 relayNode = 123,
                 relays = 2,
                 viaMqtt = true,
-                retryCount = 1,
                 emoji = 10,
                 sfppHash = sfppHash,
             )
@@ -132,7 +131,6 @@ class DataPacketTest {
         assertEquals(123, packetToUpdate.relayNode)
         assertEquals(2, packetToUpdate.relays)
         assertEquals(true, packetToUpdate.viaMqtt)
-        assertEquals(1, packetToUpdate.retryCount)
         assertEquals(10, packetToUpdate.emoji)
         assertEquals(sfppHash, packetToUpdate.sfppHash)
 

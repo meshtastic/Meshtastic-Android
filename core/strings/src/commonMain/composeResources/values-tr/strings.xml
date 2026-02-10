@@ -409,7 +409,6 @@
     <string name="ipv4_mode">IPv4 modu</string>
     <string name="ip">IP</string>
     <string name="gateway">Ağ geçidi</string>
-    <string name="subnet">Alt ağ</string>
     <string name="paxcounter_config">Pax sayacı Ayarı</string>
     <string name="paxcounter_enabled">Pax sayacı etkin</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI eşiği (varsayılan -80)</string>

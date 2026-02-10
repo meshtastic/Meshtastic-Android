@@ -44,12 +44,6 @@
     <string name="message_status_queued">În coadă pentru trimitere</string>
     <string name="message_status_sfpp_routing">Rutare prin lanțul SF++…</string>
     <string name="message_status_sfpp_confirmed">Confirmat pe lanțul SF++</string>
-    <string name="message_retry_count">Reîncercări: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Mesajul nu a fost trimis</string>
-    <string name="retry_dialog_message">Se reîncearcă în %1$d secunde… (încercarea %2$d de %3$d)</string>
-    <string name="retry_dialog_reaction_message">Se reîncearcă reacția în %1$d secunde… (încercarea %2$d de %3$d)</string>
-    <string name="retry_dialog_confirm">Reîncearcă acum</string>
-    <string name="retry_dialog_cancel">Anulează reîncercarea</string>
     <string name="routing_error_none">Confirmat</string>
     <string name="routing_error_no_route">Nici o rută</string>
     <string name="routing_error_got_nak">S-a primit o confirmare negativă</string>

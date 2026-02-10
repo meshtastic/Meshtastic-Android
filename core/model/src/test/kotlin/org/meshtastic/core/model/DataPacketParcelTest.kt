@@ -114,7 +114,6 @@ class DataPacketParcelTest {
         relayNode = 202,
         relays = 1,
         viaMqtt = true,
-        retryCount = 2,
         emoji = 0x1F600,
         sfppHash = "sfpp".toByteArray().toByteString(),
     )
@@ -137,7 +136,6 @@ class DataPacketParcelTest {
         assertEquals("relayNode", expected.relayNode, actual.relayNode)
         assertEquals("relays", expected.relays, actual.relays)
         assertEquals("viaMqtt", expected.viaMqtt, actual.viaMqtt)
-        assertEquals("retryCount", expected.retryCount, actual.retryCount)
         assertEquals("emoji", expected.emoji, actual.emoji)
         assertEquals("sfppHash", expected.sfppHash, actual.sfppHash)
     }

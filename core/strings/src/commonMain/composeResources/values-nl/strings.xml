@@ -350,7 +350,6 @@
     <string name="ipv4_mode">IPv4 modus</string>
     <string name="ip">IP-adres</string>
     <string name="gateway">Gateway</string>
-    <string name="subnet">Subnet</string>
     <string name="paxcounter_config">Paxcounter Configuratie</string>
     <string name="paxcounter_enabled">Paxcounter ingeschakeld</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI drempelwaarde (standaard -80)</string>

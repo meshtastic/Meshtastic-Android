@@ -93,8 +93,6 @@ constructor(
     val contactSettings: StateFlow<Map<String, ContactSettings>> =
         packetRepository.getContactSettings().stateInWhileSubscribed(initialValue = emptyMap())
 
-    val retryEvents = serviceRepository.retryEvents
-
     private val contactKeyForPagedMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val pagedMessagesForContactKey: Flow<PagingData<Message>> =
         combine(contactKeyForPagedMessages.filterNotNull(), _showFiltered, contactSettings) {
@@ -269,9 +267,5 @@ constructor(
         } catch (ex: RemoteException) {
             Logger.e { "Send DataPacket error: ${ex.message}" }
         }
-    }
-
-    fun respondToRetry(packetId: Int, shouldRetry: Boolean) {
-        serviceRepository.respondToRetry(packetId, shouldRetry)
     }
 }
