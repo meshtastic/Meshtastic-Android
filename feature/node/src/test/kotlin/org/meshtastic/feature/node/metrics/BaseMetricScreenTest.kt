@@ -52,7 +52,7 @@ class BaseMetricScreenTest {
                 data = testData,
                 timeProvider = { 0.0 },
                 chartPart = { _, _, _, _ -> Text("Chart Placeholder") },
-                listPart = { _, _, _ -> Text("List Placeholder") },
+                listPart = { _, _, _, _ -> Text("List Placeholder") },
             )
         }
 
@@ -79,7 +79,7 @@ class BaseMetricScreenTest {
                 timeProvider = { 0.0 },
                 onRequestTelemetry = { refreshClicked = true },
                 chartPart = { _, _, _, _ -> },
-                listPart = { _, _, _ -> },
+                listPart = { _, _, _, _ -> },
             )
         }
 

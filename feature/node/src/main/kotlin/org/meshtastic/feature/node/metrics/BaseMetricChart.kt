@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Info
@@ -154,7 +155,7 @@ fun <T> BaseMetricScreen(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onRequestTelemetry: (() -> Unit)? = null,
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
-    listPart: @Composable (Modifier, Double?, (Double) -> Unit) -> Unit,
+    listPart: @Composable (Modifier, Double?, LazyListState, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
 ) {
     var displayInfoDialog by remember { mutableStateOf(false) }
@@ -211,7 +212,7 @@ fun <T> BaseMetricScreen(
                     }
                 },
                 listPart = { modifier ->
-                    listPart(modifier, selectedX) { x ->
+                    listPart(modifier, selectedX, lazyListState) { x ->
                         selectedX = x
                         coroutineScope.launch {
                             vicoScrollState.animateScroll(Scroll.Absolute.x(x, CommonCharts.SCROLL_BIAS))

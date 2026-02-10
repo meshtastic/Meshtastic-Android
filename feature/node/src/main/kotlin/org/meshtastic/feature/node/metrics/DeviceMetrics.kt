@@ -211,8 +211,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 onPointSelected = onPointSelected,
             )
         },
-        listPart = { modifier, selectedX, onCardClick ->
-            LazyColumn(modifier = modifier.fillMaxSize()) {
+        listPart = { modifier, selectedX, lazyListState, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(data) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,

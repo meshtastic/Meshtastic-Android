@@ -170,8 +170,8 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
                 onPointSelected = onPointSelected,
             )
         },
-        listPart = { modifier, selectedX, onCardClick ->
-            LazyColumn(modifier = modifier.fillMaxSize()) {
+        listPart = { modifier, selectedX, lazyListState, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(data) { _, telemetry ->
                     PowerMetricsCard(
                         telemetry = telemetry,

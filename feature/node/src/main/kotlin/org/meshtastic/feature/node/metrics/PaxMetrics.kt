@@ -236,7 +236,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                 )
             }
         },
-        listPart = { modifier, selectedX, onCardClick ->
+        listPart = { modifier, selectedX, lazyListState, onCardClick ->
             if (paxMetrics.isEmpty()) {
                 Text(
                     text = stringResource(Res.string.no_pax_metrics_logs),
@@ -244,7 +244,11 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                     textAlign = TextAlign.Center,
                 )
             } else {
-                LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
+                LazyColumn(
+                    modifier = modifier.fillMaxSize(),
+                    state = lazyListState,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                ) {
                     itemsIndexed(paxMetrics) { _, (log, pax) ->
                         PaxMetricsItem(
                             log = log,

@@ -120,8 +120,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
                 onPointSelected = onPointSelected,
             )
         },
-        listPart = { modifier, selectedX, onCardClick ->
-            LazyColumn(modifier = modifier.fillMaxSize()) {
+        listPart = { modifier, selectedX, lazyListState, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(filteredTelemetries) { _, telemetry ->
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
