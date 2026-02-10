@@ -54,11 +54,9 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
@@ -174,16 +172,6 @@ constructor(
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
 
-    fun tracerouteMapAvailability(forwardRoute: List<Int>, returnRoute: List<Int>): TracerouteMapAvailability =
-        evaluateTracerouteMapAvailability(
-            forwardRoute = forwardRoute,
-            returnRoute = returnRoute,
-            positionedNodeNums = positionedNodeNums(),
-        )
-
-    fun tracerouteMapAvailability(overlay: TracerouteOverlay): TracerouteMapAvailability =
-        tracerouteMapAvailability(overlay.forwardRoute, overlay.returnRoute)
-
     fun positionedNodeNums(): Set<Int> =
         nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet()
 
@@ -207,19 +195,16 @@ constructor(
         destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value) }
     }
 
-    fun onServiceAction(action: ServiceAction) = viewModelScope.launch { serviceRepository.onServiceAction(action) }
-
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
 
-    private val _environmentState = MutableStateFlow(EnvironmentMetricsState())
-    val environmentState: StateFlow<EnvironmentMetricsState> = _environmentState
+    private val environmentState = MutableStateFlow(EnvironmentMetricsState())
 
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     val availableTimeFrames: StateFlow<List<TimeFrame>> =
-        combine(_state, _environmentState) { state, envState ->
+        combine(_state, environmentState) { state, envState ->
             val stateOldest = state.oldestTimestampSeconds()
             val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
             val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: (System.currentTimeMillis() / 1000L)
@@ -233,7 +218,7 @@ constructor(
 
     /** Exposes filtered and unit-converted environment metrics for the UI. */
     val filteredEnvironmentMetrics: StateFlow<List<Telemetry>> =
-        combine(_environmentState, _timeFrame, _state) { envState, timeFrame, state ->
+        combine(environmentState, _timeFrame, _state) { envState, timeFrame, state ->
             val threshold = timeFrame.timeThreshold()
             val data = envState.environmentMetrics.filter { (it.time ?: 0).toLong() >= threshold }
             if (state.isFahrenheit) {
@@ -256,9 +241,8 @@ constructor(
 
     /** Exposes graphing data specifically for the filtered environment metrics. */
     val environmentGraphingData: StateFlow<EnvironmentGraphingData> =
-        combine(filteredEnvironmentMetrics, _state) { filtered, state ->
-            EnvironmentMetricsState(filtered).environmentMetricsForGraphing(state.isFahrenheit)
-        }
+        filteredEnvironmentMetrics
+            .map { filtered -> EnvironmentMetricsState(filtered).environmentMetricsForGraphing(useFahrenheit = false) }
             .stateInWhileSubscribed(EnvironmentGraphingData(emptyList(), emptyList()))
 
     /** Exposes filtered and decoded pax metrics for the UI. */
@@ -278,10 +262,6 @@ constructor(
 
     val lastRequestNeighborsTime: StateFlow<Long?> =
         nodeRequestActions.lastRequestNeighborTimes.map { it[destNum] }.stateInWhileSubscribed(null)
-
-    fun requestUserInfo() {
-        destNum?.let { nodeRequestActions.requestUserInfo(viewModelScope, it, state.value.node?.user?.long_name ?: "") }
-    }
 
     fun requestPosition() {
         destNum?.let { nodeRequestActions.requestPosition(viewModelScope, it, state.value.node?.user?.long_name ?: "") }
@@ -379,7 +359,7 @@ constructor(
                                 // Create a fallback node if not found in database (for hidden clients, etc.)
                                 val actualNode = node ?: createFallbackNode(currentDestNum)
                                 val pioEnv = if (currentDestNum == ourNodeNum) myInfo?.pioEnv else null
-                                val hwModel = actualNode.user.hw_model?.value ?: 0
+                                val hwModel = actualNode.user.hw_model.value
                                 val deviceHardware =
                                     deviceHardwareRepository.getDeviceHardwareByModel(hwModel, target = pioEnv)
 
@@ -427,7 +407,7 @@ constructor(
                             _state.update { state ->
                                 state.copy(deviceMetrics = device, powerMetrics = power, hostMetrics = host)
                             }
-                            _environmentState.update { it.copy(environmentMetrics = env) }
+                            environmentState.update { it.copy(environmentMetrics = env) }
                         }
                     }
 
@@ -576,7 +556,7 @@ constructor(
             val decoded = packet?.decoded
             if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
                 val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
-                if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
+                if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) return pax
             }
         } catch (e: IOException) {
             Logger.e(e) { "Failed to parse Paxcount from binary data" }

@@ -187,7 +187,7 @@ private fun PowerMetricsChart(
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
-                    when (color.copy(1f)) {
+                    when (color.copy(alpha = 1f)) {
                         currentColor -> "Current: %.0f mA".format(value)
                         voltageColor -> "Voltage: %.1f V".format(value)
                         else -> "%.1f".format(value)
