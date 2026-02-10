@@ -88,8 +88,7 @@ import javax.inject.Inject
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 private fun MeshPacket.hasValidSignal(): Boolean = (rx_time ?: 0) > 0 &&
-    ((rx_snr ?: 0f) != 0f && (rx_rssi ?: 0) != 0) &&
-    ((hop_start ?: 0) > 0 && (hop_start ?: 0) - (hop_limit ?: 0) == 0)
+    ((rx_snr ?: 0f) != 0f || (rx_rssi ?: 0) != 0)
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -211,8 +210,10 @@ constructor(
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
-    val availableTimeFrames: StateFlow<List<TimeFrame>> = _state.map { state ->
-        val oldest = state.oldestTimestampSeconds() ?: (System.currentTimeMillis() / 1000L)
+    val availableTimeFrames: StateFlow<List<TimeFrame>> = combine(_state, _environmentState) { state, envState ->
+        val stateOldest = state.oldestTimestampSeconds()
+        val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
+        val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: (System.currentTimeMillis() / 1000L)
         TimeFrame.entries.filter { it.isAvailable(oldest) }
     }.stateInWhileSubscribed(TimeFrame.entries)
 
