@@ -267,6 +267,7 @@
     <string name="theme_system">Süsteemi vaikesäte</string>
     <string name="choose_theme">Vali teema</string>
     <string name="provide_location_to_mesh">Jaga telefoni asukohta mesh-võrku</string>
+    <string name="use_homoglyph_characters_encoding">Kompaktne kodeering kirillitsa jaoks</string>
     <plurals name="delete_messages">
         <item quantity="one">Kustuta sõnum?</item>
         <item quantity="other">Kustuta %1$s sõnumit?</item>
