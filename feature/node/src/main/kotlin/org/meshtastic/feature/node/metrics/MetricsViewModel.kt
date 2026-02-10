@@ -556,7 +556,7 @@ constructor(
             val decoded = packet?.decoded
             if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
                 val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
-                if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) return pax
+                if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
             }
         } catch (e: IOException) {
             Logger.e(e) { "Failed to parse Paxcount from binary data" }
