@@ -27,6 +27,8 @@ configure<LibraryExtension> {
     namespace = "org.meshtastic.feature.node"
 
     defaultConfig { manifestPlaceholders["MAPS_API_KEY"] = "DEBUG_KEY" }
+
+    testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 dependencies {
@@ -66,4 +68,5 @@ dependencies {
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.robolectric)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

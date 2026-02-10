@@ -22,7 +22,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -30,10 +29,12 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.device_metrics_log
+import org.meshtastic.core.ui.theme.AppTheme
+import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(AndroidJUnit4::class)
-@Config(instrumentedPackages = ["androidx.loader.content"])
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class BaseMetricScreenTest {
 
     @get:Rule val composeTestRule = createComposeRule()
@@ -44,16 +45,18 @@ class BaseMetricScreenTest {
         val testData = listOf("Item 1", "Item 2")
 
         composeTestRule.setContent {
-            BaseMetricScreen(
-                onNavigateUp = {},
-                telemetryType = TelemetryType.DEVICE,
-                titleRes = Res.string.device_metrics_log,
-                nodeName = nodeName,
-                data = testData,
-                timeProvider = { 0.0 },
-                chartPart = { _, _, _, _ -> Text("Chart Placeholder") },
-                listPart = { _, _, _, _ -> Text("List Placeholder") },
-            )
+            AppTheme {
+                BaseMetricScreen(
+                    onNavigateUp = {},
+                    telemetryType = TelemetryType.DEVICE,
+                    titleRes = Res.string.device_metrics_log,
+                    nodeName = nodeName,
+                    data = testData,
+                    timeProvider = { 0.0 },
+                    chartPart = { _, _, _, _ -> Text("Chart Placeholder") },
+                    listPart = { _, _, _, _ -> Text("List Placeholder") },
+                )
+            }
         }
 
         // Verify Node Name is displayed (MainAppBar title)
@@ -70,17 +73,19 @@ class BaseMetricScreenTest {
         val testData = emptyList<String>()
 
         composeTestRule.setContent {
-            BaseMetricScreen(
-                onNavigateUp = {},
-                telemetryType = TelemetryType.DEVICE,
-                titleRes = Res.string.device_metrics_log,
-                nodeName = "Node",
-                data = testData,
-                timeProvider = { 0.0 },
-                onRequestTelemetry = { refreshClicked = true },
-                chartPart = { _, _, _, _ -> },
-                listPart = { _, _, _, _ -> },
-            )
+            AppTheme {
+                BaseMetricScreen(
+                    onNavigateUp = {},
+                    telemetryType = TelemetryType.DEVICE,
+                    titleRes = Res.string.device_metrics_log,
+                    nodeName = "Node",
+                    data = testData,
+                    timeProvider = { 0.0 },
+                    onRequestTelemetry = { refreshClicked = true },
+                    chartPart = { _, _, _, _ -> },
+                    listPart = { _, _, _, _ -> },
+                )
+            }
         }
 
         composeTestRule.onNodeWithTag("refresh_button").performClick()
