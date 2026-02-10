@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
@@ -179,7 +180,10 @@ fun <T> BaseMetricScreen(
                         }
                     }
                     if (telemetryType != null) {
-                        IconButton(onClick = { onRequestTelemetry?.invoke() }) {
+                        IconButton(
+                            onClick = { onRequestTelemetry?.invoke() },
+                            modifier = Modifier.testTag("refresh_button"),
+                        ) {
                             Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
