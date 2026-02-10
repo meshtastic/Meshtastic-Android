@@ -470,11 +470,9 @@ constructor(
 
             @Suppress("MaxLineLength")
             Logger.d {
-                val retryInfo =
-                    "packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount ?: reaction?.retryCount}"
                 val statusInfo = "status=${p?.data?.status ?: reaction?.status}"
                 "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
-                    "maxRetransmit=$isMaxRetransmit $retryInfo $statusInfo"
+                    "maxRetransmit=$isMaxRetransmit packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} $statusInfo"
             }
 
             val m =

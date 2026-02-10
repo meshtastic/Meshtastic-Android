@@ -60,7 +60,6 @@ fun DeliveryInfo(
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
-            // Removed retry count display as it is no longer relevant
             if (relays != 0) {
                 Text(
                     text = pluralStringResource(Res.plurals.relays, relays, relays),
