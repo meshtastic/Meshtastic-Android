@@ -165,6 +165,7 @@
     <string name="gps_en_gpio">GPIO EN GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
+    <string name="channel">Кан</string>
     <string name="channel_name">Имя канала</string>
     <string name="qr_code">QR-код</string>
     <string name="unknown_username">Неизвестное имя пользователя</string>
@@ -371,6 +372,12 @@
     <string name="wifi_qr_code_error">Неверный формат QR-кода WiFi</string>
     <string name="navigate_back">Вернуться</string>
     <string name="battery">Батарея</string>
+    <string name="channel_utilization">ChUtil</string>
+    <string name="air_utilization">AirUtil</string>
+    <string name="temperature">Темп</string>
+    <string name="humidity">Влажн</string>
+    <string name="soil_temperature">Темп почвы</string>
+    <string name="soil_moisture">Влажн почвы</string>
     <string name="logs">Журналы</string>
     <string name="hops_away">Прыжков</string>
     <string name="hops_away_template">Количество ретрансляций %1$d</string>
@@ -454,6 +461,7 @@
     <string name="meshtastic_low_battery_notifications">Уведомление о низком уровне заряда</string>
     <string name="low_battery_title">Низкий заряд батареи: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (избранные ноды)</string>
+    <string name="baro_pressure">Давл</string>
     <string name="udp_enabled">Включено</string>
     <string name="udp_broadcast">Трансляция UDP</string>
     <string name="udp_config">UDP Config</string>
