@@ -34,10 +34,13 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.strings.Res
@@ -63,6 +67,7 @@ import org.meshtastic.core.strings.uv_lux
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.component.IaqDisplayMode
 import org.meshtastic.core.ui.component.IndoorAirQuality
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
@@ -74,15 +79,29 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
     val filteredTelemetries by viewModel.filteredEnvironmentMetrics.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
 
     BaseMetricScreen(
-        viewModel = viewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.ENVIRONMENT,
         titleRes = Res.string.env_metrics_log,
+        nodeName = state.node?.user?.long_name ?: "",
         data = filteredTelemetries,
         timeProvider = { (it.time ?: 0).toDouble() },
         infoData = listOf(InfoDialogData(Res.string.iaq, Res.string.iaq_definition, Environment.IAQ.color)),
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.ENVIRONMENT) },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,

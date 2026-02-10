@@ -36,6 +36,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -66,6 +68,7 @@ import org.meshtastic.core.strings.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshPacket
@@ -88,14 +91,28 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.signalMetrics.filter { (it.rx_time ?: 0).toLong() >= timeFrame.timeThreshold() }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
 
     BaseMetricScreen(
-        viewModel = viewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.LOCAL_STATS,
         titleRes = Res.string.signal_quality,
+        nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { (it.rx_time ?: 0).toDouble() },
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) },
         infoData =
         listOf(
             InfoDialogData(Res.string.snr, Res.string.snr_definition, SignalMetric.SNR.color),

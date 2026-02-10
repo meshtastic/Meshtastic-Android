@@ -37,6 +37,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -73,6 +75,7 @@ import org.meshtastic.core.strings.power_metrics_log
 import org.meshtastic.core.strings.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
@@ -112,14 +115,28 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.powerMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
 
     BaseMetricScreen(
-        viewModel = viewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.POWER,
         titleRes = Res.string.power_metrics_log,
+        nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { (it.time ?: 0).toDouble() },
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.POWER) },
         controlPart = {
             Column {
                 TimeFrameSelector(

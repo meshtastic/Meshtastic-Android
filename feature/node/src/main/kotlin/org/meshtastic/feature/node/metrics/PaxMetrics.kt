@@ -32,6 +32,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -68,6 +70,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import java.text.DateFormat
 import java.util.Date
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
@@ -172,11 +175,24 @@ private fun PaxMetricsChart(
 @Composable
 @Suppress("MagicNumber", "LongMethod")
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
+    val state by metricsViewModel.state.collectAsStateWithLifecycle()
     val paxMetrics by metricsViewModel.filteredPaxMetrics.collectAsStateWithLifecycle()
     val timeFrame by metricsViewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by metricsViewModel.availableTimeFrames.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val dateFormat = DateFormat.getDateTimeInstance()
+
+    LaunchedEffect(Unit) {
+        metricsViewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
 
     // Prepare data for graph
     val graphData =
@@ -191,12 +207,14 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val wifiSeries = graphData.map { it.first to it.third }
 
     BaseMetricScreen(
-        viewModel = metricsViewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.PAX,
         titleRes = Res.string.pax_metrics_log,
+        nodeName = state.node?.user?.long_name ?: "",
         data = paxMetrics,
         timeProvider = { (it.first.received_date / 1000).toDouble() },
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.PAX) },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,

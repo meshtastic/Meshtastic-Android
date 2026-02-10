@@ -37,6 +37,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +53,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -79,6 +81,7 @@ import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
@@ -125,11 +128,23 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
     val data = state.deviceMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
     val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
     val hasChUtil = remember(data) { data.any { it.device_metrics?.channel_utilization != null } }
     val hasAirUtil = remember(data) { data.any { it.device_metrics?.air_util_tx != null } }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                }
+            }
+        }
+    }
 
     val filteredLegendData =
         remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
@@ -169,13 +184,15 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         }
 
     BaseMetricScreen(
-        viewModel = viewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.DEVICE,
         titleRes = Res.string.device_metrics_log,
+        nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { (it.time ?: 0).toDouble() },
         infoData = infoItems,
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.DEVICE) },
         controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,

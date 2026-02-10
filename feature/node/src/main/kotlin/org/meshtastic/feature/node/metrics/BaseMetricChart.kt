@@ -32,7 +32,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,8 +39,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
@@ -66,7 +63,6 @@ import org.meshtastic.core.strings.logs
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
-import org.meshtastic.feature.node.detail.NodeRequestEffect
 
 /**
  * A generic chart host for Meshtastic metric charts. Handles common boilerplate for markers, scrolling, and point
@@ -147,19 +143,19 @@ fun AdaptiveMetricLayout(
 @Composable
 @Suppress("LongMethod")
 fun <T> BaseMetricScreen(
-    viewModel: MetricsViewModel,
     onNavigateUp: () -> Unit,
     telemetryType: TelemetryType?,
     titleRes: StringResource,
+    nodeName: String,
     data: List<T>,
     timeProvider: (T) -> Double,
     infoData: List<InfoDialogData> = emptyList(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onRequestTelemetry: (() -> Unit)? = null,
     chartPart: @Composable (Modifier, Double?, VicoScrollState, (Double) -> Unit) -> Unit,
     listPart: @Composable (Modifier, Double?, (Double) -> Unit) -> Unit,
     controlPart: @Composable () -> Unit = {},
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
     var displayInfoDialog by remember { mutableStateOf(false) }
 
     val lazyListState = rememberLazyListState()
@@ -167,21 +163,10 @@ fun <T> BaseMetricScreen(
     val coroutineScope = rememberCoroutineScope()
     var selectedX by remember { mutableStateOf<Double?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
-                }
-            }
-        }
-    }
-
     Scaffold(
         topBar = {
             MainAppBar(
-                title = state.node?.user?.long_name ?: "",
+                title = nodeName,
                 subtitle = stringResource(titleRes) + " (${data.size} ${stringResource(Res.string.logs)})",
                 ourNode = null,
                 showNodeChip = false,
@@ -194,7 +179,7 @@ fun <T> BaseMetricScreen(
                         }
                     }
                     if (telemetryType != null) {
-                        IconButton(onClick = { viewModel.requestTelemetry(telemetryType) }) {
+                        IconButton(onClick = { onRequestTelemetry?.invoke() }) {
                             Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
                         }
                     }
