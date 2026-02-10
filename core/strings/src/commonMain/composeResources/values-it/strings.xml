@@ -555,7 +555,6 @@
     <string name="ipv4_mode">Modalità IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Gateway</string>
-    <string name="subnet">Subnet</string>
     <string name="paxcounter_config">Configurazione Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter abilitato</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Soglia RSSI WiFi (valore predefinito -80)</string>
@@ -811,7 +810,6 @@
     <string name="notifications_for_newly_discovered_nodes">Notifiche per i nodi scoperti</string>
     <string name="low_battery">Livello batteria basso</string>
     <string name="notifications_for_low_battery_alerts">Notifiche per gli avvisi di batteria scarica per il dispositivo collegato.</string>
-    <string name="critical_alerts_description">Selezionare i pacchetti inviati come critici ignorerà la modalità silenziosa e le impostazioni di Non disturbare nel centro di notifica del sistema operativo.</string>
     <string name="configure_notification_permissions">Configura le autorizzazioni delle notifiche</string>
     <string name="phone_location">Posizione del telefono</string>
     <string name="phone_location_description">Meshtastic utilizza la posizione del telefono per abilitare molte funzionalità. È possibile aggiornare i permessi riguardo la posizione in qualsiasi momento dalle impostazioni.</string>

@@ -42,7 +42,6 @@
     <string name="unrecognized">No reconocido</string>
     <string name="message_status_enroute">Esperando ser reconocido</string>
     <string name="message_status_queued">En cola para enviar</string>
-    <string name="message_retry_count">Intentos %1$d / %2$d</string>
     <string name="routing_error_none">Reconocido</string>
     <string name="routing_error_no_route">Sin ruta</string>
     <string name="routing_error_got_nak">Recibido un reconocimiento negativo</string>
@@ -564,7 +563,6 @@ Rango de Valores 0 - 500.</string>
     <string name="ipv4_mode">Modo IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Puerta enlace</string>
-    <string name="subnet">Subred</string>
     <string name="paxcounter_config">Configuración del Contador de Paquetes</string>
     <string name="paxcounter_enabled">Activar el Contador de Paquetes</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Umbral mínimo de RSSI de WiFi (por defecto es -80)</string>

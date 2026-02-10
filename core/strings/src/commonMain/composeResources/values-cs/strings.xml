@@ -42,7 +42,6 @@
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
-    <string name="retry_dialog_title">Zprávu se nepodařilo odeslat</string>
     <string name="routing_error_none">Potvrzený příjem</string>
     <string name="routing_error_no_route">Žádná trasa</string>
     <string name="routing_error_got_nak">Obdrženo negativní potvrzení</string>
@@ -525,7 +524,6 @@
     <string name="ipv4_mode">Režim IPv4</string>
     <string name="ip">IP adresa</string>
     <string name="gateway">Gateway/Brána</string>
-    <string name="subnet">Podsíť</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Práh WiFi RSSI (výchozí hodnota -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">Práh BLE RSSI (výchozí hodnota -80)</string>
     <string name="position_config">Pozice</string>
@@ -758,7 +756,6 @@
     <string name="notifications_for_newly_discovered_nodes">Oznámení o nově nalezených uzlech.</string>
     <string name="low_battery">Nízký stav baterie</string>
     <string name="notifications_for_low_battery_alerts">Oznámení o nízké úrovni baterie připojeného zařízení.</string>
-    <string name="critical_alerts_description">Kritická upozornění obejdou ztlumení i režim Nerušit v telefonu.</string>
     <string name="phone_location">Poloha telefonu</string>
     <string name="phone_location_description">Meshtastic využívá polohu telefonu pro některé funkce. Oprávnění k poloze si můžete kdykoli upravit v nastavení.</string>
     <string name="share_location">Sdílet polohu</string>

@@ -393,7 +393,6 @@
     <string name="ipv4_mode">IPv4 モード</string>
     <string name="ip">IP</string>
     <string name="gateway">ゲートウェイ</string>
-    <string name="subnet">サブネット</string>
     <string name="paxcounter_config">Paxcounter 設定</string>
     <string name="paxcounter_enabled">Paxcounter を有効化</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI閾値（デフォルトは -80）</string>

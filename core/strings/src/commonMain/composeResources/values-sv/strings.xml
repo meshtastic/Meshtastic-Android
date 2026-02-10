@@ -42,7 +42,6 @@
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
-    <string name="message_retry_count">Försök: %1$d / %2$d</string>
     <string name="routing_error_none">Kvitterad</string>
     <string name="routing_error_no_route">Ingen rutt</string>
     <string name="routing_error_got_nak">Misslyckad kvittens</string>
@@ -571,7 +570,6 @@
     <string name="ipv4_mode">IPv4-läge</string>
     <string name="ip">Ip-adress</string>
     <string name="gateway">Gateway</string>
-    <string name="subnet">Subnät</string>
     <string name="paxcounter_config">Konfiguration av PAX-räknare</string>
     <string name="paxcounter_enabled">PAX-räknare aktiverad</string>
     <string name="position_config">Plats</string>
@@ -821,7 +819,6 @@
     <string name="notifications_for_newly_discovered_nodes">Aviseringar för nyupptäckta noder.</string>
     <string name="low_battery">Lågt batteri</string>
     <string name="notifications_for_low_battery_alerts">Aviseringar för låg batterinivå för den anslutna enheten.</string>
-    <string name="critical_alerts_description">Valda paket som skickas som kritiska kommer ignorera Mute och Stör ej inställningar i OS-meddelandecentret.</string>
     <string name="configure_notification_permissions">Konfigurera aviseringsbehörigheter</string>
     <string name="phone_location">Telefonens plats</string>
     <string name="phone_location_description">Meshtastic använder telefonens plats för att aktivera ett antal funktioner. Du kan uppdatera dina platsbehörigheter när som helst från inställningar.</string>
