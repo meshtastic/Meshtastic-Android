@@ -56,6 +56,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
@@ -77,17 +78,25 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
+import org.meshtastic.proto.Paxcount as ProtoPaxcount
 
 private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 private fun MeshPacket.hasValidSignal(): Boolean = (rx_time ?: 0) > 0 && ((rx_snr ?: 0f) != 0f || (rx_rssi ?: 0) != 0)
+
+private fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
+    val metrics = this.environment_metrics ?: return false
+    return metrics.relative_humidity != null && metrics.temperature != null && metrics.temperature?.isNaN() != true
+}
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -114,11 +123,11 @@ constructor(
 
     private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
 
-    private fun MeshLog.hasValidTraceroute(): Boolean =
-        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == destNum }
+    private fun MeshLog.hasValidTraceroute(dest: Int?): Boolean =
+        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == dest }
 
-    private fun MeshLog.hasValidNeighborInfo(): Boolean =
-        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == destNum }
+    private fun MeshLog.hasValidNeighborInfo(dest: Int?): Boolean =
+        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == dest }
 
     /**
      * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
@@ -222,6 +231,46 @@ constructor(
         _timeFrame.value = timeFrame
     }
 
+    /** Exposes filtered and unit-converted environment metrics for the UI. */
+    val filteredEnvironmentMetrics: StateFlow<List<Telemetry>> =
+        combine(_environmentState, _timeFrame, _state) { envState, timeFrame, state ->
+            val threshold = timeFrame.timeThreshold()
+            val data = envState.environmentMetrics.filter { (it.time ?: 0).toLong() >= threshold }
+            if (state.isFahrenheit) {
+                data.map { telemetry ->
+                    val em = telemetry.environment_metrics ?: return@map telemetry
+                    telemetry.copy(
+                        environment_metrics =
+                        em.copy(
+                            temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                            soil_temperature =
+                            em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                        ),
+                    )
+                }
+            } else {
+                data
+            }
+        }
+            .stateInWhileSubscribed(emptyList())
+
+    /** Exposes graphing data specifically for the filtered environment metrics. */
+    val environmentGraphingData: StateFlow<EnvironmentGraphingData> =
+        combine(filteredEnvironmentMetrics, _state) { filtered, state ->
+            EnvironmentMetricsState(filtered).environmentMetricsForGraphing(state.isFahrenheit)
+        }
+            .stateInWhileSubscribed(EnvironmentGraphingData(emptyList(), emptyList()))
+
+    /** Exposes filtered and decoded pax metrics for the UI. */
+    val filteredPaxMetrics: StateFlow<List<Pair<MeshLog, ProtoPaxcount>>> =
+        combine(_state, _timeFrame) { state, timeFrame ->
+            val threshold = timeFrame.timeThreshold()
+            state.paxMetrics
+                .filter { (it.received_date / 1000) >= threshold }
+                .mapNotNull { log -> decodePaxFromLog(log)?.let { log to it } }
+        }
+            .stateInWhileSubscribed(emptyList())
+
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
     val lastTraceRouteTime: StateFlow<Long?> =
@@ -313,7 +362,7 @@ constructor(
         }
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun initializeFlows() {
         jobs?.cancel()
         val currentDestNum = destNum
@@ -363,24 +412,22 @@ constructor(
 
                     launch {
                         meshLogRepository.getTelemetryFrom(currentDestNum).collect { telemetry ->
+                            val device = mutableListOf<Telemetry>()
+                            val power = mutableListOf<Telemetry>()
+                            val host = mutableListOf<Telemetry>()
+                            val env = mutableListOf<Telemetry>()
+
+                            for (item in telemetry) {
+                                if (item.device_metrics != null) device.add(item)
+                                if (item.power_metrics != null) power.add(item)
+                                if (item.host_metrics != null) host.add(item)
+                                if (item.hasValidEnvironmentMetrics()) env.add(item)
+                            }
+
                             _state.update { state ->
-                                state.copy(
-                                    deviceMetrics = telemetry.filter { it.device_metrics != null },
-                                    powerMetrics = telemetry.filter { it.power_metrics != null },
-                                    hostMetrics = telemetry.filter { it.host_metrics != null },
-                                )
+                                state.copy(deviceMetrics = device, powerMetrics = power, hostMetrics = host)
                             }
-                            _environmentState.update { state ->
-                                state.copy(
-                                    environmentMetrics =
-                                    telemetry.filter {
-                                        it.environment_metrics != null &&
-                                            it.environment_metrics?.relative_humidity != null &&
-                                            it.environment_metrics?.temperature != null &&
-                                            it.environment_metrics?.temperature?.isNaN()?.not() == true
-                                    },
-                                )
-                            }
+                            _environmentState.update { it.copy(environmentMetrics = env) }
                         }
                     }
 
@@ -399,7 +446,7 @@ constructor(
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(
-                                    tracerouteRequests = request.filter { it.hasValidTraceroute() },
+                                    tracerouteRequests = request.filter { it.hasValidTraceroute(currentDestNum) },
                                     tracerouteResults = response,
                                 )
                             }
@@ -414,7 +461,8 @@ constructor(
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(
-                                    neighborInfoRequests = request.filter { it.hasValidNeighborInfo() },
+                                    neighborInfoRequests =
+                                    request.filter { it.hasValidNeighborInfo(currentDestNum) },
                                     neighborInfoResults = response,
                                 )
                             }
@@ -519,4 +567,37 @@ constructor(
                 Logger.e(ex) { "Can't write file error" }
             }
         }
+
+    @Suppress("MagicNumber", "CyclomaticComplexMethod", "ReturnCount")
+    fun decodePaxFromLog(log: MeshLog): ProtoPaxcount? {
+        // First, try to parse from the binary fromRadio field (robust, like telemetry)
+        try {
+            val packet = log.fromRadio.packet
+            val decoded = packet?.decoded
+            if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
+                val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
+                if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
+            }
+        } catch (e: IOException) {
+            Logger.e(e) { "Failed to parse Paxcount from binary data" }
+        }
+        // Fallback: Try direct base64 or bytes from raw_message
+        try {
+            val base64 = log.raw_message.trim()
+            if (base64.matches(Regex("^[A-Za-z0-9+/=\r\n]+$"))) {
+                val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
+                return ProtoPaxcount.ADAPTER.decode(bytes)
+            } else if (base64.matches(Regex("^[0-9a-fA-F]+$")) && base64.length % 2 == 0) {
+                val bytes = base64.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+                return ProtoPaxcount.ADAPTER.decode(bytes)
+            }
+        } catch (e: IllegalArgumentException) {
+            Logger.e(e) { "Failed to parse Paxcount from decoded data" }
+        } catch (e: IOException) {
+            Logger.e(e) { "Failed to parse Paxcount from decoded data" }
+        } catch (e: NumberFormatException) {
+            Logger.e(e) { "Failed to parse Paxcount from decoded data" }
+        }
+        return null
+    }
 }

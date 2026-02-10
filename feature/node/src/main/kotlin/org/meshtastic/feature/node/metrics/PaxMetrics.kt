@@ -24,29 +24,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -54,8 +44,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
-import com.patrykandpatrick.vico.compose.cartesian.Scroll
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -63,8 +51,6 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
@@ -72,21 +58,16 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.ble_devices
-import org.meshtastic.core.strings.logs
 import org.meshtastic.core.strings.no_pax_metrics_logs
 import org.meshtastic.core.strings.pax
 import org.meshtastic.core.strings.pax_metrics_log
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
-import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
-import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
-import org.meshtastic.feature.node.detail.NodeRequestEffect
-import org.meshtastic.proto.PortNum
 import java.text.DateFormat
 import java.util.Date
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
@@ -191,40 +172,12 @@ private fun PaxMetricsChart(
 @Composable
 @Suppress("MagicNumber", "LongMethod")
 fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
-    val state by metricsViewModel.state.collectAsStateWithLifecycle()
+    val paxMetrics by metricsViewModel.filteredPaxMetrics.collectAsStateWithLifecycle()
     val timeFrame by metricsViewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by metricsViewModel.availableTimeFrames.collectAsStateWithLifecycle()
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    val lazyListState = rememberLazyListState()
-    val vicoScrollState = rememberVicoScrollState()
-    val coroutineScope = rememberCoroutineScope()
-    var selectedX by remember { mutableStateOf<Double?>(null) }
-
-    LaunchedEffect(Unit) {
-        metricsViewModel.effects.collect { effect ->
-            when (effect) {
-                is NodeRequestEffect.ShowFeedback -> {
-                    @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
-                }
-            }
-        }
-    }
 
     val dateFormat = DateFormat.getDateTimeInstance()
-    // Only show logs that can be decoded as ProtoPaxcount
-    val paxMetrics =
-        state.paxMetrics
-            .filter { (it.received_date / 1000) >= timeFrame.timeThreshold() }
-            .mapNotNull { log ->
-                val pax = decodePaxFromLog(log)
-                if (pax != null) {
-                    Pair(log, pax)
-                } else {
-                    null
-                }
-            }
+
     // Prepare data for graph
     val graphData =
         paxMetrics
@@ -237,154 +190,56 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val bleSeries = graphData.map { it.first to it.second }
     val wifiSeries = graphData.map { it.first to it.third }
 
-    Scaffold(
-        topBar = {
-            MainAppBar(
-                title = state.node?.user?.long_name ?: "",
-                subtitle =
-                stringResource(Res.string.pax_metrics_log) +
-                    " (${paxMetrics.size} ${stringResource(Res.string.logs)})",
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
-                onNavigateUp = onNavigateUp,
-                actions = {
-                    if (!state.isLocal) {
-                        IconButton(onClick = { metricsViewModel.requestTelemetry(TelemetryType.PAX) }) {
-                            Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
-                        }
-                    }
-                },
-                onClickChip = {},
-            )
-        },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-    ) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+    BaseMetricScreen(
+        viewModel = metricsViewModel,
+        onNavigateUp = onNavigateUp,
+        telemetryType = TelemetryType.PAX,
+        titleRes = Res.string.pax_metrics_log,
+        data = paxMetrics,
+        timeProvider = { (it.first.received_date / 1000).toDouble() },
+        controlPart = {
             TimeFrameSelector(
                 selectedTimeFrame = timeFrame,
                 availableTimeFrames = availableTimeFrames,
                 onTimeFrameSelected = metricsViewModel::setTimeFrame,
                 modifier = Modifier.padding(horizontal = 16.dp),
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            // Graph
+        },
+        chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             if (graphData.isNotEmpty()) {
-                AdaptiveMetricLayout(
-                    chartPart = { modifier ->
-                        PaxMetricsChart(
-                            modifier = modifier,
-                            totalSeries = totalSeries,
-                            bleSeries = bleSeries,
-                            wifiSeries = wifiSeries,
-                            vicoScrollState = vicoScrollState,
-                            selectedX = selectedX,
-                            onPointSelected = { x ->
-                                selectedX = x
-                                val index = paxMetrics.indexOfFirst { (it.first.received_date / 1000).toDouble() == x }
-                                if (index != -1) {
-                                    coroutineScope.launch { lazyListState.animateScrollToItem(index) }
-                                }
-                            },
-                        )
-                    },
-                    listPart = { modifier ->
-                        if (paxMetrics.isEmpty()) {
-                            Text(
-                                text = stringResource(Res.string.no_pax_metrics_logs),
-                                modifier = modifier.fillMaxSize().padding(16.dp),
-                                textAlign = TextAlign.Center,
-                            )
-                        } else {
-                            LazyColumn(
-                                modifier = modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(horizontal = 16.dp),
-                                state = lazyListState,
-                            ) {
-                                itemsIndexed(paxMetrics) { _, (log, pax) ->
-                                    PaxMetricsItem(
-                                        log = log,
-                                        pax = pax,
-                                        dateFormat = dateFormat,
-                                        isSelected = (log.received_date / 1000).toDouble() == selectedX,
-                                        onClick = {
-                                            selectedX = (log.received_date / 1000).toDouble()
-                                            coroutineScope.launch {
-                                                vicoScrollState.animateScroll(
-                                                    Scroll.Absolute.x((log.received_date / 1000).toDouble(), 0.5f),
-                                                )
-                                            }
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                    },
+                PaxMetricsChart(
+                    modifier = modifier,
+                    totalSeries = totalSeries,
+                    bleSeries = bleSeries,
+                    wifiSeries = wifiSeries,
+                    vicoScrollState = vicoScrollState,
+                    selectedX = selectedX,
+                    onPointSelected = onPointSelected,
+                )
+            }
+        },
+        listPart = { modifier, selectedX, onCardClick ->
+            if (paxMetrics.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.no_pax_metrics_logs),
+                    modifier = modifier.fillMaxSize().padding(16.dp),
+                    textAlign = TextAlign.Center,
                 )
             } else {
-                // Empty state if no graph data
-                if (paxMetrics.isEmpty()) {
-                    Text(
-                        text = stringResource(Res.string.no_pax_metrics_logs),
-                        modifier = Modifier.fillMaxSize().padding(16.dp),
-                        textAlign = TextAlign.Center,
-                    )
+                LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
+                    itemsIndexed(paxMetrics) { _, (log, pax) ->
+                        PaxMetricsItem(
+                            log = log,
+                            pax = pax,
+                            dateFormat = dateFormat,
+                            isSelected = (log.received_date / 1000).toDouble() == selectedX,
+                            onClick = { onCardClick((log.received_date / 1000).toDouble()) },
+                        )
+                    }
                 }
             }
-        }
-    }
-}
-
-@Suppress("MagicNumber", "CyclomaticComplexMethod")
-fun decodePaxFromLog(log: MeshLog): ProtoPaxcount? {
-    var result: ProtoPaxcount? = null
-    // First, try to parse from the binary fromRadio field (robust, like telemetry)
-    try {
-        val packet = log.fromRadio.packet
-        val decoded = packet?.decoded
-        if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
-            val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
-            if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) result = pax
-        }
-    } catch (e: Exception) {
-        android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from binary data", e)
-    }
-    // Fallback: Try direct base64 or bytes from raw_message
-    if (result == null) {
-        try {
-            val base64 = log.raw_message.trim()
-            if (base64.matches(Regex("^[A-Za-z0-9+/=\r\n]+$"))) {
-                val bytes = android.util.Base64.decode(base64, android.util.Base64.DEFAULT)
-                val pax = ProtoPaxcount.ADAPTER.decode(bytes)
-                result = pax
-            } else if (base64.matches(Regex("^[0-9a-fA-F]+$")) && base64.length % 2 == 0) {
-                val bytes = base64.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-                val pax = ProtoPaxcount.ADAPTER.decode(bytes)
-                result = pax
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from decoded data", e)
-        }
-    }
-    return result
-}
-
-@Suppress("MagicNumber")
-fun unescapeProtoString(escaped: String): ByteArray {
-    val out = mutableListOf<Byte>()
-    var i = 0
-    while (i < escaped.length) {
-        if (escaped[i] == '\\' && i + 3 < escaped.length && escaped[i + 1].isDigit()) {
-            // Octal escape: \\ddd
-            val octal = escaped.substring(i + 1, i + 4)
-            out.add(octal.toInt(8).toByte())
-            i += 4
-        } else {
-            out.add(escaped[i].code.toByte())
-            i++
-        }
-    }
-    return out.toByteArray()
+        },
+    )
 }
 
 @Composable
