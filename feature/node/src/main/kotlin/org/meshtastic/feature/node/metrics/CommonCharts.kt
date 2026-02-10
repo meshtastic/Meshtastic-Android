@@ -76,7 +76,6 @@ object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     val TIME_MINUTE_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
     val TIME_SECONDS_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
-    val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
@@ -105,14 +104,17 @@ object CommonCharts {
         val zoom = if (context is CartesianDrawingContext) context.zoom else 1f
         val visibleSpan = xLength / zoom
 
-        val formatter =
-            when {
-                visibleSpan <= 3600 -> TIME_SECONDS_FORMAT // < 1 hour visible
-                visibleSpan <= 86400 * 2 -> TIME_MINUTE_FORMAT // < 2 days visible
-                visibleSpan <= 86400 * 14 -> DATE_TIME_MINUTE_FORMAT // < 2 weeks visible
-                else -> DATE_FORMAT
+        when {
+            visibleSpan <= 3600 -> TIME_SECONDS_FORMAT.format(date) // < 1 hour visible
+            visibleSpan <= 86400 * 2 -> TIME_MINUTE_FORMAT.format(date) // < 2 days visible
+            visibleSpan <= 86400 * 14 -> {
+                // < 2 weeks visible: separate date and time with a newline
+                val dateStr = DATE_FORMAT.format(date)
+                val timeStr = TIME_MINUTE_FORMAT.format(date)
+                "$dateStr\n$timeStr"
             }
-        formatter.format(date)
+            else -> DATE_FORMAT.format(date)
+        }
     }
 }
 

@@ -446,11 +446,13 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Route traced toward destination:\n\n</string>
     <string name="traceroute_route_back_to_us">Route traced back to us:\n\n</string>
+    <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1W</string>
     <string name="two_weeks">2W</string>
     <string name="four_weeks">4W</string>
+    <string name="one_month">1M</string>
     <string name="max">Max</string>
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
@@ -1175,4 +1177,5 @@
     <string name="scan_nfc_text">Bring your device close to the NFC tag to scan.</string>
     <string name="generate_qr_code">Generate QR Code</string>
     <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
+    <string name="all_time">All</string>
 </resources>

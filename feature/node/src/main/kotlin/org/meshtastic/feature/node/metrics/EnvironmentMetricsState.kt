@@ -41,7 +41,8 @@ enum class Environment(val color: Color) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.soil_temperature
     },
     SOIL_MOISTURE(Purple) {
-        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.soil_moisture?.toFloat()
+        override fun getValue(telemetry: Telemetry) =
+            telemetry.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }?.toFloat()
     },
     BAROMETRIC_PRESSURE(Green) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.barometric_pressure
@@ -50,7 +51,8 @@ enum class Environment(val color: Color) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.gas_resistance
     },
     IAQ(Cyan) {
-        override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.iaq?.toFloat()
+        override fun getValue(telemetry: Telemetry) =
+            telemetry.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE }?.toFloat()
     },
     LUX(Gold) {
         override fun getValue(telemetry: Telemetry) = telemetry.environment_metrics?.lux
@@ -136,7 +138,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Moisture
-        val soilMoistures = telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != 0 } }
+        val soilMoistures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE } }
         if (soilMoistures.isNotEmpty()) {
             minValues.add(soilMoistures.minOf { it.toFloat() })
             maxValues.add(soilMoistures.maxOf { it.toFloat() })
@@ -144,7 +147,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // IAQ
-        val iaqs = telemetries.mapNotNull { it.environment_metrics?.iaq?.takeIf { it != 0 } }
+        val iaqs = telemetries.mapNotNull { it.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE } }
         if (iaqs.isNotEmpty()) {
             minValues.add(iaqs.minOf { it.toFloat() })
             maxValues.add(iaqs.maxOf { it.toFloat() })
