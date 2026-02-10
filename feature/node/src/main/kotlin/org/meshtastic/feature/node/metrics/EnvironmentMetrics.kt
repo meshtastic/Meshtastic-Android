@@ -92,7 +92,7 @@ import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.feature.node.metrics.CommonCharts.SCROLL_BIAS
 import org.meshtastic.proto.Telemetry
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()

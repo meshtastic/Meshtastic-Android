@@ -138,9 +138,8 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // Soil Moisture
-        val soilMoistures = telemetries.mapNotNull {
-            it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE }
-        }
+        val soilMoistures =
+            telemetries.mapNotNull { it.environment_metrics?.soil_moisture?.takeIf { it != Int.MIN_VALUE } }
         if (soilMoistures.isNotEmpty()) {
             minValues.add(soilMoistures.minOf { it.toFloat() })
             maxValues.add(soilMoistures.maxOf { it.toFloat() })
@@ -148,9 +147,7 @@ data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emp
         }
 
         // IAQ
-        val iaqs = telemetries.mapNotNull {
-            it.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE }
-        }
+        val iaqs = telemetries.mapNotNull { it.environment_metrics?.iaq?.takeIf { it != Int.MIN_VALUE } }
         if (iaqs.isNotEmpty()) {
             minValues.add(iaqs.minOf { it.toFloat() })
             maxValues.add(iaqs.maxOf { it.toFloat() })

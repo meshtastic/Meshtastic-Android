@@ -65,9 +65,8 @@ data class MetricsState(
 
     fun hasPaxMetrics() = paxMetrics.isNotEmpty()
 
-    /**
-     * Finds the oldest timestamp (in seconds) among all collected metric types.
-     */
+    /** Finds the oldest timestamp (in seconds) among all collected metric types. */
+    @Suppress("MagicNumber")
     fun oldestTimestampSeconds(): Long? {
         val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics).mapNotNull { it.time?.toLong() }
         val signalTimes = signalMetrics.mapNotNull { it.rx_time?.toLong() }

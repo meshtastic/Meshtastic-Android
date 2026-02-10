@@ -25,13 +25,15 @@ import org.meshtastic.core.strings.one_week
 import org.meshtastic.core.strings.twenty_four_hours
 import org.meshtastic.core.strings.two_weeks
 
+@Suppress("MagicNumber")
 enum class TimeFrame(val strRes: StringResource, val seconds: Long) {
     ONE_HOUR(Res.string.one_hour_short, 3600),
     TWENTY_FOUR_HOURS(Res.string.twenty_four_hours, 86400),
     SEVEN_DAYS(Res.string.one_week, 604800),
     TWO_WEEKS(Res.string.two_weeks, 1209600),
     ONE_MONTH(Res.string.one_month, 2592000),
-    ALL_TIME(Res.string.all_time, 0);
+    ALL_TIME(Res.string.all_time, 0),
+    ;
 
     fun timeThreshold(now: Long = System.currentTimeMillis() / 1000L): Long {
         if (this == ALL_TIME) return 0
@@ -39,8 +41,8 @@ enum class TimeFrame(val strRes: StringResource, val seconds: Long) {
     }
 
     /**
-     * Checks if this time frame is relevant given the oldest available data point.
-     * We show the option if the data extends at least into this timeframe.
+     * Checks if this time frame is relevant given the oldest available data point. We show the option if the data
+     * extends at least into this timeframe.
      */
     fun isAvailable(oldestTimestampSeconds: Long, now: Long = System.currentTimeMillis() / 1000L): Boolean {
         if (this == ALL_TIME || this == ONE_HOUR) return true

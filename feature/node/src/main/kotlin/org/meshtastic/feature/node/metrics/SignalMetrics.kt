@@ -75,7 +75,6 @@ private enum class SignalMetric(val color: Color) {
     RSSI(Blue),
 }
 
-private const val Y_AXIS_WEIGHT = 0.1f
 private val LEGEND_DATA =
     listOf(
         LegendData(nameRes = Res.string.rssi, color = SignalMetric.RSSI.color, environmentMetric = null),

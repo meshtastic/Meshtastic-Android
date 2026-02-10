@@ -105,8 +105,6 @@ private enum class PowerChannel(val strRes: StringResource) {
     THREE(Res.string.channel_3),
 }
 
-private const val Y_AXIS_WEIGHT = 0.1f
-
 private val LEGEND_DATA =
     listOf(
         LegendData(

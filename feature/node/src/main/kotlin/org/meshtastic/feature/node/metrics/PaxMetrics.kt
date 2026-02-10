@@ -97,8 +97,6 @@ private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
     WIFI(Orange, Res.string.wifi_devices),
 }
 
-private const val Y_AXIS_WEIGHT = 0.1f
-
 private val LEGEND_DATA =
     listOf(
         LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
@@ -220,13 +218,13 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         state.paxMetrics
             .filter { (it.received_date / 1000) >= timeFrame.timeThreshold() }
             .mapNotNull { log ->
-            val pax = decodePaxFromLog(log)
-            if (pax != null) {
-                Pair(log, pax)
-            } else {
-                null
+                val pax = decodePaxFromLog(log)
+                if (pax != null) {
+                    Pair(log, pax)
+                } else {
+                    null
+                }
             }
-        }
     // Prepare data for graph
     val graphData =
         paxMetrics
