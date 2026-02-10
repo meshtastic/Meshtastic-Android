@@ -42,12 +42,6 @@
     <string name="unrecognized">Nierozpoznany</string>
     <string name="message_status_enroute">Oczekiwanie na potwierdzenie</string>
     <string name="message_status_queued">Zakolejkowane do wysłania</string>
-    <string name="message_retry_count">Próba: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Wysyłanie nie powiodło się</string>
-    <string name="retry_dialog_message">Ponawianie za %1$d sekund… (Próba %2$d z %3$d)</string>
-    <string name="retry_dialog_reaction_message">Ponawianie za %1$d sekund… (Próba %2$d z %3$d)</string>
-    <string name="retry_dialog_confirm">Ponów teraz</string>
-    <string name="retry_dialog_cancel">Przerwij ponawianie</string>
     <string name="routing_error_none">Potwierdzone</string>
     <string name="routing_error_no_route">Brak trasy</string>
     <string name="routing_error_got_nak">Otrzymano negatywne potwierdzenie</string>
@@ -572,7 +566,6 @@
     <string name="ipv4_mode">Tryb IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Brama domyślna</string>
-    <string name="subnet">Podsieć</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Próg WiFi RSSI (domyślnie: -80)</string>
     <string name="position_config">Pozycjonowanie</string>
     <string name="smart_position_enabled">Sprytne pozycjonowanie</string>

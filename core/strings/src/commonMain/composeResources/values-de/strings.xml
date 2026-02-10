@@ -44,12 +44,6 @@
     <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
     <string name="message_status_sfpp_routing">Routen über den SF++ Weg.</string>
     <string name="message_status_sfpp_confirmed">Bestätigt auf dem SF++ Weg.</string>
-    <string name="message_retry_count">Versuch: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Senden der Nachricht fehlgeschlagen</string>
-    <string name="retry_dialog_message">Wiederholung in %1$d Sekunden… (Versuch %2$d von %3$d)</string>
-    <string name="retry_dialog_reaction_message">Wiederholen der Reaktion in %1$d Sekunden… (Versuch %2$d von %3$d)</string>
-    <string name="retry_dialog_confirm">Jetzt erneut versuchen</string>
-    <string name="retry_dialog_cancel">Wiederholung abbrechen</string>
     <string name="routing_error_none">Bestätigt</string>
     <string name="routing_error_no_route">Keine Route</string>
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
@@ -629,7 +623,6 @@
     <string name="ipv4_mode">IPv4 Modus</string>
     <string name="ip">IP</string>
     <string name="gateway">Gateway</string>
-    <string name="subnet">Subnetz</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
     <string name="status_message">Statusmeldung</string>
@@ -902,7 +895,6 @@
     <string name="notifications_for_newly_discovered_nodes">Benachrichtigungen für neu entdeckte Knoten.</string>
     <string name="low_battery">Niedriger Akkustand</string>
     <string name="notifications_for_low_battery_alerts">Benachrichtigungen für niedrige Akku-Warnungen des angeschlossenen Gerätes.</string>
-    <string name="critical_alerts_description">Pakete, die als kritisch gesendet werden, ignorieren den Lautlos und Ruhemodus in den Benachrichtigungseinstellungen.</string>
     <string name="configure_notification_permissions">Benachrichtigungseinstellungen</string>
     <string name="phone_location">Telefonstandort</string>
     <string name="phone_location_description">Meshtastic nutzt den Standort Ihres Telefons, um einige Funktionen zu aktivieren. Sie können Ihre Standortberechtigungen jederzeit in den Einstellungen aktualisieren.</string>

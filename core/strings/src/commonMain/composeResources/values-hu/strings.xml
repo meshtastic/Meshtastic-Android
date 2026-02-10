@@ -42,7 +42,6 @@
     <string name="unrecognized">Ismeretlen</string>
     <string name="message_status_enroute">Visszajelzésre vár</string>
     <string name="message_status_queued">Elküldésre vár</string>
-    <string name="message_retry_count">Újrapróbálkozások: %1$d / %2$d</string>
     <string name="routing_error_none">Visszaigazolva</string>
     <string name="routing_error_no_route">Nincs út</string>
     <string name="routing_error_got_nak">Negatív visszaigazolás érkezett</string>
@@ -591,7 +590,6 @@
     <string name="ipv4_mode">IPv4 mód</string>
     <string name="ip">IP</string>
     <string name="gateway">Átjáró</string>
-    <string name="subnet">Alhálózat</string>
     <string name="paxcounter_config">Paxcounter beállításai</string>
     <string name="paxcounter_enabled">Paxcounter engedélyezve</string>
     <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI küszöbérték (alapértelmezés: -80)</string>
@@ -851,7 +849,6 @@
     <string name="notifications_for_newly_discovered_nodes">Értesítések az újonnan felfedezett csomópontokról.</string>
     <string name="low_battery">Alacsony töltöttség</string>
     <string name="notifications_for_low_battery_alerts">Értesítések az alacsony akkumulátorszintű riasztásokról a csatlakoztatott eszköznél.</string>
-    <string name="critical_alerts_description">A kritikusnak jelölt csomagok figyelmen kívül hagyják a némítási kapcsolót és a „Ne zavarj” beállításokat az operációs rendszer értesítési központjában.</string>
     <string name="configure_notification_permissions">Értesítési engedélyek beállítása</string>
     <string name="phone_location">Telefon helyzete</string>
     <string name="phone_location_description">A Meshtastic a telefonod helyzetét használja több funkció engedélyezéséhez. A helyhozzáférést bármikor módosíthatod a beállításokban.</string>

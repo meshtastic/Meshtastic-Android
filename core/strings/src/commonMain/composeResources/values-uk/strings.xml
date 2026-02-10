@@ -40,12 +40,6 @@
     <string name="message_status_queued">У черзі для надсилання</string>
     <string name="message_status_sfpp_routing">Маршрутизація через SF++ ланцюжок…</string>
     <string name="message_status_sfpp_confirmed">Підтверджений на ланцюжку SF++</string>
-    <string name="message_retry_count">Повторів: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Не вдалося надіслати повідомлення</string>
-    <string name="retry_dialog_message">Повторна спроба за %1$d… сек (Спроба %2$d з %3$d)</string>
-    <string name="retry_dialog_reaction_message">Повторна спроба реакції за %1$d… сек (Спроба %2$d з %3$d)</string>
-    <string name="retry_dialog_confirm">Спробувати ще раз</string>
-    <string name="retry_dialog_cancel">Скасувати спробу</string>
     <string name="routing_error_none">Підтверджено</string>
     <string name="routing_error_no_route">Маршрут відсутній</string>
     <string name="routing_error_timeout">Таймаут</string>
@@ -451,7 +445,6 @@
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="ip">IP-адреса</string>
     <string name="gateway">Шлюз</string>
-    <string name="subnet">Підмережа</string>
     <string name="wifi_rssi_threshold_defaults_to_80">RSSI поріг WiFi (за замовчуванням -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">RSSI поріг BLE (за замовчуванням -80)</string>
     <string name="latitude">Широта</string>

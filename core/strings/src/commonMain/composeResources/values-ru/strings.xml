@@ -44,12 +44,6 @@
     <string name="message_status_queued">В очереди на отправку</string>
     <string name="message_status_sfpp_routing">Маршрутизация по SF++ цепочке…</string>
     <string name="message_status_sfpp_confirmed">Подтверждено в цепочке SF++</string>
-    <string name="message_retry_count">Повторные попытки: %1$d / %2$d</string>
-    <string name="retry_dialog_title">Не удалось отправить сообщение</string>
-    <string name="retry_dialog_message">Повторная попытка через %1$d секунд… (попытка %2$d из %3$d)</string>
-    <string name="retry_dialog_reaction_message">Повторная реакция через %1$d секунд… (попытка %2$d из %3$d)</string>
-    <string name="retry_dialog_confirm">Повторить сейчас</string>
-    <string name="retry_dialog_cancel">Отменить повтор</string>
     <string name="routing_error_none">Принято</string>
     <string name="routing_error_no_route">Нет маршрута</string>
     <string name="routing_error_got_nak">Получено отрицательное подтверждение</string>
@@ -638,7 +632,6 @@
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="ip">IP-адрес</string>
     <string name="gateway">Шлюз</string>
-    <string name="subnet">Подсеть</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
     <string name="status_message">Состояние сообщения</string>
@@ -911,7 +904,6 @@
     <string name="notifications_for_newly_discovered_nodes">Уведомления для новых обнаруженных нод.</string>
     <string name="low_battery">Низкий заряд батареи</string>
     <string name="notifications_for_low_battery_alerts">Уведомления о низком заряде батареи для подключенного устройства.</string>
-    <string name="critical_alerts_description">Выберите пакеты, отправленные как критические будут игнорировать переключатель звука и настройки \"Не беспокоить\" в центре уведомлений.</string>
     <string name="configure_notification_permissions">Настроить права доступа для уведомлений</string>
     <string name="phone_location">Местоположение телефона</string>
     <string name="phone_location_description">Meshtastic использует местоположение вашего телефона, чтобы включить ряд функций. Вы можете обновить права доступа к вашему местоположению в любое время из настроек.</string>
