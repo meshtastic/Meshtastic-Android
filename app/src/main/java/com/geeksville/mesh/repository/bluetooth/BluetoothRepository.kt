@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.bluetooth
 
 import android.annotation.SuppressLint
@@ -47,9 +46,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
 
 /** Repository responsible for maintaining and updating the state of Bluetooth availability. */
+@OptIn(ExperimentalUuidApi::class)
 @Singleton
 class BluetoothRepository
 @Inject
@@ -95,7 +94,6 @@ constructor(
     fun isValid(bleAddress: String): Boolean = BluetoothAdapter.checkBluetoothAddress(bleAddress)
 
     /** Starts a BLE scan for Meshtastic devices. The results are published to the [scannedDevices] flow. */
-    @OptIn(ExperimentalUuidApi::class)
     @SuppressLint("MissingPermission")
     fun startScan() {
         if (isScanning.value) return
@@ -106,7 +104,7 @@ constructor(
         scanJob =
             processLifecycle.coroutineScope.launch(dispatchers.default) {
                 centralManager
-                    .scan(5.seconds) { ServiceUuid(BTM_SERVICE_UUID.toKotlinUuid()) }
+                    .scan(5.seconds) { ServiceUuid(BTM_SERVICE_UUID) }
                     .distinctByPeripheral()
                     .map { it.peripheral }
                     .onStart { _isScanning.value = true }
@@ -146,7 +144,6 @@ constructor(
         refreshState()
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     internal suspend fun updateBluetoothState() {
         val hasPerms = application.hasBluetoothPermission()
         val enabled = centralManager.state.value == Manager.State.POWERED_ON
@@ -170,11 +167,9 @@ constructor(
         }
 
     /** Checks if a peripheral is one of ours, either by its advertised name or by the services it provides. */
-    @OptIn(ExperimentalUuidApi::class)
     private fun isMatchingPeripheral(peripheral: Peripheral): Boolean {
         val nameMatches = peripheral.name?.matches(Regex(BLE_NAME_PATTERN)) ?: false
-        val hasRequiredService =
-            peripheral.services(listOf(BTM_SERVICE_UUID.toKotlinUuid())).value?.isNotEmpty() ?: false
+        val hasRequiredService = peripheral.services(listOf(BTM_SERVICE_UUID)).value?.isNotEmpty() ?: false
 
         return nameMatches || hasRequiredService
     }

@@ -39,18 +39,14 @@ import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 class NordicBleInterfaceTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val address = "00:11:22:33:44:55"
-
-    private fun UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Before
     fun setup() {
@@ -107,28 +103,28 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID) {
                             Characteristic(
-                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_TORADIO_CHARACTER,
                                 properties =
                                 CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
                                 permission = Permission.WRITE,
                             )
                             fromNumHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                    uuid = BleConstants.BTM_FROMNUM_CHARACTER,
                                     properties = setOf(CharacteristicProperty.NOTIFY),
                                     permission = Permission.READ,
                                 )
                             fromRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = BleConstants.BTM_FROMRADIO_CHARACTER,
                                     properties = setOf(CharacteristicProperty.READ),
                                     permission = Permission.READ,
                                 )
                             logRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = BleConstants.BTM_LOGRADIO_CHARACTER,
                                     properties = setOf(CharacteristicProperty.NOTIFY),
                                     permission = Permission.READ,
                                 )
@@ -240,10 +236,10 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID) {
                             toRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = BleConstants.BTM_TORADIO_CHARACTER,
                                     properties =
                                     setOf(
                                         CharacteristicProperty.WRITE,
@@ -257,17 +253,17 @@ class NordicBleInterfaceTest {
                                     }
                             // Add other required chars to avoid discovery failure
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -338,9 +334,9 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID) {
                             Characteristic(
-                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_TORADIO_CHARACTER,
                                 properties =
                                 setOf(
                                     CharacteristicProperty.WRITE,
@@ -349,17 +345,17 @@ class NordicBleInterfaceTest {
                                 permission = Permission.WRITE,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -429,27 +425,27 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID) {
                             // OMIT toRadio characteristic to force failure
                                 /*
                                 Characteristic(
-                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = BleConstants.BTM_TORADIO_CHARACTER,
                                     properties = setOf(CharacteristicProperty.WRITE, CharacteristicProperty.WRITE_WITHOUT_RESPONSE),
                                     permission = Permission.WRITE
                                 )
                                  */
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -513,9 +509,9 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID) {
                             Characteristic(
-                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_TORADIO_CHARACTER,
                                 properties =
                                 setOf(
                                     CharacteristicProperty.WRITE,
@@ -524,17 +520,17 @@ class NordicBleInterfaceTest {
                                 permission = Permission.WRITE,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )

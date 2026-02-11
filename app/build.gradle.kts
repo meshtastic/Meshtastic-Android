@@ -246,6 +246,7 @@ dependencies {
     implementation(libs.kermit)
 
     implementation(libs.nordic.client.android)
+    implementation(libs.nordic.environment.android)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -264,9 +265,9 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.nordic.client.android.mock)
-    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.client.core.mock)
     testImplementation(libs.nordic.core.mock)
-    testImplementation(libs.nordic.core.android.mock)
+    testImplementation(libs.nordic.environment.android.mock)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
 }
