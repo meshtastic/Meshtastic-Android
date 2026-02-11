@@ -921,4 +921,5 @@
     <string name="add_channels_description">Vyberte kanály z QR kódu, které chcete přidat. Stávající kanály nebudou změněny.</string>
     <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
     <!-- Message Filter -->
+    <string name="all_time">Vše</string>
 </resources>

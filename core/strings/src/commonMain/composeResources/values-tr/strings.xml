@@ -574,4 +574,5 @@
     <string name="add_channels_title">Kanal Ekle</string>
     <!-- Message Filter -->
     <string name="generate_qr_code">QR kod oluştur</string>
+    <string name="all_time">Hepsi</string>
 </resources>

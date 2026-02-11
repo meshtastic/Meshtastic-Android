@@ -917,4 +917,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="mark_as_read">Marcar como leído</string>
     <string name="now">Ahora</string>
     <!-- Message Filter -->
+    <string name="all_time">Todos</string>
 </resources>

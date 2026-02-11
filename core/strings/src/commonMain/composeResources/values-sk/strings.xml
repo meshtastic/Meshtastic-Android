@@ -451,4 +451,5 @@
     <string name="interval_unset">Nenastavené</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="all_time">Všetky</string>
 </resources>

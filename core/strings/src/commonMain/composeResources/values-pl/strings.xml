@@ -828,4 +828,5 @@
     <string name="filter_enable_summary">Ukryj wiadomości zawierające filtrowane słowa</string>
     <string name="filter_words">Filtruj słowa</string>
     <string name="generate_qr_code">Generuj Kod QR</string>
+    <string name="all_time">Wszystkie</string>
 </resources>

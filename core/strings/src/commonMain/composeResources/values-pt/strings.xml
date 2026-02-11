@@ -552,4 +552,5 @@
     <string name="interval_unset">Não Definido</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="all_time">Tudo</string>
 </resources>

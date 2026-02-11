@@ -240,4 +240,5 @@
     <string name="firmware_update_keep_device_close">.</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="all_time">Усе</string>
 </resources>

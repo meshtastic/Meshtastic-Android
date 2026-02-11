@@ -619,4 +619,5 @@
     <string name="interval_unset">Nesetat</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="all_time">Toate</string>
 </resources>
