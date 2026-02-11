@@ -419,11 +419,13 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Reitti jäljitetty kohti määränpäätä:\n\n</string>
     <string name="traceroute_route_back_to_us">Reitti jäljitetty takaisin tähän laitteeseen:\n\n</string>
+    <string name="one_hour_short">1 t</string>
     <string name="twenty_four_hours">24t</string>
     <string name="forty_eight_hours">48t</string>
     <string name="one_week">1vko</string>
     <string name="two_weeks">2vko</string>
     <string name="four_weeks">4vko</string>
+    <string name="one_month">1 kk</string>
     <string name="max">Kaikki</string>
     <string name="unknown_age">Tuntematon ikä</string>
     <string name="copy">Kopioi</string>

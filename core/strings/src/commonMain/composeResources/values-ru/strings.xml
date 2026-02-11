@@ -425,13 +425,15 @@
     <string name="traceroute_showing_nodes">Показаны %1$d/%2$d узлов</string>
     <string name="traceroute_duration">Продолжительность: %1$s с</string>
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
-    <string name="traceroute_route_towards_dest">Маршрут к месту назначения:\n\n</string>
+    <string name="traceroute_route_towards_dest">Обратный маршрут:\n\n</string>
     <string name="traceroute_route_back_to_us">Маршрут к нам:\n\n</string>
+    <string name="one_hour_short">1Ч</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="forty_eight_hours">48ч</string>
     <string name="one_week">1нед</string>
     <string name="two_weeks">2нед</string>
     <string name="four_weeks">4нед</string>
+    <string name="one_month">1М</string>
     <string name="max">Макс</string>
     <string name="unknown_age">Неизвестный возраст</string>
     <string name="copy">Копировать</string>
@@ -632,6 +634,7 @@
     <string name="ipv4_mode">Режим IPv4</string>
     <string name="ip">IP-адрес</string>
     <string name="gateway">Шлюз</string>
+    <string name="subnet">Подсеть</string>
     <string name="paxcounter_config">Настройки Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter включен</string>
     <string name="status_message">Состояние сообщения</string>
@@ -904,6 +907,7 @@
     <string name="notifications_for_newly_discovered_nodes">Уведомления для новых обнаруженных нод.</string>
     <string name="low_battery">Низкий заряд батареи</string>
     <string name="notifications_for_low_battery_alerts">Уведомления о низком заряде батареи для подключенного устройства.</string>
+    <string name="critical_alerts_description">Выберите пакеты, отправленные как критические; они будут игнорировать переключение сообщений и настройки «Не беспокоить» в центре уведомлений ОС.</string>
     <string name="configure_notification_permissions">Настроить права доступа для уведомлений</string>
     <string name="phone_location">Местоположение телефона</string>
     <string name="phone_location_description">Meshtastic использует местоположение вашего телефона, чтобы включить ряд функций. Вы можете обновить права доступа к вашему местоположению в любое время из настроек.</string>
