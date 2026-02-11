@@ -54,7 +54,7 @@ wire = "6.0.0-alpha02"
 vico = "3.0.0-beta.3"
 # Removed gradle-doctor
 dependency-guard = "0.5.0"
-nordic-ble = "2.0.0-alpha12"
+nordic-ble = "2.0.0-alpha13"
 
 
 [libraries]
@@ -78,7 +78,7 @@ androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref =
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
-androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
+androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version = "lifecycle" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
@@ -189,9 +189,10 @@ markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-rend
 material = { module = "com.google.android.material:material", version = "1.13.0" }
 nordic-client-android = { module = "no.nordicsemi.kotlin.ble:client-android", version.ref = "nordic-ble" }
 nordic-client-android-mock = { module = "no.nordicsemi.kotlin.ble:client-android-mock", version.ref = "nordic-ble" }
-nordic-client-mock = { module = "no.nordicsemi.kotlin.ble:client-mock", version.ref = "nordic-ble" }
-nordic-core-android-mock = { module = "no.nordicsemi.kotlin.ble:core-android-mock", version.ref = "nordic-ble" }
+nordic-client-core-mock = { module = "no.nordicsemi.kotlin.ble:client-core-mock", version.ref = "nordic-ble" }
 nordic-core-mock = { module = "no.nordicsemi.kotlin.ble:core-mock", version.ref = "nordic-ble" }
+nordic-environment-android = { module = "no.nordicsemi.kotlin.ble:environment-android", version.ref = "nordic-ble" }
+nordic-environment-android-mock = { module = "no.nordicsemi.kotlin.ble:environment-android-mock", version.ref = "nordic-ble" }
 nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.11.0" }
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }

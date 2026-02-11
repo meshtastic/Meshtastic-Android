@@ -52,9 +52,8 @@ import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
-import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
+import kotlin.uuid.Uuid
 
 /**
  * A [IRadioInterface] implementation for BLE devices using Nordic Kotlin BLE Library.
@@ -67,6 +66,7 @@ import kotlin.uuid.toKotlinUuid
  * @param service The [RadioInterfaceService] to use for handling radio events.
  * @param address The BLE address of the device to connect to.
  */
+@OptIn(ExperimentalUuidApi::class)
 @SuppressLint("MissingPermission")
 class NordicBleInterface
 @AssistedInject
@@ -251,23 +251,22 @@ constructor(
     }
 
     @Suppress("TooGenericExceptionCaught")
-    @OptIn(ExperimentalUuidApi::class)
     private fun discoverServicesAndSetupCharacteristics(peripheral: Peripheral) {
         connectionScope.launch {
             peripheral
-                .services(listOf(BTM_SERVICE_UUID.toKotlinUuid()))
+                .services(listOf(BTM_SERVICE_UUID))
                 .onEach { services ->
-                    val meshtasticService = services?.find { it.uuid == BTM_SERVICE_UUID.toKotlinUuid() }
+                    val meshtasticService = services?.find { it.uuid == BTM_SERVICE_UUID }
 
                     if (meshtasticService != null) {
                         toRadioCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_TORADIO_CHARACTER.toKotlinUuid() }
+                            meshtasticService.characteristics.find { it.uuid == BTM_TORADIO_CHARACTER }
                         fromNumCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_FROMNUM_CHARACTER.toKotlinUuid() }
+                            meshtasticService.characteristics.find { it.uuid == BTM_FROMNUM_CHARACTER }
                         fromRadioCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER.toKotlinUuid() }
+                            meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER }
                         logRadioCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_LOGRADIO_CHARACTER.toKotlinUuid() }
+                            meshtasticService.characteristics.find { it.uuid == BTM_LOGRADIO_CHARACTER }
 
                         if (
                             listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all {
@@ -312,7 +311,6 @@ constructor(
 
     // --- Notification Setup ---
 
-    @OptIn(ExperimentalUuidApi::class)
     private suspend fun setupNotifications() {
         retryCall { fromNumCharacteristic?.subscribe() }
             ?.onStart { Logger.d { "[$address] Subscribing to fromNumCharacteristic" } }
@@ -451,11 +449,12 @@ constructor(
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 object BleConstants {
     const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
-    val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
-    val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
-    val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-    val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
-    val BTM_LOGRADIO_CHARACTER: UUID = UUID.fromString("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
+    val BTM_SERVICE_UUID: Uuid = Uuid.parse("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
+    val BTM_TORADIO_CHARACTER: Uuid = Uuid.parse("f75c76d2-129e-4dad-a1dd-7866124401e7")
+    val BTM_FROMNUM_CHARACTER: Uuid = Uuid.parse("ed9da18c-a800-4f66-a670-aa7547e34453")
+    val BTM_FROMRADIO_CHARACTER: Uuid = Uuid.parse("2c55e69e-4993-11ed-b878-0242ac120002")
+    val BTM_LOGRADIO_CHARACTER: Uuid = Uuid.parse("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
 }
