@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
@@ -464,7 +463,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         NavHost(
             navController = navController,
             startDestination = NodesRoutes.NodesGraph,
-            modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
+            modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
         ) {
             contactsGraph(navController, uIViewModel.scrollToTopEventFlow)
             nodesGraph(navController, uIViewModel.scrollToTopEventFlow)
