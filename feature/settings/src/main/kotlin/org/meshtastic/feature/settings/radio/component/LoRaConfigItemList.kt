@@ -181,8 +181,8 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.hop_limit),
                     summary = stringResource(Res.string.config_lora_hop_limit_summary),
                     items = hopLimitItems,
-                    selectedItem = formState.value.hop_limit.toLong(),
-                    onItemSelected = { formState.value = formState.value.copy(hop_limit = it.toInt()) },
+                    selectedItem = formState.value.hop_limit,
+                    onItemSelected = { formState.value = formState.value.copy(hop_limit = it) },
                     enabled = state.connected,
                 )
                 HorizontalDivider()
