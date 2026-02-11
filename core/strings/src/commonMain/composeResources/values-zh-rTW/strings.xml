@@ -1094,6 +1094,32 @@
     <string name="replace_channels_and_settings_description">此 QR Code 包含完整的設定檔，這將會覆寫您目前的頻道和無線電設定，所有頻道都會被刪除。</string>
     <string name="loading">載入中</string>
     <!-- Message Filter -->
+    <string name="filter_settings">訊息篩選</string>
+    <string name="filter_enable">啟用篩選</string>
+    <string name="filter_enable_summary">隱藏符合篩選條件的訊息</string>
+    <string name="filter_words">篩選關鍵字</string>
+    <string name="filter_words_summary">含有這些關鍵字的訊息將會隱藏</string>
+    <string name="filter_add_placeholder">新增關鍵字或正規表示式</string>
+    <string name="filter_no_words">尚未設定篩選關鍵字</string>
+    <string name="filter_regex_pattern">正規表示式</string>
+    <string name="filter_whole_word">完整字詞比對</string>
+    <string name="filter_filtered_count">已篩選 %1$d 則</string>
     <string name="filter_show_count"></string>
+    <string name="filter_hide_count">隱藏已篩選 %1$d 則</string>
+    <string name="filter_message_label">已篩選</string>
+    <string name="filter_enable_for_contact">啟用篩選</string>
+    <string name="filter_disable_for_contact">停用篩選</string>
+    <string name="channel_url">頻道網址</string>
+    <string name="scan_nfc">掃描 NFC</string>
+    <string name="scan_shared_contact_nfc">掃描聯絡人分享 NFC</string>
+    <string name="scan_shared_contact_qr">掃描聯絡人分享 QR Code</string>
+    <string name="input_shared_contact_url">輸入聯絡人分享網址</string>
+    <string name="scan_channels_nfc">掃描頻道 NFC</string>
+    <string name="scan_channels_qr">掃描頻道 QR Code</string>
+    <string name="input_channel_url">輸入頻道網址</string>
+    <string name="share_channels_qr">分享頻道 QR Code</string>
+    <string name="scan_nfc_text">請將裝置靠近 NFC 標籤以掃描。</string>
+    <string name="generate_qr_code">產生 QR Code</string>
+    <string name="nfc_disabled">NFC 已停用，請在系統設定中啟用。</string>
     <string name="all_time">全部</string>
 </resources>
