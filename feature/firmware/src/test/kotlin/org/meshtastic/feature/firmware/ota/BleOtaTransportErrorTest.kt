@@ -35,6 +35,7 @@ import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -45,16 +46,17 @@ class BleOtaTransportErrorTest {
     private val testDispatcher = StandardTestDispatcher()
     private val address = "00:11:22:33:44:55"
 
-    private val serviceUuid = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-    private val otaCharacteristicUuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
-    private val txCharacteristicUuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
+    private val serviceUuid = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+    private val otaCharacteristicUuid = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
+    private val txCharacteristicUuid = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
+
+    private fun UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Test
     fun `startOta fails when device rejects hash`() = runTest(testDispatcher) {
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
         lateinit var otaPeripheral: PeripheralSpec<String>
         var txCharHandle: Int = -1
-        var otaCharHandle: Int = -1
 
         val eventHandler =
             object : PeripheralSpecEventHandler {
@@ -84,17 +86,16 @@ class BleOtaTransportErrorTest {
                     CompleteLocalName("ESP32-OTA")
                 }
                 connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
-                    Service(uuid = serviceUuid) {
-                        otaCharHandle =
-                            Characteristic(
-                                uuid = otaCharacteristicUuid,
-                                properties =
-                                CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
-                                permission = Permission.WRITE,
-                            )
+                    Service(uuid = serviceUuid.toKotlinUuid()) {
+                        Characteristic(
+                            uuid = otaCharacteristicUuid.toKotlinUuid(),
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
                         txCharHandle =
                             Characteristic(
-                                uuid = txCharacteristicUuid,
+                                uuid = txCharacteristicUuid.toKotlinUuid(),
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )
@@ -119,7 +120,6 @@ class BleOtaTransportErrorTest {
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
         lateinit var otaPeripheral: PeripheralSpec<String>
         var txCharHandle: Int = -1
-        var otaCharHandle: Int = -1
 
         val eventHandler =
             object : PeripheralSpecEventHandler {
@@ -146,17 +146,16 @@ class BleOtaTransportErrorTest {
                     CompleteLocalName("ESP32-OTA")
                 }
                 connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
-                    Service(uuid = serviceUuid) {
-                        otaCharHandle =
-                            Characteristic(
-                                uuid = otaCharacteristicUuid,
-                                properties =
-                                CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
-                                permission = Permission.WRITE,
-                            )
+                    Service(uuid = serviceUuid.toKotlinUuid()) {
+                        Characteristic(
+                            uuid = otaCharacteristicUuid.toKotlinUuid(),
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
                         txCharHandle =
                             Characteristic(
-                                uuid = txCharacteristicUuid,
+                                uuid = txCharacteristicUuid.toKotlinUuid(),
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )
@@ -193,7 +192,6 @@ class BleOtaTransportErrorTest {
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
         lateinit var otaPeripheral: PeripheralSpec<String>
         var txCharHandle: Int = -1
-        var otaCharHandle: Int = -1
 
         val eventHandler =
             object : PeripheralSpecEventHandler {
@@ -227,17 +225,16 @@ class BleOtaTransportErrorTest {
                     CompleteLocalName("ESP32-OTA")
                 }
                 connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
-                    Service(uuid = serviceUuid) {
-                        otaCharHandle =
-                            Characteristic(
-                                uuid = otaCharacteristicUuid,
-                                properties =
-                                CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
-                                permission = Permission.WRITE,
-                            )
+                    Service(uuid = serviceUuid.toKotlinUuid()) {
+                        Characteristic(
+                            uuid = otaCharacteristicUuid.toKotlinUuid(),
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
                         txCharHandle =
                             Characteristic(
-                                uuid = txCharacteristicUuid,
+                                uuid = txCharacteristicUuid.toKotlinUuid(),
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )

@@ -32,8 +32,13 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.client.android.ScanResult
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import org.junit.Test
+import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
+import kotlin.uuid.toKotlinUuid
+
+private val SERVICE_UUID = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+private val OTA_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
+private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
 class BleOtaTransportTest {
@@ -51,10 +56,6 @@ class BleOtaTransportTest {
         val service: RemoteService = mockk(relaxed = true)
         val scanResult: ScanResult = mockk()
 
-        val serviceUuid = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-        val otaCharUuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
-        val txCharUuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
-
         every { scanResult.peripheral } returns peripheral
 
         // Mock the scan call. It takes a Duration and a lambda.
@@ -62,13 +63,12 @@ class BleOtaTransportTest {
 
         every { peripheral.address } returns address
         every { peripheral.state } returns MutableStateFlow(ConnectionState.Connected)
-        every { peripheral.isConnected } returns true
 
         coEvery { peripheral.services(any()) } returns MutableStateFlow(listOf(service))
-        every { service.uuid } returns serviceUuid
+        every { service.uuid } returns SERVICE_UUID.toKotlinUuid()
         every { service.characteristics } returns listOf(otaChar, txChar)
-        every { otaChar.uuid } returns otaCharUuid
-        every { txChar.uuid } returns txCharUuid
+        every { otaChar.uuid } returns OTA_CHARACTERISTIC_UUID.toKotlinUuid()
+        every { txChar.uuid } returns TX_CHARACTERISTIC_UUID.toKotlinUuid()
 
         coEvery { centralManager.connect(any(), any()) } returns Unit
 
