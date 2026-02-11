@@ -1123,4 +1123,5 @@
     <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
     <string name="scan_nfc_text">Bringen Sie Ihr Gerät in die Nähe des NFC-Tags zum Scannen.</string>
     <string name="generate_qr_code">QR Code Erzeugen</string>
+    <string name="all_time">Alle</string>
 </resources>

@@ -1141,4 +1141,5 @@
     <string name="scan_nfc_text">Поднесите ваше устройство ближе к метке NFC для сканирования.</string>
     <string name="generate_qr_code">Сгенерировать QR-код</string>
     <string name="nfc_disabled">NFC отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
+    <string name="all_time">Всё</string>
 </resources>

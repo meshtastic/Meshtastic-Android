@@ -1099,4 +1099,5 @@
     <string name="filter_enable_for_contact">Activer le filtrage</string>
     <string name="filter_disable_for_contact">Désactiver le filtrage</string>
     <string name="generate_qr_code">Générer un QR Code</string>
+    <string name="all_time">Tout</string>
 </resources>

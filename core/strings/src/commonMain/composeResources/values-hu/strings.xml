@@ -930,4 +930,5 @@
     <!-- Compass -->
     <string name="now">Most</string>
     <!-- Message Filter -->
+    <string name="all_time">Összes</string>
 </resources>

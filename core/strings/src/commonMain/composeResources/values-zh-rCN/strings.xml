@@ -1101,4 +1101,5 @@
     <string name="filter_enable_for_contact">启用过滤</string>
     <string name="filter_disable_for_contact">禁用过滤</string>
     <string name="generate_qr_code">生成二维码</string>
+    <string name="all_time">全部</string>
 </resources>

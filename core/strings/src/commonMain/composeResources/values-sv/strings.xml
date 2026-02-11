@@ -950,4 +950,5 @@
     <string name="add_channels_title">Lägg till kanaler</string>
     <!-- Message Filter -->
     <string name="generate_qr_code">Generera QR-kod</string>
+    <string name="all_time">Alla</string>
 </resources>

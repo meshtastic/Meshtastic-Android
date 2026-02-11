@@ -566,4 +566,5 @@
     <!-- Compass -->
     <string name="now">지금</string>
     <!-- Message Filter -->
+    <string name="all_time">All</string>
 </resources>

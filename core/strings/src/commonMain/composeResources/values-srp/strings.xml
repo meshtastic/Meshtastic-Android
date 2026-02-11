@@ -452,4 +452,5 @@
     <!-- Message Filter -->
     <string name="channel_url">Линк канала</string>
     <string name="generate_qr_code">Генерисање QR кода</string>
+    <string name="all_time">Сви</string>
 </resources>
