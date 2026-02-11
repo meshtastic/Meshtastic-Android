@@ -393,7 +393,7 @@ fun MessageScreen(
                     isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
                     textFieldState = messageInputState,
                     onSendMessage = {
-                        val messageText = messageInputState.text.toString().trim()
+                        val messageText = messageInputState.text.toString().trim { it.isWhitespace() }
                         if (messageText.isNotEmpty()) {
                             onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
                         }
@@ -866,7 +866,7 @@ private fun QuickChatRow(
             // Memoize if content is static
             QuickChatAction(
                 name = "🔔",
-                message = "🔔 $alertActionMessage  ", // Bell character added to message
+                message = "🔔 $alertActionMessage \u0007", // Bell character added to message
                 mode = QuickChatAction.Mode.Append,
                 position = -1, // Assuming -1 means it's a special prepended action
             )
