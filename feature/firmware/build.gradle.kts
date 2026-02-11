@@ -78,8 +78,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.nordic.client.android.mock)
-    testImplementation(libs.nordic.client.core.mock)
+    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.core.android.mock)
     testImplementation(libs.nordic.core.mock)
-    testImplementation(libs.nordic.environment.android.mock)
     testImplementation(libs.mockk)
 }
