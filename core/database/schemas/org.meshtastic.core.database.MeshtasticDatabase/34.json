@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 34,
-    "identityHash": "25bf8e7feb6d0e7f9eab4dfccf546e45",
+    "identityHash": "34352663e54f76b7b9c13de31d9ac8e7",
     "entities": [
       {
         "tableName": "my_node",
@@ -299,7 +299,7 @@
       },
       {
         "tableName": "packet",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB, `filtered` INTEGER NOT NULL DEFAULT 0)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `myNodeNum` INTEGER NOT NULL DEFAULT 0, `port_num` INTEGER NOT NULL, `contact_key` TEXT NOT NULL, `received_time` INTEGER NOT NULL, `read` INTEGER NOT NULL DEFAULT 1, `data` TEXT NOT NULL, `packet_id` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT -1, `retry_count` INTEGER NOT NULL DEFAULT 0, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `sfpp_hash` BLOB, `filtered` INTEGER NOT NULL DEFAULT 0)",
         "fields": [
           {
             "fieldPath": "uuid",
@@ -358,6 +358,13 @@
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "-1"
+          },
+          {
+            "fieldPath": "retryCount",
+            "columnName": "retry_count",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
           },
           {
             "fieldPath": "snr",
@@ -611,7 +618,7 @@
       },
       {
         "tableName": "reactions",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`myNodeNum` INTEGER NOT NULL DEFAULT 0, `reply_id` INTEGER NOT NULL, `user_id` TEXT NOT NULL, `emoji` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `packet_id` INTEGER NOT NULL DEFAULT 0, `status` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT 0, `relays` INTEGER NOT NULL DEFAULT 0, `relay_node` INTEGER, `to` TEXT, `channel` INTEGER NOT NULL DEFAULT 0, `sfpp_hash` BLOB, PRIMARY KEY(`myNodeNum`, `reply_id`, `user_id`, `emoji`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`myNodeNum` INTEGER NOT NULL DEFAULT 0, `reply_id` INTEGER NOT NULL, `user_id` TEXT NOT NULL, `emoji` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, `snr` REAL NOT NULL DEFAULT 0, `rssi` INTEGER NOT NULL DEFAULT 0, `hopsAway` INTEGER NOT NULL DEFAULT -1, `packet_id` INTEGER NOT NULL DEFAULT 0, `status` INTEGER NOT NULL DEFAULT 0, `routing_error` INTEGER NOT NULL DEFAULT 0, `retry_count` INTEGER NOT NULL DEFAULT 0, `relays` INTEGER NOT NULL DEFAULT 0, `relay_node` INTEGER, `to` TEXT, `channel` INTEGER NOT NULL DEFAULT 0, `sfpp_hash` BLOB, PRIMARY KEY(`myNodeNum`, `reply_id`, `user_id`, `emoji`))",
         "fields": [
           {
             "fieldPath": "myNodeNum",
@@ -682,6 +689,13 @@
           {
             "fieldPath": "routingError",
             "columnName": "routing_error",
+            "affinity": "INTEGER",
+            "notNull": true,
+            "defaultValue": "0"
+          },
+          {
+            "fieldPath": "retryCount",
+            "columnName": "retry_count",
             "affinity": "INTEGER",
             "notNull": true,
             "defaultValue": "0"
@@ -1003,7 +1017,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '25bf8e7feb6d0e7f9eab4dfccf546e45')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '34352663e54f76b7b9c13de31d9ac8e7')"
     ]
   }
 }
