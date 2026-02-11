@@ -896,4 +896,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="filter_show_count"></string>
+    <string name="all_time">全部</string>
 </resources>

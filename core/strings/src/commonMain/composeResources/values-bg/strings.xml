@@ -872,4 +872,5 @@
     <string name="filter_disable_for_contact">Дезактивиране на филтрирането</string>
     <string name="scan_nfc">Сканиране на NFC</string>
     <string name="generate_qr_code">Генериране на QR код</string>
+    <string name="all_time">Всички</string>
 </resources>

@@ -945,4 +945,5 @@
     <string name="add_channels_title">Aggiungi canali</string>
     <!-- Message Filter -->
     <string name="generate_qr_code">Genera codice QR</string>
+    <string name="all_time">Tutti</string>
 </resources>

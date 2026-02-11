@@ -763,4 +763,5 @@
     <string name="filter_enable_for_contact">Увімкнути фільтрацію</string>
     <string name="filter_disable_for_contact">Вимкнути фільтрацію</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
+    <string name="all_time">Усі</string>
 </resources>

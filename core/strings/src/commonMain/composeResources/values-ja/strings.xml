@@ -542,4 +542,5 @@
     <string name="interval_unset">削除</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="all_time">すべて</string>
 </resources>

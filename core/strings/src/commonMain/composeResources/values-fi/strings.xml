@@ -1128,4 +1128,5 @@
     <string name="scan_nfc_text">Pidä laite NFC-tunnisteen lähellä skannausta varten.</string>
     <string name="generate_qr_code">Generoi QR-koodi</string>
     <string name="nfc_disabled">NFC on poistettu käytöstä. Ota se käyttöön järjestelmäasetuksista.</string>
+    <string name="all_time">Kaikki</string>
 </resources>
