@@ -303,6 +303,17 @@ fun MessageScreen(
 
     sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
+    val originalMessage by
+        remember(replyingToPacketId, pagedMessages.itemCount) {
+            derivedStateOf {
+                replyingToPacketId?.let { id ->
+                    (0 until pagedMessages.itemCount).firstNotNullOfOrNull { index ->
+                        pagedMessages[index]?.takeIf { it.packetId == id }
+                    }
+                }
+            }
+        }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -357,82 +368,74 @@ fun MessageScreen(
                 )
             }
         },
-    ) { paddingValues ->
-        Column(Modifier.fillMaxSize().padding(paddingValues).focusable()) {
-            Box(modifier = Modifier.weight(1f)) {
-                MessageListPaged(
-                    modifier = Modifier.fillMaxSize(),
-                    listState = listState,
-                    state =
-                    MessageListPagedState(
-                        nodes = nodes,
-                        ourNode = ourNode,
-                        messages = pagedMessages,
-                        selectedIds = selectedMessageIds,
-                        contactKey = contactKey,
-                        firstUnreadMessageUuid = firstUnreadMessageUuid,
-                        hasUnreadMessages = hasUnreadMessages,
-                        filteredCount = filteredCount,
-                        showFiltered = showFiltered,
-                        filteringDisabled = filteringDisabled,
-                    ),
-                    handlers =
-                    MessageListHandlers(
-                        onUnreadChanged = { messageUuid, timestamp ->
-                            onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+        bottomBar = {
+            Column {
+                AnimatedVisibility(visible = showQuickChat) {
+                    QuickChatRow(
+                        enabled = connectionState.isConnected(),
+                        actions = quickChatActions,
+                        onClick = { action ->
+                            handleQuickChatAction(
+                                action = action,
+                                messageInputState = messageInputState,
+                                onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
+                            )
                         },
-                        onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                        onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
-                        onDeleteMessages = { viewModel.deleteMessages(it) },
-                        onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
-                        onReply = { message -> replyingToPacketId = message?.packetId },
-                    ),
-                    quickEmojis = viewModel.frequentEmojis,
-                )
-                // Show FAB if we can scroll towards the newest messages (index 0).
-                if (listState.canScrollBackward) {
-                    ScrollToBottomFab(coroutineScope, listState)
+                    )
                 }
-            }
-            AnimatedVisibility(visible = showQuickChat) {
-                QuickChatRow(
-                    enabled = connectionState.isConnected(),
-                    actions = quickChatActions,
-                    onClick = { action ->
-                        handleQuickChatAction(
-                            action = action,
-                            messageInputState = messageInputState,
-                            onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
-                        )
+                ReplySnippet(
+                    originalMessage = originalMessage,
+                    onClearReply = { replyingToPacketId = null },
+                    ourNode = ourNode,
+                )
+                MessageInput(
+                    isEnabled = connectionState.isConnected(),
+                    isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                    textFieldState = messageInputState,
+                    onSendMessage = {
+                        val messageText = messageInputState.text.toString().trim()
+                        if (messageText.isNotEmpty()) {
+                            onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
+                        }
                     },
                 )
             }
-            val originalMessage by
-                remember(replyingToPacketId, pagedMessages.itemCount) {
-                    derivedStateOf {
-                        replyingToPacketId?.let { id ->
-                            (0 until pagedMessages.itemCount).firstNotNullOfOrNull { index ->
-                                pagedMessages[index]?.takeIf { it.packetId == id }
-                            }
-                        }
-                    }
-                }
-            ReplySnippet(
-                originalMessage = originalMessage,
-                onClearReply = { replyingToPacketId = null },
-                ourNode = ourNode,
+        },
+    ) { paddingValues ->
+        Box(Modifier.fillMaxSize().padding(paddingValues).focusable()) {
+            MessageListPaged(
+                modifier = Modifier.fillMaxSize(),
+                listState = listState,
+                state =
+                MessageListPagedState(
+                    nodes = nodes,
+                    ourNode = ourNode,
+                    messages = pagedMessages,
+                    selectedIds = selectedMessageIds,
+                    contactKey = contactKey,
+                    firstUnreadMessageUuid = firstUnreadMessageUuid,
+                    hasUnreadMessages = hasUnreadMessages,
+                    filteredCount = filteredCount,
+                    showFiltered = showFiltered,
+                    filteringDisabled = filteringDisabled,
+                ),
+                handlers =
+                MessageListHandlers(
+                    onUnreadChanged = { messageUuid, timestamp ->
+                        onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+                    },
+                    onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
+                    onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
+                    onDeleteMessages = { viewModel.deleteMessages(it) },
+                    onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
+                    onReply = { message -> replyingToPacketId = message?.packetId },
+                ),
+                quickEmojis = viewModel.frequentEmojis,
             )
-            MessageInput(
-                isEnabled = connectionState.isConnected(),
-                isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
-                textFieldState = messageInputState,
-                onSendMessage = {
-                    val messageText = messageInputState.text.toString().trim()
-                    if (messageText.isNotEmpty()) {
-                        onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
-                    }
-                },
-            )
+            // Show FAB if we can scroll towards the newest messages (index 0).
+            if (listState.canScrollBackward) {
+                ScrollToBottomFab(coroutineScope, listState)
+            }
         }
     }
 }
