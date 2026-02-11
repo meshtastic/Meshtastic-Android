@@ -419,11 +419,13 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Marsruut sihtkohta:\n\n</string>
     <string name="traceroute_route_back_to_us">Marsruut meieni tagasi:\n\n</string>
+    <string name="one_hour_short">1t</string>
     <string name="twenty_four_hours">24T</string>
     <string name="forty_eight_hours">48T</string>
     <string name="one_week">1N</string>
     <string name="two_weeks">2N</string>
     <string name="four_weeks">4N</string>
+    <string name="one_month">1k</string>
     <string name="max">Maksimaalselt</string>
     <string name="unknown_age">Tundmatu vanus</string>
     <string name="copy">Kopeeri</string>

@@ -1,1 +1,1 @@
-For detailed release notes, please visit: https://github.com/meshtastic/Meshtastic-Android/releases/
+詳細的版本說明請參閱：https://github.com/meshtastic/Meshtastic-Android/releases/
