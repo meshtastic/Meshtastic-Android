@@ -203,8 +203,11 @@ constructor(
     private fun insertMeshLog(packetToSave: MeshLog) {
         scope.handledLaunch {
             // Do not log, because might contain PII
-            // info("insert: ${packetToSave.message_type} =
-            // ${packetToSave.raw_message.toOneLineString()}")
+
+            Logger.d {
+                "insert: ${packetToSave.message_type} = " +
+                    "${packetToSave.raw_message.toOneLineString()} from=${packetToSave.fromNum}"
+            }
             meshLogRepository.get().insert(packetToSave)
         }
     }
