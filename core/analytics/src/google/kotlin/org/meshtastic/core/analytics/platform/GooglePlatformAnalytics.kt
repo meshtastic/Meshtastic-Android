@@ -148,7 +148,7 @@ constructor(
         val logsConfig = LogsConfiguration.Builder().build()
         Logs.enable(logsConfig)
 
-        val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(false).build() // Disable to avoid collecting Local IP/SSID
+        val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(false).build()
         Trace.enable(traceConfig)
 
         GlobalOpenTelemetry.set(DatadogOpenTelemetry(serviceName = SERVICE_NAME))
