@@ -87,13 +87,13 @@ class ServiceRepository @Inject constructor() {
         _errorMessage.value = null
     }
 
-    private val _statusMessage = MutableStateFlow<String?>(null)
-    val statusMessage: StateFlow<String?>
-        get() = _statusMessage
+    private val _connectionProgress = MutableStateFlow<String?>(null)
+    val connectionProgress: StateFlow<String?>
+        get() = _connectionProgress
 
-    fun setStatusMessage(text: String) {
+    fun setConnectionProgress(text: String) {
         if (connectionState.value != ConnectionState.Connected) {
-            _statusMessage.value = text
+            _connectionProgress.value = text
         }
     }
 

@@ -68,3 +68,9 @@ fun Int.mpsToMph(): Float {
     val mph = this * MPS_TO_KMPH * KM_TO_MILES
     return mph
 }
+
+/** Returns true if this packet arrived via a LoRa transport mechanism. */
+fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
+    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||
+    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2 ||
+    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3

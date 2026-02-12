@@ -200,6 +200,7 @@ data class NodeInfo(
     var channel: Int = 0,
     var environmentMetrics: EnvironmentMetrics? = null,
     var hopsAway: Int = 0,
+    var nodeStatus: String? = null,
 ) : Parcelable {
 
     @Suppress("MagicNumber")
