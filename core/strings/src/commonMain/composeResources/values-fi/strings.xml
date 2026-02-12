@@ -37,6 +37,9 @@
     <string name="node_sort_last_heard">Viimeksi kuultu</string>
     <string name="node_sort_via_mqtt">MQTT:n kautta</string>
     <string name="via_mqtt">MQTT:n kautta</string>
+    <string name="via_udp">UDP-yhteyden kautta</string>
+    <string name="via_api">API-yhteyden kautta</string>
+    <string name="internal">Sisäinen</string>
     <string name="node_sort_via_favorite">Suosikkien kautta</string>
     <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="unrecognized">Tuntematon</string>
