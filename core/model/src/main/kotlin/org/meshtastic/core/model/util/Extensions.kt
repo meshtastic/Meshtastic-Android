@@ -73,5 +73,4 @@ fun Int.mpsToMph(): Float {
 fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2 ||
-    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3 ||
-    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_INTERNAL
+    transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3
