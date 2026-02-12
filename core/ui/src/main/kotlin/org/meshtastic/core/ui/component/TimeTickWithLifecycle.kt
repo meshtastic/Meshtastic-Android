@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import android.content.BroadcastReceiver
@@ -28,16 +27,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LifecycleResumeEffect
+import org.meshtastic.core.model.util.nowMillis
 
 @Composable
 fun rememberTimeTickWithLifecycle(): Long {
     val context = LocalContext.current
-    var value by remember { mutableLongStateOf(System.currentTimeMillis()) }
-    val receiver = TimeBroadcastReceiver { value = System.currentTimeMillis() }
+    var value by remember { mutableLongStateOf(nowMillis) }
+    val receiver = TimeBroadcastReceiver { value = nowMillis }
 
     LifecycleResumeEffect(Unit) {
         receiver.register(context)
-        value = System.currentTimeMillis()
+        value = nowMillis
 
         onPauseOrDispose { receiver.unregister(context) }
     }

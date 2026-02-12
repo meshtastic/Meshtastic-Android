@@ -33,6 +33,8 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.proto.Config
@@ -47,7 +49,6 @@ import kotlin.math.sqrt
 private const val ALIGNMENT_TOLERANCE_DEGREES = 5f
 private const val FULL_CIRCLE_DEGREES = 360f
 private const val BEARING_FORMAT = "%.0f°"
-private const val MILLIS_PER_SECOND = 1000
 private const val SECONDS_PER_HOUR = 3600
 private const val SECONDS_PER_MINUTE = 60
 private const val HUNDRED = 100f
@@ -192,17 +193,12 @@ constructor(
         val loc = locationState.location ?: return heading
         val baseHeading = heading ?: return null
         val geomagnetic =
-            GeomagneticField(
-                loc.latitude.toFloat(),
-                loc.longitude.toFloat(),
-                loc.altitude.toFloat(),
-                System.currentTimeMillis(),
-            )
+            GeomagneticField(loc.latitude.toFloat(), loc.longitude.toFloat(), loc.altitude.toFloat(), nowMillis)
         return (baseHeading + geomagnetic.declination + FULL_CIRCLE_DEGREES) % FULL_CIRCLE_DEGREES
     }
 
     private fun formatElapsed(timestampSec: Long): String {
-        val nowSec = System.currentTimeMillis() / MILLIS_PER_SECOND
+        val nowSec = nowSeconds
         val diff = maxOf(0, nowSec - timestampSec)
         val hours = diff / SECONDS_PER_HOUR
         val minutes = (diff % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE

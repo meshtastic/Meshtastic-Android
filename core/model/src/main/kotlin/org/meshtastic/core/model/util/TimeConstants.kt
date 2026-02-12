@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ui.timezone
+package org.meshtastic.core.model.util
 
-import org.meshtastic.core.model.util.toPosixString
-import java.time.ZoneId
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
 
-/**
- * Generates a POSIX time zone string from a [ZoneId].
- *
- * @deprecated Use [org.meshtastic.core.model.util.toPosixString] instead.
- */
-@Deprecated(
-    message = "Use org.meshtastic.core.model.util.toPosixString instead",
-    replaceWith = ReplaceWith("this.toPosixString()", "org.meshtastic.core.model.util.toPosixString"),
-)
-fun ZoneId.toPosixString(): String = this.toPosixString()
+/** Common time-related constants. */
+object TimeConstants {
+    val ONE_HOUR = 1.hours
+    val EIGHT_HOURS = 8.hours
+    val ONE_DAY = 1.days
+    val TWO_DAYS = 2.days
+
+    const val HOURS_PER_DAY = 24
+}

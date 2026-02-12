@@ -22,6 +22,7 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.NetworkDeviceHardware
+import org.meshtastic.core.model.util.nowMillis
 
 @Serializable
 @Entity(tableName = "device_hardware")
@@ -34,7 +35,7 @@ data class DeviceHardwareEntity(
     val hwModel: Int,
     @ColumnInfo(name = "hw_model_slug") val hwModelSlug: String,
     val images: List<String>?,
-    @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "last_updated") val lastUpdated: Long = nowMillis,
     @ColumnInfo(name = "partition_scheme") val partitionScheme: String? = null,
     @PrimaryKey @ColumnInfo(name = "platformio_target") val platformioTarget: String,
     @ColumnInfo(name = "requires_dfu") val requiresDfu: Boolean?,
@@ -51,7 +52,7 @@ fun NetworkDeviceHardware.asEntity() = DeviceHardwareEntity(
     hwModel = hwModel,
     hwModelSlug = hwModelSlug,
     images = images,
-    lastUpdated = System.currentTimeMillis(),
+    lastUpdated = nowMillis,
     partitionScheme = partitionScheme,
     platformioTarget = platformioTarget,
     requiresDfu = requiresDfu,

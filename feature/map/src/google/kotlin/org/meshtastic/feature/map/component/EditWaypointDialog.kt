@@ -60,7 +60,16 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
+import kotlinx.datetime.atTime
+import kotlinx.datetime.number
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.nowInstant
+import org.meshtastic.core.model.util.systemTimeZone
+import org.meshtastic.core.model.util.toDate
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.date
@@ -75,8 +84,8 @@ import org.meshtastic.core.strings.waypoint_edit
 import org.meshtastic.core.strings.waypoint_new
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.proto.Waypoint
-import java.util.Calendar
-import java.util.TimeZone
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
@@ -95,7 +104,7 @@ fun EditWaypointDialog(
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val calendar = remember { Calendar.getInstance() }
+    val tz = systemTimeZone
 
     // Initialize date and time states from waypointInput.expire
     var selectedDateString by remember { mutableStateOf("") }
@@ -106,20 +115,23 @@ fun EditWaypointDialog(
 
     val dateFormat = remember { android.text.format.DateFormat.getDateFormat(context) }
     val timeFormat = remember { android.text.format.DateFormat.getTimeFormat(context) }
-    dateFormat.timeZone = TimeZone.getDefault()
-    timeFormat.timeZone = TimeZone.getDefault()
+    dateFormat.timeZone = java.util.TimeZone.getDefault()
+    timeFormat.timeZone = java.util.TimeZone.getDefault()
 
     LaunchedEffect(waypointInput.expire, isExpiryEnabled) {
         val expireValue = waypointInput.expire ?: 0
         if (isExpiryEnabled) {
             if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                calendar.timeInMillis = expireValue * 1000L
-                selectedDateString = dateFormat.format(calendar.time)
-                selectedTimeString = timeFormat.format(calendar.time)
+                val instant = Instant.fromEpochSeconds(expireValue.toLong())
+                val date = instant.toDate()
+                selectedDateString = dateFormat.format(date)
+                selectedTimeString = timeFormat.format(date)
             } else { // If enabled but not set, default to 8 hours from now
-                calendar.timeInMillis = System.currentTimeMillis()
-                calendar.add(Calendar.HOUR_OF_DAY, 8)
-                waypointInput = waypointInput.copy(expire = (calendar.timeInMillis / 1000).toInt())
+                val futureInstant = nowInstant + 8.hours
+                val date = futureInstant.toDate()
+                selectedDateString = dateFormat.format(date)
+                selectedTimeString = timeFormat.format(date)
+                waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
             }
         } else {
             selectedDateString = ""
@@ -213,12 +225,9 @@ fun EditWaypointDialog(
                                     val expireValue = waypointInput.expire ?: 0
                                     // Default to 8 hours from now if not already set
                                     if (expireValue == 0 || expireValue == Int.MAX_VALUE) {
-                                        val cal = Calendar.getInstance()
-                                        cal.timeInMillis = System.currentTimeMillis()
-                                        cal.add(Calendar.HOUR_OF_DAY, 8)
-                                        waypointInput = waypointInput.copy(expire = (cal.timeInMillis / 1000).toInt())
+                                        val futureInstant = nowInstant + 8.hours
+                                        waypointInput = waypointInput.copy(expire = futureInstant.epochSeconds.toInt())
                                     }
-                                    // LaunchedEffect will update date/time strings
                                 } else {
                                     waypointInput = waypointInput.copy(expire = Int.MAX_VALUE)
                                 }
@@ -227,59 +236,83 @@ fun EditWaypointDialog(
                     }
 
                     if (isExpiryEnabled) {
-                        val currentCalendar =
-                            Calendar.getInstance().apply {
-                                val expireValue = waypointInput.expire ?: 0
-                                if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                                    timeInMillis = expireValue * 1000L
+                        val currentInstant =
+                            (waypointInput.expire ?: 0).let {
+                                if (it != 0 && it != Int.MAX_VALUE) {
+                                    Instant.fromEpochSeconds(it.toLong())
                                 } else {
-                                    timeInMillis = System.currentTimeMillis()
-                                    add(Calendar.HOUR_OF_DAY, 8) // Default if re-enabling
+                                    nowInstant + 8.hours
                                 }
                             }
-                        val year = currentCalendar.get(Calendar.YEAR)
-                        val month = currentCalendar.get(Calendar.MONTH)
-                        val day = currentCalendar.get(Calendar.DAY_OF_MONTH)
-                        val hour = currentCalendar.get(Calendar.HOUR_OF_DAY)
-                        val minute = currentCalendar.get(Calendar.MINUTE)
+                        val ldt = currentInstant.toLocalDateTime(tz)
 
                         val datePickerDialog =
                             DatePickerDialog(
                                 context,
                                 { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                                    val tempCal = Calendar.getInstance()
-                                    val expireValue = waypointInput.expire ?: 0
-                                    if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                                        tempCal.timeInMillis = expireValue * 1000L
-                                    } else {
-                                        tempCal.add(Calendar.HOUR_OF_DAY, 8)
-                                    }
-                                    tempCal.set(selectedYear, selectedMonth, selectedDay)
-                                    waypointInput = waypointInput.copy(expire = (tempCal.timeInMillis / 1000).toInt())
+                                    val currentLdt =
+                                        (waypointInput.expire ?: 0)
+                                            .let {
+                                                if (it != 0 && it != Int.MAX_VALUE) {
+                                                    Instant.fromEpochSeconds(it.toLong())
+                                                } else {
+                                                    nowInstant + 8.hours
+                                                }
+                                            }
+                                            .toLocalDateTime(tz)
+
+                                    val newLdt =
+                                        LocalDate(
+                                            year = selectedYear,
+                                            month = Month(selectedMonth + 1),
+                                            day = selectedDay,
+                                        )
+                                            .atTime(
+                                                hour = currentLdt.hour,
+                                                minute = currentLdt.minute,
+                                                second = currentLdt.second,
+                                                nanosecond = currentLdt.nanosecond,
+                                            )
+                                    waypointInput =
+                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
                                 },
-                                year,
-                                month,
-                                day,
+                                ldt.year,
+                                ldt.month.number - 1,
+                                ldt.day,
                             )
 
                         val timePickerDialog =
                             TimePickerDialog(
                                 context,
                                 { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
-                                    // Keep the existing date part
-                                    val tempCal = Calendar.getInstance()
-                                    val expireValue = waypointInput.expire ?: 0
-                                    if (expireValue != 0 && expireValue != Int.MAX_VALUE) {
-                                        tempCal.timeInMillis = expireValue * 1000L
-                                    } else {
-                                        tempCal.add(Calendar.HOUR_OF_DAY, 8)
-                                    }
-                                    tempCal.set(Calendar.HOUR_OF_DAY, selectedHour)
-                                    tempCal.set(Calendar.MINUTE, selectedMinute)
-                                    waypointInput = waypointInput.copy(expire = (tempCal.timeInMillis / 1000).toInt())
+                                    val currentLdt =
+                                        (waypointInput.expire ?: 0)
+                                            .let {
+                                                if (it != 0 && it != Int.MAX_VALUE) {
+                                                    Instant.fromEpochSeconds(it.toLong())
+                                                } else {
+                                                    nowInstant + 8.hours
+                                                }
+                                            }
+                                            .toLocalDateTime(tz)
+
+                                    val newLdt =
+                                        LocalDate(
+                                            year = currentLdt.year,
+                                            month = currentLdt.month,
+                                            day = currentLdt.day,
+                                        )
+                                            .atTime(
+                                                hour = selectedHour,
+                                                minute = selectedMinute,
+                                                second = currentLdt.second,
+                                                nanosecond = currentLdt.nanosecond,
+                                            )
+                                    waypointInput =
+                                        waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
                                 },
-                                hour,
-                                minute,
+                                ldt.hour,
+                                ldt.minute,
                                 android.text.format.DateFormat.is24HourFormat(context),
                             )
                         Spacer(modifier = Modifier.size(8.dp))

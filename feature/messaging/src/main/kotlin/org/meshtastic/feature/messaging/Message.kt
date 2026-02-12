@@ -183,7 +183,7 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
-    val filteredCount by viewModel.getFilteredCount(contactKey).collectAsStateWithLifecycle(initialValue = 0)
+    val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
 
@@ -220,9 +220,8 @@ fun MessageScreen(
     val listState = rememberLazyListState()
 
     // Track unread messages using lightweight metadata queries
-    val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
-    val firstUnreadMessageUuid by
-        viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
+    val hasUnreadMessages by viewModel.hasUnreadMessages.collectAsStateWithLifecycle()
+    val firstUnreadMessageUuid by viewModel.firstUnreadMessageUuid.collectAsStateWithLifecycle()
 
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
 

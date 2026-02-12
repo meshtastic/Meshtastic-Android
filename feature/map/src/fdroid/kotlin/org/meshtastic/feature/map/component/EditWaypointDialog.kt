@@ -60,7 +60,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.Month
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.nowInstant
+import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.model.util.systemTimeZone
+import org.meshtastic.core.model.util.toDate
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.date
@@ -77,7 +85,8 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Waypoint
-import java.util.Calendar
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Instant
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalLayoutApi::class)
@@ -98,18 +107,7 @@ fun EditWaypointDialog(
 
     // Get current context for dialogs
     val context = LocalContext.current
-    val calendar = remember {
-        Calendar.getInstance().apply {
-            val expire = waypoint.expire ?: 0
-            if (expire != 0 && expire != Int.MAX_VALUE) {
-                timeInMillis = expire * 1000L
-            } else {
-                timeInMillis = System.currentTimeMillis()
-                @Suppress("MagicNumber")
-                add(Calendar.HOUR_OF_DAY, 8)
-            }
-        }
-    }
+    val tz = systemTimeZone
 
     // Determine locale-specific date format
     val dateFormat = remember { android.text.format.DateFormat.getDateFormat(context) }
@@ -117,34 +115,37 @@ fun EditWaypointDialog(
     val is24Hour = remember { android.text.format.DateFormat.is24HourFormat(context) }
     val timeFormat = remember { android.text.format.DateFormat.getTimeFormat(context) }
 
+    val currentInstant =
+        remember(waypointInput.expire) {
+            val expire = waypointInput.expire ?: 0
+            if (expire != 0 && expire != Int.MAX_VALUE) {
+                Instant.fromEpochSeconds(expire.toLong())
+            } else {
+                nowInstant + 8.hours
+            }
+        }
+
     // State to hold selected date and time
-    var selectedDate by remember {
-        mutableStateOf(
-            if ((waypointInput.expire ?: 0) != 0 && waypointInput.expire != Int.MAX_VALUE) {
-                dateFormat.format(calendar.time)
-            } else {
-                ""
-            },
-        )
-    }
-    var selectedTime by remember {
-        mutableStateOf(
-            if ((waypointInput.expire ?: 0) != 0 && waypointInput.expire != Int.MAX_VALUE) {
-                timeFormat.format(calendar.time)
-            } else {
-                ""
-            },
-        )
-    }
-    var epochTime by remember {
-        mutableStateOf<Long?>(
-            if ((waypointInput.expire ?: 0) != 0 && waypointInput.expire != Int.MAX_VALUE) {
-                (waypointInput.expire ?: 0) * 1000L
-            } else {
-                null
-            },
-        )
-    }
+    var selectedDate by
+        remember(currentInstant) {
+            mutableStateOf(
+                if ((waypointInput.expire ?: 0) != 0 && waypointInput.expire != Int.MAX_VALUE) {
+                    dateFormat.format(currentInstant.toDate())
+                } else {
+                    ""
+                },
+            )
+        }
+    var selectedTime by
+        remember(currentInstant) {
+            mutableStateOf(
+                if ((waypointInput.expire ?: 0) != 0 && waypointInput.expire != Int.MAX_VALUE) {
+                    timeFormat.format(currentInstant.toDate())
+                } else {
+                    ""
+                },
+            )
+        }
 
     if (!showEmojiPickerView) {
         AlertDialog(
@@ -207,31 +208,47 @@ fun EditWaypointDialog(
                             onCheckedChange = { waypointInput = waypointInput.copy(locked_to = if (it) 1 else 0) },
                         )
                     }
+
+                    val ldt = currentInstant.toLocalDateTime(tz)
                     val datePickerDialog =
                         DatePickerDialog(
                             context,
                             { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                                calendar.set(selectedYear, selectedMonth, selectedDay)
-                                epochTime = calendar.timeInMillis
-                                selectedDate = dateFormat.format(calendar.time)
+                                val newLdt =
+                                    LocalDateTime(
+                                        year = selectedYear,
+                                        month = Month(selectedMonth + 1),
+                                        day = selectedDay,
+                                        hour = ldt.hour,
+                                        minute = ldt.minute,
+                                        second = ldt.second,
+                                        nanosecond = ldt.nanosecond,
+                                    )
+                                waypointInput = waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
                             },
-                            calendar.get(Calendar.YEAR),
-                            calendar.get(Calendar.MONTH),
-                            calendar.get(Calendar.DAY_OF_MONTH),
+                            ldt.year,
+                            ldt.monthNumber - 1,
+                            ldt.dayOfMonth,
                         )
 
                     val timePickerDialog =
                         android.app.TimePickerDialog(
                             context,
                             { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
-                                calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-                                calendar.set(Calendar.MINUTE, selectedMinute)
-                                epochTime = calendar.timeInMillis
-                                selectedTime = timeFormat.format(calendar.time)
-                                waypointInput = waypointInput.copy(expire = (calendar.timeInMillis / 1000).toInt())
+                                val newLdt =
+                                    LocalDateTime(
+                                        year = ldt.year,
+                                        month = ldt.month,
+                                        day = ldt.dayOfMonth,
+                                        hour = selectedHour,
+                                        minute = selectedMinute,
+                                        second = ldt.second,
+                                        nanosecond = ldt.nanosecond,
+                                    )
+                                waypointInput = waypointInput.copy(expire = newLdt.toInstant(tz).epochSeconds.toInt())
                             },
-                            calendar.get(Calendar.HOUR_OF_DAY),
-                            calendar.get(Calendar.MINUTE),
+                            ldt.hour,
+                            ldt.minute,
                             is24Hour,
                         )
 
@@ -249,16 +266,8 @@ fun EditWaypointDialog(
                             checked = waypointInput.expire != Int.MAX_VALUE && (waypointInput.expire ?: 0) != 0,
                             onCheckedChange = { isChecked ->
                                 if (isChecked) {
-                                    // Default to now if not already set
-                                    if (epochTime == null) {
-                                        epochTime = calendar.timeInMillis
-                                    }
-                                    selectedDate = dateFormat.format(calendar.time)
-                                    selectedTime = timeFormat.format(calendar.time)
-                                    waypointInput = waypointInput.copy(expire = (calendar.timeInMillis / 1000).toInt())
+                                    waypointInput = waypointInput.copy(expire = currentInstant.epochSeconds.toInt())
                                 } else {
-                                    selectedDate = ""
-                                    selectedTime = ""
                                     waypointInput = waypointInput.copy(expire = Int.MAX_VALUE)
                                 }
                             },
@@ -275,7 +284,7 @@ fun EditWaypointDialog(
                                 Button(onClick = { datePickerDialog.show() }) { Text(stringResource(Res.string.date)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
-                                    text = "$selectedDate",
+                                    text = selectedDate,
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center,
                                 )
@@ -284,7 +293,7 @@ fun EditWaypointDialog(
                                 Button(onClick = { timePickerDialog.show() }) { Text(stringResource(Res.string.time)) }
                                 Text(
                                     modifier = Modifier.padding(top = 4.dp),
-                                    text = "$selectedTime",
+                                    text = selectedTime,
                                     style = MaterialTheme.typography.bodyMedium,
                                     textAlign = TextAlign.Center,
                                 )
@@ -337,7 +346,7 @@ private fun EditWaypointFormPreview() {
                 name = "Test 123",
                 description = "This is only a test",
                 icon = 128169,
-                expire = (System.currentTimeMillis() / 1000 + 8 * 3600).toInt(),
+                expire = (nowSeconds.toInt() + 8 * 3600),
             ),
             onSendClicked = {},
             onDeleteClicked = {},

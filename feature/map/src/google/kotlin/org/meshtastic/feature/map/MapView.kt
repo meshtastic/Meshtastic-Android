@@ -88,13 +88,14 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.mpsToKmph
 import org.meshtastic.core.model.util.mpsToMph
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.alt
@@ -253,10 +254,7 @@ fun MapView(
         }
     }
 
-    val allNodes by
-        mapViewModel.nodes
-            .map { nodes -> nodes.filter { node -> node.validPosition != null } }
-            .collectAsStateWithLifecycle(listOf())
+    val allNodes by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
     val selectedWaypointId by mapViewModel.selectedWaypointId.collectAsStateWithLifecycle()
@@ -275,7 +273,7 @@ fun MapView(
             .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
             .filter { node ->
                 mapFilterState.lastHeardFilter.seconds == 0L ||
-                    (System.currentTimeMillis() / 1000 - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
+                    (nowSeconds - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
                     node.num == ourNodeInfo?.num
             }
 
@@ -477,7 +475,7 @@ fun MapView(
                     val timeFilteredPositions =
                         nodeTracks.filter {
                             lastHeardTrackFilter == LastHeardFilter.Any ||
-                                it.time > System.currentTimeMillis() / 1000 - lastHeardTrackFilter.seconds
+                                it.time > nowSeconds - lastHeardTrackFilter.seconds
                         }
                     val sortedPositions = timeFilteredPositions.sortedBy { it.time }
                     allNodes
@@ -537,7 +535,12 @@ fun MapView(
                                 cluster.items.forEach { bounds.include(it.position) }
                                 coroutineScope.launch {
                                     cameraPositionState.animate(
-                                        CameraUpdateFactory.newLatLngBounds(bounds.build(), 100),
+                                        CameraUpdateFactory.newCameraPosition(
+                                            CameraPosition.Builder()
+                                                .target(bounds.build().center)
+                                                .zoom(cameraPositionState.position.zoom + 1)
+                                                .build(),
+                                        ),
                                     )
                                 }
                                 Logger.d { "Cluster clicked! $cluster" }
@@ -733,7 +736,7 @@ internal fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
 
 @Suppress("NestedBlockDepth")
 fun Uri.getFileName(context: android.content.Context): String {
-    var name = this.lastPathSegment ?: "layer_${System.currentTimeMillis()}"
+    var name = this.lastPathSegment ?: "layer_$nowMillis"
     if (this.scheme == "content") {
         context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
@@ -800,7 +803,6 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
             when (displayUnits) {
                 DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
                 DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
-                else -> mpsText // Fallback or handle UNRECOGNIZED
             }
         } else {
             mpsText

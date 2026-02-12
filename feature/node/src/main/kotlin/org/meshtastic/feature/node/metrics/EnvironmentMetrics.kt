@@ -51,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.current
 import org.meshtastic.core.strings.env_metrics_log
@@ -431,8 +432,7 @@ private fun PreviewEnvironmentMetricsContent() {
             radiation = 0.15f,
             gas_resistance = 1200.0f,
         )
-    val fakeTelemetry =
-        Telemetry(time = (System.currentTimeMillis() / 1000).toInt(), environment_metrics = fakeEnvMetrics)
+    val fakeTelemetry = Telemetry(time = nowSeconds.toInt(), environment_metrics = fakeEnvMetrics)
     MaterialTheme {
         Surface { EnvironmentMetricsContent(telemetry = fakeTelemetry, environmentDisplayFahrenheit = false) }
     }

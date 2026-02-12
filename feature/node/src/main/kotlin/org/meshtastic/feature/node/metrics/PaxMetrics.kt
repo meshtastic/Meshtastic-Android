@@ -58,6 +58,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.ble_devices
 import org.meshtastic.core.strings.no_pax_metrics_logs
@@ -72,7 +74,6 @@ import org.meshtastic.core.ui.theme.GraphColors.Orange
 import org.meshtastic.core.ui.theme.GraphColors.Purple
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import java.text.DateFormat
-import java.util.Date
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
 
 private enum class PaxSeries(val color: Color, val legendRes: StringResource) {
@@ -198,7 +199,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
     val graphData =
         paxMetrics
             .map {
-                val t = (it.first.received_date / 1000).toInt()
+                val t = (it.first.received_date / CommonCharts.MS_PER_SEC).toInt()
                 Triple(t, it.second.ble ?: 0, it.second.wifi ?: 0)
             }
             .sortedBy { it.first }
@@ -212,7 +213,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
         titleRes = Res.string.pax_metrics_log,
         nodeName = state.node?.user?.long_name ?: "",
         data = paxMetrics,
-        timeProvider = { (it.first.received_date / 1000).toDouble() },
+        timeProvider = { (it.first.received_date / CommonCharts.MS_PER_SEC).toDouble() },
         snackbarHostState = snackbarHostState,
         onRequestTelemetry = { metricsViewModel.requestTelemetry(TelemetryType.PAX) },
         controlPart = {
@@ -254,8 +255,8 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
                             log = log,
                             pax = pax,
                             dateFormat = dateFormat,
-                            isSelected = (log.received_date / 1000).toDouble() == selectedX,
-                            onClick = { onCardClick((log.received_date / 1000).toDouble()) },
+                            isSelected = (log.received_date / CommonCharts.MS_PER_SEC).toDouble() == selectedX,
+                            onClick = { onCardClick((log.received_date / CommonCharts.MS_PER_SEC).toDouble()) },
                         )
                     }
                 }
@@ -297,7 +298,7 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, dateFormat: DateFormat, isS
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
-                text = dateFormat.format(Date(log.received_date)),
+                text = dateFormat.format(log.received_date.toInstant().toDate()),
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth(),

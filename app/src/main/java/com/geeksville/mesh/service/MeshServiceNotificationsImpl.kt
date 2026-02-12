@@ -52,6 +52,7 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
@@ -78,6 +79,8 @@ import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Manages the creation and display of all app notifications.
@@ -86,6 +89,7 @@ import javax.inject.Inject
  * notifications for various events like new messages, alerts, and service status changes.
  */
 @Suppress("TooManyFunctions", "LongParameterList")
+@Singleton
 class MeshServiceNotificationsImpl
 @Inject
 constructor(
@@ -97,7 +101,6 @@ constructor(
     private val notificationManager = context.getSystemService<NotificationManager>()!!
 
     companion object {
-        private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val MAX_BATTERY_LEVEL = 100
         private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
         private const val MAX_HISTORY_MESSAGES = 10
@@ -107,6 +110,8 @@ constructor(
         private const val SUMMARY_ID = 1
         private const val PERSON_ICON_SIZE = 128
         private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
+        private const val STATS_UPDATE_MINUTES = 15
+        private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
     }
 
     /**
@@ -279,7 +284,7 @@ constructor(
                 hasLocalStats -> {
                     val localStatsMessage = telemetry?.local_stats?.formatToString()
                     cachedTelemetry = telemetry
-                    nextStatsUpdateMillis = System.currentTimeMillis() + FIFTEEN_MINUTES_IN_MILLIS
+                    nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
                     localStatsMessage
                 }
                 cachedTelemetry == null && hasDeviceMetrics -> {
@@ -287,7 +292,7 @@ constructor(
                     if (cachedLocalStats == null) {
                         cachedTelemetry = telemetry
                     }
-                    nextStatsUpdateMillis = System.currentTimeMillis()
+                    nextStatsUpdateMillis = nowMillis
                     deviceMetricsMessage
                 }
                 else -> null
@@ -471,7 +476,7 @@ constructor(
         }
 
         nextUpdateAt
-            ?.takeIf { it > System.currentTimeMillis() }
+            ?.takeIf { it > nowMillis }
             ?.let {
                 builder.setWhen(it)
                 builder.setUsesChronometer(true)
@@ -579,7 +584,7 @@ constructor(
         isSilent: Boolean,
     ): Notification {
         val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+        val style = NotificationCompat.MessagingStyle(person).addMessage(message, nowMillis, person)
 
         val builder =
             commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
@@ -588,7 +593,7 @@ constructor(
                 .setStyle(style)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-                .setWhen(System.currentTimeMillis())
+                .setWhen(nowMillis)
                 .setShowWhen(true)
 
         if (isSilent) {
@@ -600,7 +605,7 @@ constructor(
 
     private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
         val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, System.currentTimeMillis(), person)
+        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, nowMillis, person)
 
         return commonBuilder(NotificationType.Alert, createOpenMessageIntent(contactKey))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -617,7 +622,7 @@ constructor(
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setAutoCancel(true)
                 .setContentTitle(title)
-                .setWhen(System.currentTimeMillis())
+                .setWhen(nowMillis)
                 .setShowWhen(true)
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -639,7 +644,7 @@ constructor(
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setWhen(System.currentTimeMillis())
+            .setWhen(nowMillis)
             .setShowWhen(true)
             .build()
     }
@@ -738,7 +743,7 @@ constructor(
             Intent(context, ReactionReceiver::class.java).apply {
                 action = REACT_ACTION
                 putExtra(ReactionReceiver.EXTRA_CONTACT_KEY, contactKey)
-                putExtra(ReactionReceiver.EXTRA_PACKET_ID, packetId)
+                putExtra(ReactionReceiver.EXTRA_REPLY_ID, packetId)
                 putExtra(ReactionReceiver.EXTRA_TO_ID, toId)
                 putExtra(ReactionReceiver.EXTRA_CHANNEL_INDEX, channelIndex)
                 putExtra(ReactionReceiver.EXTRA_EMOJI, "👍")

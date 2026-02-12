@@ -54,6 +54,7 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
@@ -520,7 +521,7 @@ constructor(
                 // Create a JSON object
                 val jsonObject =
                     JSONObject().apply {
-                        put("timestamp", System.currentTimeMillis())
+                        put("timestamp", nowMillis)
                         put("public_key", publicKeyBase64)
                         put("private_key", privateKeyBase64)
                     }

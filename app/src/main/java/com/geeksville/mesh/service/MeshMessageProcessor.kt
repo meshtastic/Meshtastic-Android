@@ -29,6 +29,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
@@ -40,7 +42,6 @@ import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -125,7 +126,7 @@ constructor(
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
                 message_type = type,
-                received_date = System.currentTimeMillis(),
+                received_date = nowMillis,
                 raw_message = message,
                 fromRadio = proto,
             ),
@@ -135,7 +136,7 @@ constructor(
     fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
             if (packet.rx_time == 0) {
-                (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
+                nowSeconds.toInt()
             } else {
                 packet.rx_time
             }
@@ -185,7 +186,7 @@ constructor(
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
                 message_type = "Packet",
-                received_date = System.currentTimeMillis(),
+                received_date = nowMillis,
                 raw_message = packet.toString(),
                 fromNum = packet.from,
                 portNum = decoded.portnum.value,
@@ -200,9 +201,7 @@ constructor(
         myNodeNum?.let { myNum ->
             val from = packet.from
             val isOtherNode = myNum != from
-            nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) {
-                it.lastHeard = (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
-            }
+            nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) { it.lastHeard = nowSeconds.toInt() }
             nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel) {
                 it.lastHeard = packet.rx_time
                 it.snr = packet.rx_snr

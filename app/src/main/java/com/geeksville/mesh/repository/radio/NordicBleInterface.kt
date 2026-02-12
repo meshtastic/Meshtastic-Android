@@ -52,6 +52,7 @@ import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
+import org.meshtastic.core.model.util.nowMillis
 import java.util.UUID
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.toKotlinUuid
@@ -170,19 +171,19 @@ constructor(
     private fun connect() {
         connectionScope.launch {
             try {
-                connectionStartTime = System.currentTimeMillis()
+                connectionStartTime = nowMillis
                 Logger.i { "[$address] BLE connection attempt started at $connectionStartTime" }
 
                 peripheral = retryCall { findAndConnectPeripheral() }
                 peripheral?.let {
-                    val connectionTime = System.currentTimeMillis() - connectionStartTime
+                    val connectionTime = nowMillis - connectionStartTime
                     Logger.i { "[$address] BLE peripheral connected in ${connectionTime}ms" }
                     onConnected()
                     observePeripheralChanges()
                     discoverServicesAndSetupCharacteristics(it)
                 }
             } catch (e: Exception) {
-                val failureTime = System.currentTimeMillis() - connectionStartTime
+                val failureTime = nowMillis - connectionStartTime
                 // BLE connection errors are common and often transient
                 Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
                 service.onDisconnect(BleError.from(e))
@@ -230,7 +231,7 @@ constructor(
 
                         val uptime =
                             if (connectionStartTime > 0) {
-                                System.currentTimeMillis() - connectionStartTime
+                                nowMillis - connectionStartTime
                             } else {
                                 0
                             }
@@ -417,7 +418,7 @@ constructor(
         runBlocking {
             val uptime =
                 if (connectionStartTime > 0) {
-                    System.currentTimeMillis() - connectionStartTime
+                    nowMillis - connectionStartTime
                 } else {
                     0
                 }

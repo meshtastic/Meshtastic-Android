@@ -66,6 +66,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.database.DatabaseConstants
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
@@ -112,7 +115,6 @@ import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
@@ -184,8 +186,8 @@ fun SettingsScreen(
                 } else {
                     deviceProfile = it
                     val nodeName = (it.short_name ?: "").ifBlank { "node" }
-                    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
-                    val dateStr = dateFormat.format(java.util.Date())
+                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                    val dateStr = dateFormat.format(nowMillis.toInstant().toDate())
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -366,7 +368,7 @@ fun SettingsScreen(
                     summary = stringResource(Res.string.device_db_cache_limit_summary),
                 )
 
-                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(nowMillis.toInstant().toDate())
                 val nodeName = ourNode?.user?.short_name ?: ""
 
                 val exportRangeTestLauncher =

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 @file:Suppress("MagicNumber")
 
 package org.meshtastic.feature.settings.util
 
 import org.jetbrains.compose.resources.PluralStringResource
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.interval_always_on
 import org.meshtastic.core.strings.interval_unset
 import org.meshtastic.core.strings.plurals_hours
 import org.meshtastic.core.strings.plurals_minutes
 import org.meshtastic.core.strings.plurals_seconds
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Defines a set of fixed time intervals in seconds, commonly used for configuration settings.
@@ -42,39 +44,39 @@ enum class FixedUpdateIntervals(
     val quantity: Int? = null,
 ) {
     UNSET(0L, textRes = Res.string.interval_unset),
-    ONE_SECOND(1L, pluralRes = Res.plurals.plurals_seconds, quantity = 1),
-    TWO_SECONDS(2L, pluralRes = Res.plurals.plurals_seconds, quantity = 2),
-    THREE_SECONDS(3L, pluralRes = Res.plurals.plurals_seconds, quantity = 3),
-    FOUR_SECONDS(4L, pluralRes = Res.plurals.plurals_seconds, quantity = 4),
-    FIVE_SECONDS(5L, pluralRes = Res.plurals.plurals_seconds, quantity = 5),
-    TEN_SECONDS(10L, pluralRes = Res.plurals.plurals_seconds, quantity = 10),
-    FIFTEEN_SECONDS(15L, pluralRes = Res.plurals.plurals_seconds, quantity = 15),
-    TWENTY_SECONDS(20L, pluralRes = Res.plurals.plurals_seconds, quantity = 20),
-    THIRTY_SECONDS(30L, pluralRes = Res.plurals.plurals_seconds, quantity = 30),
-    FORTY_FIVE_SECONDS(45L, pluralRes = Res.plurals.plurals_seconds, quantity = 45),
-    ONE_MINUTE(TimeUnit.MINUTES.toSeconds(1), pluralRes = Res.plurals.plurals_minutes, quantity = 1),
-    TWO_MINUTES(TimeUnit.MINUTES.toSeconds(2), pluralRes = Res.plurals.plurals_minutes, quantity = 2),
-    FIVE_MINUTES(TimeUnit.MINUTES.toSeconds(5), pluralRes = Res.plurals.plurals_minutes, quantity = 5),
-    TEN_MINUTES(TimeUnit.MINUTES.toSeconds(10), pluralRes = Res.plurals.plurals_minutes, quantity = 10),
-    FIFTEEN_MINUTES(TimeUnit.MINUTES.toSeconds(15), pluralRes = Res.plurals.plurals_minutes, quantity = 15),
-    THIRTY_MINUTES(TimeUnit.MINUTES.toSeconds(30), pluralRes = Res.plurals.plurals_minutes, quantity = 30),
-    ONE_HOUR(TimeUnit.HOURS.toSeconds(1), pluralRes = Res.plurals.plurals_hours, quantity = 1),
-    TWO_HOURS(TimeUnit.HOURS.toSeconds(2), pluralRes = Res.plurals.plurals_hours, quantity = 2),
-    THREE_HOURS(TimeUnit.HOURS.toSeconds(3), pluralRes = Res.plurals.plurals_hours, quantity = 3),
-    FOUR_HOURS(TimeUnit.HOURS.toSeconds(4), pluralRes = Res.plurals.plurals_hours, quantity = 4),
-    FIVE_HOURS(TimeUnit.HOURS.toSeconds(5), pluralRes = Res.plurals.plurals_hours, quantity = 5),
-    SIX_HOURS(TimeUnit.HOURS.toSeconds(6), pluralRes = Res.plurals.plurals_hours, quantity = 6),
-    TWELVE_HOURS(TimeUnit.HOURS.toSeconds(12), pluralRes = Res.plurals.plurals_hours, quantity = 12),
-    EIGHTEEN_HOURS(TimeUnit.HOURS.toSeconds(18), pluralRes = Res.plurals.plurals_hours, quantity = 18),
-    TWENTY_FOUR_HOURS(TimeUnit.HOURS.toSeconds(24), pluralRes = Res.plurals.plurals_hours, quantity = 24),
-    THIRTY_SIX_HOURS(TimeUnit.HOURS.toSeconds(36), pluralRes = Res.plurals.plurals_hours, quantity = 36),
-    FORTY_EIGHT_HOURS(TimeUnit.HOURS.toSeconds(48), pluralRes = Res.plurals.plurals_hours, quantity = 48),
-    SEVENTY_TWO_HOURS(TimeUnit.HOURS.toSeconds(72), pluralRes = Res.plurals.plurals_hours, quantity = 72),
+    ONE_SECOND(1.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 1),
+    TWO_SECONDS(2.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 2),
+    THREE_SECONDS(3.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 3),
+    FOUR_SECONDS(4.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 4),
+    FIVE_SECONDS(5.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 5),
+    TEN_SECONDS(10.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 10),
+    FIFTEEN_SECONDS(15.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 15),
+    TWENTY_SECONDS(20.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 20),
+    THIRTY_SECONDS(30.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 30),
+    FORTY_FIVE_SECONDS(45.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 45),
+    ONE_MINUTE(1.minutes.inWholeSeconds, pluralRes = Res.plurals.plurals_minutes, quantity = 1),
+    TWO_MINUTES(2.minutes.inWholeSeconds, pluralRes = Res.plurals.plurals_minutes, quantity = 2),
+    FIVE_MINUTES(5.minutes.inWholeSeconds, pluralRes = Res.plurals.plurals_minutes, quantity = 5),
+    TEN_MINUTES(10.minutes.inWholeSeconds, pluralRes = Res.plurals.plurals_minutes, quantity = 10),
+    FIFTEEN_MINUTES(15.minutes.inWholeSeconds, pluralRes = Res.plurals.plurals_minutes, quantity = 15),
+    THIRTY_MINUTES(30.minutes.inWholeSeconds, pluralRes = Res.plurals.plurals_minutes, quantity = 30),
+    ONE_HOUR(TimeConstants.ONE_HOUR.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 1),
+    TWO_HOURS(2.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 2),
+    THREE_HOURS(3.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 3),
+    FOUR_HOURS(4.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 4),
+    FIVE_HOURS(5.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 5),
+    SIX_HOURS(6.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 6),
+    TWELVE_HOURS(12.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 12),
+    EIGHTEEN_HOURS(18.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 18),
+    TWENTY_FOUR_HOURS(24.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 24),
+    THIRTY_SIX_HOURS(36.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 36),
+    FORTY_EIGHT_HOURS(48.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 48),
+    SEVENTY_TWO_HOURS(72.hours.inWholeSeconds, pluralRes = Res.plurals.plurals_hours, quantity = 72),
     ALWAYS_ON(Int.MAX_VALUE.toLong(), textRes = Res.string.interval_always_on),
-    EIGHTY_SECONDS(TimeUnit.SECONDS.toSeconds(80), pluralRes = Res.plurals.plurals_seconds, quantity = 80),
-    NINETY_SECONDS(TimeUnit.SECONDS.toSeconds(90), pluralRes = Res.plurals.plurals_seconds, quantity = 90),
-    EIGHT_SECONDS(TimeUnit.SECONDS.toSeconds(8), pluralRes = Res.plurals.plurals_seconds, quantity = 8),
-    FORTY_SECONDS(TimeUnit.SECONDS.toSeconds(40), pluralRes = Res.plurals.plurals_seconds, quantity = 40),
+    EIGHTY_SECONDS(80.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 80),
+    NINETY_SECONDS(90.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 90),
+    EIGHT_SECONDS(8.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 8),
+    FORTY_SECONDS(40.seconds.inWholeSeconds, pluralRes = Res.plurals.plurals_seconds, quantity = 40),
     ;
 
     companion object {

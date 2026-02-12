@@ -59,6 +59,7 @@ import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.disk_free_indexed
 import org.meshtastic.core.strings.free_memory
@@ -129,7 +130,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
 @Composable
 fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: Telemetry) {
     val hostMetrics = telemetry.host_metrics
-    val time = telemetry.time * CommonCharts.MS_PER_SEC
+    val time = telemetry.time.toLong() * CommonCharts.MS_PER_SEC
     Card(
         modifier = modifier.fillMaxWidth().padding(vertical = 4.dp).combinedClickable(onClick = { /* Handle click */ }),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -281,6 +282,6 @@ private fun HostMetricsItemPreview() {
             load15 = 19,
             user_string = "test",
         )
-    val logs = Telemetry(time = (System.currentTimeMillis() / 1000).toInt(), host_metrics = hostMetrics)
+    val logs = Telemetry(time = nowSeconds.toInt(), host_metrics = hostMetrics)
     AppTheme { HostMetricsItem(telemetry = logs) }
 }

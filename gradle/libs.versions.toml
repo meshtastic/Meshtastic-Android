@@ -17,8 +17,9 @@ room = "2.8.4"
 savedstate = "1.4.0"
 
 # Kotlin
-kotlin = "2.3.10"
+kotlin = "2.1.0"
 kotlinx-coroutines-android = "1.10.2"
+kotlinx-datetime = "0.7.1"
 kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
 kover = "0.9.7"
@@ -147,6 +148,7 @@ dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", versi
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-android" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 

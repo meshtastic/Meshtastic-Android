@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package com.geeksville.mesh.concurrent
+
+import org.meshtastic.core.model.util.nowMillis
+
 /** A deferred execution object (with various possible implementations) */
 interface Continuation<in T> {
     abstract fun resume(res: Result<T>)
@@ -63,10 +66,10 @@ class SyncContinuation<T> : Continuation<T> {
     fun await(timeoutMsecs: Long = 0): T {
         lock.lock()
         try {
-            val startT = System.currentTimeMillis()
+            val startT = nowMillis
             while (result == null) {
                 if (timeoutMsecs > 0) {
-                    val remaining = timeoutMsecs - (System.currentTimeMillis() - startT)
+                    val remaining = timeoutMsecs - (nowMillis - startT)
                     if (remaining <= 0) {
                         throw Exception("SyncContinuation timeout")
                     }

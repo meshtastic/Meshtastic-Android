@@ -47,6 +47,7 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.Heartbeat
@@ -146,7 +147,7 @@ constructor(
 
     private var lastHeartbeatMillis = 0L
 
-    fun keepAlive(now: Long = System.currentTimeMillis()) {
+    fun keepAlive(now: Long = nowMillis) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             if (radioIf is SerialInterface) {
                 Logger.i { "Sending ToRadio heartbeat" }

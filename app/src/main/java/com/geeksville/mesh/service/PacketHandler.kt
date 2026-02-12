@@ -33,6 +33,7 @@ import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ConnectionState
@@ -45,6 +46,8 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -59,7 +62,7 @@ constructor(
 ) {
 
     companion object {
-        private const val TIMEOUT_MS = 5000L // Increased from 250ms to be more tolerant
+        private val TIMEOUT = 5.seconds // Increased from 250ms to be more tolerant
     }
 
     private var queueJob: Job? = null
@@ -89,7 +92,7 @@ constructor(
                 MeshLog(
                     uuid = UUID.randomUUID().toString(),
                     message_type = "Packet",
-                    received_date = System.currentTimeMillis(),
+                    received_date = nowMillis,
                     raw_message = packet.toString(),
                     fromNum = packet.from ?: 0,
                     portNum = packet.decoded?.portnum?.value ?: 0,
@@ -148,7 +151,7 @@ constructor(
                         // send packet to the radio and wait for response
                         val response = sendPacket(packet)
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
-                        val success = withTimeout(TIMEOUT_MS) { response.await() }
+                        val success = withTimeout(TIMEOUT) { response.await() }
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} success $success" }
                     } catch (e: TimeoutCancellationException) {
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} timeout" }
@@ -173,11 +176,11 @@ constructor(
     }
 
     @Suppress("MagicNumber")
-    private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
+    private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1.seconds) {
         var dataPacket: DataPacket? = null
         while (dataPacket == null) {
             dataPacket = packetRepository.get().getPacketById(packetId)?.data
-            if (dataPacket == null) delay(100)
+            if (dataPacket == null) delay(100.milliseconds)
         }
         dataPacket
     }
@@ -203,8 +206,11 @@ constructor(
     private fun insertMeshLog(packetToSave: MeshLog) {
         scope.handledLaunch {
             // Do not log, because might contain PII
-            // info("insert: ${packetToSave.message_type} =
-            // ${packetToSave.raw_message.toOneLineString()}")
+
+            Logger.d {
+                "insert: ${packetToSave.message_type} = " +
+                    "${packetToSave.raw_message.toOneLineString()} from=${packetToSave.fromNum}"
+            }
             meshLogRepository.get().insert(packetToSave)
         }
     }
