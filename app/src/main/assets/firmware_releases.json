@@ -229,12 +229,6 @@
       "title": "feat(power): automatic WiFi disable when running on battery",
       "page_url": "https://github.com/meshtastic/firmware/pull/9428",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9363",
-      "title": "Allow using Spreading Factors 5 and 6",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9363",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
