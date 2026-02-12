@@ -40,11 +40,6 @@ import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumConfiguration
 import com.datadog.android.rum.tracking.AcceptAllNavDestinations
-import com.datadog.android.sessionreplay.ImagePrivacy
-import com.datadog.android.sessionreplay.SessionReplay
-import com.datadog.android.sessionreplay.SessionReplayConfiguration
-import com.datadog.android.sessionreplay.TextAndInputPrivacy
-import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
@@ -91,13 +86,13 @@ constructor(
     }
 
     init {
-        initDatadog(context as Application, analyticsPrefs)
-        initCrashlytics(context, analyticsPrefs)
+        initDatadog(context as Application)
+        initCrashlytics(context as Application)
 
         val datadogLogger =
             Logger.Builder()
                 .setService(SERVICE_NAME)
-                .setNetworkInfoEnabled(true)
+                .setNetworkInfoEnabled(false) // Disable to avoid collecting Local IP/SSID
                 .setRemoteSampleRate(sampleRate)
                 .setBundleWithTraceEnabled(true)
                 .setBundleWithRumEnabled(true)
@@ -122,7 +117,7 @@ constructor(
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
 
-    private fun initDatadog(application: Application, analyticsPrefs: AnalyticsPrefs) {
+    private fun initDatadog(application: Application) {
         val configuration =
             Configuration.Builder(
                 clientToken = BuildConfig.datadogClientToken,
@@ -135,7 +130,6 @@ constructor(
                 .build()
         // Initialize with PENDING, consent will be updated via updateAnalyticsConsent
         Datadog.initialize(application, configuration, TrackingConsent.PENDING)
-        Datadog.setUserInfo(analyticsPrefs.installId)
         Datadog.setVerbosity(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.WARN)
 
         val rumConfiguration =
@@ -154,23 +148,17 @@ constructor(
         val logsConfig = LogsConfiguration.Builder().build()
         Logs.enable(logsConfig)
 
-        val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(true).build()
+        val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(false).build() // Disable to avoid collecting Local IP/SSID
         Trace.enable(traceConfig)
 
         GlobalOpenTelemetry.set(DatadogOpenTelemetry(serviceName = SERVICE_NAME))
 
-        val sessionReplayConfig =
-            SessionReplayConfiguration.Builder(sampleRate = sampleRate)
-                .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL)
-                .setImagePrivacy(ImagePrivacy.MASK_ALL)
-                .addExtensionSupport(ComposeExtensionSupport())
-                .build()
-        SessionReplay.enable(sessionReplayConfig)
+        // Session Replay disabled to reduce PII collection as requested
     }
 
-    private fun initCrashlytics(application: Application, analyticsPrefs: AnalyticsPrefs) {
+    private fun initCrashlytics(application: Application) {
         Firebase.initialize(application)
-        Firebase.crashlytics.setUserId(analyticsPrefs.installId)
+        // User ID tracking disabled to avoid collecting Unique Identifier PII
     }
 
     /**
