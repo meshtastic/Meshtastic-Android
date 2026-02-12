@@ -46,6 +46,7 @@ import org.meshtastic.core.strings.routing_error_rate_limit_exceeded
 import org.meshtastic.core.strings.routing_error_timeout
 import org.meshtastic.core.strings.routing_error_too_large
 import org.meshtastic.core.strings.unrecognized
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Routing
 
 @Suppress("CyclomaticComplexMethod")
@@ -92,6 +93,8 @@ data class Message(
     val relayNode: Int? = null,
     val relays: Int = 0,
     val filtered: Boolean = false,
+    /** The transport mechanism this packet arrived over (see [MeshPacket.TransportMechanism]). */
+    val transportMechanism: Int = 0,
 ) {
     fun getStatusStringRes(): Pair<StringResource, StringResource> {
         val title = if (routingError > 0) Res.string.error else Res.string.message_delivery_status

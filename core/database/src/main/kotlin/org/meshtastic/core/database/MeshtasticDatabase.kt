@@ -94,8 +94,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
         AutoMigration(from = 33, to = 34, spec = AutoMigration33to34::class),
         AutoMigration(from = 34, to = 35, spec = AutoMigration34to35::class),
         AutoMigration(from = 35, to = 36),
+        AutoMigration(from = 36, to = 37),
     ],
-    version = 36,
+    version = 37,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

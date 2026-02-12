@@ -87,6 +87,7 @@ import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.component.SoilMoistureInfo
 import org.meshtastic.core.ui.component.SoilTemperatureInfo
 import org.meshtastic.core.ui.component.TemperatureInfo
+import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.determineSignalQuality
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.icon.AirUtilization
@@ -277,7 +278,7 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (thatNode.hopsAway > 0) {
                     HopsInfo(hops = thatNode.hopsAway, contentColor = contentColor)
-                } else {
+                } else if (thatNode.hopsAway == 0 && !thatNode.viaMqtt) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(4.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -420,13 +421,21 @@ private fun NodeItemHeader(
         )
 
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = longName,
-                style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
-                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = longName,
+                    style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
+                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                TransportIcon(
+                    transport = thatNode.lastTransport,
+                    viaMqtt = thatNode.viaMqtt,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
             LastHeardInfo(lastHeard = thatNode.lastHeard, showLabel = false, contentColor = contentColor)
         }
 

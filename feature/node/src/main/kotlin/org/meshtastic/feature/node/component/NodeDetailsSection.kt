@@ -152,7 +152,7 @@ private fun MainNodeDetails(node: Node) {
         HearsAndHopsRow(node)
         SectionDivider()
         UserAndUptimeRow(node)
-        if (node.hopsAway == 0) {
+        if (node.hopsAway == 0 && !node.viaMqtt) {
             SectionDivider()
             SignalRow(node)
         }

@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
@@ -205,11 +206,20 @@ constructor(
             }
             nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel) {
                 it.lastHeard = packet.rx_time
-                it.snr = packet.rx_snr
-                it.rssi = packet.rx_rssi
+                it.viaMqtt = packet.via_mqtt == true
+                it.lastTransport = packet.transport_mechanism.value
+
+                val isDirect = packet.hop_start == packet.hop_limit
+                if (isDirect && packet.isLora() && !it.viaMqtt) {
+                    it.snr = packet.rx_snr
+                    it.rssi = packet.rx_rssi
+                }
+
                 it.hopsAway =
                     if (decoded.portnum == PortNum.RANGE_TEST_APP) {
                         0
+                    } else if (it.viaMqtt) {
+                        -1
                     } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
                         -1
                     } else if (packet.hop_limit > packet.hop_start) {

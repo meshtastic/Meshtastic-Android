@@ -27,6 +27,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.util.ByteStringParceler
 import org.meshtastic.core.model.util.ByteStringSerializer
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint
 
@@ -70,6 +71,8 @@ data class DataPacket(
     @Serializable(with = ByteStringSerializer::class)
     @TypeParceler<ByteString?, ByteStringParceler>
     var sfppHash: ByteString? = null,
+    /** The transport mechanism this packet arrived over (see [MeshPacket.TransportMechanism]). */
+    var transportMechanism: Int = 0,
 ) : Parcelable {
 
     fun readFromParcel(parcel: Parcel) {
@@ -108,6 +111,7 @@ data class DataPacket(
         viaMqtt = parcel.readInt() != 0
         emoji = parcel.readInt()
         sfppHash = ByteStringParceler.create(parcel)
+        transportMechanism = parcel.readInt()
     }
 
     /** If there was an error with this message, this string describes what was wrong. */
