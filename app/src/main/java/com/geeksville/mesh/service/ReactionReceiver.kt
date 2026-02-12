@@ -36,8 +36,10 @@ class ReactionReceiver : BroadcastReceiver() {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    @Suppress("TooGenericExceptionCaught")
+    @Suppress("TooGenericExceptionCaught", "ReturnCount")
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != REACT_ACTION) return
+
         val contactKey = intent.getStringExtra(EXTRA_CONTACT_KEY) ?: return
         val reaction = intent.getStringExtra(EXTRA_EMOJI) ?: intent.getStringExtra(EXTRA_REACTION) ?: return
         val replyId = intent.getIntExtra(EXTRA_REPLY_ID, intent.getIntExtra(EXTRA_PACKET_ID, 0))

@@ -25,6 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 private val ONLINE_WINDOW_HOURS = 2.hours
+private val DAY_DURATION = 24.hours
 
 /**
  * Returns a short string representing the time if it's within the last 24 hours, otherwise returns a short string
@@ -36,7 +37,7 @@ private val ONLINE_WINDOW_HOURS = 2.hours
 fun getShortDate(time: Long): String? {
     if (time == 0L) return null
     val instant = time.toInstant()
-    val isWithin24Hours = (nowInstant - instant) <= Duration.parse("24h")
+    val isWithin24Hours = (nowInstant - instant) <= DAY_DURATION
 
     return if (isWithin24Hours) {
         DateFormat.getTimeInstance(DateFormat.SHORT).format(instant.toDate())
@@ -54,7 +55,7 @@ fun getShortDate(time: Long): String? {
  */
 fun getShortDateTime(time: Long): String {
     val instant = time.toInstant()
-    val isWithin24Hours = (nowInstant - instant) <= Duration.parse("24h")
+    val isWithin24Hours = (nowInstant - instant) <= DAY_DURATION
 
     return if (isWithin24Hours) {
         DateFormat.getTimeInstance(DateFormat.SHORT).format(instant.toDate())

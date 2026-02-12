@@ -28,7 +28,6 @@ import java.time.format.DateTimeFormatter
 import java.time.zone.ZoneOffsetTransitionRule
 import java.util.Locale
 import kotlin.math.abs
-import kotlin.time.Clock
 
 /** Generates a POSIX time zone string from a [TimeZone]. */
 @RequiresApi(Build.VERSION_CODES.O)
@@ -89,7 +88,7 @@ private fun formatAbbreviation(abbrev: String): String = if (abbrev.all { it.isL
 /** Gets the abbreviation for a given zone and transition rule. */
 @RequiresApi(Build.VERSION_CODES.O)
 internal fun getTransitionAbbreviation(zone: ZoneId, rule: ZoneOffsetTransitionRule): String {
-    val year = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).year
+    val year = nowInstant.toLocalDateTime(systemTimeZone).year
     val transition = rule.createTransition(year)
     return ZonedDateTime.ofInstant(transition.instant, zone).timeZoneShortName()
 }

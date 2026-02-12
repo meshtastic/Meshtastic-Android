@@ -803,6 +803,7 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
             when (displayUnits) {
                 DisplayUnits.METRIC -> "%.1f Km/h".format(speedInMps.mpsToKmph())
                 DisplayUnits.IMPERIAL -> "%.1f mph".format(speedInMps.mpsToMph())
+                else -> mpsText
             }
         } else {
             mpsText

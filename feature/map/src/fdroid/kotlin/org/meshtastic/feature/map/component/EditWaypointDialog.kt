@@ -228,7 +228,7 @@ fun EditWaypointDialog(
                             },
                             ldt.year,
                             ldt.monthNumber - 1,
-                            ldt.dayOfMonth,
+                            ldt.day,
                         )
 
                     val timePickerDialog =
@@ -239,7 +239,7 @@ fun EditWaypointDialog(
                                     LocalDateTime(
                                         year = ldt.year,
                                         month = ldt.month,
-                                        day = ldt.dayOfMonth,
+                                        day = ldt.day,
                                         hour = selectedHour,
                                         minute = selectedMinute,
                                         second = ldt.second,

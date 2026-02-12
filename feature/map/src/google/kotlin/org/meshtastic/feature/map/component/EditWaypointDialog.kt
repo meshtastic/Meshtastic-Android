@@ -60,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.atTime
@@ -85,7 +86,6 @@ import org.meshtastic.core.strings.waypoint_new
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.proto.Waypoint
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
