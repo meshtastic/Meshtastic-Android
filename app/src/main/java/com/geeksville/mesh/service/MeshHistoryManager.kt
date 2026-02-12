@@ -113,6 +113,7 @@ constructor(
         runCatching {
             packetHandler.sendToRadio(
                 MeshPacket(
+                    from = myNodeNum,
                     to = myNodeNum,
                     decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = request.encode().toByteString()),
                     priority = MeshPacket.Priority.BACKGROUND,
