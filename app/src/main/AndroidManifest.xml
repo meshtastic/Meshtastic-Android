@@ -126,6 +126,14 @@
             android:name="firebase_analytics_collection_enabled"
             android:value="false" />
 
+        <!-- Disable AdID collection for privacy -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
+
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.service.MeshService"
