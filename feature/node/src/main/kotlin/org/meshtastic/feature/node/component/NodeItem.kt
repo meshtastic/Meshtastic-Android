@@ -30,9 +30,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -170,6 +173,28 @@ fun NodeItem(
                 connectionState = connectionState,
                 contentColor = contentColor,
             )
+
+            thatNode.nodeStatus?.let { status ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Rounded.Notes,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = contentColor.copy(alpha = 0.7f),
+                    )
+                    Text(
+                        text = status,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = contentColor,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
 
             NodeBatteryPositionRow(
                 thatNode = thatNode,
@@ -435,6 +460,17 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last().copy(lastHeard = 0)
+        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, connectionState = ConnectionState.Connected)
+    }
+}
+
+@Composable
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+fun NodeInfoStatusPreview() {
+    AppTheme {
+        val thisNode = NodePreviewParameterProvider().values.first()
+        val thatNode =
+            NodePreviewParameterProvider().values.last().copy(nodeStatus = "Going to the farm.. to grow wheat.")
         NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, connectionState = ConnectionState.Connected)
     }
 }

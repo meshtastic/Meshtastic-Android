@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +49,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -69,10 +71,12 @@ import org.meshtastic.core.strings.role
 import org.meshtastic.core.strings.rssi
 import org.meshtastic.core.strings.short_name
 import org.meshtastic.core.strings.snr
+import org.meshtastic.core.strings.status_message
 import org.meshtastic.core.strings.supported
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_id
 import org.meshtastic.core.strings.via_mqtt
+import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.Cloud
@@ -84,6 +88,7 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Verified
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
@@ -135,6 +140,10 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 private fun MainNodeDetails(node: Node) {
     Column {
         NameAndRoleRow(node)
+        node.nodeStatus?.let { status ->
+            SectionDivider()
+            StatusMessageRow(status)
+        }
         SectionDivider()
         NodeIdentificationRow(node)
         SectionDivider()
@@ -173,6 +182,16 @@ private fun NameAndRoleRow(node: Node) {
             modifier = Modifier.weight(1f),
         )
     }
+}
+
+@Composable
+private fun StatusMessageRow(status: String) {
+    InfoItem(
+        label = stringResource(Res.string.status_message),
+        value = status,
+        icon = Icons.AutoMirrored.Rounded.Notes,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -350,5 +369,15 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             color = if (isMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun NodeDetailsSectionPreview() {
+    AppTheme {
+        val node =
+            NodePreviewParameterProvider().values.last().copy(nodeStatus = "Going to the farm.. to grow wheat.")
+        NodeDetailsSection(node = node)
     }
 }
