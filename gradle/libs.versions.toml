@@ -210,7 +210,7 @@ android-tools-common = { module = "com.android.tools:common", version = "32.0.0"
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
-datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.22.0" }
+datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.23.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.6" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
@@ -251,7 +251,7 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
-datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.22.0" }
+datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.23.0" }
 # Removed dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
