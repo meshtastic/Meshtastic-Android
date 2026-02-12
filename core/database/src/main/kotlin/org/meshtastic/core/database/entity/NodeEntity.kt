@@ -243,5 +243,6 @@ data class NodeEntity(
             environmentTelemetry.time,
         ),
         hopsAway = hopsAway,
+        nodeStatus = nodeStatus,
     )
 }

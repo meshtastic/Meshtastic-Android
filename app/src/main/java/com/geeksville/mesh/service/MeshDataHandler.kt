@@ -335,6 +335,14 @@ constructor(
         u.session_passkey.let { commandSender.setSessionPasskey(it) }
 
         val fromNum = packet.from
+        u.get_module_config_response?.let { config ->
+            if (fromNum == myNodeNum) {
+                configHandler.handleModuleConfig(config)
+            } else {
+                config.statusmessage?.node_status?.let { nodeManager.updateNodeStatus(fromNum, it) }
+            }
+        }
+
         if (fromNum == myNodeNum) {
             u.get_config_response?.let { configHandler.handleDeviceConfig(it) }
             u.get_channel_response?.let { configHandler.handleChannel(it) }
