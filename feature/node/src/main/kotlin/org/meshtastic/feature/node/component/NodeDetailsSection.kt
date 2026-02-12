@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.feature.node.component
 
 import android.content.ClipData
@@ -376,8 +378,7 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
 @Composable
 private fun NodeDetailsSectionPreview() {
     AppTheme {
-        val node =
-            NodePreviewParameterProvider().values.last().copy(nodeStatus = "Going to the farm.. to grow wheat.")
+        val node = NodePreviewParameterProvider().values.last().copy(nodeStatus = "Going to the farm.. to grow wheat.")
         NodeDetailsSection(node = node)
     }
 }
