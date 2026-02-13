@@ -37,6 +37,7 @@ import no.nordicsemi.kotlin.ble.core.and
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
@@ -64,13 +65,12 @@ class BleOtaTransportNordicMockTest {
 
     @Test
     fun `full ota flow with nordic mocks`() = runTest(testDispatcher) {
-        // Use default mock environment
-        // Use backgroundScope so that simulation coroutines are cancelled after the test
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
 
         var txCharHandle: Int = -1
+        val totalExpectedBytes = AtomicLong(64) // Smaller data for faster test
+        val bytesReceived = AtomicLong(0)
 
-        // Use a property to hold the peripheral since we need it in the event handler
         lateinit var otaPeripheral: PeripheralSpec<String>
 
         val eventHandler =
@@ -85,7 +85,12 @@ class BleOtaTransportNordicMockTest {
                 ): WriteResponse {
                     val command = value.decodeToString()
                     if (command.startsWith("OTA")) {
-                        backgroundScope.launch {
+                        println("Mock: Received Start OTA command: ${command.trim()}")
+                        val parts = command.trim().split(" ")
+                        if (parts.size >= 2) {
+                            totalExpectedBytes.set(parts[1].toLongOrNull() ?: 64L)
+                        }
+                        backgroundScope.launch(testDispatcher) {
                             delay(50.milliseconds)
                             otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
                         }
@@ -94,12 +99,18 @@ class BleOtaTransportNordicMockTest {
                 }
 
                 override fun onWriteCommand(characteristic: MockRemoteCharacteristic, value: ByteArray) {
-                    // For firmware chunks (WITHOUT_RESPONSE)
-                    backgroundScope.launch {
-                        delay(10.milliseconds)
-                        // In the real protocol, ACK is sent after each chunk.
-                        // OK is sent after the final chunk is verified.
+                    val currentTotal = bytesReceived.addAndGet(value.size.toLong())
+                    val expected = totalExpectedBytes.get()
+                    println("Mock: Received chunk size=${value.size}, total=$currentTotal/$expected")
+                    backgroundScope.launch(testDispatcher) {
+                        delay(5.milliseconds)
                         otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+
+                        if (currentTotal >= expected && expected > 0) {
+                            delay(10.milliseconds)
+                            println("Mock: Sending final OK")
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        }
                     }
                 }
             }
@@ -134,25 +145,16 @@ class BleOtaTransportNordicMockTest {
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
         // 1. Connect
-        // Note: BleOtaTransport includes a 5s delay at the start of connect()
         val connectResult = transport.connect()
         assertTrue("Connection failed: ${connectResult.exceptionOrNull()}", connectResult.isSuccess)
 
         // 2. Start OTA
-        val startResult = transport.startOta(1024L, "somehash") {}
+        val startResult = transport.startOta(totalExpectedBytes.get(), "somehash") {}
         assertTrue("Start OTA failed: ${startResult.exceptionOrNull()}", startResult.isSuccess)
 
         // 3. Stream firmware
-        // Need to simulate an OK at the very end
-        backgroundScope.launch {
-            // Wait for chunks to be sent. 1024 bytes with 512 chunk size = 2 chunks.
-            // Each chunk takes 10ms + ACK processing.
-            delay(500.milliseconds)
-            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
-        }
-
-        val data = ByteArray(1024) { it.toByte() }
-        val streamResult = transport.streamFirmware(data, 512) {}
+        val data = ByteArray(totalExpectedBytes.get().toInt()) { it.toByte() }
+        val streamResult = transport.streamFirmware(data, 20) {}
         assertTrue("Stream firmware failed: ${streamResult.exceptionOrNull()}", streamResult.isSuccess)
 
         transport.close()

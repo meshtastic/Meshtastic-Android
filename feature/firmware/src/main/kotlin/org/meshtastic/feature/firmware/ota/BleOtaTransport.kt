@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
@@ -55,8 +56,7 @@ class BleOtaTransport(
     private val bleConnection = BleConnection(centralManager, transportScope, "BLE OTA")
     private var otaCharacteristic: RemoteCharacteristic? = null
 
-    private val responseChannel =
-        kotlinx.coroutines.channels.Channel<String>(kotlinx.coroutines.channels.Channel.BUFFERED)
+    private val responseChannel = Channel<String>(Channel.UNLIMITED)
 
     private var isConnected = false
 

@@ -28,7 +28,7 @@ configure<LibraryExtension> { namespace = "org.meshtastic.feature.intro" }
 
 dependencies {
     implementation(projects.core.strings)
-    googleImplementation(projects.core.ui)
+    implementation(projects.core.ui)
 
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)
