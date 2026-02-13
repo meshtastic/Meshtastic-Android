@@ -53,7 +53,7 @@ spotless = "8.2.1"
 wire = "6.0.0-alpha02"
 vico = "3.0.0-beta.3"
 dependency-guard = "0.5.0"
-nordic-ble = "2.0.0-alpha12"
+nordic-ble = "2.0.0-alpha14"
 nordic-common = "2.8.2"
 nordic-log = "2.5.0"
 
@@ -177,8 +177,6 @@ dd-sdk-android-compose = { module = "com.datadoghq:dd-sdk-android-compose", vers
 dd-sdk-android-logs = { module = "com.datadoghq:dd-sdk-android-logs", version.ref = "dd-sdk-android" }
 dd-sdk-android-okhttp = { module = "com.datadoghq:dd-sdk-android-okhttp", version.ref = "dd-sdk-android" }
 dd-sdk-android-rum = { module = "com.datadoghq:dd-sdk-android-rum", version.ref = "dd-sdk-android" }
-dd-sdk-android-session-replay = { module = "com.datadoghq:dd-sdk-android-session-replay", version.ref = "dd-sdk-android" }
-dd-sdk-android-session-replay-compose = { module = "com.datadoghq:dd-sdk-android-session-replay-compose", version.ref = "dd-sdk-android" }
 dd-sdk-android-timber = { module = "com.datadoghq:dd-sdk-android-timber", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace = { module = "com.datadoghq:dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace-otel = { module = "com.datadoghq:dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
@@ -190,10 +188,12 @@ markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-rend
 material = { module = "com.google.android.material:material", version = "1.13.0" }
 nordic-client-android = { module = "no.nordicsemi.kotlin.ble:client-android", version.ref = "nordic-ble" }
 nordic-client-android-mock = { module = "no.nordicsemi.kotlin.ble:client-android-mock", version.ref = "nordic-ble" }
-nordic-client-mock = { module = "no.nordicsemi.kotlin.ble:client-mock", version.ref = "nordic-ble" }
+nordic-client-mock = { module = "no.nordicsemi.kotlin.ble:client-core-mock", version.ref = "nordic-ble" }
 nordic-core-android-mock = { module = "no.nordicsemi.kotlin.ble:core-android-mock", version.ref = "nordic-ble" }
 nordic-core-mock = { module = "no.nordicsemi.kotlin.ble:core-mock", version.ref = "nordic-ble" }
 nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.11.0" }
+nordic-ble-env-android = { module = "no.nordicsemi.kotlin.ble:environment-android", version.ref = "nordic-ble" }
+nordic-ble-env-android-compose = { module = "no.nordicsemi.kotlin.ble:environment-android-compose", version.ref = "nordic-ble" }
 
 nordic-common-core = { module = "no.nordicsemi.android.common:core", version.ref = "nordic-common" }
 nordic-common-logger = { module = "no.nordicsemi.android.common:logger", version.ref = "nordic-common" }

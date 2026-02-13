@@ -17,12 +17,10 @@
 package org.meshtastic.core.ble
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
-import dagger.Lazy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,11 +31,9 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.Manager
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
-import org.meshtastic.core.common.hasBluetoothPermission
-import org.meshtastic.core.common.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import javax.inject.Inject
@@ -49,11 +45,10 @@ import kotlin.time.Duration.Companion.seconds
 class BluetoothRepository
 @Inject
 constructor(
-    private val application: Application,
-    private val bluetoothBroadcastReceiverLazy: Lazy<BluetoothBroadcastReceiver>,
     private val dispatchers: CoroutineDispatchers,
     @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val centralManager: CentralManager,
+    private val androidEnvironment: AndroidEnvironment,
 ) {
     private val _state =
         MutableStateFlow(
@@ -76,9 +71,8 @@ constructor(
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            updateBluetoothState()
-            bluetoothBroadcastReceiverLazy.get().let { receiver ->
-                application.registerReceiverCompat(receiver, receiver.intentFilter)
+            androidEnvironment.bluetoothState.collect {
+                updateBluetoothState()
             }
         }
     }
@@ -140,13 +134,18 @@ constructor(
     }
 
     internal suspend fun updateBluetoothState() {
-        val hasPerms = application.hasBluetoothPermission()
-        val enabled = centralManager.state.value == Manager.State.POWERED_ON
+        val hasPerms = if (androidEnvironment.androidSdkVersion >= 31) {
+            androidEnvironment.isBluetoothScanPermissionGranted &&
+                androidEnvironment.isBluetoothConnectPermissionGranted
+        } else {
+            androidEnvironment.isLocationPermissionGranted
+        }
+        val enabled = androidEnvironment.isBluetoothEnabled
         val newState =
             BluetoothState(
                 hasPermissions = hasPerms,
                 enabled = enabled,
-                bondedDevices = getBondedAppPeripherals(enabled),
+                bondedDevices = getBondedAppPeripherals(enabled, hasPerms),
             )
 
         _state.emit(newState)
@@ -154,8 +153,8 @@ constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun getBondedAppPeripherals(enabled: Boolean): List<Peripheral> =
-        if (enabled && application.hasBluetoothPermission()) {
+    private fun getBondedAppPeripherals(enabled: Boolean, hasPerms: Boolean): List<Peripheral> =
+        if (enabled && hasPerms) {
             centralManager.getBondedPeripherals().filter(::isMatchingPeripheral)
         } else {
             emptyList()

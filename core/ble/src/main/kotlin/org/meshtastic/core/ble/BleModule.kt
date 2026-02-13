@@ -27,15 +27,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.native
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import no.nordicsemi.kotlin.ble.environment.android.NativeAndroidEnvironment
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object BleModule {
+
     @Provides
     @Singleton
-    fun provideCentralManager(@ApplicationContext context: Context, coroutineScope: CoroutineScope): CentralManager =
-        CentralManager.native(context, coroutineScope)
+    fun provideAndroidEnvironment(@ApplicationContext context: Context): AndroidEnvironment {
+        return NativeAndroidEnvironment.getInstance(context, isNeverForLocationFlagSet = true)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCentralManager(
+        environment: AndroidEnvironment,
+        coroutineScope: CoroutineScope
+    ): CentralManager {
+        return CentralManager.native(environment as NativeAndroidEnvironment, coroutineScope)
+    }
 
     @Provides
     @Singleton

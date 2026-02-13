@@ -30,6 +30,8 @@ dependencies {
     implementation(projects.core.model)
 
     api(libs.nordic.client.android)
+    api(libs.nordic.ble.env.android)
+    api(libs.nordic.ble.env.android.compose)
     api(libs.nordic.common.scanner.ble)
     api(libs.nordic.common.core)
 

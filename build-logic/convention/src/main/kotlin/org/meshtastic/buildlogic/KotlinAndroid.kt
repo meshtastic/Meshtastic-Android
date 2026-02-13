@@ -107,7 +107,8 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                 "-Xcontext-parameters",
-                "-Xannotation-default-target=param-property"
+                "-Xannotation-default-target=param-property",
+                "-Xskip-prerelease-check"
             )
         }
     }
