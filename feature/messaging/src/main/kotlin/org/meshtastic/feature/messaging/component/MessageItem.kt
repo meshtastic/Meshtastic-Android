@@ -71,15 +71,14 @@ import org.meshtastic.core.strings.filter_message_label
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.sample_message
-import org.meshtastic.core.strings.via_mqtt
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.emoji.EmojiPicker
 import org.meshtastic.core.ui.icon.Acknowledged
-import org.meshtastic.core.ui.icon.Cloud
 import org.meshtastic.core.ui.icon.CloudDone
 import org.meshtastic.core.ui.icon.CloudOffTwoTone
 import org.meshtastic.core.ui.icon.CloudSync
@@ -240,13 +239,11 @@ internal fun MessageItem(
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
             )
-            if (message.viaMqtt) {
-                Icon(
-                    MeshtasticIcons.Cloud,
-                    contentDescription = stringResource(Res.string.via_mqtt),
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            TransportIcon(
+                transport = message.transportMechanism,
+                viaMqtt = message.viaMqtt,
+                modifier = Modifier.size(16.dp),
+            )
         }
     }
     Surface(
@@ -293,7 +290,7 @@ internal fun MessageItem(
 
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     if (!message.fromLocal) {
-                        if (message.hopsAway == 0) {
+                        if (message.hopsAway == 0 && !message.viaMqtt) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Snr(message.snr)
                                 Rssi(message.rssi)
@@ -310,7 +307,12 @@ internal fun MessageItem(
                                     tint = cardColors.contentColor.copy(alpha = 0.7f),
                                 )
                                 Text(
-                                    text = message.hopsAway.toString(),
+                                    text =
+                                    if (message.hopsAway >= 0) {
+                                        message.hopsAway.toString()
+                                    } else {
+                                        "?"
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }

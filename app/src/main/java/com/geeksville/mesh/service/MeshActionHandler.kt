@@ -209,6 +209,7 @@ constructor(
     fun handleSetRemoteOwner(id: Int, destNum: Int, payload: ByteArray) {
         val u = User.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_owner = u) }
+        nodeManager.handleReceivedUser(destNum, u)
     }
 
     fun handleGetRemoteOwner(id: Int, destNum: Int) {
@@ -238,6 +239,7 @@ constructor(
     fun handleSetModuleConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = ModuleConfig.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_module_config = c) }
+        c.statusmessage?.node_status?.let { status -> nodeManager.updateNodeStatus(destNum, status) }
     }
 
     fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {

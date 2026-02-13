@@ -73,6 +73,7 @@ fun DeviceDetailsSection(state: MetricsState, modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 SectionDivider()
+
                 val deviceText =
                     state.reportedTarget?.let { target -> "${deviceHardware.displayName} ($target)" }
                         ?: deviceHardware.displayName

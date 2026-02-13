@@ -162,7 +162,7 @@ constructor(
     val spinner: StateFlow<Boolean> = bluetoothRepository.isScanning
 
     init {
-        serviceRepository.statusMessage.onEach { errorText.value = it }.launchIn(viewModelScope)
+        serviceRepository.connectionProgress.onEach { errorText.value = it }.launchIn(viewModelScope)
         Logger.d { "BTScanModel created" }
     }
 

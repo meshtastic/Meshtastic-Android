@@ -210,7 +210,11 @@ constructor(
     }
 
     fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage) {
-        updateNodeInfo(fromNum) { it.nodeStatus = s.status }
+        updateNodeStatus(fromNum, s.status)
+    }
+
+    fun updateNodeStatus(nodeNum: Int, status: String) {
+        updateNodeInfo(nodeNum) { it.nodeStatus = status }
     }
 
     fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true) {

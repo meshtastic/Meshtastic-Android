@@ -52,6 +52,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -61,9 +63,12 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.details
 import org.meshtastic.core.strings.loading
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
+import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
 import org.meshtastic.feature.node.component.AdministrationSection
@@ -75,6 +80,7 @@ import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
 import org.meshtastic.feature.node.component.PositionSection
+import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 
 private sealed interface NodeDetailOverlay {
@@ -143,7 +149,8 @@ private fun NodeDetailScaffold(
         modifier = modifier,
         topBar = {
             MainAppBar(
-                title = node?.user?.long_name ?: "",
+                title = getString(Res.string.details),
+                subtitle = node?.user?.long_name ?: "",
                 ourNode = uiState.ourNode,
                 showNodeChip = false,
                 canNavigateUp = true,
@@ -341,5 +348,28 @@ private fun handleNodeAction(
             }
         }
         else -> {}
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NodeDetailListPreview(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
+    AppTheme {
+        val uiState =
+            NodeDetailUiState(
+                node = node,
+                ourNode = node,
+                metricsState = MetricsState(node = node, isLocal = true, isManaged = false),
+                availableLogs = emptySet(),
+            )
+        NodeDetailList(
+            node = node,
+            ourNode = node,
+            uiState = uiState,
+            listState = rememberLazyListState(),
+            onAction = {},
+            onFirmwareSelect = {},
+            onSaveNotes = { _, _ -> },
+        )
     }
 }

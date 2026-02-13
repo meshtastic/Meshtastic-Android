@@ -436,6 +436,7 @@ constructor(
         }
 
         return MeshPacket(
+            from = nodeManager?.myNodeNum ?: 0,
             to = to,
             id = id,
             want_ack = wantAck,

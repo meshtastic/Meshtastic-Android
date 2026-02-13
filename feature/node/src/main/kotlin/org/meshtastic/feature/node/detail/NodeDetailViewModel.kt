@@ -46,6 +46,7 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
@@ -216,7 +217,13 @@ constructor(
                                     deviceMetrics = data.telemetry.filter { it.device_metrics != null },
                                     powerMetrics = data.telemetry.filter { it.power_metrics != null },
                                     hostMetrics = data.telemetry.filter { it.host_metrics != null },
-                                    signalMetrics = data.packets.filter { (it.rx_time ?: 0) > 0 },
+                                    signalMetrics =
+                                    data.packets.filter { pkt ->
+                                        (pkt.rx_time ?: 0) > 0 &&
+                                            pkt.hop_start == pkt.hop_limit &&
+                                            pkt.via_mqtt != true &&
+                                            pkt.isLora()
+                                    },
                                     positionLogs = data.positionPackets.mapNotNull { it.toPosition() },
                                     paxMetrics = data.paxLogs,
                                     tracerouteRequests = data.tracerouteRequests,
