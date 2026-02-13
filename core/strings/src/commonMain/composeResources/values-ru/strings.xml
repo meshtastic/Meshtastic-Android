@@ -37,6 +37,9 @@
     <string name="node_sort_last_heard">Последний раз слышен</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="via_mqtt">через MQTT</string>
+    <string name="via_udp">через UDP</string>
+    <string name="via_api">через API</string>
+    <string name="internal">Внутренний</string>
     <string name="node_sort_via_favorite">по избранным</string>
     <string name="node_filter_show_ignored">Показать только игнорируемые ноды</string>
     <string name="unrecognized">Нераспознанный</string>
