@@ -22,6 +22,7 @@ import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConjunctionFilterScope
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
+import javax.inject.Inject
 import kotlin.time.Duration
 
 /**
@@ -30,7 +31,7 @@ import kotlin.time.Duration
  *
  * @param centralManager The Nordic [CentralManager] to use for scanning.
  */
-class BleScanner(private val centralManager: CentralManager) {
+class BleScanner @Inject constructor(private val centralManager: CentralManager) {
 
     /**
      * Scans for BLE devices.

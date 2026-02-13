@@ -49,6 +49,7 @@ constructor(
     @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val centralManager: CentralManager,
     private val androidEnvironment: AndroidEnvironment,
+    private val bleScanner: BleScanner,
 ) {
     private val _state =
         MutableStateFlow(
@@ -67,7 +68,6 @@ constructor(
     val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
 
     private var scanJob: Job? = null
-    private val bleScanner = BleScanner(centralManager)
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
