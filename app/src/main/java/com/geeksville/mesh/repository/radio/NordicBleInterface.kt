@@ -310,7 +310,7 @@ constructor(
     // --- IRadioInterface Implementation ---
 
     /**
-     * Sends a packet to the radio.
+     * Sends a packet to the radio with retry support.
      *
      * @param p The packet to send.
      */
@@ -325,13 +325,16 @@ constructor(
                             } else {
                                 WriteType.WITH_RESPONSE
                             }
+
+                        retryBleOperation(tag = address) { characteristic.write(p, writeType = writeType) }
+
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
-                            "[$address] Writing packet #$packetsSent to toRadioCharacteristic with $writeType - " +
+                            "[$address] Successfully wrote packet #$packetsSent " +
+                                "to toRadioCharacteristic with $writeType - " +
                                 "${p.size} bytes (Total TX: $bytesSent bytes)"
                         }
-                        characteristic.write(p, writeType = writeType)
                         drainPacketQueueAndDispatch()
                     } catch (e: InvalidAttributeException) {
                         Logger.w(e) { "[$address] Attribute invalidated during write, clearing characteristics" }
