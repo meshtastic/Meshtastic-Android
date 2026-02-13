@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "9633",
+      "title": "Add INKHUD build support for T-Echo Plus",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9633",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9627",
+      "title": "Add phone API fanout for multiple clients",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9627",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9586",
       "title": "feat(esp32): add support for Native ESP32 Ethernet and WT32-ETH01 variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/9586",
@@ -222,12 +234,6 @@
       "id": "9428",
       "title": "feat(power): automatic WiFi disable when running on battery",
       "page_url": "https://github.com/meshtastic/firmware/pull/9428",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9363",
-      "title": "Allow using Spreading Factors 5 and 6",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9363",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
