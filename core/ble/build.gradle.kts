@@ -14,27 +14,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 import com.android.build.api.dsl.LibraryExtension
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
-    alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.feature.intro" }
+configure<LibraryExtension> { namespace = "org.meshtastic.core.ble" }
 
 dependencies {
-    implementation(projects.core.strings)
-    googleImplementation(projects.core.ui)
+    implementation(projects.core.common)
+    implementation(projects.core.di)
+    implementation(projects.core.model)
 
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.navigation3.runtime)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.nordic.common.permissions.ble)
-    implementation(libs.nordic.common.permissions.notification)
+    api(libs.nordic.client.android)
+    api(libs.nordic.common.scanner.ble)
+    api(libs.nordic.common.core)
+
+    implementation(libs.androidx.lifecycle.process)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.javax.inject)
+    implementation(libs.kermit)
+    implementation(libs.kotlinx.coroutines.core)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.mockk)
 }

@@ -25,14 +25,12 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +41,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.ble.BleError
+import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
@@ -370,12 +371,7 @@ constructor(
         serviceScope.handledLaunch { handleSendToRadio(a) }
     }
 
-    private val _meshActivity =
-        MutableSharedFlow<MeshActivity>(
-            replay = 0, // No replay needed for event-like emissions
-            extraBufferCapacity = 1, // Buffer one event to avoid loss on rapid emissions
-            onBufferOverflow = BufferOverflow.DROP_OLDEST, // Drop oldest if buffer overflows
-        )
+    private val _meshActivity = simpleSharedFlow<MeshActivity>()
     val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private fun emitSendActivity() {

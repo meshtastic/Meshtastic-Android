@@ -32,15 +32,13 @@ import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.client.android.ScanResult
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import org.junit.Test
-import java.util.UUID
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
+import kotlin.uuid.Uuid
 
-private val SERVICE_UUID = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-private val OTA_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
-private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
+private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+private val OTA_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
+private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportTest {
 
     private val centralManager: CentralManager = mockk()
@@ -65,10 +63,10 @@ class BleOtaTransportTest {
         every { peripheral.state } returns MutableStateFlow(ConnectionState.Connected)
 
         coEvery { peripheral.services(any()) } returns MutableStateFlow(listOf(service))
-        every { service.uuid } returns SERVICE_UUID.toKotlinUuid()
+        every { service.uuid } returns SERVICE_UUID
         every { service.characteristics } returns listOf(otaChar, txChar)
-        every { otaChar.uuid } returns OTA_CHARACTERISTIC_UUID.toKotlinUuid()
-        every { txChar.uuid } returns TX_CHARACTERISTIC_UUID.toKotlinUuid()
+        every { otaChar.uuid } returns OTA_CHARACTERISTIC_UUID
+        every { txChar.uuid } returns TX_CHARACTERISTIC_UUID
 
         coEvery { centralManager.connect(any(), any()) } returns Unit
 

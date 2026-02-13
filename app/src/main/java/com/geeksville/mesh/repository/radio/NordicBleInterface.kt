@@ -18,15 +18,9 @@ package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.repository.radio.BleConstants.BTM_FROMNUM_CHARACTER
-import com.geeksville.mesh.repository.radio.BleConstants.BTM_FROMRADIO_CHARACTER
-import com.geeksville.mesh.repository.radio.BleConstants.BTM_LOGRADIO_CHARACTER
-import com.geeksville.mesh.repository.radio.BleConstants.BTM_SERVICE_UUID
-import com.geeksville.mesh.repository.radio.BleConstants.BTM_TORADIO_CHARACTER
 import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -36,9 +30,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -46,15 +40,25 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
-import java.util.UUID
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
+import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleError
+import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
+import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.retryBleOperation
+import kotlin.time.Duration.Companion.seconds
+
+private const val SCAN_RETRY_COUNT = 3
+private const val SCAN_RETRY_DELAY_MS = 1000L
+private val SCAN_TIMEOUT = 5.seconds
 
 /**
  * A [IRadioInterface] implementation for BLE devices using Nordic Kotlin BLE Library.
@@ -81,7 +85,7 @@ constructor(
         Logger.w(throwable) { "[$address] Uncaught exception in connectionScope" }
         serviceScope.launch {
             try {
-                peripheral?.disconnect()
+                bleConnection.disconnect()
             } catch (e: Exception) {
                 Logger.w(e) { "[$address] Failed to disconnect in exception handler" }
             }
@@ -89,11 +93,12 @@ constructor(
         service.onDisconnect(BleError.from(throwable))
     }
 
-    private val connectionScope = CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
-    private val drainMutex = Mutex()
-    private val writeMutex = Mutex()
+    private val connectionScope: CoroutineScope =
+        CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
+    private val bleConnection: BleConnection = BleConnection(centralManager, connectionScope, address)
+    private val drainMutex: Mutex = Mutex()
+    private val writeMutex: Mutex = Mutex()
 
-    private var peripheral: Peripheral? = null
     private var connectionStartTime: Long = 0
     private var packetsReceived: Int = 0
     private var packetsSent: Int = 0
@@ -149,10 +154,8 @@ constructor(
 
     private suspend fun drainPacketQueueAndDispatch() {
         drainMutex.withLock {
-            var drainedCount = 0
             fromRadioPacketFlow()
                 .onEach { packet ->
-                    drainedCount++
                     Logger.d { "[$address] Read packet from queue (${packet.size} bytes)" }
                     dispatchPacket(packet)
                 }
@@ -163,202 +166,145 @@ constructor(
 
     // --- Connection & Discovery Logic ---
 
-    private fun findPeripheral(): Peripheral =
-        centralManager.getBondedPeripherals().firstOrNull { it.address == address }
-            ?: throw RadioNotConnectedException("Device not found at address $address")
+    /** Robustly finds the peripheral. First checks bonded devices, then performs a short scan if not found. */
+    private suspend fun findPeripheral(): Peripheral {
+        centralManager
+            .getBondedPeripherals()
+            .firstOrNull { it.address == address }
+            ?.let {
+                return it
+            }
+
+        Logger.i { "[$address] Device not found in bonded list, scanning..." }
+        val scanner = BleScanner(centralManager)
+
+        repeat(SCAN_RETRY_COUNT) { attempt ->
+            val p = scanner.scan(SCAN_TIMEOUT).firstOrNull { it.address == address }
+            if (p != null) return p
+
+            if (attempt < SCAN_RETRY_COUNT - 1) {
+                delay(SCAN_RETRY_DELAY_MS)
+            }
+        }
+
+        throw RadioNotConnectedException("Device not found at address $address")
+    }
 
     private fun connect() {
         connectionScope.launch {
             try {
                 connectionStartTime = System.currentTimeMillis()
-                Logger.i { "[$address] BLE connection attempt started at $connectionStartTime" }
+                Logger.i { "[$address] BLE connection attempt started" }
 
-                peripheral = retryCall { findAndConnectPeripheral() }
-                peripheral?.let {
-                    val connectionTime = System.currentTimeMillis() - connectionStartTime
-                    Logger.i { "[$address] BLE peripheral connected in ${connectionTime}ms" }
-                    onConnected()
-                    observePeripheralChanges()
-                    discoverServicesAndSetupCharacteristics(it)
-                }
+                bleConnection.connectionState
+                    .onEach { state ->
+                        if (state is ConnectionState.Disconnected) {
+                            onDisconnected(state)
+                        }
+                    }
+                    .launchIn(connectionScope)
+
+                val p = retryBleOperation(tag = address) { findPeripheral() }
+                bleConnection.connect(p)
+
+                onConnected()
+                discoverServicesAndSetupCharacteristics()
             } catch (e: Exception) {
                 val failureTime = System.currentTimeMillis() - connectionStartTime
-                // BLE connection errors are common and often transient
                 Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
                 service.onDisconnect(BleError.from(e))
             }
         }
     }
 
-    private suspend fun findAndConnectPeripheral(): Peripheral {
-        val p = findPeripheral()
-        centralManager.connect(
-            peripheral = p,
-            options = CentralManager.ConnectionOptions.AutoConnect(automaticallyRequestHighestValueLength = true),
-        )
-        p.requestConnectionPriority(ConnectionPriority.HIGH)
-        return p
-    }
-
     private suspend fun onConnected() {
         try {
-            peripheral?.let { p ->
-                val rssi = retryCall { p.readRssi() }
-                Logger.d { "[$address] Connection established. RSSI: $rssi dBm" }
-
-                val phyInUse = retryCall { p.readPhy() }
-                Logger.d { "[$address] PHY in use: $phyInUse" }
+            bleConnection.peripheral?.let { p ->
+                val rssi = retryBleOperation(tag = address) { p.readRssi() }
+                Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
         } catch (e: Exception) {
-            Logger.w(e) { "[$address] Failed to read initial connection properties" }
+            Logger.w(e) { "[$address] Failed to read initial connection RSSI" }
         }
     }
 
-    private fun observePeripheralChanges() {
-        peripheral?.let { p ->
-            p.phy.onEach { phy -> Logger.i { "[$address] BLE PHY changed to $phy" } }.launchIn(connectionScope)
+    private fun onDisconnected(state: ConnectionState.Disconnected) {
+        clearCharacteristics()
 
-            p.connectionParameters
-                .onEach { params -> Logger.i { "[$address] BLE connection parameters changed to $params" } }
-                .launchIn(connectionScope)
-
-            p.state
-                .onEach { state ->
-                    Logger.i { "[$address] BLE connection state changed to $state" }
-                    if (state is ConnectionState.Disconnected) {
-                        clearCharacteristics()
-
-                        val uptime =
-                            if (connectionStartTime > 0) {
-                                System.currentTimeMillis() - connectionStartTime
-                            } else {
-                                0
-                            }
-                        Logger.w {
-                            "[$address] BLE disconnected - Reason: ${state.reason}, " +
-                                "Uptime: ${uptime}ms, " +
-                                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                                "Packets TX: $packetsSent ($bytesSent bytes)"
-                        }
-                        service.onDisconnect(BleError.Disconnected(reason = state.reason))
-                    }
-                }
-                .launchIn(connectionScope)
+        val uptime =
+            if (connectionStartTime > 0) {
+                System.currentTimeMillis() - connectionStartTime
+            } else {
+                0
+            }
+        Logger.w {
+            "[$address] BLE disconnected - Reason: ${state.reason}, " +
+                "Uptime: ${uptime}ms, " +
+                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        centralManager.state
-            .onEach { state -> Logger.i { "[$address] CentralManager state changed to $state" } }
-            .launchIn(connectionScope)
+        service.onDisconnect(BleError.Disconnected(reason = state.reason))
     }
 
-    @Suppress("TooGenericExceptionCaught")
-    @OptIn(ExperimentalUuidApi::class)
-    private fun discoverServicesAndSetupCharacteristics(peripheral: Peripheral) {
-        connectionScope.launch {
-            peripheral
-                .services(listOf(BTM_SERVICE_UUID.toKotlinUuid()))
-                .onEach { services ->
-                    val meshtasticService = services?.find { it.uuid == BTM_SERVICE_UUID.toKotlinUuid() }
+    private suspend fun discoverServicesAndSetupCharacteristics() {
+        try {
+            val chars =
+                bleConnection.discoverCharacteristics(
+                    SERVICE_UUID,
+                    listOf(
+                        TORADIO_CHARACTERISTIC,
+                        FROMNUM_CHARACTERISTIC,
+                        FROMRADIO_CHARACTERISTIC,
+                        LOGRADIO_CHARACTERISTIC,
+                    ),
+                )
 
-                    if (meshtasticService != null) {
-                        toRadioCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_TORADIO_CHARACTER.toKotlinUuid() }
-                        fromNumCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_FROMNUM_CHARACTER.toKotlinUuid() }
-                        fromRadioCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIO_CHARACTER.toKotlinUuid() }
-                        logRadioCharacteristic =
-                            meshtasticService.characteristics.find { it.uuid == BTM_LOGRADIO_CHARACTER.toKotlinUuid() }
+            if (chars != null) {
+                toRadioCharacteristic = chars[TORADIO_CHARACTERISTIC]
+                fromNumCharacteristic = chars[FROMNUM_CHARACTERISTIC]
+                fromRadioCharacteristic = chars[FROMRADIO_CHARACTERISTIC]
+                logRadioCharacteristic = chars[LOGRADIO_CHARACTERISTIC]
 
-                        if (
-                            listOf(toRadioCharacteristic, fromNumCharacteristic, fromRadioCharacteristic).all {
-                                it != null
-                            }
-                        ) {
-                            Logger.d {
-                                "[$address] Found toRadio: ${toRadioCharacteristic?.uuid}, ${toRadioCharacteristic?.instanceId}"
-                            }
-                            Logger.d {
-                                "[$address] Found fromNum: ${fromNumCharacteristic?.uuid}, ${fromNumCharacteristic?.instanceId}"
-                            }
-                            Logger.d {
-                                "[$address] Found fromRadio: ${fromRadioCharacteristic?.uuid}, ${fromRadioCharacteristic?.instanceId}"
-                            }
-                            Logger.d {
-                                "[$address] Found logRadio: ${logRadioCharacteristic?.uuid}, ${logRadioCharacteristic?.instanceId}"
-                            }
-                            setupNotifications()
-                            service.onConnect()
-                        } else {
-                            Logger.w { "[$address] Discovery failed: missing required characteristics" }
-                            service.onDisconnect(BleError.DiscoveryFailed("One or more characteristics not found"))
-                        }
-                    } else {
-                        Logger.w { "[$address] Discovery failed: Meshtastic service not found" }
-                        service.onDisconnect(BleError.DiscoveryFailed("Meshtastic service not found"))
-                    }
-                }
-                .catch { e ->
-                    Logger.w(e) { "[$address] Service discovery failed" }
-                    try {
-                        peripheral.disconnect()
-                    } catch (e2: Exception) {
-                        Logger.w(e2) { "[$address] Failed to disconnect in discovery catch" }
-                    }
-                    service.onDisconnect(BleError.from(e))
-                }
-                .launchIn(connectionScope)
+                Logger.d { "[$address] Characteristics discovered successfully" }
+                setupNotifications()
+                service.onConnect()
+            } else {
+                Logger.w { "[$address] Discovery failed: missing required characteristics" }
+                service.onDisconnect(BleError.DiscoveryFailed("One or more characteristics not found"))
+            }
+        } catch (e: Exception) {
+            Logger.w(e) { "[$address] Service discovery failed" }
+            bleConnection.disconnect()
+            service.onDisconnect(BleError.from(e))
         }
     }
 
     // --- Notification Setup ---
 
-    @OptIn(ExperimentalUuidApi::class)
-    private suspend fun setupNotifications() {
-        retryCall { fromNumCharacteristic?.subscribe() }
-            ?.onStart { Logger.d { "[$address] Subscribing to fromNumCharacteristic" } }
+    private fun setupNotifications() {
+        fromNumCharacteristic
+            ?.subscribe()
             ?.onEach { notifyBytes ->
                 Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
                 connectionScope.launch { drainPacketQueueAndDispatch() }
             }
             ?.catch { e ->
-                Logger.w(e) { "[$address] Error subscribing to fromNumCharacteristic" }
+                Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
                 service.onDisconnect(BleError.from(e))
             }
             ?.launchIn(scope = connectionScope)
 
-        retryCall { logRadioCharacteristic?.subscribe() }
-            ?.onStart { Logger.d { "[$address] Subscribing to logRadioCharacteristic" } }
+        logRadioCharacteristic
+            ?.subscribe()
             ?.onEach { notifyBytes ->
                 Logger.d { "[$address] LogRadio Notification (${notifyBytes.size} bytes), dispatching packet" }
                 dispatchPacket(notifyBytes)
             }
             ?.catch { e ->
-                Logger.w(e) { "[$address] Error subscribing to logRadioCharacteristic" }
+                Logger.w(e) { "[$address] Error in logRadioCharacteristic subscription" }
                 service.onDisconnect(BleError.from(e))
             }
             ?.launchIn(scope = connectionScope)
-    }
-
-    private suspend fun <T> retryCall(block: suspend () -> T): T {
-        var currentAttempt = 0
-        while (true) {
-            try {
-                return block()
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                currentAttempt++
-                if (currentAttempt >= RETRY_COUNT) {
-                    Logger.w(e) { "[$address] BLE operation failed after $RETRY_COUNT attempts, giving up" }
-                    throw e
-                }
-                Logger.w(e) {
-                    "[$address] BLE operation failed (attempt $currentAttempt/$RETRY_COUNT), " +
-                        "retrying in ${RETRY_DELAY_MS}ms..."
-                }
-                delay(RETRY_DELAY_MS)
-            }
-        }
     }
 
     // --- IRadioInterface Implementation ---
@@ -370,10 +316,6 @@ constructor(
      */
     override fun handleSendToRadio(p: ByteArray) {
         toRadioCharacteristic?.let { characteristic ->
-            if (peripheral == null) {
-                Logger.w { "[$address] BLE peripheral is null, cannot send packet" }
-                return@let
-            }
             connectionScope.launch {
                 writeMutex.withLock {
                     try {
@@ -383,15 +325,13 @@ constructor(
                             } else {
                                 WriteType.WITH_RESPONSE
                             }
-                        retryCall {
-                            packetsSent++
-                            bytesSent += p.size
-                            Logger.d {
-                                "[$address] Writing packet #$packetsSent to toRadioCharacteristic with $writeType - " +
-                                    "${p.size} bytes (Total TX: $bytesSent bytes)"
-                            }
-                            characteristic.write(p, writeType = writeType)
+                        packetsSent++
+                        bytesSent += p.size
+                        Logger.d {
+                            "[$address] Writing packet #$packetsSent to toRadioCharacteristic with $writeType - " +
+                                "${p.size} bytes (Total TX: $bytesSent bytes)"
                         }
+                        characteristic.write(p, writeType = writeType)
                         drainPacketQueueAndDispatch()
                     } catch (e: InvalidAttributeException) {
                         Logger.w(e) { "[$address] Attribute invalidated during write, clearing characteristics" }
@@ -428,7 +368,7 @@ constructor(
                     "Packets TX: $packetsSent ($bytesSent bytes)"
             }
             connectionScope.cancel()
-            peripheral?.disconnect()
+            bleConnection.disconnect()
             service.onDisconnect(true)
         }
     }
@@ -444,18 +384,4 @@ constructor(
         fromRadioCharacteristic = null
         logRadioCharacteristic = null
     }
-
-    companion object {
-        private const val RETRY_COUNT = 3
-        private const val RETRY_DELAY_MS = 500L
-    }
-}
-
-object BleConstants {
-    const val BLE_NAME_PATTERN = "^.*_([0-9a-fA-F]{4})$"
-    val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
-    val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
-    val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
-    val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
-    val BTM_LOGRADIO_CHARACTER: UUID = UUID.fromString("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
 }

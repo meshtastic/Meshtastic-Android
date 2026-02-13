@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.repository.radio
+package org.meshtastic.core.ble
 
-import com.geeksville.mesh.service.RadioNotConnectedException
 import no.nordicsemi.kotlin.ble.client.exception.BluetoothUnavailableException
 import no.nordicsemi.kotlin.ble.client.exception.ConnectionFailedException
 import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
@@ -130,9 +129,6 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
                     else -> BluetoothError(exception)
                 }
             }
-
-            is RadioNotConnectedException -> PeripheralNotFound
-            is ManagerClosedException -> ManagerClosed(exception)
             else -> GenericError(exception)
         }
     }

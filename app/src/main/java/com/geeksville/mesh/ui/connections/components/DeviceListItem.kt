@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.connections.components
 
 import androidx.compose.foundation.Indication
@@ -22,6 +21,8 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -40,11 +41,13 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
+import no.nordicsemi.android.common.ui.view.RssiIcon
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
@@ -62,6 +65,7 @@ fun DeviceListItem(
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
     onDelete: (() -> Unit)? = null,
+    rssi: Int? = null,
 ) {
     val icon =
         when (device) {
@@ -112,10 +116,16 @@ fun DeviceListItem(
             }
         },
         trailingContent = {
-            if (connectionState.isConnecting()) {
-                CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
-            } else {
-                RadioButton(selected = connectionState.isConnected(), onClick = null)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (rssi != null) {
+                    RssiIcon(rssi = rssi)
+                }
+
+                if (connectionState.isConnecting()) {
+                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
+                } else {
+                    RadioButton(selected = connectionState.isConnected(), onClick = null)
+                }
             }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),

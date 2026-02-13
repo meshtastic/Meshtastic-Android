@@ -24,7 +24,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -42,6 +41,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
@@ -50,8 +50,6 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.meshtastic
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import javax.inject.Inject
-
-// ... (DeviceListEntry sealed class remains the same) ...
 
 @HiltViewModel
 @Suppress("LongParameterList", "TooManyFunctions")

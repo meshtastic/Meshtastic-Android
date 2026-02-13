@@ -52,9 +52,10 @@ osmdroid-android = "6.1.20"
 spotless = "8.2.1"
 wire = "6.0.0-alpha02"
 vico = "3.0.0-beta.3"
-# Removed gradle-doctor
 dependency-guard = "0.5.0"
 nordic-ble = "2.0.0-alpha12"
+nordic-common = "2.8.2"
+nordic-log = "2.5.0"
 
 
 [libraries]
@@ -193,6 +194,14 @@ nordic-client-mock = { module = "no.nordicsemi.kotlin.ble:client-mock", version.
 nordic-core-android-mock = { module = "no.nordicsemi.kotlin.ble:core-android-mock", version.ref = "nordic-ble" }
 nordic-core-mock = { module = "no.nordicsemi.kotlin.ble:core-mock", version.ref = "nordic-ble" }
 nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.11.0" }
+
+nordic-common-core = { module = "no.nordicsemi.android.common:core", version.ref = "nordic-common" }
+nordic-common-logger = { module = "no.nordicsemi.android.common:logger", version.ref = "nordic-common" }
+nordic-common-permissions-ble = { module = "no.nordicsemi.android.common:permissions-ble", version.ref = "nordic-common" }
+nordic-common-permissions-notification = { module = "no.nordicsemi.android.common:permissions-notification", version.ref = "nordic-common" }
+nordic-common-scanner-ble = { module = "no.nordicsemi.android.common:scanner-ble", version.ref = "nordic-common" }
+nordic-common-ui = { module = "no.nordicsemi.android.common:ui", version.ref = "nordic-common" }
+
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
@@ -218,7 +227,7 @@ firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-cra
 google-services-gradlePlugin = { module = "com.google.gms.google-services:com.google.gms.google-services.gradle.plugin", version = "4.4.4" }
 hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 kover-gradlePlugin = { module = "org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin", version.ref = "kover" }
-ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
+ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version = "2.3.5" }
 secrets-gradlePlugin = {module = "com.google.android.secrets-gradle-plugin:com.google.android.secrets-gradle-plugin.gradle.plugin", version = "1.1.0"}
 serialization-gradlePlugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
 spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle", version.ref = "spotless" }

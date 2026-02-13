@@ -37,22 +37,18 @@ import no.nordicsemi.kotlin.ble.core.and
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-private val SERVICE_UUID = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-private val OTA_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
-private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
+private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+private val OTA_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
+private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportNordicMockTest {
 
     private val testDispatcher = kotlinx.coroutines.test.StandardTestDispatcher()
     private val address = "00:11:22:33:44:55"
-
-    private fun java.util.UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Before
     fun setup() {
@@ -72,7 +68,6 @@ class BleOtaTransportNordicMockTest {
         // Use backgroundScope so that simulation coroutines are cancelled after the test
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
 
-        var otaCharHandle: Int = -1
         var txCharHandle: Int = -1
 
         // Use a property to hold the peripheral since we need it in the event handler
@@ -116,18 +111,17 @@ class BleOtaTransportNordicMockTest {
                 ) {
                     CompleteLocalName("ESP32-OTA")
                 }
-                connectable(name = "ESP32-OTA", eventHandler = eventHandler) {
-                    Service(uuid = SERVICE_UUID.toKotlinUuid()) {
-                        otaCharHandle =
-                            Characteristic(
-                                uuid = OTA_CHARACTERISTIC_UUID.toKotlinUuid(),
-                                properties =
-                                CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
-                                permission = Permission.WRITE,
-                            )
+                connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
+                    Service(uuid = SERVICE_UUID) {
+                        Characteristic(
+                            uuid = OTA_CHARACTERISTIC_UUID,
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
                         txCharHandle =
                             Characteristic(
-                                uuid = TX_CHARACTERISTIC_UUID.toKotlinUuid(),
+                                uuid = TX_CHARACTERISTIC_UUID,
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )

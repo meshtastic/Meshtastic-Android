@@ -105,6 +105,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
             freeCompilerArgs.addAll(
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                 "-Xcontext-parameters",
                 "-Xannotation-default-target=param-property"
             )

@@ -195,6 +195,7 @@ project.afterEvaluate {
 
 dependencies {
     implementation(projects.core.analytics)
+    implementation(projects.core.ble)
     implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.database)
@@ -246,6 +247,11 @@ dependencies {
     implementation(libs.kermit)
 
     implementation(libs.nordic.client.android)
+    implementation(libs.nordic.common.core)
+    implementation(libs.nordic.common.permissions.ble)
+    implementation(libs.nordic.common.permissions.notification)
+    implementation(libs.nordic.common.scanner.ble)
+    implementation(libs.nordic.common.ui)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

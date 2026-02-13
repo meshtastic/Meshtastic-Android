@@ -18,8 +18,6 @@
 
 package com.geeksville.mesh.ui
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
@@ -94,11 +92,9 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -161,7 +157,7 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanModel = hiltViewModel()) {
@@ -171,16 +167,11 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-        LaunchedEffect(connectionState, notificationPermissionState) {
-            if (connectionState == ConnectionState.Connected && !notificationPermissionState.status.isGranted) {
-                notificationPermissionState.launchPermissionRequest()
-            }
-        }
-    }
-
     if (connectionState == ConnectionState.Connected) {
+        RequestNotificationPermission {
+            // Nordic handled the trigger for POST_NOTIFICATIONS when connected
+        }
+
         sharedContactRequested?.let {
             SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
         }

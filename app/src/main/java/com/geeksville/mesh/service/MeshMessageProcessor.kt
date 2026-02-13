@@ -36,11 +36,11 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import java.util.ArrayDeque
 import java.util.Locale
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -123,7 +123,7 @@ constructor(
 
         insertMeshLog(
             MeshLog(
-                uuid = UUID.randomUUID().toString(),
+                uuid = Uuid.random().toString(),
                 message_type = type,
                 received_date = System.currentTimeMillis(),
                 raw_message = message,
@@ -183,7 +183,7 @@ constructor(
         val decoded = packet.decoded ?: return
         val log =
             MeshLog(
-                uuid = UUID.randomUUID().toString(),
+                uuid = Uuid.random().toString(),
                 message_type = "Packet",
                 received_date = System.currentTimeMillis(),
                 raw_message = packet.toString(),

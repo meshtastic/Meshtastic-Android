@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.model
 
 import android.hardware.usb.UsbManager
@@ -23,6 +22,7 @@ import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
+import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.model.util.anonymize
 
 /**
@@ -64,3 +64,13 @@ sealed class DeviceListEntry(open val name: String, open val fullAddress: String
 
     data class Mock(override val name: String) : DeviceListEntry(name, "m", true)
 }
+
+/** Matches names like Meshtastic_1234. */
+private val bleNameRegex = Regex(BLE_NAME_PATTERN)
+
+/**
+ * Returns the short name of the device if it's a Meshtastic device, otherwise null.
+ *
+ * @return The short name (e.g., 1234) or null.
+ */
+fun Peripheral.getMeshtasticShortName(): String? = name?.let { bleNameRegex.find(it)?.groupValues?.get(1) }
