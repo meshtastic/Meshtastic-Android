@@ -300,7 +300,6 @@
     <string name="select_all">Select all</string>
     <string name="close_selection">Close selection</string>
     <string name="delete_selection">Delete selected</string>
-    <string name="map_style_selection">Style Selection</string>
     <string name="map_download_region">Download Region</string>
     <string name="name">Name</string>
     <string name="description">Description</string>
@@ -1016,17 +1015,14 @@
 
 
     <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
-    <string name="analytics_platforms">"Analytics platforms: "</string>
-    <string name="firebase_link" translatable="false">Firebase https://firebase.google.com/</string>
-    <string name="datadog_link" translatable="false">Datadog  https://www.datadoghq.com/</string>
+    <string name="analytics_platforms">Analytics platforms:</string>
+    <string name="firebase_link" translatable="false">Firebase: https://firebase.google.com/</string>
+    <string name="datadog_link" translatable="false">Datadog: https://www.datadoghq.com/</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
-    <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
+    <string name="privacy_url" translatable="false">https://meshtastic.org/docs/legal/privacy/</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Heard %1$d Relay</item>
-        <item quantity="other">Heard %1$d Relays</item>
-    </plurals>
+    <string name="relays">Heard relays: %1$d</string>
 
     <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
     <string name="learn_more">Learn more</string>
@@ -1076,7 +1072,7 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Rebooting to DFU...</string>
     <string name="firmware_update_waiting_for_device">Waiting for DFU device...</string>
-    <string name="firmware_update_copying">Copying firmware...</string>
+    <string name="firmware_update_copying">High-five! Wait, copying firmware...</string>
     <string name="firmware_update_save_dfu_file">Please save the .uf2 file to your device&apos;s DFU drive.</string>
     <string name="firmware_update_flashing">Flashing device, please wait...</string>
     <string name="firmware_update_method_usb">USB File Transfer</string>
@@ -1116,18 +1112,9 @@
 
     <string name="interval_unset">Unset</string>
     <string name="interval_always_on">Always On</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 second</item>
-        <item quantity="other">%1$d seconds</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minute</item>
-        <item quantity="other">%1$d minutes</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 hour</item>
-        <item quantity="other">%1$d hours</item>
-    </plurals>
+    <string name="plurals_seconds">Seconds: %1$d</string>
+    <string name="plurals_minutes">Minutes: %1$d</string>
+    <string name="plurals_hours">Hours: %1$d</string>
 
     <!-- Compass -->
     <string name="compass_title">Compass</string>
@@ -1178,4 +1165,16 @@
     <string name="generate_qr_code">Generate QR Code</string>
     <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
     <string name="all_time">All</string>
+
+    <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Configure Bluetooth Permissions</string>
+    <string name="connect_to_radio">Connect to Radio</string>
+    <string name="connect_to_radio_description">Scan for and connect to your Meshtastic mesh radio device.</string>
+    <string name="bluetooth_feature_discovery">Discovery</string>
+    <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
+    <string name="bluetooth_feature_config">Configuration</string>
+    <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
+
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_denied">Permission denied</string>
 </resources>

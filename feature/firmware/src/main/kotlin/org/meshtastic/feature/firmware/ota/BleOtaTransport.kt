@@ -139,16 +139,18 @@ class BleOtaTransport(
                         "Ensure the device has rebooted into OTA mode and is advertising.",
                 )
 
-        try {
-            withTimeout(CONNECTION_TIMEOUT_MS) {
-                bleConnection.connectionState
-                    .onEach { state ->
-                        Logger.d { "BLE OTA: Connection state changed to $state" }
-                        isConnected = state is ConnectionState.Connected
-                    }
-                    .launchIn(transportScope)
+        bleConnection.connectionState
+            .onEach { state ->
+                Logger.d { "BLE OTA: Connection state changed to $state" }
+                isConnected = state is ConnectionState.Connected
+            }
+            .launchIn(transportScope)
 
-                bleConnection.connect(p)
+        try {
+            val finalState = bleConnection.connectAndAwait(p, CONNECTION_TIMEOUT_MS)
+            if (finalState is ConnectionState.Disconnected) {
+                Logger.w { "BLE OTA: Failed to connect to ${p.address} (state=$finalState)" }
+                throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${p.address}")
             }
         } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
             Logger.w { "BLE OTA: Timed out waiting to connect to ${p.address}. Error: ${e.message}" }

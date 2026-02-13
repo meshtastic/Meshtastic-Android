@@ -19,6 +19,11 @@ package org.meshtastic.feature.intro
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -28,6 +33,10 @@ import kotlinx.serialization.Serializable
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.permission_denied
+import org.meshtastic.core.strings.permission_granted
+import org.meshtastic.core.ui.util.showToast
 
 /**
  * Composable function for the main application introduction screen. This screen guides the user through initial setup
@@ -35,7 +44,7 @@ import no.nordicsemi.android.common.permissions.notification.RequestNotification
  *
  * @param onDone Callback invoked when the introduction flow is completed.
  */
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun AppIntroductionScreen(onDone: () -> Unit) {
     val context = LocalContext.current
@@ -49,19 +58,33 @@ fun AppIntroductionScreen(onDone: () -> Unit) {
             entry<Welcome> { WelcomeScreen(onGetStarted = { backStack.add(Notifications) }) }
 
             entry<Notifications> {
-                RequestNotificationPermission { canShowNotifications ->
-                    NotificationsScreen(
-                        showNextButton = canShowNotifications == true,
-                        onSkip = {
-                            // Skip this screen and the Critical Alerts screen. Proceed to Bluetooth screen.
-                            backStack.add(Bluetooth)
-                        },
-                        onConfigure = {
+                var isConfiguring by remember { mutableStateOf(false) }
+
+                if (isConfiguring) {
+                    RequestNotificationPermission { canShowNotifications ->
+                        LaunchedEffect(canShowNotifications) {
                             if (canShowNotifications == true) {
-                                backStack.add(CriticalAlerts)
+                                context.showToast(Res.string.permission_granted)
+                            } else if (canShowNotifications == false) {
+                                context.showToast(Res.string.permission_denied)
                             }
-                            // Else: RequestNotificationPermission internally handles the request UI.
-                        },
+                        }
+
+                        NotificationsScreen(
+                            showNextButton = canShowNotifications == true,
+                            onSkip = { backStack.add(Bluetooth) },
+                            onConfigure = {
+                                if (canShowNotifications == true) {
+                                    backStack.add(CriticalAlerts)
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    NotificationsScreen(
+                        showNextButton = false,
+                        onSkip = { backStack.add(Bluetooth) },
+                        onConfigure = { isConfiguring = true },
                     )
                 }
             }
@@ -81,20 +104,50 @@ fun AppIntroductionScreen(onDone: () -> Unit) {
                 )
             }
 
-            entry<Bluetooth> { RequireBluetooth { backStack.add(Location) } }
+            entry<Bluetooth> {
+                var isConfiguring by remember { mutableStateOf(false) }
+
+                if (isConfiguring) {
+                    RequireBluetooth {
+                        LaunchedEffect(Unit) {
+                            context.showToast(Res.string.permission_granted)
+                            backStack.add(Location)
+                        }
+                    }
+                } else {
+                    BluetoothScreen(
+                        showNextButton = false,
+                        onSkip = { backStack.add(Location) },
+                        onConfigure = { isConfiguring = true },
+                    )
+                }
+            }
 
             entry<Location> {
-                RequireLocation { isLocationRequiredAndDisabled ->
-                    LocationScreen(
-                        showNextButton = !isLocationRequiredAndDisabled,
-                        onSkip = onDone,
-                        onConfigure = {
+                var isConfiguring by remember { mutableStateOf(false) }
+
+                if (isConfiguring) {
+                    RequireLocation { isLocationRequiredAndDisabled ->
+                        LaunchedEffect(isLocationRequiredAndDisabled) {
                             if (!isLocationRequiredAndDisabled) {
-                                onDone()
+                                context.showToast(Res.string.permission_granted)
+                            } else {
+                                context.showToast(Res.string.permission_denied)
                             }
-                            // Else: RequireLocation internally handles the request UI.
-                        },
-                    )
+                        }
+
+                        LocationScreen(
+                            showNextButton = !isLocationRequiredAndDisabled,
+                            onSkip = onDone,
+                            onConfigure = {
+                                if (!isLocationRequiredAndDisabled) {
+                                    onDone()
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    LocationScreen(showNextButton = false, onSkip = onDone, onConfigure = { isConfiguring = true })
                 }
             }
         },

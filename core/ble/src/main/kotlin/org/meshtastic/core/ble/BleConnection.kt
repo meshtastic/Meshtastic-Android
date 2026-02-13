@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
@@ -32,6 +33,8 @@ import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import kotlin.uuid.Uuid
+
+private const val SERVICE_DISCOVERY_TIMEOUT_MS = 10_000L
 
 /**
  * Encapsulates a BLE connection to a [Peripheral]. Handles connection lifecycle, state monitoring, and service
@@ -58,7 +61,8 @@ class BleConnection(
     private var stateJob: Job? = null
 
     /**
-     * Connects to the given [Peripheral].
+     * Connects to the given [Peripheral]. Note that this method returns as soon as the connection attempt is initiated.
+     * Use [connectAndAwait] if you need to wait for the connection to be established.
      *
      * @param p The peripheral to connect to.
      */
@@ -86,6 +90,21 @@ class BleConnection(
                 .launchIn(scope)
     }
 
+    /**
+     * Connects to the given [Peripheral] and waits for a terminal state (Connected or Disconnected).
+     *
+     * @param p The peripheral to connect to.
+     * @param timeoutMs The maximum time to wait for a connection in milliseconds.
+     * @return The final [ConnectionState].
+     * @throws kotlinx.coroutines.TimeoutCancellationException if the timeout is reached.
+     */
+    suspend fun connectAndAwait(p: Peripheral, timeoutMs: Long): ConnectionState {
+        connect(p)
+        return withTimeout(timeoutMs) {
+            connectionState.first { it is ConnectionState.Connected || it is ConnectionState.Disconnected }
+        }
+    }
+
     /** Discovers characteristics for a specific service with retries. */
     @Suppress("ReturnCount")
     suspend fun discoverCharacteristics(
@@ -93,7 +112,8 @@ class BleConnection(
         characteristicUuids: List<Uuid>,
     ): Map<Uuid, RemoteCharacteristic>? = retryBleOperation(tag = tag) {
         val p = peripheral ?: return@retryBleOperation null
-        val services = p.services(listOf(serviceUuid)).filterNotNull().first()
+        val services =
+            withTimeout(SERVICE_DISCOVERY_TIMEOUT_MS) { p.services(listOf(serviceUuid)).filterNotNull().first() }
         val service = services.find { it.uuid == serviceUuid } ?: return@retryBleOperation null
 
         val result = mutableMapOf<Uuid, RemoteCharacteristic>()

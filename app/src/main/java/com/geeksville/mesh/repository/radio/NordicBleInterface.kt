@@ -58,6 +58,7 @@ import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
 private const val SCAN_RETRY_DELAY_MS = 1000L
+private const val CONNECTION_TIMEOUT_MS = 15_000L
 private val SCAN_TIMEOUT = 5.seconds
 
 /**
@@ -205,7 +206,10 @@ constructor(
                     .launchIn(connectionScope)
 
                 val p = retryBleOperation(tag = address) { findPeripheral() }
-                bleConnection.connect(p)
+                val state = bleConnection.connectAndAwait(p, CONNECTION_TIMEOUT_MS)
+                if (state !is ConnectionState.Connected) {
+                    throw RadioNotConnectedException("Failed to connect to device at address $address")
+                }
 
                 onConnected()
                 discoverServicesAndSetupCharacteristics()

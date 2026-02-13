@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import android.text.Spannable
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,9 +48,15 @@ fun AutoLinkText(
     style: TextStyle = TextStyle.Default,
     linkStyles: TextLinkStyles = DefaultTextLinkStyles,
     color: Color = Color.Unspecified,
+    textAlign: TextAlign? = null,
 ) {
     val spannable = remember(text) { linkify(text) }
-    Text(text = spannable.toAnnotatedString(linkStyles), modifier = modifier, style = style.copy(color = color))
+    Text(
+        text = spannable.toAnnotatedString(linkStyles),
+        modifier = modifier,
+        style = style.copy(color = color),
+        textAlign = textAlign,
+    )
 }
 
 private fun linkify(text: String) = Factory.getInstance().newSpannable(text).also {
