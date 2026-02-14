@@ -166,6 +166,7 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
 @Composable
 fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanModel = hiltViewModel()) {
     val navController = rememberNavController()
+    LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) } }
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
