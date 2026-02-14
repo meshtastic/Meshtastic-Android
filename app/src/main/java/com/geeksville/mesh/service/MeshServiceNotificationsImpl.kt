@@ -436,7 +436,7 @@ constructor(
     }
 
     override fun showNewNodeSeenNotification(node: NodeEntity) {
-        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name)
+        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name, node.num)
         notificationManager.notify(node.num, notification)
     }
 
@@ -615,10 +615,10 @@ constructor(
             .build()
     }
 
-    private fun createNewNodeSeenNotification(name: String, message: String): Notification {
+    private fun createNewNodeSeenNotification(name: String, message: String, nodeNum: Int): Notification {
         val title = getString(Res.string.new_node_seen).format(name)
         val builder =
-            commonBuilder(NotificationType.NewNode)
+            commonBuilder(NotificationType.NewNode, createOpenNodeDetailIntent(nodeNum))
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setAutoCancel(true)
                 .setContentTitle(title)
@@ -636,7 +636,7 @@ constructor(
         val batteryLevel = node.deviceTelemetry?.device_metrics?.battery_level ?: 0
         val message = getString(Res.string.low_battery_message).format(node.longName, batteryLevel)
 
-        return commonBuilder(type)
+        return commonBuilder(type, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -689,6 +689,19 @@ constructor(
         return TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
             getPendingIntent(waypointId, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+    }
+
+    private fun createOpenNodeDetailIntent(nodeNum: Int): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/node?destNum=$nodeNum".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(nodeNum, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
     }
 
