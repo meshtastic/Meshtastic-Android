@@ -24,7 +24,7 @@ import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import java.net.MalformedURLException
 
-private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
+private const val BASE64FLAGS = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
 
 /**
  * Return a [SharedContact] that represents the contact encoded by the URL.
@@ -40,15 +40,26 @@ fun Uri.toSharedContact(): SharedContact {
 
     val frag = fragment
     if (frag.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
-        throw MalformedURLException("Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!frag.isNullOrBlank()}")
+        throw MalformedURLException(
+            "Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!frag.isNullOrBlank()}",
+        )
     }
 
+    val data = frag.substringBefore('?')
+    val decodedBytes =
+        try {
+            // We use a more lenient decoding for the input to handle variations from different clients
+            Base64.decode(data, Base64.DEFAULT or Base64.URL_SAFE)
+        } catch (e: Exception) {
+            throw MalformedURLException(
+                "Failed to Base64 decode SharedContact data ($data): ${e.javaClass.simpleName}: ${e.message}",
+            )
+        }
+
     return try {
-        // Handle potential query parameters within the fragment (e.g. from older Apple/web clients)
-        val data = frag.substringBefore('?')
-        SharedContact.ADAPTER.decode(Base64.decode(data, BASE64FLAGS).toByteString())
+        SharedContact.ADAPTER.decode(decodedBytes.toByteString())
     } catch (e: Exception) {
-        throw MalformedURLException("Failed to decode SharedContact: ${e.message}")
+        throw MalformedURLException("Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}")
     }
 }
 
