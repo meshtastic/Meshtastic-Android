@@ -19,7 +19,7 @@ savedstate = "1.4.0"
 # Kotlin
 kotlin = "2.3.10"
 kotlinx-coroutines-android = "1.10.2"
-kotlinx-datetime = "0.7.1"
+kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
 kover = "0.9.7"
