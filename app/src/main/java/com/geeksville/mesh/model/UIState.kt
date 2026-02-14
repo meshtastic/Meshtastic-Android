@@ -198,6 +198,13 @@ constructor(
     val unreadMessageCount =
         packetRepository.getUnreadCountTotal().map { it.coerceAtLeast(0) }.stateInWhileSubscribed(initialValue = 0)
 
+    private val _navigationDeepLink = MutableSharedFlow<Uri>(replay = 1)
+    val navigationDeepLink = _navigationDeepLink.asSharedFlow()
+
+    fun handleNavigationDeepLink(uri: Uri) {
+        _navigationDeepLink.tryEmit(uri)
+    }
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
