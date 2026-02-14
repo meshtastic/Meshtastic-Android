@@ -15,20 +15,16 @@
      along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
-    <!-- Shim in the system UI overrides -->
-    <style name="SplashTheme.NightAdjusted" parent="Theme.SplashScreen">
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+    <!-- Splash screen theme using the Jetpack Splash Screen library -->
+    <style name="SplashTheme" parent="Theme.SplashScreen">
+        <!-- Background color for the splash screen -->
         <item name="windowSplashScreenBackground">#FFFFFF</item>
-    </style>
-
-    <style name="SplashTheme" parent="SplashTheme.NightAdjusted">
+        <!-- The splash screen icon -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
-        <item name="postSplashScreenTheme">@style/AppTheme</item>
+        <!-- The theme to switch to after the splash screen is dismissed -->
+        <item name="postSplashScreenTheme">@style/Theme.Material3.DynamicColors.DayNight.NoActionBar</item>
     </style>
-
-    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar" />
 
 </resources>

@@ -112,7 +112,8 @@
         android:hardwareAccelerated="true"
         android:theme="@style/SplashTheme"
         android:localeConfig="@xml/locales_config"
-        android:networkSecurityConfig="@xml/network_security_config">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true">
 
         <uses-library
             android:name="org.apache.http.legacy"

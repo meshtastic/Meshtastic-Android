@@ -10,12 +10,12 @@
     <path
         android:pathData="m17.5564,11.8482 l-5.208,7.6376 -1.5217,-1.0377 5.9674,-8.7512c0.1714,-0.2513 0.4558,-0.4019 0.76,-0.4022 0.3042,-0.0003 0.5889,0.1497 0.7608,0.4008l5.9811,8.7374 -1.5199,1.0404z"
         android:strokeLineJoin="round"
-        android:fillColor="@color/ic_splash"
+        android:fillColor="@android:color/black"
         android:fillType="evenOdd"/>
     <path
         android:pathData="m5.854,19.4956 l6.3707,-9.3423 -1.5749,-1.0739 -6.3707,9.3423z"
         android:strokeLineJoin="round"
-        android:fillColor="@color/ic_splash"
+        android:fillColor="@android:color/black"
         android:fillType="evenOdd"/>
   </group>
 </vector>
