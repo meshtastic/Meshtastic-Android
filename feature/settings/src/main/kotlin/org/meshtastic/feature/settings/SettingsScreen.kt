@@ -540,10 +540,7 @@ private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit
 
 @VisibleForTesting
 @Composable
-fun HomoglyphSetting(
-    homoglyphEncodingEnabled: Boolean,
-    onToggle: () -> Unit,
-) {
+fun HomoglyphSetting(homoglyphEncodingEnabled: Boolean, onToggle: () -> Unit) {
     val currentLocale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
     val supportedLanguages = listOf("ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn")
     if (currentLocale?.language in supportedLanguages) {

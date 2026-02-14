@@ -36,21 +36,15 @@ import java.util.Locale
 @Config(sdk = [34])
 class HomoglyphSettingTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     @Test
     fun homoglyphSetting_isVisible_forRussianLocale() {
-        val russianConfig = Configuration().apply {
-            setLocale(Locale.forLanguageTag("ru"))
-        }
+        val russianConfig = Configuration().apply { setLocale(Locale.forLanguageTag("ru")) }
 
         composeTestRule.setContent {
             CompositionLocalProvider(LocalConfiguration provides russianConfig) {
-                HomoglyphSetting(
-                    homoglyphEncodingEnabled = false,
-                    onToggle = {},
-                )
+                HomoglyphSetting(homoglyphEncodingEnabled = false, onToggle = {})
             }
         }
 
@@ -60,16 +54,11 @@ class HomoglyphSettingTest {
 
     @Test
     fun homoglyphSetting_isNotVisible_forEnglishLocale() {
-        val englishConfig = Configuration().apply {
-            setLocale(Locale.forLanguageTag("en"))
-        }
+        val englishConfig = Configuration().apply { setLocale(Locale.forLanguageTag("en")) }
 
         composeTestRule.setContent {
             CompositionLocalProvider(LocalConfiguration provides englishConfig) {
-                HomoglyphSetting(
-                    homoglyphEncodingEnabled = false,
-                    onToggle = {},
-                )
+                HomoglyphSetting(homoglyphEncodingEnabled = false, onToggle = {})
             }
         }
 
