@@ -180,29 +180,20 @@
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
-                <!-- The QR codes to share channel settings and contacts are shared as meshtastic URLS
+                <!--
+                  The QR codes to share channel settings and contacts are shared as meshtastic URLS.
+                  We also support NFC NDEF Discovery for the same URLs.
 
-                an approximate example:
-                https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
-                https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
+                  An approximate example:
+                  https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                  https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
                 -->
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https" />
-                <data android:host="meshtastic.org" />
-                <data android:pathPrefix="/e/" />
-                <data android:pathPrefix="/E/" />
-                <data android:pathPrefix="/v/" />
-                <data android:pathPrefix="/V/" />
-            </intent-filter>
-
-            <!-- Support NFC NDEF Discovery for the same URLs -->
-            <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="https" />
                 <data android:host="meshtastic.org" />
                 <data android:pathPrefix="/e/" />
