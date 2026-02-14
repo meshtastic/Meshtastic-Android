@@ -35,7 +35,6 @@ import no.nordicsemi.kotlin.ble.client.mock.internal.MockRemoteCharacteristic
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
-import org.junit.Ignore
 import org.junit.Test
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
@@ -50,7 +49,6 @@ class NordicBleInterfaceDrainTest {
     private val testDispatcher = StandardTestDispatcher()
     private val address = "00:11:22:33:44:55"
 
-    @Ignore("Flaky: relies on timing in the Nordic BLE mock library which causes intermittent CI failures")
     @Test
     fun `drainPacketQueueAndDispatch reads multiple packets until empty`() = runTest(testDispatcher) {
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
