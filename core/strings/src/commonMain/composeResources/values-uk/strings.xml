@@ -29,11 +29,14 @@
     <string name="node_filter_ignored">Ви переглядаєте ігноровані вузли,\nНатисніть щоб повернутися до списку вузлів.</string>
     <string name="node_filter_show_details">Показати деталі</string>
     <string name="node_sort_title">Сортувати за</string>
+    <string name="node_sort_button">Опції сортування вузлів</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Канал</string>
     <string name="node_sort_distance">Відстань</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="via_mqtt">через MQTT</string>
+    <string name="via_udp">через UDP</string>
+    <string name="via_api">через API</string>
     <string name="node_sort_via_favorite">через Обране</string>
     <string name="node_filter_show_ignored">Показати лише ігноровані вузли</string>
     <string name="message_status_enroute">Очікування на підтвердження</string>
@@ -106,6 +109,7 @@
     <string name="gps_en_gpio">GPS EN GPIO</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Відлагодження</string>
+    <string name="channel">Кн</string>
     <string name="channel_name">Ім'я каналу</string>
     <string name="qr_code">QR код</string>
     <string name="unknown_username">Невідомий користувач</string>
@@ -246,6 +250,7 @@
     <string name="delivery_confirmed">Доставку підтверджено</string>
     <string name="error">Помилка</string>
     <string name="ignore">Ігнорувати</string>
+    <string name="remove_ignored">Вилучити з ігнорованих</string>
     <string name="ignore_add">Додати '%1$s' до чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="ignore_remove">Видалити '%1$s' з чорного списку? Після цієї зміни ваш пристрій перезавантажиться.</string>
     <string name="map_select_download_region">Оберіть регіон завантаження</string>
@@ -286,6 +291,8 @@
     <string name="wifi_qr_code_scan">Сканувати QR-код Wi-Fi</string>
     <string name="navigate_back">Перейти назад</string>
     <string name="battery">Батарея</string>
+    <string name="soil_temperature">Температура ґрунту</string>
+    <string name="soil_moisture">Вологість ґрунту</string>
     <string name="logs">Журнали подій</string>
     <string name="info">Інформація</string>
     <string name="iaq">IAQ</string>
@@ -317,11 +324,13 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Маршрут у напрямку призначення:\n\n</string>
     <string name="traceroute_route_back_to_us">Зворотний маршрут до нас:\n\n</string>
+    <string name="one_hour_short">1г</string>
     <string name="twenty_four_hours">24Г</string>
     <string name="forty_eight_hours">48Г</string>
     <string name="one_week">1Т</string>
     <string name="two_weeks">2Т</string>
     <string name="four_weeks">4Т</string>
+    <string name="one_month">1м</string>
     <string name="max">Макс</string>
     <string name="copy">Копіювати</string>
     <string name="critical_alert">Критичне сповіщення!</string>
