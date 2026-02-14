@@ -84,6 +84,12 @@ constructor(
         }
     }
 
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        Logger.d { "Lifecycle: ON_STOP" }
+        close()
+    }
+
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
         Logger.d { "Lifecycle: ON_DESTROY" }
