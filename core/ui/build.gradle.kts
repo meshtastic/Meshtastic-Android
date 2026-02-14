@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.zxing.core)
     implementation(libs.kermit)
+    implementation(libs.nordic.common.core)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

@@ -26,13 +26,14 @@ import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -46,6 +47,8 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import no.nordicsemi.kotlin.ble.environment.android.compose.LocalEnvironmentOwner
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -58,13 +61,15 @@ import org.meshtastic.feature.intro.AppIntroductionScreen
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     private val model: UIViewModel by viewModels()
 
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
     @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
     @Inject internal lateinit var uiPreferencesDataSource: UiPreferencesDataSource
+
+    @Inject internal lateinit var androidEnvironment: AndroidEnvironment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -90,17 +95,20 @@ class MainActivity : AppCompatActivity() {
                     else -> isSystemInDarkTheme()
                 }
 
-            AppTheme(dynamicColor = dynamic, darkTheme = dark) {
-                val view = LocalView.current
-                if (!view.isInEditMode) {
-                    SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
-                }
+            @Suppress("SpreadOperator")
+            CompositionLocalProvider(*(LocalEnvironmentOwner provides androidEnvironment)) {
+                AppTheme(dynamicColor = dynamic, darkTheme = dark) {
+                    val view = LocalView.current
+                    if (!view.isInEditMode) {
+                        SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
+                    }
 
-                val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
-                if (appIntroCompleted) {
-                    MainScreen(uIViewModel = model)
-                } else {
-                    AppIntroductionScreen(onDone = { model.onAppIntroCompleted() })
+                    val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
+                    if (appIntroCompleted) {
+                        MainScreen(uIViewModel = model)
+                    } else {
+                        AppIntroductionScreen(onDone = { model.onAppIntroCompleted() })
+                    }
                 }
             }
         }

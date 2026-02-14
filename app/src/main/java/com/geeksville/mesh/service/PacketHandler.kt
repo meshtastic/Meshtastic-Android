@@ -40,11 +40,11 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -87,7 +87,7 @@ constructor(
         if (packet?.decoded != null) {
             val packetToSave =
                 MeshLog(
-                    uuid = UUID.randomUUID().toString(),
+                    uuid = Uuid.random().toString(),
                     message_type = "Packet",
                     received_date = System.currentTimeMillis(),
                     raw_message = packet.toString(),

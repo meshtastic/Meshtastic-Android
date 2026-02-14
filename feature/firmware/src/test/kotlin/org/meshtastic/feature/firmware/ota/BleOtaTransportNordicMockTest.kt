@@ -37,22 +37,19 @@ import no.nordicsemi.kotlin.ble.core.and
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-private val SERVICE_UUID = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-private val OTA_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
-private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
+private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+private val OTA_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
+private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportNordicMockTest {
 
     private val testDispatcher = kotlinx.coroutines.test.StandardTestDispatcher()
     private val address = "00:11:22:33:44:55"
-
-    private fun java.util.UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Before
     fun setup() {
@@ -68,14 +65,12 @@ class BleOtaTransportNordicMockTest {
 
     @Test
     fun `full ota flow with nordic mocks`() = runTest(testDispatcher) {
-        // Use default mock environment
-        // Use backgroundScope so that simulation coroutines are cancelled after the test
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
 
-        var otaCharHandle: Int = -1
         var txCharHandle: Int = -1
+        val totalExpectedBytes = AtomicLong(64) // Smaller data for faster test
+        val bytesReceived = AtomicLong(0)
 
-        // Use a property to hold the peripheral since we need it in the event handler
         lateinit var otaPeripheral: PeripheralSpec<String>
 
         val eventHandler =
@@ -90,7 +85,12 @@ class BleOtaTransportNordicMockTest {
                 ): WriteResponse {
                     val command = value.decodeToString()
                     if (command.startsWith("OTA")) {
-                        backgroundScope.launch {
+                        println("Mock: Received Start OTA command: ${command.trim()}")
+                        val parts = command.trim().split(" ")
+                        if (parts.size >= 2) {
+                            totalExpectedBytes.set(parts[1].toLongOrNull() ?: 64L)
+                        }
+                        backgroundScope.launch(testDispatcher) {
                             delay(50.milliseconds)
                             otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
                         }
@@ -99,12 +99,18 @@ class BleOtaTransportNordicMockTest {
                 }
 
                 override fun onWriteCommand(characteristic: MockRemoteCharacteristic, value: ByteArray) {
-                    // For firmware chunks (WITHOUT_RESPONSE)
-                    backgroundScope.launch {
-                        delay(10.milliseconds)
-                        // In the real protocol, ACK is sent after each chunk.
-                        // OK is sent after the final chunk is verified.
+                    val currentTotal = bytesReceived.addAndGet(value.size.toLong())
+                    val expected = totalExpectedBytes.get()
+                    println("Mock: Received chunk size=${value.size}, total=$currentTotal/$expected")
+                    backgroundScope.launch(testDispatcher) {
+                        delay(5.milliseconds)
                         otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+
+                        if (currentTotal >= expected && expected > 0) {
+                            delay(10.milliseconds)
+                            println("Mock: Sending final OK")
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        }
                     }
                 }
             }
@@ -116,18 +122,17 @@ class BleOtaTransportNordicMockTest {
                 ) {
                     CompleteLocalName("ESP32-OTA")
                 }
-                connectable(name = "ESP32-OTA", eventHandler = eventHandler) {
-                    Service(uuid = SERVICE_UUID.toKotlinUuid()) {
-                        otaCharHandle =
-                            Characteristic(
-                                uuid = OTA_CHARACTERISTIC_UUID.toKotlinUuid(),
-                                properties =
-                                CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
-                                permission = Permission.WRITE,
-                            )
+                connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
+                    Service(uuid = SERVICE_UUID) {
+                        Characteristic(
+                            uuid = OTA_CHARACTERISTIC_UUID,
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
                         txCharHandle =
                             Characteristic(
-                                uuid = TX_CHARACTERISTIC_UUID.toKotlinUuid(),
+                                uuid = TX_CHARACTERISTIC_UUID,
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )
@@ -140,25 +145,16 @@ class BleOtaTransportNordicMockTest {
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
         // 1. Connect
-        // Note: BleOtaTransport includes a 5s delay at the start of connect()
         val connectResult = transport.connect()
         assertTrue("Connection failed: ${connectResult.exceptionOrNull()}", connectResult.isSuccess)
 
         // 2. Start OTA
-        val startResult = transport.startOta(1024L, "somehash") {}
+        val startResult = transport.startOta(totalExpectedBytes.get(), "somehash") {}
         assertTrue("Start OTA failed: ${startResult.exceptionOrNull()}", startResult.isSuccess)
 
         // 3. Stream firmware
-        // Need to simulate an OK at the very end
-        backgroundScope.launch {
-            // Wait for chunks to be sent. 1024 bytes with 512 chunk size = 2 chunks.
-            // Each chunk takes 10ms + ACK processing.
-            delay(500.milliseconds)
-            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
-        }
-
-        val data = ByteArray(1024) { it.toByte() }
-        val streamResult = transport.streamFirmware(data, 512) {}
+        val data = ByteArray(totalExpectedBytes.get().toInt()) { it.toByte() }
+        val streamResult = transport.streamFirmware(data, 20) {}
         assertTrue("Stream firmware failed: ${streamResult.exceptionOrNull()}", streamResult.isSuccess)
 
         transport.close()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,51 +14,43 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.repository.bluetooth
+package org.meshtastic.core.ble
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.bluetooth.BluetoothAdapter
+import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.repository.radio.BleConstants.BLE_NAME_PATTERN
-import com.geeksville.mesh.repository.radio.BleConstants.BTM_SERVICE_UUID
-import com.geeksville.mesh.util.registerReceiverCompat
-import dagger.Lazy
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
-import no.nordicsemi.kotlin.ble.core.Manager
-import org.meshtastic.core.common.hasBluetoothPermission
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
+import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
 
 /** Repository responsible for maintaining and updating the state of Bluetooth availability. */
 @Singleton
 class BluetoothRepository
 @Inject
 constructor(
-    private val application: Application,
-    private val bluetoothBroadcastReceiverLazy: Lazy<BluetoothBroadcastReceiver>,
     private val dispatchers: CoroutineDispatchers,
     @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val centralManager: CentralManager,
+    private val androidEnvironment: AndroidEnvironment,
+    private val bleScanner: BleScanner,
 ) {
     private val _state =
         MutableStateFlow(
@@ -80,10 +72,7 @@ constructor(
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            updateBluetoothState()
-            bluetoothBroadcastReceiverLazy.get().let { receiver ->
-                application.registerReceiverCompat(receiver, receiver.intentFilter)
-            }
+            androidEnvironment.bluetoothState.collect { updateBluetoothState() }
         }
     }
 
@@ -95,7 +84,6 @@ constructor(
     fun isValid(bleAddress: String): Boolean = BluetoothAdapter.checkBluetoothAddress(bleAddress)
 
     /** Starts a BLE scan for Meshtastic devices. The results are published to the [scannedDevices] flow. */
-    @OptIn(ExperimentalUuidApi::class)
     @SuppressLint("MissingPermission")
     fun startScan() {
         if (isScanning.value) return
@@ -105,10 +93,8 @@ constructor(
 
         scanJob =
             processLifecycle.coroutineScope.launch(dispatchers.default) {
-                centralManager
-                    .scan(5.seconds) { ServiceUuid(BTM_SERVICE_UUID.toKotlinUuid()) }
-                    .distinctByPeripheral()
-                    .map { it.peripheral }
+                bleScanner
+                    .scan(5.seconds) { ServiceUuid(SERVICE_UUID) }
                     .onStart { _isScanning.value = true }
                     .onCompletion { _isScanning.value = false }
                     .catch { ex ->
@@ -146,15 +132,20 @@ constructor(
         refreshState()
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     internal suspend fun updateBluetoothState() {
-        val hasPerms = application.hasBluetoothPermission()
-        val enabled = centralManager.state.value == Manager.State.POWERED_ON
+        val hasPerms =
+            if (androidEnvironment.androidSdkVersion >= Build.VERSION_CODES.S) {
+                androidEnvironment.isBluetoothScanPermissionGranted &&
+                    androidEnvironment.isBluetoothConnectPermissionGranted
+            } else {
+                androidEnvironment.isLocationPermissionGranted
+            }
+        val enabled = androidEnvironment.isBluetoothEnabled
         val newState =
             BluetoothState(
                 hasPermissions = hasPerms,
                 enabled = enabled,
-                bondedDevices = getBondedAppPeripherals(enabled),
+                bondedDevices = getBondedAppPeripherals(enabled, hasPerms),
             )
 
         _state.emit(newState)
@@ -162,19 +153,17 @@ constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun getBondedAppPeripherals(enabled: Boolean): List<Peripheral> =
-        if (enabled && application.hasBluetoothPermission()) {
+    private fun getBondedAppPeripherals(enabled: Boolean, hasPerms: Boolean): List<Peripheral> =
+        if (enabled && hasPerms) {
             centralManager.getBondedPeripherals().filter(::isMatchingPeripheral)
         } else {
             emptyList()
         }
 
     /** Checks if a peripheral is one of ours, either by its advertised name or by the services it provides. */
-    @OptIn(ExperimentalUuidApi::class)
     private fun isMatchingPeripheral(peripheral: Peripheral): Boolean {
         val nameMatches = peripheral.name?.matches(Regex(BLE_NAME_PATTERN)) ?: false
-        val hasRequiredService =
-            peripheral.services(listOf(BTM_SERVICE_UUID.toKotlinUuid())).value?.isNotEmpty() ?: false
+        val hasRequiredService = peripheral.services(listOf(SERVICE_UUID)).value?.isNotEmpty() ?: false
 
         return nameMatches || hasRequiredService
     }

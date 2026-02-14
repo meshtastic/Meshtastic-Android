@@ -37,7 +37,7 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 class MeshLogRepositoryTest {
 
@@ -65,7 +65,7 @@ class MeshLogRepositoryTest {
 
         val meshLog =
             MeshLog(
-                uuid = UUID.randomUUID().toString(),
+                uuid = Uuid.random().toString(),
                 message_type = "telemetry",
                 received_date = System.currentTimeMillis(),
                 raw_message = "",
@@ -92,7 +92,7 @@ class MeshLogRepositoryTest {
 
         val meshLog =
             MeshLog(
-                uuid = UUID.randomUUID().toString(),
+                uuid = Uuid.random().toString(),
                 message_type = "telemetry",
                 received_date = System.currentTimeMillis(),
                 raw_message = "",

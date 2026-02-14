@@ -23,7 +23,6 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,7 +35,6 @@ import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,7 +78,6 @@ import org.meshtastic.core.strings.must_set_region
 import org.meshtastic.core.strings.no_device_selected
 import org.meshtastic.core.strings.not_connected
 import org.meshtastic.core.strings.set_your_region
-import org.meshtastic.core.strings.warning_not_paired
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.TitledCard
@@ -91,6 +88,7 @@ import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.Config
+import kotlin.uuid.ExperimentalUuidApi
 
 fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
     false
@@ -105,7 +103,7 @@ fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
  * Composable screen for managing device connections (BLE, TCP, USB). It handles permission requests for location and
  * displays connection status.
  */
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3ExpressiveApi::class, ExperimentalUuidApi::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
@@ -118,13 +116,11 @@ fun ConnectionsScreen(
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
-    val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
     val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
@@ -188,14 +184,7 @@ fun ConnectionsScreen(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier =
-                Modifier.fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .height(IntrinsicSize.Max)
-                    .padding(paddingValues)
-                    .padding(16.dp),
-            ) {
+            Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
                 val uiState =
                     when {
                         connectionState.isConnected() && ourNode != null -> 2
@@ -280,17 +269,20 @@ fun ConnectionsScreen(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                Column(modifier = Modifier.fillMaxSize()) {
+                val modifier =
+                    if (selectedDeviceType == DeviceType.BLE) {
+                        Modifier.fillMaxWidth()
+                    } else {
+                        Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
+                    }
+
+                Column(modifier = modifier) {
                     when (selectedDeviceType) {
                         DeviceType.BLE -> {
-                            val (bonded, available) = bleDevices.partition { it.bonded }
                             BLEDevices(
                                 connectionState = connectionState,
-                                bondedDevices = bonded,
-                                availableDevices = available,
                                 selectedDevice = selectedDevice,
                                 scanModel = scanModel,
-                                bluetoothEnabled = bluetoothState.enabled,
                             )
                         }
 
@@ -315,24 +307,6 @@ fun ConnectionsScreen(
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    // Warning Not Paired
-                    val hasShownNotPairedWarning by
-                        connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
-                    val (bonded, _) = bleDevices.partition { it.bonded }
-                    val showWarningNotPaired =
-                        !connectionState.isConnected() && !hasShownNotPairedWarning && bonded.isEmpty()
-                    if (showWarningNotPaired) {
-                        Text(
-                            text = stringResource(Res.string.warning_not_paired),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        LaunchedEffect(Unit) { connectionsViewModel.suppressNoPairedWarning() }
-                    }
                 }
             }
             scanStatusText?.let {

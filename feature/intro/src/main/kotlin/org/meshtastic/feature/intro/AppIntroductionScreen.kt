@@ -16,22 +16,27 @@
  */
 package org.meshtastic.feature.intro
 
-import android.Manifest
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.serialization.Serializable
+import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
+import no.nordicsemi.android.common.permissions.ble.RequireLocation
+import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.permission_denied
+import org.meshtastic.core.strings.permission_granted
+import org.meshtastic.core.ui.util.showToast
 
 /**
  * Composable function for the main application introduction screen. This screen guides the user through initial setup
@@ -39,23 +44,10 @@ import kotlinx.serialization.Serializable
  *
  * @param onDone Callback invoked when the introduction flow is completed.
  */
-@OptIn(ExperimentalPermissionsApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun AppIntroductionScreen(onDone: () -> Unit) {
     val context = LocalContext.current
-
-    val notificationPermissionState: PermissionState? =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-        } else {
-            null
-        }
-
-    val locationPermissions =
-        listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
-    val locationPermissionState = rememberMultiplePermissionsState(permissions = locationPermissions)
-
     val backStack = rememberNavBackStack(Welcome)
 
     NavDisplay(
@@ -66,57 +58,97 @@ fun AppIntroductionScreen(onDone: () -> Unit) {
             entry<Welcome> { WelcomeScreen(onGetStarted = { backStack.add(Notifications) }) }
 
             entry<Notifications> {
-                val notificationsAlreadyGranted = notificationPermissionState?.status?.isGranted ?: true
-                NotificationsScreen(
-                    showNextButton = notificationsAlreadyGranted,
-                    onSkip = {
-                        // Skip this screen and the Critical Alerts screen. Proceed to Location screen.
-                        backStack.add(Location)
-                    },
-                    onConfigure = {
-                        if (notificationsAlreadyGranted) {
-                            backStack.add(CriticalAlerts)
-                        } else {
-                            // For Android Tiramisu (API 33) and above, this requests POST_NOTIFICATIONS
-                            // For lower versions, notificationPermissionState will be null, and this branch isn't
-                            // taken.
-                            notificationPermissionState.launchPermissionRequest()
+                var isConfiguring by remember { mutableStateOf(false) }
+
+                if (isConfiguring) {
+                    RequestNotificationPermission { canShowNotifications ->
+                        LaunchedEffect(canShowNotifications) {
+                            if (canShowNotifications == true) {
+                                context.showToast(Res.string.permission_granted)
+                            } else if (canShowNotifications == false) {
+                                context.showToast(Res.string.permission_denied)
+                            }
                         }
-                    },
-                )
+
+                        NotificationsScreen(
+                            showNextButton = canShowNotifications == true,
+                            onSkip = { backStack.add(Bluetooth) },
+                            onConfigure = {
+                                if (canShowNotifications == true) {
+                                    backStack.add(CriticalAlerts)
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    NotificationsScreen(
+                        showNextButton = false,
+                        onSkip = { backStack.add(Bluetooth) },
+                        onConfigure = { isConfiguring = true },
+                    )
+                }
             }
 
             entry<CriticalAlerts> {
                 CriticalAlertsScreen(
-                    onSkip = { backStack.add(Location) },
+                    onSkip = { backStack.add(Bluetooth) },
                     onConfigure = {
-                        // Intent to open the specific notification channel settings for "my_alerts"
-                        // This allows the user to enable critical alerts if they were initially denied
-                        // or to adjust settings for notifications that can bypass Do Not Disturb.
                         val intent =
                             Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
                                 putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                                 putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                             }
                         context.startActivity(intent)
-                        backStack.add(Location)
+                        backStack.add(Bluetooth)
                     },
                 )
             }
 
-            entry<Location> {
-                val locationAlreadyGranted = locationPermissionState.allPermissionsGranted
-                LocationScreen(
-                    showNextButton = locationAlreadyGranted,
-                    onSkip = onDone, // Callback to signify completion of the intro flow
-                    onConfigure = {
-                        if (locationAlreadyGranted) {
-                            onDone() // Permissions already granted, proceed to finish
-                        } else {
-                            locationPermissionState.launchMultiplePermissionRequest()
+            entry<Bluetooth> {
+                var isConfiguring by remember { mutableStateOf(false) }
+
+                if (isConfiguring) {
+                    RequireBluetooth {
+                        LaunchedEffect(Unit) {
+                            context.showToast(Res.string.permission_granted)
+                            backStack.add(Location)
                         }
-                    },
-                )
+                    }
+                } else {
+                    BluetoothScreen(
+                        showNextButton = false,
+                        onSkip = { backStack.add(Location) },
+                        onConfigure = { isConfiguring = true },
+                    )
+                }
+            }
+
+            entry<Location> {
+                var isConfiguring by remember { mutableStateOf(false) }
+
+                if (isConfiguring) {
+                    RequireLocation { isLocationRequiredAndDisabled ->
+                        LaunchedEffect(isLocationRequiredAndDisabled) {
+                            if (!isLocationRequiredAndDisabled) {
+                                context.showToast(Res.string.permission_granted)
+                            } else {
+                                context.showToast(Res.string.permission_denied)
+                            }
+                        }
+
+                        LocationScreen(
+                            showNextButton = !isLocationRequiredAndDisabled,
+                            onSkip = onDone,
+                            onConfigure = {
+                                if (!isLocationRequiredAndDisabled) {
+                                    onDone()
+                                }
+                            },
+                        )
+                    }
+                } else {
+                    LocationScreen(showNextButton = false, onSkip = onDone, onConfigure = { isConfiguring = true })
+                }
             }
         },
     )
@@ -127,5 +159,7 @@ fun AppIntroductionScreen(onDone: () -> Unit) {
 @Serializable private data object Notifications : NavKey
 
 @Serializable private data object CriticalAlerts : NavKey
+
+@Serializable private data object Bluetooth : NavKey
 
 @Serializable private data object Location : NavKey

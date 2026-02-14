@@ -22,24 +22,21 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
-import java.util.UUID
+import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleScanner
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.toKotlinUuid
+import kotlin.uuid.Uuid
 
 /**
  * BLE transport implementation for ESP32 Unified OTA protocol. Uses Nordic Kotlin-BLE-Library for modern coroutine
@@ -56,11 +53,10 @@ class BleOtaTransport(
 ) : UnifiedOtaProtocol {
 
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
-    private var peripheral: Peripheral? = null
+    private val bleConnection = BleConnection(centralManager, transportScope, "BLE OTA")
     private var otaCharacteristic: RemoteCharacteristic? = null
 
-    private val responseChannel =
-        kotlinx.coroutines.channels.Channel<String>(kotlinx.coroutines.channels.Channel.BUFFERED)
+    private val responseChannel = Channel<String>(Channel.UNLIMITED)
 
     private var isConnected = false
 
@@ -74,12 +70,13 @@ class BleOtaTransport(
      * ESP32 bootloaders may use the original MAC address OR increment the last byte by 1 for OTA mode, so we check both
      * addresses.
      */
-    @OptIn(ExperimentalUuidApi::class)
     private suspend fun scanForOtaDevice(): Peripheral? {
         // ESP32 OTA bootloader may use MAC address with last byte incremented by 1
         val otaAddress = calculateOtaAddress(address)
         val targetAddresses = setOf(address, otaAddress)
         Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
+
+        val scanner = BleScanner(centralManager)
 
         repeat(SCAN_RETRY_COUNT) { attempt ->
             Logger.i { "BLE OTA: Scanning for device (attempt ${attempt + 1}/$SCAN_RETRY_COUNT)..." }
@@ -88,10 +85,8 @@ class BleOtaTransport(
             // Log all devices found during scan for debugging
             val foundDevices = mutableSetOf<String>()
             val peripheral =
-                centralManager
+                scanner
                     .scan(SCAN_TIMEOUT)
-                    .distinctByPeripheral()
-                    .map { it.peripheral }
                     .onEach { p ->
                         if (foundDevices.add(p.address)) {
                             Logger.d { "BLE OTA: Scan found device: ${p.address} (name=${p.name})" }
@@ -108,7 +103,7 @@ class BleOtaTransport(
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
                 Logger.i { "BLE OTA: Device not found, waiting ${SCAN_RETRY_DELAY_MS}ms before retry..." }
-                kotlinx.coroutines.delay(SCAN_RETRY_DELAY_MS)
+                delay(SCAN_RETRY_DELAY_MS)
             }
         }
         return null
@@ -129,11 +124,10 @@ class BleOtaTransport(
     }
 
     /** Connect to the device and discover OTA service. */
-    @OptIn(ExperimentalUuidApi::class)
     @Suppress("LongMethod")
     override suspend fun connect(): Result<Unit> = runCatching {
         Logger.i { "BLE OTA: Waiting ${REBOOT_DELAY_MS}ms for device to reboot into OTA mode..." }
-        kotlinx.coroutines.delay(REBOOT_DELAY_MS)
+        delay(REBOOT_DELAY_MS)
 
         Logger.i { "BLE OTA: Connecting to $address using Nordic BLE Library..." }
 
@@ -145,52 +139,33 @@ class BleOtaTransport(
                         "Ensure the device has rebooted into OTA mode and is advertising.",
                 )
 
-        peripheral = p
-
-        centralManager.connect(
-            peripheral = p,
-            options = CentralManager.ConnectionOptions.AutoConnect(automaticallyRequestHighestValueLength = true),
-        )
-        p.requestConnectionPriority(ConnectionPriority.HIGH)
-
-        // Monitor connection state
-        p.state
+        bleConnection.connectionState
             .onEach { state ->
                 Logger.d { "BLE OTA: Connection state changed to $state" }
-                if (state is ConnectionState.Disconnected) {
-                    isConnected = false
-                }
+                isConnected = state is ConnectionState.Connected
             }
             .launchIn(transportScope)
 
-        // Wait for connection or failure with timeout
-        // Don't use drop(1) - we might already be connected by the time we start collecting
-        val connectionState =
-            try {
-                withTimeout(CONNECTION_TIMEOUT_MS) {
-                    p.state.first { it is ConnectionState.Connected || it is ConnectionState.Disconnected }
-                }
-            } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
-                Logger.w { "BLE OTA: Timed out waiting to connect to ${p.address}. Error: ${e.message}" }
-                throw OtaProtocolException.Timeout("Timed out connecting to device at address ${p.address}")
+        try {
+            val finalState = bleConnection.connectAndAwait(p, CONNECTION_TIMEOUT_MS)
+            if (finalState is ConnectionState.Disconnected) {
+                Logger.w { "BLE OTA: Failed to connect to ${p.address} (state=$finalState)" }
+                throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${p.address}")
             }
-
-        if (connectionState is ConnectionState.Disconnected) {
-            Logger.w { "BLE OTA: Failed to connect to ${p.address} (state=$connectionState)" }
-            throw OtaProtocolException.ConnectionFailed("Failed to connect to device at address ${p.address}")
+        } catch (@Suppress("SwallowedException") e: kotlinx.coroutines.TimeoutCancellationException) {
+            Logger.w { "BLE OTA: Timed out waiting to connect to ${p.address}. Error: ${e.message}" }
+            throw OtaProtocolException.Timeout("Timed out connecting to device at address ${p.address}")
         }
 
         Logger.i { "BLE OTA: Connected to ${p.address}, discovering services..." }
 
         // Discover services
-        val services = p.services(listOf(SERVICE_UUID.toKotlinUuid())).filterNotNull().first()
-        val meshtasticOtaService =
-            services.find { it.uuid == SERVICE_UUID.toKotlinUuid() }
-                ?: throw OtaProtocolException.ConnectionFailed("ESP32 OTA service not found")
+        val chars =
+            bleConnection.discoverCharacteristics(SERVICE_UUID, listOf(OTA_CHARACTERISTIC_UUID, TX_CHARACTERISTIC_UUID))
+                ?: throw OtaProtocolException.ConnectionFailed("Required OTA service or characteristics not found")
 
-        otaCharacteristic =
-            meshtasticOtaService.characteristics.find { it.uuid == OTA_CHARACTERISTIC_UUID.toKotlinUuid() }
-        val txChar = meshtasticOtaService.characteristics.find { it.uuid == TX_CHARACTERISTIC_UUID.toKotlinUuid() }
+        otaCharacteristic = chars[OTA_CHARACTERISTIC_UUID]
+        val txChar = chars[TX_CHARACTERISTIC_UUID]
 
         if (otaCharacteristic == null || txChar == null) {
             throw OtaProtocolException.ConnectionFailed("Required characteristics not found")
@@ -210,7 +185,6 @@ class BleOtaTransport(
             }
             .launchIn(transportScope)
 
-        isConnected = true
         Logger.i { "BLE OTA: Service discovered and ready" }
     }
 
@@ -315,8 +289,7 @@ class BleOtaTransport(
     }
 
     override suspend fun close() {
-        peripheral?.disconnect()
-        peripheral = null
+        bleConnection.disconnect()
         isConnected = false
         transportScope.cancel()
     }
@@ -345,9 +318,9 @@ class BleOtaTransport(
 
     companion object {
         // Service and Characteristic UUIDs from ESP32 Unified OTA spec
-        private val SERVICE_UUID = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-        private val OTA_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
-        private val TX_CHARACTERISTIC_UUID = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
+        private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+        private val OTA_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
+        private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
 
         // Timeouts and retries
         private val SCAN_TIMEOUT = 10.seconds

@@ -195,6 +195,7 @@ project.afterEvaluate {
 
 dependencies {
     implementation(projects.core.analytics)
+    implementation(projects.core.ble)
     implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.database)
@@ -246,6 +247,11 @@ dependencies {
     implementation(libs.kermit)
 
     implementation(libs.nordic.client.android)
+    implementation(libs.nordic.common.core)
+    implementation(libs.nordic.common.permissions.ble)
+    implementation(libs.nordic.common.permissions.notification)
+    implementation(libs.nordic.common.scanner.ble)
+    implementation(libs.nordic.common.ui)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -264,9 +270,8 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.nordic.client.android.mock)
-    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.client.core.mock)
     testImplementation(libs.nordic.core.mock)
-    testImplementation(libs.nordic.core.android.mock)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
 }
