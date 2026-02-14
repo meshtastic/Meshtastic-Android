@@ -25,6 +25,7 @@ import android.provider.Settings
 import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
@@ -53,9 +54,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.core.os.ConfigurationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -313,11 +316,10 @@ fun SettingsScreen(
 
                 val homoglyphEncodingEnabled by
                     viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
-                SwitchListItem(
-                    text = stringResource(Res.string.use_homoglyph_characters_encoding),
-                    checked = homoglyphEncodingEnabled,
-                    leadingIcon = Icons.Default.Abc,
-                    onClick = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+
+                HomoglyphSetting(
+                    homoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                    onToggle = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                 )
 
                 val settingsLauncher =
@@ -534,4 +536,22 @@ private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit
             }
         },
     )
+}
+
+@VisibleForTesting
+@Composable
+fun HomoglyphSetting(
+    homoglyphEncodingEnabled: Boolean,
+    onToggle: () -> Unit,
+) {
+    val currentLocale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
+    val supportedLanguages = listOf("ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn")
+    if (currentLocale?.language in supportedLanguages) {
+        SwitchListItem(
+            text = stringResource(Res.string.use_homoglyph_characters_encoding),
+            checked = homoglyphEncodingEnabled,
+            leadingIcon = Icons.Default.Abc,
+            onClick = onToggle,
+        )
+    }
 }
