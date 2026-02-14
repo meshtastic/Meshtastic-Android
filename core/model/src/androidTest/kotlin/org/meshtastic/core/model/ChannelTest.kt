@@ -20,7 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Assert
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.model.util.URL_PREFIX
+import org.meshtastic.core.model.util.CHANNEL_URL_PREFIX
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.proto.ChannelSet
@@ -33,7 +33,7 @@ class ChannelTest {
         val ch = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig)
         val channelUrl = ch.getChannelUrl()
 
-        Assert.assertTrue(channelUrl.toString().startsWith(URL_PREFIX))
+        Assert.assertTrue(channelUrl.toString().startsWith(CHANNEL_URL_PREFIX))
         Assert.assertEquals(channelUrl.toChannelSet(), ch)
     }
 
