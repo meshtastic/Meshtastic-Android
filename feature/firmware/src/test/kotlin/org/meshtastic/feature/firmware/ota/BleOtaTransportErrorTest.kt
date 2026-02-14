@@ -106,13 +106,15 @@ class BleOtaTransportErrorTest {
         centralManager.simulatePeripherals(listOf(otaPeripheral))
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        transport.connect().getOrThrow()
+        try {
+            transport.connect().getOrThrow()
 
-        val result = transport.startOta(1024, "badhash") {}
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is OtaProtocolException.HashRejected)
-
-        transport.close()
+            val result = transport.startOta(1024, "badhash") {}
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull() is OtaProtocolException.HashRejected)
+        } finally {
+            transport.close()
+        }
     }
 
     @Test
@@ -166,25 +168,27 @@ class BleOtaTransportErrorTest {
         centralManager.simulatePeripherals(listOf(otaPeripheral))
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        transport.connect().getOrThrow()
-        transport.startOta(1024, "hash") {}.getOrThrow()
+        try {
+            transport.connect().getOrThrow()
+            transport.startOta(1024, "hash") {}.getOrThrow()
 
-        // Find the connected peripheral and disconnect it
-        // We use isBonded=true to ensure it shows up in getBondedPeripherals()
-        val peripheral = centralManager.getBondedPeripherals().first { it.address == address }
-        peripheral.disconnect()
+            // Find the connected peripheral and disconnect it
+            // We use isBonded=true to ensure it shows up in getBondedPeripherals()
+            val peripheral = centralManager.getBondedPeripherals().first { it.address == address }
+            peripheral.disconnect()
 
-        // Wait for state propagation
-        delay(100.milliseconds)
+            // Wait for state propagation
+            delay(100.milliseconds)
 
-        val data = ByteArray(1024) { it.toByte() }
-        val result = transport.streamFirmware(data, 512) {}
+            val data = ByteArray(1024) { it.toByte() }
+            val result = transport.streamFirmware(data, 512) {}
 
-        assertTrue("Should fail due to connection loss", result.isFailure)
-        assertTrue(result.exceptionOrNull() is OtaProtocolException.TransferFailed)
-        assertTrue(result.exceptionOrNull()?.message?.contains("Connection lost") == true)
-
-        transport.close()
+            assertTrue("Should fail due to connection loss", result.isFailure)
+            assertTrue(result.exceptionOrNull() is OtaProtocolException.TransferFailed)
+            assertTrue(result.exceptionOrNull()?.message?.contains("Connection lost") == true)
+        } finally {
+            transport.close()
+        }
     }
 
     @Test
@@ -245,21 +249,27 @@ class BleOtaTransportErrorTest {
         centralManager.simulatePeripherals(listOf(otaPeripheral))
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        transport.connect().getOrThrow()
-        transport.startOta(1024, "hash") {}.getOrThrow()
+        try {
+            transport.connect().getOrThrow()
+            transport.startOta(1024, "hash") {}.getOrThrow()
 
-        // Setup final response to be a Hash Mismatch error after chunks are sent
-        backgroundScope.launch {
-            delay(1000.milliseconds)
-            otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+            // Setup final response to be a Hash Mismatch error after chunks are sent
+            backgroundScope.launch {
+                delay(1000.milliseconds)
+                otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+            }
+
+            val data = ByteArray(1024) { it.toByte() }
+            val result = transport.streamFirmware(data, 512) {}
+
+            val exception = result.exceptionOrNull()
+            assertTrue("Expected failure, but succeeded", result.isFailure)
+            assertTrue(
+                "Expected OtaProtocolException.VerificationFailed but got $exception",
+                exception is OtaProtocolException.VerificationFailed,
+            )
+        } finally {
+            transport.close()
         }
-
-        val data = ByteArray(1024) { it.toByte() }
-        val result = transport.streamFirmware(data, 512) {}
-
-        assertTrue("Should fail due to hash mismatch, but got ${result.exceptionOrNull()}", result.isFailure)
-        assertTrue(result.exceptionOrNull() is OtaProtocolException.VerificationFailed)
-
-        transport.close()
     }
 }
