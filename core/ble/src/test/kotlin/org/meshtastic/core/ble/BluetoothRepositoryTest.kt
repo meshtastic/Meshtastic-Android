@@ -55,11 +55,7 @@ import kotlin.time.Duration.Companion.seconds
 class BluetoothRepositoryTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(
-        main = testDispatcher,
-        default = testDispatcher,
-        io = testDispatcher,
-    )
+    private val dispatchers = CoroutineDispatchers(main = testDispatcher, default = testDispatcher, io = testDispatcher)
 
     private lateinit var mockEnvironment: MockAndroidEnvironment
     private lateinit var lifecycleOwner: TestLifecycleOwner
@@ -67,12 +63,14 @@ class BluetoothRepositoryTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        mockEnvironment = MockAndroidEnvironment.Api31(
-            isBluetoothEnabled = true,
-            isBluetoothScanPermissionGranted = true,
-            isBluetoothConnectPermissionGranted = true
-        )
-        lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.RESUMED, coroutineDispatcher = testDispatcher)
+        mockEnvironment =
+            MockAndroidEnvironment.Api31(
+                isBluetoothEnabled = true,
+                isBluetoothScanPermissionGranted = true,
+                isBluetoothConnectPermissionGranted = true,
+            )
+        lifecycleOwner =
+            TestLifecycleOwner(initialState = Lifecycle.State.RESUMED, coroutineDispatcher = testDispatcher)
     }
 
     @After
@@ -84,8 +82,9 @@ class BluetoothRepositoryTest {
     fun `initial state reflects environment`() = runTest(testDispatcher) {
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
         val bleScanner = BleScanner(centralManager)
-        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
-        
+        val repository =
+            BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
+
         runCurrent()
         val state = repository.state.value
         assertTrue(state.enabled)
@@ -96,11 +95,12 @@ class BluetoothRepositoryTest {
     fun `state updates when bluetooth is disabled`() = runTest(testDispatcher) {
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
         val bleScanner = BleScanner(centralManager)
-        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
-        
+        val repository =
+            BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
+
         mockEnvironment.simulatePowerOff()
         runCurrent()
-        
+
         val state = repository.state.value
         assertFalse(state.enabled)
     }
@@ -110,31 +110,33 @@ class BluetoothRepositoryTest {
         val address = "C0:00:00:00:00:01"
         val peripheral = mockk<Peripheral>()
         every { peripheral.address } returns address
-        
+
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
         val bleScanner = mockk<BleScanner>()
-        coEvery { bleScanner.scan(any(), any()) } returns flow {
-            emit(peripheral)
-            delay(5000) // Prevent immediate completion
-        }
-        
-        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
-        
+        coEvery { bleScanner.scan(any(), any()) } returns
+            flow {
+                emit(peripheral)
+                delay(5000) // Prevent immediate completion
+            }
+
+        val repository =
+            BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
+
         repository.startScan()
 
         // Verify scanning started
         assertTrue(repository.isScanning.value)
-        
+
         // Give it time to scan (virtual)
         runCurrent()
-        
+
         val scannedDevices = repository.scannedDevices.value
         assertFalse("Scanned devices list should not be empty", scannedDevices.isEmpty())
         assertEquals(address, scannedDevices.first().address)
-        
+
         // Verify BleScanner was called with correct timeout and filter
         verify { bleScanner.scan(5.seconds, any()) }
-        
+
         repository.stopScan()
         assertFalse(repository.isScanning.value)
     }
@@ -143,16 +145,17 @@ class BluetoothRepositoryTest {
     fun `scan ignores non-matching devices`() = runTest(testDispatcher) {
         // Since logic is delegated to BleScanner, we test that repository correctly handles BleScanner result
         // Here we simulate BleScanner not finding anything (e.g. filter worked)
-        
+
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
         val bleScanner = mockk<BleScanner>()
         coEvery { bleScanner.scan(any(), any()) } returns flowOf()
-        
-        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
-        
+
+        val repository =
+            BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
+
         repository.startScan()
         runCurrent()
-        
+
         val scannedDevices = repository.scannedDevices.value
         assertTrue("Should be empty", scannedDevices.isEmpty())
     }
@@ -160,33 +163,33 @@ class BluetoothRepositoryTest {
     @Test
     fun `bonded devices are correctly identified`() = runTest(testDispatcher) {
         val address = "C0:00:00:00:00:03"
-        val peripheral = PeripheralSpec.simulatePeripheral(
-            identifier = address,
-            addressType = AddressType.RANDOM_STATIC,
-            proximity = Proximity.IMMEDIATE
-        ) {
-            advertising(
-                parameters = LegacyAdvertisingSetParameters(connectable = true),
+        val peripheral =
+            PeripheralSpec.simulatePeripheral(
+                identifier = address,
+                addressType = AddressType.RANDOM_STATIC,
+                proximity = Proximity.IMMEDIATE,
             ) {
-                CompleteLocalName("Meshtastic_5678")
+                advertising(parameters = LegacyAdvertisingSetParameters(connectable = true)) {
+                    CompleteLocalName("Meshtastic_5678")
+                }
+                connectable(
+                    name = "Meshtastic_5678",
+                    isBonded = true,
+                    eventHandler = object : PeripheralSpecEventHandler {},
+                ) {
+                    Service(uuid = SERVICE_UUID) {}
+                }
             }
-            connectable(
-                name = "Meshtastic_5678",
-                isBonded = true,
-                eventHandler = object : PeripheralSpecEventHandler {},
-            ) {
-                Service(uuid = SERVICE_UUID) {}
-            }
-        }
-        
+
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
         centralManager.simulatePeripherals(listOf(peripheral))
-        
+
         val bleScanner = BleScanner(centralManager)
-        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
+        val repository =
+            BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, mockEnvironment, bleScanner)
         repository.refreshState()
         runCurrent()
-        
+
         val state = repository.state.value
         assertEquals("Should find 1 bonded device", 1, state.bondedDevices.size)
         assertEquals(address, state.bondedDevices.first().address)

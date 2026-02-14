@@ -95,6 +95,7 @@ class MainActivity : ComponentActivity() {
                     else -> isSystemInDarkTheme()
                 }
 
+            @Suppress("SpreadOperator")
             CompositionLocalProvider(*(LocalEnvironmentOwner provides androidEnvironment)) {
                 AppTheme(dynamicColor = dynamic, darkTheme = dark) {
                     val view = LocalView.current

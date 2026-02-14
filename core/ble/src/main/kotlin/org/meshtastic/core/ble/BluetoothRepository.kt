@@ -18,6 +18,7 @@ package org.meshtastic.core.ble
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
@@ -71,9 +72,7 @@ constructor(
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            androidEnvironment.bluetoothState.collect {
-                updateBluetoothState()
-            }
+            androidEnvironment.bluetoothState.collect { updateBluetoothState() }
         }
     }
 
@@ -134,12 +133,13 @@ constructor(
     }
 
     internal suspend fun updateBluetoothState() {
-        val hasPerms = if (androidEnvironment.androidSdkVersion >= 31) {
-            androidEnvironment.isBluetoothScanPermissionGranted &&
-                androidEnvironment.isBluetoothConnectPermissionGranted
-        } else {
-            androidEnvironment.isLocationPermissionGranted
-        }
+        val hasPerms =
+            if (androidEnvironment.androidSdkVersion >= Build.VERSION_CODES.S) {
+                androidEnvironment.isBluetoothScanPermissionGranted &&
+                    androidEnvironment.isBluetoothConnectPermissionGranted
+            } else {
+                androidEnvironment.isLocationPermissionGranted
+            }
         val enabled = androidEnvironment.isBluetoothEnabled
         val newState =
             BluetoothState(

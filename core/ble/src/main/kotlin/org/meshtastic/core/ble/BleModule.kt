@@ -37,18 +37,13 @@ object BleModule {
 
     @Provides
     @Singleton
-    fun provideAndroidEnvironment(@ApplicationContext context: Context): AndroidEnvironment {
-        return NativeAndroidEnvironment.getInstance(context, isNeverForLocationFlagSet = true)
-    }
+    fun provideAndroidEnvironment(@ApplicationContext context: Context): AndroidEnvironment =
+        NativeAndroidEnvironment.getInstance(context, isNeverForLocationFlagSet = true)
 
     @Provides
     @Singleton
-    fun provideCentralManager(
-        environment: AndroidEnvironment,
-        coroutineScope: CoroutineScope
-    ): CentralManager {
-        return CentralManager.native(environment as NativeAndroidEnvironment, coroutineScope)
-    }
+    fun provideCentralManager(environment: AndroidEnvironment, coroutineScope: CoroutineScope): CentralManager =
+        CentralManager.native(environment as NativeAndroidEnvironment, coroutineScope)
 
     @Provides
     @Singleton
