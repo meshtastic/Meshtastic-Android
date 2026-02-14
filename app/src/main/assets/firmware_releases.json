@@ -223,6 +223,12 @@
       "title": "Improved Periodic class",
       "page_url": "https://github.com/meshtastic/firmware/pull/9501",
       "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9476",
+      "title": "Deprecate/block packets with a missing/invalid hop_start value (pre-hop firmware) (related to issue #7369)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9476",
+      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
