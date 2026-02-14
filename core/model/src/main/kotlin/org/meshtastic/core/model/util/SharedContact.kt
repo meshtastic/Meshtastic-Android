@@ -33,6 +33,13 @@ private const val BASE64FLAGS = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_P
  */
 @Throws(MalformedURLException::class)
 fun Uri.toSharedContact(): SharedContact {
+    checkSharedContactUrl()
+    val data = fragment!!.substringBefore('?')
+    return decodeSharedContactData(data)
+}
+
+@Throws(MalformedURLException::class)
+private fun Uri.checkSharedContactUrl() {
     val h = host?.lowercase() ?: ""
     val isCorrectHost = h == MESHTASTIC_HOST || h == "www.$MESHTASTIC_HOST"
     val segments = pathSegments
@@ -44,22 +51,29 @@ fun Uri.toSharedContact(): SharedContact {
             "Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!frag.isNullOrBlank()}",
         )
     }
+}
 
-    val data = frag.substringBefore('?')
+@Throws(MalformedURLException::class)
+private fun decodeSharedContactData(data: String): SharedContact {
     val decodedBytes =
         try {
             // We use a more lenient decoding for the input to handle variations from different clients
             Base64.decode(data, Base64.DEFAULT or Base64.URL_SAFE)
-        } catch (e: Exception) {
-            throw MalformedURLException(
-                "Failed to Base64 decode SharedContact data ($data): ${e.javaClass.simpleName}: ${e.message}",
-            )
+        } catch (e: IllegalArgumentException) {
+            val ex =
+                MalformedURLException(
+                    "Failed to Base64 decode SharedContact data ($data): ${e.javaClass.simpleName}: ${e.message}",
+                )
+            ex.initCause(e)
+            throw ex
         }
 
     return try {
         SharedContact.ADAPTER.decode(decodedBytes.toByteString())
-    } catch (e: Exception) {
-        throw MalformedURLException("Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}")
+    } catch (e: java.io.IOException) {
+        val ex = MalformedURLException("Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}")
+        ex.initCause(e)
+        throw ex
     }
 }
 
