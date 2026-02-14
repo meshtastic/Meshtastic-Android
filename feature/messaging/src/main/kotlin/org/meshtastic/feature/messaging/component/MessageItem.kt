@@ -65,6 +65,7 @@ import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.filter_message_label
 import org.meshtastic.core.strings.message_delivery_status
@@ -459,7 +460,7 @@ private fun MessageItemPreview() {
             rssi = 90,
             hopsAway = 0,
             uuid = 1L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().mickeyMouse,
             read = false,
             routingError = 0,
@@ -478,7 +479,7 @@ private fun MessageItemPreview() {
             rssi = 90,
             hopsAway = 0,
             uuid = 2L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().minnieMouse,
             read = false,
             routingError = 0,
@@ -497,7 +498,7 @@ private fun MessageItemPreview() {
             rssi = 90,
             hopsAway = 2,
             uuid = 2L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().minnieMouse,
             read = false,
             routingError = 0,
@@ -517,7 +518,7 @@ private fun MessageItemPreview() {
             rssi = 70,
             hopsAway = 1,
             uuid = 3L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().minnieMouse,
             read = false,
             routingError = 0,

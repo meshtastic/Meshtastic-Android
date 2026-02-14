@@ -39,6 +39,8 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -325,7 +327,7 @@ constructor(
         val payload = packet.decoded?.payload ?: return
         val u = Waypoint.ADAPTER.decode(payload)
         if (u.locked_to != 0 && u.locked_to != packet.from) return
-        val currentSecond = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
+        val currentSecond = nowSeconds.toInt()
         rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
     }
 
@@ -443,7 +445,7 @@ constructor(
             isRemote -> shouldDisplay = true
         }
         if (shouldDisplay) {
-            val now = System.currentTimeMillis() / MILLISECONDS_IN_SECOND
+            val now = nowSeconds
             if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0L
             if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
                 batteryPercentCooldowns[fromNum] = now
@@ -461,7 +463,7 @@ constructor(
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,
-            dataMapper.toNodeID(packet.from),
+            nodeManager.toNodeID(packet.from),
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
         )
@@ -599,7 +601,7 @@ constructor(
                         packetId = dataPacket.id,
                         port_num = dataPacket.dataType,
                         contact_key = contactKey,
-                        received_time = System.currentTimeMillis(),
+                        received_time = nowMillis,
                         read = fromLocal || isFiltered,
                         data = dataPacket,
                         snr = dataPacket.snr,
@@ -693,8 +695,8 @@ constructor(
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
         val decoded = packet.decoded ?: return@handledLaunch
         val emoji = decoded.payload.toByteArray().decodeToString()
-        val fromId = dataMapper.toNodeID(packet.from)
-        val toId = dataMapper.toNodeID(packet.to)
+        val fromId = nodeManager.toNodeID(packet.from)
+        val toId = nodeManager.toNodeID(packet.to)
 
         val reaction =
             ReactionEntity(
@@ -702,7 +704,7 @@ constructor(
                 replyId = decoded.reply_id,
                 userId = fromId,
                 emoji = emoji,
-                timestamp = System.currentTimeMillis(),
+                timestamp = nowMillis,
                 snr = packet.rx_snr,
                 rssi = packet.rx_rssi,
                 hopsAway =
@@ -790,7 +792,6 @@ constructor(
     }
 
     companion object {
-        private const val MILLISECONDS_IN_SECOND = 1000L
         private const val HOPS_AWAY_UNAVAILABLE = -1
 
         private const val BATTERY_PERCENT_UNSUPPORTED = 0.0

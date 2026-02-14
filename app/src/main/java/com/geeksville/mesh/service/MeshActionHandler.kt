@@ -31,6 +31,7 @@ import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
@@ -160,7 +161,7 @@ constructor(
                     replyId = action.replyId,
                     userId = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL,
                     emoji = action.emoji,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = nowMillis,
                     snr = 0f,
                     rssi = 0,
                     hopsAway = 0,

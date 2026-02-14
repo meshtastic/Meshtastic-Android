@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,60 +14,89 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.model.util
 
+import org.meshtastic.core.model.util.TimeConstants.HOURS_PER_DAY
 import java.text.DateFormat
-import java.util.Date
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
-private const val ONLINE_WINDOW_HOURS = 2
+private val ONLINE_WINDOW_HOURS = 2.hours
+private val DAY_DURATION = 24.hours
 
-// return time if within 24 hours, otherwise date
+/**
+ * Returns a short string representing the time if it's within the last 24 hours, otherwise returns a short string
+ * representing the date.
+ *
+ * @param time The time in milliseconds
+ * @return Formatted date or time string, or null if time is 0
+ */
 fun getShortDate(time: Long): String? {
-    val date = if (time != 0L) Date(time) else return null
-    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
+    if (time == 0L) return null
+    val instant = time.toInstant()
+    val isWithin24Hours = (nowInstant - instant) <= DAY_DURATION
 
     return if (isWithin24Hours) {
-        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(instant.toDate())
     } else {
-        DateFormat.getDateInstance(DateFormat.SHORT).format(date)
+        DateFormat.getDateInstance(DateFormat.SHORT).format(instant.toDate())
     }
 }
 
-// return time if within 24 hours, otherwise date/time
+/**
+ * Returns a short string representing the time if it's within the last 24 hours, otherwise returns a combined short
+ * date/time string.
+ *
+ * @param time The time in milliseconds
+ * @return Formatted date/time string
+ */
 fun getShortDateTime(time: Long): String {
-    val date = Date(time)
-    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
+    val instant = time.toInstant()
+    val isWithin24Hours = (nowInstant - instant) <= DAY_DURATION
 
     return if (isWithin24Hours) {
-        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(instant.toDate())
     } else {
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date)
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(instant.toDate())
     }
 }
 
+/**
+ * Formats a duration in seconds as a human-readable uptime string (e.g., "1d 2h 3m 4s").
+ *
+ * @param seconds The duration in seconds.
+ * @return A formatted uptime string.
+ */
 fun formatUptime(seconds: Int): String = formatUptime(seconds.toLong())
 
+/**
+ * Formats a duration in seconds as a human-readable uptime string (e.g., "1d 2h 3m 4s").
+ *
+ * @param seconds The duration in seconds.
+ * @return A formatted uptime string.
+ */
 private fun formatUptime(seconds: Long): String {
-    val days = TimeUnit.SECONDS.toDays(seconds)
-    val hours = TimeUnit.SECONDS.toHours(seconds) % TimeUnit.DAYS.toHours(1)
-    val minutes = TimeUnit.SECONDS.toMinutes(seconds) % TimeUnit.HOURS.toMinutes(1)
-    val secs = seconds % TimeUnit.MINUTES.toSeconds(1)
-
-    return listOfNotNull(
-        "${days}d".takeIf { days > 0 },
-        "${hours}h".takeIf { hours > 0 },
-        "${minutes}m".takeIf { minutes > 0 },
-        "${secs}s".takeIf { secs > 0 },
-    )
-        .joinToString(" ")
+    if (seconds == 0L) return "0s"
+    return seconds.seconds.toComponents { days, hours, minutes, secs, _ ->
+        listOfNotNull(
+            "${days}d".takeIf { days > 0 },
+            "${hours}h".takeIf { hours > 0 },
+            "${minutes}m".takeIf { minutes > 0 },
+            "${secs}s".takeIf { secs > 0 },
+        )
+            .joinToString(" ")
+    }
 }
 
-fun onlineTimeThreshold(): Int {
-    val currentSeconds = System.currentTimeMillis() / TimeUnit.SECONDS.toMillis(1)
-    return (currentSeconds - TimeUnit.HOURS.toSeconds(ONLINE_WINDOW_HOURS.toLong())).toInt()
-}
+/**
+ * Calculates the threshold in seconds for considering a node "online".
+ *
+ * @return The epoch seconds threshold.
+ */
+fun onlineTimeThreshold(): Int = (nowInstant - ONLINE_WINDOW_HOURS).epochSeconds.toInt()
 
 /**
  * Calculates the remaining mute time in days and hours.
@@ -76,9 +105,8 @@ fun onlineTimeThreshold(): Int {
  * @return Pair of (days, hours), where days is Int and hours is Double
  */
 fun formatMuteRemainingTime(remainingMillis: Long): Pair<Int, Double> {
-    if (remainingMillis <= 0) return Pair(0, 0.0)
-    val totalHours = remainingMillis.toDouble() / TimeUnit.HOURS.toMillis(1)
-    val days = (totalHours / TimeUnit.DAYS.toHours(1)).toInt()
-    val hours = totalHours % TimeUnit.DAYS.toHours(1)
-    return Pair(days, hours)
+    val duration = remainingMillis.milliseconds
+    if (duration <= Duration.ZERO) return 0 to 0.0
+    val totalHours = duration.toDouble(DurationUnit.HOURS)
+    return (totalHours / HOURS_PER_DAY).toInt() to (totalHours % HOURS_PER_DAY)
 }

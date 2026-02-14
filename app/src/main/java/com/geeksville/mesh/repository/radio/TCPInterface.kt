@@ -25,6 +25,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import java.io.BufferedInputStream
@@ -104,7 +105,7 @@ constructor(
         if (s != null) {
             val uptime =
                 if (connectionStartTime > 0) {
-                    System.currentTimeMillis() - connectionStartTime
+                    nowMillis - connectionStartTime
                 } else {
                     0
                 }
@@ -130,7 +131,7 @@ constructor(
                 } catch (ex: IOException) {
                     val uptime =
                         if (connectionStartTime > 0) {
-                            System.currentTimeMillis() - connectionStartTime
+                            nowMillis - connectionStartTime
                         } else {
                             0
                         }
@@ -140,7 +141,7 @@ constructor(
                 } catch (ex: Throwable) {
                     val uptime =
                         if (connectionStartTime > 0) {
-                            System.currentTimeMillis() - connectionStartTime
+                            nowMillis - connectionStartTime
                         } else {
                             0
                         }
@@ -175,7 +176,7 @@ constructor(
 
     // Create a socket to make the connection with the server
     private suspend fun startConnect() = withContext(dispatchers.io) {
-        val attemptStart = System.currentTimeMillis()
+        val attemptStart = nowMillis
         Logger.i { "[$address] TCP connection attempt starting..." }
 
         val parts = address.split(":", limit = 2)
@@ -190,8 +191,8 @@ constructor(
             socket.soTimeout = SOCKET_TIMEOUT
             this@TCPInterface.socket = socket
 
-            val connectTime = System.currentTimeMillis() - attemptStart
-            connectionStartTime = System.currentTimeMillis()
+            val connectTime = nowMillis - attemptStart
+            connectionStartTime = nowMillis
             Logger.i {
                 "[$address] TCP socket connected in ${connectTime}ms - " +
                     "Local: ${socket.localSocketAddress}, Remote: ${socket.remoteSocketAddress}"

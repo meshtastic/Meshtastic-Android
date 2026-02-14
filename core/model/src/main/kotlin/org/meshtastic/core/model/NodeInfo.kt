@@ -22,6 +22,7 @@ import kotlinx.parcelize.Parcelize
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
@@ -84,7 +85,7 @@ data class Position(
 
         fun degI(d: Double) = (d * 1e7).toInt()
 
-        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+        fun currentTime() = nowSeconds.toInt()
     }
 
     /**
@@ -134,7 +135,7 @@ data class DeviceMetrics(
 ) : Parcelable {
     companion object {
         @Suppress("MagicNumber")
-        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+        fun currentTime() = nowSeconds.toInt()
     }
 
     /** Create our model object from a protobuf. */
@@ -168,7 +169,7 @@ data class EnvironmentMetrics(
 ) : Parcelable {
     @Suppress("MagicNumber")
     companion object {
-        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+        fun currentTime() = nowSeconds.toInt()
 
         fun fromTelemetryProto(proto: org.meshtastic.proto.EnvironmentMetrics, time: Int): EnvironmentMetrics =
             EnvironmentMetrics(

@@ -30,6 +30,8 @@ import org.meshtastic.core.model.EnvironmentMetrics
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -100,7 +102,7 @@ data class NodeWithRelations(
 data class MetadataEntity(
     @PrimaryKey val num: Int,
     @ColumnInfo(name = "proto", typeAffinity = ColumnInfo.BLOB) val proto: DeviceMetadata,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = nowMillis,
 )
 
 @Suppress("MagicNumber")
@@ -181,7 +183,7 @@ data class NodeEntity(
 
         val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
 
-        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+        fun currentTime() = nowSeconds.toInt()
     }
 
     fun toModel() = Node(

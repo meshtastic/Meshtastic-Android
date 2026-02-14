@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.node_sort_last_heard
 import org.meshtastic.core.ui.R
@@ -34,13 +35,14 @@ import org.meshtastic.core.ui.util.formatAgo
 fun LastHeardInfo(
     modifier: Modifier = Modifier,
     lastHeard: Int,
+    showLabel: Boolean = true,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
     IconInfo(
         modifier = modifier,
         icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
         contentDescription = stringResource(Res.string.node_sort_last_heard),
-        label = stringResource(Res.string.node_sort_last_heard),
+        label = if (showLabel) stringResource(Res.string.node_sort_last_heard) else null,
         text = formatAgo(lastHeard),
         contentColor = contentColor,
     )
@@ -49,5 +51,5 @@ fun LastHeardInfo(
 @PreviewLightDark
 @Composable
 private fun LastHeardInfoPreview() {
-    AppTheme { LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600) }
+    AppTheme { LastHeardInfo(lastHeard = nowSeconds.toInt() - 8600) }
 }

@@ -27,6 +27,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.util.ByteStringParceler
 import org.meshtastic.core.model.util.ByteStringSerializer
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint
@@ -54,7 +55,7 @@ data class DataPacket(
     // A port number for this packet
     var dataType: Int,
     var from: String? = ID_LOCAL, // a nodeID string, or ID_LOCAL for localhost
-    var time: Long = System.currentTimeMillis(), // msecs since 1970
+    var time: Long = nowMillis, // msecs since 1970
     var id: Int = 0, // 0 means unassigned
     var status: MessageStatus? = MessageStatus.UNKNOWN,
     var hopLimit: Int = 0,
@@ -128,7 +129,7 @@ data class DataPacket(
         bytes = text.encodeToByteArray().toByteString(),
         dataType = PortNum.TEXT_MESSAGE_APP.value,
         channel = channel,
-        replyId = replyId ?: 0,
+        replyId = replyId,
     )
 
     /** If this is a text message, return the string, otherwise null */

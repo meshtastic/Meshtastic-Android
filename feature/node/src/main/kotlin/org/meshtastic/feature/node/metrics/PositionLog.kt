@@ -64,6 +64,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.metersIn
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.alt
@@ -270,7 +271,7 @@ private val testPosition =
         longitude_i = -953698040,
         altitude = 1230,
         sats_in_view = 7,
-        time = (System.currentTimeMillis() / 1000).toInt(),
+        time = nowSeconds.toInt(),
     )
 
 @Preview(showBackground = true)

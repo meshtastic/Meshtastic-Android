@@ -35,8 +35,9 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.toJavaDuration
 
 /**
  * The main application class for Meshtastic.
@@ -67,11 +68,7 @@ class MeshUtilApplication :
 
     private fun scheduleMeshLogCleanup() {
         val cleanupRequest =
-            PeriodicWorkRequestBuilder<MeshLogCleanupWorker>(
-                repeatInterval = 1,
-                repeatIntervalTimeUnit = TimeUnit.HOURS,
-            )
-                .build()
+            PeriodicWorkRequestBuilder<MeshLogCleanupWorker>(repeatInterval = 1.hours.toJavaDuration()).build()
 
         WorkManager.getInstance(this)
             .enqueueUniquePeriodicWork(

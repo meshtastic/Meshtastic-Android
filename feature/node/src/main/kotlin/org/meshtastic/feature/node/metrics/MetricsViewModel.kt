@@ -56,6 +56,9 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
@@ -207,7 +210,7 @@ constructor(
         combine(_state, environmentState) { state, envState ->
             val stateOldest = state.oldestTimestampSeconds()
             val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
-            val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: (System.currentTimeMillis() / 1000L)
+            val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: nowSeconds
             TimeFrame.entries.filter { it.isAvailable(oldest) }
         }
             .stateInWhileSubscribed(TimeFrame.entries)
@@ -519,7 +522,7 @@ constructor(
             val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
 
             positions.forEach { position ->
-                val rxDateTime = dateFormat.format((position.time ?: 0).toLong() * 1000L)
+                val rxDateTime = dateFormat.format(((position.time ?: 0).toLong() * 1000L).toInstant().toDate())
                 val latitude = (position.latitude_i ?: 0) * 1e-7
                 val longitude = (position.longitude_i ?: 0) * 1e-7
                 val altitude = position.altitude

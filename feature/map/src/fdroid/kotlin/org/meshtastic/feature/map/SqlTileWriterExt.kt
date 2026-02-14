@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
 import android.database.Cursor
+import org.meshtastic.core.model.util.nowMillis
 import org.osmdroid.tileprovider.modules.DatabaseFileArchive
 import org.osmdroid.tileprovider.modules.SqlTileWriter
 
@@ -98,7 +98,7 @@ class SqlTileWriterExt : SqlTileWriter() {
         }
 
     val rowCountExpired: Long
-        get() = getRowCount("$COLUMN_EXPIRES<?", arrayOf(System.currentTimeMillis().toString()))
+        get() = getRowCount("$COLUMN_EXPIRES<?", arrayOf(nowMillis.toString()))
 
     class SourceCount {
         var rowCount: Long = 0

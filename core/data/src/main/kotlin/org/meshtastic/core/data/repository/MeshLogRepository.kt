@@ -26,6 +26,8 @@ import kotlinx.coroutines.withContext
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
@@ -126,9 +128,9 @@ constructor(
 
         val cutoffTimestamp =
             if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
-                System.currentTimeMillis() - (60 * 60 * 1000L)
+                nowMillis - TimeConstants.ONE_HOUR.inWholeMilliseconds
             } else {
-                System.currentTimeMillis() - (retentionDays * 24 * 60 * 60 * 1000L)
+                nowMillis - (retentionDays * TimeConstants.ONE_DAY.inWholeMilliseconds)
             }
         dbManager.currentDb.value.meshLogDao().deleteOlderThan(cutoffTimestamp)
     }

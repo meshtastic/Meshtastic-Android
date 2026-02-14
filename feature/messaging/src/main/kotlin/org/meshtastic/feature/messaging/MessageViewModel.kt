@@ -124,6 +124,24 @@ constructor(
 
     val homoglyphEncodingEnabled = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
 
+    val firstUnreadMessageUuid: StateFlow<Long?> =
+        contactKeyForPagedMessages
+            .filterNotNull()
+            .flatMapLatest { packetRepository.getFirstUnreadMessageUuid(it) }
+            .stateInWhileSubscribed(null)
+
+    val hasUnreadMessages: StateFlow<Boolean> =
+        contactKeyForPagedMessages
+            .filterNotNull()
+            .flatMapLatest { packetRepository.hasUnreadMessages(it) }
+            .stateInWhileSubscribed(false)
+
+    val filteredCount: StateFlow<Int> =
+        contactKeyForPagedMessages
+            .filterNotNull()
+            .flatMapLatest { packetRepository.getFilteredCountFlow(it) }
+            .stateInWhileSubscribed(0)
+
     init {
         val contactKey = savedStateHandle.get<String>("contactKey")
         if (contactKey != null) {
@@ -142,18 +160,11 @@ constructor(
         return pagedMessagesForContactKey
     }
 
-    fun getFirstUnreadMessageUuid(contactKey: String): Flow<Long?> =
-        packetRepository.getFirstUnreadMessageUuid(contactKey)
-
-    fun hasUnreadMessages(contactKey: String): Flow<Boolean> = packetRepository.hasUnreadMessages(contactKey)
-
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
     fun toggleShowFiltered() {
         _showFiltered.update { !it }
     }
-
-    fun getFilteredCount(contactKey: String): Flow<Int> = packetRepository.getFilteredCountFlow(contactKey)
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }

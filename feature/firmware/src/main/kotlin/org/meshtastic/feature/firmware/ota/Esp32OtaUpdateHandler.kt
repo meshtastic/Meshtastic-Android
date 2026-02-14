@@ -28,6 +28,7 @@ import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.firmware_update_connecting_attempt
@@ -302,13 +303,13 @@ constructor(
                 WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
             }
 
-        val startTime = System.currentTimeMillis()
+        val startTime = nowMillis
         transport
             .streamFirmware(
                 data = firmwareData,
                 chunkSize = chunkSize,
                 onProgress = { progress ->
-                    val currentTime = System.currentTimeMillis()
+                    val currentTime = nowMillis
                     val elapsedSeconds = (currentTime - startTime) / MILLIS_PER_SECOND
                     val percent = (progress * PERCENT_MAX).toInt()
 

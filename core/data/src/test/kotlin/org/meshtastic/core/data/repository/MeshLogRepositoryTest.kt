@@ -30,6 +30,7 @@ import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.EnvironmentMetrics
@@ -67,7 +68,7 @@ class MeshLogRepositoryTest {
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
                 message_type = "telemetry",
-                received_date = System.currentTimeMillis(),
+                received_date = nowMillis,
                 raw_message = "",
                 fromRadio = FromRadio(packet = meshPacket),
             )
@@ -94,7 +95,7 @@ class MeshLogRepositoryTest {
             MeshLog(
                 uuid = UUID.randomUUID().toString(),
                 message_type = "telemetry",
-                received_date = System.currentTimeMillis(),
+                received_date = nowMillis,
                 raw_message = "",
                 fromRadio = FromRadio(packet = meshPacket),
             )

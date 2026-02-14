@@ -42,6 +42,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.encodeToString
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.admin_key
 import org.meshtastic.core.strings.admin_keys
@@ -122,10 +123,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/*"
-                        putExtra(
-                            Intent.EXTRA_TITLE,
-                            "${node?.user?.short_name}_keys_${System.currentTimeMillis()}.json",
-                        )
+                        putExtra(Intent.EXTRA_TITLE, "${node?.user?.short_name}_keys_$nowMillis.json")
                     }
                 exportConfigLauncher.launch(intent)
             },

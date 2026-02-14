@@ -33,6 +33,8 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.isWithinSizeLimit
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
@@ -64,7 +66,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository?,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private val currentPacketId = AtomicLong(java.util.Random(System.currentTimeMillis()).nextLong().absoluteValue)
+    private val currentPacketId = AtomicLong(java.util.Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = AtomicReference(ByteString.EMPTY)
     private val offlineSentPackets = CopyOnWriteArrayList<DataPacket>()
     val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
@@ -175,7 +177,7 @@ constructor(
                     emoji = p.emoji,
                 ),
             )
-        p.time = System.currentTimeMillis()
+        p.time = nowMillis
         packetHandler?.sendToRadio(meshPacket)
     }
 
@@ -240,7 +242,7 @@ constructor(
                 latitude_i = Position.degI(currentPosition.latitude),
                 longitude_i = Position.degI(currentPosition.longitude),
                 altitude = currentPosition.altitude,
-                time = (System.currentTimeMillis() / TIME_MS_TO_S).toInt(),
+                time = nowSeconds.toInt(),
             )
         packetHandler?.sendToRadio(
             buildMeshPacket(
@@ -292,7 +294,7 @@ constructor(
     }
 
     fun requestTraceroute(requestId: Int, destNum: Int) {
-        tracerouteStartTimes[requestId] = System.currentTimeMillis()
+        tracerouteStartTimes[requestId] = nowMillis
         packetHandler?.sendToRadio(
             buildMeshPacket(
                 to = destNum,
@@ -343,7 +345,7 @@ constructor(
     }
 
     fun requestNeighborInfo(requestId: Int, destNum: Int) {
-        neighborInfoStartTimes[requestId] = System.currentTimeMillis()
+        neighborInfoStartTimes[requestId] = nowMillis
         val myNum = nodeManager?.myNodeNum ?: 0
         if (destNum == myNum) {
             val neighborInfoToSend =
@@ -360,7 +362,7 @@ constructor(
                                 Neighbor(
                                     node_id = 0, // Dummy node ID that can be intercepted
                                     snr = 0f,
-                                    last_rx_time = (System.currentTimeMillis() / TIME_MS_TO_S).toInt(),
+                                    last_rx_time = nowSeconds.toInt(),
                                     node_broadcast_interval_secs = oneHour,
                                 ),
                             ),
@@ -471,7 +473,6 @@ constructor(
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL
         private const val PACKET_ID_SHIFT_BITS = 32
-        private const val TIME_MS_TO_S = 1000L
 
         private const val ADMIN_CHANNEL_NAME = "admin"
         private const val NODE_ID_PREFIX = "!"

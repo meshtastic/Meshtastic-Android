@@ -66,6 +66,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.systemTimeZone
+import org.meshtastic.core.model.util.toPosixString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.accept
 import org.meshtastic.core.strings.are_you_sure
@@ -115,12 +117,10 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
-import org.meshtastic.core.ui.timezone.toPosixString
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
-import java.time.ZoneId
 
 private val Config.DeviceConfig.Role.description: StringResource
     get() =
@@ -259,12 +259,12 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
             TitledCard(title = stringResource(Res.string.time_zone)) {
                 val context = LocalContext.current
                 val appTzPosixString by
-                    produceState(initialValue = ZoneId.systemDefault().toPosixString()) {
+                    produceState(initialValue = systemTimeZone.toPosixString()) {
                         val receiver =
                             object : BroadcastReceiver() {
                                 override fun onReceive(context: Context, intent: Intent) {
                                     if (intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
-                                        value = ZoneId.systemDefault().toPosixString()
+                                        value = systemTimeZone.toPosixString()
                                     }
                                 }
                             }

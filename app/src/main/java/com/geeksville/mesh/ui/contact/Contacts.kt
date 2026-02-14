@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,8 +67,10 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.formatMuteRemainingTime
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.are_you_sure
 import org.meshtastic.core.strings.cancel
@@ -104,7 +107,7 @@ import org.meshtastic.core.ui.icon.VolumeUpTwoTone
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ChannelSet
-import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -172,7 +175,7 @@ fun ContactsScreen(
                 .filter { it.contactKey in selectedContactKeys }
         }
     // Get message count directly from repository for selected contacts
-    var selectedCount by remember { mutableStateOf(0) }
+    var selectedCount by remember { mutableIntStateOf(0) }
     LaunchedEffect(selectedContactKeys.size, selectedContactKeys.joinToString(",")) {
         selectedCount = viewModel.getTotalMessageCount(selectedContactKeys.toList())
     }
@@ -323,14 +326,14 @@ private fun MuteNotificationsDialog(
     val muteOptions = remember {
         listOf(
             Res.string.unmute to 0L,
-            Res.string.mute_8_hours to TimeUnit.HOURS.toMillis(8),
-            Res.string.mute_1_week to TimeUnit.DAYS.toMillis(7),
+            Res.string.mute_8_hours to TimeConstants.EIGHT_HOURS.inWholeMilliseconds,
+            Res.string.mute_1_week to 7.days.inWholeMilliseconds,
             Res.string.mute_always to Long.MAX_VALUE,
         )
     }
 
     // State to hold the selected mute duration index
-    var selectedOptionIndex by remember { mutableStateOf(2) } // Default to "Always"
+    var selectedOptionIndex by remember { mutableIntStateOf(2) } // Default to "Always"
 
     MeshtasticDialog(
         onDismiss = onDismiss, // Dismiss the dialog when clicked outside
@@ -347,7 +350,7 @@ private fun MuteNotificationsDialog(
                 // Show current mute status
                 selectedContactKeys.forEach { contactKey ->
                     contactSettings[contactKey]?.let { settings ->
-                        val now = System.currentTimeMillis()
+                        val now = nowMillis
                         val statusText =
                             when {
                                 settings.muteUntil > 0 && settings.muteUntil != Long.MAX_VALUE -> {

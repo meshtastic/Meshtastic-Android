@@ -28,6 +28,7 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.getShortDateTime
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.User
 
 data class PacketEntity(
@@ -126,7 +127,7 @@ data class ContactSettings(
     @ColumnInfo(name = "filtering_disabled", defaultValue = "0") val filteringDisabled: Boolean = false,
 ) {
     val isMuted
-        get() = System.currentTimeMillis() <= muteUntil
+        get() = nowMillis <= muteUntil
 }
 
 data class Reaction(

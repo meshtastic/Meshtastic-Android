@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.model
 
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.all_time
 import org.meshtastic.core.strings.one_hour_short
@@ -35,7 +36,7 @@ enum class TimeFrame(val strRes: StringResource, val seconds: Long) {
     ALL_TIME(Res.string.all_time, 0),
     ;
 
-    fun timeThreshold(now: Long = System.currentTimeMillis() / 1000L): Long {
+    fun timeThreshold(now: Long = nowSeconds): Long {
         if (this == ALL_TIME) return 0
         return now - seconds
     }
@@ -44,7 +45,7 @@ enum class TimeFrame(val strRes: StringResource, val seconds: Long) {
      * Checks if this time frame is relevant given the oldest available data point. We show the option if the data
      * extends at least into this timeframe.
      */
-    fun isAvailable(oldestTimestampSeconds: Long, now: Long = System.currentTimeMillis() / 1000L): Boolean {
+    fun isAvailable(oldestTimestampSeconds: Long, now: Long = nowSeconds): Boolean {
         if (this == ALL_TIME || this == ONE_HOUR) return true
         val rangeSeconds = now - oldestTimestampSeconds
         return rangeSeconds >= seconds

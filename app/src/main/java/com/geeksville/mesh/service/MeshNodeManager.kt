@@ -32,6 +32,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -186,12 +187,7 @@ constructor(
         }
     }
 
-    fun handleReceivedPosition(
-        fromNum: Int,
-        myNodeNum: Int,
-        p: ProtoPosition,
-        defaultTime: Long = System.currentTimeMillis(),
-    ) {
+    fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long = nowMillis) {
         if (myNodeNum == fromNum && (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0) {
             Logger.d { "Ignoring nop position update for the local node" }
         } else {
