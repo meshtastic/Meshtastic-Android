@@ -35,6 +35,10 @@ import org.meshtastic.proto.HardwareModel
 @Dao
 interface NodeInfoDao {
 
+    companion object {
+        const val KEY_SIZE = 32
+    }
+
     /**
      * Verifies a [NodeEntity] before an upsert operation. It handles populating the publicKey for lazy migration,
      * checks for public key conflicts with new nodes, and manages updates to existing nodes, particularly in cases of
@@ -84,64 +88,75 @@ interface NodeInfoDao {
         return newNode
     }
 
+    /**
+     * Resolves the public key for an existing node during an update.
+     *
+     * This function implements safety checks to prevent public key conflicts (PKC) and ensure robust handling of key
+     * updates.
+     *
+     * @param existingNode The current state of the node in the database.
+     * @param incomingNode The new node data being upserted.
+     * @return The resolved [ByteString] for the public key:
+     * - [NodeEntity.ERROR_BYTE_STRING]: If there is a mismatch between a valid existing key and a new incoming key.
+     * - `incomingNode.publicKey`: If the incoming key is new, matches the existing one, or if recovering from an error
+     *   state.
+     * - `existingNode.publicKey`: If the incoming update has no key, or if the user is licensed but already has a valid
+     *   key (prevents wiping).
+     * - [ByteString.EMPTY]: If the user is licensed and didn't previously have a key (or if key is explicitly cleared).
+     */
+    private fun resolvePublicKey(existingNode: NodeEntity, incomingNode: NodeEntity): ByteString? {
+        val existingKey = existingNode.publicKey ?: existingNode.user.public_key
+        val incomingKey = incomingNode.publicKey
+
+        val incomingHasKey = (incomingKey?.size ?: 0) == KEY_SIZE
+        val existingHasKey = (existingKey?.size ?: 0) == KEY_SIZE && existingKey != NodeEntity.ERROR_BYTE_STRING
+
+        return when {
+            incomingHasKey -> {
+                if (existingHasKey && incomingKey != existingKey) {
+                    // Actual mismatch between two non-empty keys
+                    NodeEntity.ERROR_BYTE_STRING
+                } else {
+                    // New key, same key, or recovery from Error state
+                    incomingKey
+                }
+            }
+            existingHasKey -> existingKey
+            incomingNode.user.is_licensed -> ByteString.EMPTY
+            else -> existingKey
+        }
+    }
+
+    /**
+     * Handles the validation logic when upserting an existing node.
+     *
+     * It distinguishes between two scenarios:
+     * 1. **Preservation**: If the incoming update is a placeholder (unset HW model) with a default name, and the
+     *    existing node has full user info, we preserve the existing identity (user, keys, names, verification) while
+     *    updating telemetry and status fields from the incoming packet.
+     * 2. **Update**: If it's a normal update, we validate the public key using [resolvePublicKey] to prevent conflicts
+     *    or accidental key wiping, and then update the node.
+     */
     @Suppress("CyclomaticComplexMethod", "MagicNumber")
     private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
+        val resolvedNotes = incomingNode.notes.ifBlank { existingNode.notes }
+
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
         val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
         val isDefaultName = incomingNode.user.long_name?.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$")) == true
 
-        val shouldPreserve = hasExistingUser && isPlaceholder && isDefaultName
-
-        if (shouldPreserve) {
-            // Preserve existing name and user info, but update metadata like lastHeard, SNR, and position.
-            val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
-            return existingNode.copy(
-                lastHeard = incomingNode.lastHeard,
-                snr = incomingNode.snr,
-                rssi = incomingNode.rssi,
-                position = incomingNode.position,
-                hopsAway = incomingNode.hopsAway,
-                deviceTelemetry = incomingNode.deviceTelemetry,
-                environmentTelemetry = incomingNode.environmentTelemetry,
-                powerTelemetry = incomingNode.powerTelemetry,
-                paxcounter = incomingNode.paxcounter,
-                channel = incomingNode.channel,
-                viaMqtt = incomingNode.viaMqtt,
-                isFavorite = incomingNode.isFavorite,
-                isIgnored = incomingNode.isIgnored,
-                isMuted = incomingNode.isMuted,
+        if (hasExistingUser && isPlaceholder && isDefaultName) {
+            return incomingNode.copy(
+                user = existingNode.user,
+                publicKey = existingNode.publicKey,
+                longName = existingNode.longName,
+                shortName = existingNode.shortName,
+                manuallyVerified = existingNode.manuallyVerified,
                 notes = resolvedNotes,
             )
         }
 
-        val existingKey = existingNode.publicKey ?: existingNode.user.public_key
-        val incomingKey = incomingNode.publicKey
-
-        val incomingHasKey = (incomingKey?.size ?: 0) == 32
-        val existingHasKey = (existingKey?.size ?: 0) == 32 && existingKey != NodeEntity.ERROR_BYTE_STRING
-
-        val resolvedKey =
-            when {
-                incomingHasKey -> {
-                    if (existingHasKey && incomingKey != existingKey) {
-                        // Actual mismatch between two non-empty keys
-                        NodeEntity.ERROR_BYTE_STRING
-                    } else {
-                        // New key, same key, or recovery from Error state
-                        incomingKey
-                    }
-                }
-                incomingNode.user.is_licensed -> {
-                    // Explicitly clear key for licensed (HAM) users
-                    ByteString.EMPTY
-                }
-                else -> {
-                    // Routine update without key: preserve what we have (even if it's currently Error)
-                    existingKey
-                }
-            }
-
-        val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
+        val resolvedKey = resolvePublicKey(existingNode, incomingNode)
 
         return incomingNode.copy(
             user = incomingNode.user.copy(public_key = resolvedKey ?: ByteString.EMPTY),
