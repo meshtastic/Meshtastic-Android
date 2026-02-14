@@ -33,16 +33,23 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
  */
 @Throws(MalformedURLException::class)
 fun Uri.toSharedContact(): SharedContact {
-    val h = host ?: ""
-    val isCorrectHost =
-        h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
+    val h = host?.lowercase() ?: ""
+    val isCorrectHost = h == MESHTASTIC_HOST || h == "www.$MESHTASTIC_HOST"
     val segments = pathSegments
     val isCorrectPath = segments.any { it.equals("v", ignoreCase = true) }
 
-    if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
-        throw MalformedURLException("Not a valid Meshtastic URL")
+    val frag = fragment
+    if (frag.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
+        throw MalformedURLException("Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!frag.isNullOrBlank()}")
     }
-    return SharedContact.ADAPTER.decode(Base64.decode(fragment!!, BASE64FLAGS).toByteString())
+
+    return try {
+        // Handle potential query parameters within the fragment (e.g. from older Apple/web clients)
+        val data = frag.substringBefore('?')
+        SharedContact.ADAPTER.decode(Base64.decode(data, BASE64FLAGS).toByteString())
+    } catch (e: Exception) {
+        throw MalformedURLException("Failed to decode SharedContact: ${e.message}")
+    }
 }
 
 /** Converts a [SharedContact] to its corresponding URI representation. */

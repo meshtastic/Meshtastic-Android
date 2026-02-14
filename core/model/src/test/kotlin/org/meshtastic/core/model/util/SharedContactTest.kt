@@ -65,4 +65,19 @@ class SharedContactTest {
         val url = Uri.parse(urlStr)
         url.toSharedContact()
     }
+
+    @Test(expected = java.net.MalformedURLException::class)
+    fun testInvalidPathThrows() {
+        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val urlStr = original.getSharedContactUrl().toString().replace("/v/", "/wrong/")
+        val url = Uri.parse(urlStr)
+        url.toSharedContact()
+    }
+
+    @Test(expected = java.net.MalformedURLException::class)
+    fun testMissingFragmentThrows() {
+        val urlStr = "https://meshtastic.org/v/"
+        val url = Uri.parse(urlStr)
+        url.toSharedContact()
+    }
 }
