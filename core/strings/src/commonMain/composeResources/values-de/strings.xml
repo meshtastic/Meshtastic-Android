@@ -735,7 +735,7 @@
     <string name="uptime">Laufzeit</string>
     <string name="load_indexed">Last %1$d</string>
     <string name="fetching_channel_indexed">Abrufen von Kanal %1$d/%2$d</string>
-    <string name="fetching_config">Abrufen %1$s</string>
+    <string name="fetching_config">%1$s Abrufen</string>
     <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <string name="timestamp">Zeitstempel</string>
     <string name="heading">Überschrift</string>
