@@ -45,6 +45,7 @@
     <string name="message_status_sfpp_confirmed">Підтверджений на ланцюжку SF++</string>
     <string name="routing_error_none">Підтверджено</string>
     <string name="routing_error_no_route">Маршрут відсутній</string>
+    <string name="routing_error_got_nak">Отримано негативне підтвердження</string>
     <string name="routing_error_timeout">Таймаут</string>
     <string name="routing_error_no_channel">Канал відсутній</string>
     <string name="routing_error_too_large">Пакет завеликий</string>
