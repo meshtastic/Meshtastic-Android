@@ -203,6 +203,7 @@
     <string name="delete">Smazat</string>
     <string name="delete_for_everyone">Smazat pro všechny</string>
     <string name="delete_for_me">Smazat pro mě</string>
+    <string name="select">Vybrat</string>
     <string name="select_all">Vybrat vše</string>
     <string name="map_style_selection">Výběr stylu</string>
     <string name="map_download_region">Stáhnout oblast</string>
@@ -289,6 +290,8 @@
     <string name="wifi_qr_code_error">Neplatný formát QR kódu WiFi</string>
     <string name="navigate_back">Přejít zpět</string>
     <string name="battery">Baterie</string>
+    <string name="temperature">Teplota</string>
+    <string name="humidity">Vlhkost</string>
     <string name="logs">Logy</string>
     <string name="hops_away">Počet skoků</string>
     <string name="hops_away_template">Počet skoků: %1$d</string>
@@ -339,11 +342,13 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Trasa směrem k cíli:\n\n</string>
     <string name="traceroute_route_back_to_us">Trasa zpět k nám:\n\n</string>
+    <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1T</string>
     <string name="two_weeks">2T</string>
     <string name="four_weeks">4T</string>
+    <string name="one_month">1M</string>
     <string name="max">Max</string>
     <string name="unknown_age">Neznámé stáří</string>
     <string name="copy">Kopírovat</string>
@@ -367,6 +372,7 @@
     <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
     <string name="low_battery_title">Nízký stav baterie: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
+    <string name="baro_pressure">Tlak</string>
     <string name="udp_enabled">Povoleno</string>
     <string name="udp_config">UDP Konfigurace</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Naposledy slyšen: %2$s<br>Poslední pozice: %3$s<br>Baterie: %4$s]]></string>
@@ -660,6 +666,7 @@
     <string name="nodes">Uzly</string>
     <string name="bottom_nav_settings">Nastavení</string>
     <string name="set_your_region">Nastavte svůj region</string>
+    <string name="reply">Odpovědět</string>
     <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
     <string name="map_reporting_consent_header">Souhlas se sdílením nešifrovaných dat uzlu prostřednictvím MQTT</string>
     <string name="map_reporting_consent_text">Povolením této funkce potvrzujete a výslovně souhlasíte s přenosem zeměpisné polohy vašeho zařízení v reálném čase přes MQTT protokol bez šifrování. Tato lokalizační data mohou být použita pro účely, jako je hlášení živých map, sledování zařízení a související telemetrické funkce.</string>
@@ -921,5 +928,13 @@
     <string name="add_channels_description">Vyberte kanály z QR kódu, které chcete přidat. Stávající kanály nebudou změněny.</string>
     <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
     <!-- Message Filter -->
+    <string name="scan_nfc">Naskenovat NFC</string>
+    <string name="scan_shared_contact_nfc">Naskenovat NFC sdíleného kontaktu</string>
+    <string name="scan_shared_contact_qr">Naskenovat QR kód sdíleného kontaktu</string>
+    <string name="scan_channels_nfc">Naskenovat NFC kanálů</string>
+    <string name="scan_channels_qr">Naskenovat kód QR kanálů</string>
+    <string name="share_channels_qr">Sdílet QR kód kanálů</string>
+    <string name="generate_qr_code">Vytvořit QR kód</string>
+    <string name="nfc_disabled">NFC je zakázáno. Povolte jej v nastavení systému.</string>
     <string name="all_time">Vše</string>
 </resources>
