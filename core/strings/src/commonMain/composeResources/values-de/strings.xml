@@ -37,6 +37,9 @@
     <string name="node_sort_last_heard">Zuletzt gehört</string>
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
+    <string name="via_udp">über UDP</string>
+    <string name="via_api">über API</string>
+    <string name="internal">Intern</string>
     <string name="node_sort_via_favorite">über Favorit</string>
     <string name="node_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
     <string name="unrecognized">Unbekannt</string>
@@ -261,6 +264,7 @@
     <string name="theme_system">System</string>
     <string name="choose_theme">Design auswählen</string>
     <string name="provide_location_to_mesh">Standort zum Mesh angeben</string>
+    <string name="use_homoglyph_characters_encoding">Kompakte Kodierung für Kyrillisch</string>
     <plurals name="delete_messages">
         <item quantity="one">Nachricht löschen?</item>
         <item quantity="other">%1$s Nachrichten löschen?</item>
@@ -418,11 +422,13 @@
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Route zum Zielort:\n\n</string>
     <string name="traceroute_route_back_to_us">Route zurück zu uns:\n\n</string>
+    <string name="one_hour_short">1 Stunde</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1 Woche</string>
     <string name="two_weeks">2 Wochen</string>
     <string name="four_weeks">4W</string>
+    <string name="one_month">1 Monat</string>
     <string name="max">Maximal</string>
     <string name="unknown_age">Alter unbekannt</string>
     <string name="copy">Kopie</string>
@@ -623,6 +629,7 @@
     <string name="ipv4_mode">IPv4 Modus</string>
     <string name="ip">IP</string>
     <string name="gateway">Gateway</string>
+    <string name="subnet">Subnet</string>
     <string name="paxcounter_config">Einstellung Besucherzähler</string>
     <string name="paxcounter_enabled">Besucherzähler aktiviert</string>
     <string name="status_message">Statusmeldung</string>
@@ -756,7 +763,7 @@
     <string name="public_key_changed">Öffentlicher Schlüssel geändert</string>
     <string name="import_label">Importieren</string>
     <string name="request">Anfordern</string>
-    <string name="requesting_from">Anfordern %1$s von %2$s</string>
+    <string name="requesting_from">%1$s von %2$s Anfordern</string>
     <string name="user_info">Benutzerinfo</string>
     <string name="request_neighbor_info">Nachbarinfo (2.7.15+)</string>
     <string name="request_telemetry">Telemetrie anfordern</string>
@@ -895,6 +902,7 @@
     <string name="notifications_for_newly_discovered_nodes">Benachrichtigungen für neu entdeckte Knoten.</string>
     <string name="low_battery">Niedriger Akkustand</string>
     <string name="notifications_for_low_battery_alerts">Benachrichtigungen für niedrige Akku-Warnungen des angeschlossenen Gerätes.</string>
+    <string name="critical_alerts_description">Pakete, die als kritisch gesendet werden, ignorieren den Lautlos und Ruhemodus in den Benachrichtigungseinstellungen.</string>
     <string name="configure_notification_permissions">Benachrichtigungseinstellungen</string>
     <string name="phone_location">Telefonstandort</string>
     <string name="phone_location_description">Meshtastic nutzt den Standort Ihres Telefons, um einige Funktionen zu aktivieren. Sie können Ihre Standortberechtigungen jederzeit in den Einstellungen aktualisieren.</string>
@@ -1123,5 +1131,6 @@
     <string name="share_channels_qr">QR-Code für Kanäle teilen</string>
     <string name="scan_nfc_text">Bringen Sie Ihr Gerät in die Nähe des NFC-Tags zum Scannen.</string>
     <string name="generate_qr_code">QR Code Erzeugen</string>
+    <string name="nfc_disabled">NFC ist deaktiviert. Bitte aktivieren Sie es in den Systemeinstellungen.</string>
     <string name="all_time">Alle</string>
 </resources>
