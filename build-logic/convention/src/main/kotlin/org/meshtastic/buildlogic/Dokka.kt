@@ -37,11 +37,18 @@ fun Project.configureDokka() {
                 suppress.set(true)
             }
 
-            // Ensure source sets containing core logic are not suppressed
-            val isCoreSourceSet = name in listOf("main", "commonMain", "androidMain", "fdroid", "google")
-            if (isCoreSourceSet) {
-                suppress.set(false)
-            }
+            // Dokka 2.x requires each source file to belong to exactly one source set.
+            val baseSourceSets = listOf(
+                "main",
+                "commonMain",
+                "androidMain",
+                "fdroid",
+                "google",
+                "release"
+            )
+
+            val isCoreSourceSet = name in baseSourceSets
+            suppress.set(!isCoreSourceSet)
 
             sourceLink {
                 enableJdkDocumentationLink.set(true)
@@ -50,7 +57,8 @@ fun Project.configureDokka() {
 
                 // Standardized repo-root based source links
                 localDirectory.set(project.projectDir)
-                val relativePath = project.projectDir.relativeTo(rootProject.projectDir).path.replace("\\", "/")
+                val relativePath =
+                    project.projectDir.relativeTo(rootProject.projectDir).path.replace("\\", "/")
                 remoteUrl.set(URI("https://github.com/meshtastic/Meshtastic-Android/blob/main/$relativePath"))
                 remoteLineSuffix.set("#L")
             }
