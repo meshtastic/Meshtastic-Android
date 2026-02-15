@@ -53,7 +53,7 @@ markdownRenderer = "0.39.2"
 osmdroid-android = "6.1.20"
 spotless = "8.2.1"
 wire = "6.0.0-alpha02"
-vico = "3.0.0-beta.3"
+vico = "3.0.0-beta.4"
 # Removed gradle-doctor
 dependency-guard = "0.5.0"
 nordic-ble = "2.0.0-alpha12"
