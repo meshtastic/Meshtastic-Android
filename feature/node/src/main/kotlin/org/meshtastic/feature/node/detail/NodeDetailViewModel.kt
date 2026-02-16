@@ -65,6 +65,17 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import javax.inject.Inject
 
+/**
+ * UI state for the Node Details screen.
+ *
+ * @property node The node being viewed, or null if loading.
+ * @property ourNode Information about the locally connected node.
+ * @property metricsState Aggregated sensor and signal metrics.
+ * @property environmentState Standardized environmental sensor data.
+ * @property availableLogs A set of log types available for this node.
+ * @property lastTracerouteTime Timestamp of the last successful traceroute request.
+ * @property lastRequestNeighborsTime Timestamp of the last successful neighbor info request.
+ */
 data class NodeDetailUiState(
     val node: Node? = null,
     val ourNode: Node? = null,
@@ -75,6 +86,9 @@ data class NodeDetailUiState(
     val lastRequestNeighborsTime: Long? = null,
 )
 
+/**
+ * ViewModel for the Node Details screen, coordinating data from the node database, mesh logs, and radio configuration.
+ */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class NodeDetailViewModel
@@ -101,6 +115,7 @@ constructor(
         combine(MutableStateFlow(nodeIdFromRoute), manualNodeId) { fromRoute, manual -> manual ?: fromRoute }
             .distinctUntilChanged()
 
+    /** Primary UI state stream, combining identity, metrics, and global device metadata. */
     val uiState: StateFlow<NodeDetailUiState> =
         activeNodeId
             .flatMapLatest { nodeId ->
@@ -111,36 +126,33 @@ constructor(
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun buildUiStateFlow(nodeId: Int): Flow<NodeDetailUiState> {
-        val logNodeIdFlow = nodeRepository.effectiveLogNodeId(nodeId)
         val nodeFlow =
             nodeRepository.nodeDBbyNum
                 .map { it[nodeId] ?: Node.createFallback(nodeId, getString(Res.string.fallback_node_name)) }
                 .distinctUntilChanged()
 
-        // 1. Logs & Metrics Data
+        // 1. Logs & Metrics Data (fetches telemetry, packets, paxcount, and response history)
         val metricsLogsFlow =
-            logNodeIdFlow.flatMapLatest { logId ->
-                val telemetry = meshLogRepository.getTelemetryFrom(logId)
-                val packets = meshLogRepository.getMeshPacketsFrom(logId)
-                val posPackets = meshLogRepository.getMeshPacketsFrom(logId, PortNum.POSITION_APP.value)
-                val pax = meshLogRepository.getLogsFrom(logId, PortNum.PAXCOUNTER_APP.value)
-                val trRes = meshLogRepository.getLogsFrom(logId, PortNum.TRACEROUTE_APP.value)
-                val niRes = meshLogRepository.getLogsFrom(logId, PortNum.NEIGHBORINFO_APP.value)
-
+            combine(
+                meshLogRepository.getTelemetryFrom(nodeId),
+                meshLogRepository.getMeshPacketsFrom(nodeId),
+                meshLogRepository.getMeshPacketsFrom(nodeId, PortNum.POSITION_APP.value),
+                meshLogRepository.getLogsFrom(nodeId, PortNum.PAXCOUNTER_APP.value),
+                meshLogRepository.getLogsFrom(nodeId, PortNum.TRACEROUTE_APP.value),
+                meshLogRepository.getLogsFrom(nodeId, PortNum.NEIGHBORINFO_APP.value),
+            ) { args: Array<List<Any?>> ->
                 @Suppress("UNCHECKED_CAST")
-                combine(telemetry, packets, posPackets, pax, trRes, niRes) { args: Array<Any?> ->
-                    LogsGroup(
-                        telemetry = args[0] as List<Telemetry>,
-                        packets = args[1] as List<MeshPacket>,
-                        posPackets = args[2] as List<MeshPacket>,
-                        pax = args[3] as List<MeshLog>,
-                        trRes = args[4] as List<MeshLog>,
-                        niRes = args[5] as List<MeshLog>,
-                    )
-                }
+                LogsGroup(
+                    telemetry = args[0] as List<Telemetry>,
+                    packets = args[1] as List<MeshPacket>,
+                    posPackets = args[2] as List<MeshPacket>,
+                    pax = args[3] as List<MeshLog>,
+                    trRes = args[4] as List<MeshLog>,
+                    niRes = args[5] as List<MeshLog>,
+                )
             }
 
-        // 2. Identity & Config
+        // 2. Identity & Config (local device info and radio profile)
         val identityFlow =
             combine(nodeRepository.ourNodeInfo, nodeRepository.myNodeInfo, radioConfigRepository.deviceProfileFlow) {
                     ourNode,
@@ -150,7 +162,7 @@ constructor(
                 IdentityGroup(ourNode, myInfo?.toMyNodeInfo(), profile)
             }
 
-        // 3. Metadata & Times
+        // 3. Metadata & Request Timestamps (firmware versions and last request times)
         val metadataFlow =
             combine(
                 meshLogRepository.getMyNodeInfo().map { it?.firmware_edition }.distinctUntilChanged(),
@@ -158,11 +170,17 @@ constructor(
                 firmwareReleaseRepository.alphaRelease,
                 nodeRequestActions.lastTracerouteTimes.map { it[nodeId] },
                 nodeRequestActions.lastRequestNeighborTimes.map { it[nodeId] },
-            ) { edition, stable, alpha, trTime, niTime ->
-                MetadataGroup(edition, stable, alpha, trTime, niTime)
+            ) { args: Array<Any?> ->
+                MetadataGroup(
+                    edition = args[0] as? FirmwareEdition,
+                    stable = args[1] as? FirmwareRelease,
+                    alpha = args[2] as? FirmwareRelease,
+                    trTime = args[3] as? Long,
+                    niTime = args[4] as? Long,
+                )
             }
 
-        // 4. Requests (History)
+        // 4. Requests History (tracking traceroute and neighbor info requests sent from this device)
         val requestsFlow =
             combine(
                 meshLogRepository.getRequestLogs(nodeId, PortNum.TRACEROUTE_APP),
@@ -171,6 +189,7 @@ constructor(
                 trReqs to niReqs
             }
 
+        // Assemble final UI state
         return combine(nodeFlow, metricsLogsFlow, identityFlow, metadataFlow, requestsFlow) {
                 node,
                 logs,
@@ -269,6 +288,7 @@ constructor(
         }
     }
 
+    /** Dispatches high-level node management actions like removal, muting, or favoriting. */
     fun handleNodeMenuAction(action: NodeMenuAction) {
         when (action) {
             is NodeMenuAction.Remove -> nodeManagementActions.requestRemoveNode(viewModelScope, action.node)
@@ -304,6 +324,7 @@ constructor(
         nodeManagementActions.setNodeNotes(viewModelScope, nodeNum, notes)
     }
 
+    /** Returns the type-safe navigation route for a direct message to this node. */
     fun getDirectMessageRoute(node: Node, ourNode: Node?): String {
         val hasPKC = ourNode?.hasPKC == true
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel

@@ -37,6 +37,11 @@ import org.meshtastic.proto.PowerMetrics
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 
+/**
+ * Domain model representing a node in the mesh network.
+ *
+ * This class aggregates user information, position data, and hardware metrics.
+ */
 @Suppress("MagicNumber")
 data class Node(
     val num: Int,

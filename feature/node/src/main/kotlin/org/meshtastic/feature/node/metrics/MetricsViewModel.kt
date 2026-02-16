@@ -36,7 +36,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
@@ -89,6 +88,9 @@ import java.util.Locale
 import javax.inject.Inject
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
 
+/**
+ * ViewModel responsible for managing and graphing metrics (telemetry, signal strength, paxcount) for a specific node.
+ */
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
 class MetricsViewModel
@@ -118,6 +120,7 @@ constructor(
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 
+    /** Returns the map overlay for a specific traceroute request ID. */
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
         val cached = tracerouteOverlayCache.value[requestId]
         if (cached != null) return cached
@@ -171,13 +174,18 @@ constructor(
     }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
+
+    /** Current aggregated metrics state, including signal history and sensor logs. */
     val state: StateFlow<MetricsState> = _state
 
     private val environmentState = MutableStateFlow(EnvironmentMetricsState())
 
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+
+    /** The active time window for filtering graphed data. */
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
+    /** Returns the list of time frames that are actually available based on the oldest data point. */
     val availableTimeFrames: StateFlow<List<TimeFrame>> =
         combine(_state, environmentState) { state, envState ->
             val stateOldest = state.oldestTimestampSeconds()
@@ -267,6 +275,7 @@ constructor(
         )
     }
 
+    /** Shows the detail dialog for a traceroute result, with an option to view on the map. */
     fun showTracerouteDetail(
         annotatedMessage: AnnotatedString,
         requestId: Int,
@@ -324,8 +333,6 @@ constructor(
         jobs =
             viewModelScope.launch {
                 if (currentDestNum != null) {
-                    val logNodeIdFlow = nodeRepository.effectiveLogNodeId(currentDestNum)
-
                     launch {
                         combine(nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) { nodes, myInfo ->
                             nodes[currentDestNum] to (nodes.keys.firstOrNull() to myInfo)
@@ -370,44 +377,38 @@ constructor(
                     }
 
                     launch {
-                        logNodeIdFlow
-                            .flatMapLatest { meshLogRepository.getTelemetryFrom(it) }
-                            .collect { telemetry ->
-                                val device = mutableListOf<Telemetry>()
-                                val power = mutableListOf<Telemetry>()
-                                val host = mutableListOf<Telemetry>()
-                                val env = mutableListOf<Telemetry>()
+                        meshLogRepository.getTelemetryFrom(currentDestNum).collect { telemetry ->
+                            val device = mutableListOf<Telemetry>()
+                            val power = mutableListOf<Telemetry>()
+                            val host = mutableListOf<Telemetry>()
+                            val env = mutableListOf<Telemetry>()
 
-                                for (item in telemetry) {
-                                    if (item.device_metrics != null) device.add(item)
-                                    if (item.power_metrics != null) power.add(item)
-                                    if (item.host_metrics != null) host.add(item)
-                                    if (item.hasValidEnvironmentMetrics()) env.add(item)
-                                }
-
-                                _state.update { state ->
-                                    state.copy(deviceMetrics = device, powerMetrics = power, hostMetrics = host)
-                                }
-                                environmentState.update { it.copy(environmentMetrics = env) }
+                            for (item in telemetry) {
+                                if (item.device_metrics != null) device.add(item)
+                                if (item.power_metrics != null) power.add(item)
+                                if (item.host_metrics != null) host.add(item)
+                                if (item.hasValidEnvironmentMetrics()) env.add(item)
                             }
+
+                            _state.update { state ->
+                                state.copy(deviceMetrics = device, powerMetrics = power, hostMetrics = host)
+                            }
+                            environmentState.update { it.copy(environmentMetrics = env) }
+                        }
                     }
 
                     launch {
-                        logNodeIdFlow
-                            .flatMapLatest { meshLogRepository.getMeshPacketsFrom(it) }
-                            .collect { meshPackets ->
-                                _state.update { state ->
-                                    state.copy(signalMetrics = meshPackets.filter { it.isDirectSignal() })
-                                }
+                        meshLogRepository.getMeshPacketsFrom(currentDestNum).collect { meshPackets ->
+                            _state.update { state ->
+                                state.copy(signalMetrics = meshPackets.filter { it.isDirectSignal() })
                             }
+                        }
                     }
 
                     launch {
                         combine(
                             meshLogRepository.getRequestLogs(currentDestNum, PortNum.TRACEROUTE_APP),
-                            logNodeIdFlow.flatMapLatest {
-                                meshLogRepository.getLogsFrom(it, PortNum.TRACEROUTE_APP.value)
-                            },
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP.value),
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(tracerouteRequests = request, tracerouteResults = response)
@@ -419,9 +420,7 @@ constructor(
                     launch {
                         combine(
                             meshLogRepository.getRequestLogs(currentDestNum, PortNum.NEIGHBORINFO_APP),
-                            logNodeIdFlow.flatMapLatest {
-                                meshLogRepository.getLogsFrom(it, PortNum.NEIGHBORINFO_APP.value)
-                            },
+                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP.value),
                         ) { request, response ->
                             _state.update { state ->
                                 state.copy(neighborInfoRequests = request, neighborInfoResults = response)
@@ -431,26 +430,27 @@ constructor(
                     }
 
                     launch {
-                        logNodeIdFlow
-                            .flatMapLatest { meshLogRepository.getMeshPacketsFrom(it, PortNum.POSITION_APP.value) }
-                            .collect { packets ->
-                                val distinctPositions =
-                                    packets
-                                        .mapNotNull { it.toPosition() }
-                                        .asFlow()
-                                        .distinctUntilChanged { old, new ->
-                                            old.time == new.time ||
-                                                (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
-                                        }
-                                        .toList()
-                                _state.update { state -> state.copy(positionLogs = distinctPositions) }
-                            }
+                        meshLogRepository.getMeshPacketsFrom(
+                            currentDestNum,
+                            PortNum.POSITION_APP.value,
+                        ).collect { packets ->
+                            val distinctPositions =
+                                packets
+                                    .mapNotNull { it.toPosition() }
+                                    .asFlow()
+                                    .distinctUntilChanged { old, new ->
+                                        old.time == new.time ||
+                                            (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
+                                    }
+                                    .toList()
+                            _state.update { state -> state.copy(positionLogs = distinctPositions) }
+                        }
                     }
 
                     launch {
-                        logNodeIdFlow
-                            .flatMapLatest { meshLogRepository.getLogsFrom(it, PortNum.PAXCOUNTER_APP.value) }
-                            .collect { logs -> _state.update { state -> state.copy(paxMetrics = logs) } }
+                        meshLogRepository.getLogsFrom(currentDestNum, PortNum.PAXCOUNTER_APP.value).collect { logs ->
+                            _state.update { state -> state.copy(paxMetrics = logs) }
+                        }
                     }
 
                     launch {

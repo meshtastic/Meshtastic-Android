@@ -26,6 +26,7 @@ import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.dao.MeshLogDao
@@ -47,14 +48,16 @@ class MeshLogRepositoryTest {
     private val appDatabase: MeshtasticDatabase = mockk()
     private val meshLogDao: MeshLogDao = mockk()
     private val meshLogPrefs: MeshLogPrefs = mockk()
+    private val nodeInfoReadDataSource: NodeInfoReadDataSource = mockk()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
-    private val repository = MeshLogRepository(dbManager, dispatchers, meshLogPrefs)
+    private val repository = MeshLogRepository(dbManager, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
 
     init {
         every { dbManager.currentDb } returns MutableStateFlow(appDatabase)
         every { appDatabase.meshLogDao() } returns meshLogDao
+        every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(null)
     }
 
     @Test
