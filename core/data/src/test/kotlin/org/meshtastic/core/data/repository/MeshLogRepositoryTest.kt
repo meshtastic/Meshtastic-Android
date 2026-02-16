@@ -19,6 +19,7 @@ package org.meshtastic.core.data.repository
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
@@ -109,5 +110,79 @@ class MeshLogRepositoryTest {
 
         // Should be NaN as per repository logic for missing fields
         assertEquals(Float.NaN, resultMetrics?.temperature ?: 0f, 0.01f)
+    }
+
+    @Test
+    fun `getRequestLogs filters correctly`() = runTest(testDispatcher) {
+        val targetNode = 123
+        val otherNode = 456
+        val port = PortNum.TRACEROUTE_APP
+
+        val logs =
+            listOf(
+                // Valid request
+                MeshLog(
+                    uuid = "1",
+                    message_type = "Packet",
+                    received_date = nowMillis,
+                    raw_message = "",
+                    fromNum = 0,
+                    portNum = port.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(to = targetNode, decoded = Data(portnum = port, want_response = true)),
+                    ),
+                ),
+                // Wrong target
+                MeshLog(
+                    uuid = "2",
+                    message_type = "Packet",
+                    received_date = nowMillis,
+                    raw_message = "",
+                    fromNum = 0,
+                    portNum = port.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(to = otherNode, decoded = Data(portnum = port, want_response = true)),
+                    ),
+                ),
+                // Not a request (want_response = false)
+                MeshLog(
+                    uuid = "3",
+                    message_type = "Packet",
+                    received_date = nowMillis,
+                    raw_message = "",
+                    fromNum = 0,
+                    portNum = port.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(to = targetNode, decoded = Data(portnum = port, want_response = false)),
+                    ),
+                ),
+                // Wrong fromNum
+                MeshLog(
+                    uuid = "4",
+                    message_type = "Packet",
+                    received_date = nowMillis,
+                    raw_message = "",
+                    fromNum = 789,
+                    portNum = port.value,
+                    fromRadio =
+                    FromRadio(
+                        packet =
+                        MeshPacket(to = targetNode, decoded = Data(portnum = port, want_response = true)),
+                    ),
+                ),
+            )
+
+        every { meshLogDao.getLogsFrom(0, port.value, any()) } returns MutableStateFlow(logs)
+
+        val result = repository.getRequestLogs(targetNode, port).first()
+
+        assertEquals(1, result.size)
+        assertEquals("1", result[0].uuid)
     }
 }

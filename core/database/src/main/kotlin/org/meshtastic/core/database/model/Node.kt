@@ -20,6 +20,7 @@ import android.graphics.Color
 import okio.ByteString
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
@@ -205,6 +206,20 @@ data class Node(
         nodeStatus = nodeStatus,
         lastTransport = lastTransport,
     )
+
+    companion object {
+        private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+
+        /** Creates a fallback [Node] when the node is not found in the database. */
+        fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {
+            val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+            val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
+            val longName = "$fallbackNamePrefix $safeUserId"
+            val defaultUser =
+                User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
+            return Node(num = nodeNum, user = defaultUser)
+        }
+    }
 }
 
 fun Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in

@@ -52,7 +52,6 @@ import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
@@ -76,11 +75,9 @@ import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import org.meshtastic.proto.User
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -89,8 +86,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
-
-private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 private fun MeshPacket.hasValidSignal(): Boolean = (rx_time ?: 0) > 0 && ((rx_snr ?: 0f) != 0f || (rx_rssi ?: 0) != 0)
 
@@ -124,26 +119,6 @@ constructor(
 
     private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
 
-    private fun MeshLog.hasValidTraceroute(dest: Int?): Boolean =
-        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == dest }
-
-    private fun MeshLog.hasValidNeighborInfo(dest: Int?): Boolean =
-        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == dest }
-
-    /**
-     * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
-     * freezing when viewing unknown nodes.
-     */
-    private suspend fun createFallbackNode(nodeNum: Int): Node {
-        val userId = DataPacket.nodeNumToDefaultId(nodeNum)
-        val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
-        val longName = getString(Res.string.fallback_node_name) + "  $safeUserId"
-        val defaultUser =
-            User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
-
-        return Node(num = nodeNum, user = defaultUser)
-    }
-
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
@@ -176,7 +151,9 @@ constructor(
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
 
     fun positionedNodeNums(): Set<Int> =
-        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet()
+        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
+
+    private fun List<Node>.numSet(): Set<Int> = map { it.num }.toSet()
 
     init {
         viewModelScope.launch {
@@ -360,7 +337,9 @@ constructor(
                             .collect { (node, localData) ->
                                 val (ourNodeNum, myInfo) = localData
                                 // Create a fallback node if not found in database (for hidden clients, etc.)
-                                val actualNode = node ?: createFallbackNode(currentDestNum)
+                                val actualNode =
+                                    node
+                                        ?: Node.createFallback(currentDestNum, getString(Res.string.fallback_node_name))
                                 val pioEnv = if (currentDestNum == ourNodeNum) myInfo?.pioEnv else null
                                 val hwModel = actualNode.user.hw_model.value
                                 val deviceHardware =
@@ -424,14 +403,11 @@ constructor(
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP.value),
+                            meshLogRepository.getRequestLogs(currentDestNum, PortNum.TRACEROUTE_APP),
                             meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP.value),
                         ) { request, response ->
                             _state.update { state ->
-                                state.copy(
-                                    tracerouteRequests = request.filter { it.hasValidTraceroute(currentDestNum) },
-                                    tracerouteResults = response,
-                                )
+                                state.copy(tracerouteRequests = request, tracerouteResults = response)
                             }
                         }
                             .collect {}
@@ -439,15 +415,11 @@ constructor(
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP.value),
+                            meshLogRepository.getRequestLogs(currentDestNum, PortNum.NEIGHBORINFO_APP),
                             meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP.value),
                         ) { request, response ->
                             _state.update { state ->
-                                state.copy(
-                                    neighborInfoRequests =
-                                    request.filter { it.hasValidNeighborInfo(currentDestNum) },
-                                    neighborInfoResults = response,
-                                )
+                                state.copy(neighborInfoRequests = request, neighborInfoResults = response)
                             }
                         }
                             .collect {}

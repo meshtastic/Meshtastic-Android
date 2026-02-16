@@ -59,11 +59,9 @@ import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.FirmwareEdition
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import org.meshtastic.proto.User
 import javax.inject.Inject
 
 data class NodeDetailUiState(
@@ -116,38 +114,11 @@ constructor(
                     meshLogRepository.getMeshPacketsFrom(nodeId, PortNum.POSITION_APP.value).distinctUntilChanged()
                 val paxLogsFlow =
                     meshLogRepository.getLogsFrom(nodeId, PortNum.PAXCOUNTER_APP.value).distinctUntilChanged()
-                val trReqsFlow =
-                    meshLogRepository
-                        .getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP.value)
-                        .map { logs ->
-                            logs.filter { log ->
-                                val pkt = log.fromRadio.packet
-                                val decoded = pkt?.decoded
-                                pkt != null &&
-                                    decoded != null &&
-                                    decoded.want_response == true &&
-                                    pkt.from == 0 &&
-                                    pkt.to == nodeId
-                            }
-                        }
-                        .distinctUntilChanged()
+                val trReqsFlow = meshLogRepository.getRequestLogs(nodeId, PortNum.TRACEROUTE_APP).distinctUntilChanged()
                 val trResFlow =
                     meshLogRepository.getLogsFrom(nodeId, PortNum.TRACEROUTE_APP.value).distinctUntilChanged()
                 val niReqsFlow =
-                    meshLogRepository
-                        .getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP.value)
-                        .map { logs ->
-                            logs.filter { log ->
-                                val pkt = log.fromRadio.packet
-                                val decoded = pkt?.decoded
-                                pkt != null &&
-                                    decoded != null &&
-                                    decoded.want_response == true &&
-                                    pkt.from == 0 &&
-                                    pkt.to == nodeId
-                            }
-                        }
-                        .distinctUntilChanged()
+                    meshLogRepository.getRequestLogs(nodeId, PortNum.NEIGHBORINFO_APP).distinctUntilChanged()
                 val niResFlow =
                     meshLogRepository.getLogsFrom(nodeId, PortNum.NEIGHBORINFO_APP.value).distinctUntilChanged()
 
@@ -174,7 +145,9 @@ constructor(
                     @Suppress("UNCHECKED_CAST")
                     NodeDetailUiStateData(
                         nodeId = nodeId,
-                        actualNode = (args[2] as Node?) ?: createFallbackNode(nodeId),
+                        actualNode =
+                        (args[2] as Node?)
+                            ?: Node.createFallback(nodeId, getString(Res.string.fallback_node_name)),
                         ourNode = args[0] as Node?,
                         ourNodeNum = args[1] as Int?,
                         myInfo = (args[3] as MyNodeEntity?)?.toMyNodeInfo(),
@@ -325,16 +298,6 @@ constructor(
         val hasPKC = ourNode?.hasPKC == true
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         return "${channel}${node.user.id}"
-    }
-
-    @Suppress("MagicNumber")
-    private suspend fun createFallbackNode(nodeNum: Int): Node {
-        val userId = DataPacket.nodeNumToDefaultId(nodeNum)
-        val safeUserId = userId.padStart(4, '0').takeLast(4)
-        val longName = "${getString(Res.string.fallback_node_name)}_$safeUserId"
-        val defaultUser =
-            User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
-        return Node(num = nodeNum, user = defaultUser)
     }
 }
 

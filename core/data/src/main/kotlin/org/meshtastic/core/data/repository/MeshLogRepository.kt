@@ -105,6 +105,25 @@ constructor(
             .mapLatest { list -> list.mapNotNull { it.fromRadio.packet } }
             .flowOn(dispatchers.io)
 
+    /**
+     * Retrieves logs for requests sent from the local node to a specific node. Useful for tracking traceroute or
+     * neighbor info requests.
+     */
+    fun getRequestLogs(toNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> =
+        getLogsFrom(MeshLog.NODE_NUM_LOCAL, portNum.value)
+            .mapLatest { list ->
+                list.filter { log ->
+                    val pkt = log.fromRadio.packet
+                    val decoded = pkt?.decoded
+                    pkt != null &&
+                        decoded != null &&
+                        decoded.want_response == true &&
+                        log.fromNum == MeshLog.NODE_NUM_LOCAL &&
+                        pkt.to == toNodeNum
+                }
+            }
+            .flowOn(dispatchers.io)
+
     fun getMyNodeInfo(): Flow<MyNodeInfo?> = getLogsFrom(0, 0)
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
         .flowOn(dispatchers.io)

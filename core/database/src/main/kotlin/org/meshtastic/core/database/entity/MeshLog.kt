@@ -59,4 +59,9 @@ data class MeshLog(
                     null
                 }
             } ?: nodeInfo?.position
+
+    companion object {
+        /** The node number used to represent the local node in the logs. */
+        const val NODE_NUM_LOCAL = 0
+    }
 }
