@@ -172,29 +172,30 @@ constructor(
         }
     }
 
-    fun clearPosition() =
-        viewModelScope.launch(dispatchers.io) {
-            destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value) }
-        }
+    fun clearPosition() = viewModelScope.launch(dispatchers.io) {
+        destNum?.let { meshLogRepository.deleteLogs(it, PortNum.POSITION_APP.value) }
+    }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
+
     /** Current aggregated metrics state, including signal history and sensor logs. */
     val state: StateFlow<MetricsState> = _state
 
     private val environmentState = MutableStateFlow(EnvironmentMetricsState())
 
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+
     /** The active time window for filtering graphed data. */
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     /** Returns the list of time frames that are actually available based on the oldest data point. */
     val availableTimeFrames: StateFlow<List<TimeFrame>> =
         combine(_state, environmentState) { state, envState ->
-                val stateOldest = state.oldestTimestampSeconds()
-                val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
-                val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: nowSeconds
-                TimeFrame.entries.filter { it.isAvailable(oldest) }
-            }
+            val stateOldest = state.oldestTimestampSeconds()
+            val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
+            val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: nowSeconds
+            TimeFrame.entries.filter { it.isAvailable(oldest) }
+        }
             .stateInWhileSubscribed(TimeFrame.entries)
 
     fun setTimeFrame(timeFrame: TimeFrame) {
@@ -204,24 +205,24 @@ constructor(
     /** Exposes filtered and unit-converted environment metrics for the UI. */
     val filteredEnvironmentMetrics: StateFlow<List<Telemetry>> =
         combine(environmentState, _timeFrame, _state) { envState, timeFrame, state ->
-                val threshold = timeFrame.timeThreshold()
-                val data = envState.environmentMetrics.filter { (it.time ?: 0).toLong() >= threshold }
-                if (state.isFahrenheit) {
-                    data.map { telemetry ->
-                        val em = telemetry.environment_metrics ?: return@map telemetry
-                        telemetry.copy(
-                            environment_metrics =
-                                em.copy(
-                                    temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
-                                    soil_temperature =
-                                        em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
-                                )
-                        )
-                    }
-                } else {
-                    data
+            val threshold = timeFrame.timeThreshold()
+            val data = envState.environmentMetrics.filter { (it.time ?: 0).toLong() >= threshold }
+            if (state.isFahrenheit) {
+                data.map { telemetry ->
+                    val em = telemetry.environment_metrics ?: return@map telemetry
+                    telemetry.copy(
+                        environment_metrics =
+                        em.copy(
+                            temperature = em.temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                            soil_temperature =
+                            em.soil_temperature?.let { UnitConversions.celsiusToFahrenheit(it) },
+                        ),
+                    )
                 }
+            } else {
+                data
             }
+        }
             .stateInWhileSubscribed(emptyList())
 
     /** Exposes graphing data specifically for the filtered environment metrics. */
@@ -233,11 +234,11 @@ constructor(
     /** Exposes filtered and decoded pax metrics for the UI. */
     val filteredPaxMetrics: StateFlow<List<Pair<MeshLog, ProtoPaxcount>>> =
         combine(_state, _timeFrame) { state, timeFrame ->
-                val threshold = timeFrame.timeThreshold()
-                state.paxMetrics
-                    .filter { (it.received_date / 1000) >= threshold }
-                    .mapNotNull { log -> decodePaxFromLog(log)?.let { log to it } }
-            }
+            val threshold = timeFrame.timeThreshold()
+            state.paxMetrics
+                .filter { (it.received_date / 1000) >= threshold }
+                .mapNotNull { log -> decodePaxFromLog(log)?.let { log to it } }
+        }
             .stateInWhileSubscribed(emptyList())
 
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
@@ -339,8 +340,8 @@ constructor(
 
                     launch {
                         combine(nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) { nodes, myInfo ->
-                                nodes[currentDestNum] to (nodes.keys.firstOrNull() to myInfo)
-                            }
+                            nodes[currentDestNum] to (nodes.keys.firstOrNull() to myInfo)
+                        }
                             .distinctUntilChanged()
                             .collect { (node, localData) ->
                                 val (ourNodeNum, myInfo) = localData
@@ -372,8 +373,8 @@ constructor(
                                 state.copy(
                                     isManaged = profile.config?.security?.is_managed ?: false,
                                     isFahrenheit =
-                                        moduleConfig?.telemetry?.environment_display_fahrenheit == true ||
-                                            (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
+                                    moduleConfig?.telemetry?.environment_display_fahrenheit == true ||
+                                        (displayUnits == Config.DisplayConfig.DisplayUnits.IMPERIAL),
                                     displayUnits = displayUnits ?: Config.DisplayConfig.DisplayUnits.METRIC,
                                 )
                             }
@@ -415,29 +416,29 @@ constructor(
 
                     launch {
                         combine(
-                                meshLogRepository.getRequestLogs(currentDestNum, PortNum.TRACEROUTE_APP),
-                                logNodeIdFlow.flatMapLatest {
-                                    meshLogRepository.getLogsFrom(it, PortNum.TRACEROUTE_APP.value)
-                                },
-                            ) { request, response ->
-                                _state.update { state ->
-                                    state.copy(tracerouteRequests = request, tracerouteResults = response)
-                                }
+                            meshLogRepository.getRequestLogs(currentDestNum, PortNum.TRACEROUTE_APP),
+                            logNodeIdFlow.flatMapLatest {
+                                meshLogRepository.getLogsFrom(it, PortNum.TRACEROUTE_APP.value)
+                            },
+                        ) { request, response ->
+                            _state.update { state ->
+                                state.copy(tracerouteRequests = request, tracerouteResults = response)
                             }
+                        }
                             .collect {}
                     }
 
                     launch {
                         combine(
-                                meshLogRepository.getRequestLogs(currentDestNum, PortNum.NEIGHBORINFO_APP),
-                                logNodeIdFlow.flatMapLatest {
-                                    meshLogRepository.getLogsFrom(it, PortNum.NEIGHBORINFO_APP.value)
-                                },
-                            ) { request, response ->
-                                _state.update { state ->
-                                    state.copy(neighborInfoRequests = request, neighborInfoResults = response)
-                                }
+                            meshLogRepository.getRequestLogs(currentDestNum, PortNum.NEIGHBORINFO_APP),
+                            logNodeIdFlow.flatMapLatest {
+                                meshLogRepository.getLogsFrom(it, PortNum.NEIGHBORINFO_APP.value)
+                            },
+                        ) { request, response ->
+                            _state.update { state ->
+                                state.copy(neighborInfoRequests = request, neighborInfoResults = response)
                             }
+                        }
                             .collect {}
                     }
 
@@ -499,32 +500,31 @@ constructor(
     }
 
     /** Write the persisted Position data out to a CSV file in the specified location. */
-    fun savePositionCSV(uri: Uri) =
-        viewModelScope.launch(dispatchers.main) {
-            val positions = state.value.positionLogs
-            writeToUri(uri) { writer ->
+    fun savePositionCSV(uri: Uri) = viewModelScope.launch(dispatchers.main) {
+        val positions = state.value.positionLogs
+        writeToUri(uri) { writer ->
+            writer.appendLine(
+                "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"",
+            )
+
+            val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
+
+            positions.forEach { position ->
+                val rxDateTime = dateFormat.format(((position.time ?: 0).toLong() * 1000L).toInstant().toDate())
+                val latitude = (position.latitude_i ?: 0) * 1e-7
+                val longitude = (position.longitude_i ?: 0) * 1e-7
+                val altitude = position.altitude
+                val satsInView = position.sats_in_view
+                val speed = position.ground_speed
+                val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
+
+                // date,time,latitude,longitude,altitude,satsInView,speed,heading
                 writer.appendLine(
-                    "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\""
+                    "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"",
                 )
-
-                val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
-
-                positions.forEach { position ->
-                    val rxDateTime = dateFormat.format(((position.time ?: 0).toLong() * 1000L).toInstant().toDate())
-                    val latitude = (position.latitude_i ?: 0) * 1e-7
-                    val longitude = (position.longitude_i ?: 0) * 1e-7
-                    val altitude = position.altitude
-                    val satsIn_view = position.sats_in_view
-                    val speed = position.ground_speed
-                    val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
-
-                    // date,time,latitude,longitude,altitude,satsInView,speed,heading
-                    writer.appendLine(
-                        "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsIn_view\",\"$speed\",\"$heading\""
-                    )
-                }
             }
         }
+    }
 
     private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) =
         withContext(dispatchers.io) {
@@ -546,6 +546,8 @@ constructor(
             val packet = log.fromRadio.packet
             val decoded = packet?.decoded
             if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
+                // Requests for paxcount (want_response = true) should not be logged as data points.
+                if (decoded.want_response == true) return null
                 val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
                 if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
             }
