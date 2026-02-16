@@ -189,9 +189,9 @@
   },
   "pullRequests": [
     {
-      "id": "9633",
-      "title": "Add INKHUD build support for T-Echo Plus",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9633",
+      "id": "9666",
+      "title": "Heltec-v3 on battery: button and rotary encoder responsiveness fix",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9666",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
