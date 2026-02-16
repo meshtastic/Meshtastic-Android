@@ -458,7 +458,7 @@ private fun NodeItemFooter(thatNode: Node, contentColor: Color) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         HardwareInfo(hwModel = thatNode.user.hw_model.name, contentColor = contentColor)
-        RoleInfo(role = thatNode.user.role.name, contentColor = contentColor)
+        RoleInfo(role = thatNode.user.role, contentColor = contentColor)
         NodeIdInfo(id = thatNode.user.id.ifEmpty { "???" }, contentColor = contentColor)
     }
 }

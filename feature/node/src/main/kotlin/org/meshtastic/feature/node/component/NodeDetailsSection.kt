@@ -88,8 +88,8 @@ import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
-import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Verified
+import org.meshtastic.core.ui.icon.role
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
 
@@ -180,7 +180,7 @@ private fun NameAndRoleRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.role),
             value = node.user.role?.name ?: "",
-            icon = MeshtasticIcons.Role,
+            icon = MeshtasticIcons.role(node.user.role),
             modifier = Modifier.weight(1f),
         )
     }
