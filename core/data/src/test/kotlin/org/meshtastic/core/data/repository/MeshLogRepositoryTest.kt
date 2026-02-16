@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.data.repository
 
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +33,7 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
@@ -187,5 +190,34 @@ class MeshLogRepositoryTest {
 
         assertEquals(1, result.size)
         assertEquals("1", result[0].uuid)
+    }
+
+    @Test
+    fun `deleteLogs redirects local node number to NODE_NUM_LOCAL`() = runTest(testDispatcher) {
+        val localNodeNum = 999
+        val port = 100
+        val myNodeEntity = mockk<MyNodeEntity>()
+        every { myNodeEntity.myNodeNum } returns localNodeNum
+        every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)
+        coEvery { meshLogDao.deleteLogs(any(), any()) } returns Unit
+
+        repository.deleteLogs(localNodeNum, port)
+
+        coVerify { meshLogDao.deleteLogs(MeshLog.NODE_NUM_LOCAL, port) }
+    }
+
+    @Test
+    fun `deleteLogs preserves remote node numbers`() = runTest(testDispatcher) {
+        val localNodeNum = 999
+        val remoteNodeNum = 888
+        val port = 100
+        val myNodeEntity = mockk<MyNodeEntity>()
+        every { myNodeEntity.myNodeNum } returns localNodeNum
+        every { nodeInfoReadDataSource.myNodeInfoFlow() } returns MutableStateFlow(myNodeEntity)
+        coEvery { meshLogDao.deleteLogs(any(), any()) } returns Unit
+
+        repository.deleteLogs(remoteNodeNum, port)
+
+        coVerify { meshLogDao.deleteLogs(remoteNodeNum, port) }
     }
 }
