@@ -85,9 +85,13 @@ fun PositionSection(
                 Spacer(Modifier.height(8.dp))
             }
 
-            if (!isLocal) {
-                PositionActionButtons(node, hasValidPosition, metricsState.displayUnits, onAction)
-            }
+            PositionActionButtons(
+                node = node,
+                isLocal = isLocal,
+                hasValidPosition = hasValidPosition,
+                displayUnits = metricsState.displayUnits,
+                onAction = onAction,
+            )
 
             if (availableLogs.contains(LogsType.NODE_MAP) || availableLogs.contains(LogsType.POSITIONS)) {
                 Spacer(Modifier.height(12.dp))
@@ -147,39 +151,44 @@ private fun PositionMap(node: Node, distance: String?) {
 @Composable
 private fun PositionActionButtons(
     node: Node,
+    isLocal: Boolean,
     hasValidPosition: Boolean,
     displayUnits: Config.DisplayConfig.DisplayUnits,
     onAction: (NodeDetailAction) -> Unit,
 ) {
+    if (isLocal && !hasValidPosition) return
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Button(
-            onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
-            modifier = Modifier.weight(EXCHANGE_BUTTON_WEIGHT),
-            shape = MaterialTheme.shapes.large,
-            colors =
-            ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ),
-        ) {
-            Icon(Icons.Rounded.LocationOn, null, Modifier.size(18.dp))
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = stringResource(Res.string.exchange_position),
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Visible,
-            )
+        if (!isLocal) {
+            Button(
+                onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
+                modifier = Modifier.weight(EXCHANGE_BUTTON_WEIGHT),
+                shape = MaterialTheme.shapes.large,
+                colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ),
+            ) {
+                Icon(Icons.Rounded.LocationOn, null, Modifier.size(18.dp))
+                Spacer(Modifier.width(6.dp))
+                Text(
+                    text = stringResource(Res.string.exchange_position),
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Visible,
+                )
+            }
         }
 
         if (hasValidPosition) {
             FilledTonalButton(
                 onClick = { onAction(NodeDetailAction.OpenCompass(node, displayUnits)) },
-                modifier = Modifier.weight(COMPASS_BUTTON_WEIGHT),
+                modifier = if (isLocal) Modifier.fillMaxWidth() else Modifier.weight(COMPASS_BUTTON_WEIGHT),
                 shape = MaterialTheme.shapes.large,
             ) {
                 Icon(Icons.Rounded.Explore, null, Modifier.size(18.dp))

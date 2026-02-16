@@ -189,7 +189,7 @@ constructor(
                 message_type = "Packet",
                 received_date = nowMillis,
                 raw_message = packet.toString(),
-                fromNum = packet.from,
+                fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
                 fromRadio = FromRadio(packet = packet),
             )

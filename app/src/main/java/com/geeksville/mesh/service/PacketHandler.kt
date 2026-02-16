@@ -94,7 +94,7 @@ constructor(
                     message_type = "Packet",
                     received_date = nowMillis,
                     raw_message = packet.toString(),
-                    fromNum = packet.from ?: 0,
+                    fromNum = MeshLog.NODE_NUM_LOCAL, // Outgoing packets are always from the local node
                     portNum = packet.decoded?.portnum?.value ?: 0,
                     fromRadio = FromRadio(packet = packet),
                 )

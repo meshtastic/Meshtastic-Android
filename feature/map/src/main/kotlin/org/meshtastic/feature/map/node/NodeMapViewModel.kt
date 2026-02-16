@@ -23,12 +23,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.toList
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.ui.util.toPosition
@@ -58,17 +60,23 @@ constructor(
 
     val applicationId = buildConfigProvider.applicationId
 
+    private val ourNodeNumFlow = nodeRepository.nodeDBbyNum.map { it.keys.firstOrNull() }.distinctUntilChanged()
+
     val positionLogs: StateFlow<List<Position>> =
-        meshLogRepository
-            .getMeshPacketsFrom(destNum!!, PortNum.POSITION_APP.value)
-            .map { packets ->
-                packets
-                    .mapNotNull { it.toPosition() }
-                    .asFlow()
-                    .distinctUntilChanged { old, new ->
-                        old.time == new.time || (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
-                    }
-                    .toList()
+        ourNodeNumFlow
+            .map { if (destNum == it) MeshLog.NODE_NUM_LOCAL else destNum!! }
+            .distinctUntilChanged()
+            .flatMapLatest { logId ->
+                meshLogRepository.getMeshPacketsFrom(logId, PortNum.POSITION_APP.value).map { packets ->
+                    packets
+                        .mapNotNull { it.toPosition() }
+                        .asFlow()
+                        .distinctUntilChanged { old, new ->
+                            old.time == new.time ||
+                                (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
+                        }
+                        .toList()
+                }
             }
             .stateInWhileSubscribed(initialValue = emptyList())
 

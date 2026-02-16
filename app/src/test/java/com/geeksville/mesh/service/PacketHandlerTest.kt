@@ -17,6 +17,7 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -28,8 +29,11 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 
@@ -96,5 +100,16 @@ class PacketHandlerTest {
 
         handler.handleQueueStatus(status)
         testScheduler.runCurrent()
+    }
+
+    @Test
+    fun `outgoing packets are logged with NODE_NUM_LOCAL`() = runTest(testDispatcher) {
+        val packet = MeshPacket(id = 123, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+        val toRadio = ToRadio(packet = packet)
+
+        handler.sendToRadio(toRadio)
+        testScheduler.runCurrent()
+
+        coVerify { meshLogRepository.insert(match { log -> log.fromNum == MeshLog.NODE_NUM_LOCAL }) }
     }
 }
