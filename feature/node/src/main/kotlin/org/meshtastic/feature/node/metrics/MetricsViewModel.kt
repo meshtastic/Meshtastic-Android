@@ -56,6 +56,8 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
+import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toDate
 import org.meshtastic.core.model.util.toInstant
@@ -76,7 +78,6 @@ import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import java.io.BufferedWriter
@@ -87,13 +88,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
-
-private fun MeshPacket.hasValidSignal(): Boolean = (rx_time ?: 0) > 0 && ((rx_snr ?: 0f) != 0f || (rx_rssi ?: 0) != 0)
-
-private fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
-    val metrics = this.environment_metrics ?: return false
-    return metrics.relative_humidity != null && metrics.temperature != null && metrics.temperature?.isNaN() != true
-}
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
@@ -330,11 +324,7 @@ constructor(
         jobs =
             viewModelScope.launch {
                 if (currentDestNum != null) {
-                    val ourNodeNumFlow = nodeRepository.nodeDBbyNum.map { it.keys.firstOrNull() }.distinctUntilChanged()
-                    val logNodeIdFlow =
-                        ourNodeNumFlow
-                            .map { ourNum -> if (currentDestNum == ourNum) MeshLog.NODE_NUM_LOCAL else currentDestNum }
-                            .distinctUntilChanged()
+                    val logNodeIdFlow = nodeRepository.effectiveLogNodeId(currentDestNum)
 
                     launch {
                         combine(nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) { nodes, myInfo ->
@@ -407,7 +397,7 @@ constructor(
                             .flatMapLatest { meshLogRepository.getMeshPacketsFrom(it) }
                             .collect { meshPackets ->
                                 _state.update { state ->
-                                    state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+                                    state.copy(signalMetrics = meshPackets.filter { it.isDirectSignal() })
                                 }
                             }
                     }
@@ -550,7 +540,7 @@ constructor(
         } catch (e: IOException) {
             Logger.e(e) { "Failed to parse Paxcount from binary data" }
         }
-        // Fallback: Try direct base64 or bytes from raw_message
+        // Fallback: Try George's direct base64 or bytes from raw_message
         try {
             val base64 = log.raw_message.trim()
             if (base64.matches(Regex("^[A-Za-z0-9+/=\r\n]+$"))) {

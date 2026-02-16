@@ -14,11 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.core.model.util
 
 import org.meshtastic.core.model.BuildConfig
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.Telemetry
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users or positions. But
@@ -74,3 +77,12 @@ fun MeshPacket.isLora(): Boolean = transport_mechanism == MeshPacket.TransportMe
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT1 ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT2 ||
     transport_mechanism == MeshPacket.TransportMechanism.TRANSPORT_LORA_ALT3
+
+/** Returns true if this packet is a direct LoRa signal (not MQTT, and hop count matches). */
+fun MeshPacket.isDirectSignal(): Boolean = rx_time > 0 && hop_start == hop_limit && via_mqtt != true && isLora()
+
+/** Returns true if this telemetry packet contains valid, plot-able environment metrics. */
+fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
+    val metrics = this.environment_metrics ?: return false
+    return metrics.relative_humidity != null && metrics.temperature != null && !metrics.temperature!!.isNaN()
+}

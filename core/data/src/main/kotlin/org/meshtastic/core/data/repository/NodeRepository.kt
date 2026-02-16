@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -35,6 +36,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
+import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
@@ -101,6 +103,11 @@ constructor(
             }
             .launchIn(processLifecycle.coroutineScope)
     }
+
+    /** Returns the node number used for log queries. Maps [nodeNum] to 0 if it is the local node. */
+    fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = myNodeInfo
+        .map { info -> if (nodeNum == info?.myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum }
+        .distinctUntilChanged()
 
     fun getNodeDBbyNum() =
         nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
