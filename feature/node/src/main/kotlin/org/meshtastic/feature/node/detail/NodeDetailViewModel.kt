@@ -107,20 +107,35 @@ constructor(
             .flatMapLatest { nodeId ->
                 if (nodeId == null) return@flatMapLatest flowOf(NodeDetailUiState())
 
+                val logNodeIdFlow =
+                    ourNodeNumFlow
+                        .map { ourNum -> if (nodeId == ourNum) MeshLog.NODE_NUM_LOCAL else nodeId }
+                        .distinctUntilChanged()
+
                 val nodeFlow = nodeRepository.nodeDBbyNum.map { it[nodeId] }.distinctUntilChanged()
-                val telemetryFlow = meshLogRepository.getTelemetryFrom(nodeId).distinctUntilChanged()
-                val packetsFlow = meshLogRepository.getMeshPacketsFrom(nodeId).distinctUntilChanged()
+                val telemetryFlow =
+                    logNodeIdFlow.flatMapLatest { meshLogRepository.getTelemetryFrom(it) }.distinctUntilChanged()
+                val packetsFlow =
+                    logNodeIdFlow.flatMapLatest { meshLogRepository.getMeshPacketsFrom(it) }.distinctUntilChanged()
                 val posPacketsFlow =
-                    meshLogRepository.getMeshPacketsFrom(nodeId, PortNum.POSITION_APP.value).distinctUntilChanged()
+                    logNodeIdFlow
+                        .flatMapLatest { meshLogRepository.getMeshPacketsFrom(it, PortNum.POSITION_APP.value) }
+                        .distinctUntilChanged()
                 val paxLogsFlow =
-                    meshLogRepository.getLogsFrom(nodeId, PortNum.PAXCOUNTER_APP.value).distinctUntilChanged()
+                    logNodeIdFlow
+                        .flatMapLatest { meshLogRepository.getLogsFrom(it, PortNum.PAXCOUNTER_APP.value) }
+                        .distinctUntilChanged()
                 val trReqsFlow = meshLogRepository.getRequestLogs(nodeId, PortNum.TRACEROUTE_APP).distinctUntilChanged()
                 val trResFlow =
-                    meshLogRepository.getLogsFrom(nodeId, PortNum.TRACEROUTE_APP.value).distinctUntilChanged()
+                    logNodeIdFlow
+                        .flatMapLatest { meshLogRepository.getLogsFrom(it, PortNum.TRACEROUTE_APP.value) }
+                        .distinctUntilChanged()
                 val niReqsFlow =
                     meshLogRepository.getRequestLogs(nodeId, PortNum.NEIGHBORINFO_APP).distinctUntilChanged()
                 val niResFlow =
-                    meshLogRepository.getLogsFrom(nodeId, PortNum.NEIGHBORINFO_APP.value).distinctUntilChanged()
+                    logNodeIdFlow
+                        .flatMapLatest { meshLogRepository.getLogsFrom(it, PortNum.NEIGHBORINFO_APP.value) }
+                        .distinctUntilChanged()
 
                 combine(
                     nodeRepository.ourNodeInfo,
