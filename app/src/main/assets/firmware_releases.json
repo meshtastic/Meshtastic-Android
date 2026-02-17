@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9668",
+      "title": "Fix/rak3401 button",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9668",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9666",
       "title": "Heltec-v3 on battery: button and rotary encoder responsiveness fix",
       "page_url": "https://github.com/meshtastic/firmware/pull/9666",
@@ -207,21 +213,15 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9514",
-      "title": "InkHUD: Allow non-system applets to subscribe to input events",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9514",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
       "id": "9509",
       "title": "fix(power): reset LPF when adc_multiplier_override changes at runtime",
       "page_url": "https://github.com/meshtastic/firmware/pull/9509",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9501",
-      "title": "Improved Periodic class",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9501",
+      "id": "9476",
+      "title": "Deprecate/block packets with a missing/invalid hop_start value (pre-hop firmware) (related to issue #7369)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9476",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
