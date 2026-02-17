@@ -197,15 +197,17 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
 
     // Prepare data for graph
     val graphData =
-        paxMetrics
-            .map {
-                val t = (it.first.received_date / CommonCharts.MS_PER_SEC).toInt()
-                Triple(t, it.second.ble ?: 0, it.second.wifi ?: 0)
-            }
-            .sortedBy { it.first }
-    val totalSeries = graphData.map { it.first to (it.second + it.third) }
-    val bleSeries = graphData.map { it.first to it.second }
-    val wifiSeries = graphData.map { it.first to it.third }
+        remember(paxMetrics) {
+            paxMetrics
+                .map {
+                    val t = (it.first.received_date / CommonCharts.MS_PER_SEC).toInt()
+                    Triple(t, it.second.ble ?: 0, it.second.wifi ?: 0)
+                }
+                .sortedBy { it.first }
+        }
+    val totalSeries = remember(graphData) { graphData.map { it.first to (it.second + it.third) } }
+    val bleSeries = remember(graphData) { graphData.map { it.first to it.second } }
+    val wifiSeries = remember(graphData) { graphData.map { it.first to it.third } }
 
     BaseMetricScreen(
         onNavigateUp = onNavigateUp,

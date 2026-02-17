@@ -212,67 +212,100 @@ private fun PowerMetricsChart(
                 },
             )
 
-        LaunchedEffect(telemetries, selectedChannel) {
+        val currentData =
+            remember(telemetries, selectedChannel) {
+                telemetries.filter { !retrieveCurrent(selectedChannel, it).isNaN() }
+            }
+        val voltageData =
+            remember(telemetries, selectedChannel) {
+                telemetries.filter { !retrieveVoltage(selectedChannel, it).isNaN() }
+            }
+
+        LaunchedEffect(currentData, voltageData) {
             modelProducer.runTransaction {
-                lineSeries {
-                    val currentData = telemetries.filter { !retrieveCurrent(selectedChannel, it).isNaN() }
-                    series(
-                        x = currentData.map { it.time ?: 0 },
-                        y = currentData.map { retrieveCurrent(selectedChannel, it) },
-                    )
+                if (currentData.isNotEmpty()) {
+                    lineSeries {
+                        series(
+                            x = currentData.map { it.time ?: 0 },
+                            y = currentData.map { retrieveCurrent(selectedChannel, it) },
+                        )
+                    }
                 }
-                lineSeries {
-                    val voltageData = telemetries.filter { !retrieveVoltage(selectedChannel, it).isNaN() }
-                    series(
-                        x = voltageData.map { it.time ?: 0 },
-                        y = voltageData.map { retrieveVoltage(selectedChannel, it) },
-                    )
+                if (voltageData.isNotEmpty()) {
+                    lineSeries {
+                        series(
+                            x = voltageData.map { it.time ?: 0 },
+                            y = voltageData.map { retrieveVoltage(selectedChannel, it) },
+                        )
+                    }
                 }
             }
         }
 
-        GenericMetricChart(
-            modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
-            layers =
-            listOf(
+        val currentLayer =
+            if (currentData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createBoldLine(currentColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
-                ),
+                )
+            } else {
+                null
+            }
+
+        val voltageLayer =
+            if (voltageData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createGradientLine(voltageColor, ChartStyling.MEDIUM_POINT_SIZE_DP),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
+                )
+            } else {
+                null
+            }
+
+        val layers = remember(currentLayer, voltageLayer) { listOfNotNull(currentLayer, voltageLayer) }
+
+        if (layers.isNotEmpty()) {
+            GenericMetricChart(
+                modelProducer = modelProducer,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                layers = layers,
+                startAxis =
+                if (currentData.isNotEmpty()) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(color = currentColor),
+                        valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                if (voltageData.isNotEmpty()) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = voltageColor),
+                        valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    label = ChartStyling.rememberAxisLabel(),
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                    labelRotationDegrees = 45f,
                 ),
-            ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = currentColor),
-                valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                labelRotationDegrees = 45f,
-            ),
-            marker = marker,
-            selectedX = selectedX,
-            onPointSelected = onPointSelected,
-            vicoScrollState = vicoScrollState,
-        )
+                marker = marker,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+                vicoScrollState = vicoScrollState,
+            )
+        }
 
         Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
