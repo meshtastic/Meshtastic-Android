@@ -23,17 +23,19 @@ import androidx.compose.material.icons.rounded.MilitaryTech
 import androidx.compose.material.icons.rounded.MyLocation
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonOff
-import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Sensors
 import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.Work
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.ui.R
 import org.meshtastic.proto.Config
 
 val MeshtasticIcons.HardwareModel: ImageVector
@@ -44,13 +46,11 @@ val MeshtasticIcons.NodeId: ImageVector
     get() = Icons.Rounded.Fingerprint
 
 /** Returns a specific icon for a given [Config.DeviceConfig.Role]. */
-@Suppress("DEPRECATION")
+@Composable
 fun MeshtasticIcons.role(role: Config.DeviceConfig.Role?): ImageVector = when (role) {
     Config.DeviceConfig.Role.CLIENT -> Icons.Rounded.Person
     Config.DeviceConfig.Role.CLIENT_MUTE -> Icons.Rounded.PersonOff
-    Config.DeviceConfig.Role.ROUTER -> Icons.Rounded.Router
-    Config.DeviceConfig.Role.ROUTER_CLIENT -> Icons.Rounded.Router
-    Config.DeviceConfig.Role.REPEATER -> Icons.Rounded.Repeat
+    Config.DeviceConfig.Role.ROUTER -> ImageVector.vectorResource(R.drawable.mountain_flag_24px)
     Config.DeviceConfig.Role.TRACKER -> Icons.Rounded.MyLocation
     Config.DeviceConfig.Role.SENSOR -> Icons.Rounded.Sensors
     Config.DeviceConfig.Role.TAK -> Icons.Rounded.MilitaryTech
