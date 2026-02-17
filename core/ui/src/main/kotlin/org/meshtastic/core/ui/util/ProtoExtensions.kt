@@ -20,6 +20,7 @@ import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.unknown_age
 import org.meshtastic.proto.Channel
@@ -32,7 +33,7 @@ private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
 fun Position.formatPositionTime(): String {
-    val currentTime = System.currentTimeMillis()
+    val currentTime = nowMillis
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
     val isOlderThanSixMonths = (time ?: 0) * SECONDS_TO_MILLIS < sixMonthsAgo
     val timeText =

@@ -20,6 +20,7 @@ import android.graphics.Color
 import okio.ByteString
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
@@ -29,11 +30,18 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.PowerMetrics
+import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 
+/**
+ * Domain model representing a node in the mesh network.
+ *
+ * This class aggregates user information, position data, and hardware metrics.
+ */
 @Suppress("MagicNumber")
 data class Node(
     val num: Int,
@@ -57,6 +65,8 @@ data class Node(
     val notes: String = "",
     val manuallyVerified: Boolean = false,
     val nodeStatus: String? = null,
+    /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
+    val lastTransport: Int = 0,
 ) {
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
 
@@ -175,6 +185,46 @@ data class Node(
 
     fun getTelemetryStrings(isFahrenheit: Boolean = false): List<String> =
         environmentMetrics.getDisplayStrings(isFahrenheit)
+
+    fun toEntity() = NodeEntity(
+        num = num,
+        user = user,
+        position = position,
+        latitude = latitude,
+        longitude = longitude,
+        snr = snr,
+        rssi = rssi,
+        lastHeard = lastHeard,
+        deviceTelemetry = Telemetry(device_metrics = deviceMetrics),
+        channel = channel,
+        viaMqtt = viaMqtt,
+        hopsAway = hopsAway,
+        isFavorite = isFavorite,
+        isIgnored = isIgnored,
+        isMuted = isMuted,
+        environmentTelemetry = Telemetry(environment_metrics = environmentMetrics),
+        powerTelemetry = Telemetry(power_metrics = powerMetrics),
+        paxcounter = paxcounter,
+        publicKey = publicKey ?: user.public_key,
+        notes = notes,
+        manuallyVerified = manuallyVerified,
+        nodeStatus = nodeStatus,
+        lastTransport = lastTransport,
+    )
+
+    companion object {
+        private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+
+        /** Creates a fallback [Node] when the node is not found in the database. */
+        fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {
+            val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+            val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
+            val longName = "$fallbackNamePrefix $safeUserId"
+            val defaultUser =
+                User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
+            return Node(num = nodeNum, user = defaultUser)
+        }
+    }
 }
 
 fun Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in

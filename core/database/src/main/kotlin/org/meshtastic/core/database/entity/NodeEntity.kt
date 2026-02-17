@@ -30,9 +30,12 @@ import org.meshtastic.core.model.EnvironmentMetrics
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
@@ -65,6 +68,7 @@ data class NodeWithRelations(
             notes = notes,
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,
+            lastTransport = lastTransport,
         )
     }
 
@@ -89,6 +93,7 @@ data class NodeWithRelations(
             notes = notes,
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,
+            lastTransport = lastTransport,
         )
     }
 }
@@ -97,7 +102,7 @@ data class NodeWithRelations(
 data class MetadataEntity(
     @PrimaryKey val num: Int,
     @ColumnInfo(name = "proto", typeAffinity = ColumnInfo.BLOB) val proto: DeviceMetadata,
-    val timestamp: Long = System.currentTimeMillis(),
+    val timestamp: Long = nowMillis,
 )
 
 @Suppress("MagicNumber")
@@ -140,6 +145,8 @@ data class NodeEntity(
     @ColumnInfo(name = "manually_verified", defaultValue = "0")
     var manuallyVerified: Boolean = false, // ONLY set true when scanned/imported manually
     @ColumnInfo(name = "node_status") var nodeStatus: String? = null,
+    /** The transport mechanism this node was last heard over (see [MeshPacket.TransportMechanism]). */
+    @ColumnInfo(name = "last_transport", defaultValue = "0") var lastTransport: Int = 0,
 ) {
     val deviceMetrics: org.meshtastic.proto.DeviceMetrics?
         get() = deviceTelemetry.device_metrics
@@ -176,7 +183,7 @@ data class NodeEntity(
 
         val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
 
-        fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+        fun currentTime() = nowSeconds.toInt()
     }
 
     fun toModel() = Node(
@@ -199,6 +206,7 @@ data class NodeEntity(
         publicKey = publicKey ?: user.public_key,
         notes = notes,
         nodeStatus = nodeStatus,
+        lastTransport = lastTransport,
     )
 
     fun toNodeInfo() = NodeInfo(
@@ -243,5 +251,6 @@ data class NodeEntity(
             environmentTelemetry.time,
         ),
         hopsAway = hopsAway,
+        nodeStatus = nodeStatus,
     )
 }

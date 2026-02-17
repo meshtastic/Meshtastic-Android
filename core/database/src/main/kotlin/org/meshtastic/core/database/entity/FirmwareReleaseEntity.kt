@@ -22,6 +22,7 @@ import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.NetworkFirmwareRelease
+import org.meshtastic.core.model.util.nowMillis
 
 @Serializable
 @Entity(tableName = "firmware_release")
@@ -31,7 +32,7 @@ data class FirmwareReleaseEntity(
     @ColumnInfo(name = "release_notes") val releaseNotes: String = "",
     @ColumnInfo(name = "title") val title: String = "",
     @ColumnInfo(name = "zip_url") val zipUrl: String = "",
-    @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "last_updated") val lastUpdated: Long = nowMillis,
     @ColumnInfo(name = "release_type") val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
 )
 
@@ -41,7 +42,7 @@ fun NetworkFirmwareRelease.asEntity(releaseType: FirmwareReleaseType) = Firmware
     releaseNotes = releaseNotes,
     title = title,
     zipUrl = zipUrl,
-    lastUpdated = System.currentTimeMillis(),
+    lastUpdated = nowMillis,
     releaseType = releaseType,
 )
 
@@ -61,7 +62,7 @@ data class FirmwareRelease(
     val releaseNotes: String = "",
     val title: String = "",
     val zipUrl: String = "",
-    val lastUpdated: Long = System.currentTimeMillis(),
+    val lastUpdated: Long = nowMillis,
     val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
 )
 

@@ -28,6 +28,7 @@ import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 
 class DeviceHardwareRepositoryTest {
@@ -120,6 +121,6 @@ class DeviceHardwareRepositoryTest {
         requiresDfu = false,
         supportLevel = 0,
         tags = emptyList(),
-        lastUpdated = System.currentTimeMillis(),
+        lastUpdated = nowMillis,
     )
 }

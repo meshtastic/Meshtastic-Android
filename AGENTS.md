@@ -103,6 +103,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   **Protobuf:** Communication with the device uses Protobufs. The definitions are in `core/proto`. This is a Git submodule, but the build system handles it.
 -   **Legacy:** Some code in `app/` uses the `com.geeksville.mesh` package. Newer code in `core/` and `feature/` uses `org.meshtastic.*`. Respect the existing package structure of the file you are editing.
 -   **Versioning:** Do not manually edit `versionCode` or `versionName`. These are managed by the build system and CI/CD.
+-   **Database Safety:** When modifying critical database logic (e.g., `NodeInfoDao`), always ensure you have explicit test coverage for security edge cases (like PKC conflicts or key wiping). Refer to `core/database/src/androidTest/kotlin/org/meshtastic/core/database/dao/NodeInfoDaoTest.kt` for examples.
 
 ## 7. Troubleshooting
 

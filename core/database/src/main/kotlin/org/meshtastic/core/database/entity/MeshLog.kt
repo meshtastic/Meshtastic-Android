@@ -28,6 +28,19 @@ import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.Position
 
+/**
+ * Represents a log entry in the database.
+ *
+ * Logs are used for auditing radio traffic, telemetry history, and debugging.
+ *
+ * @property uuid Unique identifier for this log entry.
+ * @property message_type The type of message (e.g., "Packet", "Telemetry", "LogRecord").
+ * @property received_date Timestamp when the log was recorded.
+ * @property raw_message A string representation of the raw data.
+ * @property fromNum The node number that sent the packet.
+ * @property portNum The application port number associated with the data.
+ * @property fromRadio The decoded [FromRadio] protobuf object.
+ */
 @Suppress("EmptyCatchBlock", "SwallowedException", "ConstructorParameterNaming")
 @Entity(tableName = "log", indices = [Index(value = ["from_num"]), Index(value = ["port_num"])])
 data class MeshLog(
@@ -59,4 +72,14 @@ data class MeshLog(
                     null
                 }
             } ?: nodeInfo?.position
+
+    companion object {
+        /**
+         * The node number used to represent the local node in the logs.
+         *
+         * Using 0 instead of the actual node number ensures log continuity even if the radio hardware or local ID
+         * changes.
+         */
+        const val NODE_NUM_LOCAL = 0
+    }
 }

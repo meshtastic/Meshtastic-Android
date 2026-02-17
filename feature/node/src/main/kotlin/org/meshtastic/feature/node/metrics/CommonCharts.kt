@@ -61,6 +61,9 @@ import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.delete
@@ -70,7 +73,7 @@ import org.meshtastic.core.strings.snr
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import java.text.DateFormat
-import java.util.Date
+import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
@@ -99,15 +102,15 @@ object CommonCharts {
 
     /** A dynamic [CartesianValueFormatter] that adjusts the time format based on the visible X range. */
     val dynamicTimeFormatter = CartesianValueFormatter { context, value, _ ->
-        val date = Date((value * MS_PER_SEC.toDouble()).toLong())
+        val date = (value * MS_PER_SEC.toDouble()).toLong().toInstant().toDate()
         val xLength = context.ranges.xLength
         val zoom = if (context is CartesianDrawingContext) context.zoom else 1f
         val visibleSpan = xLength / zoom
 
         when {
-            visibleSpan <= 3600 -> TIME_SECONDS_FORMAT.format(date) // < 1 hour visible
-            visibleSpan <= 86400 * 2 -> TIME_MINUTE_FORMAT.format(date) // < 2 days visible
-            visibleSpan <= 86400 * 14 -> {
+            visibleSpan <= TimeConstants.ONE_HOUR.inWholeSeconds -> TIME_SECONDS_FORMAT.format(date) // < 1 hour visible
+            visibleSpan <= 2.days.inWholeSeconds -> TIME_MINUTE_FORMAT.format(date) // < 2 days visible
+            visibleSpan <= 14.days.inWholeSeconds -> {
                 // < 2 weeks visible: separate date and time with a newline
                 val dateStr = DATE_FORMAT.format(date)
                 val timeStr = TIME_MINUTE_FORMAT.format(date)

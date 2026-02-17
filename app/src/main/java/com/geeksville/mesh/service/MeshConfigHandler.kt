@@ -59,12 +59,16 @@ constructor(
 
     fun handleDeviceConfig(config: Config) {
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        serviceRepository.setStatusMessage("Device config received")
+        serviceRepository.setConnectionProgress("Device config received")
     }
 
     fun handleModuleConfig(config: ModuleConfig) {
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        serviceRepository.setStatusMessage("Module config received")
+        serviceRepository.setConnectionProgress("Module config received")
+
+        config.statusmessage?.node_status?.let { status ->
+            nodeManager.myNodeNum?.let { num -> nodeManager.updateNodeStatus(num, status) }
+        }
     }
 
     fun handleChannel(ch: Channel) {
@@ -75,9 +79,9 @@ constructor(
         val mi = nodeManager.getMyNodeInfo()
         val index = ch.index ?: 0
         if (mi != null) {
-            serviceRepository.setStatusMessage("Channels (${index + 1} / ${mi.maxChannels})")
+            serviceRepository.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
         } else {
-            serviceRepository.setStatusMessage("Channels (${index + 1})")
+            serviceRepository.setConnectionProgress("Channels (${index + 1})")
         }
     }
 }

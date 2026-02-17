@@ -21,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import org.meshtastic.core.model.util.nowMillis
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
@@ -262,9 +263,9 @@ class WifiOtaTransport(private val deviceIpAddress: String, private val port: In
 
                         // Listen for responses
                         val receiveBuffer = ByteArray(RECEIVE_BUFFER_SIZE)
-                        val startTime = System.currentTimeMillis()
+                        val startTime = nowMillis
 
-                        while (System.currentTimeMillis() - startTime < timeoutMs) {
+                        while (nowMillis - startTime < timeoutMs) {
                             try {
                                 val receivePacket = DatagramPacket(receiveBuffer, receiveBuffer.size)
                                 socket.receive(receivePacket)

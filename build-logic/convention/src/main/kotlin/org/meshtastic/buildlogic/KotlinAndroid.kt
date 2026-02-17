@@ -106,6 +106,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+                "-opt-in=kotlin.time.ExperimentalTime",
                 "-Xcontext-parameters",
                 "-Xannotation-default-target=param-property",
                 "-Xskip-prerelease-check"

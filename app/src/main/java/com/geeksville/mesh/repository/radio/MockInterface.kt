@@ -26,6 +26,7 @@ import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
@@ -146,7 +147,7 @@ constructor(
             id = packetIdSequence.next(),
             from = numIn,
             to = 0xffffffff.toInt(), // broadcast
-            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_time = nowSeconds.toInt(),
             rx_snr = 1.5f,
             decoded =
             Data(
@@ -162,7 +163,7 @@ constructor(
             id = packetIdSequence.next(),
             from = numIn,
             to = 0xffffffff.toInt(), // broadcast
-            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_time = nowSeconds.toInt(),
             rx_snr = 1.5f,
             decoded =
             Data(
@@ -177,13 +178,13 @@ constructor(
                         Neighbor(
                             node_id = numIn + 1,
                             snr = 10.0f,
-                            last_rx_time = (System.currentTimeMillis() / 1000).toInt(),
+                            last_rx_time = nowSeconds.toInt(),
                             node_broadcast_interval_secs = 60,
                         ),
                         Neighbor(
                             node_id = numIn + 2,
                             snr = 12.0f,
-                            last_rx_time = (System.currentTimeMillis() / 1000).toInt(),
+                            last_rx_time = nowSeconds.toInt(),
                             node_broadcast_interval_secs = 60,
                         ),
                     ),
@@ -200,7 +201,7 @@ constructor(
             id = packetIdSequence.next(),
             from = numIn,
             to = 0xffffffff.toInt(), // broadcast
-            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_time = nowSeconds.toInt(),
             rx_snr = 1.5f,
             decoded =
             Data(
@@ -210,7 +211,7 @@ constructor(
                     latitude_i = org.meshtastic.core.model.Position.degI(32.776665),
                     longitude_i = org.meshtastic.core.model.Position.degI(-96.796989),
                     altitude = 150,
-                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    time = nowSeconds.toInt(),
                     precision_bits = 15,
                 )
                     .encode()
@@ -225,14 +226,14 @@ constructor(
             id = packetIdSequence.next(),
             from = numIn,
             to = 0xffffffff.toInt(), // broadcast
-            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_time = nowSeconds.toInt(),
             rx_snr = 1.5f,
             decoded =
             Data(
                 portnum = PortNum.TELEMETRY_APP,
                 payload =
                 Telemetry(
-                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    time = nowSeconds.toInt(),
                     device_metrics =
                     DeviceMetrics(
                         battery_level = 85,
@@ -254,7 +255,7 @@ constructor(
             id = packetIdSequence.next(),
             from = numIn,
             to = 0xffffffff.toInt(), // broadcast
-            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_time = nowSeconds.toInt(),
             rx_snr = 1.5f,
             decoded =
             Data(
@@ -271,7 +272,7 @@ constructor(
             id = packetIdSequence.next(),
             from = fromIn,
             to = toIn,
-            rx_time = (System.currentTimeMillis() / 1000).toInt(),
+            rx_time = nowSeconds.toInt(),
             rx_snr = 1.5f,
             decoded = data,
         ),
@@ -326,7 +327,7 @@ constructor(
                     latitude_i = org.meshtastic.core.model.Position.degI(lat),
                     longitude_i = org.meshtastic.core.model.Position.degI(lon),
                     altitude = 35,
-                    time = (System.currentTimeMillis() / 1000).toInt(),
+                    time = nowSeconds.toInt(),
                     precision_bits = Random.nextInt(10, 19),
                 ),
             ),
@@ -344,6 +345,7 @@ constructor(
                 // Fake NodeDB
                 makeNodeInfo(MY_NODE, 32.776665, -96.796989), // dallas
                 makeNodeInfo(MY_NODE + 1, 32.960758, -96.733521), // richardson
+                FromRadio(config = Config(lora = defaultLoRaConfig)),
                 FromRadio(config = Config(lora = defaultLoRaConfig)),
                 FromRadio(channel = defaultChannel),
                 FromRadio(config_complete_id = configId),

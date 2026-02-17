@@ -64,6 +64,8 @@ import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Soil
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.core.ui.icon.role
+import org.meshtastic.proto.Config
 
 private const val SIZE_ICON = 14
 
@@ -225,6 +227,22 @@ fun HardwareInfo(
         icon = MeshtasticIcons.HardwareModel,
         contentDescription = "Hardware Model",
         text = hwModel,
+        style = MaterialTheme.typography.labelSmall,
+        contentColor = contentColor,
+    )
+}
+
+@Composable
+fun RoleInfo(
+    role: Config.DeviceConfig.Role,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    IconInfo(
+        modifier = modifier,
+        icon = MeshtasticIcons.role(role),
+        contentDescription = stringResource(Res.string.role),
+        text = role.name,
         style = MaterialTheme.typography.labelSmall,
         contentColor = contentColor,
     )

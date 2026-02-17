@@ -31,6 +31,7 @@ import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 
@@ -155,7 +156,7 @@ class MigrationTest {
                 myNodeNum = 42424242,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "$channel!broadcast",
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = false,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = channel, text = text),
             ),

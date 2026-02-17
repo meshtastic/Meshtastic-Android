@@ -34,6 +34,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.util.nowMillis
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -115,7 +116,7 @@ class DatabaseManager @Inject constructor(private val app: Application, private 
     inline fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
 
     private fun markLastUsed(dbName: String) {
-        prefs.edit().putLong(lastUsedKey(dbName), System.currentTimeMillis()).apply()
+        prefs.edit().putLong(lastUsedKey(dbName), nowMillis).apply()
     }
 
     private fun lastUsed(dbName: String): Long {

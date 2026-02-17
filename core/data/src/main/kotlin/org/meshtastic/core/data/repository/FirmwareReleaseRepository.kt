@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
@@ -26,8 +25,9 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -124,10 +124,9 @@ constructor(
     }
 
     /** Extension function to check if the cached entity is stale. */
-    private fun FirmwareReleaseEntity.isStale(): Boolean =
-        (System.currentTimeMillis() - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
+    private fun FirmwareReleaseEntity.isStale(): Boolean = (nowMillis - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
 
     companion object {
-        private val CACHE_EXPIRATION_TIME_MS = TimeUnit.HOURS.toMillis(1)
+        private val CACHE_EXPIRATION_TIME_MS = TimeConstants.ONE_HOUR.inWholeMilliseconds
     }
 }

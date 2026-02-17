@@ -37,6 +37,9 @@
     <string name="node_sort_last_heard">Viimati kuuldud</string>
     <string name="node_sort_via_mqtt">läbi MQTT</string>
     <string name="via_mqtt">läbi MQTT</string>
+    <string name="via_udp">UDP kaudu</string>
+    <string name="via_api">API kaudu</string>
+    <string name="internal">Sisemine</string>
     <string name="node_sort_via_favorite">läbi Lemmikud</string>
     <string name="node_filter_show_ignored">Näita ainult ignoreeritud sõlmi</string>
     <string name="unrecognized">Tundmatu</string>

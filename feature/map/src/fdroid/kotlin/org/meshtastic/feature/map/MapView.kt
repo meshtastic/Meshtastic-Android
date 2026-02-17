@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -89,6 +90,7 @@ import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.calculating
 import org.meshtastic.core.strings.cancel
@@ -510,7 +512,7 @@ fun MapView(
                 )
             val label = (pt.name ?: "") + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if ((pt.icon ?: 0) == 0) 128205 else pt.icon!!))
-            val now = System.currentTimeMillis()
+            val now = nowMillis
             val expireTimeMillis = (pt.expire ?: 0) * 1000L
             val expireTimeStr =
                 when {

@@ -34,12 +34,12 @@ interface MeshLogDao {
     /**
      * Retrieves [MeshLog]s matching 'from_num' (nodeNum) and 'port_num' (PortNum).
      *
-     * @param portNum If 0, returns all MeshPackets. Otherwise, filters by 'port_num'.
+     * @param portNum If -1, returns all logs regardless of port. If 0, returns logs with port 0.
      */
     @Query(
         """
         SELECT * FROM log 
-        WHERE from_num = :fromNum AND (:portNum = 0 AND port_num != 0 OR port_num = :portNum)
+        WHERE from_num = :fromNum AND (:portNum = -1 OR port_num = :portNum)
         ORDER BY received_date DESC LIMIT 0,:maxItem
         """,
     )

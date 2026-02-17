@@ -25,6 +25,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 
 @RunWith(AndroidJUnit4::class)
@@ -45,7 +46,7 @@ class MessageItemTest {
                 rssi = 90,
                 hopsAway = 0,
                 uuid = 1L,
-                receivedTime = System.currentTimeMillis(),
+                receivedTime = nowMillis,
                 node = testNode,
                 read = false,
                 routingError = 0,
@@ -84,7 +85,7 @@ class MessageItemTest {
                 rssi = 90,
                 hopsAway = 0,
                 uuid = 1L,
-                receivedTime = System.currentTimeMillis(),
+                receivedTime = nowMillis,
                 node = testNode,
                 read = false,
                 routingError = 0,
@@ -123,7 +124,7 @@ class MessageItemTest {
                 rssi = 90,
                 hopsAway = 0,
                 uuid = 1L,
-                receivedTime = System.currentTimeMillis(),
+                receivedTime = nowMillis,
                 node = testNode,
                 read = false,
                 routingError = 0,

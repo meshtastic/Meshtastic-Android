@@ -29,6 +29,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
@@ -39,7 +42,6 @@ import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
@@ -125,7 +127,7 @@ constructor(
             MeshLog(
                 uuid = Uuid.random().toString(),
                 message_type = type,
-                received_date = System.currentTimeMillis(),
+                received_date = nowMillis,
                 raw_message = message,
                 fromRadio = proto,
             ),
@@ -135,7 +137,7 @@ constructor(
     fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
             if (packet.rx_time == 0) {
-                (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
+                nowSeconds.toInt()
             } else {
                 packet.rx_time
             }
@@ -185,9 +187,9 @@ constructor(
             MeshLog(
                 uuid = Uuid.random().toString(),
                 message_type = "Packet",
-                received_date = System.currentTimeMillis(),
+                received_date = nowMillis,
                 raw_message = packet.toString(),
-                fromNum = packet.from,
+                fromNum = if (packet.from == myNodeNum) MeshLog.NODE_NUM_LOCAL else packet.from,
                 portNum = decoded.portnum.value,
                 fromRadio = FromRadio(packet = packet),
             )
@@ -200,16 +202,23 @@ constructor(
         myNodeNum?.let { myNum ->
             val from = packet.from
             val isOtherNode = myNum != from
-            nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) {
-                it.lastHeard = (System.currentTimeMillis().milliseconds.inWholeSeconds).toInt()
-            }
+            nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) { it.lastHeard = nowSeconds.toInt() }
             nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel) {
                 it.lastHeard = packet.rx_time
-                it.snr = packet.rx_snr
-                it.rssi = packet.rx_rssi
+                it.viaMqtt = packet.via_mqtt == true
+                it.lastTransport = packet.transport_mechanism.value
+
+                val isDirect = packet.hop_start == packet.hop_limit
+                if (isDirect && packet.isLora() && !it.viaMqtt) {
+                    it.snr = packet.rx_snr
+                    it.rssi = packet.rx_rssi
+                }
+
                 it.hopsAway =
                     if (decoded.portnum == PortNum.RANGE_TEST_APP) {
                         0
+                    } else if (it.viaMqtt) {
+                        -1
                     } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
                         -1
                     } else if (packet.hop_limit > packet.hop_start) {

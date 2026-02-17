@@ -28,10 +28,13 @@ import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.CloudOff
 import androidx.compose.material.icons.rounded.Dangerous
 import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Lan
 import androidx.compose.material.icons.rounded.NoCell
+import androidx.compose.material.icons.rounded.SettingsEthernet
 import androidx.compose.material.icons.rounded.SpeakerNotesOff
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
+import androidx.compose.material.icons.rounded.Terminal
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
@@ -84,3 +87,10 @@ val MeshtasticIcons.CheckCircle: ImageVector
 
 val MeshtasticIcons.Acknowledged: ImageVector
     get() = Icons.TwoTone.HowToReg
+
+val MeshtasticIcons.Udp: ImageVector
+    get() = Icons.Rounded.Lan
+val MeshtasticIcons.Api: ImageVector
+    get() = Icons.Rounded.Terminal
+val MeshtasticIcons.Ethernet: ImageVector
+    get() = Icons.Rounded.SettingsEthernet

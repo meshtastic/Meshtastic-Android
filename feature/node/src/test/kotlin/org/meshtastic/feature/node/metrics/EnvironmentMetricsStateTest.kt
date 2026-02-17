@@ -19,6 +19,7 @@ package org.meshtastic.feature.node.metrics
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Telemetry
 
@@ -26,7 +27,7 @@ class EnvironmentMetricsStateTest {
 
     @Test
     fun `environmentMetricsForGraphing correctly calculates times`() {
-        val now = (System.currentTimeMillis() / 1000).toInt()
+        val now = nowSeconds.toInt()
         val metrics =
             listOf(
                 Telemetry(time = now - 100, environment_metrics = EnvironmentMetrics(temperature = 20f)),
@@ -42,7 +43,7 @@ class EnvironmentMetricsStateTest {
 
     @Test
     fun `environmentMetricsForGraphing handles valid zero temperatures`() {
-        val now = (System.currentTimeMillis() / 1000).toInt()
+        val now = nowSeconds.toInt()
         val metrics = listOf(Telemetry(time = now, environment_metrics = EnvironmentMetrics(temperature = 0.0f)))
         val state = EnvironmentMetricsState(metrics)
         val result = state.environmentMetricsForGraphing()

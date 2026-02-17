@@ -38,7 +38,6 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 
 @RunWith(AndroidJUnit4::class)
@@ -256,14 +255,14 @@ class NodeInfoDaoTest {
     @Test
     fun testSortByAlpha() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.ALPHABETICAL)
-        val sortedNodes = nodes.sortedBy { it.user.long_name?.uppercase() ?: "" }
+        val sortedNodes = nodes.sortedBy { it.user.long_name.uppercase() }
         assertEquals(sortedNodes, nodes)
     }
 
     @Test
     fun testSortByDistance() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.DISTANCE)
-        fun NodeEntity.toNode() = Node(num = num, user = user, position = position ?: Position())
+        fun NodeEntity.toNode() = Node(num = num, user = user, position = position)
         val sortedNodes =
             nodes.sortedWith( // nodes with invalid (null) positions at the end
                 compareBy<Node> { it.validPosition == null }.thenBy { it.distance(ourNode.toNode()) },
@@ -281,7 +280,7 @@ class NodeInfoDaoTest {
     @Test
     fun testSortByViaMqtt() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.VIA_MQTT)
-        val sortedNodes = nodes.sortedBy { it.user.long_name?.contains("(MQTT)") == true }
+        val sortedNodes = nodes.sortedBy { it.user.long_name.contains("(MQTT)") }
         assertEquals(sortedNodes, nodes)
     }
 
@@ -339,8 +338,14 @@ class NodeInfoDaoTest {
 
     @Test
     fun testPkcMismatch() = runBlocking {
+        val newNodeNum = 9999
         // First, ensure the node is in the DB with Key A
-        val nodeA = testNodes[10].copy(publicKey = ByteArray(32) { 1 }.toByteString())
+        val nodeA =
+            testNodes[0].copy(
+                num = newNodeNum,
+                publicKey = ByteArray(32) { 1 }.toByteString(),
+                user = testNodes[0].user.copy(id = "!uniqueId1", public_key = ByteArray(32) { 1 }.toByteString()),
+            )
         nodeInfoDao.upsert(nodeA)
 
         // Now upsert with Key B (mismatch)
@@ -358,9 +363,15 @@ class NodeInfoDaoTest {
 
     @Test
     fun testRoutineUpdatePreservesKey() = runBlocking {
+        val newNodeNum = 9998
         // First, ensure the node is in the DB with Key A
         val keyA = ByteArray(32) { 1 }.toByteString()
-        val nodeA = testNodes[10].copy(publicKey = keyA, user = testNodes[10].user.copy(public_key = keyA))
+        val nodeA =
+            testNodes[0].copy(
+                num = newNodeNum,
+                publicKey = keyA,
+                user = testNodes[0].user.copy(id = "!uniqueId2", public_key = keyA),
+            )
         nodeInfoDao.upsert(nodeA)
 
         // Now upsert with an empty key (common in position/telemetry updates)
@@ -374,11 +385,13 @@ class NodeInfoDaoTest {
 
     @Test
     fun testRecoveryFromErrorState() = runBlocking {
+        val newNodeNum = 9997
         // Start in Error state
         val nodeError =
-            testNodes[10].copy(
+            testNodes[0].copy(
+                num = newNodeNum,
                 publicKey = NodeEntity.ERROR_BYTE_STRING,
-                user = testNodes[10].user.copy(public_key = NodeEntity.ERROR_BYTE_STRING),
+                user = testNodes[0].user.copy(id = "!uniqueId3", public_key = NodeEntity.ERROR_BYTE_STRING),
             )
         nodeInfoDao.doUpsert(nodeError)
         assertTrue(nodeInfoDao.getNodeByNum(nodeError.num)!!.toModel().mismatchKey)
@@ -394,13 +407,19 @@ class NodeInfoDaoTest {
     }
 
     @Test
-    fun testLicensedUserClearsKey() = runBlocking {
+    fun testLicensedUserDoesNotClearKey() = runBlocking {
+        val newNodeNum = 9996
         // Start with a key
         val keyA = ByteArray(32) { 1 }.toByteString()
-        val nodeA = testNodes[10].copy(publicKey = keyA, user = testNodes[10].user.copy(public_key = keyA))
+        val nodeA =
+            testNodes[0].copy(
+                num = newNodeNum,
+                publicKey = keyA,
+                user = testNodes[0].user.copy(id = "!uniqueId4", public_key = keyA),
+            )
         nodeInfoDao.upsert(nodeA)
 
-        // Upsert as licensed user
+        // Upsert as licensed user (without key)
         val nodeLicensed =
             nodeA.copy(
                 user = nodeA.user.copy(is_licensed = true, public_key = ByteString.EMPTY),
@@ -409,7 +428,72 @@ class NodeInfoDaoTest {
         nodeInfoDao.upsert(nodeLicensed)
 
         val stored = nodeInfoDao.getNodeByNum(nodeA.num)!!.node
-        assertTrue(stored.publicKey == null || (stored.publicKey?.size ?: 0) == 0)
+        // Should NOT clear key to prevent PKC wipe attack
+        assertEquals(keyA, stored.publicKey)
         assertFalse(stored.toModel().mismatchKey)
+    }
+
+    @Test
+    fun testValidLicensedUserNoKey() = runBlocking {
+        val newNodeNum = 9995
+        // Start with no key and licensed status
+        val nodeLicensed =
+            testNodes[0].copy(
+                num = newNodeNum,
+                publicKey = null,
+                user = testNodes[0].user.copy(id = "!uniqueId5", is_licensed = true, public_key = ByteString.EMPTY),
+            )
+        nodeInfoDao.upsert(nodeLicensed)
+
+        val stored = nodeInfoDao.getNodeByNum(newNodeNum)!!.node
+        assertEquals(ByteString.EMPTY, stored.publicKey)
+        assertFalse(stored.toModel().mismatchKey)
+    }
+
+    @Test
+    fun testPlaceholderUpdatePreservesIdentity() = runBlocking {
+        val newNodeNum = 9994
+        val keyA = ByteArray(32) { 5 }.toByteString()
+        val originalName = "Real Name"
+        // 1. Create a full node with key and name
+        val fullNode =
+            testNodes[0].copy(
+                num = newNodeNum,
+                longName = originalName,
+                publicKey = keyA,
+                user =
+                testNodes[0]
+                    .user
+                    .copy(
+                        id = "!uniqueId6",
+                        long_name = originalName,
+                        public_key = keyA,
+                        hw_model = HardwareModel.TLORA_V2, // Set a specific HW model
+                    ),
+            )
+        nodeInfoDao.upsert(fullNode)
+
+        // 2. Simulate receiving a placeholder packet (e.g. from a legacy node or partial info)
+        // HW Model UNSET, Default Name "Meshtastic XXXX"
+        val placeholderNode =
+            fullNode.copy(
+                user =
+                fullNode.user.copy(
+                    hw_model = HardwareModel.UNSET,
+                    long_name = "Meshtastic 1234",
+                    public_key = ByteString.EMPTY,
+                ),
+                longName = "Meshtastic 1234",
+                publicKey = null,
+            )
+        nodeInfoDao.upsert(placeholderNode)
+
+        // 3. Verify that the identity (Name and Key) is preserved
+        val stored = nodeInfoDao.getNodeByNum(newNodeNum)!!.node
+        assertEquals(originalName, stored.longName)
+        assertEquals(keyA, stored.publicKey)
+        // Ensure HW model is NOT overwritten by UNSET if we preserve the user
+        // Note: The logic in handleExistingNodeUpsertValidation copies the *existing* user back.
+        assertEquals(HardwareModel.TLORA_V2, stored.user.hw_model)
     }
 }

@@ -169,6 +169,11 @@ class MainActivity : ComponentActivity() {
 
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
+        if (uri.toString().startsWith(DEEP_LINK_BASE_URI)) {
+            model.handleNavigationDeepLink(uri)
+            return
+        }
+
         uri.dispatchMeshtasticUri(
             onChannel = { model.setRequestChannelSet(it) },
             onContact = { model.setSharedContactRequested(it) },

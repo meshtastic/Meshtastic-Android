@@ -94,8 +94,9 @@ jobs:
           IS_FIRST_API=$(echo '${{ inputs.api_levels }}' | jq -r '.[0] == ${{ matrix.api_level }}')
           IS_FIRST_FLAVOR=$(echo '${{ inputs.flavors }}' | jq -r '.[0] == "${{ matrix.flavor }}"')
           
-          if [ "${{ inputs.run_lint }}" = "true" ] && [ "$IS_FIRST_API" = "true" ] && [ "$IS_FIRST_FLAVOR" = "true" ]; then
-            TASKS="$TASKS spotlessCheck detekt "
+          if [ "$IS_FIRST_API" = "true" ] && [ "$IS_FIRST_FLAVOR" = "true" ]; then
+            [ "${{ inputs.run_lint }}" = "true" ] && TASKS="$TASKS spotlessCheck detekt "
+            [ "${{ inputs.run_unit_tests }}" = "true" ] && TASKS="$TASKS testDebugUnitTest "
           fi
           
           FLAVOR="${{ matrix.flavor }}"
@@ -111,6 +112,7 @@ jobs:
           
           # Instrumented Test Tasks
           if [ "${{ inputs.run_instrumented_tests }}" = "true" ]; then
+            [ "$IS_FIRST_FLAVOR" = "true" ] && TASKS="$TASKS connectedDebugAndroidTest "
             if [ "$FLAVOR" = "google" ]; then
               TASKS="$TASKS connectedGoogleDebugAndroidTest "
             elif [ "$FLAVOR" = "fdroid" ]; then

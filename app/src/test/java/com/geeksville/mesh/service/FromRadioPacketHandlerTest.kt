@@ -72,7 +72,7 @@ class FromRadioPacketHandlerTest {
         handler.handleFromRadio(proto)
 
         verify { router.configFlowManager.handleNodeInfo(nodeInfo) }
-        verify { serviceRepository.setStatusMessage(any()) }
+        verify { serviceRepository.setConnectionProgress(any()) }
     }
 
     @Test

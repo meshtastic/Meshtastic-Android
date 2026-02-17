@@ -55,7 +55,7 @@ constructor(
             metadata != null -> router.configFlowManager.handleLocalMetadata(metadata)
             nodeInfo != null -> {
                 router.configFlowManager.handleNodeInfo(nodeInfo)
-                serviceRepository.setStatusMessage("Nodes (${router.configFlowManager.newNodeCount})")
+                serviceRepository.setConnectionProgress("Nodes (${router.configFlowManager.newNodeCount})")
             }
             configCompleteId != null -> router.configFlowManager.handleConfigComplete(configCompleteId)
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)

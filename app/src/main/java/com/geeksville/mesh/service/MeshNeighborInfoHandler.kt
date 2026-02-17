@@ -21,6 +21,7 @@ import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.unknown_username
@@ -74,7 +75,7 @@ constructor(
 
         val responseText =
             if (start != null) {
-                val elapsedMs = System.currentTimeMillis() - start
+                val elapsedMs = nowMillis - start
                 val seconds = elapsedMs / MILLIS_PER_SECOND
                 Logger.i { "Neighbor info $requestId complete in $seconds s" }
                 String.format(Locale.US, "%s\n\nDuration: %.1f s", formatted, seconds)

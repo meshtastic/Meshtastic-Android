@@ -25,6 +25,7 @@ import android.provider.Settings
 import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
@@ -53,9 +54,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.core.os.ConfigurationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -66,6 +69,9 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.database.DatabaseConstants
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res
@@ -112,7 +118,6 @@ import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
@@ -184,8 +189,8 @@ fun SettingsScreen(
                 } else {
                     deviceProfile = it
                     val nodeName = (it.short_name ?: "").ifBlank { "node" }
-                    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
-                    val dateStr = dateFormat.format(java.util.Date())
+                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                    val dateStr = dateFormat.format(nowMillis.toInstant().toDate())
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -311,11 +316,10 @@ fun SettingsScreen(
 
                 val homoglyphEncodingEnabled by
                     viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
-                SwitchListItem(
-                    text = stringResource(Res.string.use_homoglyph_characters_encoding),
-                    checked = homoglyphEncodingEnabled,
-                    leadingIcon = Icons.Default.Abc,
-                    onClick = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+
+                HomoglyphSetting(
+                    homoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                    onToggle = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                 )
 
                 val settingsLauncher =
@@ -366,7 +370,7 @@ fun SettingsScreen(
                     summary = stringResource(Res.string.device_db_cache_limit_summary),
                 )
 
-                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(nowMillis.toInstant().toDate())
                 val nodeName = ourNode?.user?.short_name ?: ""
 
                 val exportRangeTestLauncher =
@@ -532,4 +536,19 @@ private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit
             }
         },
     )
+}
+
+@VisibleForTesting
+@Composable
+fun HomoglyphSetting(homoglyphEncodingEnabled: Boolean, onToggle: () -> Unit) {
+    val currentLocale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
+    val supportedLanguages = listOf("ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn")
+    if (currentLocale?.language in supportedLanguages) {
+        SwitchListItem(
+            text = stringResource(Res.string.use_homoglyph_characters_encoding),
+            checked = homoglyphEncodingEnabled,
+            leadingIcon = Icons.Default.Abc,
+            onClick = onToggle,
+        )
+    }
 }

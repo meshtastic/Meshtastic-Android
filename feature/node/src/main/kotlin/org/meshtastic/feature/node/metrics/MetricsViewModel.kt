@@ -36,6 +36,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
@@ -52,10 +53,13 @@ import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
+import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
@@ -73,11 +77,9 @@ import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import org.meshtastic.proto.User
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
@@ -87,15 +89,11 @@ import java.util.Locale
 import javax.inject.Inject
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
 
-private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+private fun MeshPacket.hasValidSignal(): Boolean = rx_time > 0 && (rx_snr != 0f || rx_rssi != 0)
 
-private fun MeshPacket.hasValidSignal(): Boolean = (rx_time ?: 0) > 0 && ((rx_snr ?: 0f) != 0f || (rx_rssi ?: 0) != 0)
-
-private fun Telemetry.hasValidEnvironmentMetrics(): Boolean {
-    val metrics = this.environment_metrics ?: return false
-    return metrics.relative_humidity != null && metrics.temperature != null && metrics.temperature?.isNaN() != true
-}
-
+/**
+ * ViewModel responsible for managing and graphing metrics (telemetry, signal strength, paxcount) for a specific node.
+ */
 @Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
 class MetricsViewModel
@@ -121,30 +119,11 @@ constructor(
 
     private val tracerouteOverlayCache = MutableStateFlow<Map<Int, TracerouteOverlay>>(emptyMap())
 
-    private fun MeshLog.hasValidTraceroute(dest: Int?): Boolean =
-        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == dest }
-
-    private fun MeshLog.hasValidNeighborInfo(dest: Int?): Boolean =
-        with(fromRadio.packet) { this?.decoded != null && decoded?.want_response == true && from == 0 && to == dest }
-
-    /**
-     * Creates a fallback node for hidden clients or nodes not yet in the database. This prevents the detail screen from
-     * freezing when viewing unknown nodes.
-     */
-    private suspend fun createFallbackNode(nodeNum: Int): Node {
-        val userId = DataPacket.nodeNumToDefaultId(nodeNum)
-        val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
-        val longName = getString(Res.string.fallback_node_name) + "  $safeUserId"
-        val defaultUser =
-            User(id = userId, long_name = longName, short_name = safeUserId, hw_model = HardwareModel.UNSET)
-
-        return Node(num = nodeNum, user = defaultUser)
-    }
-
     fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 
+    /** Returns the map overlay for a specific traceroute request ID. */
     fun getTracerouteOverlay(requestId: Int): TracerouteOverlay? {
         val cached = tracerouteOverlayCache.value[requestId]
         if (cached != null) return cached
@@ -173,7 +152,9 @@ constructor(
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
 
     fun positionedNodeNums(): Set<Int> =
-        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet()
+        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
+
+    private fun List<Node>.numSet(): Set<Int> = map { it.num }.toSet()
 
     init {
         viewModelScope.launch {
@@ -196,18 +177,23 @@ constructor(
     }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
+
+    /** Current aggregated metrics state, including signal history and sensor logs. */
     val state: StateFlow<MetricsState> = _state
 
     private val environmentState = MutableStateFlow(EnvironmentMetricsState())
 
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
+
+    /** The active time window for filtering graphed data. */
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
+    /** Returns the list of time frames that are actually available based on the oldest data point. */
     val availableTimeFrames: StateFlow<List<TimeFrame>> =
         combine(_state, environmentState) { state, envState ->
             val stateOldest = state.oldestTimestampSeconds()
             val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
-            val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: (System.currentTimeMillis() / 1000L)
+            val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: nowSeconds
             TimeFrame.entries.filter { it.isAvailable(oldest) }
         }
             .stateInWhileSubscribed(TimeFrame.entries)
@@ -292,6 +278,7 @@ constructor(
         )
     }
 
+    /** Shows the detail dialog for a traceroute result, with an option to view on the map. */
     fun showTracerouteDetail(
         annotatedMessage: AnnotatedString,
         requestId: Int,
@@ -349,6 +336,8 @@ constructor(
         jobs =
             viewModelScope.launch {
                 if (currentDestNum != null) {
+                    val logNodeIdFlow = nodeRepository.effectiveLogNodeId(currentDestNum)
+
                     launch {
                         combine(nodeRepository.nodeDBbyNum, nodeRepository.myNodeInfo) { nodes, myInfo ->
                             nodes[currentDestNum] to (nodes.keys.firstOrNull() to myInfo)
@@ -357,7 +346,9 @@ constructor(
                             .collect { (node, localData) ->
                                 val (ourNodeNum, myInfo) = localData
                                 // Create a fallback node if not found in database (for hidden clients, etc.)
-                                val actualNode = node ?: createFallbackNode(currentDestNum)
+                                val actualNode =
+                                    node
+                                        ?: Node.createFallback(currentDestNum, getString(Res.string.fallback_node_name))
                                 val pioEnv = if (currentDestNum == ourNodeNum) myInfo?.pioEnv else null
                                 val hwModel = actualNode.user.hw_model.value
                                 val deviceHardware =
@@ -391,44 +382,47 @@ constructor(
                     }
 
                     launch {
-                        meshLogRepository.getTelemetryFrom(currentDestNum).collect { telemetry ->
-                            val device = mutableListOf<Telemetry>()
-                            val power = mutableListOf<Telemetry>()
-                            val host = mutableListOf<Telemetry>()
-                            val env = mutableListOf<Telemetry>()
+                        logNodeIdFlow
+                            .flatMapLatest { meshLogRepository.getTelemetryFrom(it) }
+                            .collect { telemetry ->
+                                val device = mutableListOf<Telemetry>()
+                                val power = mutableListOf<Telemetry>()
+                                val host = mutableListOf<Telemetry>()
+                                val env = mutableListOf<Telemetry>()
 
-                            for (item in telemetry) {
-                                if (item.device_metrics != null) device.add(item)
-                                if (item.power_metrics != null) power.add(item)
-                                if (item.host_metrics != null) host.add(item)
-                                if (item.hasValidEnvironmentMetrics()) env.add(item)
-                            }
+                                for (item in telemetry) {
+                                    if (item.device_metrics != null) device.add(item)
+                                    if (item.power_metrics != null) power.add(item)
+                                    if (item.host_metrics != null) host.add(item)
+                                    if (item.hasValidEnvironmentMetrics()) env.add(item)
+                                }
 
-                            _state.update { state ->
-                                state.copy(deviceMetrics = device, powerMetrics = power, hostMetrics = host)
+                                _state.update { state ->
+                                    state.copy(deviceMetrics = device, powerMetrics = power, hostMetrics = host)
+                                }
+                                environmentState.update { it.copy(environmentMetrics = env) }
                             }
-                            environmentState.update { it.copy(environmentMetrics = env) }
-                        }
                     }
 
                     launch {
-                        meshLogRepository.getMeshPacketsFrom(currentDestNum).collect { meshPackets ->
-                            _state.update { state ->
-                                state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+                        logNodeIdFlow
+                            .flatMapLatest { meshLogRepository.getMeshPacketsFrom(it) }
+                            .collect { meshPackets ->
+                                _state.update { state ->
+                                    state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+                                }
                             }
-                        }
                     }
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP.value),
-                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.TRACEROUTE_APP.value),
+                            meshLogRepository.getRequestLogs(currentDestNum, PortNum.TRACEROUTE_APP),
+                            logNodeIdFlow.flatMapLatest {
+                                meshLogRepository.getLogsFrom(it, PortNum.TRACEROUTE_APP.value)
+                            },
                         ) { request, response ->
                             _state.update { state ->
-                                state.copy(
-                                    tracerouteRequests = request.filter { it.hasValidTraceroute(currentDestNum) },
-                                    tracerouteResults = response,
-                                )
+                                state.copy(tracerouteRequests = request, tracerouteResults = response)
                             }
                         }
                             .collect {}
@@ -436,42 +430,39 @@ constructor(
 
                     launch {
                         combine(
-                            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.NEIGHBORINFO_APP.value),
-                            meshLogRepository.getLogsFrom(currentDestNum, PortNum.NEIGHBORINFO_APP.value),
+                            meshLogRepository.getRequestLogs(currentDestNum, PortNum.NEIGHBORINFO_APP),
+                            logNodeIdFlow.flatMapLatest {
+                                meshLogRepository.getLogsFrom(it, PortNum.NEIGHBORINFO_APP.value)
+                            },
                         ) { request, response ->
                             _state.update { state ->
-                                state.copy(
-                                    neighborInfoRequests =
-                                    request.filter { it.hasValidNeighborInfo(currentDestNum) },
-                                    neighborInfoResults = response,
-                                )
+                                state.copy(neighborInfoRequests = request, neighborInfoResults = response)
                             }
                         }
                             .collect {}
                     }
 
                     launch {
-                        meshLogRepository.getMeshPacketsFrom(
-                            currentDestNum,
-                            PortNum.POSITION_APP.value,
-                        ).collect { packets ->
-                            val distinctPositions =
-                                packets
-                                    .mapNotNull { it.toPosition() }
-                                    .asFlow()
-                                    .distinctUntilChanged { old, new ->
-                                        old.time == new.time ||
-                                            (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
-                                    }
-                                    .toList()
-                            _state.update { state -> state.copy(positionLogs = distinctPositions) }
-                        }
+                        logNodeIdFlow
+                            .flatMapLatest { meshLogRepository.getMeshPacketsFrom(it, PortNum.POSITION_APP.value) }
+                            .collect { packets ->
+                                val distinctPositions =
+                                    packets
+                                        .mapNotNull { it.toPosition() }
+                                        .asFlow()
+                                        .distinctUntilChanged { old, new ->
+                                            old.time == new.time ||
+                                                (old.latitude_i == new.latitude_i && old.longitude_i == new.longitude_i)
+                                        }
+                                        .toList()
+                                _state.update { state -> state.copy(positionLogs = distinctPositions) }
+                            }
                     }
 
                     launch {
-                        meshLogRepository.getLogsFrom(currentDestNum, PortNum.PAXCOUNTER_APP.value).collect { logs ->
-                            _state.update { state -> state.copy(paxMetrics = logs) }
-                        }
+                        logNodeIdFlow
+                            .flatMapLatest { meshLogRepository.getLogsFrom(it, PortNum.PAXCOUNTER_APP.value) }
+                            .collect { logs -> _state.update { state -> state.copy(paxMetrics = logs) } }
                     }
 
                     launch {
@@ -519,7 +510,7 @@ constructor(
             val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
 
             positions.forEach { position ->
-                val rxDateTime = dateFormat.format((position.time ?: 0).toLong() * 1000L)
+                val rxDateTime = dateFormat.format(((position.time ?: 0).toLong() * 1000L).toInstant().toDate())
                 val latitude = (position.latitude_i ?: 0) * 1e-7
                 val longitude = (position.longitude_i ?: 0) * 1e-7
                 val altitude = position.altitude
@@ -555,13 +546,15 @@ constructor(
             val packet = log.fromRadio.packet
             val decoded = packet?.decoded
             if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
+                // Requests for paxcount (want_response = true) should not be logged as data points.
+                if (decoded.want_response == true) return null
                 val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
                 if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
             }
         } catch (e: IOException) {
             Logger.e(e) { "Failed to parse Paxcount from binary data" }
         }
-        // Fallback: Try direct base64 or bytes from raw_message
+        // Fallback: Attempt to parse Paxcount from raw_message as base64 or hex string.
         try {
             val base64 = log.raw_message.trim()
             if (base64.matches(Regex("^[A-Za-z0-9+/=\r\n]+$"))) {

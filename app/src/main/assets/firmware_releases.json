@@ -189,9 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "9590",
-      "title": "Fix seeed_xiao_nrf52840_kit_i2c build",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9590",
+      "id": "9666",
+      "title": "Heltec-v3 on battery: button and rotary encoder responsiveness fix",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9666",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9627",
+      "title": "Add phone API fanout for multiple clients",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9627",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
@@ -216,24 +222,6 @@
       "id": "9501",
       "title": "Improved Periodic class",
       "page_url": "https://github.com/meshtastic/firmware/pull/9501",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9476",
-      "title": "Deprecate/block packets with a missing/invalid hop_start value (pre-hop firmware) (related to issue #7369)",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9476",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9428",
-      "title": "feat(power): automatic WiFi disable when running on battery",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9428",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9363",
-      "title": "Allow using Spreading Factors 5 and 6",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9363",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]

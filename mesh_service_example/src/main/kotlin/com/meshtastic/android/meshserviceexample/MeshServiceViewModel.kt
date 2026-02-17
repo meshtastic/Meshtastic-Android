@@ -31,10 +31,12 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.proto.PortNum
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.random.Random
 
@@ -118,7 +120,7 @@ class MeshServiceViewModel : ViewModel() {
                         bytes = text.encodeToByteArray().toByteString(),
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                         from = DataPacket.ID_LOCAL,
-                        time = System.currentTimeMillis(),
+                        time = nowMillis,
                         id = service.packetId,
                         status = MessageStatus.UNKNOWN,
                         hopLimit = 3,
@@ -144,7 +146,7 @@ class MeshServiceViewModel : ViewModel() {
                         bytes = "Special Payload for ${portNum.name}".encodeToByteArray().toByteString(),
                         dataType = portNum.value,
                         from = DataPacket.ID_LOCAL,
-                        time = System.currentTimeMillis(),
+                        time = nowMillis,
                         id = service.packetId,
                         status = MessageStatus.UNKNOWN,
                         hopLimit = 3,
@@ -341,7 +343,8 @@ class MeshServiceViewModel : ViewModel() {
     }
 
     private fun addToLog(entry: String) {
-        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        val date = nowMillis.toInstant().toDate()
+        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(date)
         val logEntry = "[$timestamp] $entry"
         Log.d(TAG, "Log: $logEntry")
         @Suppress("MagicNumber")

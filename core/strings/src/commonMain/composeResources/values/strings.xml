@@ -48,6 +48,9 @@
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
+    <string name="via_udp">via UDP</string>
+    <string name="via_api">via API</string>
+    <string name="internal">Internal</string>
     <string name="node_sort_via_favorite">via Favorite</string>
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
     <string name="unrecognized">Unrecognized</string>

@@ -40,21 +40,27 @@ class SharedContactTest {
 
     @Test
     fun testWwwHostIsAccepted() {
-        val url = Uri.parse("https://www.meshtastic.org/v/#CggKBVN1enVtZRICU1oaBTEyMzQ1")
+        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val urlStr = original.getSharedContactUrl().toString().replace("meshtastic.org", "www.meshtastic.org")
+        val url = Uri.parse(urlStr)
         val contact = url.toSharedContact()
         assertEquals("Suzume", contact.user?.long_name)
     }
 
     @Test
     fun testLongPathIsAccepted() {
-        val url = Uri.parse("https://meshtastic.org/contact/v/#CggKBVN1enVtZRICU1oaBTEyMzQ1")
+        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val urlStr = original.getSharedContactUrl().toString().replace("/v/", "/contact/v/")
+        val url = Uri.parse(urlStr)
         val contact = url.toSharedContact()
         assertEquals("Suzume", contact.user?.long_name)
     }
 
     @Test(expected = java.net.MalformedURLException::class)
     fun testInvalidHostThrows() {
-        val url = Uri.parse("https://example.com/v/#CggKBVN1enVtZRICU1oaBTEyMzQ1")
+        val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
+        val urlStr = original.getSharedContactUrl().toString().replace("meshtastic.org", "example.com")
+        val url = Uri.parse(urlStr)
         url.toSharedContact()
     }
 }

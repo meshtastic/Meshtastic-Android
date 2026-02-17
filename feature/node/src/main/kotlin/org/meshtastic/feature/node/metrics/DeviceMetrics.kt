@@ -66,6 +66,7 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.air_util_definition
 import org.meshtastic.core.strings.air_utilization
@@ -352,7 +353,7 @@ private fun DeviceMetricsChart(
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsChartPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
+    val now = nowSeconds.toInt()
     val telemetries =
         List(20) { i ->
             Telemetry(
@@ -468,7 +469,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsCardPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
+    val now = nowSeconds.toInt()
     val telemetry =
         Telemetry(
             time = now,
@@ -488,7 +489,7 @@ private fun DeviceMetricsCardPreview() {
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsScreenPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
+    val now = nowSeconds.toInt()
     val telemetries =
         List(24) { i ->
             Telemetry(

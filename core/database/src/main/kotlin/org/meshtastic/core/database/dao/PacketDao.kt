@@ -31,6 +31,7 @@ import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.ChannelSettings
 
 @Suppress("TooManyFunctions")
@@ -347,7 +348,7 @@ interface PacketDao {
                     } else if (until == 0L) { // unmute
                         0L
                     } else {
-                        System.currentTimeMillis() + until
+                        nowMillis + until
                     }
 
                 getContactSettings(contact)?.copy(muteUntil = absoluteMuteUntil)

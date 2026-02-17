@@ -37,6 +37,7 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.PortNum
 
 @RunWith(AndroidJUnit4::class)
@@ -71,7 +72,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = contactKey,
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = false,
                 data = DataPacket(DataPacket.ID_BROADCAST, 0, "Message $it!"),
             )
@@ -153,7 +154,7 @@ class PacketDaoTest {
 
     @Test
     fun test_clearUnreadCount() = runBlocking {
-        val timestamp = System.currentTimeMillis()
+        val timestamp = nowMillis
         testContactKeys.forEach { contactKey ->
             packetDao.clearUnreadCount(contactKey, timestamp)
             val unreadCount = packetDao.getUnreadCount(contactKey)
@@ -180,7 +181,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = true,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = 0, text = "Test").copy(id = packetId),
                 packetId = packetId,
@@ -203,7 +204,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = true,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = 0, text = "Test"),
                 sfpp_hash = hashByteString,
@@ -227,7 +228,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = true,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = 0, text = "Test"),
                 sfpp_hash = hashByteString,
@@ -262,7 +263,7 @@ class PacketDaoTest {
                 replyId = 123,
                 userId = "sender",
                 emoji = "👍",
-                timestamp = System.currentTimeMillis(),
+                timestamp = nowMillis,
                 sfpp_hash = hashByteString,
             )
 
@@ -290,7 +291,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = true,
                 data = DataPacket(to = "target", channel = 0, text = "Hello").copy(id = initialId),
                 packetId = initialId,
@@ -322,7 +323,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = "test",
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = true,
                 data = DataPacket(to = toId, channel = 0, text = "Match me").copy(from = fromId, id = packetId),
                 packetId = packetId,
@@ -356,7 +357,7 @@ class PacketDaoTest {
                 myNodeNum = myNodeNum,
                 port_num = PortNum.TEXT_MESSAGE_APP.value,
                 contact_key = filteredContactKey,
-                received_time = System.currentTimeMillis(),
+                received_time = nowMillis,
                 read = false,
                 data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
                 filtered = true,
@@ -380,7 +381,7 @@ class PacketDaoTest {
                     myNodeNum = myNodeNum,
                     port_num = PortNum.TEXT_MESSAGE_APP.value,
                     contact_key = contactKey,
-                    received_time = System.currentTimeMillis() + i,
+                    received_time = nowMillis + i,
                     read = false,
                     data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered $i"),
                     filtered = true,
@@ -428,7 +429,7 @@ class PacketDaoTest {
                     myNodeNum = myNodeNum,
                     port_num = PortNum.TEXT_MESSAGE_APP.value,
                     contact_key = contactKey,
-                    received_time = System.currentTimeMillis() + index,
+                    received_time = nowMillis + index,
                     read = false,
                     data = DataPacket(DataPacket.ID_BROADCAST, 0, text),
                     filtered = false,
@@ -443,7 +444,7 @@ class PacketDaoTest {
                     myNodeNum = myNodeNum,
                     port_num = PortNum.TEXT_MESSAGE_APP.value,
                     contact_key = contactKey,
-                    received_time = System.currentTimeMillis() + normalMessages.size + index,
+                    received_time = nowMillis + normalMessages.size + index,
                     read = true, // Filtered messages are marked as read
                     data = DataPacket(DataPacket.ID_BROADCAST, 0, text),
                     filtered = true,

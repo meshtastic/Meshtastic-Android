@@ -39,6 +39,9 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
+import org.meshtastic.core.model.util.nowInstant
+import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.model.util.toReadableString
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.strings.Res
@@ -60,7 +63,6 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
 import java.text.DateFormat
-import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -306,7 +308,7 @@ constructor(
             UiMeshLog(
                 uuid = log.uuid,
                 messageType = log.message_type,
-                formattedReceivedDate = TIME_FORMAT.format(log.received_date),
+                formattedReceivedDate = TIME_FORMAT.format(log.received_date.toInstant().toDate()),
                 logMessage = annotateMeshLogMessage(log),
                 decodedPayload = decodePayloadFromMeshLog(log),
             )
@@ -430,7 +432,7 @@ constructor(
             // decoded
             add("decoded")
             // today (locale-dependent short date format)
-            add(DateFormat.getDateInstance(DateFormat.SHORT).format(Date()))
+            add(DateFormat.getDateInstance(DateFormat.SHORT).format(nowInstant.toDate()))
             // Each app name
             addAll(PortNum.entries.map { it.name })
         }

@@ -65,20 +65,20 @@ import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.filter_message_label
 import org.meshtastic.core.strings.message_delivery_status
 import org.meshtastic.core.strings.reply
 import org.meshtastic.core.strings.sample_message
-import org.meshtastic.core.strings.via_mqtt
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
+import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.emoji.EmojiPicker
 import org.meshtastic.core.ui.icon.Acknowledged
-import org.meshtastic.core.ui.icon.Cloud
 import org.meshtastic.core.ui.icon.CloudDone
 import org.meshtastic.core.ui.icon.CloudOffTwoTone
 import org.meshtastic.core.ui.icon.CloudSync
@@ -239,13 +239,11 @@ internal fun MessageItem(
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
             )
-            if (message.viaMqtt) {
-                Icon(
-                    MeshtasticIcons.Cloud,
-                    contentDescription = stringResource(Res.string.via_mqtt),
-                    modifier = Modifier.size(16.dp),
-                )
-            }
+            TransportIcon(
+                transport = message.transportMechanism,
+                viaMqtt = message.viaMqtt,
+                modifier = Modifier.size(16.dp),
+            )
         }
     }
     Surface(
@@ -292,7 +290,7 @@ internal fun MessageItem(
 
                 Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                     if (!message.fromLocal) {
-                        if (message.hopsAway == 0) {
+                        if (message.hopsAway == 0 && !message.viaMqtt) {
                             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Snr(message.snr)
                                 Rssi(message.rssi)
@@ -309,7 +307,12 @@ internal fun MessageItem(
                                     tint = cardColors.contentColor.copy(alpha = 0.7f),
                                 )
                                 Text(
-                                    text = message.hopsAway.toString(),
+                                    text =
+                                    if (message.hopsAway >= 0) {
+                                        message.hopsAway.toString()
+                                    } else {
+                                        "?"
+                                    },
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }
@@ -457,7 +460,7 @@ private fun MessageItemPreview() {
             rssi = 90,
             hopsAway = 0,
             uuid = 1L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().mickeyMouse,
             read = false,
             routingError = 0,
@@ -476,7 +479,7 @@ private fun MessageItemPreview() {
             rssi = 90,
             hopsAway = 0,
             uuid = 2L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().minnieMouse,
             read = false,
             routingError = 0,
@@ -495,7 +498,7 @@ private fun MessageItemPreview() {
             rssi = 90,
             hopsAway = 2,
             uuid = 2L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().minnieMouse,
             read = false,
             routingError = 0,
@@ -515,7 +518,7 @@ private fun MessageItemPreview() {
             rssi = 70,
             hopsAway = 1,
             uuid = 3L,
-            receivedTime = System.currentTimeMillis(),
+            receivedTime = nowMillis,
             node = NodePreviewParameterProvider().minnieMouse,
             read = false,
             routingError = 0,

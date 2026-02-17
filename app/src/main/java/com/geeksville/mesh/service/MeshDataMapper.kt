@@ -49,6 +49,7 @@ class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManage
             relayNode = packet.relay_node,
             viaMqtt = packet.via_mqtt == true,
             emoji = decoded.emoji,
+            transportMechanism = packet.transport_mechanism.value,
         )
     }
 }

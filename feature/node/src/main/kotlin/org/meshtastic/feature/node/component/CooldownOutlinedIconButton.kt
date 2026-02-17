@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
@@ -56,7 +57,7 @@ fun CooldownIconButton(
             progress.snapTo(0f)
             return@LaunchedEffect
         }
-        val timeSinceLast = System.currentTimeMillis() - cooldownTimestamp
+        val timeSinceLast = nowMillis - cooldownTimestamp
         if (timeSinceLast < cooldownDuration) {
             val remainingTime = cooldownDuration - timeSinceLast
             progress.snapTo(remainingTime / cooldownDuration.toFloat())
@@ -106,7 +107,7 @@ fun CooldownOutlinedIconButton(
             progress.snapTo(0f)
             return@LaunchedEffect
         }
-        val timeSinceLast = System.currentTimeMillis() - cooldownTimestamp
+        val timeSinceLast = nowMillis - cooldownTimestamp
         if (timeSinceLast < cooldownDuration) {
             val remainingTime = cooldownDuration - timeSinceLast
             progress.snapTo(remainingTime / cooldownDuration.toFloat())
@@ -146,7 +147,7 @@ fun CooldownOutlinedIconButton(
 @Composable
 private fun CooldownOutlinedIconButtonPreview() {
     AppTheme {
-        CooldownOutlinedIconButton(onClick = {}, cooldownTimestamp = System.currentTimeMillis() - 15000L) {
+        CooldownOutlinedIconButton(onClick = {}, cooldownTimestamp = nowMillis - 15000L) {
             Icon(imageVector = MeshtasticIcons.Refresh, contentDescription = null)
         }
     }

@@ -34,6 +34,8 @@ import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -48,7 +50,9 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
@@ -140,7 +144,7 @@ constructor(
         }
         serviceBroadcasts.broadcastConnection()
         Logger.d { "Starting connect" }
-        connectTimeMsec = System.currentTimeMillis()
+        connectTimeMsec = nowMillis
         scope.handledLaunch { nodeRepository.clearMyNodeInfo() }
         startConfigOnly()
     }
@@ -152,12 +156,12 @@ constructor(
         mqttManager.stop()
 
         if (connectTimeMsec != 0L) {
-            val now = System.currentTimeMillis()
+            val now = nowMillis
             val duration = now - connectTimeMsec
             connectTimeMsec = 0L
             analytics.track(
                 EVENT_CONNECTED_SECONDS,
-                DataPair(EVENT_CONNECTED_SECONDS, duration / MILLISECONDS_IN_SECOND),
+                DataPair(EVENT_CONNECTED_SECONDS, duration.milliseconds.toDouble(DurationUnit.SECONDS)),
             )
         }
 
@@ -207,9 +211,7 @@ constructor(
 
         val myNodeNum = nodeManager.myNodeNum ?: 0
         // Set time
-        commandSender.sendAdmin(myNodeNum) {
-            AdminMessage(set_time_only = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt())
-        }
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
     }
 
     fun onNodeDbReady() {
@@ -268,7 +270,6 @@ constructor(
     companion object {
         private const val CONFIG_ONLY_NONCE = 69420
         private const val NODE_INFO_NONCE = 69421
-        private const val MILLISECONDS_IN_SECOND = 1000.0
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
 
         private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
