@@ -207,14 +207,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
             message = message,
             html = state.html,
             icon = state.icon,
-            text = {
-                val composableMsg = state.composableMessage
-                if (composableMsg != null) {
-                    composableMsg.Content()
-                } else {
-                    // message is handled internally by MeshtasticDialog
-                }
-            },
+            text = state.composableMessage?.let { msg -> { msg.Content() } },
             confirmText = confirmText,
             onConfirm = state.onConfirm,
             dismissText = dismissText,
