@@ -298,7 +298,7 @@ constructor(
         val fromRadioSyncReady = CompletableDeferred<Unit>()
         val logRadioReady = CompletableDeferred<Unit>()
 
-        if (fromRadioCharacteristic == null) {
+        if (fromRadioSyncCharacteristic == null) {
             fromNumCharacteristic
                 ?.subscribe {
                     Logger.d { "[$address] FromNum subscription active" }
