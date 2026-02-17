@@ -213,8 +213,8 @@ constructor(
         updateNodeStatus(fromNum, s.status)
     }
 
-    fun updateNodeStatus(nodeNum: Int, status: String) {
-        updateNodeInfo(nodeNum) { it.nodeStatus = status }
+    fun updateNodeStatus(nodeNum: Int, status: String?) {
+        updateNodeInfo(nodeNum) { it.nodeStatus = status?.takeIf { s -> s.isNotEmpty() } }
     }
 
     fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true) {

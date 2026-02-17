@@ -239,7 +239,7 @@ constructor(
     fun handleSetModuleConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = ModuleConfig.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_module_config = c) }
-        c.statusmessage?.node_status?.let { status -> nodeManager.updateNodeStatus(destNum, status) }
+        c.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
     }
 
     fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
