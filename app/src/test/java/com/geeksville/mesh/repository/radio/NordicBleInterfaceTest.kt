@@ -577,4 +577,90 @@ class NordicBleInterfaceTest {
 
         nordicInterface.close()
     }
+
+    @Test
+    fun `fromRadioSync notification delivers packet directly`() = runTest(testDispatcher) {
+        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val service = mockk<RadioInterfaceService>(relaxed = true)
+
+        var fromRadioSyncHandle: Int = -1
+
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(
+                    preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
+                ): ConnectionResult = ConnectionResult.Accept
+                override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
+                    ReadResponse.Success(byteArrayOf())
+            }
+
+        val peripheralSpec =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("Meshtastic_1234")
+                }
+                connectable(
+                    name = "Meshtastic_1234",
+                    isBonded = true,
+                    eventHandler = eventHandler,
+                    cachedServices = {
+                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                            Characteristic(
+                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.WRITE),
+                                permission = Permission.WRITE,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.READ),
+                                permission = Permission.READ,
+                            )
+                            fromRadioSyncHandle = Characteristic(
+                                uuid = BleConstants.BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.INDICATE),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                        }
+                    },
+                )
+            }
+
+        centralManager.simulatePeripherals(listOf(peripheralSpec))
+        delay(100.milliseconds)
+
+        val nordicInterface =
+            NordicBleInterface(
+                serviceScope = this,
+                centralManager = centralManager,
+                service = service,
+                address = address,
+            )
+
+        // Wait for connection
+        delay(1000.milliseconds)
+        verify(timeout = 2000) { service.onConnect() }
+
+        // Simulate notification (Indication) on FromRadioSync
+        val syncData = byteArrayOf(0xAA.toByte(), 0xBB.toByte())
+        peripheralSpec.simulateValueUpdate(fromRadioSyncHandle, syncData)
+
+        delay(500.milliseconds)
+
+        // Verify that handleFromRadio was called with the data
+        verify(timeout = 2000) { service.handleFromRadio(syncData) }
+
+        nordicInterface.close()
+    }
 }

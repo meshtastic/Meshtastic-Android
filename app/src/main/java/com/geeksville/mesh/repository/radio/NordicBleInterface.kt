@@ -99,7 +99,8 @@ constructor(
 
     private val connectionScope: CoroutineScope =
         CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
-    private val bleConnection: BleConnection = BleConnection(centralManager, connectionScope, address)
+    private val bleConnection: BleConnection =
+        BleConnection(centralManager, connectionScope, address)
     private val drainMutex: Mutex = Mutex()
     private val writeMutex: Mutex = Mutex()
 
@@ -112,6 +113,7 @@ constructor(
     private var toRadioCharacteristic: RemoteCharacteristic? = null
     private var fromNumCharacteristic: RemoteCharacteristic? = null
     private var fromRadioCharacteristic: RemoteCharacteristic? = null
+    private var fromRadioSyncCharacteristic: RemoteCharacteristic? = null
     private var logRadioCharacteristic: RemoteCharacteristic? = null
 
     init {
@@ -147,7 +149,7 @@ constructor(
         bytesReceived += packet.size
         Logger.d {
             "[$address] Dispatching packet to service.handleFromRadio() - " +
-                "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
+                    "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
         }
         try {
             service.handleFromRadio(p = packet)
@@ -246,9 +248,9 @@ constructor(
             }
         Logger.w {
             "[$address] BLE disconnected - Reason: ${state.reason}, " +
-                "Uptime: ${uptime}ms, " +
-                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                "Packets TX: $packetsSent ($bytesSent bytes)"
+                    "Uptime: ${uptime}ms, " +
+                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                    "Packets TX: $packetsSent ($bytesSent bytes)"
         }
         service.onDisconnect(BleError.Disconnected(reason = state.reason))
     }
@@ -270,7 +272,10 @@ constructor(
                 toRadioCharacteristic = chars[TORADIO_CHARACTERISTIC]
                 fromNumCharacteristic = chars[FROMNUM_CHARACTERISTIC]
                 fromRadioCharacteristic = chars[FROMRADIO_CHARACTERISTIC]
-                logRadioCharacteristic = chars[LOGRADIO_CHARACTERISTIC]
+                fromRadioSyncCharacteristic =
+                    meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid() }
+                logRadioCharacteristic =
+                    chars[LOGRADIO_CHARACTERISTIC]
 
                 Logger.d { "[$address] Characteristics discovered successfully" }
                 setupNotifications()
@@ -290,23 +295,40 @@ constructor(
 
     private suspend fun setupNotifications() {
         val fromNumReady = CompletableDeferred<Unit>()
+        val fromRadioSyncReady = CompletableDeferred<Unit>()
         val logRadioReady = CompletableDeferred<Unit>()
 
-        fromNumCharacteristic
-            ?.subscribe {
-                Logger.d { "[$address] FromNum subscription active" }
-                fromNumReady.complete(Unit)
-            }
+        if (fromRadioCharacteristic == null) {
+            fromNumCharacteristic
+                ?.subscribe {
+                    Logger.d { "[$address] FromNum subscription active" }
+                    fromNumReady.complete(Unit)
+                }
+                ?.onEach { notifyBytes ->
+                    Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
+                    connectionScope.launch { drainPacketQueueAndDispatch() }
+                }
+                ?.catch { e ->
+                    if (!fromNumReady.isCompleted) fromNumReady.completeExceptionally(e)
+                    Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
+                    service.onDisconnect(BleError.from(e))
+                }
+                ?.launchIn(connectionScope) ?: fromNumReady.complete(Unit)
+        }
+
+        fromRadioSyncCharacteristic?.subscribe {
+            Logger.d { "[$address] FromRadioSync subscription active" }
+            fromRadioSyncReady.complete(Unit)
+        }
             ?.onEach { notifyBytes ->
-                Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
-                connectionScope.launch { drainPacketQueueAndDispatch() }
+                Logger.d { "[$address] FromRadioSync Notification (${notifyBytes.size} bytes), dispatching packet" }
+                dispatchPacket(notifyBytes)
             }
             ?.catch { e ->
-                if (!fromNumReady.isCompleted) fromNumReady.completeExceptionally(e)
-                Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
+                Logger.w(e) { "[$address] Error subscribing to fromRadioSyncCharacteristic" }
                 service.onDisconnect(BleError.from(e))
             }
-            ?.launchIn(connectionScope) ?: fromNumReady.complete(Unit)
+            ?.launchIn(scope = connectionScope) ?: fromRadioSyncReady.complete(Unit)
 
         logRadioCharacteristic
             ?.subscribe {
@@ -355,14 +377,19 @@ constructor(
                                 WriteType.WITH_RESPONSE
                             }
 
-                        retryBleOperation(tag = address) { characteristic.write(p, writeType = writeType) }
+                        retryBleOperation(tag = address) {
+                            characteristic.write(
+                                p,
+                                writeType = writeType
+                            )
+                        }
 
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
                             "[$address] Successfully wrote packet #$packetsSent " +
-                                "to toRadioCharacteristic with $writeType - " +
-                                "${p.size} bytes (Total TX: $bytesSent bytes)"
+                                    "to toRadioCharacteristic with $writeType - " +
+                                    "${p.size} bytes (Total TX: $bytesSent bytes)"
                         }
                         drainPacketQueueAndDispatch()
                     } catch (e: InvalidAttributeException) {
@@ -371,7 +398,7 @@ constructor(
                     } catch (e: Exception) {
                         Logger.w(e) {
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
-                                "$packetsSent successful writes"
+                                    "$packetsSent successful writes"
                         }
                         service.onDisconnect(BleError.from(e))
                     }
@@ -395,9 +422,9 @@ constructor(
                 }
             Logger.i {
                 "[$address] BLE close() called - " +
-                    "Uptime: ${uptime}ms, " +
-                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                    "Packets TX: $packetsSent ($bytesSent bytes)"
+                        "Uptime: ${uptime}ms, " +
+                        "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                        "Packets TX: $packetsSent ($bytesSent bytes)"
             }
             connectionScope.cancel()
             bleConnection.disconnect()
@@ -414,6 +441,7 @@ constructor(
         toRadioCharacteristic = null
         fromNumCharacteristic = null
         fromRadioCharacteristic = null
+        fromRadioSyncCharacteristic = null
         logRadioCharacteristic = null
     }
 }
