@@ -590,6 +590,7 @@ class NordicBleInterfaceTest {
                 override fun onConnectionRequest(
                     preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
                 ): ConnectionResult = ConnectionResult.Accept
+
                 override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
                     ReadResponse.Success(byteArrayOf())
             }
@@ -622,11 +623,12 @@ class NordicBleInterfaceTest {
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
-                            fromRadioSyncHandle = Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid(),
-                                properties = setOf(CharacteristicProperty.INDICATE),
-                                permission = Permission.READ,
-                            )
+                            fromRadioSyncHandle =
+                                Characteristic(
+                                    uuid = BleConstants.BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid(),
+                                    properties = setOf(CharacteristicProperty.INDICATE),
+                                    permission = Permission.READ,
+                                )
                             Characteristic(
                                 uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
                                 properties = setOf(CharacteristicProperty.NOTIFY),

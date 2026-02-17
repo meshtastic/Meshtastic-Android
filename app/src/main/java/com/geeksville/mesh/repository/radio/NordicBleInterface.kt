@@ -273,7 +273,9 @@ constructor(
                 fromNumCharacteristic = chars[FROMNUM_CHARACTERISTIC]
                 fromRadioCharacteristic = chars[FROMRADIO_CHARACTERISTIC]
                 fromRadioSyncCharacteristic =
-                    meshtasticService.characteristics.find { it.uuid == BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid() }
+                    meshtasticService.characteristics.find {
+                                it.uuid == BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid()
+                            }
                 logRadioCharacteristic =
                     chars[LOGRADIO_CHARACTERISTIC]
 
