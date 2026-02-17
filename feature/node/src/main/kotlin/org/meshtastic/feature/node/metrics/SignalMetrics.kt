@@ -149,7 +149,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
@@ -162,23 +162,23 @@ private fun SignalMetricsChart(
         if (meshPackets.isEmpty()) return@Column
 
         val modelProducer = remember { CartesianChartModelProducer() }
+        val rssiColor = SignalMetric.RSSI.color
+        val snrColor = SignalMetric.SNR.color
 
-        LaunchedEffect(meshPackets) {
+        val rssiData = remember(meshPackets) { meshPackets.filter { (it.rx_rssi ?: 0) != 0 } }
+        val snrData = remember(meshPackets) { meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) } }
+
+        LaunchedEffect(rssiData, snrData) {
             modelProducer.runTransaction {
-                /* Use separate lineSeries calls to associate them with different vertical axes */
-                lineSeries {
-                    val rssiData = meshPackets.filter { (it.rx_rssi ?: 0) != 0 }
-                    series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 })
+                if (rssiData.isNotEmpty()) {
+                    /* Use separate lineSeries calls to associate them with different vertical axes */
+                    lineSeries { series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 }) }
                 }
-                lineSeries {
-                    val snrData = meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) }
-                    series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f })
+                if (snrData.isNotEmpty()) {
+                    lineSeries { series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f }) }
                 }
             }
         }
-
-        val rssiColor = SignalMetric.RSSI.color
-        val snrColor = SignalMetric.SNR.color
 
         val marker =
             ChartStyling.rememberMarker(
@@ -192,48 +192,70 @@ private fun SignalMetricsChart(
                 },
             )
 
-        GenericMetricChart(
-            modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
-            layers =
-            listOf(
+        val rssiLayer =
+            if (rssiData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
-                ),
+                )
+            } else {
+                null
+            }
+
+        val snrLayer =
+            if (snrData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
+                )
+            } else {
+                null
+            }
+
+        val layers = remember(rssiLayer, snrLayer) { listOfNotNull(rssiLayer, snrLayer) }
+
+        if (layers.isNotEmpty()) {
+            GenericMetricChart(
+                modelProducer = modelProducer,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                layers = layers,
+                startAxis =
+                if (rssiData.isNotEmpty()) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(color = rssiColor),
+                        valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                if (snrData.isNotEmpty()) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = snrColor),
+                        valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    label = ChartStyling.rememberAxisLabel(),
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                    labelRotationDegrees = 45f,
                 ),
-            ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = rssiColor),
-                valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = snrColor),
-                valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                labelRotationDegrees = 45f,
-            ),
-            marker = marker,
-            selectedX = selectedX,
-            onPointSelected = onPointSelected,
-            vicoScrollState = vicoScrollState,
-        )
+                marker = marker,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+                vicoScrollState = vicoScrollState,
+            )
+        }
 
         Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }

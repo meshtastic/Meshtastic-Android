@@ -25,7 +25,6 @@ import android.os.RemoteException
 import android.util.Base64
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -55,7 +54,6 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
@@ -77,6 +75,7 @@ import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
@@ -94,7 +93,7 @@ data class RadioConfigState(
     val metadata: DeviceMetadata? = null,
     val userConfig: User = User(),
     val channelList: List<ChannelSettings> = emptyList(),
-    val radioConfig: Config = Config(),
+    val radioConfig: LocalConfig = LocalConfig(),
     val moduleConfig: LocalModuleConfig = LocalModuleConfig(),
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
@@ -178,16 +177,26 @@ constructor(
 
         radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
+        radioConfigRepository.localConfigFlow
+            .onEach { lc -> if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(radioConfig = lc) } }
+            .launchIn(viewModelScope)
+
+        radioConfigRepository.moduleConfigFlow
+            .onEach { lmc ->
+                if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(moduleConfig = lmc) }
+            }
+            .launchIn(viewModelScope)
+
         serviceRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
 
-        combine(serviceRepository.connectionState, radioConfigState) { connState, configState ->
+        combine(serviceRepository.connectionState, radioConfigState) { connState, _ ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.Connected) }
         }
             .launchIn(viewModelScope)
 
         nodeRepository.myNodeInfo
             .onEach { ni ->
-                _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
+                _radioConfigState.update { it.copy(isLocal = (destNum == null) || (destNum == ni?.myNodeNum)) }
             }
             .launchIn(viewModelScope)
 
@@ -222,7 +231,7 @@ constructor(
     private fun request(destNum: Int, requestAction: suspend (IMeshService, Int, Int) -> Unit, errorMessage: String) =
         viewModelScope.launch {
             meshService?.let { service ->
-                val packetId = service.packetId
+                val packetId = service.getPacketId()
                 try {
                     requestAction(service, packetId, destNum)
                     requestIds.update { it.apply { add(packetId) } }
@@ -273,12 +282,6 @@ constructor(
             }
         }
         _radioConfigState.update { it.copy(channelList = new) }
-    }
-
-    private fun setChannels(channelUrl: String) = viewModelScope.launch {
-        val new = channelUrl.toUri().toChannelSet()
-        val old = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launch
-        updateChannels(new.settings, old.settings)
     }
 
     private fun setRemoteChannel(destNum: Int, channel: Channel) = request(
@@ -369,7 +372,11 @@ constructor(
     fun setRingtone(ringtone: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        meshService?.setRingtone(destNum, ringtone)
+        try {
+            meshService?.setRingtone(destNum, ringtone)
+        } catch (ex: RemoteException) {
+            Logger.e { "Set ringtone error: ${ex.message}" }
+        }
     }
 
     private fun getRingtone(destNum: Int) = request(
@@ -381,7 +388,11 @@ constructor(
     fun setCannedMessages(messages: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        meshService?.setCannedMessages(destNum, messages)
+        try {
+            meshService?.setCannedMessages(destNum, messages)
+        } catch (ex: RemoteException) {
+            Logger.e { "Set canned messages error: ${ex.message}" }
+        }
     }
 
     private fun getCannedMessages(destNum: Int) = request(
@@ -416,7 +427,7 @@ constructor(
                 // Clear the service's in-memory node cache first so screens refresh immediately.
                 val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
                 meshService?.let { service ->
-                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
+                    existingNodeNums.forEach { service.removeByNodenum(service.getPacketId(), it) }
                 }
                 nodeRepository.clearNodeDB()
             }
@@ -434,7 +445,7 @@ constructor(
                 // Clear the service's in-memory node cache as well so UI updates immediately.
                 val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
                 meshService?.let { service ->
-                    existingNodeNums.forEach { service.removeByNodenum(service.packetId, it) }
+                    existingNodeNums.forEach { service.removeByNodenum(service.getPacketId(), it) }
                 }
                 nodeRepository.clearNodeDB(preserveFavorites)
             }
@@ -451,7 +462,7 @@ constructor(
             AdminRoute.REBOOT.name -> requestReboot(destNum)
             AdminRoute.SHUTDOWN.name ->
                 with(radioConfigState.value) {
-                    if (metadata != null && metadata.canShutdown != true) {
+                    if (metadata?.canShutdown != true) {
                         sendError(Res.string.cant_shutdown)
                     } else {
                         requestShutdown(destNum)
@@ -511,8 +522,8 @@ constructor(
     private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: Config.SecurityConfig) =
         withContext(Dispatchers.IO) {
             try {
-                val publicKeyBytes = securityConfig.public_key?.toByteArray() ?: ByteArray(0)
-                val privateKeyBytes = securityConfig.private_key?.toByteArray() ?: ByteArray(0)
+                val publicKeyBytes = securityConfig.public_key.toByteArray()
+                val privateKeyBytes = securityConfig.private_key.toByteArray()
 
                 // Convert byte arrays to Base64 strings for human readability in JSON
                 val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
@@ -609,7 +620,7 @@ constructor(
 
             ConfigRoute.CHANNELS -> {
                 getChannel(destNum, 0)
-                getConfig(destNum, ConfigRoute.LORA.type)
+                getConfig(destNum, AdminMessage.ConfigType.LORA_CONFIG.value)
                 // channel editor is synchronous, so we don't use requestIds as total
                 setResponseStateTotal(maxChannels + 1)
             }
@@ -746,7 +757,7 @@ constructor(
                             state.copy(
                                 channelList =
                                 state.channelList.toMutableList().apply {
-                                    val index = response.index ?: 0
+                                    val index = response.index
                                     val settings = response.settings ?: ChannelSettings()
                                     // Make sure list is large enough
                                     while (size <= index) add(ChannelSettings())
@@ -755,14 +766,14 @@ constructor(
                             )
                         }
                         incrementCompleted()
-                        val index = response.index ?: 0
+                        val index = response.index
                         if (index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {
                             // Not done yet, request next channel
                             getChannel(destNum, index + 1)
                         }
                     } else {
                         // Received last channel, update total and start channel editor
-                        setResponseStateTotal((response.index ?: 0) + 1)
+                        setResponseStateTotal(response.index + 1)
                     }
                 }
 
@@ -773,7 +784,21 @@ constructor(
 
                 parsed.get_config_response != null -> {
                     val response = parsed.get_config_response!!
-                    _radioConfigState.update { it.copy(radioConfig = response) }
+                    _radioConfigState.update { state ->
+                        state.copy(
+                            radioConfig =
+                            state.radioConfig.copy(
+                                device = response.device ?: state.radioConfig.device,
+                                position = response.position ?: state.radioConfig.position,
+                                power = response.power ?: state.radioConfig.power,
+                                network = response.network ?: state.radioConfig.network,
+                                display = response.display ?: state.radioConfig.display,
+                                lora = response.lora ?: state.radioConfig.lora,
+                                bluetooth = response.bluetooth ?: state.radioConfig.bluetooth,
+                                security = response.security ?: state.radioConfig.security,
+                            ),
+                        )
+                    }
                     incrementCompleted()
                 }
 
@@ -818,7 +843,7 @@ constructor(
 
                 parsed.get_device_connection_status_response != null -> {
                     _radioConfigState.update {
-                        it.copy(deviceConnectionStatus = parsed.get_device_connection_status_response)
+                        it.copy(deviceConnectionStatus = parsed.get_device_connection_status_response!!)
                     }
                     incrementCompleted()
                 }

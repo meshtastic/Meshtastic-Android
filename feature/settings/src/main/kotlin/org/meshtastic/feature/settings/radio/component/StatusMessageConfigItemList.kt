@@ -18,8 +18,14 @@ package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,6 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.clear
 import org.meshtastic.core.strings.node_status_summary
 import org.meshtastic.core.strings.status_message
 import org.meshtastic.core.strings.status_message_config
@@ -37,10 +44,24 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
+
+    // Use the config value if present, otherwise fall back to the node's current status message from telemetry
     val statusMessageConfig =
-        state.moduleConfig.statusmessage ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
+        remember(state.moduleConfig.statusmessage, destNode?.nodeStatus) {
+            val config = state.moduleConfig.statusmessage ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
+            val currentStatus = destNode?.nodeStatus ?: ""
+            if (config.node_status.isBlank() && currentStatus.isNotBlank()) {
+                config.copy(node_status = currentStatus)
+            } else {
+                config
+            }
+        }
+
     val formState = rememberConfigState(initialValue = statusMessageConfig)
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(statusMessageConfig) { formState.value = statusMessageConfig }
 
     RadioConfigScreenList(
         title = stringResource(Res.string.status_message),
@@ -58,7 +79,7 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
             TitledCard(title = stringResource(Res.string.status_message_config)) {
                 EditTextPreference(
                     title = stringResource(Res.string.node_status_summary),
-                    value = formState.value.node_status ?: "",
+                    value = formState.value.node_status,
                     maxSize = 80, // status_message max_size:80
                     enabled = state.connected,
                     isError = false,
@@ -66,6 +87,16 @@ fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(),
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(node_status = it) },
+                    trailingIcon = {
+                        if (formState.value.node_status.isNotEmpty()) {
+                            IconButton(onClick = { formState.value = formState.value.copy(node_status = "") }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = stringResource(Res.string.clear),
+                                )
+                            }
+                        }
+                    },
                 )
             }
         }

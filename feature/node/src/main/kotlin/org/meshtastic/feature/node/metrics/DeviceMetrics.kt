@@ -226,7 +226,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
@@ -258,59 +258,82 @@ private fun DeviceMetricsChart(
                 },
             )
 
-        LaunchedEffect(telemetries) {
+        val batteryData = remember(telemetries) { telemetries.filter { it.device_metrics?.battery_level != null } }
+        val chUtilData = remember(telemetries) { telemetries.filter { it.device_metrics?.channel_utilization != null } }
+        val airUtilData = remember(telemetries) { telemetries.filter { it.device_metrics?.air_util_tx != null } }
+        val voltageData = remember(telemetries) { telemetries.filter { it.device_metrics?.voltage != null } }
+
+        val batteryStyle =
+            if (batteryData.isNotEmpty()) {
+                ChartStyling.createBoldLine(batteryColor, ChartStyling.MEDIUM_POINT_SIZE_DP)
+            } else {
+                null
+            }
+        val chUtilStyle =
+            if (chUtilData.isNotEmpty()) {
+                ChartStyling.createPointOnlyLine(chUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+            } else {
+                null
+            }
+        val airUtilStyle =
+            if (airUtilData.isNotEmpty()) {
+                ChartStyling.createPointOnlyLine(airUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+            } else {
+                null
+            }
+
+        val leftLayerSeriesStyles =
+            remember(batteryStyle, chUtilStyle, airUtilStyle) { listOfNotNull(batteryStyle, chUtilStyle, airUtilStyle) }
+
+        LaunchedEffect(batteryData, chUtilData, airUtilData, voltageData, leftLayerSeriesStyles) {
             modelProducer.runTransaction {
                 /* Series for Left Axis (0-100%) */
-                lineSeries {
-                    series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { it.device_metrics?.battery_level ?: 0 },
-                    )
-                    val chUtilData = telemetries.filter { it.device_metrics?.channel_utilization != null }
-                    series(
-                        x = chUtilData.map { it.time ?: 0 },
-                        y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
-                    )
-                    val airUtilData = telemetries.filter { it.device_metrics?.air_util_tx != null }
-                    series(
-                        x = airUtilData.map { it.time ?: 0 },
-                        y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
-                    )
+                if (leftLayerSeriesStyles.isNotEmpty()) {
+                    lineSeries {
+                        if (batteryData.isNotEmpty()) {
+                            series(
+                                x = batteryData.map { it.time ?: 0 },
+                                y = batteryData.map { (it.device_metrics?.battery_level ?: 0).toFloat() },
+                            )
+                        }
+                        if (chUtilData.isNotEmpty()) {
+                            series(
+                                x = chUtilData.map { it.time ?: 0 },
+                                y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
+                            )
+                        }
+                        if (airUtilData.isNotEmpty()) {
+                            series(
+                                x = airUtilData.map { it.time ?: 0 },
+                                y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
+                            )
+                        }
+                    }
                 }
                 /* Series for Right Axis (Voltage) */
-                lineSeries {
-                    val voltageData = telemetries.filter { it.device_metrics?.voltage != null }
-                    series(
-                        x = voltageData.map { it.time ?: 0 },
-                        y = voltageData.map { it.device_metrics?.voltage ?: 0f },
-                    )
+                if (voltageData.isNotEmpty()) {
+                    lineSeries {
+                        series(
+                            x = voltageData.map { it.time ?: 0 },
+                            y = voltageData.map { it.device_metrics?.voltage ?: 0f },
+                        )
+                    }
                 }
             }
         }
 
-        GenericMetricChart(
-            modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
-            layers =
-            listOf(
+        val leftLayer =
+            if (leftLayerSeriesStyles.isNotEmpty()) {
                 rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createBoldLine(
-                            lineColor = batteryColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                        ),
-                        ChartStyling.createPointOnlyLine(
-                            pointColor = chUtilColor,
-                            pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
-                        ),
-                        ChartStyling.createPointOnlyLine(
-                            pointColor = airUtilColor,
-                            pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
-                        ),
-                    ),
+                    lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
-                ),
+                )
+            } else {
+                null
+            }
+
+        val rightLayer =
+            if (voltageData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
@@ -320,30 +343,49 @@ private fun DeviceMetricsChart(
                         ),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
+                )
+            } else {
+                null
+            }
+
+        val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
+
+        if (layers.isNotEmpty()) {
+            GenericMetricChart(
+                modelProducer = modelProducer,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                layers = layers,
+                startAxis =
+                if (leftLayer != null) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(color = batteryColor),
+                        valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                if (rightLayer != null) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = voltageColor),
+                        valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    label = ChartStyling.rememberAxisLabel(),
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+                    labelRotationDegrees = 45f,
                 ),
-            ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = batteryColor),
-                valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-                labelRotationDegrees = 45f,
-            ),
-            marker = marker,
-            selectedX = selectedX,
-            onPointSelected = onPointSelected,
-            vicoScrollState = vicoScrollState,
-        )
+                marker = marker,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+                vicoScrollState = vicoScrollState,
+            )
+        }
 
         Legend(legendData = legendData, modifier = Modifier.padding(top = 0.dp))
     }

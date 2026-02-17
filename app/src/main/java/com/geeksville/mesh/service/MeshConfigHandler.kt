@@ -66,8 +66,8 @@ constructor(
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
         serviceRepository.setConnectionProgress("Module config received")
 
-        config.statusmessage?.node_status?.let { status ->
-            nodeManager.myNodeNum?.let { num -> nodeManager.updateNodeStatus(num, status) }
+        config.statusmessage?.let { sm ->
+            nodeManager.myNodeNum?.let { num -> nodeManager.updateNodeStatus(num, sm.node_status) }
         }
     }
 
