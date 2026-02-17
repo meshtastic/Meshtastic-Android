@@ -55,11 +55,13 @@
     <string name="routing_error_admin_public_key_unauthorized">Несанкціонований відкритий ключ</string>
     <string name="routing_error_pki_send_fail_public_key">Помилка надсилання PKI, відсутній публічний ключ</string>
     <string name="role_client">Клієнт</string>
+    <string name="role_client_desc">Застосунок з'єднано або автономний режим обміну повідомленнями.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Пристрій, який не пересилає пакети з інших пристроїв.</string>
     <string name="role_client_base">Client Base</string>
     <string name="role_client_base_desc">Розглядає пакети від або до улюблених вузлів так само як ROUTER_LATE, а всі інші пакети як CLIENT.</string>
     <string name="role_router">Router</string>
+    <string name="role_router_desc">Вузол інфраструктури для розширення покриття мережею повторними повідомленнями. Видимий у списку вузлів.</string>
     <string name="role_router_client">Router Client</string>
     <string name="role_router_client_desc">Комбінація ROUTER і CLIENT. Не для мобільних пристроїв.</string>
     <string name="role_repeater">Repeater</string>
@@ -102,6 +104,7 @@
     <string name="config_network_udp_enabled_summary">Увімкнути трансляцію пакетів через UDP через локальну мережу.</string>
     <string name="config_position_gps_update_interval_summary">Як часто слід намагатися отримати позицію GPS (&lt;10 сек тримає GPS постійно увімкненим).</string>
     <string name="config_security_private_key">Використовується для створення спільного ключа з віддаленим пристроєм.</string>
+    <string name="config_security_admin_key">Публічний ключ уповноважений надсилати повідомлення адміністратора на цей вузол.</string>
     <!-- Position Config -->
     <string name="device_gps">GPS пристрій</string>
     <string name="altitude">Висота</string>
