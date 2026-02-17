@@ -117,6 +117,8 @@ import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.icon.role
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
@@ -195,6 +197,8 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
                     selectedItem = currentRole,
                     onItemSelected = { selectedRole = it },
                     summary = stringResource(currentRole.description),
+                    itemIcon = { MeshtasticIcons.role(it) },
+                    itemLabel = { it.name },
                 )
 
                 HorizontalDivider()

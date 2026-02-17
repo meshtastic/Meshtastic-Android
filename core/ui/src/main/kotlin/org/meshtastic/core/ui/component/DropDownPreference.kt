@@ -17,13 +17,18 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +36,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -43,13 +50,26 @@ fun <T : Enum<T>> DropDownPreference(
     onItemSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
     summary: String? = null,
+    itemIcon: @Composable ((T) -> ImageVector)? = null,
+    itemLabel: @Composable ((T) -> String)? = null,
 ) {
+    val enumConstants =
+        remember(selectedItem) {
+            selectedItem.declaringJavaClass.enumConstants?.filter { it.name != "UNRECOGNIZED" && !it.isDeprecated() }
+                ?: emptyList()
+        }
+
+    val items =
+        enumConstants.map {
+            val label = itemLabel?.invoke(it) ?: it.name
+            val icon = itemIcon?.invoke(it)
+            DropDownItem(it, label, icon)
+        }
+
     DropDownPreference(
         title = title,
         enabled = enabled,
-        items =
-        selectedItem.declaringJavaClass.enumConstants?.filter { it.name != "UNRECOGNIZED" }?.map { it to it.name }
-            ?: emptyList(),
+        items = items,
         selectedItem = selectedItem,
         onItemSelected = onItemSelected,
         modifier = modifier,
@@ -57,7 +77,9 @@ fun <T : Enum<T>> DropDownPreference(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+data class DropDownItem<T>(val value: T, val label: String, val icon: ImageVector? = null)
+
+@JvmName("DropDownPreferencePairs")
 @Composable
 fun <T> DropDownPreference(
     title: String,
@@ -68,9 +90,31 @@ fun <T> DropDownPreference(
     modifier: Modifier = Modifier,
     summary: String? = null,
 ) {
+    DropDownPreference(
+        title = title,
+        enabled = enabled,
+        items = items.map { DropDownItem(it.first, it.second) },
+        selectedItem = selectedItem,
+        onItemSelected = onItemSelected,
+        modifier = modifier,
+        summary = summary,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+@Suppress("LongMethod")
+fun <T> DropDownPreference(
+    title: String,
+    enabled: Boolean,
+    items: List<DropDownItem<T>>,
+    selectedItem: T,
+    onItemSelected: (T) -> Unit,
+    modifier: Modifier = Modifier,
+    summary: String? = null,
+) {
     var expanded by remember { mutableStateOf(false) }
 
-    val deprecatedItems: List<T> = emptyList() // Protobuf-Java specific deprecation check removed
     Column(modifier = modifier.fillMaxWidth().padding(8.dp)) {
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -80,13 +124,24 @@ fun <T> DropDownPreference(
                 }
             },
         ) {
+            val currentItem = items.firstOrNull { it.value == selectedItem }
             OutlinedTextField(
                 label = { Text(text = title) },
                 modifier =
                 Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled),
                 readOnly = true,
-                value = items.firstOrNull { it.first == selectedItem }?.second ?: "",
+                value = currentItem?.label ?: "",
                 onValueChange = {},
+                leadingIcon =
+                currentItem?.icon?.let {
+                    {
+                        Icon(
+                            imageVector = it,
+                            contentDescription = currentItem.label,
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 enabled = enabled,
@@ -98,20 +153,33 @@ fun <T> DropDownPreference(
                 },
             )
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                items
-                    .filterNot { it.first in deprecatedItems }
-                    .forEach { selectionOption ->
-                        DropdownMenuItem(
-                            text = { Text(selectionOption.second) },
-                            onClick = {
-                                onItemSelected(selectionOption.first)
-                                expanded = false
-                            },
-                        )
-                    }
+                items.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                selectionOption.icon?.let {
+                                    Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp))
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                }
+                                Text(selectionOption.label)
+                            }
+                        },
+                        onClick = {
+                            onItemSelected(selectionOption.value)
+                            expanded = false
+                        },
+                    )
+                }
             }
         }
     }
+}
+
+private fun Enum<*>.isDeprecated(): Boolean = try {
+    val field = this::class.java.getField(this.name)
+    field.isAnnotationPresent(Deprecated::class.java) || field.isAnnotationPresent(java.lang.Deprecated::class.java)
+} catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
+    false
 }
 
 @Preview(showBackground = true)
@@ -121,7 +189,7 @@ private fun DropDownPreferencePreview() {
         title = "Settings",
         summary = "Lorem ipsum dolor sit amet",
         enabled = true,
-        items = listOf("TEST1" to "text1", "TEST2" to "text2"),
+        items = listOf(DropDownItem("TEST1", "text1"), DropDownItem("TEST2", "text2")),
         selectedItem = "TEST2",
         onItemSelected = {},
     )
