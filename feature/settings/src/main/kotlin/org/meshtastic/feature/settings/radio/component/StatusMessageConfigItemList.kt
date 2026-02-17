@@ -23,7 +23,9 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,10 +44,24 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 @Composable
 fun StatusMessageConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
+
+    // Use the config value if present, otherwise fall back to the node's current status message from telemetry
     val statusMessageConfig =
-        state.moduleConfig.statusmessage ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
+        remember(state.moduleConfig.statusmessage, destNode?.nodeStatus) {
+            val config = state.moduleConfig.statusmessage ?: org.meshtastic.proto.ModuleConfig.StatusMessageConfig()
+            val currentStatus = destNode?.nodeStatus ?: ""
+            if (config.node_status.isBlank() && currentStatus.isNotBlank()) {
+                config.copy(node_status = currentStatus)
+            } else {
+                config
+            }
+        }
+
     val formState = rememberConfigState(initialValue = statusMessageConfig)
     val focusManager = LocalFocusManager.current
+
+    LaunchedEffect(statusMessageConfig) { formState.value = statusMessageConfig }
 
     RadioConfigScreenList(
         title = stringResource(Res.string.status_message),
