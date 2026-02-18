@@ -196,6 +196,10 @@ constructor(
                 throw RadioNotConnectedException()
             }
             sendToRadio(ToRadio(packet = packet))
+        } catch (ex: RadioNotConnectedException) {
+            // Expected when radio is not connected, log as warning to avoid Crashlytics noise
+            Logger.w(ex) { "sendToRadio skipped: Not connected to radio" }
+            deferred.complete(false)
         } catch (ex: Exception) {
             Logger.e(ex) { "sendToRadio error: ${ex.message}" }
             deferred.complete(false)

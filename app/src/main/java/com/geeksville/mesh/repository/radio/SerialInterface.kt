@@ -96,7 +96,8 @@ constructor(
                                     0
                                 }
                             thrown?.let { e ->
-                                Logger.e(e) { "[$address] Serial error after ${uptime}ms: ${e.message}" }
+                                // USB errors are common when unplugging; log as warning to avoid Crashlytics noise
+                                Logger.w(e) { "[$address] Serial error after ${uptime}ms: ${e.message}" }
                             }
                             Logger.w {
                                 "[$address] Serial device disconnected - " +

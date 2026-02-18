@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.common)
+    implementation(libs.androidx.savedstate.compose)
     implementation(libs.androidx.savedstate.ktx)
     implementation(libs.material)
     implementation(libs.kermit)

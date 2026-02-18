@@ -84,7 +84,8 @@ constructor(
         try {
             stream.write(p)
         } catch (ex: IOException) {
-            Logger.e(ex) { "[$address] TCP write error: ${ex.message}" }
+            // TCP write errors are common when the connection is lost; log as warning to avoid Crashlytics noise
+            Logger.w(ex) { "[$address] TCP write error: ${ex.message}" }
             onDeviceDisconnect(false)
         }
     }
@@ -95,7 +96,8 @@ constructor(
         try {
             stream.flush()
         } catch (ex: IOException) {
-            Logger.e(ex) { "[$address] TCP flush error: ${ex.message}" }
+            // TCP flush errors are common when the connection is lost; log as warning to avoid Crashlytics noise
+            Logger.w(ex) { "[$address] TCP flush error: ${ex.message}" }
             onDeviceDisconnect(false)
         }
     }

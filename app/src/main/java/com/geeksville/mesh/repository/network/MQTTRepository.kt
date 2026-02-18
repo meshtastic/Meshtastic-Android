@@ -70,10 +70,12 @@ constructor(
     fun disconnect() {
         Logger.i { "MQTT Disconnected" }
         mqttClient?.apply {
-            ignoreException { disconnect() }
-            close(true)
-            mqttClient = null
+            if (isConnected) {
+                ignoreException { disconnect() }
+            }
+            ignoreException { close(true) }
         }
+        mqttClient = null
     }
 
     val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
@@ -166,7 +168,11 @@ constructor(
             val token = mqttClient?.publish(topic, data, DEFAULT_QOS, retained)
             Logger.i { "MQTT Publish messageId: ${token?.messageId}" }
         } catch (ex: Exception) {
-            Logger.e { "MQTT Publish error: ${ex.message}" }
+            if (ex.message?.contains("Client is disconnected") == true) {
+                Logger.w { "MQTT Publish skipped: Client is disconnected" }
+            } else {
+                Logger.e(ex) { "MQTT Publish error: ${ex.message}" }
+            }
         }
     }
 }
