@@ -18,6 +18,7 @@ package com.geeksville.mesh.service
 
 import android.util.Log
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.InterfaceId
@@ -459,7 +460,7 @@ constructor(
         val payload = packet.decoded?.payload ?: return
         val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
-            serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle))
+            serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle), Severity.Warn)
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,

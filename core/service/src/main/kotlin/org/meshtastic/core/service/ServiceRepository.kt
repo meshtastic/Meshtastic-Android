@@ -17,6 +17,7 @@
 package org.meshtastic.core.service
 
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +66,7 @@ class ServiceRepository @Inject constructor() {
         get() = _clientNotification
 
     fun setClientNotification(notification: ClientNotification?) {
-        Logger.e { notification?.message.orEmpty() }
+        notification?.message?.let { Logger.w { it } }
 
         _clientNotification.value = notification
     }
@@ -78,8 +79,8 @@ class ServiceRepository @Inject constructor() {
     val errorMessage: StateFlow<String?>
         get() = _errorMessage
 
-    fun setErrorMessage(text: String) {
-        Logger.e { text }
+    fun setErrorMessage(text: String, severity: Severity = Severity.Error) {
+        Logger.log(severity, "ServiceRepository", null, text)
         _errorMessage.value = text
     }
 
