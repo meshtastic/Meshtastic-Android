@@ -24,6 +24,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -207,11 +209,20 @@ constructor(
                 changeDeviceAddress(entry.fullAddress)
             } catch (ex: SecurityException) {
                 Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
-                serviceRepository.setErrorMessage("Bonding failed: ${ex.message} Permissions not granted")
+                serviceRepository.setErrorMessage(
+                    text = "Bonding failed: ${ex.message} Permissions not granted",
+                    severity = Severity.Warn,
+                )
             } catch (ex: Exception) {
                 // Bonding is often flaky and can fail for many reasons (timeout, user cancel, etc)
-                Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
-                serviceRepository.setErrorMessage("Bonding failed: ${ex.message}")
+                val message = ex.message ?: ""
+                if (message.contains("Received bond state changed 11")) {
+                    // This is a known issue where bonding is still in progress, ignore as error
+                    Logger.d { "Bonding still in progress for ${entry.peripheral.address.anonymize}" }
+                } else {
+                    Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
+                    serviceRepository.setErrorMessage(text = "Bonding failed: ${ex.message}", severity = Severity.Warn)
+                }
             }
         }
     }

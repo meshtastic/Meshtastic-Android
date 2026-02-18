@@ -63,7 +63,7 @@ import kotlin.time.Duration.Companion.seconds
 private const val RSSI_DELAY = 10
 private const val RSSI_TIMEOUT = 5
 
-@Suppress("LongMethod", "LoopWithTooManyJumpStatements")
+@Suppress("LongMethod", "LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable
 fun CurrentlyConnectedInfo(
     node: Node,
@@ -80,13 +80,17 @@ fun CurrentlyConnectedInfo(
                     rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.peripheral.readRssi() }
                     delay(RSSI_DELAY.seconds)
                 } catch (e: PeripheralNotConnectedException) {
-                    Logger.e(e) { "Failed to read RSSI ${e.message}" }
+                    Logger.w(e) { "Failed to read RSSI ${e.message}" }
                     break
                 } catch (e: OperationFailedException) {
-                    Logger.e(e) { "Failed to read RSSI ${e.message}" }
+                    // RSSI reading failures are common when disconnecting; log as warning to avoid Crashlytics noise
+                    Logger.w(e) { "Failed to read RSSI ${e.message}" }
                     break
                 } catch (e: SecurityException) {
-                    Logger.e(e) { "Failed to read RSSI ${e.message}" }
+                    Logger.w(e) { "Failed to read RSSI ${e.message}" }
+                    break
+                } catch (e: Exception) {
+                    Logger.w(e) { "Unexpected error reading RSSI: ${e.message}" }
                     break
                 }
             }

@@ -48,7 +48,7 @@ coil = "3.3.0"
 dd-sdk-android = "3.6.0"
 detekt = "1.23.8"
 dokka = "2.2.0-Beta"
-devtools-ksp = "2.3.5"
+devtools-ksp = "2.3.6"
 markdownRenderer = "0.39.2"
 osmdroid-android = "6.1.20"
 spotless = "8.2.1"
@@ -100,6 +100,7 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+androidx-savedstate-compose = { module = "androidx.savedstate:savedstate-compose", version.ref = "savedstate" }
 androidx-savedstate-ktx = { module = "androidx.savedstate:savedstate-ktx", version.ref = "savedstate" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.1" }
 

@@ -17,6 +17,7 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import com.geeksville.mesh.repository.network.MQTTRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +50,12 @@ constructor(
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
                     .onEach { message -> packetHandler.sendToRadio(ToRadio(mqttClientProxyMessage = message)) }
-                    .catch { throwable -> serviceRepository.setErrorMessage("MqttClientProxy failed: $throwable") }
+                    .catch { throwable ->
+                        serviceRepository.setErrorMessage(
+                            text = "MqttClientProxy failed: $throwable",
+                            severity = Severity.Warn,
+                        )
+                    }
                     .launchIn(scope)
         }
     }
