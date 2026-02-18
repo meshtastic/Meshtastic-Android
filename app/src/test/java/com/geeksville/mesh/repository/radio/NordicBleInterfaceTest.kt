@@ -37,6 +37,7 @@ import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
+import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.ble.BleError
@@ -67,7 +68,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `full connection and notification flow`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
         val service = mockk<RadioInterfaceService>(relaxed = true)
 
         var fromNumHandle: Int = -1
@@ -190,7 +192,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `handleSendToRadio writes to toRadioCharacteristic`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
         val service = mockk<RadioInterfaceService>(relaxed = true)
 
         var toRadioHandle: Int = -1
@@ -309,7 +312,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `disconnection triggers onDisconnect`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Mock service
         val service = mockk<RadioInterfaceService>(relaxed = true)
@@ -402,7 +406,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `discovery fails if required characteristic missing`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Mock service
         val service = mockk<RadioInterfaceService>(relaxed = true)
@@ -482,7 +487,8 @@ class NordicBleInterfaceTest {
     @Test
     fun `write exception triggers disconnect`() = runTest(testDispatcher) {
         val uniqueAddress = "11:22:33:44:55:66"
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Mock service
         val service = mockk<RadioInterfaceService>(relaxed = true)

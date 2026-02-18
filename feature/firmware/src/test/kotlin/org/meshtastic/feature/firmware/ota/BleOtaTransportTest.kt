@@ -16,22 +16,26 @@
  */
 package org.meshtastic.feature.firmware.ota
 
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
-import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
-import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.client.android.ScanResult
-import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.client.android.mock.mock
+import no.nordicsemi.kotlin.ble.client.mock.ConnectionResult
+import no.nordicsemi.kotlin.ble.client.mock.PeripheralSpec
+import no.nordicsemi.kotlin.ble.client.mock.PeripheralSpecEventHandler
+import no.nordicsemi.kotlin.ble.client.mock.Proximity
+import no.nordicsemi.kotlin.ble.client.mock.WriteResponse
+import no.nordicsemi.kotlin.ble.client.mock.internal.MockRemoteCharacteristic
+import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
+import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
+import no.nordicsemi.kotlin.ble.core.Permission
+import no.nordicsemi.kotlin.ble.core.and
+import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Test
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
@@ -41,58 +45,73 @@ private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac1
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportTest {
 
-    private val centralManager: CentralManager = mockk()
     private val address = "00:11:22:33:44:55"
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val transport = BleOtaTransport(centralManager, address, testDispatcher)
+    private val testDispatcher = StandardTestDispatcher()
 
     @Test
     fun `race condition check - response before waitForResponse`() = runTest(testDispatcher) {
-        val peripheral: Peripheral = mockk(relaxed = true)
-        val otaChar: RemoteCharacteristic = mockk(relaxed = true)
-        val txChar: RemoteCharacteristic = mockk(relaxed = true)
-        val service: RemoteService = mockk(relaxed = true)
-        val scanResult: ScanResult = mockk()
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
-        every { scanResult.peripheral } returns peripheral
+        var txCharHandle: Int = -1
+        lateinit var otaPeripheral: PeripheralSpec<String>
 
-        // Mock the scan call. It takes a Duration and a lambda.
-        every { centralManager.scan(any(), any()) } returns flowOf(scanResult)
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(
+                    preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>,
+                ): ConnectionResult = ConnectionResult.Accept
 
-        every { peripheral.address } returns address
-        every { peripheral.state } returns MutableStateFlow(ConnectionState.Connected)
+                override fun onWriteRequest(
+                    characteristic: MockRemoteCharacteristic,
+                    value: ByteArray,
+                ): WriteResponse {
+                    // When receiving an OTA command, immediately simulate a response
+                    backgroundScope.launch(testDispatcher) {
+                        // Use a very small delay to simulate high speed
+                        delay(1.milliseconds)
+                        otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                    }
+                    return WriteResponse.Success
+                }
+            }
 
-        coEvery { peripheral.services(any()) } returns MutableStateFlow(listOf(service))
-        every { service.uuid } returns SERVICE_UUID
-        every { service.characteristics } returns listOf(otaChar, txChar)
-        every { otaChar.uuid } returns OTA_CHARACTERISTIC_UUID
-        every { txChar.uuid } returns TX_CHARACTERISTIC_UUID
+        otaPeripheral =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("ESP32-OTA")
+                }
+                connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
+                    Service(uuid = SERVICE_UUID) {
+                        Characteristic(
+                            uuid = OTA_CHARACTERISTIC_UUID,
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
+                        txCharHandle =
+                            Characteristic(
+                                uuid = TX_CHARACTERISTIC_UUID,
+                                property = CharacteristicProperty.NOTIFY,
+                                permission = Permission.READ,
+                            )
+                    }
+                }
+            }
 
-        coEvery { centralManager.connect(any(), any()) } returns Unit
+        centralManager.simulatePeripherals(listOf(otaPeripheral))
 
-        val notificationFlow = MutableSharedFlow<ByteArray>(extraBufferCapacity = 1)
-        every { txChar.subscribe() } returns notificationFlow
+        val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        // Connect
+        // 1. Connect
         transport.connect().getOrThrow()
 
-        // Simulate sending a command and getting a response BEFORE calling startOta
-        // This is tricky to simulate exactly as in the real race, but we can verify
-        // if responseFlow is indeed dropping messages.
-
-        // In startOta:
-        // 1. sendCommand(command)
-        // 2. waitForResponse() -> responseFlow.first()
-
-        // If the device is super fast, the notification arrives between 1 and 2.
-
-        val size = 100L
-        val hash = "hash"
-
-        // We mock write to immediately emit to notificationFlow
-        coEvery { otaChar.write(any(), any()) } coAnswers { notificationFlow.emit("OK\n".toByteArray()) }
-
-        val result = transport.startOta(size, hash) {}
+        // 2. Start OTA - should succeed even if response is very fast
+        val result = transport.startOta(100L, "hash") {}
         assert(result.isSuccess)
+
+        transport.close()
     }
 }

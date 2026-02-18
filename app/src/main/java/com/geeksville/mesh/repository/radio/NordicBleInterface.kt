@@ -21,6 +21,7 @@ import co.touchlab.kermit.Logger
 import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -38,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -45,7 +47,6 @@ import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BleScanner
@@ -55,6 +56,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.retryBleOperation
+import org.meshtastic.core.model.util.nowMillis
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
@@ -286,30 +288,52 @@ constructor(
 
     // --- Notification Setup ---
 
-    private fun setupNotifications() {
+    private suspend fun setupNotifications() {
+        val fromNumReady = CompletableDeferred<Unit>()
+        val logRadioReady = CompletableDeferred<Unit>()
+
         fromNumCharacteristic
-            ?.subscribe()
+            ?.subscribe {
+                Logger.d { "[$address] FromNum subscription active" }
+                fromNumReady.complete(Unit)
+            }
             ?.onEach { notifyBytes ->
                 Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
                 connectionScope.launch { drainPacketQueueAndDispatch() }
             }
             ?.catch { e ->
+                if (!fromNumReady.isCompleted) fromNumReady.completeExceptionally(e)
                 Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
                 service.onDisconnect(BleError.from(e))
             }
-            ?.launchIn(scope = connectionScope)
+            ?.launchIn(connectionScope) ?: fromNumReady.complete(Unit)
 
         logRadioCharacteristic
-            ?.subscribe()
+            ?.subscribe {
+                Logger.d { "[$address] LogRadio subscription active" }
+                logRadioReady.complete(Unit)
+            }
             ?.onEach { notifyBytes ->
                 Logger.d { "[$address] LogRadio Notification (${notifyBytes.size} bytes), dispatching packet" }
                 dispatchPacket(notifyBytes)
             }
             ?.catch { e ->
+                if (!logRadioReady.isCompleted) logRadioReady.completeExceptionally(e)
                 Logger.w(e) { "[$address] Error in logRadioCharacteristic subscription" }
                 service.onDisconnect(BleError.from(e))
             }
-            ?.launchIn(scope = connectionScope)
+            ?.launchIn(connectionScope) ?: logRadioReady.complete(Unit)
+
+        try {
+            withTimeout(CONNECTION_TIMEOUT_MS) {
+                fromNumReady.await()
+                logRadioReady.await()
+            }
+            Logger.d { "[$address] All notifications successfully subscribed" }
+        } catch (e: Exception) {
+            Logger.e(e) { "[$address] Timeout or error waiting for characteristic subscriptions" }
+            throw e
+        }
     }
 
     // --- IRadioInterface Implementation ---

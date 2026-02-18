@@ -35,6 +35,7 @@ import no.nordicsemi.kotlin.ble.client.mock.internal.MockRemoteCharacteristic
 import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
+import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Test
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
@@ -51,7 +52,8 @@ class NordicBleInterfaceDrainTest {
 
     @Test
     fun `drainPacketQueueAndDispatch reads multiple packets until empty`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
         val service = mockk<RadioInterfaceService>(relaxed = true)
 
         var fromRadioHandle: Int = -1

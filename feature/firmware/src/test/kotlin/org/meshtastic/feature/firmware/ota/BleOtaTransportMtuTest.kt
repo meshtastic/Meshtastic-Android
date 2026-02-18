@@ -16,23 +16,23 @@
  */
 package org.meshtastic.feature.firmware.ota
 
-import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.mockk
+import io.mockk.spyk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
-import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.client.android.ScanResult
-import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.client.android.mock.mock
+import no.nordicsemi.kotlin.ble.client.mock.PeripheralSpec
+import no.nordicsemi.kotlin.ble.client.mock.PeripheralSpecEventHandler
+import no.nordicsemi.kotlin.ble.client.mock.Proximity
+import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
+import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
+import no.nordicsemi.kotlin.ble.core.Permission
+import no.nordicsemi.kotlin.ble.core.and
+import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Test
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
 
 private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
@@ -42,37 +42,52 @@ private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac1
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportMtuTest {
 
-    private val centralManager: CentralManager = mockk(relaxed = true)
     private val address = "00:11:22:33:44:55"
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
     @Test
     fun `connect requests MTU`() = runTest(testDispatcher) {
-        val peripheral: Peripheral = mockk(relaxed = true)
-        val otaChar: RemoteCharacteristic = mockk(relaxed = true)
-        val txChar: RemoteCharacteristic = mockk(relaxed = true)
-        val service: RemoteService = mockk(relaxed = true)
-        val scanResult: ScanResult = mockk(relaxed = true)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = spyk(CentralManager.mock(mockEnvironment, backgroundScope))
 
-        every { scanResult.peripheral } returns peripheral
-        every { centralManager.scan(any(), any()) } returns flowOf(scanResult)
-        every { peripheral.address } returns address
-        every { peripheral.state } returns MutableStateFlow(ConnectionState.Connected)
-        coEvery { peripheral.services(any()) } returns MutableStateFlow(listOf(service))
-        every { service.uuid } returns SERVICE_UUID
-        every { service.characteristics } returns listOf(otaChar, txChar)
-        every { otaChar.uuid } returns OTA_CHARACTERISTIC_UUID
-        every { txChar.uuid } returns TX_CHARACTERISTIC_UUID
-        coEvery { centralManager.connect(any(), any()) } returns Unit
-        every { txChar.subscribe() } returns MutableSharedFlow()
+        val otaPeripheral =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("ESP32-OTA")
+                }
+                connectable(
+                    name = "ESP32-OTA",
+                    eventHandler = object : PeripheralSpecEventHandler {},
+                    isBonded = true,
+                ) {
+                    Service(uuid = SERVICE_UUID) {
+                        Characteristic(
+                            uuid = OTA_CHARACTERISTIC_UUID,
+                            properties =
+                            CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
+                            permission = Permission.WRITE,
+                        )
+                        Characteristic(
+                            uuid = TX_CHARACTERISTIC_UUID,
+                            property = CharacteristicProperty.NOTIFY,
+                            permission = Permission.READ,
+                        )
+                    }
+                }
+            }
+
+        centralManager.simulatePeripherals(listOf(otaPeripheral))
+
+        val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
         transport.connect().getOrThrow()
 
         // Verify connect was called with automaticallyRequestHighestValueLength = true
         coVerify {
             centralManager.connect(
-                peripheral,
+                any(),
                 CentralManager.ConnectionOptions.AutoConnect(automaticallyRequestHighestValueLength = true),
             )
         }

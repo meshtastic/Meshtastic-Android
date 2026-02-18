@@ -63,7 +63,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import no.nordicsemi.android.common.core.registerReceiver
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.systemTimeZone
 import org.meshtastic.core.model.util.toPosixString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.accept
@@ -120,6 +119,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
+import java.time.ZoneId
 
 private val Config.DeviceConfig.Role.description: StringResource
     get() =
@@ -258,20 +258,11 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         }
         item {
             TitledCard(title = stringResource(Res.string.time_zone)) {
-                val context = LocalContext.current
-                val appTzPosixString by
-                    produceState(initialValue = systemTimeZone.toPosixString()) {
-                        val receiver =
-                            object : BroadcastReceiver() {
-                                override fun onReceive(context: Context, intent: Intent) {
-                                    if (intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
-                                        value = systemTimeZone.toPosixString()
-                                    }
-                                }
-                            }
-                        context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
-                        awaitDispose { context.unregisterReceiver(receiver) }
-                    }
+                var appTzPosixString by remember { mutableStateOf(ZoneId.systemDefault().toPosixString()) }
+
+                registerReceiver(IntentFilter(Intent.ACTION_TIMEZONE_CHANGED)) {
+                    appTzPosixString = ZoneId.systemDefault().toPosixString()
+                }
 
                 EditTextPreference(
                     title = "",

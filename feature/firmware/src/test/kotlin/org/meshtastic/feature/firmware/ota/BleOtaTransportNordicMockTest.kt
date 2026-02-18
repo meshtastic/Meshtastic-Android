@@ -34,6 +34,7 @@ import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
+import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -65,7 +66,8 @@ class BleOtaTransportNordicMockTest {
 
     @Test
     fun `full ota flow with nordic mocks`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         var txCharHandle: Int = -1
         val totalExpectedBytes = AtomicLong(64) // Smaller data for faster test

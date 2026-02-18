@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +25,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -72,7 +74,7 @@ class BleOtaTransport(
      */
     private suspend fun scanForOtaDevice(): Peripheral? {
         // ESP32 OTA bootloader may use MAC address with last byte incremented by 1
-        val otaAddress = calculateOtaAddress(address)
+        val otaAddress = calculateOtaAddress(macAddress = address)
         val targetAddresses = setOf(address, otaAddress)
         Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
 
@@ -172,8 +174,12 @@ class BleOtaTransport(
         }
 
         // Enable notifications and collect responses
+        val subscribed = CompletableDeferred<Unit>()
         txChar
-            .subscribe()
+            .subscribe {
+                Logger.d { "BLE OTA: TX characteristic subscribed" }
+                subscribed.complete(Unit)
+            }
             .onEach { notifyBytes ->
                 try {
                     val response = notifyBytes.decodeToString()
@@ -183,8 +189,13 @@ class BleOtaTransport(
                     Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
                 }
             }
+            .catch { e ->
+                if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
+                Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
+            }
             .launchIn(transportScope)
 
+        subscribed.await()
         Logger.i { "BLE OTA: Service discovered and ready" }
     }
 
