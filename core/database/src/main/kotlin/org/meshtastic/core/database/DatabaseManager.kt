@@ -42,6 +42,7 @@ import javax.inject.Singleton
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
+@Suppress("TooManyFunctions")
 class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)

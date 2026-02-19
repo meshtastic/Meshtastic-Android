@@ -560,6 +560,7 @@
     <string name="state_broadcast_seconds">State broadcast (seconds)</string>
     <string name="send_bell_with_alert_message">Send bell with alert message</string>
     <string name="friendly_name">Friendly name</string>
+    <string name="friendly_address">Friendly address</string>
     <string name="gpio_pin_to_monitor">GPIO pin to monitor</string>
     <string name="detection_trigger_type">Detection trigger type</string>
     <string name="use_input_pullup_mode">Use INPUT_PULLUP mode</string>
@@ -907,9 +908,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="wifi_devices">WiFi Devices</string>
-    <string name="ble_devices">BLE Devices</string>
     <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Connected Device</string>
 
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
@@ -922,6 +921,7 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
+    <string name="available_bluetooth_devices">Available Bluetooth Devices</string>
 
     <string name="get_started">Get started</string>
     <string name="intro_welcome">Welcome to</string>

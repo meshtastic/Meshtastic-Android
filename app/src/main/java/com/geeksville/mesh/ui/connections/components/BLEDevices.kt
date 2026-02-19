@@ -16,10 +16,14 @@
  */
 package com.geeksville.mesh.ui.connections.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -30,9 +34,12 @@ import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import no.nordicsemi.android.common.scanner.rememberFilterState
 import no.nordicsemi.android.common.scanner.view.ScannerView
+import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.discovered_bluetooth_devices
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
@@ -56,24 +63,38 @@ fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanMod
         )
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
 
-    ScannerView(
-        state = filterState,
-        onScanResultSelected = { result -> scanModel.onSelected(DeviceListEntry.Ble(result.peripheral)) },
-        deviceItem = { result ->
-            val device =
-                remember(result.peripheral.address, bleDevices) {
-                    bleDevices.find { it.fullAddress == "x${result.peripheral.address}" }
-                        ?: DeviceListEntry.Ble(result.peripheral)
+    Column {
+        Text(
+            text = stringResource(Res.string.discovered_bluetooth_devices),
+            modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 16.dp).fillMaxWidth(),
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+        )
+
+        ScannerView(
+            state = filterState,
+            onScanResultSelected = { result -> scanModel.onSelected(DeviceListEntry.Ble(result.peripheral)) },
+            deviceItem = { result ->
+                val device =
+                    remember(result.peripheral.address, bleDevices) {
+                        bleDevices.find { it.fullAddress == "x${result.peripheral.address}" }
+                            ?: DeviceListEntry.Ble(result.peripheral)
+                    }
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh),
+                ) {
+                    DeviceListItem(
+                        connectionState =
+                        connectionState.takeIf { device.fullAddress == selectedDevice }
+                            ?: ConnectionState.Disconnected,
+                        device = device,
+                        onSelect = { scanModel.onSelected(device) },
+                        rssi = result.rssi,
+                    )
                 }
-            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                DeviceListItem(
-                    connectionState =
-                    connectionState.takeIf { device.fullAddress == selectedDevice } ?: ConnectionState.Disconnected,
-                    device = device,
-                    onSelect = { scanModel.onSelected(device) },
-                    rssi = result.rssi,
-                )
-            }
-        },
-    )
+            },
+        )
+    }
 }

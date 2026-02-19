@@ -157,7 +157,7 @@ constructor(
                             // follows Meshtastic pattern
                             val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
                             suffix != null &&
-                                suffix.length >= 4 &&
+                                suffix.length >= suffixLength &&
                                 node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
                         }
                     } else {
@@ -180,6 +180,8 @@ constructor(
                 .sortedBy { it.name }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    private val suffixLength = 4
 
     /** UI StateFlow for discovered TCP devices. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
@@ -210,7 +212,7 @@ constructor(
                         val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
                         db.values.find { node ->
                             suffix != null &&
-                                suffix.length >= 4 &&
+                                suffix.length >= suffixLength &&
                                 node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
                         }
                     } else {
