@@ -58,6 +58,7 @@
     <string name="routing_error_pki_unknown_pubkey">Neznámý veřejný klíč</string>
     <string name="routing_error_admin_bad_session_key">Špatný klíč relace</string>
     <string name="routing_error_admin_public_key_unauthorized">Veřejný klíč není autorizován</string>
+    <string name="routing_error_pki_send_fail_public_key">Odeslání PKI selhalo, chybí veřejný klíč.</string>
     <string name="role_client_desc">Připojená aplikace nebo nezávislé zařízení.</string>
     <string name="role_client_mute_desc">Zařízení, které nepřeposílá pakety ostatních zařízení.</string>
     <string name="role_router_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přeposíláním zpráv. Viditelné v seznamu uzlů.</string>
@@ -98,6 +99,9 @@
     <string name="config_lora_modem_preset_summary">Dostupné předvolby modemu, výchozí je Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Nastaví maximální počet skoků, výchozí hodnota je 3. Zvýšení počtu skoků zároveň zvyšuje zahlcení sítě, proto je třeba tuto možnost používat opatrně. Zprávy s 0 skoky (broadcast) neobdrží potvrzení (ACK).</string>
     <string name="config_lora_frequency_slot_summary">Provozní frekvence vašeho uzlu se vypočítává na základě regionu, předvolby modemu a této hodnoty. Pokud je nastavena na 0, slot se automaticky určí podle názvu primárního kanálu a změní se z výchozího veřejného slotu. Vraťte tuto hodnotu zpět na výchozí veřejný slot, pokud jsou nakonfigurovány soukromé primární a veřejné sekundární kanály.</string>
+    <string name="config_network_wifi_enabled_summary">Zapnutí Wi-Fi deaktivuje Bluetooth připojení k aplikaci.</string>
+    <string name="config_network_eth_enabled_summary">Zapnutí Ethernetu deaktivuje Bluetooth připojení k aplikaci. TCP připojení k uzlu není na zařízeních Apple k dispozici.</string>
+    <string name="config_network_udp_enabled_summary">Povolit vysílání paketů přes UDP v místní síti.</string>
     <string name="config_position_broadcast_secs_summary">Maximální interval, který může uplynout, aniž by uzel odeslal polohový paket.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Nejkratší interval, ve kterém budou odesílány aktualizace polohy, pokud byla splněna minimální vzdálenost.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">Minimální změna vzdálenosti v metrech, která se bere v úvahu pro chytré vysílání polohy.</string>
@@ -116,6 +120,7 @@
     <string name="smart_position">Chytrá poloha</string>
     <string name="device_gps">GPS zařízení</string>
     <string name="fixed_position">Pevná poloha</string>
+    <string name="altitude">Nadm. výška</string>
     <string name="advanced_device_gps">Pokročilé nastavení GPS zařízení</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladění</string>
@@ -140,6 +145,7 @@
     <string name="pairing_failed_try_again">Párování selhalo, prosím zkuste to znovu</string>
     <string name="location_disabled">Přístup k poloze zařízení nebyl povolen, není možné poskytnout polohu zařízení do Mesh sítě.</string>
     <string name="share">Sdílet</string>
+    <string name="new_node_seen">Nově objevený uzel: %1$s</string>
     <string name="disconnected">Odpojeno</string>
     <string name="device_sleeping">Zařízení spí</string>
     <string name="connected_count">Připojeno: %1$s online</string>
@@ -162,18 +168,24 @@
     <string name="debug_logs_export">Exportovat protokoly</string>
     <string name="debug_export_cancelled">Export byl zrušen</string>
     <string name="debug_export_success">%1$d exportováno</string>
+    <string name="debug_export_failed">Nepodařilo se zapsat soubor protokolu: %1$s</string>
+    <string name="debug_export_no_logs">Žádné protokoly k exportu</string>
     <string name="debug_filters">Filtry</string>
     <string name="debug_active_filters">Aktivní filtry</string>
     <string name="debug_default_search">Hledat v protokolech…</string>
     <string name="debug_search_clear">Vymazat hledání</string>
     <string name="debug_filter_add">Přidat filtr</string>
     <string name="debug_filter_clear">Vymazat všechny filtry</string>
+    <string name="debug_filter_add_custom">Přidat vlastní filtr</string>
+    <string name="debug_filter_preset_title">Přednastavené filtry</string>
+    <string name="debug_store_logs_title">Uložit protokoly sítě</string>
     <string name="debug_clear">Vymazat protokoly</string>
     <string name="clear">Vymazat</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="new_messages_below">Nové zprávy</string>
     <string name="meshtastic_messages_notifications">Upozornění na přímou zprávu</string>
     <string name="meshtastic_broadcast_notifications">Upozornění na hromadné zprávy</string>
+    <string name="meshtastic_waypoints_notifications">Oznámení trasových bodů</string>
     <string name="meshtastic_alerts_notifications">Upozornění na varování</string>
     <string name="firmware_too_old">Je vyžadována aktualizace firmwaru.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
@@ -205,6 +217,8 @@
     <string name="delete_for_me">Smazat pro mě</string>
     <string name="select">Vybrat</string>
     <string name="select_all">Vybrat vše</string>
+    <string name="close_selection">Zavřít výběr</string>
+    <string name="delete_selection">Smazat vybrané</string>
     <string name="map_style_selection">Výběr stylu</string>
     <string name="map_download_region">Stáhnout oblast</string>
     <string name="name">Jméno</string>
@@ -300,7 +314,9 @@
     <string name="air_util_definition">Procento vysílacího času použitého během poslední hodiny.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Sdílený klíč</string>
+    <string name="encryption_psk_text">Lze odesílat a přijímat pouze kanálové zprávy. Přímé zprávy vyžadují funkci infrastruktury veřejných klíčů (PKI) ve firmwaru verze 2.5 a vyšší.</string>
     <string name="encryption_pkc">Šifrování veřejného klíče</string>
+    <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování.</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="userinfo">Informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
@@ -530,6 +546,9 @@
     <string name="ipv4_mode">Režim IPv4</string>
     <string name="ip">IP adresa</string>
     <string name="gateway">Gateway/Brána</string>
+    <string name="status_message">Stavová zpráva</string>
+    <string name="status_message_config">Nastavení stavové zprávy</string>
+    <string name="node_status_summary">Aktuální stav</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Práh WiFi RSSI (výchozí hodnota -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">Práh BLE RSSI (výchozí hodnota -80)</string>
     <string name="position_config">Pozice</string>
@@ -665,6 +684,7 @@
     <string name="conversations">Konverzace</string>
     <string name="nodes">Uzly</string>
     <string name="bottom_nav_settings">Nastavení</string>
+    <string name="selected">Vybrané</string>
     <string name="set_your_region">Nastavte svůj region</string>
     <string name="reply">Odpovědět</string>
     <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
@@ -763,6 +783,8 @@
     <string name="notifications_for_newly_discovered_nodes">Oznámení o nově nalezených uzlech.</string>
     <string name="low_battery">Nízký stav baterie</string>
     <string name="notifications_for_low_battery_alerts">Oznámení o nízké úrovni baterie připojeného zařízení.</string>
+    <string name="critical_alerts_description">Pakety označené jako kritické budou ignorovat přepínač ztlumení i nastavení režimu Nerušit v oznamovacím centru systému.</string>
+    <string name="configure_notification_permissions">Nastavit oprávnění oznámení</string>
     <string name="phone_location">Poloha telefonu</string>
     <string name="phone_location_description">Meshtastic využívá polohu telefonu pro některé funkce. Oprávnění k poloze si můžete kdykoli upravit v nastavení.</string>
     <string name="share_location">Sdílet polohu</string>
@@ -773,6 +795,7 @@
     <string name="distance_filters_description">Filtrovat seznam uzlů a mesh mapu podle vzdálenosti od vašeho telefonu.</string>
     <string name="mesh_map_location">Poloha v mesh mapě</string>
     <string name="mesh_map_location_description">Zobrazí modrou tečku polohy vašeho telefonu v mesh mapě.</string>
+    <string name="configure_location_permissions">Nastavit oprávnění polohy</string>
     <string name="skip">Přeskočit</string>
     <string name="settings">nastavení</string>
     <string name="critical_alerts">Kritická upozornění</string>
@@ -802,6 +825,8 @@
     <string name="no_custom_tile_sources_found">Žádné vlastní zdroje dlaždic</string>
     <string name="edit_custom_tile_source">Upravit vlastní zdroj dlaždic</string>
     <string name="delete_custom_tile_source">Odstranit vlastní zdroj dlaždic</string>
+    <string name="url_cannot_be_empty">Adresa URL nesmí být prázdná.</string>
+    <string name="url_template">URL šablona</string>
     <string name="track_point">bod trasy</string>
     <string name="app_settings">Aplikace</string>
     <string name="app_version">Verze</string>
@@ -927,13 +952,25 @@
     <string name="add_channels_title">Přidat kanály</string>
     <string name="add_channels_description">Vyberte kanály z QR kódu, které chcete přidat. Stávající kanály nebudou změněny.</string>
     <string name="replace_channels_and_settings_description">Tento QR kód obsahuje kompletní konfiguraci. Tímto se NAHRADÍ vaše stávající kanály a nastavení rádia. Všechny existující kanály budou odstraněny.</string>
+    <string name="loading">Načítám</string>
     <!-- Message Filter -->
+    <string name="filter_enable">Zapnout filtrování</string>
+    <string name="filter_filtered_count">%1$d filtrováno</string>
+    <string name="filter_show_count">Zobrazit %1$d filtrované</string>
+    <string name="filter_hide_count">Skrýt %1$d filtrované</string>
+    <string name="filter_message_label">Filtrované</string>
+    <string name="filter_enable_for_contact">Zapnout filtrování</string>
+    <string name="filter_disable_for_contact">Vypnout filtrování</string>
+    <string name="channel_url">URL kanálu</string>
     <string name="scan_nfc">Naskenovat NFC</string>
     <string name="scan_shared_contact_nfc">Naskenovat NFC sdíleného kontaktu</string>
     <string name="scan_shared_contact_qr">Naskenovat QR kód sdíleného kontaktu</string>
+    <string name="input_shared_contact_url">Vložit URL adresu sdíleného kontaktu</string>
     <string name="scan_channels_nfc">Naskenovat NFC kanálů</string>
     <string name="scan_channels_qr">Naskenovat kód QR kanálů</string>
+    <string name="input_channel_url">Vložit URL adresu kanálu</string>
     <string name="share_channels_qr">Sdílet QR kód kanálů</string>
+    <string name="scan_nfc_text">Přiložte zařízení k NFC tagu pro naskenování.</string>
     <string name="generate_qr_code">Vytvořit QR kód</string>
     <string name="nfc_disabled">NFC je zakázáno. Povolte jej v nastavení systému.</string>
     <string name="all_time">Vše</string>
