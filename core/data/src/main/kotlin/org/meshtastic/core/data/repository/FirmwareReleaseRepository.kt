@@ -19,6 +19,7 @@ package org.meshtastic.core.data.repository
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
 import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -26,7 +27,6 @@ import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.model.util.TimeConstants
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import javax.inject.Inject
 import javax.inject.Singleton

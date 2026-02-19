@@ -25,9 +25,9 @@ import kotlinx.parcelize.TypeParceler
 import kotlinx.serialization.Serializable
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.util.ByteStringParceler
 import org.meshtastic.core.model.util.ByteStringSerializer
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Waypoint

@@ -17,15 +17,15 @@
 package com.geeksville.mesh.repository.radio
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.util.Exceptions
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.Exceptions
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import java.io.BufferedInputStream

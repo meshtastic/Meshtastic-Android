@@ -14,16 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.meshtastic.core.strings
+package org.meshtastic.core.strings
 
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 
+/** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */
 fun getString(stringResource: StringResource): String = runBlocking {
     org.jetbrains.compose.resources.getString(stringResource)
 }
 
+/** Retrieves a formatted string from the [StringResource] in a blocking manner. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
     val resolvedArgs =
         formatArgs.map { arg ->

@@ -26,9 +26,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.firmware_update_connecting_attempt

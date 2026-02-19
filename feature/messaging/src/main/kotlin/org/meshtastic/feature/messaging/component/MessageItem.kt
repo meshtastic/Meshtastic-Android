@@ -61,11 +61,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.filter_message_label
 import org.meshtastic.core.strings.message_delivery_status

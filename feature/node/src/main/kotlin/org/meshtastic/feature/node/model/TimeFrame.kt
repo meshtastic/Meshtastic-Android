@@ -17,7 +17,7 @@
 package org.meshtastic.feature.node.model
 
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.all_time
 import org.meshtastic.core.strings.one_hour_short

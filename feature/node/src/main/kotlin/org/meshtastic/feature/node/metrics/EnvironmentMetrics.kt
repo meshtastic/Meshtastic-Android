@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -44,18 +43,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.current
 import org.meshtastic.core.strings.env_metrics_log
 import org.meshtastic.core.strings.gas_resistance
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.humidity
 import org.meshtastic.core.strings.iaq
 import org.meshtastic.core.strings.iaq_definition
@@ -359,7 +359,6 @@ private fun RadiationDisplay(envMetrics: org.meshtastic.proto.EnvironmentMetrics
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EnvironmentMetricsCard(
     telemetry: Telemetry,
@@ -386,7 +385,6 @@ private fun EnvironmentMetricsCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
@@ -394,7 +392,11 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = DATE_TIME_FORMAT.format(time), style = MaterialTheme.typography.titleMediumEmphasized)
+            Text(
+                text = DATE_TIME_FORMAT.format(time),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
             TemperatureDisplay(envMetrics, environmentDisplayFahrenheit)
         }
 

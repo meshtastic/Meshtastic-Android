@@ -22,17 +22,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.android.BinaryLogFile
-import com.geeksville.mesh.android.BuildUtils
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.util.ignoreException
-import com.geeksville.mesh.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,10 +39,15 @@ import no.nordicsemi.android.common.core.simpleSharedFlow
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.common.util.BinaryLogFile
+import org.meshtastic.core.common.util.BuildUtils
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.Heartbeat
@@ -83,10 +82,10 @@ constructor(
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    private val _receivedData = MutableSharedFlow<ByteArray>()
+    private val _receivedData = simpleSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
-    private val _connectionError = MutableSharedFlow<BleError>()
+    private val _connectionError = simpleSharedFlow<BleError>()
     val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
 
     // Thread-safe StateFlow for tracking device address changes

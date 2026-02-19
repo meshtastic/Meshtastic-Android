@@ -32,7 +32,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -50,19 +49,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.disk_free_indexed
 import org.meshtastic.core.strings.free_memory
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.load_indexed
 import org.meshtastic.core.strings.uptime
 import org.meshtastic.core.strings.user_string
@@ -125,7 +125,6 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "MagicNumber")
 @Composable
 fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: Telemetry) {
@@ -144,7 +143,8 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: Telemetry) {
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.End,
                         text = DATE_TIME_FORMAT.format(time),
-                        style = MaterialTheme.typography.titleMediumEmphasized,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
                     )
                     hostMetrics?.uptime_seconds?.let {
                         LogLine(

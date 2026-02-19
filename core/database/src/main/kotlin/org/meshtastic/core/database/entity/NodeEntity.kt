@@ -24,14 +24,14 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel

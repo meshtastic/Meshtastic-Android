@@ -23,9 +23,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.are_you_sure

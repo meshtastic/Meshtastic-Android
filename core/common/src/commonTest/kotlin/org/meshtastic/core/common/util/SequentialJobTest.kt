@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.concurrent
+package org.meshtastic.core.common.util
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class SequentialJobTest {
 
     private val sequentialJob = SequentialJob()
@@ -45,7 +44,7 @@ class SequentialJobTest {
         }
 
         advanceTimeBy(100)
-        assertTrue("Job 1 should be active", job1Active)
+        assertTrue(job1Active, "Job 1 should be active")
 
         // Launch second job
         sequentialJob.launch(this) {
@@ -53,7 +52,7 @@ class SequentialJobTest {
         }
 
         advanceTimeBy(100)
-        assertTrue("Job 1 should be cancelled", job1Cancelled)
+        assertTrue(job1Cancelled, "Job 1 should be cancelled")
     }
 
     @Test
@@ -71,11 +70,11 @@ class SequentialJobTest {
         }
 
         advanceTimeBy(100)
-        assertTrue("Job should be active", jobActive)
+        assertTrue(jobActive, "Job should be active")
 
         sequentialJob.cancel()
 
         advanceTimeBy(100)
-        assertTrue("Job should be cancelled", jobCancelled)
+        assertTrue(jobCancelled, "Job should be cancelled")
     }
 }

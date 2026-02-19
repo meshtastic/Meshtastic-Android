@@ -43,10 +43,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.getNeighborInfoResponse
 import org.meshtastic.core.strings.Res
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.neighbor_info
 import org.meshtastic.core.strings.routing_error_no_response
 import org.meshtastic.core.ui.component.MainAppBar

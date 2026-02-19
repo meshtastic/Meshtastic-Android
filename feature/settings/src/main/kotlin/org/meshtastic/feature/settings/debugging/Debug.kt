@@ -83,9 +83,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.toDate
-import org.meshtastic.core.model.util.toInstant
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_clear
 import org.meshtastic.core.strings.debug_decoded_payload

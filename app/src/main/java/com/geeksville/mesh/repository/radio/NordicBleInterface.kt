@@ -56,7 +56,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.retryBleOperation
-import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.common.util.nowMillis
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3

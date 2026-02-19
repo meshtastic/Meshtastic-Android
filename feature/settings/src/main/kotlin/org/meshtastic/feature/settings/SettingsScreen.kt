@@ -68,10 +68,10 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.database.DatabaseConstants
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.toDate
-import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.strings.Res

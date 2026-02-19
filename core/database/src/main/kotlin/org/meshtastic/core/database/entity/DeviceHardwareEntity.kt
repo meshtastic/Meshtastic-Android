@@ -20,9 +20,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.NetworkDeviceHardware
-import org.meshtastic.core.model.util.nowMillis
 
 @Serializable
 @Entity(tableName = "device_hardware")

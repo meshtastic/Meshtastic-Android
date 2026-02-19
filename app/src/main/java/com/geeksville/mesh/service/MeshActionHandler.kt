@@ -16,8 +16,6 @@
  */
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.util.ignoreException
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,13 +23,15 @@ import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction

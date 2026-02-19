@@ -18,9 +18,7 @@ package com.geeksville.mesh.service
 
 import android.app.Notification
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,10 +30,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -44,6 +43,7 @@ import org.meshtastic.core.strings.connected_count
 import org.meshtastic.core.strings.connecting
 import org.meshtastic.core.strings.device_sleeping
 import org.meshtastic.core.strings.disconnected
+import org.meshtastic.core.strings.getString
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry

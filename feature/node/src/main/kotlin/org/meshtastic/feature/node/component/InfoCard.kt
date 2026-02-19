@@ -51,6 +51,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.copy
+import org.meshtastic.core.ui.util.thenIf
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -122,6 +123,3 @@ fun InfoCard(
 internal fun DrawableInfoCard(@DrawableRes iconRes: Int, text: String, value: String, rotateIcon: Float = 0f) {
     InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon)
 }
-
-inline fun Modifier.thenIf(precondition: Boolean, action: Modifier.() -> Modifier): Modifier =
-    if (precondition) action() else this

@@ -14,36 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.concurrent
-
-import org.meshtastic.core.model.util.nowMillis
+package org.meshtastic.core.common.util
 
 /** A deferred execution object (with various possible implementations) */
 interface Continuation<in T> {
-    abstract fun resume(res: Result<T>)
+    fun resume(res: Result<T>)
 
-    // syntactic sugar
-
+    /** Syntactic sugar for resuming with success. */
     fun resumeSuccess(res: T) = resume(Result.success(res))
 
-    fun resumeWithException(ex: Throwable) = try {
-        resume(Result.failure(ex))
-    } catch (ex: Throwable) {
-        // Logger.e { "Ignoring $ex while resuming because we are the ones who threw it" }
-        throw ex
-    }
+    /** Syntactic sugar for resuming with failure. */
+    fun resumeWithException(ex: Throwable) = resume(Result.failure(ex))
 }
 
-/** An async continuation that just calls a callback when the result is available */
+/** An async continuation that calls a callback when the result is available. */
 class CallbackContinuation<in T>(private val cb: (Result<T>) -> Unit) : Continuation<T> {
     override fun resume(res: Result<T>) = cb(res)
 }
 
 /**
- * This is a blocking/threaded version of coroutine Continuation
+ * A blocking version of coroutine Continuation using traditional threading primitives.
  *
- * A little bit ugly, but the coroutine version has a nasty internal bug that showed up in my SyncBluetoothDevice so I
- * needed a quick workaround.
+ * This is useful in contexts where coroutine suspension is not desirable or when bridging with legacy threaded code.
  */
 class SyncContinuation<T> : Continuation<T> {
 
@@ -61,7 +53,13 @@ class SyncContinuation<T> : Continuation<T> {
         }
     }
 
-    // Wait for the result (or throw an exception)
+    /**
+     * Blocks the current thread until the result is available or the timeout expires.
+     *
+     * @param timeoutMsecs Maximum time to wait in milliseconds. If 0, waits indefinitely.
+     * @return The result of the operation.
+     * @throws IllegalStateException if a timeout occurs or if an internal error happens.
+     */
     @Suppress("NestedBlockDepth")
     fun await(timeoutMsecs: Long = 0): T {
         lock.lock()
@@ -70,10 +68,7 @@ class SyncContinuation<T> : Continuation<T> {
             while (result == null) {
                 if (timeoutMsecs > 0) {
                     val remaining = timeoutMsecs - (nowMillis - startT)
-                    if (remaining <= 0) {
-                        throw Exception("SyncContinuation timeout")
-                    }
-                    // await returns false if waiting time elapsed
+                    check(remaining > 0) { "SyncContinuation timeout" }
                     condition.await(remaining, java.util.concurrent.TimeUnit.MILLISECONDS)
                 } else {
                     condition.await()
@@ -81,11 +76,8 @@ class SyncContinuation<T> : Continuation<T> {
             }
 
             val r = result
-            if (r != null) {
-                return r.getOrThrow()
-            } else {
-                throw Exception("This shouldn't happen")
-            }
+            checkNotNull(r) { "Unexpected null result in SyncContinuation" }
+            return r.getOrThrow()
         } finally {
             lock.unlock()
         }
@@ -93,17 +85,13 @@ class SyncContinuation<T> : Continuation<T> {
 }
 
 /**
- * Calls an init function which is responsible for saving our continuation so that some other thread can call resume or
- * resume with exception.
+ * Calls an [initfn] that is responsible for starting an operation and saving the [SyncContinuation]. Then blocks the
+ * current thread until the operation completes or times out.
  *
- * Essentially this is a blocking version of the (buggy) coroutine suspendCoroutine
+ * Essentially a blocking version of [kotlinx.coroutines.suspendCancellableCoroutine].
  */
 fun <T> suspend(timeoutMsecs: Long = -1, initfn: (SyncContinuation<T>) -> Unit): T {
     val cont = SyncContinuation<T>()
-
-    // First call the init funct
     initfn(cont)
-
-    // Now wait for the continuation to finish
     return cont.await(timeoutMsecs)
 }

@@ -61,14 +61,14 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.alt
 import org.meshtastic.core.strings.clear
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.heading
 import org.meshtastic.core.strings.latitude
 import org.meshtastic.core.strings.longitude

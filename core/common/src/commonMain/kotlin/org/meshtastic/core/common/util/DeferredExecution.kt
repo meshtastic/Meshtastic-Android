@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.concurrent
+package org.meshtastic.core.common.util
 
 import co.touchlab.kermit.Logger
 
@@ -29,14 +28,14 @@ import co.touchlab.kermit.Logger
 class DeferredExecution {
     private val queue = mutableListOf<() -> Unit>()
 
-    // / Queue some new work
+    /** Queues new work to be executed later. */
     fun add(fn: () -> Unit) {
         queue.add(fn)
     }
 
-    // / run all work in the queue and clear it to be ready to accept new work
+    /** Runs all work in the queue and clears it. */
     fun run() {
-        Logger.d { "Running deferred execution numjobs=${queue.size}" }
+        Logger.d { "Running deferred execution, numJobs=${queue.size}" }
         queue.forEach { it() }
         queue.clear()
     }

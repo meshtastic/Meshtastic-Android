@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.android
+package org.meshtastic.core.service
 
 import android.content.ComponentName
 import android.content.Context
@@ -23,40 +23,57 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.IInterface
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.util.exceptionReporter
 import kotlinx.coroutines.delay
+import org.meshtastic.core.common.util.exceptionReporter
 import java.io.Closeable
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 
 class BindFailedException : Exception("bindService failed")
 
-/** A wrapper that cleans up the service binding process */
+/**
+ * A generic helper for binding to an Android Service via AIDL. Handles connection lifecycle, thread safety for initial
+ * binding, and automatic retry for common race conditions.
+ *
+ * @param T The type of the AIDL interface.
+ * @param stubFactory A factory function to convert an [IBinder] to the interface type.
+ */
 open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T) : Closeable {
 
+    private companion object {
+        const val BIND_RETRY_DELAY_MS = 500L
+    }
+
+    /** The currently bound service instance, or null if not connected. */
     var serviceP: T? = null
 
-    // A getter that returns the bound service or throws if not bound
+    /**
+     * Returns the bound service instance. If not currently connected, this will block the current thread until the
+     * connection is established.
+     *
+     * @throws IllegalStateException If [connect] has not been called.
+     * @throws IllegalStateException If the service is not bound after waiting.
+     */
     val service: T
         get() {
-            waitConnect() // Wait for at least the initial connection to happen
-            return serviceP ?: throw Exception("Service not bound")
+            waitConnect()
+            return checkNotNull(serviceP) { "Service not bound" }
         }
 
     private var context: Context? = null
-
     private var isClosed = true
 
     private val lock = ReentrantLock()
     private val condition = lock.newCondition()
 
-    /** Call this if you want to stall until the connection is completed */
+    /**
+     * Blocks the current thread until the service is connected.
+     *
+     * @throws IllegalStateException If [connect] has not been called.
+     */
     fun waitConnect() {
-        // Wait until this service is connected
         lock.withLock {
-            if (context == null) {
-                throw Exception("Haven't called connect")
-            }
+            check(context != null) { "Connect must be called before waitConnect" }
 
             if (serviceP == null) {
                 condition.await()
@@ -64,22 +81,28 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
         }
     }
 
+    /**
+     * Initiates a binding to the service.
+     *
+     * @param c The context to use for binding.
+     * @param intent The intent used to identify the service.
+     * @param flags Binding flags (e.g., [Context.BIND_AUTO_CREATE]).
+     * @throws BindFailedException If the initial bind call fails twice.
+     */
     suspend fun connect(c: Context, intent: Intent, flags: Int) {
         context = c
         if (isClosed) {
             isClosed = false
             if (!c.bindService(intent, connection, flags)) {
-                // Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false.
-                // Try
-                // a short sleep to see if that helps
-                Logger.e { "Needed to use the second bind attempt hack" }
-                delay(500) // was 200ms, but received an autobug from a Galaxy Note4, android 6.0.1
+                // Handle potential race condition on quick re-bind
+                Logger.w { "Initial bind failed, retrying after delay..." }
+                delay(BIND_RETRY_DELAY_MS)
                 if (!c.bindService(intent, connection, flags)) {
                     throw BindFailedException()
                 }
             }
         } else {
-            Logger.w { "Ignoring rebind attempt for service" }
+            Logger.w { "Ignoring rebind attempt for already active service connection" }
         }
     }
 
@@ -88,17 +111,16 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
         try {
             context?.unbindService(connection)
         } catch (ex: IllegalArgumentException) {
-            // Autobugs show this can generate an illegal arg exception for "service not registered" during reinstall?
-            Logger.w { "Ignoring error in ServiceClient.close, probably harmless" }
+            Logger.w(ex) { "Ignoring error during unbind: service might have already been cleaned up" }
         }
         serviceP = null
         context = null
     }
 
-    // Called when we become connected
+    /** Called on the main thread when the service is connected. */
     open fun onConnected(service: T) {}
 
-    // called on loss of connection
+    /** Called on the main thread when the service connection is lost. */
     open fun onDisconnected() {}
 
     private val connection =
@@ -109,13 +131,9 @@ open class ServiceClient<T : IInterface>(private val stubFactory: (IBinder) -> T
                     serviceP = s
                     onConnected(s)
 
-                    // after calling our handler, tell anyone who was waiting for this connection to complete
                     lock.withLock { condition.signalAll() }
                 } else {
-                    // If we start to close a service, it seems that there is a possibility a onServiceConnected event
-                    // is the queue
-                    // for us.  Be careful not to process that stale event
-                    Logger.w { "A service connected while we were closing it, ignoring" }
+                    Logger.w { "Service connected after close was called; ignoring stale connection" }
                 }
             }
 

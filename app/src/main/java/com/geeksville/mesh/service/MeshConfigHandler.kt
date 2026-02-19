@@ -16,7 +16,6 @@
  */
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.concurrent.handledLaunch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.Channel

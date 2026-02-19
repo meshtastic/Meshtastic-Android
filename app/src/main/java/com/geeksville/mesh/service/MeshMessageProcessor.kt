@@ -19,7 +19,6 @@ package com.geeksville.mesh.service
 import android.util.Log
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.concurrent.handledLaunch
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,11 +26,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.util.isLora
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord

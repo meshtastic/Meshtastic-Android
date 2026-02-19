@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.common.util
 
-package com.geeksville.mesh.util
-
-import androidx.compose.ui.Modifier
+import android.content.Context
+import java.io.File
+import java.io.FileOutputStream
 
 /**
- * Conditionally applies the [action] to the receiver [Modifier], if [precondition] is true.
- * Returns the receiver as-is otherwise.
+ * A specialized [FileOutputStream] that writes data to a file in the application's external files directory. Primarily
+ * used for low-level protocol debugging and packet logging.
+ *
+ * @param context The context used to locate the external files directory.
+ * @param name The name of the log file.
  */
-inline fun Modifier.thenIf(precondition: Boolean, action: Modifier.() -> Modifier): Modifier =
-    if (precondition) action() else this
+class BinaryLogFile(context: Context, name: String) :
+    FileOutputStream(File(context.getExternalFilesDir(null), name), true)

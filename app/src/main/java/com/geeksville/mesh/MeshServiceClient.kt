@@ -23,15 +23,15 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.android.BindFailedException
-import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.concurrent.SequentialJob
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.SequentialJob
+import org.meshtastic.core.service.BindFailedException
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.ServiceClient
 import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 

@@ -49,7 +49,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -83,14 +82,13 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.hasGps
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.calculating
 import org.meshtastic.core.strings.cancel
@@ -99,6 +97,7 @@ import org.meshtastic.core.strings.close
 import org.meshtastic.core.strings.delete_for_everyone
 import org.meshtastic.core.strings.delete_for_me
 import org.meshtastic.core.strings.expires
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.location_disabled
 import org.meshtastic.core.strings.map_cache_info
 import org.meshtastic.core.strings.map_cache_manager
@@ -415,7 +414,7 @@ fun MapView(
                 id = u.id
                 title = u.long_name
                 snippet =
-                    com.meshtastic.core.strings.getString(
+                    getString(
                         Res.string.map_node_popup_details,
                         node.gpsString(),
                         formatAgo(node.lastHeard),
@@ -423,12 +422,7 @@ fun MapView(
                         if (node.batteryStr != "") node.batteryStr else "?",
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription =
-                        com.meshtastic.core.strings.getString(
-                            Res.string.map_subDescription,
-                            ourNode.bearing(node).toString(),
-                            dist,
-                        )
+                    subDescription = getString(Res.string.map_subDescription, ourNode.bearing(node).toString(), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -449,16 +443,16 @@ fun MapView(
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(com.meshtastic.core.strings.getString(Res.string.waypoint_delete))
-        builder.setNeutralButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { _, _ ->
+        builder.setTitle(getString(Res.string.waypoint_delete))
+        builder.setNeutralButton(getString(Res.string.cancel)) { _, _ ->
             Logger.d { "User canceled marker delete dialog" }
         }
-        builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.delete_for_me)) { _, _ ->
+        builder.setNegativeButton(getString(Res.string.delete_for_me)) { _, _ ->
             Logger.d { "User deleted waypoint ${waypoint.id} for me" }
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if ((waypoint.locked_to ?: 0) in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.delete_for_everyone)) { _, _ ->
+            builder.setPositiveButton(getString(Res.string.delete_for_everyone)) { _, _ ->
                 Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
                 mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
                 mapViewModel.deleteWaypoint(waypoint.id)
@@ -493,7 +487,7 @@ fun MapView(
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL || (myId != null && id == myId)) {
-        com.meshtastic.core.strings.getString(Res.string.you)
+        getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).long_name
     }
@@ -530,10 +524,7 @@ fun MapView(
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet =
-                    "[$time] ${pt.description}  " +
-                    com.meshtastic.core.strings.getString(Res.string.expires) +
-                    ": $expireTimeStr"
+                snippet = "[$time] ${pt.description}  " + getString(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 if (selectedWaypointId == pt.id) {
                     showInfoWindow()
@@ -644,7 +635,7 @@ fun MapView(
         val tileCount: Int =
             CacheManager(this)
                 .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
-        cacheEstimate = com.meshtastic.core.strings.getString(Res.string.map_cache_tiles, tileCount)
+        cacheEstimate = getString(Res.string.map_cache_tiles, tileCount)
     }
 
     val boxOverlayListener =
@@ -988,7 +979,6 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()

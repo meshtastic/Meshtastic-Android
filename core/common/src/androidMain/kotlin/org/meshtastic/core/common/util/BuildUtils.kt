@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.android
+package org.meshtastic.core.common.util
 
 import android.os.Build
 
-/** Created by kevinh on 1/14/16. */
+/** Utility for checking build properties, such as emulator detection. */
 object BuildUtils {
-    // Are we running on the emulator?
-    val isEmulator
+    /** Whether the app is currently running on an emulator. */
+    val isEmulator: Boolean
         get() =
             Build.FINGERPRINT.startsWith("generic") ||
                 Build.FINGERPRINT.startsWith("unknown") ||

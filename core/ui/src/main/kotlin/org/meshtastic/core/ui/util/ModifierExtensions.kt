@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.ui.util
 
-package com.geeksville.mesh.android
-
-import java.util.*
+import androidx.compose.ui.Modifier
 
 /**
- * Created by kevinh on 1/13/16.
+ * Conditionally applies the [action] to the receiver [Modifier] if [precondition] is true. Otherwise, returns the
+ * receiver unchanged.
  */
-object DateUtils {
-    fun dateUTC(year: Int, month: Int, day: Int): Date {
-        val cal = GregorianCalendar(TimeZone.getTimeZone("GMT"))
-        cal.set(year, month, day, 0, 0, 0);
-        return Date(cal.getTime().getTime())
-    }
-}
+inline fun Modifier.thenIf(precondition: Boolean, action: Modifier.() -> Modifier): Modifier =
+    if (precondition) action() else this

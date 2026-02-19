@@ -16,6 +16,9 @@
  */
 package org.meshtastic.core.model.util
 
+import org.meshtastic.core.common.util.nowInstant
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.model.util.TimeConstants.HOURS_PER_DAY
 import java.text.DateFormat
 import kotlin.time.Duration

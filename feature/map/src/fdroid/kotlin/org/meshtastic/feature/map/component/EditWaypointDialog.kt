@@ -60,15 +60,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.nowInstant
-import org.meshtastic.core.model.util.nowSeconds
-import org.meshtastic.core.model.util.systemTimeZone
-import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.common.util.nowInstant
+import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.systemTimeZone
+import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.date
@@ -86,7 +87,6 @@ import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Waypoint
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Instant
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalLayoutApi::class)

@@ -26,6 +26,7 @@ plugins {
 configure<LibraryExtension> { namespace = "org.meshtastic.core.ui" }
 
 dependencies {
+    implementation(projects.core.common)
     implementation(projects.core.barcode)
     implementation(projects.core.nfc)
     implementation(projects.core.data)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.concurrent
+package org.meshtastic.core.common.util
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -23,18 +22,15 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 /**
- * A helper class that manages a single [Job].
- *
- * When a new job is launched, the previous one is cancelled. This is useful for ensuring that only one operation of a
- * certain type is running at a time.
+ * A helper class that manages a single [Job]. When a new job is launched, the previous one is cancelled. This is useful
+ * for ensuring that only one operation of a certain type is running at a time.
  */
 class SequentialJob @Inject constructor() {
     private val job = AtomicReference<Job?>(null)
 
     /**
-     * Cancels the previous job (if any) and launches a new one in the given [scope].
-     *
-     * The new job uses [handledLaunch] to ensure exceptions are reported.
+     * Cancels the previous job (if any) and launches a new one in the given [scope]. The new job uses [handledLaunch]
+     * to ensure exceptions are reported.
      */
     fun launch(scope: CoroutineScope, block: suspend CoroutineScope.() -> Unit) {
         cancel()

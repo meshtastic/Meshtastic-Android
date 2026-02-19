@@ -43,7 +43,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
@@ -57,13 +59,11 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
-import org.meshtastic.core.model.util.nowSeconds
-import org.meshtastic.core.model.util.toDate
-import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.okay
 import org.meshtastic.core.strings.traceroute
 import org.meshtastic.core.strings.view_on_map

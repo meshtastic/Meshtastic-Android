@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,33 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.common.util
 
-package com.geeksville.mesh.concurrent
-
-import com.geeksville.mesh.util.Exceptions
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-private val errorHandler =
-    CoroutineExceptionHandler { _, exception ->
-        Exceptions.report(
-            exception,
-            "MeshService-coroutine",
-            "coroutine-exception"
-        )
-    }
+private val errorHandler = CoroutineExceptionHandler { _, exception ->
+    Exceptions.report(exception, "coroutine-exception-handler", "Uncaught coroutine exception")
+}
 
-/// Wrap launch with an exception handler, FIXME, move into a utility lib
+/**
+ * Launches a new coroutine with a central [CoroutineExceptionHandler] that reports errors to [Exceptions].
+ *
+ * @param context Additional to [CoroutineExceptionHandler] context.
+ * @param start Coroutine start option.
+ * @param block The coroutine code block.
+ * @return The launched [Job].
+ */
 fun CoroutineScope.handledLaunch(
     context: CoroutineContext = EmptyCoroutineContext,
     start: CoroutineStart = CoroutineStart.DEFAULT,
-    block: suspend CoroutineScope.() -> Unit
-) = this.launch(
-    context = context + com.geeksville.mesh.concurrent.errorHandler,
-    start = start,
-    block = block
-)
+    block: suspend CoroutineScope.() -> Unit,
+): Job = launch(context = context + errorHandler, start = start, block = block)

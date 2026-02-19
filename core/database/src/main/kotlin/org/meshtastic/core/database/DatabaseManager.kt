@@ -33,8 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.nowMillis
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
