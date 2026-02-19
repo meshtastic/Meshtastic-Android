@@ -60,8 +60,8 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
-private const val RSSI_DELAY = 10
-private const val RSSI_TIMEOUT = 5
+private const val RSSI_DELAY = 2
+private const val RSSI_TIMEOUT = 1
 
 @Suppress("LongMethod", "LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable

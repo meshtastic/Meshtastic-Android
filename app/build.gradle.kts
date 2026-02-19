@@ -265,6 +265,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.nordic.client.android.mock)
+    androidTestImplementation(libs.nordic.core.mock)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

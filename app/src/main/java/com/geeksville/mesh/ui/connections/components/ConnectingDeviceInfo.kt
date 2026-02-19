@@ -33,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.strings.Res
@@ -49,24 +48,28 @@ fun ConnectingDeviceInfo(
     onClickDisconnect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier) {
+    Column(modifier = modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            CircularWavyProgressIndicator(modifier = Modifier.size(40.dp))
+            CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
 
             Column {
-                Text(text = deviceName, style = MaterialTheme.typography.titleMedium)
-                Text(text = deviceAddress, style = MaterialTheme.typography.bodySmall)
-                Text(text = stringResource(Res.string.connecting), style = MaterialTheme.typography.labelSmall)
+                Text(text = deviceName, style = MaterialTheme.typography.headlineSmall)
+                Text(text = deviceAddress, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = stringResource(Res.string.connecting),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
         }
 
         Button(
-            shape = RectangleShape,
-            modifier = Modifier.fillMaxWidth().height(40.dp),
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = MaterialTheme.shapes.medium,
             colors =
             ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.StatusRed,
@@ -74,7 +77,7 @@ fun ConnectingDeviceInfo(
             ),
             onClick = onClickDisconnect,
         ) {
-            Text(stringResource(Res.string.disconnect))
+            Text(stringResource(Res.string.disconnect), style = MaterialTheme.typography.titleMedium)
         }
     }
 }

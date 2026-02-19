@@ -184,7 +184,11 @@ fun ConnectionsScreen(
         },
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(modifier = Modifier.fillMaxSize().padding(paddingValues).padding(16.dp)) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(paddingValues).padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                Spacer(modifier = Modifier.height(4.dp))
                 val uiState =
                     when {
                         connectionState.isConnected() && ourNode != null -> 2
@@ -194,11 +198,7 @@ fun ConnectionsScreen(
                         else -> 0
                     }
 
-                Crossfade(
-                    targetState = uiState,
-                    label = "connection_state",
-                    modifier = Modifier.padding(bottom = 16.dp),
-                ) { state ->
+                Crossfade(targetState = uiState, label = "connection_state") { state ->
                     when (state) {
                         2 -> {
                             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -267,16 +267,7 @@ fun ConnectionsScreen(
                     selectedDeviceType = it
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                val modifier =
-                    if (selectedDeviceType == DeviceType.BLE) {
-                        Modifier.fillMaxWidth()
-                    } else {
-                        Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
-                    }
-
-                Column(modifier = modifier) {
+                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                     when (selectedDeviceType) {
                         DeviceType.BLE -> {
                             BLEDevices(
@@ -287,26 +278,36 @@ fun ConnectionsScreen(
                         }
 
                         DeviceType.TCP -> {
-                            NetworkDevices(
-                                connectionState = connectionState,
-                                discoveredNetworkDevices = discoveredTcpDevices,
-                                recentNetworkDevices = recentTcpDevices,
-                                selectedDevice = selectedDevice,
-                                scanModel = scanModel,
-                            )
+                            Column(
+                                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                NetworkDevices(
+                                    connectionState = connectionState,
+                                    discoveredNetworkDevices = discoveredTcpDevices,
+                                    recentNetworkDevices = recentTcpDevices,
+                                    selectedDevice = selectedDevice,
+                                    scanModel = scanModel,
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
                         }
 
                         DeviceType.USB -> {
-                            UsbDevices(
-                                connectionState = connectionState,
-                                usbDevices = usbDevices,
-                                selectedDevice = selectedDevice,
-                                scanModel = scanModel,
-                            )
+                            Column(
+                                modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                            ) {
+                                UsbDevices(
+                                    connectionState = connectionState,
+                                    usbDevices = usbDevices,
+                                    selectedDevice = selectedDevice,
+                                    scanModel = scanModel,
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
             }
             scanStatusText?.let {

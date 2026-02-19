@@ -16,9 +16,14 @@
  */
 package com.geeksville.mesh.ui.connections.components
 
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import no.nordicsemi.android.common.scanner.rememberFilterState
@@ -52,12 +57,15 @@ fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanMod
         onScanResultSelected = { result -> scanModel.onSelected(DeviceListEntry.Ble(result.peripheral)) },
         deviceItem = { result ->
             val device = remember(result.peripheral.address) { DeviceListEntry.Ble(result.peripheral) }
-            DeviceListItem(
-                connectionState =
-                connectionState.takeIf { device.fullAddress == selectedDevice } ?: ConnectionState.Disconnected,
-                device = device,
-                onSelect = { scanModel.onSelected(device) },
-            )
+            Card(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                DeviceListItem(
+                    connectionState =
+                    connectionState.takeIf { device.fullAddress == selectedDevice } ?: ConnectionState.Disconnected,
+                    device = device,
+                    onSelect = { scanModel.onSelected(device) },
+                    rssi = result.rssi,
+                )
+            }
         },
     )
 }

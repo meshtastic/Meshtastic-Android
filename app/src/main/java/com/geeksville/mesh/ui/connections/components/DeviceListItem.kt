@@ -24,6 +24,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.BluetoothSearching
@@ -37,16 +38,22 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
+import kotlinx.coroutines.delay
 import no.nordicsemi.android.common.ui.view.RssiIcon
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
@@ -55,6 +62,8 @@ import org.meshtastic.core.strings.add
 import org.meshtastic.core.strings.bluetooth
 import org.meshtastic.core.strings.network
 import org.meshtastic.core.strings.serial
+
+private const val RSSI_UPDATE_RATE_MS = 2000L
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -67,6 +76,20 @@ fun DeviceListItem(
     onDelete: (() -> Unit)? = null,
     rssi: Int? = null,
 ) {
+    // Throttle the RSSI updates to match the connected device polling rate
+    var displayedRssi by remember { mutableIntStateOf(rssi ?: 0) }
+    LaunchedEffect(rssi) {
+        if (displayedRssi == 0) {
+            displayedRssi = rssi ?: 0
+        }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(RSSI_UPDATE_RATE_MS)
+            displayedRssi = rssi ?: 0
+        }
+    }
+
     val icon =
         when (device) {
             is DeviceListEntry.Ble ->
@@ -95,34 +118,44 @@ fun DeviceListItem(
     val interactionSource = remember { MutableInteractionSource() }
     val indication: Indication = LocalIndication.current
 
-    ListItem(
-        modifier =
-        if (useSelectable && onDelete != null) {
-            modifier.fillMaxWidth().indication(interactionSource, indication).pointerInput(onDelete) {
-                detectTapGestures(onTap = { onSelect() }, onLongPress = { onDelete() })
-            }
-        } else if (useSelectable) {
-            modifier.fillMaxWidth().indication(interactionSource, indication).pointerInput(Unit) {
-                detectTapGestures(onTap = { onSelect() })
+    val clickableModifier =
+        if (useSelectable) {
+            Modifier.indication(interactionSource, indication).pointerInput(device.fullAddress, onDelete) {
+                detectTapGestures(onTap = { onSelect() }, onLongPress = onDelete?.let { { it() } })
             }
         } else {
-            modifier.fillMaxWidth()
+            Modifier
+        }
+
+    ListItem(
+        modifier = modifier.fillMaxWidth().then(clickableModifier).padding(vertical = 4.dp),
+        headlineContent = { Text(text = device.name, style = MaterialTheme.typography.titleLarge) },
+        leadingContent = {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                modifier = Modifier.size(32.dp),
+                tint =
+                if (connectionState.isConnected()) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
         },
-        headlineContent = { Text(device.name) },
-        leadingContent = { Icon(icon, contentDescription) },
         supportingContent = {
             if (device is DeviceListEntry.Tcp) {
-                Text(device.address)
+                Text(text = device.address, style = MaterialTheme.typography.bodyLarge)
             }
         },
         trailingContent = {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (rssi != null) {
-                    RssiIcon(rssi = rssi)
+                    RssiIcon(rssi = displayedRssi)
                 }
 
                 if (connectionState.isConnecting()) {
-                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
+                    CircularWavyProgressIndicator(modifier = Modifier.size(32.dp))
                 } else {
                     RadioButton(selected = connectionState.isConnected(), onClick = null)
                 }
