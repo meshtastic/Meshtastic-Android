@@ -26,8 +26,8 @@ import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import com.geeksville.mesh.util.toRemoteExceptions
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope

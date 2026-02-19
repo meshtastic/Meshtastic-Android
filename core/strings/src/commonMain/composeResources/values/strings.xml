@@ -259,6 +259,7 @@
     <string name="debug_filter_clear">Clear all filters</string>
     <string name="debug_filter_add_custom">Add custom filter</string>
     <string name="debug_filter_preset_title">Preset Filters</string>
+    <string name="debug_filter_show_ignored">Only show ignored Nodes</string>
     <string name="debug_store_logs_title">Store mesh logs</string>
     <string name="debug_store_logs_summary">Disable to skip writing mesh logs to disk</string>
     <string name="debug_clear">Clear Logs</string>
@@ -847,13 +848,10 @@
     <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
-    <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
-    <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">No Network devices found.</string>
     <string name="no_usb_devices">No USB Serial devices found.</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Scanning</string>
     <string name="security_icon_description">Security Status</string>
     <string name="security_icon_secure">Secure</string>
     <string name="security_icon_badge_warning_description">Warning Badge</string>
@@ -921,7 +919,7 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
-    <string name="available_bluetooth_devices">Available Bluetooth Devices</string>
+    <string name="bluetooth_available_devices">Available Bluetooth Devices</string>
 
     <string name="get_started">Get started</string>
     <string name="intro_welcome">Welcome to</string>

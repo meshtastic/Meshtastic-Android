@@ -47,9 +47,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
+import com.geeksville.mesh.ui.connections.ScannerViewModel
 import com.geeksville.mesh.ui.connections.isValidAddress
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -75,7 +75,7 @@ fun NetworkDevices(
     discoveredNetworkDevices: List<DeviceListEntry>,
     recentNetworkDevices: List<DeviceListEntry>,
     selectedDevice: String,
-    scanModel: BTScanModel,
+    scanModel: ScannerViewModel,
 ) {
     val searchDialogState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 

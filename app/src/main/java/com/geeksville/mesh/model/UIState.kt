@@ -16,7 +16,6 @@
  */
 package com.geeksville.mesh.model
 
-import android.app.Application
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.LiveData
@@ -102,12 +101,11 @@ fun getInitials(fullName: String): String {
 
 private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
 
-@Suppress("LongParameterList", "LargeClass", "UnusedPrivateProperty")
 @HiltViewModel
+@Suppress("LongParameterList")
 class UIViewModel
 @Inject
 constructor(
-    private val app: Application,
     private val nodeDB: NodeRepository,
     private val serviceRepository: ServiceRepository,
     radioInterfaceService: RadioInterfaceService,

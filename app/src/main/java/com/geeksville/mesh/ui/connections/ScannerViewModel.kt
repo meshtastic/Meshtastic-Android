@@ -14,17 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.model
+package com.geeksville.mesh.ui.connections
 
 import android.app.Application
 import android.content.Context
 import android.hardware.usb.UsbManager
 import android.os.RemoteException
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.geeksville.mesh.model.DeviceListEntry
+import com.geeksville.mesh.model.getMeshtasticShortName
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
@@ -58,7 +59,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
-class BTScanModel
+class ScannerViewModel
 @Inject
 constructor(
     private val application: Application,
@@ -75,10 +76,10 @@ constructor(
     private val context: Context
         get() = application.applicationContext
 
-    val showMockInterface: StateFlow<Boolean>
-        get() = MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
+    val showMockInterface: StateFlow<Boolean> = MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
 
-    val errorText = MutableLiveData<String?>(null)
+    private val _errorText = MutableStateFlow<String?>(null)
+    val errorText: StateFlow<String?> = _errorText.asStateFlow()
 
     private val nodeDb: StateFlow<Map<Int, Node>> = nodeRepository.nodeDBbyNum
 
@@ -87,15 +88,10 @@ constructor(
             .map { ble -> ble.bondedDevices.map { DeviceListEntry.Ble(it) } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    private val scannedBleDevicesFlow: StateFlow<List<DeviceListEntry.Ble>> =
-        bluetoothRepository.scannedDevices
-            .map { peripherals -> peripherals.map { DeviceListEntry.Ble(it) } }
-            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
     // Flow for discovered TCP devices, using recent addresses for potential name enrichment
     private val processedDiscoveredTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
         combine(networkRepository.resolvedList, recentAddressesDataSource.recentAddresses) { tcpServices, recentList ->
-            val recentMap = recentList.associateBy({ it.address }, { it.name })
+            val recentMap = recentList.associateBy({ it.address }) { it.name }
             tcpServices
                 .map { service ->
                     val address = "t${service.toAddressString()}"
@@ -107,7 +103,7 @@ constructor(
                         shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: getString(Res.string.meshtastic)
                     val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
                     var displayName = recentMap[address] ?: shortName
-                    if (deviceId != null && !displayName.split("_").none { it == deviceId }) {
+                    if (deviceId != null && (displayName.split("_").none { it == deviceId })) {
                         displayName += "_$deviceId"
                     }
                     DeviceListEntry.Tcp(displayName, address)
@@ -116,12 +112,10 @@ constructor(
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    /** A combined list of bonded and scanned BLE devices for the UI. */
+    /** A combined list of bonded BLE devices for the UI. */
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(bondedBleDevicesFlow, scannedBleDevicesFlow, nodeDb) { bonded, scanned, db ->
-            val bondedAddresses = bonded.map { it.fullAddress }.toSet()
-            val uniqueScanned = scanned.filterNot { it.fullAddress in bondedAddresses }
-            (bonded + uniqueScanned)
+        combine(bondedBleDevicesFlow, nodeDb) { bonded, db ->
+            bonded
                 .map { entry: DeviceListEntry.Ble ->
                     val matchingNode =
                         if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
@@ -139,13 +133,13 @@ constructor(
             .stateInWhileSubscribed(initialValue = emptyList())
 
     private val usbDevicesFlow: StateFlow<List<DeviceListEntry.Usb>> =
-        usbRepository.serialDevicesWithDrivers
+        usbRepository.serialDevices
             .map { usb -> usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.get(), d) } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     val mockDevice = DeviceListEntry.Mock("Demo Mode")
 
-    // Flow for recent TCP devices, filtered to exclude any currently discovered devices
+    /** UI StateFlow for USB devices. */
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         combine(usbDevicesFlow, showMockInterface) { usb, showMock ->
             val all: List<DeviceListEntry> = usb + if (showMock) listOf(mockDevice) else emptyList()
@@ -168,6 +162,7 @@ constructor(
         }
             .stateInWhileSubscribed(initialValue = if (showMockInterface.value) listOf(mockDevice) else emptyList())
 
+    // Flow for recent TCP devices, filtered to exclude any currently discovered devices
     private val filteredRecentTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
         combine(recentAddressesDataSource.recentAddresses, processedDiscoveredTcpDevicesFlow) {
                 recentList,
@@ -230,35 +225,18 @@ constructor(
             .map { it ?: NO_DEVICE_SELECTED }
             .stateInWhileSubscribed(initialValue = selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
 
-    val spinner: StateFlow<Boolean> = bluetoothRepository.isScanning
-
     init {
-        serviceRepository.connectionProgress.onEach { errorText.value = it }.launchIn(viewModelScope)
-        Logger.d { "BTScanModel created" }
+        serviceRepository.connectionProgress.onEach { _errorText.value = it }.launchIn(viewModelScope)
+        Logger.d { "ScannerViewModel created" }
     }
 
     override fun onCleared() {
         super.onCleared()
-        bluetoothRepository.stopScan()
-        Logger.d { "BTScanModel cleared" }
+        Logger.d { "ScannerViewModel cleared" }
     }
 
     fun setErrorText(text: String) {
-        errorText.value = text
-    }
-
-    fun stopScan() {
-        Logger.d { "stopping scan" }
-        bluetoothRepository.stopScan()
-    }
-
-    fun refreshPermissions() {
-        bluetoothRepository.refreshState()
-    }
-
-    fun startScan() {
-        Logger.d { "starting ble scan" }
-        bluetoothRepository.startScan()
+        _errorText.value = text
     }
 
     private fun changeDeviceAddress(address: String) {

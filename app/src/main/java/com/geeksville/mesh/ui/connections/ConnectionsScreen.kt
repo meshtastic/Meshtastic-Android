@@ -40,7 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -52,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectingDeviceInfo
@@ -62,7 +60,6 @@ import com.geeksville.mesh.ui.connections.components.EmptyStateContent
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.Route
@@ -108,7 +105,7 @@ fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
 @Composable
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = hiltViewModel(),
-    scanModel: BTScanModel = hiltViewModel(),
+    scanModel: ScannerViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
@@ -116,9 +113,8 @@ fun ConnectionsScreen(
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
-    val scanStatusText by scanModel.errorText.observeAsState("")
+    val scanStatusText by scanModel.errorText.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
-    val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
@@ -147,14 +143,6 @@ fun ConnectionsScreen(
                 }
             },
         )
-    }
-
-    // when scanning is true - wait 10000ms and then stop scanning
-    LaunchedEffect(scanning) {
-        if (scanning) {
-            delay(SCAN_PERIOD)
-            scanModel.stopScan()
-        }
     }
 
     LaunchedEffect(connectionState, regionUnset) {
@@ -329,5 +317,3 @@ fun ConnectionsScreen(
         }
     }
 }
-
-private const val SCAN_PERIOD: Long = 10000 // 10 seconds

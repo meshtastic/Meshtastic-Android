@@ -30,8 +30,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
+import com.geeksville.mesh.ui.connections.ScannerViewModel
 import no.nordicsemi.android.common.scanner.rememberFilterState
 import no.nordicsemi.android.common.scanner.view.ScannerView
 import org.jetbrains.compose.resources.stringResource
@@ -39,7 +39,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.discovered_bluetooth_devices
+import org.meshtastic.core.strings.bluetooth_available_devices
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
@@ -51,7 +51,7 @@ import org.meshtastic.core.strings.discovered_bluetooth_devices
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanModel: BTScanModel) {
+fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanModel: ScannerViewModel) {
     val filterState =
         rememberFilterState(
             filter = {
@@ -65,7 +65,7 @@ fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanMod
 
     Column {
         Text(
-            text = stringResource(Res.string.discovered_bluetooth_devices),
+            text = stringResource(Res.string.bluetooth_available_devices),
             modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 16.dp).fillMaxWidth(),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,

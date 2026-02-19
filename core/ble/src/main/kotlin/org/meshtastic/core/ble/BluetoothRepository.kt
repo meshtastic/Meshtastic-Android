@@ -22,13 +22,9 @@ import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -39,7 +35,6 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.time.Duration.Companion.seconds
 
 /** Repository responsible for maintaining and updating the state of Bluetooth availability. */
 @Singleton
@@ -50,7 +45,6 @@ constructor(
     @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val centralManager: CentralManager,
     private val androidEnvironment: AndroidEnvironment,
-    private val bleScanner: BleScanner,
 ) {
     private val _state =
         MutableStateFlow(
@@ -61,14 +55,6 @@ constructor(
             ),
         )
     val state: StateFlow<BluetoothState> = _state.asStateFlow()
-
-    private val _scannedDevices = MutableStateFlow<List<Peripheral>>(emptyList())
-    val scannedDevices: StateFlow<List<Peripheral>> = _scannedDevices.asStateFlow()
-
-    private val _isScanning = MutableStateFlow(false)
-    val isScanning: StateFlow<Boolean> = _isScanning.asStateFlow()
-
-    private var scanJob: Job? = null
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
@@ -82,40 +68,6 @@ constructor(
 
     /** @return true for a valid Bluetooth address, false otherwise */
     fun isValid(bleAddress: String): Boolean = BluetoothAdapter.checkBluetoothAddress(bleAddress)
-
-    /** Starts a BLE scan for Meshtastic devices. The results are published to the [scannedDevices] flow. */
-    @SuppressLint("MissingPermission")
-    fun startScan() {
-        if (isScanning.value) return
-
-        scanJob?.cancel()
-        _scannedDevices.value = emptyList()
-
-        scanJob =
-            processLifecycle.coroutineScope.launch(dispatchers.default) {
-                bleScanner
-                    .scan(5.seconds) { ServiceUuid(SERVICE_UUID) }
-                    .onStart { _isScanning.value = true }
-                    .onCompletion { _isScanning.value = false }
-                    .catch { ex ->
-                        Logger.w(ex) { "Bluetooth scan failed" }
-                        _isScanning.value = false
-                    }
-                    .collect { peripheral ->
-                        // Add or update the peripheral in our list
-                        val currentList = _scannedDevices.value
-                        _scannedDevices.value =
-                            (currentList.filterNot { it.address == peripheral.address } + peripheral)
-                    }
-            }
-    }
-
-    /** Stops the currently active BLE scan. */
-    fun stopScan() {
-        scanJob?.cancel()
-        scanJob = null
-        _isScanning.value = false
-    }
 
     /**
      * Initiates bonding with the given peripheral. This is a suspending function that completes when the bonding

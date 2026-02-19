@@ -79,7 +79,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
 import com.geeksville.mesh.navigation.connectionsGraph
@@ -91,6 +90,7 @@ import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.DeviceType
+import com.geeksville.mesh.ui.connections.ScannerViewModel
 import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -160,7 +160,7 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanModel = hiltViewModel()) {
+fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) } }
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
