@@ -19,15 +19,16 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - Write clear, descriptive variable and function names.
 - Add comments where necessary, especially for complex logic.
 - Keep methods and classes focused and concise.
-- Use localised strings; edit the English [`strings.xml`](app/src/main/res/values/strings.xml) file. CrowdIn will manage translations to other languages.
-  - For example,
-
+- **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:strings`.
+  - Do **not** use the legacy `app/src/main/res/values/strings.xml`.
+  - **Definition:** Add strings to `core/strings/src/commonMain/composeResources/values/strings.xml`.
+  - **Usage:**
     ```kotlin
-    // instead of hardcoding a string in your code:
-    Text("Settings")
+    import org.jetbrains.compose.resources.stringResource
+    import org.meshtastic.core.strings.Res
+    import org.meshtastic.core.strings.your_string_key
 
-    // use the localised string resource:
-    Text(stringResource(R.string.settings))
+    Text(text = stringResource(Res.string.your_string_key))
     ```
 
 ### Linting
@@ -45,8 +46,8 @@ Consistent linting helps keep the codebase clean and maintainable.
 
 Meshtastic-Android uses both unit tests and instrumented UI tests to ensure code quality and reliability.
 
-- **Unit tests** are located in `app/src/test/java/` and should be written for all new logic where possible.
-- **Instrumented tests** (including UI tests using Jetpack Compose) are located in `app/src/androidTest/java/`. For Compose UI, use the [Jetpack Compose Testing APIs](https://developer.android.com/jetpack/compose/testing).
+- **Unit tests** are located in the `src/test/` directory of each module.
+- **Instrumented tests** (including UI tests using Jetpack Compose) are located in `src/androidTest/`. For Compose UI, use the [Jetpack Compose Testing APIs](https://developer.android.com/jetpack/compose/testing).
 
 #### Guidelines for Testing
 
@@ -54,7 +55,7 @@ Meshtastic-Android uses both unit tests and instrumented UI tests to ensure code
 - Ensure all tests pass by running:
   - `./gradlew test` for unit tests
   - `./gradlew connectedAndroidTest` for instrumented tests
-- For UI components, write Compose UI tests to verify user interactions and visual elements. See existing tests in `DebugFiltersTest.kt` for examples.
+- For UI components, write Compose UI tests to verify user interactions and visual elements.
 - If your change is difficult to test, explain why in your pull request.
 
 Comprehensive testing helps prevent regressions and ensures a stable experience for all users.
@@ -70,7 +71,7 @@ Comprehensive testing helps prevent regressions and ensures a stable experience 
     - reserved (release, automation)
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.
-- Inlude information on how to test and/or replicate if it is not obvious.
+- Include information on how to test and/or replicate if it is not obvious.
 - Include screenshots or logs if your change affects the UI or user experience.
 - Be responsive to feedback and make requested changes promptly.
 - Squash commits if requested by a maintainer.

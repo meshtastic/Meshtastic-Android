@@ -1,11 +1,28 @@
 # `:core:common`
 
+## Overview
+The `:core:common` module contains low-level utility functions, extensions, and common data structures that do not depend on any other Meshtastic-specific modules. It is designed to be highly reusable across the project.
+
+## Key Components
+
+### 1. `util` package
+Contains general-purpose extensions and helpers:
+- **Coroutines**: Helpers for structured concurrency and Flow transformations.
+- **Time**: Utilities for handling timestamps and durations.
+- **Exceptions**: Standardized exception types for common error scenarios.
+
+### 2. `ByteUtils.kt`
+Low-level operations for working with `ByteArray` and binary data, essential for parsing radio protocol packets.
+
+### 3. `BuildConfigProvider.kt`
+An interface for accessing build-time configuration in a multiplatform-friendly way.
+
 ## Module dependency graph
 
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:common[common]:::null
+  :core:common[common]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

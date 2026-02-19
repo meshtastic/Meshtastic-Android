@@ -25,7 +25,12 @@ The `NodeInfoDao` implements specific logic to protect against impersonation and
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:database[database]:::null
+  :core:database[database]:::android-library
+  :core:database -.-> :core:common
+  :core:database -.-> :core:di
+  :core:database -.-> :core:model
+  :core:database -.-> :core:proto
+  :core:database -.-> :core:strings
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
