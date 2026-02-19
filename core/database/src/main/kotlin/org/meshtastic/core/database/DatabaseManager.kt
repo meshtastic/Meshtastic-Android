@@ -115,6 +115,13 @@ class DatabaseManager @Inject constructor(private val app: Application, private 
     /** Execute [block] with the current DB instance. */
     inline fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
 
+    /** Returns true if a database exists for the given device address. */
+    fun hasDatabaseFor(address: String?): Boolean {
+        if (address.isNullOrBlank() || address == "n") return false
+        val dbName = buildDbName(address)
+        return getDbFile(app, dbName) != null
+    }
+
     private fun markLastUsed(dbName: String) {
         prefs.edit().putLong(lastUsedKey(dbName), nowMillis).apply()
     }

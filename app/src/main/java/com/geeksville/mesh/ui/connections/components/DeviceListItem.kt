@@ -62,6 +62,7 @@ import org.meshtastic.core.strings.add
 import org.meshtastic.core.strings.bluetooth
 import org.meshtastic.core.strings.network
 import org.meshtastic.core.strings.serial
+import org.meshtastic.core.ui.component.NodeChip
 
 private const val RSSI_UPDATE_RATE_MS = 2000L
 
@@ -129,7 +130,12 @@ fun DeviceListItem(
 
     ListItem(
         modifier = modifier.fillMaxWidth().then(clickableModifier).padding(vertical = 4.dp),
-        headlineContent = { Text(text = device.name, style = MaterialTheme.typography.titleLarge) },
+        headlineContent = {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                device.node?.let { node -> NodeChip(node = node) }
+                    ?: Text(text = device.name, style = MaterialTheme.typography.titleLarge)
+            }
+        },
         leadingContent = {
             Icon(
                 imageVector = icon,
@@ -143,11 +149,7 @@ fun DeviceListItem(
                 },
             )
         },
-        supportingContent = {
-            if (device is DeviceListEntry.Tcp) {
-                Text(text = device.address, style = MaterialTheme.typography.bodyLarge)
-            }
-        },
+        supportingContent = { Text(text = device.address, style = MaterialTheme.typography.bodyLarge) },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (rssi != null) {
