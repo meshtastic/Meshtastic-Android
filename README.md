@@ -56,6 +56,19 @@ You can generate the documentation locally to preview your changes.
 2.  **View the output:**
     The generated HTML files will be located in the `app/build/dokka/html` directory. You can open the `index.html` file in your browser to view the documentation.
 
+## Architecture
+
+### Modern Android Development (MAD)
+The app follows modern Android development practices:
+- **UI:** Jetpack Compose (Material 3).
+- **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
+- **Dependency Injection:** Hilt.
+- **Navigation:** Type-Safe Navigation (Jetpack Navigation).
+- **Data Layer:** Repository pattern with Room (local DB), DataStore (prefs), and Protobuf (device comms).
+
+### Bluetooth Low Energy (BLE)
+The BLE stack has been modernized to use **Nordic Semiconductor's Android Common Libraries** and **Kotlin BLE Library**. This provides a robust, Coroutine-based architecture for reliable device communication. See [core/ble/README.md](core/ble/README.md) for details.
+
 ## Translations
 
 You can help translate the app into your native language using [Crowdin](https://crowdin.meshtastic.org/android).
