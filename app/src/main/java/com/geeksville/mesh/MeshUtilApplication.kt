@@ -52,7 +52,7 @@ open class MeshUtilApplication :
     Application(),
     Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
-    
+
     private val applicationScope = CoroutineScope(Dispatchers.Default)
 
     override fun onCreate() {
@@ -64,9 +64,7 @@ open class MeshUtilApplication :
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
-        applicationScope.launch {
-            entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress)
-        }
+        applicationScope.launch { entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress) }
     }
 
     override fun onTerminate() {

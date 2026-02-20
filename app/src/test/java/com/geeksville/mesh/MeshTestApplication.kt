@@ -22,8 +22,8 @@ import dagger.hilt.android.EntryPointAccessors
 /**
  * A lightweight application class for Robolectric tests.
  *
- * It prevents heavy background initialization (WorkManager, DatabaseManager) by default
- * to avoid resource leaks and flaky native SQLite issues on the JVM.
+ * It prevents heavy background initialization (WorkManager, DatabaseManager) by default to avoid resource leaks and
+ * flaky native SQLite issues on the JVM.
  */
 class MeshTestApplication : MeshUtilApplication() {
 
@@ -43,9 +43,7 @@ class MeshTestApplication : MeshUtilApplication() {
     }
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setMinimumLoggingLevel(android.util.Log.DEBUG)
-            .build()
+        get() = Configuration.Builder().setMinimumLoggingLevel(android.util.Log.DEBUG).build()
 
     companion object {
         /** Set to true in a test @Before block if you need real DB/WorkManager init. */

@@ -312,6 +312,7 @@
     <string name="rssi_definition">Показник рівня потужності сигналу — вимірювання, що використовується для визначення рівня потужності, що приймається антеною. Вище значення RSSI зазвичай вказує на міцніше та стабільніше з'єднання.</string>
     <string name="device_metrics_log">Показники пристрою</string>
     <string name="node_map">Мапа вузлів</string>
+    <string name="position_log">Місцезнаходження</string>
     <string name="env_metrics_log">Показники довкілля</string>
     <string name="administration">Адміністрування</string>
     <string name="remote_admin">Віддалене керування</string>
@@ -361,6 +362,7 @@
     <string name="user">Користувач</string>
     <string name="channels">Канали</string>
     <string name="device">Пристрій</string>
+    <string name="position">Місцезнаходження</string>
     <string name="power">Живлення</string>
     <string name="network">Мережа</string>
     <string name="display">Дисплей</string>
@@ -384,6 +386,7 @@
     <string name="bluetooth_enabled">Bluetooth увімкнено</string>
     <string name="fixed_pin">Фіксований PIN</string>
     <string name="default_">За замовчуванням</string>
+    <string name="position_enabled">Місцезнаходження увімкнено</string>
     <string name="gpio_pin">GPIO контакт</string>
     <string name="type">Тип</string>
     <string name="hide_password">Приховати пароль</string>
@@ -460,6 +463,8 @@
     <string name="gateway">Шлюз</string>
     <string name="wifi_rssi_threshold_defaults_to_80">RSSI поріг WiFi (за замовчуванням -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">RSSI поріг BLE (за замовчуванням -80)</string>
+    <string name="position_config">Місцезнаходження</string>
+    <string name="use_fixed_position">Використовувати зафіксоване місцезнаходження</string>
     <string name="latitude">Широта</string>
     <string name="longitude">Довгота</string>
     <string name="altitude_meters">Висота (метри)</string>
@@ -630,13 +635,14 @@
     <string name="stay_connected_anywhere">Залишайтесь на зв'язку будь-де</string>
     <string name="create_your_own_networks">Створюйте власні мережі</string>
     <string name="easily_set_up_private_mesh_networks">Легко налаштовуйте приватні mesh-мережі для безпечного та надійного зв'язку у віддалених районах.</string>
+    <string name="track_and_share_locations">Відстежуйте та діліться місцезнаходженням</string>
     <string name="app_notifications">Сповіщення застосунку</string>
     <string name="incoming_messages">Вхідні повідомлення</string>
     <string name="notifications_for_channel_and_direct_messages">Сповіщення для каналу та особистих повідомлень.</string>
     <string name="new_nodes">Нові Вузли</string>
     <string name="low_battery">Низький заряд батареї</string>
     <string name="configure_notification_permissions">Налаштувати дозволи для сповіщень</string>
-    <string name="share_location">Поділитися місцеперебуванням</string>
+    <string name="share_location">Поділитися місцезнаходженням</string>
     <string name="distance_measurements">Вимірювання відстані</string>
     <string name="distance_filters">Фільтри відстані</string>
     <string name="skip">Пропустити</string>

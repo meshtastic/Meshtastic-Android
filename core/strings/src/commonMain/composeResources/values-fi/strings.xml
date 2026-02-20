@@ -534,6 +534,7 @@
     <string name="state_broadcast_seconds">Tilatiedon lähetys (sekuntia)</string>
     <string name="send_bell_with_alert_message">Lähetä äänimerkki hälytyssanoman kanssa</string>
     <string name="friendly_name">Käyttäjäystävällinen nimi</string>
+    <string name="friendly_address">Helppolukuinen osoite</string>
     <string name="gpio_pin_to_monitor">GPIO-pinni valvontaa varten</string>
     <string name="detection_trigger_type">Tunnistuksen tyyppi</string>
     <string name="use_input_pullup_mode">Käytä INPUT_PULLUP tilaa</string>
@@ -870,6 +871,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">PAX mittareita ei ole saatavilla.</string>
     <string name="wifi_devices">WiFi-laitteet</string>
+    <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="bluetooth_paired_devices">Paritetut laitteet</string>
     <string name="connected_device">Yhdistetty laite</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
@@ -882,6 +884,7 @@
     <string name="firmware_edition">Laiteohjelmistoversio</string>
     <string name="recent_network_devices">Äskettäin havaitut verkkolaitteet</string>
     <string name="discovered_network_devices">Löydetyt verkkolaitteet</string>
+    <string name="bluetooth_available_devices">Saatavilla olevat Bluetooth-laitteet</string>
     <string name="get_started">Näin pääset alkuun</string>
     <string name="intro_welcome">Tervetuloa</string>
     <string name="stay_connected_anywhere">Pysy yhteydessä kaikkialla</string>
@@ -974,9 +977,14 @@
     <string name="system_settings">Järjestelmäasetukset</string>
     <string name="no_local_stats">Tilastoja ei ole saatavilla</string>
     <string name="analytics_notice">Analytiikkatietoja kerätään auttamaan meitä parantamaan Android-sovellusta (kiitos siitä). Saamme anonymisoitua tietoa käyttäjien toiminnasta, kuten kaatumisraportteja ja tietoa sovelluksessa käytetyistä näkymistä jne.</string>
+    <string name="analytics_platforms">Analytiikkapalvelut</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Kuultu %1$d radion kautta</item>
+        <item quantity="other">Kuultu %1$d radion kautta</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="learn_more">Lue lisää</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
@@ -1024,6 +1032,7 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_waiting_for_device">Odottaa DFU-laitetta...</string>
+    <string name="firmware_update_copying">Ylävitonen! Odota, laiteohjelmistoa kopioidaan…</string>
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
     <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
     <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
@@ -1063,6 +1072,14 @@
     <string name="back">Edellinen</string>
     <string name="interval_unset">Ei yhdistetty</string>
     <string name="interval_always_on">Aina päällä</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d sekunti</item>
+        <item quantity="other">%1$d sekuntia</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d minuutti</item>
+        <item quantity="other">%1$d minuuttia</item>
+    </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d tunti</item>
         <item quantity="other">%1$d tuntia</item>
@@ -1116,5 +1133,14 @@
     <string name="nfc_disabled">NFC on poistettu käytöstä. Ota se käyttöön järjestelmäasetuksista.</string>
     <string name="all_time">Kaikki</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Määritä Bluetooth-oikeudet</string>
+    <string name="connect_to_radio">Yhdistä radioon</string>
+    <string name="connect_to_radio_description">Etsi Meshtastic-laitteita ja yhdistä niihin.</string>
+    <string name="bluetooth_feature_discovery">Haku</string>
+    <string name="bluetooth_feature_discovery_description">Etsi ja tunnista lähelläsi olevia Meshtastic-laitteita.</string>
     <string name="bluetooth_feature_config">Asetukset</string>
+    <string name="bluetooth_feature_config_description">Hallitse laitteesi asetuksia ja kanavia langattomasti.</string>
+    <string name="permission_granted">Lupa myönnetty</string>
+    <string name="permission_denied">Lupa evätty</string>
+    <string name="map_style_selection">Karttatyylin valinta</string>
 </resources>
