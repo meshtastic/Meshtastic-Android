@@ -988,6 +988,10 @@
     <string name="back">Tillbaka</string>
     <string name="interval_unset">Ej inställd</string>
     <string name="interval_always_on">Alltid på</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d timme</item>
+        <item quantity="other">%1$d timmar</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
     <string name="open_compass">Visa kompass</string>

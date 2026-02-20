@@ -617,6 +617,11 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualizare eșuată</string>
     <string name="interval_unset">Nesetat</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d oră</item>
+        <item quantity="few">%1$d ore</item>
+        <item quantity="other">%1$d de ore</item>
+    </plurals>
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="all_time">Toate</string>

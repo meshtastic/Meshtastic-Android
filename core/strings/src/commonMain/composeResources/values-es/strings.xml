@@ -893,6 +893,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="firmware_update_channel_name">Actualización de firmware</string>
     <string name="interval_unset">Sin configurar</string>
     <string name="interval_always_on">Siempre encendido</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d hora</item>
+        <item quantity="other">%1$d horas</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Brújula</string>
     <string name="open_compass">Abrir brújula</string>
