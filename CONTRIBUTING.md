@@ -44,18 +44,20 @@ Consistent linting helps keep the codebase clean and maintainable.
 
 ### Testing
 
-Meshtastic-Android uses both unit tests and instrumented UI tests to ensure code quality and reliability.
+Meshtastic-Android uses unit tests, Robolectric JVM tests, and instrumented UI tests to ensure code quality and reliability.
 
 - **Unit tests** are located in the `src/test/` directory of each module.
-- **Instrumented tests** (including UI tests using Jetpack Compose) are located in `src/androidTest/`. For Compose UI, use the [Jetpack Compose Testing APIs](https://developer.android.com/jetpack/compose/testing).
+- **Compose UI Tests (JVM)** are preferred for component testing and are also located in `src/test/` using **Robolectric**. 
+    - Note: If using Java 17, pin your Robolectric tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility issues.
+- **Instrumented tests** (including full E2E UI tests) are located in `src/androidTest/`. For Compose UI, use the [Jetpack Compose Testing APIs](https://developer.android.com/jetpack/compose/testing).
 
 #### Guidelines for Testing
 
 - Add or update tests for any new features or bug fixes.
 - Ensure all tests pass by running:
-  - `./gradlew test` for unit tests
+  - `./gradlew test` for unit and Robolectric tests
   - `./gradlew connectedAndroidTest` for instrumented tests
-- For UI components, write Compose UI tests to verify user interactions and visual elements.
+- For UI components, write Robolectric Compose tests where possible for faster execution.
 - If your change is difficult to test, explain why in your pull request.
 
 Comprehensive testing helps prevent regressions and ensures a stable experience for all users.

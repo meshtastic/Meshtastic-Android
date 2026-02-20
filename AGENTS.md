@@ -64,6 +64,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   **Location:** Core logic resides in `core/ble`.
 -   **Key Classes:** `BluetoothRepository`, `NordicBleInterface`, `BleConnection`.
 -   **Usage:** Use `BluetoothRepository` for scanning and bonding. Use `BleConnection` for managing connections. Avoid legacy `BluetoothAdapter` APIs directly.
+-   **Environment Mocking:** Use `LocalEnvironmentOwner` and `MockAndroidEnvironment` to test UI hardware reactions without a real device.
 
 ### E. Dependency Management
 -   **Never** hardcode versions in `build.gradle.kts` files.
@@ -90,7 +91,10 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
 ### C. Testing
 -   **Unit Tests:** JUnit 4/5 in `src/test/java`. Run with `./gradlew test`.
--   **UI Tests:** Espresso/Compose in `src/androidTest/java`. Run with `./gradlew connectedAndroidTest`.
+-   **Compose UI Tests (JVM):** Preferred for component testing. Use **Robolectric** in `src/test/java`.
+    -   **Important:** Annotate with `@Config(sdk = [34])` if using Java 17 to avoid SDK 35 compatibility issues.
+    -   **Best Practice:** Pass mocked ViewModels to Composables instead of using Hilt in Robolectric tests.
+-   **Instrumented Tests:** For full E2E or Hilt integration tests, use `src/androidTest/java`. Run with `./gradlew connectedAndroidTest`.
 -   **Feature Test:** `./gradlew feature:settings:testGoogleDebug`
 
 ## 5. Agent Workflow
