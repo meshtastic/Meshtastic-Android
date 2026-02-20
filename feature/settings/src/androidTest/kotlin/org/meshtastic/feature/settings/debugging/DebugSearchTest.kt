@@ -31,7 +31,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.meshtastic.core.strings.getString
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,6 +38,7 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.debug_active_filters
 import org.meshtastic.core.strings.debug_default_search
 import org.meshtastic.core.strings.debug_filters
+import org.meshtastic.core.strings.getString
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState

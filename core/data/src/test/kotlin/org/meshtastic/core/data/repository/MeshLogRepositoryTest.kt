@@ -28,6 +28,7 @@ import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.MeshtasticDatabase
@@ -35,7 +36,6 @@ import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.EnvironmentMetrics

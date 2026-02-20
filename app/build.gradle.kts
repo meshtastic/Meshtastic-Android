@@ -141,7 +141,10 @@ configure<ApplicationExtension> {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
-        named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
+        named("google") {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google"
+            manifestPlaceholders["MAPS_API_KEY"] = "dummy"
+        }
         named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
 
@@ -158,6 +161,8 @@ configure<ApplicationExtension> {
         }
     }
     bundle { language { enableSplit = false } }
+
+    testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 secrets {
@@ -275,6 +280,8 @@ dependencies {
     testImplementation(libs.nordic.core.mock)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.ext.junit)
 }
 
 aboutLibraries {

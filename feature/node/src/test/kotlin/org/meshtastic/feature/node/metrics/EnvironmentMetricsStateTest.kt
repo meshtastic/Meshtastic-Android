@@ -19,7 +19,7 @@ package org.meshtastic.feature.node.metrics
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Telemetry
 
