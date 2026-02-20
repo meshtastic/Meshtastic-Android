@@ -378,6 +378,7 @@
     <string name="audio">Аудіо</string>
     <string name="remote_hardware">Віддалене обладнання</string>
     <string name="neighbor_info">Інформація про сусідів</string>
+    <string name="detection_sensor">Датчик виявлення</string>
     <string name="audio_config">Налаштування аудіо</string>
     <string name="codec_2_enabled">CODEC 2 увімкнено</string>
     <string name="ptt_pin">PTT контакт</string>
@@ -401,6 +402,8 @@
     <string name="messages">Повідомлення</string>
     <string name="device_db_cache_limit_summary">Макс. кількість баз даних, що зберігаються на цьому телефоні</string>
     <string name="log_retention_never">Ніколи не видаляти журнали</string>
+    <string name="detection_sensor_config">Налаштування датчика виявлення</string>
+    <string name="detection_sensor_enabled">Датчик виявлення увімкнено</string>
     <string name="friendly_name">Дружня назва</string>
     <string name="gpio_pin_to_monitor">GPIO контакт для моніторингу</string>
     <string name="use_input_pullup_mode">Використовувати режим INPUT_PULLUP</string>
@@ -445,7 +448,9 @@
     <string name="encryption_enabled">Шифрування увімкнено</string>
     <string name="json_output_enabled">Вивід JSON увімкнено</string>
     <string name="tls_enabled">TLS увімкнений</string>
-    <string name="proxy_to_client_enabled">Proxy для клієнта увімкнуто</string>
+    <string name="proxy_to_client_enabled">Проксі для клієнта увімкнуто</string>
+    <string name="neighbor_info_config">Налаштування інформації про сусідів</string>
+    <string name="neighbor_info_enabled">Інформацію про сусідів увімкнено</string>
     <string name="update_interval_seconds">Інтервал оновлення (секунд)</string>
     <string name="transmit_over_lora">Передавати через LoRa</string>
     <string name="network_config">Мережа</string>
@@ -673,6 +678,7 @@
     <string name="channel_features">Характеристики каналу</string>
     <string name="icon_meanings">Значення іконок</string>
     <string name="device_configuration">Налаштування пристрою</string>
+    <string name="device_telemetry_enabled">Надсилати телеметрію пристрою</string>
     <string name="one_hour">1 година</string>
     <string name="eight_hours">8 Годин</string>
     <string name="one_day">24 Годин</string>
@@ -784,6 +790,7 @@
     <string name="filter_enable_for_contact">Увімкнути фільтрацію</string>
     <string name="filter_disable_for_contact">Вимкнути фільтрацію</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
+    <string name="nfc_disabled">NFC вимкнено. Будь ласка, увімкніть його у системних налаштуваннях.</string>
     <string name="all_time">Усі</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Налаштування</string>
