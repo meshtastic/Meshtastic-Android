@@ -120,9 +120,16 @@ jobs:
             fi
           fi
           
-          # Run coverage report if any tests were executed
-          if [[ $TASKS == *"test"* ]]; then
-             TASKS="$TASKS koverXmlReport"
+          # Run coverage report if unit tests were executed
+          if [ "${{ inputs.run_unit_tests }}" = "true" ] && [ "$IS_FIRST_API" = "true" ]; then
+            if [ "$IS_FIRST_FLAVOR" = "true" ]; then
+              TASKS="$TASKS koverXmlReportDebug "
+            fi
+            if [ "$FLAVOR" = "google" ]; then
+              TASKS="$TASKS koverXmlReportGoogleDebug "
+            elif [ "$FLAVOR" = "fdroid" ]; then
+              TASKS="$TASKS koverXmlReportFdroidDebug "
+            fi
           fi
           
           echo "tasks=$TASKS" >> $GITHUB_OUTPUT
@@ -160,7 +167,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          files: "**/build/reports/kover/report.xml"
+          files: "**/build/reports/kover/report*.xml"
 
       - name: Upload test results to Codecov
         if: ${{ !cancelled() }}
