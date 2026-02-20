@@ -17,7 +17,7 @@
 package org.meshtastic.feature.map
 
 import android.database.Cursor
-import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.common.util.nowMillis
 import org.osmdroid.tileprovider.modules.DatabaseFileArchive
 import org.osmdroid.tileprovider.modules.SqlTileWriter
 

@@ -29,8 +29,8 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.ui.component.NodeChip
 
 @Composable

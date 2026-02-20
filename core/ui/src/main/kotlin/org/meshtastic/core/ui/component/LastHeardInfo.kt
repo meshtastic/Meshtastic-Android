@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.node_sort_last_heard
 import org.meshtastic.core.ui.R

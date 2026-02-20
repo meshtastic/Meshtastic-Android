@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kermit)
+    implementation(libs.nordic.common.core)
+    implementation(libs.nordic.common.permissions.ble)
 
     testImplementation(libs.junit)
     testImplementation(libs.robolectric)

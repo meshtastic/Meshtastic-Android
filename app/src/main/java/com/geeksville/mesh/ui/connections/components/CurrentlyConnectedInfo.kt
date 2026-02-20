@@ -43,6 +43,7 @@ import co.touchlab.kermit.Logger
 import com.geeksville.mesh.model.DeviceListEntry
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
+import no.nordicsemi.android.common.ui.view.RssiIcon
 import no.nordicsemi.kotlin.ble.client.exception.OperationFailedException
 import no.nordicsemi.kotlin.ble.client.exception.PeripheralNotConnectedException
 import org.jetbrains.compose.resources.stringResource
@@ -51,7 +52,6 @@ import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.disconnect
 import org.meshtastic.core.strings.firmware_version
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
-import org.meshtastic.core.ui.component.MaterialBluetoothSignalInfo
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
@@ -60,8 +60,8 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User
 import kotlin.time.Duration.Companion.seconds
 
-private const val RSSI_DELAY = 10
-private const val RSSI_TIMEOUT = 5
+private const val RSSI_DELAY = 2
+private const val RSSI_TIMEOUT = 1
 
 @Suppress("LongMethod", "LoopWithTooManyJumpStatements", "TooGenericExceptionCaught")
 @Composable
@@ -104,7 +104,7 @@ fun CurrentlyConnectedInfo(
         ) {
             MaterialBatteryInfo(level = node.batteryLevel, voltage = node.voltage)
             if (bleDevice is DeviceListEntry.Ble) {
-                MaterialBluetoothSignalInfo(rssi)
+                RssiIcon(rssi = rssi)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {

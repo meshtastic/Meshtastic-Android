@@ -20,6 +20,7 @@ include(
     ":core:analytics",
     ":core:api",
     ":core:barcode",
+    ":core:ble",
     ":core:common",
     ":core:data",
     ":core:database",

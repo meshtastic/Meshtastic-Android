@@ -1,0 +1,46 @@
+/*
+ * Copyright (c) 2025-2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.common.util
+
+import android.os.RemoteException
+import co.touchlab.kermit.Logger
+
+/**
+ * Wraps and discards exceptions, but reports them to the crash reporter before logging. Use this for operations that
+ * should not crash the process but are still unexpected.
+ */
+fun exceptionReporter(inner: () -> Unit) {
+    try {
+        inner()
+    } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+        Exceptions.report(ex, "exceptionReporter", "Uncaught Exception")
+    }
+}
+
+/**
+ * Wraps an operation and converts any thrown exceptions into [RemoteException] for safe return through an AIDL
+ * interface.
+ */
+fun <T> toRemoteExceptions(inner: () -> T): T = try {
+    inner()
+} catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+    Logger.e(ex) { "Uncaught exception in service call, returning RemoteException to client" }
+    when (ex) {
+        is RemoteException -> throw ex
+        else -> throw RemoteException(ex.message).apply { initCause(ex) }
+    }
+}

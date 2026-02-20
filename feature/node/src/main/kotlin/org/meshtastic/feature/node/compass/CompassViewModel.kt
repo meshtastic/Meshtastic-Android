@@ -29,12 +29,12 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.proto.Config

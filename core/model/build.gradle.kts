@@ -55,6 +55,7 @@ afterEvaluate {
 
 dependencies {
     api(projects.core.proto)
+    api(projects.core.common)
 
     api(libs.androidx.annotation)
     api(libs.kotlinx.serialization.json)

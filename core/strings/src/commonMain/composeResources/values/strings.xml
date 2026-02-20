@@ -259,6 +259,7 @@
     <string name="debug_filter_clear">Clear all filters</string>
     <string name="debug_filter_add_custom">Add custom filter</string>
     <string name="debug_filter_preset_title">Preset Filters</string>
+    <string name="debug_filter_show_ignored">Only show ignored Nodes</string>
     <string name="debug_store_logs_title">Store mesh logs</string>
     <string name="debug_store_logs_summary">Disable to skip writing mesh logs to disk</string>
     <string name="debug_clear">Clear Logs</string>
@@ -303,7 +304,6 @@
     <string name="select_all">Select all</string>
     <string name="close_selection">Close selection</string>
     <string name="delete_selection">Delete selected</string>
-    <string name="map_style_selection">Style Selection</string>
     <string name="map_download_region">Download Region</string>
     <string name="name">Name</string>
     <string name="description">Description</string>
@@ -561,6 +561,7 @@
     <string name="state_broadcast_seconds">State broadcast (seconds)</string>
     <string name="send_bell_with_alert_message">Send bell with alert message</string>
     <string name="friendly_name">Friendly name</string>
+    <string name="friendly_address">Friendly address</string>
     <string name="gpio_pin_to_monitor">GPIO pin to monitor</string>
     <string name="detection_trigger_type">Detection trigger type</string>
     <string name="use_input_pullup_mode">Use INPUT_PULLUP mode</string>
@@ -847,13 +848,10 @@
     <string name="node_count_template">(%1$d online / %2$d shown / %3$d total)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
-    <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
-    <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">No Network devices found.</string>
     <string name="no_usb_devices">No USB Serial devices found.</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Scanning</string>
     <string name="security_icon_description">Security Status</string>
     <string name="security_icon_secure">Secure</string>
     <string name="security_icon_badge_warning_description">Warning Badge</string>
@@ -908,9 +906,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">No PAX metrics available.</string>
     <string name="wifi_devices">WiFi Devices</string>
-    <string name="ble_devices">BLE Devices</string>
     <string name="bluetooth_paired_devices">Paired devices</string>
-    <string name="bluetooth_available_devices">Available devices</string>
     <string name="connected_device">Connected Device</string>
 
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
@@ -923,6 +919,7 @@
     <string name="firmware_edition">Firmware Edition</string>
     <string name="recent_network_devices">Recent Network Devices</string>
     <string name="discovered_network_devices">Discovered Network Devices</string>
+    <string name="bluetooth_available_devices">Available Bluetooth Devices</string>
 
     <string name="get_started">Get started</string>
     <string name="intro_welcome">Welcome to</string>
@@ -1019,17 +1016,14 @@
 
 
     <string name="analytics_notice">Analytics are collected to help us improve the Android app (thank you), we will receive anonymized information about user behavior. This includes crash reports, screens used in the app, etc.</string>
-    <string name="analytics_platforms">"Analytics platforms: "</string>
-    <string name="firebase_link" translatable="false">Firebase https://firebase.google.com/</string>
-    <string name="datadog_link" translatable="false">Datadog  https://www.datadoghq.com/</string>
+    <string name="analytics_platforms">Analytics platforms:</string>
+    <string name="firebase_link" translatable="false">Firebase: https://firebase.google.com/</string>
+    <string name="datadog_link" translatable="false">Datadog: https://www.datadoghq.com/</string>
     <string name="for_more_information_see_our_privacy_policy">For more information, see our privacy policy.</string>
-    <string name="privacy_url" translatable="false">" https://meshtastic.org/docs/legal/privacy/"</string>
+    <string name="privacy_url" translatable="false">https://meshtastic.org/docs/legal/privacy/</string>
     <string name="unset">Unset - 0</string>
     <string name="relayed_by">Relayed by: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Heard %1$d Relay</item>
-        <item quantity="other">Heard %1$d Relays</item>
-    </plurals>
+    <string name="relays">Heard relays: %1$d</string>
 
     <string name="firmware_update_usb_bootloader_warning">%1$s usually ships with a bootloader that does not support OTA updates. You may need to flash an OTA-capable bootloader over USB before flashing OTA.</string>
     <string name="learn_more">Learn more</string>
@@ -1079,7 +1073,7 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Rebooting to DFU...</string>
     <string name="firmware_update_waiting_for_device">Waiting for DFU device...</string>
-    <string name="firmware_update_copying">Copying firmware...</string>
+    <string name="firmware_update_copying">High-five! Wait, copying firmware...</string>
     <string name="firmware_update_save_dfu_file">Please save the .uf2 file to your device&apos;s DFU drive.</string>
     <string name="firmware_update_flashing">Flashing device, please wait...</string>
     <string name="firmware_update_method_usb">USB File Transfer</string>
@@ -1119,18 +1113,9 @@
 
     <string name="interval_unset">Unset</string>
     <string name="interval_always_on">Always On</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 second</item>
-        <item quantity="other">%1$d seconds</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minute</item>
-        <item quantity="other">%1$d minutes</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 hour</item>
-        <item quantity="other">%1$d hours</item>
-    </plurals>
+    <string name="plurals_seconds">Seconds: %1$d</string>
+    <string name="plurals_minutes">Minutes: %1$d</string>
+    <string name="plurals_hours">Hours: %1$d</string>
 
     <!-- Compass -->
     <string name="compass_title">Compass</string>
@@ -1181,4 +1166,16 @@
     <string name="generate_qr_code">Generate QR Code</string>
     <string name="nfc_disabled">NFC is disabled. Please enable it in system settings.</string>
     <string name="all_time">All</string>
+
+    <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Configure Bluetooth Permissions</string>
+    <string name="connect_to_radio">Connect to Radio</string>
+    <string name="connect_to_radio_description">Scan for and connect to your Meshtastic mesh radio device.</string>
+    <string name="bluetooth_feature_discovery">Discovery</string>
+    <string name="bluetooth_feature_discovery_description">Find and identify Meshtastic devices near you.</string>
+    <string name="bluetooth_feature_config">Configuration</string>
+    <string name="bluetooth_feature_config_description">Wirelessly manage your device settings and channels.</string>
+
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_denied">Permission denied</string>
 </resources>

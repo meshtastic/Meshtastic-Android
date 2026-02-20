@@ -28,13 +28,13 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.TimeConstants
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
@@ -102,7 +102,7 @@ abstract class BaseMapViewModel(
                     .associateBy { packet -> packet.data.waypoint!!.id }
                     .filterValues {
                         val expire = it.data.waypoint!!.expire ?: 0
-                        expire == 0 || expire > nowSeconds
+                        expire == 0 || expire.toLong() > nowSeconds
                     }
             }
             .stateInWhileSubscribed(initialValue = emptyMap())

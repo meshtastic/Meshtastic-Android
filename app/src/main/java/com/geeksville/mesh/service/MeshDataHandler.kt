@@ -20,9 +20,7 @@ import android.util.Log
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.InterfaceId
-import com.meshtastic.core.strings.getString
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +30,9 @@ import kotlinx.coroutines.flow.first
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.Packet
@@ -40,8 +41,6 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.model.util.decodeOrNull
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -50,6 +49,7 @@ import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.critical_alert
 import org.meshtastic.core.strings.error_duty_cycle
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.core.strings.waypoint_received
 import org.meshtastic.proto.AdminMessage
@@ -477,13 +477,12 @@ constructor(
             val isAck = routingError == Routing.Error.NONE.value
             val p = packetRepository.get().getPacketById(requestId)
             val reaction = packetRepository.get().getReactionByPacketId(requestId)
-            val isMaxRetransmit = routingError == Routing.Error.MAX_RETRANSMIT.value
 
             @Suppress("MaxLineLength")
             Logger.d {
                 val statusInfo = "status=${p?.data?.status ?: reaction?.status}"
                 "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
-                    "maxRetransmit=$isMaxRetransmit packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} $statusInfo"
+                    "packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} $statusInfo"
             }
 
             val m =

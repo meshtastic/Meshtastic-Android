@@ -22,7 +22,19 @@ kotlin {
     android { androidResources.enable = false }
 
     sourceSets {
-        androidMain.dependencies { implementation(libs.androidx.core.ktx) }
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonMain.dependencies {
+            implementation(libs.javax.inject)
+            implementation(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.datetime)
+            implementation(libs.kermit)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+            api(libs.nordic.common.core)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

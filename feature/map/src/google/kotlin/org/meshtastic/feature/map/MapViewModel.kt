@@ -65,8 +65,8 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.UUID
 import javax.inject.Inject
+import kotlin.uuid.Uuid
 
 private const val TILE_SIZE = 256
 
@@ -393,7 +393,7 @@ constructor(
                 if (fileName != null) {
                     "$layerName.$extension"
                 } else {
-                    "layer_${UUID.randomUUID()}.$extension"
+                    "layer_${Uuid.random()}.$extension"
                 }
 
             val localFileUri = copyFileToInternalStorage(uri, finalFileName)
@@ -550,7 +550,7 @@ enum class LayerType {
 }
 
 data class MapLayerItem(
-    val id: String = UUID.randomUUID().toString(),
+    val id: String = Uuid.random().toString(),
     val name: String,
     val uri: Uri? = null,
     var isVisible: Boolean = true,

@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.common.util.nowMillis
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter

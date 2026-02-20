@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.model
 
 import android.hardware.usb.UsbManager
@@ -23,6 +22,8 @@ import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
+import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.anonymize
 
 /**
@@ -33,34 +34,65 @@ import org.meshtastic.core.model.util.anonymize
  * @param name The display name of the device.
  * @param fullAddress The unique address of the device, prefixed with a type identifier.
  * @param bonded Indicates whether the device is bonded (for BLE) or has permission (for USB).
+ * @param node The [Node] associated with this device, if found in the database.
  */
-sealed class DeviceListEntry(open val name: String, open val fullAddress: String, open val bonded: Boolean) {
+sealed class DeviceListEntry(
+    open val name: String,
+    open val fullAddress: String,
+    open val bonded: Boolean,
+    open val node: Node? = null,
+) {
     val address: String
         get() = fullAddress.substring(1)
 
+    abstract fun copy(node: Node?): DeviceListEntry
+
     override fun toString(): String =
-        "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize}, bonded=$bonded)"
+        "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize}, bonded=$bonded, hasNode=${node != null})"
 
     @Suppress("MissingPermission")
-    data class Ble(val peripheral: Peripheral) :
+    data class Ble(val peripheral: Peripheral, override val node: Node? = null) :
         DeviceListEntry(
             name = peripheral.name ?: "unnamed-${peripheral.address}",
             fullAddress = "x${peripheral.address}",
             bonded = peripheral.bondState.value == BondState.BONDED,
-        )
+            node = node,
+        ) {
+        override fun copy(node: Node?): Ble = copy(peripheral = peripheral, node = node)
+    }
 
     data class Usb(
         private val radioInterfaceService: RadioInterfaceService,
         private val usbManager: UsbManager,
         val driver: UsbSerialDriver,
+        override val node: Node? = null,
     ) : DeviceListEntry(
         name = driver.device.deviceName,
         fullAddress = radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, driver.device.deviceName),
         bonded = usbManager.hasPermission(driver.device),
-    )
+        node = node,
+    ) {
+        override fun copy(node: Node?): Usb =
+            copy(radioInterfaceService = radioInterfaceService, usbManager = usbManager, driver = driver, node = node)
+    }
 
-    data class Tcp(override val name: String, override val fullAddress: String) :
-        DeviceListEntry(name, fullAddress, true)
+    data class Tcp(override val name: String, override val fullAddress: String, override val node: Node? = null) :
+        DeviceListEntry(name, fullAddress, true, node) {
+        override fun copy(node: Node?): Tcp = copy(name = name, fullAddress = fullAddress, node = node)
+    }
 
-    data class Mock(override val name: String) : DeviceListEntry(name, "m", true)
+    data class Mock(override val name: String, override val node: Node? = null) :
+        DeviceListEntry(name, "m", true, node) {
+        override fun copy(node: Node?): Mock = copy(name = name, node = node)
+    }
 }
+
+/** Matches names like Meshtastic_1234. */
+private val bleNameRegex = Regex(BLE_NAME_PATTERN)
+
+/**
+ * Returns the short name of the device if it's a Meshtastic device, otherwise null.
+ *
+ * @return The short name (e.g., 1234) or null.
+ */
+fun Peripheral.getMeshtasticShortName(): String? = name?.let { bleNameRegex.find(it)?.groupValues?.get(1) }

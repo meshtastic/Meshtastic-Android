@@ -23,12 +23,12 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import okio.ByteString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.getShortDateTime
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.User
 
 data class PacketEntity(

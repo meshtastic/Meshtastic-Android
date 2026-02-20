@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.usb
 
 import android.app.Application
@@ -22,19 +21,18 @@ import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
-import com.geeksville.mesh.util.registerReceiverCompat
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import javax.inject.Inject
@@ -55,27 +53,13 @@ constructor(
 ) {
     private val _serialDevices = MutableStateFlow(emptyMap<String, UsbDevice>())
 
-    @Suppress("unused") // Retained as public API
-    val serialDevices = _serialDevices.asStateFlow()
-
-    @Suppress("unused") // Retained as public API
-    val serialDevicesWithDrivers =
+    val serialDevices =
         _serialDevices
             .mapLatest { serialDevices ->
                 val serialProber = usbSerialProberLazy.get()
                 buildMap {
                     serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { driver -> put(k, driver) } }
                 }
-            }
-            .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
-
-    @Suppress("unused") // Retained as public API
-    val serialDevicesWithPermission =
-        _serialDevices
-            .mapLatest { serialDevices ->
-                usbManagerLazy.get()?.let { usbManager ->
-                    serialDevices.filterValues { device -> usbManager.hasPermission(device) }
-                } ?: emptyMap()
             }
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 

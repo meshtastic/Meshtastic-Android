@@ -20,7 +20,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import com.meshtastic.core.strings.getString
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -52,6 +51,7 @@ import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.fallback_node_name
+import org.meshtastic.core.strings.getString
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState
@@ -72,7 +72,7 @@ import javax.inject.Inject
  * @property ourNode Information about the locally connected node.
  * @property metricsState Aggregated sensor and signal metrics.
  * @property environmentState Standardized environmental sensor data.
- * @property availableLogs A set of log types available for this node.
+ * @property availableLogs a set of log types available for this node.
  * @property lastTracerouteTime Timestamp of the last successful traceroute request.
  * @property lastRequestNeighborsTime Timestamp of the last successful neighbor info request.
  */

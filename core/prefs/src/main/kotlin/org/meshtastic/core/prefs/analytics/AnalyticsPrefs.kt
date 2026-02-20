@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.prefs.analytics
 
 import android.content.SharedPreferences
@@ -25,9 +24,9 @@ import org.meshtastic.core.prefs.NullableStringPrefDelegate
 import org.meshtastic.core.prefs.PrefDelegate
 import org.meshtastic.core.prefs.di.AnalyticsSharedPreferences
 import org.meshtastic.core.prefs.di.AppSharedPreferences
-import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.uuid.Uuid
 
 /** Interface for managing analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -66,7 +65,7 @@ constructor(
     private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)
 
     override val installId: String
-        get() = _installId ?: UUID.randomUUID().toString().also { _installId = it }
+        get() = _installId ?: Uuid.random().toString().also { _installId = it }
 
     override fun getAnalyticsAllowedChangesFlow(): Flow<Boolean> = callbackFlow {
         val listener =

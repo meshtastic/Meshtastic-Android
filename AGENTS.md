@@ -19,6 +19,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 | :--- | :--- |
 | `app/` | Main application module. Contains `MainActivity`, `AppNavigation`, and Hilt entry points. Uses package `com.geeksville.mesh`. |
 | `core/` | Shared library modules. Most code here uses package `org.meshtastic.core.*`. |
+| `core/ble/` | **New:** Bluetooth Low Energy stack using Nordic libraries. |
 | `core/strings/` | **Crucial:** Centralized string resources using Compose Multiplatform Resources. |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`). Each is a standalone Gradle module. Uses package `org.meshtastic.feature.*`. |
 | `build-logic/` | Custom Gradle convention plugins. Defines build logic for the entire project. |
@@ -58,13 +59,20 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   Routes are defined in `core/navigation` (e.g., `ContactsRoutes`, `SettingsRoutes`).
 -   The main `NavHost` is located in `app/src/main/java/com/geeksville/mesh/ui/Main.kt`.
 
-### D. Dependency Management
+### D. Bluetooth (BLE)
+-   **Library:** Uses **Nordic Semiconductor's Kotlin BLE Library** and **Android Common Libraries**.
+-   **Location:** Core logic resides in `core/ble`.
+-   **Key Classes:** `BluetoothRepository`, `NordicBleInterface`, `BleConnection`.
+-   **Usage:** Use `BluetoothRepository` for scanning and bonding. Use `BleConnection` for managing connections. Avoid legacy `BluetoothAdapter` APIs directly.
+-   **Environment Mocking:** Use `LocalEnvironmentOwner` and `MockAndroidEnvironment` to test UI hardware reactions without a real device.
+
+### E. Dependency Management
 -   **Never** hardcode versions in `build.gradle.kts` files.
 -   **Action:** Add the library and version to `gradle/libs.versions.toml`.
 -   **Action:** Apply plugins using the alias from the catalog (e.g., `alias(libs.plugins.meshtastic.android.library)`).
 -   **Alpha Libraries:** Do not be shy about using alpha libraries from Google if they provide necessary features.
 
-### E. Build Variants (Flavors)
+### F. Build Variants (Flavors)
 -   **`google`**: Includes Google Play Services (Maps, Firebase, Crashlytics).
 -   **`fdroid`**: FOSS version. **Strictly segregate sensitive data** (Crashlytics, Firebase, etc.) out of this flavor.
 -   **Task Example:** `./gradlew assembleFdroidDebug`
@@ -83,7 +91,10 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
 ### C. Testing
 -   **Unit Tests:** JUnit 4/5 in `src/test/java`. Run with `./gradlew test`.
--   **UI Tests:** Espresso/Compose in `src/androidTest/java`. Run with `./gradlew connectedAndroidTest`.
+-   **Compose UI Tests (JVM):** Preferred for component testing. Use **Robolectric** in `src/test/java`.
+    -   **Important:** Annotate with `@Config(sdk = [34])` if using Java 17 to avoid SDK 35 compatibility issues.
+    -   **Best Practice:** Pass mocked ViewModels to Composables instead of using Hilt in Robolectric tests.
+-   **Instrumented Tests:** For full E2E or Hilt integration tests, use `src/androidTest/java`. Run with `./gradlew connectedAndroidTest`.
 -   **Feature Test:** `./gradlew feature:settings:testGoogleDebug`
 
 ## 5. Agent Workflow

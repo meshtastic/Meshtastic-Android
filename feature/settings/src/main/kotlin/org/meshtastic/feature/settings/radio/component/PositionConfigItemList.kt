@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Build
@@ -37,9 +36,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.core.location.LocationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.strings.Res
@@ -79,8 +77,8 @@ import org.meshtastic.feature.settings.util.gpioPins
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
@@ -113,14 +111,6 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
         }
     val formState = rememberConfigState(initialValue = sanitizedPositionConfig)
     var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
-
-    val locationPermissionState =
-        rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) { granted ->
-            if (granted) {
-                @SuppressLint("MissingPermission")
-                coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
-            }
-        }
 
     LaunchedEffect(phoneLocation) {
         phoneLocation?.let { phoneLoc ->
@@ -262,11 +252,16 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                         onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },
                     )
                     HorizontalDivider()
-                    TextButton(
-                        enabled = state.connected,
-                        onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
-                    ) {
-                        Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
+                    RequireLocation { isLocationRequiredAndDisabled: Boolean ->
+                        TextButton(
+                            enabled = state.connected && !isLocationRequiredAndDisabled,
+                            onClick = {
+                                @SuppressLint("MissingPermission")
+                                coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
+                            },
+                        ) {
+                            Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
+                        }
                     }
                 } else {
                     HorizontalDivider()

@@ -27,11 +27,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 
@@ -150,7 +150,7 @@ class MigrationTest {
     }
 
     private suspend fun insertPacket(channel: Int, text: String) {
-        packetDao.insert(
+        val packet =
             Packet(
                 uuid = 0L,
                 myNodeNum = 42424242,
@@ -159,8 +159,8 @@ class MigrationTest {
                 received_time = nowMillis,
                 read = false,
                 data = DataPacket(to = DataPacket.ID_BROADCAST, channel = channel, text = text),
-            ),
-        )
+            )
+        packetDao.insert(packet)
     }
 
     private suspend fun getAllPackets() = packetDao.getAllPackets(PortNum.TEXT_MESSAGE_APP.value).first()

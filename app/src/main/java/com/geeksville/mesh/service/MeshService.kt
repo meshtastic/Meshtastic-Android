@@ -25,10 +25,8 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.util.toRemoteExceptions
+import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +36,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion

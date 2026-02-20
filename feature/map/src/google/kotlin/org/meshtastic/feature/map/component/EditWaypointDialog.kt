@@ -68,9 +68,9 @@ import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.nowInstant
-import org.meshtastic.core.model.util.systemTimeZone
-import org.meshtastic.core.model.util.toDate
+import org.meshtastic.core.common.util.nowInstant
+import org.meshtastic.core.common.util.systemTimeZone
+import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.cancel
 import org.meshtastic.core.strings.date

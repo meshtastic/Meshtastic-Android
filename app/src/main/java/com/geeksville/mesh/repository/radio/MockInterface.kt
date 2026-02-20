@@ -17,16 +17,16 @@
 package com.geeksville.mesh.repository.radio
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.model.getInitials
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.util.nowSeconds
+import org.meshtastic.core.model.util.getInitials
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data

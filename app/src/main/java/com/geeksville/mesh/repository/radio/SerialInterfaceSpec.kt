@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
 import android.hardware.usb.UsbManager
@@ -22,24 +21,18 @@ import com.geeksville.mesh.repository.usb.UsbRepository
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import javax.inject.Inject
 
-/**
- * Serial/USB interface backend implementation.
- */
-class SerialInterfaceSpec @Inject constructor(
+/** Serial/USB interface backend implementation. */
+class SerialInterfaceSpec
+@Inject
+constructor(
     private val factory: SerialInterfaceFactory,
     private val usbManager: dagger.Lazy<UsbManager>,
     private val usbRepository: UsbRepository,
 ) : InterfaceSpec<SerialInterface> {
-    override fun createInterface(rest: String): SerialInterface {
-        return factory.create(rest)
-    }
+    override fun createInterface(rest: String): SerialInterface = factory.create(rest)
 
-    override fun addressValid(
-        rest: String
-    ): Boolean {
-        usbRepository.serialDevicesWithDrivers.value.filterValues {
-            usbManager.get().hasPermission(it.device)
-        }
+    override fun addressValid(rest: String): Boolean {
+        usbRepository.serialDevices.value.filterValues { usbManager.get().hasPermission(it.device) }
         findSerial(rest)?.let { d ->
             return usbManager.get().hasPermission(d.device)
         }
@@ -47,7 +40,7 @@ class SerialInterfaceSpec @Inject constructor(
     }
 
     internal fun findSerial(rest: String): UsbSerialDriver? {
-        val deviceMap = usbRepository.serialDevicesWithDrivers.value
+        val deviceMap = usbRepository.serialDevices.value
         return if (deviceMap.containsKey(rest)) {
             deviceMap[rest]!!
         } else {

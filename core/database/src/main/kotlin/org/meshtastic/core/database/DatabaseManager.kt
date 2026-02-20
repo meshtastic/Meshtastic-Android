@@ -33,8 +33,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.nowMillis
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -42,6 +42,7 @@ import javax.inject.Singleton
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
+@Suppress("TooManyFunctions")
 class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -114,6 +115,13 @@ class DatabaseManager @Inject constructor(private val app: Application, private 
 
     /** Execute [block] with the current DB instance. */
     inline fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
+
+    /** Returns true if a database exists for the given device address. */
+    fun hasDatabaseFor(address: String?): Boolean {
+        if (address.isNullOrBlank() || address == "n") return false
+        val dbName = buildDbName(address)
+        return getDbFile(app, dbName) != null
+    }
 
     private fun markLastUsed(dbName: String) {
         prefs.edit().putLong(lastUsedKey(dbName), nowMillis).apply()

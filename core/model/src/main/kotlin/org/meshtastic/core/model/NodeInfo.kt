@@ -19,10 +19,10 @@ package org.meshtastic.core.model
 import android.graphics.Color
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.model.util.bearing
 import org.meshtastic.core.model.util.latLongToMeter
-import org.meshtastic.core.model.util.nowSeconds
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel

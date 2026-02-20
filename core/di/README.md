@@ -1,11 +1,25 @@
 # `:core:di`
 
+## Overview
+The `:core:di` module defines the core Dagger Hilt modules and provides standard dependencies that are shared across all other modules.
+
+## Key Components
+
+### 1. `AppModule.kt`
+Defines bindings for application-wide singletons like `Application`, `Context`, and `Resources`.
+
+### 2. `CoroutineDispatchers.kt`
+Provides a wrapper for standard Kotlin `CoroutineDispatchers` (`IO`, `Default`, `Main`), allowing for easy mocking in unit tests.
+
+### 3. `ProcessLifecycle.kt`
+Exposes the application's global process lifecycle as a Hilt binding, enabling components to react to the app entering the foreground or background.
+
 ## Module dependency graph
 
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:di[di]:::null
+  :core:di[di]:::android-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
