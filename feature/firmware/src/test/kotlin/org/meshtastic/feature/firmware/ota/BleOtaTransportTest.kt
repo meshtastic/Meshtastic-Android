@@ -70,7 +70,9 @@ class BleOtaTransportTest {
                     backgroundScope.launch(testDispatcher) {
                         // Use a very small delay to simulate high speed
                         delay(1.milliseconds)
-                        otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        if (otaPeripheral.isConnected) {
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        }
                     }
                     return WriteResponse.Success
                 }

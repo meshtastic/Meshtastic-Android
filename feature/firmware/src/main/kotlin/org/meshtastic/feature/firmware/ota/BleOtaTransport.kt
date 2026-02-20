@@ -303,6 +303,7 @@ class BleOtaTransport(
         bleConnection.disconnect()
         isConnected = false
         transportScope.cancel()
+        responseChannel.close()
     }
 
     private suspend fun sendCommand(command: OtaCommand) {

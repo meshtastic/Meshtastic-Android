@@ -94,7 +94,9 @@ class BleOtaTransportNordicMockTest {
                         }
                         backgroundScope.launch(testDispatcher) {
                             delay(50.milliseconds)
-                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                            if (otaPeripheral.isConnected) {
+                                otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                            }
                         }
                     }
                     return WriteResponse.Success
@@ -106,12 +108,16 @@ class BleOtaTransportNordicMockTest {
                     println("Mock: Received chunk size=${value.size}, total=$currentTotal/$expected")
                     backgroundScope.launch(testDispatcher) {
                         delay(5.milliseconds)
-                        otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+                        if (otaPeripheral.isConnected) {
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+                        }
 
                         if (currentTotal >= expected && expected > 0) {
                             delay(10.milliseconds)
                             println("Mock: Sending final OK")
-                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                            if (otaPeripheral.isConnected) {
+                                otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                            }
                         }
                     }
                 }

@@ -67,7 +67,9 @@ class BleOtaTransportErrorTest {
                     if (command.startsWith("OTA")) {
                         backgroundScope.launch {
                             delay(50.milliseconds)
-                            otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Rejected\n".toByteArray())
+                            if (otaPeripheral.isConnected) {
+                                otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Rejected\n".toByteArray())
+                            }
                         }
                     }
                     return WriteResponse.Success
@@ -130,7 +132,9 @@ class BleOtaTransportErrorTest {
                 ): WriteResponse {
                     backgroundScope.launch {
                         delay(50.milliseconds)
-                        otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        if (otaPeripheral.isConnected) {
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        }
                     }
                     return WriteResponse.Success
                 }
@@ -204,7 +208,9 @@ class BleOtaTransportErrorTest {
                 ): WriteResponse {
                     backgroundScope.launch {
                         delay(50.milliseconds)
-                        otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        if (otaPeripheral.isConnected) {
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "OK\n".toByteArray())
+                        }
                     }
                     return WriteResponse.Success
                 }
@@ -212,7 +218,9 @@ class BleOtaTransportErrorTest {
                 override fun onWriteCommand(characteristic: MockRemoteCharacteristic, value: ByteArray) {
                     backgroundScope.launch {
                         delay(10.milliseconds)
-                        otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+                        if (otaPeripheral.isConnected) {
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+                        }
                     }
                 }
             }
@@ -252,7 +260,9 @@ class BleOtaTransportErrorTest {
             // Setup final response to be a Hash Mismatch error after chunks are sent
             backgroundScope.launch {
                 delay(1000.milliseconds)
-                otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+                if (otaPeripheral.isConnected) {
+                    otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+                }
             }
 
             val data = ByteArray(1024) { it.toByte() }
