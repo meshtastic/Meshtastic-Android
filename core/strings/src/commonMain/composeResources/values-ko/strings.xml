@@ -566,4 +566,6 @@
     <string name="now">지금</string>
     <!-- Message Filter -->
     <string name="all_time">All</string>
+    <string name="bluetooth_permission">블루투스</string>
+    <string name="bluetooth_feature_config">설정</string>
 </resources>

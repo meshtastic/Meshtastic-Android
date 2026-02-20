@@ -620,4 +620,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="all_time">Toate</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

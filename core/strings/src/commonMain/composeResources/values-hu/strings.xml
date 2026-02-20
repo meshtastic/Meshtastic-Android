@@ -925,4 +925,5 @@
     <string name="now">Most</string>
     <!-- Message Filter -->
     <string name="all_time">Összes</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

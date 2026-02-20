@@ -903,4 +903,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <!-- Message Filter -->
     <string name="all_time">Todos</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Configuración</string>
 </resources>

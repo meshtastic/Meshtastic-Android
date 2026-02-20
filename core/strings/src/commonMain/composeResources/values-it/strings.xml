@@ -939,4 +939,6 @@
     <!-- Message Filter -->
     <string name="generate_qr_code">Genera codice QR</string>
     <string name="all_time">Tutti</string>
+    <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Configurazione</string>
 </resources>

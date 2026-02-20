@@ -1077,4 +1077,6 @@
     <string name="filter_disable_for_contact">Désactiver le filtrage</string>
     <string name="generate_qr_code">Générer un QR Code</string>
     <string name="all_time">Tout</string>
+    <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Configuration</string>
 </resources>

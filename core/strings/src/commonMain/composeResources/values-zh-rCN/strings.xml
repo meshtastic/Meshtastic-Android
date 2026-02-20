@@ -1083,4 +1083,6 @@
     <string name="filter_disable_for_contact">禁用过滤</string>
     <string name="generate_qr_code">生成二维码</string>
     <string name="all_time">全部</string>
+    <string name="bluetooth_permission">蓝牙</string>
+    <string name="bluetooth_feature_config">配置</string>
 </resources>

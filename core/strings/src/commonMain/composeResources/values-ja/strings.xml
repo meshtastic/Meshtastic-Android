@@ -542,4 +542,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="all_time">すべて</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

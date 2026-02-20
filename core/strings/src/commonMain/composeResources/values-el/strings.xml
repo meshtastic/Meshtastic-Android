@@ -205,4 +205,5 @@
     <string name="interval_unset">Αναίρεση</string>
     <!-- Compass -->
     <!-- Message Filter -->
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

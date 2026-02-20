@@ -968,4 +968,5 @@
     <string name="generate_qr_code">Vytvořit QR kód</string>
     <string name="nfc_disabled">NFC je zakázáno. Povolte jej v nastavení systému.</string>
     <string name="all_time">Vše</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

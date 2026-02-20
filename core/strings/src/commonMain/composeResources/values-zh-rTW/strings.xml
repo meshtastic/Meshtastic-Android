@@ -1103,4 +1103,6 @@
     <string name="generate_qr_code">產生 QR Code</string>
     <string name="nfc_disabled">NFC 已停用，請在系統設定中啟用。</string>
     <string name="all_time">全部</string>
+    <string name="bluetooth_permission">藍牙</string>
+    <string name="bluetooth_feature_config">設定</string>
 </resources>

@@ -1110,4 +1110,6 @@
     <string name="generate_qr_code">QR Code Erzeugen</string>
     <string name="nfc_disabled">NFC ist deaktiviert. Bitte aktivieren Sie es in den Systemeinstellungen.</string>
     <string name="all_time">Alle</string>
+    <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Einstellungen</string>
 </resources>

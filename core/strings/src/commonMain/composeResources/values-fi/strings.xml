@@ -1111,4 +1111,6 @@
     <string name="generate_qr_code">Generoi QR-koodi</string>
     <string name="nfc_disabled">NFC on poistettu käytöstä. Ota se käyttöön järjestelmäasetuksista.</string>
     <string name="all_time">Kaikki</string>
+    <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Asetukset</string>
 </resources>

@@ -1119,4 +1119,5 @@
     <string name="nfc_disabled">NFC отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
     <string name="all_time">Всё</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="bluetooth_feature_config">Настройки</string>
 </resources>
