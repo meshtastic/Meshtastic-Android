@@ -31,6 +31,7 @@ import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
@@ -47,10 +48,12 @@ import kotlin.time.toJavaDuration
  * user preferences.
  */
 @HiltAndroidApp
-class MeshUtilApplication :
+open class MeshUtilApplication :
     Application(),
     Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    
+    private val applicationScope = CoroutineScope(Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
@@ -61,9 +64,17 @@ class MeshUtilApplication :
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
-        CoroutineScope(Dispatchers.Default).launch {
+        applicationScope.launch {
             entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress)
         }
+    }
+
+    override fun onTerminate() {
+        // Shutdown managers (useful for Robolectric tests)
+        val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
+        entryPoint.databaseManager().close()
+        applicationScope.cancel()
+        super.onTerminate()
     }
 
     private fun scheduleMeshLogCleanup() {

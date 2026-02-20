@@ -24,6 +24,7 @@ import androidx.room.RoomDatabase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -208,6 +209,14 @@ class DatabaseManager @Inject constructor(private val app: Application, private 
             }
         }
         prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()
+    }
+
+    /** Closes all open databases and cancels background work. */
+    fun close() {
+        managerScope.cancel()
+        dbCache.values.forEach { it.close() }
+        dbCache.clear()
+        _currentDb.value = null
     }
 }
 
