@@ -18,7 +18,6 @@ package org.meshtastic.core.ble
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
-import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
@@ -86,7 +85,7 @@ constructor(
 
     internal suspend fun updateBluetoothState() {
         val hasPerms =
-            if (androidEnvironment.androidSdkVersion >= Build.VERSION_CODES.S) {
+            if (androidEnvironment.requiresBluetoothRuntimePermissions) {
                 androidEnvironment.isBluetoothScanPermissionGranted &&
                     androidEnvironment.isBluetoothConnectPermissionGranted
             } else {
