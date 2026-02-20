@@ -91,7 +91,7 @@ fun ScannedQrCodeDialog(
     var shouldReplace by remember { mutableStateOf(incoming.lora_config != null) }
 
     val channelSet =
-        remember(shouldReplace) {
+        remember(shouldReplace, channels) {
             if (shouldReplace) {
                 // When replacing, apply the incoming LoRa configuration but preserve certain
                 // locally safe fields such as MQTT flags and TX power. This prevents QR codes
