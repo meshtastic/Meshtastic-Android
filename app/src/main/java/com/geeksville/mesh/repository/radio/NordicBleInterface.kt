@@ -51,6 +51,7 @@ import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
@@ -99,8 +100,7 @@ constructor(
 
     private val connectionScope: CoroutineScope =
         CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
-    private val bleConnection: BleConnection =
-        BleConnection(centralManager, connectionScope, address)
+    private val bleConnection: BleConnection = BleConnection(centralManager, connectionScope, address)
     private val drainMutex: Mutex = Mutex()
     private val writeMutex: Mutex = Mutex()
 
@@ -149,7 +149,7 @@ constructor(
         bytesReceived += packet.size
         Logger.d {
             "[$address] Dispatching packet to service.handleFromRadio() - " +
-                    "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
+                "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
         }
         try {
             service.handleFromRadio(p = packet)
@@ -248,9 +248,9 @@ constructor(
             }
         Logger.w {
             "[$address] BLE disconnected - Reason: ${state.reason}, " +
-                    "Uptime: ${uptime}ms, " +
-                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                    "Packets TX: $packetsSent ($bytesSent bytes)"
+                "Uptime: ${uptime}ms, " +
+                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                "Packets TX: $packetsSent ($bytesSent bytes)"
         }
         service.onDisconnect(BleError.Disconnected(reason = state.reason))
     }
@@ -272,12 +272,8 @@ constructor(
                 toRadioCharacteristic = chars[TORADIO_CHARACTERISTIC]
                 fromNumCharacteristic = chars[FROMNUM_CHARACTERISTIC]
                 fromRadioCharacteristic = chars[FROMRADIO_CHARACTERISTIC]
-                fromRadioSyncCharacteristic =
-                    meshtasticService.characteristics.find {
-                                it.uuid == BTM_FROMRADIOSYNC_CHARACTER.toKotlinUuid()
-                            }
-                logRadioCharacteristic =
-                    chars[LOGRADIO_CHARACTERISTIC]
+                fromRadioSyncCharacteristic = chars[FROMRADIOSYNC_CHARACTERISTIC]
+                logRadioCharacteristic = chars[LOGRADIO_CHARACTERISTIC]
 
                 Logger.d { "[$address] Characteristics discovered successfully" }
                 setupNotifications()
@@ -295,6 +291,7 @@ constructor(
 
     // --- Notification Setup ---
 
+    @Suppress("LongMethod")
     private suspend fun setupNotifications() {
         val fromNumReady = CompletableDeferred<Unit>()
         val fromRadioSyncReady = CompletableDeferred<Unit>()
@@ -318,10 +315,11 @@ constructor(
                 ?.launchIn(connectionScope) ?: fromNumReady.complete(Unit)
         }
 
-        fromRadioSyncCharacteristic?.subscribe {
-            Logger.d { "[$address] FromRadioSync subscription active" }
-            fromRadioSyncReady.complete(Unit)
-        }
+        fromRadioSyncCharacteristic
+            ?.subscribe {
+                Logger.d { "[$address] FromRadioSync subscription active" }
+                fromRadioSyncReady.complete(Unit)
+            }
             ?.onEach { notifyBytes ->
                 Logger.d { "[$address] FromRadioSync Notification (${notifyBytes.size} bytes), dispatching packet" }
                 dispatchPacket(notifyBytes)
@@ -379,19 +377,14 @@ constructor(
                                 WriteType.WITH_RESPONSE
                             }
 
-                        retryBleOperation(tag = address) {
-                            characteristic.write(
-                                p,
-                                writeType = writeType
-                            )
-                        }
+                        retryBleOperation(tag = address) { characteristic.write(p, writeType = writeType) }
 
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
                             "[$address] Successfully wrote packet #$packetsSent " +
-                                    "to toRadioCharacteristic with $writeType - " +
-                                    "${p.size} bytes (Total TX: $bytesSent bytes)"
+                                "to toRadioCharacteristic with $writeType - " +
+                                "${p.size} bytes (Total TX: $bytesSent bytes)"
                         }
                         drainPacketQueueAndDispatch()
                     } catch (e: InvalidAttributeException) {
@@ -400,7 +393,7 @@ constructor(
                     } catch (e: Exception) {
                         Logger.w(e) {
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
-                                    "$packetsSent successful writes"
+                                "$packetsSent successful writes"
                         }
                         service.onDisconnect(BleError.from(e))
                     }
@@ -424,9 +417,9 @@ constructor(
                 }
             Logger.i {
                 "[$address] BLE close() called - " +
-                        "Uptime: ${uptime}ms, " +
-                        "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                        "Packets TX: $packetsSent ($bytesSent bytes)"
+                    "Uptime: ${uptime}ms, " +
+                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                    "Packets TX: $packetsSent ($bytesSent bytes)"
             }
             connectionScope.cancel()
             bleConnection.disconnect()
