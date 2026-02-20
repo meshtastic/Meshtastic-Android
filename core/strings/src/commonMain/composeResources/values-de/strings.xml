@@ -1062,6 +1062,10 @@
     <string name="back">Zurück</string>
     <string name="interval_unset">Nicht konfiguriert</string>
     <string name="interval_always_on">Immer an</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d Stunde</item>
+        <item quantity="other">%1$d Stunden</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
     <string name="open_compass">Kompass öffnen</string>

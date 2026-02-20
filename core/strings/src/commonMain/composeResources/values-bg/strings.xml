@@ -833,6 +833,10 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d час</item>
+        <item quantity="other">%1$d часа</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Компас</string>
     <string name="open_compass">Отваряне на компас</string>

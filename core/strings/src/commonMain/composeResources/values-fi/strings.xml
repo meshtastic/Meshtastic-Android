@@ -1063,6 +1063,10 @@
     <string name="back">Edellinen</string>
     <string name="interval_unset">Ei yhdistetty</string>
     <string name="interval_always_on">Aina päällä</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d tunti</item>
+        <item quantity="other">%1$d tuntia</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompassi</string>
     <string name="open_compass">Avaa kompassi</string>

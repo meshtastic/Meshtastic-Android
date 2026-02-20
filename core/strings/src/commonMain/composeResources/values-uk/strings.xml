@@ -628,7 +628,8 @@
     <string name="get_started">З чого почати</string>
     <string name="intro_welcome">Ласкаво просимо до</string>
     <string name="stay_connected_anywhere">Залишайтесь на зв'язку будь-де</string>
-    <string name="create_your_own_networks">Створіть свої власні мережі</string>
+    <string name="create_your_own_networks">Створюйте власні мережі</string>
+    <string name="easily_set_up_private_mesh_networks">Легко налаштовуйте приватні mesh-мережі для безпечного та надійного зв'язку у віддалених районах.</string>
     <string name="app_notifications">Сповіщення застосунку</string>
     <string name="incoming_messages">Вхідні повідомлення</string>
     <string name="notifications_for_channel_and_direct_messages">Сповіщення для каналу та особистих повідомлень.</string>
@@ -749,6 +750,12 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Скинути</string>
     <string name="interval_always_on">Завжди увімк.</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d година</item>
+        <item quantity="few">%1$d години</item>
+        <item quantity="many">%1$d години</item>
+        <item quantity="other">%1$d годин</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Компас</string>
     <string name="open_compass">Відкрити компас</string>

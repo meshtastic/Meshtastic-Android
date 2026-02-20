@@ -921,6 +921,10 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">A frissítés sikertelen</string>
     <string name="interval_unset">Nincs beállítva</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d óra</item>
+        <item quantity="other">%1$d óra</item>
+    </plurals>
     <!-- Compass -->
     <string name="now">Most</string>
     <!-- Message Filter -->

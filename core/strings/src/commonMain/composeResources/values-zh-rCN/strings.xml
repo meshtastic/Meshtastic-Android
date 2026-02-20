@@ -1046,6 +1046,15 @@
     <string name="back">后退</string>
     <string name="interval_unset">未设置</string>
     <string name="interval_always_on">常亮</string>
+    <plurals name="plurals_seconds">
+        <item quantity="other">%1$d 秒</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="other">%1$d 分钟</item>
+    </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="other">%1$d 小时</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">指南针</string>
     <string name="open_compass">打开指南针...</string>

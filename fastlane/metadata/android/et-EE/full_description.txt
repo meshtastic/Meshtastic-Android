@@ -17,5 +17,5 @@ Meshtastic rakenduse funktsioonide ja võimaluste kohta vaata meie ametlikku dok
 
 <b>Tõlked</b>
 
-Saate Crowdini abil rakendust oma emakeelde tõlkida:
+Saad Crowdini abil rakendust oma emakeelde tõlkida:
 <a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

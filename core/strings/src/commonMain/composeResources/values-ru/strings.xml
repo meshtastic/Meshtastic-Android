@@ -1070,6 +1070,12 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Не установлена</string>
     <string name="interval_always_on">Всегда включено</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d час</item>
+        <item quantity="few">%1$d часов</item>
+        <item quantity="many">%1$d часа</item>
+        <item quantity="other">%1$d часы</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Компас</string>
     <string name="open_compass">Открыть компас</string>

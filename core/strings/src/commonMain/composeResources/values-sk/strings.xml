@@ -449,6 +449,12 @@
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Aktualizácia zlyhala</string>
     <string name="interval_unset">Nenastavené</string>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d hodina</item>
+        <item quantity="few">%1$d hodiny</item>
+        <item quantity="many">%1$d hodín</item>
+        <item quantity="other">%1$d hodín</item>
+    </plurals>
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="all_time">Všetky</string>
