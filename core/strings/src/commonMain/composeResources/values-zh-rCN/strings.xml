@@ -223,6 +223,7 @@
     <string name="debug_filter_clear">清除所有筛选条件</string>
     <string name="debug_filter_add_custom">添加过滤器</string>
     <string name="debug_filter_preset_title">重置筛选</string>
+    <string name="debug_filter_show_ignored">仅显示忽略的节点</string>
     <string name="debug_store_logs_title">储存mesh日志</string>
     <string name="debug_store_logs_summary">禁用以跳过将msh日志写入磁盘。</string>
     <string name="debug_clear">清除日志</string>
@@ -267,7 +268,6 @@
     <string name="select_all">选择全部</string>
     <string name="close_selection">关闭选中</string>
     <string name="delete_selection">删除选中</string>
-    <string name="map_style_selection">主题选择</string>
     <string name="map_download_region">下载区域</string>
     <string name="name">名称</string>
     <string name="description">说明</string>
@@ -800,13 +800,10 @@
     <string name="node_count_template">(%1$d 在线 / %2$d 显示 / %3$d 总计)</string>
     <string name="react">互动</string>
     <string name="disconnect">断开</string>
-    <string name="scanning_bluetooth">扫描蓝牙设备…</string>
-    <string name="no_ble_devices">无配对的蓝牙设备。</string>
     <string name="no_network_devices">未找到网络设备。</string>
     <string name="no_usb_devices">未找到 USB 串口设备。</string>
     <string name="scroll_to_bottom">滚动到底部</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">正在扫描</string>
     <string name="security_icon_description">安全状态</string>
     <string name="security_icon_secure">安全</string>
     <string name="security_icon_badge_warning_description">警告标志</string>
@@ -853,9 +850,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">无可用的 PAX 计量.</string>
     <string name="wifi_devices">WiFi 设备</string>
-    <string name="ble_devices">BLE 设备</string>
     <string name="bluetooth_paired_devices">已配对设备</string>
-    <string name="bluetooth_available_devices">可用设备</string>
     <string name="connected_device">已连设备</string>
     <string name="routing_error_rate_limit_exceeded">超过速率限制。请稍后再试。</string>
     <string name="view_release">查看发行版</string>
@@ -957,13 +952,9 @@
     <string name="system_settings">系统设置</string>
     <string name="no_local_stats">没有可用的统计信息 </string>
     <string name="analytics_notice">我们收集分析数据是为了帮助改进这款安卓应用（感谢您的支持），我们会收到关于用户行为的匿名信息。这包括崩溃报告、应用中使用过的屏幕等内容。</string>
-    <string name="analytics_platforms">"分析平台： "</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多信息，请参阅我们的隐私政策。</string>
     <string name="unset">未设定 - 0</string>
     <string name="relayed_by">由: %1$s</string>
-    <plurals name="relays">
-        <item quantity="other">连接到的 %1$d 中继节点</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s通常配备的引导加载程序不支持OTA更新。在进行OTA刷写之前，您可能需要通过USB刷写一个支持OTA的引导加载程序。</string>
     <string name="learn_more">更多信息</string>
     <string name="firmware_update_rak4631_bootloader_hint">对于RAK WisBlock RAK4631，请使用供应商的串行DFU工具（例如，搭配提供的引导加载程序.zip文件使用adafruit-nrfutil dfu serial）。仅复制.uf2文件无法更新引导加载程序。</string>
@@ -1017,7 +1008,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">正在重启到 DFU……</string>
     <string name="firmware_update_waiting_for_device">正在等待 DFU 设备...</string>
-    <string name="firmware_update_copying">正在复制固件...</string>
     <string name="firmware_update_save_dfu_file">请将 .uf2 文件保存到您的设备&apos;s DFU 驱动器。</string>
     <string name="firmware_update_flashing">正在刷入设备，请稍候...</string>
     <string name="firmware_update_method_usb">USB文件传输</string>
@@ -1056,15 +1046,6 @@
     <string name="back">后退</string>
     <string name="interval_unset">未设置</string>
     <string name="interval_always_on">常亮</string>
-    <plurals name="plurals_seconds">
-        <item quantity="other">%1$d 秒</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="other">%1$d 分钟</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="other">%1$d 小时</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">指南针</string>
     <string name="open_compass">打开指南针...</string>

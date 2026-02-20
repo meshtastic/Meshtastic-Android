@@ -217,6 +217,7 @@
     <string name="debug_filter_add">Szűrő hozzáadása</string>
     <string name="debug_filter_included">Szűrő hozzáadva</string>
     <string name="debug_filter_clear">Összes szűrő törlése</string>
+    <string name="debug_filter_show_ignored">Csak a mellőzött csomópontok megjelenítése</string>
     <string name="debug_clear">Naplók törlése</string>
     <string name="match_any">Bármelyik | Mind</string>
     <string name="match_all">Mind | Bármelyik</string>
@@ -257,7 +258,6 @@
     <string name="select_all">Összes kijelölése</string>
     <string name="close_selection">Kijelölés bezárása</string>
     <string name="delete_selection">Kijelöltek törlése</string>
-    <string name="map_style_selection">Stílus választás</string>
     <string name="map_download_region">Letöltési régió</string>
     <string name="name">Név</string>
     <string name="description">Leírás</string>
@@ -770,13 +770,10 @@
     <string name="node_count_template">(%1$d online / %2$d megjelenítve / %3$d összesen)</string>
     <string name="react">Reagálás</string>
     <string name="disconnect">Leválasztás</string>
-    <string name="scanning_bluetooth">Bluetooth-eszközök keresése…</string>
-    <string name="no_ble_devices">Nincsenek párosított Bluetooth-eszközök.</string>
     <string name="no_network_devices">Nem található hálózati eszköz.</string>
     <string name="no_usb_devices">Nem találhatók USB-soros eszközök.</string>
     <string name="scroll_to_bottom">Görgetés az aljára</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Keresés</string>
     <string name="security_icon_description">Biztonsági állapot</string>
     <string name="security_icon_secure">Biztonságos</string>
     <string name="security_icon_badge_warning_description">Figyelmeztető jelvény</string>
@@ -820,9 +817,7 @@
     <string name="type_a_message">Írj üzenetet</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi eszközök</string>
-    <string name="ble_devices">BLE eszközök</string>
     <string name="bluetooth_paired_devices">Párosított eszközök</string>
-    <string name="bluetooth_available_devices">Elérhető eszközök</string>
     <string name="connected_device">Csatlakoztatott eszköz</string>
     <string name="routing_error_rate_limit_exceeded">Túllépted a sebességkorlátot. Próbáld újra később.</string>
     <string name="view_release">Kiadás megtekintése</string>
@@ -921,7 +916,6 @@
     <string name="system_settings">Rendszerbeállítások</string>
     <string name="no_local_stats">Nem állnak rendelkezésre statisztikák</string>
     <string name="analytics_notice">Analitikai adatokat gyűjtünk az Android alkalmazás fejlesztésének segítésére (köszönjük). Anonimizált információkat kapunk a felhasználói viselkedésről, beleértve a hibajelentéseket, a használt képernyőket stb.</string>
-    <string name="analytics_platforms">"Analitikai platformok: "</string>
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <string name="unset">Nincs beállítva – 0</string>
     <!-- Firmware Update -->

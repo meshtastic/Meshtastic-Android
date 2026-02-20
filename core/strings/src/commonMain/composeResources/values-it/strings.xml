@@ -197,6 +197,7 @@
     <string name="debug_filter_add">Aggiungi filtro</string>
     <string name="debug_filter_included">Filtra inclusi</string>
     <string name="debug_filter_clear">Rimuovi tutti i filtri</string>
+    <string name="debug_filter_show_ignored">Visualizza solo i nodi ignorati</string>
     <string name="debug_clear">Cancella i log</string>
     <string name="match_any">Trova qualsiasi corrispondenza | Tutte</string>
     <string name="match_all">Trova tutte le corrispondenze | Qualsiasi</string>
@@ -236,7 +237,6 @@
     <string name="select_all">Seleziona tutti</string>
     <string name="close_selection">Chiudi selezione</string>
     <string name="delete_selection">Elimina selezionati</string>
-    <string name="map_style_selection">Selezione Stile</string>
     <string name="map_download_region">Scarica Regione</string>
     <string name="name">Nome</string>
     <string name="description">Descrizione</string>
@@ -730,13 +730,10 @@
     <string name="node_count_template">(%1$d online / %2$d visualizzati / %3$d in totale)</string>
     <string name="react">Rispondi</string>
     <string name="disconnect">Disconnetti</string>
-    <string name="scanning_bluetooth">Scansione dei dispositivi Bluetooth…</string>
-    <string name="no_ble_devices">Nessun dispositivo Bluetooth associato.</string>
     <string name="no_network_devices">Nessun dispositivo di rete trovato.</string>
     <string name="no_usb_devices">Nessun dispositivo trovato sulla seriale USB.</string>
     <string name="scroll_to_bottom">Scorri fino in fondo</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Scansione in corso</string>
     <string name="security_icon_description">Stato di sicurezza</string>
     <string name="security_icon_secure">Sicuro</string>
     <string name="security_icon_badge_warning_description">Badge di attenzione</string>
@@ -781,9 +778,7 @@
     <string name="type_a_message">Inserisci un messaggio</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">Dispositivi WiFi</string>
-    <string name="ble_devices">Dispositivi BLE</string>
     <string name="bluetooth_paired_devices">Dispositivi associati</string>
-    <string name="bluetooth_available_devices">Dispositivi disponibili</string>
     <string name="connected_device">Dispositivo connesso</string>
     <string name="routing_error_rate_limit_exceeded">Limite di trasmissione superato. Riprova più tardi</string>
     <string name="view_release">Visualizza Release</string>
@@ -885,7 +880,6 @@
     <string name="system_settings">Impostazioni di Sistema</string>
     <string name="no_local_stats">Statistiche Non Disponibili</string>
     <string name="analytics_notice">I dati di utilizzo sono raccolti per aiutarci a migliorare l'applicazione Android (grazie), riceveremo informazioni anonimizzate sul comportamento dell'utente. Queste includono rapporti di arresti anomali, schermi utilizzate nell'app, ecc.</string>
-    <string name="analytics_platforms">"Piattaforme di analytics: "</string>
     <string name="for_more_information_see_our_privacy_policy">Per ulteriori informazioni, consulta la nostra informativa sulla privacy.</string>
     <string name="unset">Disattiva - 0</string>
     <string name="relayed_by">Ritrasmesso da: %1$s</string>
@@ -928,7 +922,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Riavvio in DFU...</string>
     <string name="firmware_update_waiting_for_device">In attesa del dispositivo DFU...</string>
-    <string name="firmware_update_copying">Copia del firmware...</string>
     <string name="firmware_update_save_dfu_file">Salva il file .uf2 nell'unità DFU del dispositivo.</string>
     <string name="firmware_update_flashing">Flash del dispositivo in corso, attendere...</string>
     <string name="firmware_update_method_usb">Trasferimento File via USB</string>

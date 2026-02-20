@@ -146,7 +146,6 @@
     <string name="delete_for_everyone">Herkesten sil</string>
     <string name="delete_for_me">Benden sil</string>
     <string name="select_all">Tümünü seç</string>
-    <string name="map_style_selection">Stil Seçimi</string>
     <string name="map_download_region">Bölgeyi İndir</string>
     <string name="name">İsmi</string>
     <string name="description">Açıklaması</string>
@@ -538,7 +537,6 @@
     <string name="only_favorites">Sadece Favoriler</string>
     <string name="disconnect">Bağlantıyı Kes</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Taranıyor</string>
     <string name="security_icon_description">Güvenlik Durumu</string>
     <string name="security_icon_secure">Güvenlik</string>
     <string name="unknown">Bilinmeyen</string>
@@ -575,4 +573,5 @@
     <!-- Message Filter -->
     <string name="generate_qr_code">QR kod oluştur</string>
     <string name="all_time">Hepsi</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

@@ -135,7 +135,6 @@
     <string name="delete_for_everyone">全員のデバイスから削除</string>
     <string name="delete_for_me">自分のデバイスから削除</string>
     <string name="select_all">すべてを選択</string>
-    <string name="map_style_selection">スタイルの選択</string>
     <string name="map_download_region">リージョンをダウンロードする</string>
     <string name="name">名前</string>
     <string name="description">説明</string>

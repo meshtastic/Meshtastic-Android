@@ -217,6 +217,7 @@
     <string name="debug_filter_clear">Wyczyść wszystkie filtry</string>
     <string name="debug_filter_add_custom">Dodaj niestandardowy filtr</string>
     <string name="debug_filter_preset_title">Wstępnie ustawione filtry</string>
+    <string name="debug_filter_show_ignored">Pokaż tylko ignorowane węzły</string>
     <string name="debug_store_logs_title">Przechowuj logi sieci</string>
     <string name="debug_store_logs_summary">Wyłącz, aby pominąć zapisywanie logów na dysku</string>
     <string name="debug_clear">Wyczyść logi</string>
@@ -262,7 +263,6 @@
     <string name="select_all">Zaznacz wszystko</string>
     <string name="close_selection">Zamknij wybór</string>
     <string name="delete_selection">Usuń zaznaczone</string>
-    <string name="map_style_selection">Wybór stylu</string>
     <string name="map_download_region">Pobierz region</string>
     <string name="name">Nazwa</string>
     <string name="description">Opis</string>
@@ -660,7 +660,6 @@
     <string name="disconnect">Rozłącz</string>
     <string name="scroll_to_bottom">Przewiń w dół</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Skanowanie</string>
     <string name="unknown_channel">Nieznany kanał</string>
     <string name="warning">Uwaga</string>
     <string name="unknown">Nieznany</string>
@@ -690,9 +689,7 @@
     <string name="delete_messages_title">Usunąć wiadomość?</string>
     <string name="message_input_label">Wiadomość</string>
     <string name="wifi_devices">Urządzenia WiFi</string>
-    <string name="ble_devices">Urządzenia BLE</string>
     <string name="bluetooth_paired_devices">Sparowane urządzenia</string>
-    <string name="bluetooth_available_devices">Dostępne urządzenia</string>
     <string name="connected_device">Połączone urządzenia</string>
     <string name="download">Pobierz</string>
     <string name="installed_firmware_version">Obecnie zainstalowana wersja</string>
@@ -736,12 +733,6 @@
     <string name="two_days">48 Godzin</string>
     <string name="system_settings">Ustawienia systemowe</string>
     <string name="no_local_stats">Statystyki niedostępne</string>
-    <plurals name="relays">
-        <item quantity="one">Usłyszano %1$d przekaźnik</item>
-        <item quantity="few">Usłyszano %1$d przekaźników</item>
-        <item quantity="many">Usłyszano %1$d przekaźników</item>
-        <item quantity="other">Usłyszano %1$d przekaźników</item>
-    </plurals>
     <string name="learn_more">Dowiedz się więcej</string>
     <string name="usb_devices">Urządzenia USB</string>
     <!-- Firmware Update -->
@@ -788,24 +779,6 @@
     <string name="back">Wstecz</string>
     <string name="interval_unset">Nieustawiony</string>
     <string name="interval_always_on">Zawsze włączone</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 sekunda</item>
-        <item quantity="few">%1$d sekund</item>
-        <item quantity="many">%1$d sekund</item>
-        <item quantity="other">%1$d sekund</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minuta</item>
-        <item quantity="few">%1$d minuty</item>
-        <item quantity="many">%1$d minuty</item>
-        <item quantity="other">%1$d minuty</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 godzina</item>
-        <item quantity="few">%1$d godzin</item>
-        <item quantity="many">%1$d godzin</item>
-        <item quantity="other">%1$d godzin</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompas</string>
     <string name="open_compass">Otwórz kompas</string>

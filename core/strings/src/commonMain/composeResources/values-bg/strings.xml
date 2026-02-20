@@ -183,6 +183,7 @@
     <string name="debug_filter_clear">Изчистване на всички филтри</string>
     <string name="debug_filter_add_custom">Добавяне на персонализиран филтър</string>
     <string name="debug_filter_preset_title">Предварително зададени филтри</string>
+    <string name="debug_filter_show_ignored">Показване само на игнорираните възли</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
@@ -220,7 +221,6 @@
     <string name="select_all">Избери всички</string>
     <string name="close_selection">Затваряне на избраните</string>
     <string name="delete_selection">Изтриване на избраните</string>
-    <string name="map_style_selection">Избор на стил</string>
     <string name="map_download_region">Сваляне на регион</string>
     <string name="name">Име</string>
     <string name="description">Описание</string>
@@ -628,13 +628,10 @@
     <string name="remote">Отдалечен</string>
     <string name="node_count_template">(%1$d онлайн / %2$d показани / %3$d общо)</string>
     <string name="disconnect">Прекъсване на връзката</string>
-    <string name="scanning_bluetooth">Сканиране за Bluetooth устройства…</string>
-    <string name="no_ble_devices">Няма сдвоени Bluetooth устройства.</string>
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
     <string name="scroll_to_bottom">Превъртане до края</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Сканиране</string>
     <string name="security_icon_description">Състояние на сигурността</string>
     <string name="security_icon_secure">Сигурно</string>
     <string name="security_icon_badge_warning_description">Предупредителна значка</string>
@@ -674,9 +671,7 @@
     <string name="type_a_message">Въведете съобщение</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi устройства</string>
-    <string name="ble_devices">BLE устройства</string>
     <string name="bluetooth_paired_devices">Сдвоени устройства</string>
-    <string name="bluetooth_available_devices">Налични устройства</string>
     <string name="connected_device">Свързано устройство</string>
     <string name="view_release">Преглед на изданието</string>
     <string name="download">Изтегляне</string>
@@ -759,7 +754,6 @@
     <string name="system_settings">Системни настройки</string>
     <string name="no_local_stats">Няма налична статистика</string>
     <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
-    <string name="analytics_platforms">"Аналитични платформи:"</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Не е зададен - 0</string>
     <string name="relayed_by">Препредадено от: %1$s</string>
@@ -807,7 +801,6 @@
     <string name="chirpy">Чирпи</string>
     <string name="firmware_update_rebooting">Рестартиране в DFU...</string>
     <string name="firmware_update_waiting_for_device">Изчакване за DFU устройство...</string>
-    <string name="firmware_update_copying">Копиране на фърмуера...</string>
     <string name="firmware_update_flashing">Програмиране на устройството, моля изчакайте...</string>
     <string name="firmware_update_method_usb">Прехвърляне на файл през USB</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
@@ -840,18 +833,6 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 секунда</item>
-        <item quantity="other">%1$d секунди</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 минута</item>
-        <item quantity="other">%1$d минути</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 час</item>
-        <item quantity="other">%1$d часа</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Компас</string>
     <string name="open_compass">Отваряне на компас</string>

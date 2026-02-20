@@ -229,6 +229,7 @@
     <string name="debug_filter_clear">Rensa alla filter</string>
     <string name="debug_filter_add_custom">Lägg till anpassat filter</string>
     <string name="debug_filter_preset_title">Förinställda filter</string>
+    <string name="debug_filter_show_ignored">Visa endast ignorerade noder</string>
     <string name="debug_store_logs_title">Spara meshnätsloggar</string>
     <string name="debug_clear">Töm loggar</string>
     <string name="match_any">Matcha någon &lt;unk&gt; alla</string>
@@ -271,7 +272,6 @@
     <string name="select_all">Välj alla</string>
     <string name="close_selection">Stäng markerade</string>
     <string name="delete_selection">Radera markerade</string>
-    <string name="map_style_selection">Stilval</string>
     <string name="map_download_region">Ladda ner region</string>
     <string name="name">Namn</string>
     <string name="description">Beskrivning</string>
@@ -779,13 +779,10 @@
     <string name="node_count_template">(%1$d aktiva / %2$d visas / %3$d totalt)</string>
     <string name="react">Reagera</string>
     <string name="disconnect">Koppla från</string>
-    <string name="scanning_bluetooth">Söker efter Bluetooth-enheter…</string>
-    <string name="no_ble_devices">Inga parkopplade Bluetooth-enheter.</string>
     <string name="no_network_devices">Inga nätverksenheter hittades.</string>
     <string name="no_usb_devices">Inga USB-seriella enheter hittades.</string>
     <string name="scroll_to_bottom">Gå till slutet</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Skannar</string>
     <string name="security_icon_description">Säkerhetsstatus</string>
     <string name="security_icon_secure">Säker</string>
     <string name="security_icon_badge_warning_description">Varningsemblem</string>
@@ -830,9 +827,7 @@
     <string name="type_a_message">Skriv ett meddelande</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi-enheter</string>
-    <string name="ble_devices">BLE-enheter</string>
     <string name="bluetooth_paired_devices">Parkopplade enheter</string>
-    <string name="bluetooth_available_devices">Tillgängliga enheter</string>
     <string name="connected_device">Ansluten enhet</string>
     <string name="routing_error_rate_limit_exceeded">Sändningsgräns uppnådd. Försök igen senare.</string>
     <string name="view_release">Visa version</string>
@@ -934,7 +929,6 @@
     <string name="system_settings">Systeminställningar</string>
     <string name="no_local_stats">Ingen tillgänglig statistik</string>
     <string name="analytics_notice">Mätdata samlas in för att hjälpa oss att förbättra Android-appen (tack), vi kommer att få anonymiserad information om användarnas beteende. Detta inkluderar kraschrapporter, skärmar som används i appen etc.</string>
-    <string name="analytics_platforms">"Analysplattformar: "</string>
     <string name="for_more_information_see_our_privacy_policy">För mer information, se vår integritetspolicy.</string>
     <string name="unset">Odefinierad - 0</string>
     <string name="relayed_by">Vidaresänt av: %1$s</string>
@@ -974,7 +968,6 @@
     <string name="firmware_update_source_local">Källa: Lokal fil</string>
     <string name="firmware_update_disclaimer_chirpy_says">Chirpy säger: \"Håll i dig!\"</string>
     <string name="chirpy">Chirpy</string>
-    <string name="firmware_update_copying">Kopierar fast programvara...</string>
     <string name="firmware_update_flashing">Intallerar enhetens fasta programvara, vänligen vänta...</string>
     <string name="firmware_update_method_usb">USB filöverföring</string>
     <string name="firmware_update_verifying">Verifierar uppdatering...</string>
@@ -995,18 +988,6 @@
     <string name="back">Tillbaka</string>
     <string name="interval_unset">Ej inställd</string>
     <string name="interval_always_on">Alltid på</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 sekund</item>
-        <item quantity="other">%1$d sekunder</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minut</item>
-        <item quantity="other">%1$d minuter</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 timme</item>
-        <item quantity="other">%1$d timmar</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
     <string name="open_compass">Visa kompass</string>
@@ -1046,4 +1027,5 @@
     <string name="generate_qr_code">Generera QR-kod</string>
     <string name="nfc_disabled">NFC är inaktiverat. Aktivera det i systeminställningar.</string>
     <string name="all_time">Alla</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

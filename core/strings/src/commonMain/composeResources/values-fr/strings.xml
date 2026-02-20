@@ -225,6 +225,7 @@
     <string name="debug_filter_clear">Supprimer tous les filtres</string>
     <string name="debug_filter_add_custom">Ajouter un filtre personnalisé</string>
     <string name="debug_filter_preset_title">Filtres prédéfinis</string>
+    <string name="debug_filter_show_ignored">Afficher uniquement les nœuds ignorés</string>
     <string name="debug_store_logs_title">Stocker les journaux de maillage</string>
     <string name="debug_store_logs_summary">Désactiver pour passer l'écriture des journaux de maillage sur le disque</string>
     <string name="debug_clear">Effacer le journal</string>
@@ -268,7 +269,6 @@
     <string name="select_all">Sélectionner tout</string>
     <string name="close_selection">Fermer le choix</string>
     <string name="delete_selection">Supprimer la sélection</string>
-    <string name="map_style_selection">Sélection du style</string>
     <string name="map_download_region">Télécharger la région</string>
     <string name="name">Nom</string>
     <string name="description">Description</string>
@@ -802,13 +802,10 @@
     <string name="node_count_template">(%1$d en ligne / %2$d affichés / %3$d total)</string>
     <string name="react">Réagir</string>
     <string name="disconnect">Déconnecter</string>
-    <string name="scanning_bluetooth">Recherche de périphériques Bluetooth…</string>
-    <string name="no_ble_devices">Aucun périphérique Bluetooth associé.</string>
     <string name="no_network_devices">Aucun périphérique réseau trouvé.</string>
     <string name="no_usb_devices">Aucun périphérique série USB détecté.</string>
     <string name="scroll_to_bottom">Défiler vers le bas</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Balayage</string>
     <string name="security_icon_description">Statut de sécurité</string>
     <string name="security_icon_secure">Sécurisé</string>
     <string name="security_icon_badge_warning_description">Badge d'alerte</string>
@@ -855,9 +852,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Aucune métrique PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
-    <string name="ble_devices">Appareils BLE</string>
     <string name="bluetooth_paired_devices">Périphériques appairés</string>
-    <string name="bluetooth_available_devices">Périphériques disponibles</string>
     <string name="connected_device">Périphérique connecté</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
@@ -957,14 +952,9 @@
     <string name="system_settings">Paramètres système</string>
     <string name="no_local_stats">Pas de stats disponibles</string>
     <string name="analytics_notice">Les statistiques sont collectées pour nous aider à améliorer l'application Android (merci), nous recevrons des informations anonymes sur le comportement de l'utilisateur. Cela inclut les rapports de plantage, les écrans utilisés dans l'application, etc.</string>
-    <string name="analytics_platforms">"Plateformes d'analyse : "</string>
     <string name="for_more_information_see_our_privacy_policy">Pour plus d'informations, consultez notre politique de confidentialité.</string>
     <string name="unset">Non défini - 0</string>
     <string name="relayed_by">Relayé par : %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Entendu par %1$d relai</item>
-        <item quantity="other">Entendu par %1$d relais</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s est généralement livré avec un chargeur d'amorçage qui ne prend pas en charge les mises à jour via Bluetooth (OTA ou Over The Air). Vous devrez peut-être flasher un chargeur d'amorçage compatible OTA via USB avant de flasher OTA.</string>
     <string name="learn_more">En savoir plus</string>
     <string name="firmware_update_rak4631_bootloader_hint">Pour le RAK WisBlock RAK4631, utilisez l'outil DFU série du fournisseur (par exemple, adafruit-nrfutil dfu serial avec le fichier .zip du bootloader fourni). La copie du fichier .uf2 seul ne permettra pas de mettre à jour le bootloader.</string>
@@ -1012,7 +1002,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Redémarrage en mode DFU...</string>
     <string name="firmware_update_waiting_for_device">Attente du périphérique en mode DFU...</string>
-    <string name="firmware_update_copying">Copie du micrologiciel (firmware)...</string>
     <string name="firmware_update_save_dfu_file">Veuillez enregistrer le fichier .uf2 sur le lecteur DFU de votre appareil.</string>
     <string name="firmware_update_flashing">Flash de l'appareil, veuillez patienter...</string>
     <string name="firmware_update_method_usb">Transfert de fichier USB</string>
@@ -1051,18 +1040,6 @@
     <string name="back">Retour</string>
     <string name="interval_unset">Désactivé</string>
     <string name="interval_always_on">En permanence</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 seconde</item>
-        <item quantity="other">%1$d secondes</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minute</item>
-        <item quantity="other">%1$d minutes</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 heure</item>
-        <item quantity="other">%1$d heures</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Boussole</string>
     <string name="open_compass">Boussole</string>
