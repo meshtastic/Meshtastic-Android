@@ -127,7 +127,6 @@
     <string name="delete_for_everyone">Slett for alle brukere</string>
     <string name="delete_for_me">Slett kun for meg</string>
     <string name="select_all">Velg alle</string>
-    <string name="map_style_selection">Stil valg</string>
     <string name="map_download_region">Nedlastings Region</string>
     <string name="name">Navn</string>
     <string name="description">Beskrivelse</string>

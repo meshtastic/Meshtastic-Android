@@ -228,6 +228,7 @@
     <string name="debug_filter_clear">Ștergeți toate filtrele</string>
     <string name="debug_filter_add_custom">Adăugare filtru personalizat</string>
     <string name="debug_filter_preset_title">Presetări filtre</string>
+    <string name="debug_filter_show_ignored">Arată doar nodurile ignorate</string>
     <string name="debug_store_logs_title">Salvează jurnalele din mesh</string>
     <string name="debug_store_logs_summary">Dezactivați pentru a omite scrierea jurnalelor din mesh pe disc</string>
     <string name="debug_clear">Ștergeți jurnalele</string>
@@ -272,7 +273,6 @@
     <string name="select_all">Selectează tot</string>
     <string name="close_selection">Închideți selecția</string>
     <string name="delete_selection">Ștergeți selecția</string>
-    <string name="map_style_selection">Selecție stil</string>
     <string name="map_download_region">Descarca regiunea</string>
     <string name="name">Nume</string>
     <string name="description">Descriere</string>

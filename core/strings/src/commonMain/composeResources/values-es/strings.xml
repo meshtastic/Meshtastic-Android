@@ -202,6 +202,7 @@
     <string name="debug_filter_add">Añadir filtro</string>
     <string name="debug_filter_included">Filtro incluido</string>
     <string name="debug_filter_clear">Borrar todos los filtros</string>
+    <string name="debug_filter_show_ignored">Solo mostrar nodos ignorados</string>
     <string name="debug_clear">Limpiar los registros</string>
     <string name="match_any">Coincidir con cualquier | Todo</string>
     <string name="match_all">Coincidir todo | Cualquiera</string>
@@ -241,7 +242,6 @@
     <string name="select_all">Seleccionar todo</string>
     <string name="close_selection">Cerrar selección</string>
     <string name="delete_selection">Borrar seleccionados</string>
-    <string name="map_style_selection">Selección de estilo</string>
     <string name="map_download_region">Descargar región</string>
     <string name="name">Nombre</string>
     <string name="description">Descripción</string>
@@ -742,13 +742,10 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="node_count_template">(%1$d en línea / %2$d mostrado / %3$d total)</string>
     <string name="react">Reaccionar</string>
     <string name="disconnect">Desconectar</string>
-    <string name="scanning_bluetooth">Buscando dispositivos Bluetooth…</string>
-    <string name="no_ble_devices">No hay dispositivos Bluetooth emparejados.</string>
     <string name="no_network_devices">No se encontraron dispositivos de red.</string>
     <string name="no_usb_devices">No se encontraron dispositivos Serial USB.</string>
     <string name="scroll_to_bottom">Desplazarse hacia abajo</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Buscando</string>
     <string name="security_icon_description">Estado de seguridad</string>
     <string name="security_icon_secure">Seguro</string>
     <string name="unknown_channel">Canal desconocido</string>
@@ -786,9 +783,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="message_input_label">Mensaje</string>
     <string name="type_a_message">Escribe un mensaje</string>
     <string name="wifi_devices">Dispositivos WiFi</string>
-    <string name="ble_devices">Dispositivos BLE</string>
     <string name="bluetooth_paired_devices">Dispositivos emparejados</string>
-    <string name="bluetooth_available_devices">Dispositivos disponibles</string>
     <string name="connected_device">Dispositivo conectado</string>
     <string name="routing_error_rate_limit_exceeded">Límite de tasa excedido. Por favor intente de nuevo más tarde.</string>
     <string name="download">Descarga</string>
@@ -898,18 +893,6 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="firmware_update_channel_name">Actualización de firmware</string>
     <string name="interval_unset">Sin configurar</string>
     <string name="interval_always_on">Siempre encendido</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 segundo</item>
-        <item quantity="other">%1$d segundos</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minuto</item>
-        <item quantity="other">%1$d minutos</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 hora</item>
-        <item quantity="other">%1$d horas</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Brújula</string>
     <string name="open_compass">Abrir brújula</string>
@@ -919,4 +902,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="now">Ahora</string>
     <!-- Message Filter -->
     <string name="all_time">Todos</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

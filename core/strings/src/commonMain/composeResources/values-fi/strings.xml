@@ -232,6 +232,7 @@
     <string name="debug_filter_clear">Tyhjennä kaikki suodattimet</string>
     <string name="debug_filter_add_custom">Lisää mukautettu suodatin</string>
     <string name="debug_filter_preset_title">Oletussuodattimet</string>
+    <string name="debug_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
     <string name="debug_store_logs_title">Tallenna mesh-verkon lokitiedot</string>
     <string name="debug_store_logs_summary">Poista käytöstä, jos et halua kirjoittaa mesh-lokitietoja levylle</string>
     <string name="debug_clear">Tyhjennä lokitiedot</string>
@@ -276,7 +277,6 @@
     <string name="select_all">Valitse kaikki</string>
     <string name="close_selection">Sulje valinta</string>
     <string name="delete_selection">Poista valitut</string>
-    <string name="map_style_selection">Tyylin Valinta</string>
     <string name="map_download_region">Lataa alue</string>
     <string name="name">Nimi</string>
     <string name="description">Kuvaus</string>
@@ -820,13 +820,10 @@
     <string name="node_count_template">(%1$d yhdistetty / %2$d nähty / %3$d yhteensä)</string>
     <string name="react">Reagoi</string>
     <string name="disconnect">Katkaise yhteys</string>
-    <string name="scanning_bluetooth">Etsitään bluetooth-laitteita…</string>
-    <string name="no_ble_devices">Ei paritettuja Bluetooth-laitteita.</string>
     <string name="no_network_devices">Verkkolaitteita ei löytynyt.</string>
     <string name="no_usb_devices">USB-sarjalaitteita ei löytynyt.</string>
     <string name="scroll_to_bottom">Siirry loppuun</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Etsitään</string>
     <string name="security_icon_description">Turvallisuustila</string>
     <string name="security_icon_secure">Suojattu</string>
     <string name="security_icon_badge_warning_description">Varoituskuvake</string>
@@ -873,9 +870,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">PAX mittareita ei ole saatavilla.</string>
     <string name="wifi_devices">WiFi-laitteet</string>
-    <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="bluetooth_paired_devices">Paritetut laitteet</string>
-    <string name="bluetooth_available_devices">Käytettävissä olevat laitteet</string>
     <string name="connected_device">Yhdistetty laite</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
     <string name="view_release">Näytä versio</string>
@@ -979,14 +974,9 @@
     <string name="system_settings">Järjestelmäasetukset</string>
     <string name="no_local_stats">Tilastoja ei ole saatavilla</string>
     <string name="analytics_notice">Analytiikkatietoja kerätään auttamaan meitä parantamaan Android-sovellusta (kiitos siitä). Saamme anonymisoitua tietoa käyttäjien toiminnasta, kuten kaatumisraportteja ja tietoa sovelluksessa käytetyistä näkymistä jne.</string>
-    <string name="analytics_platforms">"Analytiikka-alustat: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisätietoja saat tietosuojakäytännöstämme.</string>
     <string name="unset">Ei asetettu – 0</string>
     <string name="relayed_by">Välittänyt: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Kuultu %1$d kautta</item>
-        <item quantity="other">Kuultu %1$d kautta</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s toimitetaan yleensä bootloaderilla, joka ei tue OTA-päivityksiä. Sinun täytyy ehkä ohjelmoida OTA-yhteensopiva bootloader USB:n kautta ennen kuin voit tehdä OTA-päivityksiä.</string>
     <string name="learn_more">Lue lisää</string>
     <string name="firmware_update_rak4631_bootloader_hint">Käytä RAK WisBlock RAK4631 -moduulille valmistajan DFU-työkalua (esimerkiksi adafruit-nrfutil dfu serial -komentoa yhdessä annetun bootloaderin .zip-tiedoston kanssa). Pelkän .uf2-tiedoston kopioiminen ei päivitä bootloaderia.</string>
@@ -1034,7 +1024,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Käynnistetään DFU-tilaan...</string>
     <string name="firmware_update_waiting_for_device">Odottaa DFU-laitetta...</string>
-    <string name="firmware_update_copying">Kopioidaan laiteohjainta...</string>
     <string name="firmware_update_save_dfu_file">Tallenna .uf2-tiedosto laitteesi DFU-asemaan.</string>
     <string name="firmware_update_flashing">Ohjelmoidaan laitetta. Odota...</string>
     <string name="firmware_update_method_usb">USB-tiedonsiirto</string>
@@ -1074,18 +1063,6 @@
     <string name="back">Edellinen</string>
     <string name="interval_unset">Ei yhdistetty</string>
     <string name="interval_always_on">Aina päällä</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 sekunti</item>
-        <item quantity="other">%1$d sekuntia</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minuutti</item>
-        <item quantity="other">%1$d minuuttia</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 tunti</item>
-        <item quantity="other">%1$d tuntia</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompassi</string>
     <string name="open_compass">Avaa kompassi</string>

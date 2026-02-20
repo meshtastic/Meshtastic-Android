@@ -178,6 +178,7 @@
     <string name="debug_filter_clear">Vymazať všetky filtre</string>
     <string name="debug_filter_add_custom">Pridať vlastný filter</string>
     <string name="debug_filter_preset_title">Prednastavené filtre</string>
+    <string name="debug_filter_show_ignored">Zobraziť len ignorované Uzly</string>
     <string name="clear">Zmazať</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>
@@ -207,7 +208,6 @@
     <string name="delete_for_everyone">Vymazať pre všetkých</string>
     <string name="delete_for_me">Vymazať pre mňa</string>
     <string name="select_all">Vybrať všetko</string>
-    <string name="map_style_selection">Štýl výberu</string>
     <string name="map_download_region">Stiahnuť oblasť</string>
     <string name="name">Názov</string>
     <string name="description">Popis</string>
@@ -452,4 +452,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="all_time">Všetky</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

@@ -232,6 +232,7 @@
     <string name="debug_filter_clear">Puhasta kõik filtrid</string>
     <string name="debug_filter_add_custom">Lisa kohandatud filter</string>
     <string name="debug_filter_preset_title">Eelseadistatud filtrid</string>
+    <string name="debug_filter_show_ignored">Näita ainult ignoreeritud sõlmi</string>
     <string name="debug_store_logs_title">Salvesta võrgusõlme logiid</string>
     <string name="debug_store_logs_summary">Keela võrgusõlme logide kettale kirjutamise vahele jätmine</string>
     <string name="debug_clear">Puhasta logid</string>
@@ -276,7 +277,6 @@
     <string name="select_all">Vali kõik</string>
     <string name="close_selection">Sulge valik</string>
     <string name="delete_selection">Kustuta valik</string>
-    <string name="map_style_selection">Stiili valik</string>
     <string name="map_download_region">Lae piirkond</string>
     <string name="name">Nimi</string>
     <string name="description">Kirjeldus</string>
@@ -820,13 +820,10 @@
     <string name="node_count_template">(%1$d võrgus / %2$d näidatud / %3$d kokku)</string>
     <string name="react">Reageeri</string>
     <string name="disconnect">Katkesta ühendus</string>
-    <string name="scanning_bluetooth">Otsin sinihamba seadmeid…</string>
-    <string name="no_ble_devices">Pole seotud sinihamba seadmeid.</string>
     <string name="no_network_devices">Võrguseadmeid ei leitud.</string>
     <string name="no_usb_devices">USB seadmeid ei leita.</string>
     <string name="scroll_to_bottom">Mine lõppu</string>
     <string name="meshtastic">Kärgvõrgustik</string>
-    <string name="scanning">Skaneerin</string>
     <string name="security_icon_description">Turvalisuse olek</string>
     <string name="security_icon_secure">Turvaline</string>
     <string name="security_icon_badge_warning_description">Hoiatusmärk</string>
@@ -873,9 +870,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Pax mõõdikut pole saadaval.</string>
     <string name="wifi_devices">WiFi seadmed</string>
-    <string name="ble_devices">Sinihamba seadmed</string>
     <string name="bluetooth_paired_devices">Seotud seadmed</string>
-    <string name="bluetooth_available_devices">Saadaolevad seadmed</string>
     <string name="connected_device">Ühendatud seadmed</string>
     <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
     <string name="view_release">Näita versioon</string>
@@ -979,14 +974,9 @@
     <string name="system_settings">Süsteemi sätted</string>
     <string name="no_local_stats">Statistikat pole saadaval</string>
     <string name="analytics_notice">Analüüsiandmeid kogutakse Androidi rakenduse täiustamiseks (tänan). Me saame anonüümset teavet kasutajate käitumise kohta. See hõlmab krahhiaruandeid, rakenduse ekraanipilte jms.</string>
-    <string name="analytics_platforms">"Analüütika platvormid: "</string>
     <string name="for_more_information_see_our_privacy_policy">Lisateabe saamiseks vaata privaatsuspoliitikat.</string>
     <string name="unset">Tühistatud - 0</string>
     <string name="relayed_by">Vahendab: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Kuulsin %1$d vahendajat</item>
-        <item quantity="other">Kuuldi %1$d vahendajat</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s on tavaliselt varustatud alglaaduriga, mis ei toeta OTA värskendusi. Enne OTA värskendamist pead võib-olla USB kaudu OTA-toega alglaaduri käivitama.</string>
     <string name="learn_more">Lisateave</string>
     <string name="firmware_update_rak4631_bootloader_hint">RAK WisBlock RAK4631 puhul kasutage tootja&apos; seerianumbri DFU tööriista (näiteks adafruit-nrfutil dfu koos kaasasoleva alglaaduri jadapordi .zip-failiga). Ainult .uf2-faili kopeerimine ei värskenda alglaadurit.</string>
@@ -1034,7 +1024,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Taaskäivitamine DFU reziimi...</string>
     <string name="firmware_update_waiting_for_device">Ootan DFU seadet...</string>
-    <string name="firmware_update_copying">Püsivara kopeerimine...</string>
     <string name="firmware_update_save_dfu_file">Palun salvesta .uf2-fail oma seadme&apos; DFU kettale.</string>
     <string name="firmware_update_flashing">Seadme värskendamine, palun oota...</string>
     <string name="firmware_update_method_usb">USB failiedastus</string>
@@ -1073,18 +1062,6 @@
     <string name="back">Tagasi</string>
     <string name="interval_unset">Määramatta</string>
     <string name="interval_always_on">Alati sees</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 sekund</item>
-        <item quantity="other">%1$d sekundit</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 minut</item>
-        <item quantity="other">%d minutit</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 tund</item>
-        <item quantity="other">%1$d tundi</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
     <string name="open_compass">Ava kompass</string>

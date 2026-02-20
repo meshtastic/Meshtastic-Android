@@ -147,7 +147,6 @@
     <string name="delete_for_everyone">모두에게서 삭제</string>
     <string name="delete_for_me">나에게서 삭제</string>
     <string name="select_all">전부 선택</string>
-    <string name="map_style_selection">스타일 선택</string>
     <string name="map_download_region">다운로드 지역</string>
     <string name="name">이름</string>
     <string name="description">설명</string>

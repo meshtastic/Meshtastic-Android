@@ -241,4 +241,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="all_time">Усе</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

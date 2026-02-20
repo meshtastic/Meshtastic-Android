@@ -159,7 +159,6 @@
     <string name="select_all">Selecionar tudo</string>
     <string name="close_selection">Fechar seleção</string>
     <string name="delete_selection">Excluir selecionados</string>
-    <string name="map_style_selection">Seleção de estilo</string>
     <string name="map_download_region">Baixar região</string>
     <string name="name">Nome</string>
     <string name="description">Descrição</string>
@@ -579,13 +578,10 @@
     <string name="remote">Remoto</string>
     <string name="react">Reagir</string>
     <string name="disconnect">Desconectar</string>
-    <string name="scanning_bluetooth">Procurando dispositivos Bluetooth…</string>
-    <string name="no_ble_devices">Nenhum dispositivo Bluetooth pareado.</string>
     <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
     <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
     <string name="scroll_to_bottom">Rolar para o final</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Escaneando</string>
     <string name="security_icon_description">Status de segurança</string>
     <string name="security_icon_secure">Seguro</string>
     <string name="security_icon_badge_warning_description">Emblema de aviso</string>
@@ -627,7 +623,6 @@
     <string name="type_a_message">Digite uma mensagem</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">Dispositivos WiFi</string>
-    <string name="ble_devices">Dispositivos BLE</string>
     <string name="connected_device">Dispositivo Conectado</string>
     <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="view_release">Ver Lançamento</string>

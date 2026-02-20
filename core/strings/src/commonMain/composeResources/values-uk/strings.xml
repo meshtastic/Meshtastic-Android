@@ -181,6 +181,7 @@
     <string name="debug_filter_clear">Очистити всі фільтри</string>
     <string name="debug_filter_add_custom">Додати свій фільтр</string>
     <string name="debug_filter_preset_title">Готові фільтри</string>
+    <string name="debug_filter_show_ignored">Показати лише ігноровані вузли</string>
     <string name="debug_clear">Очистити журнал</string>
     <string name="clear">Очистити</string>
     <string name="message_delivery_status">Статус доставки повідомлень</string>
@@ -218,7 +219,6 @@
     <string name="select">Вибрати</string>
     <string name="select_all">Вибрати все</string>
     <string name="delete_selection">Видалити вибране</string>
-    <string name="map_style_selection">Вибір стилю</string>
     <string name="map_download_region">Завантажити регіон</string>
     <string name="name">Ім'я</string>
     <string name="description">Опис</string>
@@ -588,7 +588,6 @@
     <string name="no_network_devices">Не знайдено жодного мережевого пристрою.</string>
     <string name="scroll_to_bottom">Прокрутити донизу</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Сканування</string>
     <string name="unknown_channel">Невідомий канал</string>
     <string name="warning">Попередження</string>
     <string name="advanced_title">Розширені</string>
@@ -616,9 +615,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Немає доступних показників PAX.</string>
     <string name="wifi_devices">Wi-Fi пристрої</string>
-    <string name="ble_devices">BLE пристрої</string>
     <string name="bluetooth_paired_devices">Прив'язані пристрої</string>
-    <string name="bluetooth_available_devices">Доступні пристрої</string>
     <string name="connected_device">Під'єднаний пристрій</string>
     <string name="view_release">Переглянути реліз</string>
     <string name="download">Завантажити</string>
@@ -677,7 +674,6 @@
     <string name="system_settings">Системі налаштування</string>
     <string name="no_local_stats">Статистика відсутня</string>
     <string name="analytics_notice">Аналітика збирається для того, щоб допомогти нам покращити додаток для Android (дякуємо), ми будемо отримувати анонімну інформацію про поведінку користувачів. Це включає звіти про збої, екрани, що використовуються в програмі й тому подібне.</string>
-    <string name="analytics_platforms">"Аналітичні платформи: "</string>
     <string name="for_more_information_see_our_privacy_policy">Для додаткової інформації, перегляньте нашу політику конфіденційності.</string>
     <string name="firmware_update_usb_bootloader_warning">%1$s зазвичай постачається із завантажувачем, який не підтримує оновлення OTA. Вам може знадобитися завантажувач з можливістю оновлень OTA через USB перед прошиванням OTA.</string>
     <string name="learn_more">Докладніше</string>
@@ -723,7 +719,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Перезавантаження у DFU...</string>
     <string name="firmware_update_waiting_for_device">Очікування пристрою DFU...</string>
-    <string name="firmware_update_copying">Копіювання прошивки...</string>
     <string name="firmware_update_save_dfu_file">Будь ласка, збережіть .uf2 файл на DFU диск вашого пристрою.</string>
     <string name="firmware_update_flashing">Прошивка пристрою, будь ласка, зачекайте...</string>
     <string name="firmware_update_method_usb">Передача файлів через USB</string>
@@ -777,4 +772,5 @@
     <string name="filter_disable_for_contact">Вимкнути фільтрацію</string>
     <string name="generate_qr_code">Згенерувати QR-код</string>
     <string name="all_time">Усі</string>
+    <string name="bluetooth_permission">Bluetooth</string>
 </resources>

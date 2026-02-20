@@ -227,6 +227,7 @@
     <string name="debug_filter_clear">清除所有篩選</string>
     <string name="debug_filter_add_custom">新增自訂篩選條件</string>
     <string name="debug_filter_preset_title">預設篩選條件</string>
+    <string name="debug_filter_show_ignored">僅顯示已忽略的節點</string>
     <string name="debug_store_logs_title">儲存網狀網路日誌</string>
     <string name="debug_store_logs_summary">停用後將不會把網狀網路日誌寫入磁碟</string>
     <string name="debug_clear">清除所有日誌</string>
@@ -270,7 +271,6 @@
     <string name="select_all">選擇全部</string>
     <string name="close_selection">關閉選取</string>
     <string name="delete_selection">刪除選取項目</string>
-    <string name="map_style_selection">樣式選擇</string>
     <string name="map_download_region">下載區域</string>
     <string name="name">名稱</string>
     <string name="description">描述說明</string>
@@ -813,13 +813,10 @@
     <string name="node_count_template"></string>
     <string name="react">回應</string>
     <string name="disconnect">中斷連線</string>
-    <string name="scanning_bluetooth">正在尋找藍牙裝置…</string>
-    <string name="no_ble_devices">沒有已配對的藍牙裝置。</string>
     <string name="no_network_devices">找不到網路裝置。</string>
     <string name="no_usb_devices">找不到 USB 序列裝置。</string>
     <string name="scroll_to_bottom">移至最底部</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">掃描中</string>
     <string name="security_icon_description">安全性狀態</string>
     <string name="security_icon_secure">安全性</string>
     <string name="security_icon_badge_warning_description">警告標誌</string>
@@ -866,9 +863,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
     <string name="wifi_devices">WiFi 裝置</string>
-    <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">已配對的裝置</string>
-    <string name="bluetooth_available_devices">可用裝置</string>
     <string name="connected_device">連接裝置</string>
     <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
     <string name="view_release">查看版本資訊</string>
@@ -972,13 +967,9 @@
     <string name="system_settings">系統設定</string>
     <string name="no_local_stats">沒有可用的統計資料</string>
     <string name="analytics_notice">我們會收集分析數據以協助改善 Android 應用程式（感謝您的支持），我們將收到匿名化的使用者行為資訊，包括當機報告、應用程式使用畫面等。</string>
-    <string name="analytics_platforms">"分析平台: "</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
-    <plurals name="relays">
-        <item quantity="other">接收到 %1$d 個中繼器</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s 裝置出廠時預載的開機載入程式通常不支援 OTA 更新功能。在執行 OTA 韌體更新前,您可能需要先透過 USB 連線刷入具備 OTA 功能的開機載入程式。</string>
     <string name="learn_more">瞭解詳情</string>
     <string name="firmware_update_rak4631_bootloader_hint">針對 RAK WisBlock RAK4631 裝置，必須使用 &apos; 提供的序列埠 DFU（裝置韌體更新）工具進行更新。舉例來說，可以使用 adafruit-nrfutil dfu serial 命令配合提供的 bootloader .zip 壓縮檔。注意：單純複製 .uf2 檔案並不會更新開機載入程式。</string>
@@ -1026,7 +1017,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">正在進入 DFU 模式...</string>
     <string name="firmware_update_waiting_for_device">等待裝置進入 DFU 模式...</string>
-    <string name="firmware_update_copying">正在複製韌體...</string>
     <string name="firmware_update_save_dfu_file">請將 .uf2 檔案儲存到您 &apos; 裝置 DFU 磁碟機。</string>
     <string name="firmware_update_flashing">刷入韌體中，請稍等...</string>
     <string name="firmware_update_method_usb">USB 檔案傳輸</string>
@@ -1065,15 +1055,6 @@
     <string name="back">返回</string>
     <string name="interval_unset">取消設定</string>
     <string name="interval_always_on">保持開啟</string>
-    <plurals name="plurals_seconds">
-        <item quantity="other">1秒</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="other">1分鐘</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="other">1小時</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">指南針</string>
     <string name="open_compass">開啟指南針</string>

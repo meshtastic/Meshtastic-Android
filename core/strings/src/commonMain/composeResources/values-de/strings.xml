@@ -232,6 +232,7 @@
     <string name="debug_filter_clear">Alle Filter löschen</string>
     <string name="debug_filter_add_custom">Benutzerdefinierten Filter hinzufügen</string>
     <string name="debug_filter_preset_title">Voreingestellte Filter</string>
+    <string name="debug_filter_show_ignored">Nur ignorierte Knoten anzeigen</string>
     <string name="debug_store_logs_title">Netzprotokolle speichern</string>
     <string name="debug_store_logs_summary">Deaktivieren, um das Schreiben von Netzprotokollen auf die Festplatte zu überspringen</string>
     <string name="debug_clear">Protokolle löschen</string>
@@ -276,7 +277,6 @@
     <string name="select_all">Alle auswählen</string>
     <string name="close_selection">Auswahl schließen</string>
     <string name="delete_selection">Auswahl löschen</string>
-    <string name="map_style_selection">Stil-Auswahl</string>
     <string name="map_download_region">Region herunterladen</string>
     <string name="name">Name</string>
     <string name="description">Beschreibung</string>
@@ -820,13 +820,10 @@
     <string name="node_count_template">(%1$d online / %2$d angezeigt / %3$d gesamt)</string>
     <string name="react">Reagieren</string>
     <string name="disconnect">Verbindung trennen</string>
-    <string name="scanning_bluetooth">Suche nach Bluetooth Geräten…</string>
-    <string name="no_ble_devices">Keine gekoppelten Bluetooth Geräte.</string>
     <string name="no_network_devices">Keine Netzwerkgeräte gefunden.</string>
     <string name="no_usb_devices">Keine seriellen USB Geräte gefunden.</string>
     <string name="scroll_to_bottom">Zum Ende springen</string>
     <string name="meshtastic">Meshtastic</string>
-    <string name="scanning">Suche</string>
     <string name="security_icon_description">Sicherheitsstatus</string>
     <string name="security_icon_secure">Sicher</string>
     <string name="security_icon_badge_warning_description">Warnhinweis</string>
@@ -873,9 +870,7 @@
     <string name="pax">Besucher</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
-    <string name="ble_devices">BLE Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
-    <string name="bluetooth_available_devices">Verfügbare Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>
@@ -979,14 +974,9 @@
     <string name="system_settings">Systemeinstellungen</string>
     <string name="no_local_stats">Keine Statistiken verfügbar</string>
     <string name="analytics_notice">Die Analysedaten helfen uns, die Android-App zu verbessern (Danke). Wir erhalten anonymisierte Informationen zum Nutzerverhalten. Dazu gehören Absturzberichte, in der App verwendete Bildschirme usw.</string>
-    <string name="analytics_platforms">"Analyse Plattformen: "</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
-    <plurals name="relays">
-        <item quantity="one">Höre %1$d Relais</item>
-        <item quantity="other">Höre %1$d Relais</item>
-    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="learn_more">Mehr erfahren</string>
     <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
@@ -1034,7 +1024,6 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Neustart in DFU Modus...</string>
     <string name="firmware_update_waiting_for_device">Warte auf DFU Gerät...</string>
-    <string name="firmware_update_copying">Kopiere Firmware...</string>
     <string name="firmware_update_save_dfu_file">Bitte speichern Sie die .uf2-Datei auf DFU Laufwerk Ihres Gerätes.</string>
     <string name="firmware_update_flashing">Gerät wird programmiert, bitte warten...</string>
     <string name="firmware_update_method_usb">USB Dateiübertragung</string>
@@ -1073,18 +1062,6 @@
     <string name="back">Zurück</string>
     <string name="interval_unset">Nicht konfiguriert</string>
     <string name="interval_always_on">Immer an</string>
-    <plurals name="plurals_seconds">
-        <item quantity="one">1 Sekunde</item>
-        <item quantity="other">%1$d Sekunden</item>
-    </plurals>
-    <plurals name="plurals_minutes">
-        <item quantity="one">1 Minute</item>
-        <item quantity="other">%1$d Minuten</item>
-    </plurals>
-    <plurals name="plurals_hours">
-        <item quantity="one">1 Stunde</item>
-        <item quantity="other">%1$d Stunden</item>
-    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompass</string>
     <string name="open_compass">Kompass öffnen</string>
