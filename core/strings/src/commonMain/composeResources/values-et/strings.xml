@@ -331,7 +331,7 @@
     <string name="map_cache_info">Vahemälu maht: %1$d MB\nVahemälu kasutus: %2$d MB</string>
     <string name="map_clear_tiles">Tühjenda allalaetud paanid</string>
     <string name="map_tile_source">Paani allikas</string>
-    <string name="map_purge_success">SQL-i vahemälu puhastatud %1$s jaoks</string>
+    <string name="map_purge_success">SQL-i vahemälu puhastatud %1$s' jaoks</string>
     <string name="map_purge_fail">SQL-i vahemälu tühjendamine ebaõnnestus, vaata üksikasju logcat'ist</string>
     <string name="map_cache_manager">Vahemälu haldamine</string>
     <string name="map_download_complete">Allalaadimine on lõppenud!</string>
@@ -418,7 +418,7 @@
     <string name="view_on_map">Vaata kaardil</string>
     <string name="traceroute_map_no_data">Sellel marsruudil pole veel ühtegi kaardil nähtavat sõlme.</string>
     <string name="traceroute_showing_nodes">Kuvatakse %1$d/%2$d sõlme</string>
-    <string name="traceroute_duration">Kestus: %1$s s</string>
+    <string name="traceroute_duration">Kestus: %1$s' s</string>
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
     <string name="traceroute_route_towards_dest">Marsruut sihtkohta:\n\n</string>
     <string name="traceroute_route_back_to_us">Marsruut meieni tagasi:\n\n</string>
@@ -996,7 +996,7 @@
     <string name="firmware_update_checking">Otsin uuendusi...</string>
     <string name="firmware_update_device">Seade: %1$s</string>
     <string name="firmware_update_currently_installed">Praegu paigaldatud: %1$s</string>
-    <string name="firmware_update_latest">Uuenda: %1$s le</string>
+    <string name="firmware_update_latest">Uuenda: %1$s' le</string>
     <string name="firmware_update_stable">Stabiilne</string>
     <string name="firmware_update_alpha">Alfa</string>
     <string name="firmware_update_disconnect_warning">Märkus. See katkestab ajutiselt seadme ühenduse värskendamise ajal.</string>
@@ -1013,17 +1013,17 @@
     <string name="firmware_update_unknown_hardware">Tundmatu riistvaramudel: %1$d</string>
     <string name="firmware_update_invalid_address">Ühendatud seade ei ole kehtiv BLE seade või aadress on teadmata (%1$s).</string>
     <string name="firmware_update_no_device">Ühtegi seadet pole ühendatud</string>
-    <string name="firmware_update_not_found_in_release">%1$s püsivara ei leitud selles versioonis.</string>
+    <string name="firmware_update_not_found_in_release">Selles versioonis ei leitud püsivara %1$s'le.</string>
     <string name="firmware_update_extracting">Püsivara lahtipakkimine...</string>
     <string name="firmware_update_starting_service">DFU teenuse käivitamiseks katkestamine ühenduse...</string>
     <string name="firmware_update_failed">Värskendus ebaõnnestus</string>
     <string name="firmware_update_hang_tight">Pea vastu, me töötame selle kallal...</string>
-    <string name="firmware_update_keep_device_close">Hoidke seade telefoni lähedal.</string>
+    <string name="firmware_update_keep_device_close">Hoia seade telefoni lähedal.</string>
     <string name="firmware_update_do_not_close">Ära sulge rakendust.</string>
     <string name="firmware_update_almost_there">Kohe lõpetan...</string>
     <string name="firmware_update_taking_a_while">See võib võtta minuti...</string>
     <string name="firmware_update_select_file">Vali kohalik fail</string>
-    <string name="firmware_update_local_file">Kohalik fail</string>
+    <string name="firmware_update_local_file">Lokaalne</string>
     <string name="firmware_update_source_local">Allikas: kohalik fail</string>
     <string name="firmware_update_unknown_release">Tundmatu väljalase</string>
     <string name="firmware_update_disclaimer_title">Värskenduse hoiatus</string>
@@ -1038,7 +1038,7 @@
     <string name="firmware_update_method_usb">USB failiedastus</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
     <string name="firmware_update_method_wifi">Üle WiFi</string>
-    <string name="firmware_update_method_detail">Uuendamine %1$s kaudu</string>
+    <string name="firmware_update_method_detail">Uuenda %1$s' abil</string>
     <string name="firmware_update_usb_instruction_title">Vali DFU USB ketas</string>
     <string name="firmware_update_usb_instruction_text">Seade on taaskäivitatud DFU režiimis ja kuvatakse USB kettana (nt RAK4631).\n\nKui failivalija avaneb, vali püsivara faili salvestamiseks selle ketta juurkaust.</string>
     <string name="firmware_update_verifying">Värskenduse kinnitamine...</string>
@@ -1138,7 +1138,8 @@
     <string name="bluetooth_feature_discovery">Avastamine</string>
     <string name="bluetooth_feature_discovery_description">Leia ja tuvasta lähedal asuvad Meshtastic seadmed.</string>
     <string name="bluetooth_feature_config">Sätted</string>
-    <string name="bluetooth_feature_config_description">Halda seadme seadeid ja kanaleid juhtmevabalt.</string>
+    <string name="bluetooth_feature_config_description">Halda juhtmevabalt seadme sätteid ja kanaleid.</string>
     <string name="permission_granted">Luba antud</string>
     <string name="permission_denied">Luba mitte antud</string>
+    <string name="map_style_selection">Kaardi stiilis valik</string>
 </resources>
