@@ -189,15 +189,15 @@
   },
   "pullRequests": [
     {
-      "id": "9675",
-      "title": "add FromRadioSync BLE characteristic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9675",
+      "id": "9706",
+      "title": "Add VL53L0 distance sensor.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9706",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9668",
-      "title": "Fix/rak3401 button",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9668",
+      "id": "9675",
+      "title": "add FromRadioSync BLE characteristic",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9675",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
@@ -216,6 +216,12 @@
       "id": "9509",
       "title": "fix(power): reset LPF when adc_multiplier_override changes at runtime",
       "page_url": "https://github.com/meshtastic/firmware/pull/9509",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9476",
+      "title": "Deprecate/block packets with a missing/invalid hop_start value (pre-hop firmware) (related to issue #7369)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9476",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]

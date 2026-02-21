@@ -118,6 +118,7 @@
     <string name="config_lora_region_summary">Regionen där du kommer att använda din radio.</string>
     <string name="config_lora_modem_preset_summary">Tillgängliga modemförinställningar, standard är Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Sätter det maximala antalet hopp, standard är 3. Ökat antal hopp ökar också trängseln och bör användas med försiktighet. 0 hopp sända meddelanden kommer inte att få ACKs.</string>
+    <string name="config_lora_frequency_slot_summary">Din nods driftfrekvens beräknas baserat på regionen, modeminställning och detta fält. När värdet är 0 beräknas det automatiskt baserat på det primära kanalnamnet och kommer att bli annan än den förvalda publika frekvensen. Ändra tillbaka till den publika standardfrekvensen om privata primära och publika sekundära kanaler är konfigurerade.</string>
     <string name="label_very_long_slow">Mycket lång räckvidd - långsamt</string>
     <string name="label_long_fast">Lång räckvidd - snabbt</string>
     <string name="label_long_turbo">Lång räckvidd - supersnabbt</string>
@@ -827,6 +828,7 @@
     <string name="type_a_message">Skriv ett meddelande</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi-enheter</string>
+    <string name="ble_devices">Blåtandsenheter</string>
     <string name="bluetooth_paired_devices">Parkopplade enheter</string>
     <string name="connected_device">Ansluten enhet</string>
     <string name="routing_error_rate_limit_exceeded">Sändningsgräns uppnådd. Försök igen senare.</string>
@@ -839,6 +841,7 @@
     <string name="firmware_edition">Fast programvaruversion</string>
     <string name="recent_network_devices">Senaste nätverksenheterna</string>
     <string name="discovered_network_devices">Upptäckta nätverksenheter</string>
+    <string name="bluetooth_available_devices">Tillgängliga blåtandsenheter</string>
     <string name="get_started">Kom igång</string>
     <string name="intro_welcome">Välkommen till</string>
     <string name="stay_connected_anywhere">Håll dig uppkopplad var som helst</string>

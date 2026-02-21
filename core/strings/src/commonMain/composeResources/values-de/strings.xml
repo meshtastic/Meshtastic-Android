@@ -534,6 +534,7 @@
     <string name="state_broadcast_seconds">Statusübertragung (Sekunden)</string>
     <string name="send_bell_with_alert_message">Glocke mit Warnmeldung senden</string>
     <string name="friendly_name">Anzeigename</string>
+    <string name="friendly_address">Freundliche Adresse</string>
     <string name="gpio_pin_to_monitor">Zu überwachender GPIO-Pin</string>
     <string name="detection_trigger_type">Typ der Erkennungsauslösung</string>
     <string name="use_input_pullup_mode">Eingang PULLUP Einstellung</string>
@@ -870,6 +871,7 @@
     <string name="pax">Besucher</string>
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
+    <string name="ble_devices">Bluetooth Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
@@ -882,6 +884,7 @@
     <string name="firmware_edition">Firmware-Version</string>
     <string name="recent_network_devices">Kürzliche Netzwerkgeräte</string>
     <string name="discovered_network_devices">Entdeckte Netzwerkgeräte</string>
+    <string name="bluetooth_available_devices">Verfügbare Bluetooth Geräte</string>
     <string name="get_started">Erste Schritte</string>
     <string name="intro_welcome">Willkommen bei</string>
     <string name="stay_connected_anywhere">Bleibe überall in Verbindung</string>
@@ -974,9 +977,14 @@
     <string name="system_settings">Systemeinstellungen</string>
     <string name="no_local_stats">Keine Statistiken verfügbar</string>
     <string name="analytics_notice">Die Analysedaten helfen uns, die Android-App zu verbessern (Danke). Wir erhalten anonymisierte Informationen zum Nutzerverhalten. Dazu gehören Absturzberichte, in der App verwendete Bildschirme usw.</string>
+    <string name="analytics_platforms">Analyse Plattformen:</string>
     <string name="for_more_information_see_our_privacy_policy">Weitere Informationen finden Sie in unserer Datenschutzrichtlinie.</string>
     <string name="unset">Nicht gesetzt - 0</string>
     <string name="relayed_by">Weitergeleitet von: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Höre %1$d Relais</item>
+        <item quantity="other">Höre %1$d Relais</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s wird üblicherweise mit einem Bootloader ausgeliefert, der keine OTA Aktualisierung unterstützt. Möglicherweise müssen Sie vor dem Programmieren einer OTA Aktualisierung einen OTA fähigen Bootloader über USB programmieren.</string>
     <string name="learn_more">Mehr erfahren</string>
     <string name="firmware_update_rak4631_bootloader_hint">Für RAK WisBlock RAK4631 verwenden Sie die serielle DFU Software des Herstellers (z. B. adafruit-nrfutil dfu serial mit der mitgelieferten Bootloader-ZIP-Datei). Das alleinige Kopieren der .uf2 Datei aktualisiert den Bootloader nicht.</string>
@@ -1024,6 +1032,7 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">Neustart in DFU Modus...</string>
     <string name="firmware_update_waiting_for_device">Warte auf DFU Gerät...</string>
+    <string name="firmware_update_copying">Bitte warten, Firmware wird kopiert.</string>
     <string name="firmware_update_save_dfu_file">Bitte speichern Sie die .uf2-Datei auf DFU Laufwerk Ihres Gerätes.</string>
     <string name="firmware_update_flashing">Gerät wird programmiert, bitte warten...</string>
     <string name="firmware_update_method_usb">USB Dateiübertragung</string>
@@ -1062,6 +1071,14 @@
     <string name="back">Zurück</string>
     <string name="interval_unset">Nicht konfiguriert</string>
     <string name="interval_always_on">Immer an</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d Sekunde</item>
+        <item quantity="other">%1$d Sekunden</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d Minute</item>
+        <item quantity="other">%1$d Minuten</item>
+    </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d Stunde</item>
         <item quantity="other">%1$d Stunden</item>
@@ -1115,5 +1132,14 @@
     <string name="nfc_disabled">NFC ist deaktiviert. Bitte aktivieren Sie es in den Systemeinstellungen.</string>
     <string name="all_time">Alle</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Bluetooth Berechtigungen konfigurieren</string>
+    <string name="connect_to_radio">Mit Funkgerät verbinden</string>
+    <string name="connect_to_radio_description">Suchen und verbinden Sie sich mit Ihrem Meshtastic Funkgerät.</string>
+    <string name="bluetooth_feature_discovery">Entdecken</string>
+    <string name="bluetooth_feature_discovery_description">Suchen und identifizieren Sie Meshtastic Geräte in Ihrer Nähe.</string>
     <string name="bluetooth_feature_config">Einstellungen</string>
+    <string name="bluetooth_feature_config_description">Verwalten Sie drahtlos Ihre Geräteeinstellungen und Kanäle.</string>
+    <string name="permission_granted">Berechtigung gewährt</string>
+    <string name="permission_denied">Berechtigung verweigert</string>
+    <string name="map_style_selection">Auswahl Kartenstil</string>
 </resources>
