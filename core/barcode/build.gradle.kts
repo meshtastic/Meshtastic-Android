@@ -39,9 +39,9 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
 
-    // Consistently use ML Kit's bundled barcode scanner across all flavors
-    // to avoid the GMS-dependent "google's silly overlay".
-    implementation(libs.mlkit.barcode.scanning)
+    // ML Kit is used for the Google flavor, while ZXing is used for F-Droid to avoid GMS dependencies.
+    googleImplementation(libs.mlkit.barcode.scanning)
+    fdroidImplementation(libs.zxing.core)
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
