@@ -33,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
@@ -71,6 +72,7 @@ open class MeshUtilApplication :
         // Shutdown managers (useful for Robolectric tests)
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
         entryPoint.databaseManager().close()
+        entryPoint.androidEnvironment().close()
         applicationScope.cancel()
         super.onTerminate()
     }
@@ -99,6 +101,8 @@ interface AppEntryPoint {
     fun meshPrefs(): MeshPrefs
 
     fun meshLogPrefs(): MeshLogPrefs
+
+    fun androidEnvironment(): AndroidEnvironment
 }
 
 fun logAssert(executeReliableWrite: Boolean) {

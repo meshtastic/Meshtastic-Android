@@ -20,14 +20,20 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
+import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -105,25 +111,40 @@ class BleConnection(
         }
     }
 
-    /** Discovers characteristics for a specific service with retries. */
-    @Suppress("ReturnCount")
+    /** A flow of discovered services. Useful for reacting to "Service Changed" indications. */
+    val services: SharedFlow<List<RemoteService>> =
+        _connectionState
+            .asSharedFlow()
+            .filter { it is ConnectionState.Connected }
+            .flatMapLatest { peripheral?.services() ?: flowOf(emptyList()) }
+            .filterNotNull()
+            .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    /** Discovers characteristics for a specific service. */
     suspend fun discoverCharacteristics(
         serviceUuid: Uuid,
-        characteristicUuids: List<Uuid>,
-    ): Map<Uuid, RemoteCharacteristic>? = retryBleOperation(tag = tag) {
-        val p = peripheral ?: return@retryBleOperation null
-        val services =
-            withTimeout(SERVICE_DISCOVERY_TIMEOUT_MS) { p.services(listOf(serviceUuid)).filterNotNull().first() }
-        val service = services.find { it.uuid == serviceUuid } ?: return@retryBleOperation null
+        requiredUuids: List<Uuid>,
+        optionalUuids: List<Uuid> = emptyList(),
+    ): Map<Uuid, RemoteCharacteristic>? {
+        val p = peripheral ?: return null
 
-        val result = mutableMapOf<Uuid, RemoteCharacteristic>()
-        for (uuid in characteristicUuids) {
-            val char = service.characteristics.find { it.uuid == uuid }
-            if (char != null) {
-                result[uuid] = char
+        return retryBleOperation(tag = tag) {
+            val allRequested = requiredUuids + optionalUuids
+            val serviceList =
+                withTimeout(SERVICE_DISCOVERY_TIMEOUT_MS) { p.services(listOf(serviceUuid)).filterNotNull().first() }
+            val service = serviceList.find { it.uuid == serviceUuid } ?: return@retryBleOperation null
+
+            val result = mutableMapOf<Uuid, RemoteCharacteristic>()
+            for (uuid in allRequested) {
+                val char = service.characteristics.find { it.uuid == uuid }
+                if (char != null) {
+                    result[uuid] = char
+                }
             }
+
+            val hasAllRequired = requiredUuids.all { result.containsKey(it) }
+            if (hasAllRequired) result else null
         }
-        return@retryBleOperation if (result.size == characteristicUuids.size) result else null
     }
 
     private fun observePeripheralDetails(p: Peripheral) {
