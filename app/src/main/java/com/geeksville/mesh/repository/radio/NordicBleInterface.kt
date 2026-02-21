@@ -51,6 +51,7 @@ import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
@@ -113,6 +114,7 @@ constructor(
     private var fromNumCharacteristic: RemoteCharacteristic? = null
     private var fromRadioCharacteristic: RemoteCharacteristic? = null
     private var logRadioCharacteristic: RemoteCharacteristic? = null
+    private var fromRadioSyncCharacteristic: RemoteCharacteristic? = null
 
     init {
         connect()
@@ -257,13 +259,15 @@ constructor(
         try {
             val chars =
                 bleConnection.discoverCharacteristics(
-                    SERVICE_UUID,
+                    serviceUuid = SERVICE_UUID,
+                    requiredUuids =
                     listOf(
                         TORADIO_CHARACTERISTIC,
                         FROMNUM_CHARACTERISTIC,
                         FROMRADIO_CHARACTERISTIC,
                         LOGRADIO_CHARACTERISTIC,
                     ),
+                    optionalUuids = listOf(FROMRADIOSYNC_CHARACTERISTIC),
                 )
 
             if (chars != null) {
@@ -271,6 +275,7 @@ constructor(
                 fromNumCharacteristic = chars[FROMNUM_CHARACTERISTIC]
                 fromRadioCharacteristic = chars[FROMRADIO_CHARACTERISTIC]
                 logRadioCharacteristic = chars[LOGRADIO_CHARACTERISTIC]
+                fromRadioSyncCharacteristic = chars[FROMRADIOSYNC_CHARACTERISTIC]
 
                 Logger.d { "[$address] Characteristics discovered successfully" }
                 setupNotifications()
@@ -288,25 +293,48 @@ constructor(
 
     // --- Notification Setup ---
 
+    @Suppress("LongMethod")
     private suspend fun setupNotifications() {
-        val fromNumReady = CompletableDeferred<Unit>()
+        val fromRadioReady = CompletableDeferred<Unit>()
         val logRadioReady = CompletableDeferred<Unit>()
 
-        fromNumCharacteristic
-            ?.subscribe {
-                Logger.d { "[$address] FromNum subscription active" }
-                fromNumReady.complete(Unit)
-            }
-            ?.onEach { notifyBytes ->
-                Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
-                connectionScope.launch { drainPacketQueueAndDispatch() }
-            }
-            ?.catch { e ->
-                if (!fromNumReady.isCompleted) fromNumReady.completeExceptionally(e)
-                Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
-                service.onDisconnect(BleError.from(e))
-            }
-            ?.launchIn(connectionScope) ?: fromNumReady.complete(Unit)
+        // 1. Prefer FromRadioSync (Indicate) if available
+        if (fromRadioSyncCharacteristic != null) {
+            Logger.i { "[$address] Using FromRadioSync for packet reception" }
+            fromRadioSyncCharacteristic
+                ?.subscribe {
+                    Logger.d { "[$address] FromRadioSync subscription active" }
+                    fromRadioReady.complete(Unit)
+                }
+                ?.onEach { payload ->
+                    Logger.d { "[$address] FromRadioSync Indication (${payload.size} bytes)" }
+                    dispatchPacket(payload)
+                }
+                ?.catch { e ->
+                    if (!fromRadioReady.isCompleted) fromRadioReady.completeExceptionally(e)
+                    Logger.w(e) { "[$address] Error in fromRadioSyncCharacteristic subscription" }
+                    service.onDisconnect(BleError.from(e))
+                }
+                ?.launchIn(connectionScope) ?: fromRadioReady.complete(Unit)
+        } else {
+            // 2. Fallback to legacy FromNum (Notify) + FromRadio (Read)
+            Logger.i { "[$address] Using legacy FromNum/FromRadio for packet reception" }
+            fromNumCharacteristic
+                ?.subscribe {
+                    Logger.d { "[$address] FromNum subscription active" }
+                    fromRadioReady.complete(Unit)
+                }
+                ?.onEach { notifyBytes ->
+                    Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
+                    connectionScope.launch { drainPacketQueueAndDispatch() }
+                }
+                ?.catch { e ->
+                    if (!fromRadioReady.isCompleted) fromRadioReady.completeExceptionally(e)
+                    Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
+                    service.onDisconnect(BleError.from(e))
+                }
+                ?.launchIn(connectionScope) ?: fromRadioReady.complete(Unit)
+        }
 
         logRadioCharacteristic
             ?.subscribe {
@@ -326,7 +354,7 @@ constructor(
 
         try {
             withTimeout(CONNECTION_TIMEOUT_MS) {
-                fromNumReady.await()
+                fromRadioReady.await()
                 logRadioReady.await()
             }
             Logger.d { "[$address] All notifications successfully subscribed" }
@@ -364,7 +392,11 @@ constructor(
                                 "to toRadioCharacteristic with $writeType - " +
                                 "${p.size} bytes (Total TX: $bytesSent bytes)"
                         }
-                        drainPacketQueueAndDispatch()
+
+                        // Only manually drain if we are using the legacy FromNum/FromRadio flow
+                        if (fromRadioSyncCharacteristic == null) {
+                            drainPacketQueueAndDispatch()
+                        }
                     } catch (e: InvalidAttributeException) {
                         Logger.w(e) { "[$address] Attribute invalidated during write, clearing characteristics" }
                         handleInvalidAttribute(e)
@@ -415,5 +447,6 @@ constructor(
         fromNumCharacteristic = null
         fromRadioCharacteristic = null
         logRadioCharacteristic = null
+        fromRadioSyncCharacteristic = null
     }
 }

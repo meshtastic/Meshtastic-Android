@@ -37,4 +37,6 @@ object MeshtasticBleConstants {
 
     /** Characteristic for receiving log notifications from the radio. */
     val LOGRADIO_CHARACTERISTIC: Uuid = Uuid.parse("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
+
+    val FROMRADIOSYNC_CHARACTERISTIC: Uuid = Uuid.parse("888a50c3-982d-45db-9963-c7923769165d")
 }
