@@ -100,7 +100,7 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
-    viewModel.start(nodeId)
+    LaunchedEffect(nodeId) { viewModel.start(nodeId) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {

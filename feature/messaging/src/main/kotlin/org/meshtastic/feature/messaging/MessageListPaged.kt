@@ -327,7 +327,8 @@ private fun RenderPagedChatMessageRow(
     val ourNode = state.ourNode ?: return
     val selected by
         remember(message.uuid, state.selectedIds.value) {
- derivedStateOf { state.selectedIds.value.contains(message.uuid) } }
+            derivedStateOf { state.selectedIds.value.contains(message.uuid) }
+        }
     val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
