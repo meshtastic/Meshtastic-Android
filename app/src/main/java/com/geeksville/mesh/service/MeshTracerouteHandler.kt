@@ -26,14 +26,14 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
-import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.traceroute_duration
 import org.meshtastic.core.resources.traceroute_route_back_to_us
 import org.meshtastic.core.resources.traceroute_route_towards_dest
 import org.meshtastic.core.resources.unknown_username
+import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.proto.MeshPacket
 import java.util.Locale
 import javax.inject.Inject

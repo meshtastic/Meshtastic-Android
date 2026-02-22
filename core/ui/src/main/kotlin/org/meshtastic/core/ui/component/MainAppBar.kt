@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -32,16 +31,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.resources.vectorResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.resources.R
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_meshtastic
 import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
@@ -82,12 +80,7 @@ fun MainAppBar(
                 }
             }
         } else {
-            {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = org.meshtastic.core.ui.R.drawable.ic_meshtastic),
-                    contentDescription = null,
-                )
-            }
+            { Icon(imageVector = vectorResource(Res.drawable.ic_meshtastic), contentDescription = null) }
         },
         actions = {
             TopBarActions(ourNode = ourNode, showNodeChip = showNodeChip, actions = actions, onClickChip = onClickChip)

@@ -24,8 +24,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.service.ServiceAction
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add
@@ -39,6 +37,8 @@ import org.meshtastic.core.resources.mute_remove
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_node_text
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.AlertManager
 import javax.inject.Inject
 import javax.inject.Singleton

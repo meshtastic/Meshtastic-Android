@@ -125,7 +125,7 @@ fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: ()
 }
 
 fun MapView.addPositionMarkers(positions: List<Position>, onClick: () -> Unit): List<Marker> {
-    val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation_24)
+    val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation)
     val markers =
         positions.map {
             Marker(this).apply {

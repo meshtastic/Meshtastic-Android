@@ -29,7 +29,6 @@ import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
 import org.meshtastic.core.resources.firmware_update_downloading_percent
@@ -41,6 +40,7 @@ import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_starting_ota
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState

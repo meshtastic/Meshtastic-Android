@@ -53,8 +53,6 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.getString
@@ -74,6 +72,8 @@ import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.core.resources.no_local_stats
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.you
+import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats

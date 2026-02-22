@@ -287,12 +287,11 @@ fun MapView(
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot_24)
-                        ?.let {
-                            setPersonIcon(it)
-                            setPersonAnchor(0.5f, 0.5f)
-                        }
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation_24)?.let {
+                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot)?.let {
+                        setPersonIcon(it)
+                        setPersonAnchor(0.5f, 0.5f)
+                    }
+                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -389,7 +388,7 @@ fun MapView(
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
     val markerIcon = remember {
-        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24)
+        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_location_on)
     }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {

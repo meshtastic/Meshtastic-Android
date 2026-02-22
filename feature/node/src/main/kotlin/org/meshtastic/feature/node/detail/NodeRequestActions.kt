@@ -31,7 +31,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.position
@@ -45,6 +44,7 @@ import org.meshtastic.core.resources.requesting_from
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
+import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 

@@ -58,11 +58,11 @@ import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cant_shutdown
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.cant_shutdown
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute

@@ -18,33 +18,49 @@ package org.meshtastic.core.ui.icon
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.resources.ic_counter_0
+import org.meshtastic.core.resources.ic_counter_1
+import org.meshtastic.core.resources.ic_counter_2
+import org.meshtastic.core.resources.ic_counter_3
+import org.meshtastic.core.resources.ic_counter_4
+import org.meshtastic.core.resources.ic_counter_5
+import org.meshtastic.core.resources.ic_counter_6
+import org.meshtastic.core.resources.ic_counter_7
+import org.meshtastic.core.resources.ic_counter_8
 
 /** These are from Material Symbols drawables. */
 val MeshtasticIcons.Counter0: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_0_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_0)
 
 val MeshtasticIcons.Counter1: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_1_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_1)
 
 val MeshtasticIcons.Counter2: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_2_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_2)
 
 val MeshtasticIcons.Counter3: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_3_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_3)
 
 val MeshtasticIcons.Counter4: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_4_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_4)
 
 val MeshtasticIcons.Counter5: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_5_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_5)
 
 val MeshtasticIcons.Counter6: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_6_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_6)
 
 val MeshtasticIcons.Counter7: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_7_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_7)
 
 val MeshtasticIcons.Counter8: ImageVector
-    @Composable get() = ImageVector.vectorResource(R.drawable.counter_8_24px)
+    @Composable
+    get() = org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_counter_8)

@@ -132,6 +132,7 @@ import org.meshtastic.core.resources.firmware_update_verification_failed
 import org.meshtastic.core.resources.firmware_update_verifying
 import org.meshtastic.core.resources.firmware_update_waiting_reconnect
 import org.meshtastic.core.resources.i_know_what_i_m_doing
+import org.meshtastic.core.resources.img_chirpy
 import org.meshtastic.core.resources.learn_more
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.save
@@ -336,7 +337,9 @@ private fun FirmwareUpdateContent(
                 is FirmwareUpdateState.Verifying -> VerifyingState()
                 is FirmwareUpdateState.VerificationFailed ->
                     VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
+
                 is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
+
                 is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
                 is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
             }
@@ -493,7 +496,7 @@ private fun ChirpyCard() {
                 AsyncImage(
                     model =
                     ImageRequest.Builder(LocalContext.current)
-                        .data(org.meshtastic.core.ui.R.drawable.chirpy)
+                        .data(Res.drawable.img_chirpy)
                         .crossfade(true)
                         .build(),
                     contentScale = ContentScale.Fit,

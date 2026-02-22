@@ -106,7 +106,6 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
 import org.meshtastic.core.resources.bottom_nav_settings
@@ -126,6 +125,7 @@ import org.meshtastic.core.resources.should_update
 import org.meshtastic.core.resources.should_update_firmware
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations

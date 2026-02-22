@@ -26,11 +26,11 @@ import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.clean_node_database_confirmation
 import org.meshtastic.core.resources.clean_now
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.AlertManager
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days

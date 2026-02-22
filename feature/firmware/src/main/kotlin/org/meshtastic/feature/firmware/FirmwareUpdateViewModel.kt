@@ -49,8 +49,6 @@ import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.radio.isTcp
-import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
@@ -73,6 +71,8 @@ import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_updating
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.unknown
+import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.service.ServiceRepository
 import java.io.File
 import javax.inject.Inject
 

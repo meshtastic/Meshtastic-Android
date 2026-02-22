@@ -55,7 +55,6 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.channel_utilization
@@ -64,6 +63,7 @@ import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.AirQualityInfo
 import org.meshtastic.core.ui.component.ChannelInfo
 import org.meshtastic.core.ui.component.DistanceInfo
