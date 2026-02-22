@@ -214,6 +214,8 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
+    focusedNodeNum: Int? = null,
+    nodeTracks: List<Position>? = null,
     tracerouteOverlay: TracerouteOverlay? = null,
     tracerouteNodePositions: Map<Int, Position> = emptyMap(),
     onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
