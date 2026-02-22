@@ -34,11 +34,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.send
-import org.meshtastic.core.strings.shutdown_node_name
-import org.meshtastic.core.strings.shutdown_warning
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.send
+import org.meshtastic.core.resources.shutdown_node_name
+import org.meshtastic.core.resources.shutdown_warning
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.User

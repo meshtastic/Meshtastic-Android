@@ -18,13 +18,13 @@ package org.meshtastic.feature.node.model
 
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.all_time
-import org.meshtastic.core.strings.one_hour_short
-import org.meshtastic.core.strings.one_month
-import org.meshtastic.core.strings.one_week
-import org.meshtastic.core.strings.twenty_four_hours
-import org.meshtastic.core.strings.two_weeks
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.all_time
+import org.meshtastic.core.resources.one_hour_short
+import org.meshtastic.core.resources.one_month
+import org.meshtastic.core.resources.one_week
+import org.meshtastic.core.resources.twenty_four_hours
+import org.meshtastic.core.resources.two_weeks
 
 @Suppress("MagicNumber")
 enum class TimeFrame(val strRes: StringResource, val seconds: Long) {

@@ -26,20 +26,20 @@ import androidx.compose.material.icons.outlined.Router
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.configure_location_permissions
-import org.meshtastic.core.strings.distance_filters
-import org.meshtastic.core.strings.distance_filters_description
-import org.meshtastic.core.strings.distance_measurements
-import org.meshtastic.core.strings.distance_measurements_description
-import org.meshtastic.core.strings.mesh_map_location
-import org.meshtastic.core.strings.mesh_map_location_description
-import org.meshtastic.core.strings.next
-import org.meshtastic.core.strings.phone_location
-import org.meshtastic.core.strings.phone_location_description
-import org.meshtastic.core.strings.settings
-import org.meshtastic.core.strings.share_location
-import org.meshtastic.core.strings.share_location_description
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.configure_location_permissions
+import org.meshtastic.core.resources.distance_filters
+import org.meshtastic.core.resources.distance_filters_description
+import org.meshtastic.core.resources.distance_measurements
+import org.meshtastic.core.resources.distance_measurements_description
+import org.meshtastic.core.resources.mesh_map_location
+import org.meshtastic.core.resources.mesh_map_location_description
+import org.meshtastic.core.resources.next
+import org.meshtastic.core.resources.phone_location
+import org.meshtastic.core.resources.phone_location_description
+import org.meshtastic.core.resources.settings
+import org.meshtastic.core.resources.share_location
+import org.meshtastic.core.resources.share_location_description
 
 /**
  * Screen for configuring location permissions during the app introduction. It explains why location permissions are

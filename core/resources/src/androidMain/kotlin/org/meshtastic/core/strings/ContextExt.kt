@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.strings
+package org.meshtastic.core.resources
 
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource

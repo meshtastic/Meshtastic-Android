@@ -42,9 +42,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.okay
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.okay
 
 /**
  * A comprehensive and flexible dialog component for the Meshtastic application.

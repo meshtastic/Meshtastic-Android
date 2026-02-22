@@ -37,8 +37,8 @@ This file serves as a comprehensive guide for AI agents and developers working o
     -   **Usage:**
         ```kotlin
         import org.jetbrains.compose.resources.stringResource
-        import org.meshtastic.core.strings.Res
-        import org.meshtastic.core.strings.your_string_key
+        import org.meshtastic.core.resources.Res
+        import org.meshtastic.core.resources.your_string_key
 
         Text(text = stringResource(Res.string.your_string_key))
         ```
@@ -118,7 +118,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
 ## 7. Troubleshooting
 
--   **Missing Strings:** If `Res.string.xyz` is unresolved, ensure you have imported `org.meshtastic.core.strings.Res` and the specific string property, and that you have run a build to generate the resources.
+-   **Missing Strings:** If `Res.string.xyz` is unresolved, ensure you have imported `org.meshtastic.core.resources.Res` and the specific string property, and that you have run a build to generate the resources.
 -   **Build Errors:** Check `gradle/libs.versions.toml` for version conflicts. Use `build-logic` conventions to ensure plugins are applied correctly.
 
 ---

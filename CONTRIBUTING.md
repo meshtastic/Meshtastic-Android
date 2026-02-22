@@ -19,14 +19,14 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - Write clear, descriptive variable and function names.
 - Add comments where necessary, especially for complex logic.
 - Keep methods and classes focused and concise.
-- **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:strings`.
+- **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:resources`.
   - Do **not** use the legacy `app/src/main/res/values/strings.xml`.
   - **Definition:** Add strings to `core/strings/src/commonMain/composeResources/values/strings.xml`.
   - **Usage:**
     ```kotlin
     import org.jetbrains.compose.resources.stringResource
-    import org.meshtastic.core.strings.Res
-    import org.meshtastic.core.strings.your_string_key
+    import org.meshtastic.core.resources.Res
+    import org.meshtastic.core.resources.your_string_key
 
     Text(text = stringResource(Res.string.your_string_key))
     ```

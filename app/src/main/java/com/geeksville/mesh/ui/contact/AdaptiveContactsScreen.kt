@@ -49,8 +49,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.conversations
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.MeshtasticIcons

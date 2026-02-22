@@ -43,11 +43,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.flowOf
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.fullRouteDiscovery
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.traceroute_outgoing_route
-import org.meshtastic.core.strings.traceroute_return_route
-import org.meshtastic.core.strings.traceroute_showing_nodes
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.traceroute
+import org.meshtastic.core.resources.traceroute_outgoing_route
+import org.meshtastic.core.resources.traceroute_return_route
+import org.meshtastic.core.resources.traceroute_showing_nodes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Route

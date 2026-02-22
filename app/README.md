@@ -39,7 +39,7 @@ graph TB
   :app -.-> :core:prefs
   :app -.-> :core:proto
   :app -.-> :core:service
-  :app -.-> :core:strings
+  :app -.-> :core:resources
   :app -.-> :core:ui
   :app -.-> :core:barcode
   :app -.-> :feature:intro

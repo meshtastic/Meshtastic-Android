@@ -34,11 +34,11 @@ import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.firmware_update_downloading_percent
-import org.meshtastic.core.strings.firmware_update_nordic_failed
-import org.meshtastic.core.strings.firmware_update_not_found_in_release
-import org.meshtastic.core.strings.firmware_update_starting_service
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.firmware_update_downloading_percent
+import org.meshtastic.core.resources.firmware_update_nordic_failed
+import org.meshtastic.core.resources.firmware_update_not_found_in_release
+import org.meshtastic.core.resources.firmware_update_starting_service
 import java.io.File
 import javax.inject.Inject
 

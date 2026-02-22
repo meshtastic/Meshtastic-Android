@@ -43,8 +43,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.skip
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.skip
 
 /**
  * A generic layout for screens within the app introduction flow. It typically presents a headline, a descriptive text

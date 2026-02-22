@@ -66,8 +66,8 @@ import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.new_messages_below
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
 

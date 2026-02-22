@@ -44,9 +44,9 @@ import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.debug_clear
-import org.meshtastic.core.strings.debug_clear_logs_confirm
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.debug_clear
+import org.meshtastic.core.resources.debug_clear_logs_confirm
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminMessage

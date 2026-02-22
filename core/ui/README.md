@@ -33,8 +33,8 @@ Most components are designed to be used with the **Compose Multiplatform Resourc
 
 ```kotlin
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.ok
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ok
 
 MeshtasticResourceDialog(
     title = Res.string.your_title,
@@ -59,7 +59,7 @@ graph TB
   :core:ui -.-> :core:prefs
   :core:ui -.-> :core:proto
   :core:ui -.-> :core:service
-  :core:ui -.-> :core:strings
+  :core:ui -.-> :core:resources
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

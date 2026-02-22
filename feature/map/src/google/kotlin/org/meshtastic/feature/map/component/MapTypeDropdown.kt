@@ -29,13 +29,13 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.maps.android.compose.MapType
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.manage_custom_tile_sources
-import org.meshtastic.core.strings.map_type_hybrid
-import org.meshtastic.core.strings.map_type_normal
-import org.meshtastic.core.strings.map_type_satellite
-import org.meshtastic.core.strings.map_type_terrain
-import org.meshtastic.core.strings.selected_map_type
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.manage_custom_tile_sources
+import org.meshtastic.core.resources.map_type_hybrid
+import org.meshtastic.core.resources.map_type_normal
+import org.meshtastic.core.resources.map_type_satellite
+import org.meshtastic.core.resources.map_type_terrain
+import org.meshtastic.core.resources.selected_map_type
 import org.meshtastic.feature.map.MapViewModel
 
 @Suppress("LongMethod")

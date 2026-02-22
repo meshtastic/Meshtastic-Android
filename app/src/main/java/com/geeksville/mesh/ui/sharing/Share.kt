@@ -43,12 +43,12 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.contact.ContactItem
 import com.geeksville.mesh.ui.contact.ContactsViewModel
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.sample_message
-import org.meshtastic.core.strings.share
-import org.meshtastic.core.strings.share_to
-import org.meshtastic.core.strings.some_username
-import org.meshtastic.core.strings.unknown_username
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.sample_message
+import org.meshtastic.core.resources.share
+import org.meshtastic.core.resources.share_to
+import org.meshtastic.core.resources.some_username
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 

@@ -28,11 +28,11 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.i_agree
-import org.meshtastic.core.strings.map_reporting
-import org.meshtastic.core.strings.map_reporting_summary
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.i_agree
+import org.meshtastic.core.resources.map_reporting
+import org.meshtastic.core.resources.map_reporting_summary
 
 @RunWith(AndroidJUnit4::class)
 class MapReportingPreferenceTest {

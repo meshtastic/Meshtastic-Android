@@ -30,8 +30,8 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.mikepenz.aboutlibraries.util.withContext
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.acknowledgements
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.acknowledgements
 import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable

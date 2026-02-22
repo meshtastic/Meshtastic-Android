@@ -57,9 +57,9 @@ import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.TracerouteResponse
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.client_notification
-import org.meshtastic.core.strings.compromised_keys
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.client_notification
+import org.meshtastic.core.resources.compromised_keys
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.ComposableContent

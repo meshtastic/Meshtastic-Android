@@ -57,11 +57,11 @@ import kotlinx.coroutines.delay
 import no.nordicsemi.android.common.ui.view.RssiIcon
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.add
-import org.meshtastic.core.strings.bluetooth
-import org.meshtastic.core.strings.network
-import org.meshtastic.core.strings.serial
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.add
+import org.meshtastic.core.resources.bluetooth
+import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.component.NodeChip
 
 private const val RSSI_UPDATE_RATE_MS = 2000L

@@ -32,11 +32,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.clear
-import org.meshtastic.core.strings.node_status_summary
-import org.meshtastic.core.strings.status_message
-import org.meshtastic.core.strings.status_message_config
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.node_status_summary
+import org.meshtastic.core.resources.status_message
+import org.meshtastic.core.resources.status_message_config
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel

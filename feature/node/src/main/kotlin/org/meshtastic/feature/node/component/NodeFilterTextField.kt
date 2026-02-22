@@ -61,18 +61,18 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.NodeSortOption
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.desc_node_filter_clear
-import org.meshtastic.core.strings.node_filter_exclude_infrastructure
-import org.meshtastic.core.strings.node_filter_ignored
-import org.meshtastic.core.strings.node_filter_include_unknown
-import org.meshtastic.core.strings.node_filter_only_direct
-import org.meshtastic.core.strings.node_filter_only_online
-import org.meshtastic.core.strings.node_filter_placeholder
-import org.meshtastic.core.strings.node_filter_show_ignored
-import org.meshtastic.core.strings.node_filter_title
-import org.meshtastic.core.strings.node_sort_button
-import org.meshtastic.core.strings.node_sort_title
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.desc_node_filter_clear
+import org.meshtastic.core.resources.node_filter_exclude_infrastructure
+import org.meshtastic.core.resources.node_filter_ignored
+import org.meshtastic.core.resources.node_filter_include_unknown
+import org.meshtastic.core.resources.node_filter_only_direct
+import org.meshtastic.core.resources.node_filter_only_online
+import org.meshtastic.core.resources.node_filter_placeholder
+import org.meshtastic.core.resources.node_filter_show_ignored
+import org.meshtastic.core.resources.node_filter_title
+import org.meshtastic.core.resources.node_sort_button
+import org.meshtastic.core.resources.node_sort_title
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("LongParameterList")

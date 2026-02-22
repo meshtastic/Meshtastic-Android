@@ -21,8 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.unknown_age
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.unknown_age
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.MeshPacket

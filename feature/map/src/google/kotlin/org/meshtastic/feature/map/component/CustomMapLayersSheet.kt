@@ -39,14 +39,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.add_layer
-import org.meshtastic.core.strings.hide_layer
-import org.meshtastic.core.strings.manage_map_layers
-import org.meshtastic.core.strings.map_layer_formats
-import org.meshtastic.core.strings.no_map_layers_loaded
-import org.meshtastic.core.strings.remove_layer
-import org.meshtastic.core.strings.show_layer
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.add_layer
+import org.meshtastic.core.resources.hide_layer
+import org.meshtastic.core.resources.manage_map_layers
+import org.meshtastic.core.resources.map_layer_formats
+import org.meshtastic.core.resources.no_map_layers_loaded
+import org.meshtastic.core.resources.remove_layer
+import org.meshtastic.core.resources.show_layer
 import org.meshtastic.feature.map.MapLayerItem
 
 @Suppress("LongMethod")

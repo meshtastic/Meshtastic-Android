@@ -44,10 +44,10 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
-import org.meshtastic.core.strings.elevation_suffix
-import org.meshtastic.core.strings.last_position_update
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
+import org.meshtastic.core.resources.elevation_suffix
+import org.meshtastic.core.resources.last_position_update
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.icon
 import org.meshtastic.core.ui.theme.AppTheme

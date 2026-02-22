@@ -32,7 +32,7 @@ graph TB
   :feature:messaging -.-> :core:prefs
   :feature:messaging -.-> :core:proto
   :feature:messaging -.-> :core:service
-  :feature:messaging -.-> :core:strings
+  :feature:messaging -.-> :core:resources
   :feature:messaging -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

@@ -26,18 +26,18 @@ import androidx.compose.material.icons.outlined.SpeakerPhone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.app_notifications
-import org.meshtastic.core.strings.configure_notification_permissions
-import org.meshtastic.core.strings.incoming_messages
-import org.meshtastic.core.strings.low_battery
-import org.meshtastic.core.strings.new_nodes
-import org.meshtastic.core.strings.next
-import org.meshtastic.core.strings.notification_permissions_description
-import org.meshtastic.core.strings.notifications_for_channel_and_direct_messages
-import org.meshtastic.core.strings.notifications_for_low_battery_alerts
-import org.meshtastic.core.strings.notifications_for_newly_discovered_nodes
-import org.meshtastic.core.strings.settings
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_notifications
+import org.meshtastic.core.resources.configure_notification_permissions
+import org.meshtastic.core.resources.incoming_messages
+import org.meshtastic.core.resources.low_battery
+import org.meshtastic.core.resources.new_nodes
+import org.meshtastic.core.resources.next
+import org.meshtastic.core.resources.notification_permissions_description
+import org.meshtastic.core.resources.notifications_for_channel_and_direct_messages
+import org.meshtastic.core.resources.notifications_for_low_battery_alerts
+import org.meshtastic.core.resources.notifications_for_newly_discovered_nodes
+import org.meshtastic.core.resources.settings
 
 /**
  * Screen for configuring notification permissions during the app introduction. It explains why notification permissions

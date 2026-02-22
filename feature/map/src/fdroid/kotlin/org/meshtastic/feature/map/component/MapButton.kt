@@ -29,8 +29,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.map_style_selection
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.map_style_selection
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Composable

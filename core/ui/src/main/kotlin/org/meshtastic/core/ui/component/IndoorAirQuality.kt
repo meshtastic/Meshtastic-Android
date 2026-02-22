@@ -50,10 +50,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.air_quality_icon
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.indoor_air_quality_iaq
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_quality_icon
+import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.indoor_air_quality_iaq
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.ThumbUp
 import org.meshtastic.core.ui.icon.Warning

@@ -40,8 +40,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.dbm_value
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.dbm_value
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SignalCellular0Bar
 import org.meshtastic.core.ui.icon.SignalCellular1Bar

@@ -46,11 +46,11 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.device
-import org.meshtastic.core.strings.hardware
-import org.meshtastic.core.strings.supported
-import org.meshtastic.core.strings.supported_by_community
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.device
+import org.meshtastic.core.resources.hardware
+import org.meshtastic.core.resources.supported
+import org.meshtastic.core.resources.supported_by_community
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed

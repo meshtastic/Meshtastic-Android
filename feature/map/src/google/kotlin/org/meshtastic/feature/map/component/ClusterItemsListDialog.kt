@@ -31,9 +31,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.nodes_at_this_location
-import org.meshtastic.core.strings.okay
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.nodes_at_this_location
+import org.meshtastic.core.resources.okay
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.model.NodeClusterItem
 

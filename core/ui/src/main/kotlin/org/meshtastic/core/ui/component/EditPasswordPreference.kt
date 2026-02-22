@@ -35,9 +35,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.hide_password
-import org.meshtastic.core.strings.show_password
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.hide_password
+import org.meshtastic.core.resources.show_password
 
 @Composable
 fun EditPasswordPreference(

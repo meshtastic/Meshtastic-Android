@@ -42,10 +42,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.message_delivery_status
-import org.meshtastic.core.strings.react
-import org.meshtastic.core.strings.reply
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.react
+import org.meshtastic.core.resources.reply
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 
 @Composable

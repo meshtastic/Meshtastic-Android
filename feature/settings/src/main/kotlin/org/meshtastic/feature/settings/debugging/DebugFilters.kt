@@ -56,16 +56,16 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.debug_active_filters
-import org.meshtastic.core.strings.debug_filter_add
-import org.meshtastic.core.strings.debug_filter_add_custom
-import org.meshtastic.core.strings.debug_filter_clear
-import org.meshtastic.core.strings.debug_filter_included
-import org.meshtastic.core.strings.debug_filter_preset_title
-import org.meshtastic.core.strings.debug_filters
-import org.meshtastic.core.strings.match_all
-import org.meshtastic.core.strings.match_any
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.debug_active_filters
+import org.meshtastic.core.resources.debug_filter_add
+import org.meshtastic.core.resources.debug_filter_add_custom
+import org.meshtastic.core.resources.debug_filter_clear
+import org.meshtastic.core.resources.debug_filter_included
+import org.meshtastic.core.resources.debug_filter_preset_title
+import org.meshtastic.core.resources.debug_filters
+import org.meshtastic.core.resources.match_all
+import org.meshtastic.core.resources.match_any
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 
 @Composable

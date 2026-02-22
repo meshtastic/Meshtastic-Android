@@ -56,10 +56,10 @@ import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.okay
-import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.view_on_map
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.okay
+import org.meshtastic.core.resources.traceroute
+import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed

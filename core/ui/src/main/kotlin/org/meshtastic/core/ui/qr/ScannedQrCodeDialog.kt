@@ -51,14 +51,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.accept
-import org.meshtastic.core.strings.add
-import org.meshtastic.core.strings.add_channels_description
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.new_channel_rcvd
-import org.meshtastic.core.strings.replace
-import org.meshtastic.core.strings.replace_channels_and_settings_description
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.accept
+import org.meshtastic.core.resources.add
+import org.meshtastic.core.resources.add_channels_description
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.new_channel_rcvd
+import org.meshtastic.core.resources.replace
+import org.meshtastic.core.resources.replace_channels_and_settings_description
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.proto.ChannelSet
 

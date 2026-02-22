@@ -31,7 +31,7 @@ graph TB
   :feature:node -.-> :core:model
   :feature:node -.-> :core:proto
   :feature:node -.-> :core:service
-  :feature:node -.-> :core:strings
+  :feature:node -.-> :core:resources
   :feature:node -.-> :core:ui
   :feature:node -.-> :core:navigation
   :feature:node -.-> :feature:map

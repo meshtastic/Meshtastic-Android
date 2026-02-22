@@ -40,16 +40,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.communicate_off_the_grid
-import org.meshtastic.core.strings.create_your_own_networks
-import org.meshtastic.core.strings.easily_set_up_private_mesh_networks
-import org.meshtastic.core.strings.get_started
-import org.meshtastic.core.strings.intro_welcome
-import org.meshtastic.core.strings.meshtastic
-import org.meshtastic.core.strings.share_your_location_in_real_time
-import org.meshtastic.core.strings.stay_connected_anywhere
-import org.meshtastic.core.strings.track_and_share_locations
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.communicate_off_the_grid
+import org.meshtastic.core.resources.create_your_own_networks
+import org.meshtastic.core.resources.easily_set_up_private_mesh_networks
+import org.meshtastic.core.resources.get_started
+import org.meshtastic.core.resources.intro_welcome
+import org.meshtastic.core.resources.meshtastic
+import org.meshtastic.core.resources.share_your_location_in_real_time
+import org.meshtastic.core.resources.stay_connected_anywhere
+import org.meshtastic.core.resources.track_and_share_locations
 
 /**
  * The initial welcome screen for the app introduction flow. It displays a brief overview of the app's key features.

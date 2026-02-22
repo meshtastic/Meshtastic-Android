@@ -26,8 +26,8 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.map
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.map
 import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable

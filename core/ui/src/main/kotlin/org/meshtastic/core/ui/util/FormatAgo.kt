@@ -18,10 +18,10 @@ package org.meshtastic.core.ui.util
 
 import android.text.format.DateUtils
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.now
-import org.meshtastic.core.strings.unknown
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.unknown
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds

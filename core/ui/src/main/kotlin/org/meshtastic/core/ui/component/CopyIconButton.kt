@@ -29,8 +29,8 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
 
 @Composable
 fun CopyIconButton(

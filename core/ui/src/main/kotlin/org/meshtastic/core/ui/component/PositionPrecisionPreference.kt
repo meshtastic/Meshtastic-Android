@@ -33,9 +33,9 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.position_enabled
-import org.meshtastic.core.strings.precise_location
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.position_enabled
+import org.meshtastic.core.resources.precise_location
 import kotlin.math.pow
 import kotlin.math.roundToInt
 

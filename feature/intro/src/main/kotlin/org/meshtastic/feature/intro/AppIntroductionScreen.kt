@@ -33,9 +33,9 @@ import kotlinx.serialization.Serializable
 import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
 import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.permission_denied
-import org.meshtastic.core.strings.permission_granted
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.permission_denied
+import org.meshtastic.core.resources.permission_granted
 import org.meshtastic.core.ui.util.showToast
 
 /**

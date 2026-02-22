@@ -40,9 +40,9 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.strings.R
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.navigate_back
+import org.meshtastic.core.resources.R
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.navigate_back
 import org.meshtastic.core.ui.component.preview.BooleanProvider
 import org.meshtastic.core.ui.component.preview.previewNode
 import org.meshtastic.core.ui.theme.AppTheme

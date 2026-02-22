@@ -48,11 +48,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
-import org.meshtastic.core.strings.okay
-import org.meshtastic.core.strings.qr_code
-import org.meshtastic.core.strings.url
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
+import org.meshtastic.core.resources.okay
+import org.meshtastic.core.resources.qr_code
+import org.meshtastic.core.resources.url
 import org.meshtastic.core.ui.util.findActivity
 
 private const val QR_IMAGE_SIZE = 320

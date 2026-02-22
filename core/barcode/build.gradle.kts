@@ -29,7 +29,7 @@ configure<LibraryExtension> {
 }
 
 dependencies {
-    implementation(project(":core:strings"))
+    implementation(project(":core:resources"))
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

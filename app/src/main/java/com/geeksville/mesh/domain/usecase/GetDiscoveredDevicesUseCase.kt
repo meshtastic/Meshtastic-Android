@@ -34,8 +34,8 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.meshtastic
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.meshtastic
 import java.util.Locale
 import javax.inject.Inject
 

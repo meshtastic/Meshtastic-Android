@@ -49,8 +49,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
 import org.meshtastic.core.ui.util.thenIf
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)

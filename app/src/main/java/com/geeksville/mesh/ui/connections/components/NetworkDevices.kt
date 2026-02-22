@@ -54,16 +54,16 @@ import com.geeksville.mesh.ui.connections.isValidAddress
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.add_network_device
-import org.meshtastic.core.strings.address
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.confirm_forget_connection
-import org.meshtastic.core.strings.discovered_network_devices
-import org.meshtastic.core.strings.forget_connection
-import org.meshtastic.core.strings.ip_port
-import org.meshtastic.core.strings.no_network_devices
-import org.meshtastic.core.strings.recent_network_devices
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.add_network_device
+import org.meshtastic.core.resources.address
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.confirm_forget_connection
+import org.meshtastic.core.resources.discovered_network_devices
+import org.meshtastic.core.resources.forget_connection
+import org.meshtastic.core.resources.ip_port
+import org.meshtastic.core.resources.no_network_devices
+import org.meshtastic.core.resources.recent_network_devices
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.theme.AppTheme
 

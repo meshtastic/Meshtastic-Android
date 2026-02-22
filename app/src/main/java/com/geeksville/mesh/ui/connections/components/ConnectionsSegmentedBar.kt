@@ -34,10 +34,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ui.connections.DeviceType
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.bluetooth
-import org.meshtastic.core.strings.network
-import org.meshtastic.core.strings.serial
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth
+import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.serial
 import org.meshtastic.core.ui.theme.AppTheme
 
 @Suppress("LambdaParameterEventTrailing")

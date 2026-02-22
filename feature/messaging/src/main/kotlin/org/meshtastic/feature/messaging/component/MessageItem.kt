@@ -66,11 +66,11 @@ import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.filter_message_label
-import org.meshtastic.core.strings.message_delivery_status
-import org.meshtastic.core.strings.reply
-import org.meshtastic.core.strings.sample_message
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.filter_message_label
+import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.core.ui.component.Rssi

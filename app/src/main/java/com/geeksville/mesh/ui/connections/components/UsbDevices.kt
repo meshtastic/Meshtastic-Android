@@ -28,8 +28,8 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.ScannerViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.no_usb_devices
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.no_usb_devices
 
 @Composable
 fun UsbDevices(

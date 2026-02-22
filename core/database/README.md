@@ -30,7 +30,7 @@ graph TB
   :core:database -.-> :core:di
   :core:database -.-> :core:model
   :core:database -.-> :core:proto
-  :core:database -.-> :core:strings
+  :core:database -.-> :core:resources
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

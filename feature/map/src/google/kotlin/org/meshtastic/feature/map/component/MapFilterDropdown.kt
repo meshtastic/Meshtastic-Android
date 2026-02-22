@@ -40,11 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.last_heard_filter_label
-import org.meshtastic.core.strings.only_favorites
-import org.meshtastic.core.strings.show_precision_circle
-import org.meshtastic.core.strings.show_waypoints
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.last_heard_filter_label
+import org.meshtastic.core.resources.only_favorites
+import org.meshtastic.core.resources.show_precision_circle
+import org.meshtastic.core.resources.show_waypoints
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.MapViewModel
 import kotlin.math.roundToInt

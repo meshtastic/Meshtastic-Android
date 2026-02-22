@@ -45,10 +45,10 @@ import com.mikepenz.markdown.m3.Markdown
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.download
-import org.meshtastic.core.strings.error_no_app_to_handle_link
-import org.meshtastic.core.strings.view_release
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.download
+import org.meshtastic.core.resources.error_no_app_to_handle_link
+import org.meshtastic.core.resources.view_release
 import org.meshtastic.core.ui.util.showToast
 
 @Composable

@@ -27,8 +27,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.device_metrics_log
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.device_metrics_log
 import org.meshtastic.core.ui.theme.AppTheme
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config

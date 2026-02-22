@@ -34,9 +34,9 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.fallback_node_name
-import org.meshtastic.core.strings.getString
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.fallback_node_name
+import org.meshtastic.core.resources.getString
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 import org.meshtastic.feature.node.detail.NodeRequestActions

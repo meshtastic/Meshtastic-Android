@@ -64,8 +64,8 @@ import com.google.zxing.MultiFormatReader
 import com.google.zxing.PlanarYUVLuminanceSource
 import com.google.zxing.common.HybridBinarizer
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.close
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.close
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 

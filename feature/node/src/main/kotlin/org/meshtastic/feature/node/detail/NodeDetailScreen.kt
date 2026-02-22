@@ -61,10 +61,10 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.details
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.loading
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.details
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.loading
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
