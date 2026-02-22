@@ -156,11 +156,12 @@ configure<ApplicationExtension> {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
-        named("google") {
-            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google"
-            manifestPlaceholders["MAPS_API_KEY"] = "dummy"
+        configureEach {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) $name"
+            if (name == "google") {
+                manifestPlaceholders["MAPS_API_KEY"] = "dummy"
+            }
         }
-        named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
 
     buildTypes {
@@ -186,15 +187,12 @@ secrets {
 }
 
 androidComponents {
-    onVariants(selector().all()) { variant ->
-        if (variant.name == "fdroidDebug") {
-            variant.applicationId = "com.geeksville.mesh.fdroid.debug"
-        }
-
-        if (variant.name == "googleDebug") {
-            variant.applicationId = "com.geeksville.mesh.google.debug"
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.flavorName?.let { flavor ->
+            variant.applicationId = "com.geeksville.mesh.$flavor.debug"
         }
     }
+    
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
