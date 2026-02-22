@@ -189,7 +189,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: google-apk
-          path: app/build/outputs/apk/google/release/*.apk
+          path: app/build/outputs/apk/**/*.apk
           retention-days: 1
 
       - name: Attest Google artifacts provenance
@@ -198,7 +198,7 @@ jobs:
         with:
           subject-path: |
             app/build/outputs/bundle/googleRelease/app-google-release.aab
-            app/build/outputs/apk/google/release/*.apk
+            app/build/outputs/apk/**/*.apk
 
   release-fdroid:
     runs-on: ubuntu-latest
@@ -254,13 +254,13 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: fdroid-apk
-          path: app/build/outputs/apk/fdroid/release/*.apk
+          path: app/build/outputs/apk/**/*.apk
           retention-days: 1
 
       - name: Attest F-Droid APK provenance
         uses: actions/attest-build-provenance@v3
         with:
-          subject-path: app/build/outputs/apk/fdroid/release/*.apk
+          subject-path: app/build/outputs/apk/**/*.apk
 
   github-release:
     runs-on: ubuntu-latest
