@@ -188,11 +188,9 @@ secrets {
 
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
-        variant.flavorName?.let { flavor ->
-            variant.applicationId = "com.geeksville.mesh.$flavor.debug"
-        }
+        variant.flavorName?.let { flavor -> variant.applicationId = "com.geeksville.mesh.$flavor.debug" }
     }
-    
+
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
