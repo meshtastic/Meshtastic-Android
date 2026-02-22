@@ -35,7 +35,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +71,6 @@ import org.meshtastic.core.strings.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.ReactionDialog
 
-@Stable
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,
     val onSendReaction: (String, Int) -> Unit,
@@ -82,7 +80,6 @@ internal data class MessageListHandlers(
     val onReply: (Message?) -> Unit,
 )
 
-@Stable
 internal data class MessageListPagedState(
     val nodes: List<Node>,
     val ourNode: Node?,
@@ -197,11 +194,13 @@ private fun MessageListPagedContent(
     quickEmojis: List<String>,
 ) {
     // Calculate unread divider position using snapshot to avoid side-effects and improve performance
-    // Optimized: Avoid derivedStateOf for simple calculations that are bound to list size changes
-    val unreadDividerIndex =
+    // Optimized: Use full snapshot index to correctly match LazyColumn index range
+    val unreadDividerIndex by
         remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
-            val uuid = state.firstUnreadMessageUuid ?: return@remember null
-            state.messages.itemSnapshotList.indexOfFirst { it?.uuid == uuid }.takeIf { it != -1 }
+            derivedStateOf {
+                val uuid = state.firstUnreadMessageUuid ?: return@derivedStateOf null
+                state.messages.itemSnapshotList.indexOfFirst { it?.uuid == uuid }.takeIf { it != -1 }
+            }
         }
 
     // Disable animations during scroll to prevent jank/stutter
@@ -220,10 +219,8 @@ private fun MessageListPagedContent(
                 contentType = state.messages.itemContentType { "message" },
             ) { index ->
                 val message = state.messages[index]
-                // Optimized: Use peek() to prevent premature fetching of adjacent items
-                val visuallyPrevMessage =
-                    if (index < state.messages.itemCount - 1) state.messages.peek(index + 1) else null
-                val visuallyNextMessage = if (index > 0) state.messages.peek(index - 1) else null
+                val visuallyPrevMessage = if (index < state.messages.itemCount - 1) state.messages[index + 1] else null
+                val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
 
                 val hasSamePrev =
                     if (message != null && visuallyPrevMessage != null) {
@@ -329,7 +326,8 @@ private fun RenderPagedChatMessageRow(
 ) {
     val ourNode = state.ourNode ?: return
     val selected by
-        remember(message.uuid, state.selectedIds) { derivedStateOf { state.selectedIds.value.contains(message.uuid) } }
+        remember(message.uuid, state.selectedIds.value) {
+ derivedStateOf { state.selectedIds.value.contains(message.uuid) } }
     val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
@@ -481,8 +479,9 @@ private fun UpdateUnreadCountPaged(
 
     // Track remote message count to restart effect when remote messages change
     // This fixes race condition when sending/receiving messages during debounce period
-    // Optimized: Use itemSnapshotList instead of iterating through indices. Avoid unnecessary derivedStateOf
-    val remoteMessageCount = remember(messages.itemCount) { messages.itemSnapshotList.items.count { !it.fromLocal } }
+    // Optimized: Use itemSnapshotList instead of iterating through indices
+    val remoteMessageCount by
+        remember(messages.itemCount) { derivedStateOf { messages.itemSnapshotList.items.count { !it.fromLocal } } }
 
     // Mark messages as read after debounce period
     // Handles both scrolling cases and when all unread messages are visible without scrolling
@@ -541,10 +540,12 @@ private fun MessageStatusDialog(
     onDismiss: () -> Unit,
 ) {
     val (title, text) = message.getStatusStringRes()
-    val relayNodeName =
+    val relayNodeName by
         remember(message.relayNode, nodes, ourNode) {
-            message.relayNode?.let { relayNodeId ->
-                Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
+            derivedStateOf {
+                message.relayNode?.let { relayNodeId ->
+                    Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
+                }
             }
         }
     DeliveryInfo(

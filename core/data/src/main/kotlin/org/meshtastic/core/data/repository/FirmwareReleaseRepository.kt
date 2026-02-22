@@ -67,9 +67,11 @@ constructor(
         // 1. Emit cached data first, regardless of staleness.
         // This gives the UI something to show immediately.
         val cachedRelease = localDataSource.getLatestRelease(releaseType)
-        cachedRelease?.let {
-            Logger.d { "Emitting cached firmware for $releaseType (isStale=${it.isStale()})" }
-            emit(it.asExternalModel())
+        if (cachedRelease != null) {
+            Logger.d { "Emitting cached firmware for $releaseType (isStale=${cachedRelease.isStale()})" }
+            emit(cachedRelease.asExternalModel())
+        } else {
+            emit(null)
         }
 
         // 2. If the cache was fresh and we are not forcing a refresh, we're done.
