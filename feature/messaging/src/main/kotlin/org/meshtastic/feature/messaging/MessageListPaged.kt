@@ -18,13 +18,13 @@ package org.meshtastic.feature.messaging
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -192,13 +192,12 @@ private fun MessageListPagedContent(
     modifier: Modifier = Modifier,
     quickEmojis: List<String>,
 ) {
-    // Calculate unread divider position
+    // Calculate unread divider position using snapshot to avoid side-effects and improve performance
     val unreadDividerIndex by
         remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
             derivedStateOf {
-                state.firstUnreadMessageUuid?.let { uuid ->
-                    (0 until state.messages.itemCount).firstOrNull { index -> state.messages[index]?.uuid == uuid }
-                }
+                val uuid = state.firstUnreadMessageUuid ?: return@derivedStateOf null
+                state.messages.itemSnapshotList.items.indexOfFirst { it.uuid == uuid }.takeIf { it != -1 }
             }
         }
 
@@ -234,27 +233,49 @@ private fun MessageListPagedContent(
                     }
 
                 if (message != null) {
-                    renderPagedChatMessageRow(
-                        message = message,
-                        state = state,
-                        nodeMap = nodeMap,
-                        handlers = handlers,
-                        inSelectionMode = inSelectionMode,
-                        coroutineScope = coroutineScope,
-                        haptics = haptics,
-                        listState = listState,
-                        onShowStatusDialog = onShowStatusDialog,
-                        onShowReactions = onShowReactions,
-                        enableAnimations = enableAnimations,
-                        showUserName = !hasSamePrev,
-                        hasSamePrev = hasSamePrev,
-                        hasSameNext = hasSameNext,
-                        quickEmojis = quickEmojis,
-                    )
+                    val isFirstUnread = state.hasUnreadMessages && unreadDividerIndex == index
+                    val itemModifier = if (enableAnimations) Modifier.animateItem() else Modifier
 
-                    // Show unread divider after the first unread message
-                    if (state.hasUnreadMessages && unreadDividerIndex == index) {
-                        UnreadMessagesDivider(modifier = if (enableAnimations) Modifier.animateItem() else Modifier)
+                    if (isFirstUnread) {
+                        // Wrap in Column to prevent overlapping of divider and message item
+                        // Apply animation to the container Column once
+                        Column(modifier = itemModifier) {
+                            UnreadMessagesDivider()
+                            renderPagedChatMessageRow(
+                                message = message,
+                                state = state,
+                                nodeMap = nodeMap,
+                                handlers = handlers,
+                                inSelectionMode = inSelectionMode,
+                                coroutineScope = coroutineScope,
+                                haptics = haptics,
+                                listState = listState,
+                                onShowStatusDialog = onShowStatusDialog,
+                                onShowReactions = onShowReactions,
+                                showUserName = !hasSamePrev,
+                                hasSamePrev = hasSamePrev,
+                                hasSameNext = hasSameNext,
+                                quickEmojis = quickEmojis,
+                            )
+                        }
+                    } else {
+                        renderPagedChatMessageRow(
+                            message = message,
+                            state = state,
+                            nodeMap = nodeMap,
+                            handlers = handlers,
+                            inSelectionMode = inSelectionMode,
+                            coroutineScope = coroutineScope,
+                            haptics = haptics,
+                            listState = listState,
+                            onShowStatusDialog = onShowStatusDialog,
+                            onShowReactions = onShowReactions,
+                            modifier = itemModifier,
+                            showUserName = !hasSamePrev,
+                            hasSamePrev = hasSamePrev,
+                            hasSameNext = hasSameNext,
+                            quickEmojis = quickEmojis,
+                        )
                     }
                 }
             }
@@ -280,7 +301,7 @@ private fun MessageListPagedContent(
 
 @Suppress("LongParameterList")
 @Composable
-private fun LazyItemScope.renderPagedChatMessageRow(
+private fun renderPagedChatMessageRow(
     message: Message,
     state: MessageListPagedState,
     nodeMap: Map<Int, Node>,
@@ -291,7 +312,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     listState: LazyListState,
     onShowStatusDialog: (Message) -> Unit,
     onShowReactions: (List<Reaction>) -> Unit,
-    enableAnimations: Boolean,
+    modifier: Modifier = Modifier,
     showUserName: Boolean,
     hasSamePrev: Boolean,
     hasSameNext: Boolean,
@@ -305,7 +326,7 @@ private fun LazyItemScope.renderPagedChatMessageRow(
     val node = nodeMap[message.node.num] ?: message.node
 
     MessageItem(
-        modifier = if (enableAnimations) Modifier.animateItem() else Modifier,
+        modifier = modifier,
         node = node,
         ourNode = ourNode,
         message = message,
@@ -341,12 +362,11 @@ private fun LazyItemScope.renderPagedChatMessageRow(
         onNavigateToOriginalMessage = {
             coroutineScope.launch {
                 // Note: With pagination, we can't guarantee the original message is loaded
-                // This is a limitation of pagination - we would need to implement
-                // a search/jump feature to load and scroll to specific messages
-                val targetIndex =
-                    (0 until state.messages.itemCount).firstOrNull { index ->
-                        state.messages[index]?.packetId == message.replyId
-                    }
+                // Optimized: Use snapshot to find index to avoid side-effects during search
+                val targetIndex = state.messages.itemSnapshotList.items.indexOfFirst {
+                    it.packetId == message.replyId
+                }.takeIf { it != -1 }
+
                 if (targetIndex != null) {
                     listState.animateScrollToItem(index = targetIndex)
                 }
@@ -503,7 +523,7 @@ internal fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun MessageStatusDialog(
+private fun MessageStatusDialog(
     message: Message,
     nodes: List<Node>,
     ourNode: Node?,
