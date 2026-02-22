@@ -32,8 +32,8 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   **Material 3:** The app uses Material 3. Look for ways to use **Material 3 Expressive** components where appropriate.
 -   **Strings:**
     -   Do **not** use `app/src/main/res/values/strings.xml` for UI strings.
-    -   Use the **Compose Multiplatform Resource** library in `core/strings`.
-    -   **Definition:** Add strings to `core/strings/src/commonMain/composeResources/values/strings.xml`.
+    -   Use the **Compose Multiplatform Resource** library in `core:resources`.
+    -   **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
     -   **Usage:**
         ```kotlin
         import org.jetbrains.compose.resources.stringResource
@@ -102,7 +102,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 1.  **Explore First:** Before making changes, read `gradle/libs.versions.toml` and the relevant `build.gradle.kts` to understand the environment.
 2.  **Plan:** Identify which modules (`core` or `feature`) need modification.
 3.  **Implement:**
-    -   If adding a string, modify `core/strings`.
+    -   If adding a string, modify `core:resources`.
     -   If adding a dependency, modify `libs.versions.toml` first.
 4.  **Verify:**
     -   Run `./gradlew spotlessApply` (Essential!).
@@ -123,3 +123,9 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
 ---
 *Refer to `CONTRIBUTING.md` for human-centric processes like Code of Conduct and Pull Request etiquette.*
+
+### E. Resources and Assets
+-   **Centralization:** All global app resources (Strings, Drawables, Fonts, raw files) should be placed in `:core:resources`.
+-   **Module Path:** `core/resources/src/commonMain/composeResources/`
+-   **Decentralization:** Feature-specific strings and assets can (and should) be housed in their respective feature module's `composeResources` directory to maintain modular boundaries and clean architectural dependency graphs. Crowdin localization handles globbing `/**/composeResources/values/strings.xml` perfectly.
+-   **Drawables:** Use `painterResource(Res.drawable.your_icon)` to access cross-platform drawables. Name them consistently (`ic_` for icons, `img_` for artwork). Avoid putting standard Drawables or Vectors in legacy Android `res/drawable` folders unless strictly required by a legacy library (like `OsmDroid` map markers) or the OS layer (like `app_icon.xml`).

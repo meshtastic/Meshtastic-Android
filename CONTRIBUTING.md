@@ -21,7 +21,7 @@ Thank you for your interest in contributing to Meshtastic-Android! We welcome co
 - Keep methods and classes focused and concise.
 - **Strings:** Use localised strings via the **Compose Multiplatform Resource** library in `:core:resources`.
   - Do **not** use the legacy `app/src/main/res/values/strings.xml`.
-  - **Definition:** Add strings to `core/strings/src/commonMain/composeResources/values/strings.xml`.
+  - **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
   - **Usage:**
     ```kotlin
     import org.jetbrains.compose.resources.stringResource
