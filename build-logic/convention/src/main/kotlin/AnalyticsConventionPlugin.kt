@@ -50,7 +50,7 @@ class AnalyticsConventionPlugin : Plugin<Project> {
             // This avoids iterating all tasks with a generic filter and improves configuration performance.
             plugins.withId("com.google.gms.google-services") {
                 tasks.configureEach {
-                    if (name.contains("fdroid", ignoreCase = true)) {
+                    if (name.contains("GoogleServices", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)) {
                         enabled = false
                     }
                 }
@@ -58,7 +58,7 @@ class AnalyticsConventionPlugin : Plugin<Project> {
 
             plugins.withId("com.google.firebase.crashlytics") {
                 tasks.configureEach {
-                    if (name.contains("fdroid", ignoreCase = true)) {
+                    if (name.contains("Crashlytics", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)) {
                         enabled = false
                     }
                 }
@@ -66,7 +66,7 @@ class AnalyticsConventionPlugin : Plugin<Project> {
 
             plugins.withId("com.datadoghq.dd-sdk-android-gradle-plugin") {
                 tasks.configureEach {
-                    if (name.contains("fdroid", ignoreCase = true)) {
+                    if ((name.contains("datadog", ignoreCase = true) || name.contains("uploadMapping", ignoreCase = true)) && name.contains("fdroid", ignoreCase = true)) {
                         enabled = false
                     }
                 }

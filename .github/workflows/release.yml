@@ -176,6 +176,9 @@ jobs:
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane internal
 
+      - name: List outputs
+        run: ls -R app/build/outputs/
+
       - name: Upload Google AAB artifact
         if: always()
         uses: actions/upload-artifact@v6
@@ -249,6 +252,9 @@ jobs:
           VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane fdroid_build
+
+      - name: List outputs
+        run: ls -R app/build/outputs/
 
       - name: Upload F-Droid APK artifact
         uses: actions/upload-artifact@v6
