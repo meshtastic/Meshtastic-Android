@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9709",
+      "title": "platform: nrf52: Fix typo in BLEDfuSecure filename",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9709",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9706",
       "title": "Add VL53L0 distance sensor.",
       "page_url": "https://github.com/meshtastic/firmware/pull/9706",
