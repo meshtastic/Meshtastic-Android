@@ -226,11 +226,12 @@ fun MessageScreen(
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
 
     // Find the index of the first unread message in the paged list
+    // Optimized: Use snapshot to avoid triggering paging loads during search
     val firstUnreadIndex by
         remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
             derivedStateOf {
                 firstUnreadMessageUuid?.let { uuid ->
-                    (0 until pagedMessages.itemCount).firstOrNull { index -> pagedMessages[index]?.uuid == uuid }
+                    pagedMessages.itemSnapshotList.indexOfFirst { it?.uuid == uuid }.takeIf { it != -1 }
                 }
             }
         }
@@ -302,14 +303,11 @@ fun MessageScreen(
 
     sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
+    // Optimized: Use snapshot to find the original message without triggering loads
     val originalMessage by
         remember(replyingToPacketId, pagedMessages.itemCount) {
             derivedStateOf {
-                replyingToPacketId?.let { id ->
-                    (0 until pagedMessages.itemCount).firstNotNullOfOrNull { index ->
-                        pagedMessages[index]?.takeIf { it.packetId == id }
-                    }
-                }
+                replyingToPacketId?.let { id -> pagedMessages.itemSnapshotList.firstOrNull { it?.packetId == id } }
             }
         }
 
@@ -322,9 +320,9 @@ fun MessageScreen(
                     onAction = { action ->
                         when (action) {
                             MessageMenuAction.ClipboardCopy -> {
+                                // Optimized: Use snapshot items to avoid triggering loads
                                 val copiedText =
-                                    (0 until pagedMessages.itemCount)
-                                        .mapNotNull { pagedMessages[it] }
+                                    pagedMessages.itemSnapshotList.items
                                         .filter { it.uuid in selectedMessageIds.value }
                                         .joinToString("\n") { it.text }
                                 onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
@@ -333,14 +331,12 @@ fun MessageScreen(
                             MessageMenuAction.Delete -> showDeleteDialog = true
                             MessageMenuAction.Dismiss -> selectedMessageIds.value = emptySet()
                             MessageMenuAction.SelectAll -> {
-                                // Note: Select All is disabled with pagination since we don't have
-                                // access to the full message list. This would need to be reworked
-                                // to select all currently loaded items instead.
+                                // Optimized: Select only currently loaded items to avoid massive page trigger
                                 selectedMessageIds.value =
                                     if (selectedMessageIds.value.size == pagedMessages.itemCount) {
                                         emptySet()
                                     } else {
-                                        (0 until pagedMessages.itemCount).mapNotNull { pagedMessages[it]?.uuid }.toSet()
+                                        pagedMessages.itemSnapshotList.items.map { it.uuid }.toSet()
                                     }
                             }
                         }
@@ -654,7 +650,7 @@ private fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -
 /**
  * The default top app bar for the message screen.
  *
- * @param title The title to display (contact or channel name).
+ * @param title The title to display (contact or name).
  * @param channelIndex The index of the current channel, if applicable.
  * @param mismatchKey True if there's a key mismatch for the current PKC.
  * @param onNavigateBack Callback for the navigation icon.

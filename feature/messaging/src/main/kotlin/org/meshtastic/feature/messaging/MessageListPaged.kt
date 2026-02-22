@@ -53,6 +53,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -193,11 +194,12 @@ private fun MessageListPagedContent(
     quickEmojis: List<String>,
 ) {
     // Calculate unread divider position using snapshot to avoid side-effects and improve performance
+    // Optimized: Use full snapshot index to correctly match LazyColumn index range
     val unreadDividerIndex by
         remember(state.messages.itemCount, state.firstUnreadMessageUuid) {
             derivedStateOf {
                 val uuid = state.firstUnreadMessageUuid ?: return@derivedStateOf null
-                state.messages.itemSnapshotList.items.indexOfFirst { it.uuid == uuid }.takeIf { it != -1 }
+                state.messages.itemSnapshotList.indexOfFirst { it?.uuid == uuid }.takeIf { it != -1 }
             }
         }
 
@@ -211,7 +213,11 @@ private fun MessageListPagedContent(
             reverseLayout = true,
             contentPadding = PaddingValues(bottom = 24.dp),
         ) {
-            items(count = state.messages.itemCount, key = state.messages.itemKey { it.uuid }) { index ->
+            items(
+                count = state.messages.itemCount,
+                key = state.messages.itemKey { it.uuid },
+                contentType = state.messages.itemContentType { "message" },
+            ) { index ->
                 val message = state.messages[index]
                 val visuallyPrevMessage = if (index < state.messages.itemCount - 1) state.messages[index + 1] else null
                 val visuallyNextMessage = if (index > 0) state.messages[index - 1] else null
@@ -241,7 +247,7 @@ private fun MessageListPagedContent(
                         // Apply animation to the container Column once
                         Column(modifier = itemModifier) {
                             UnreadMessagesDivider()
-                            renderPagedChatMessageRow(
+                            RenderPagedChatMessageRow(
                                 message = message,
                                 state = state,
                                 nodeMap = nodeMap,
@@ -259,7 +265,7 @@ private fun MessageListPagedContent(
                             )
                         }
                     } else {
-                        renderPagedChatMessageRow(
+                        RenderPagedChatMessageRow(
                             message = message,
                             state = state,
                             nodeMap = nodeMap,
@@ -284,7 +290,7 @@ private fun MessageListPagedContent(
             state.messages.apply {
                 when {
                     loadState.append is LoadState.Loading -> {
-                        item(key = "append_loading") {
+                        item(key = "append_loading", contentType = "loading") {
                             Box(
                                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                                 contentAlignment = Alignment.Center,
@@ -301,7 +307,7 @@ private fun MessageListPagedContent(
 
 @Suppress("LongParameterList")
 @Composable
-private fun renderPagedChatMessageRow(
+private fun RenderPagedChatMessageRow(
     message: Message,
     state: MessageListPagedState,
     nodeMap: Map<Int, Node>,
@@ -363,9 +369,8 @@ private fun renderPagedChatMessageRow(
             coroutineScope.launch {
                 // Note: With pagination, we can't guarantee the original message is loaded
                 // Optimized: Use snapshot to find index to avoid side-effects during search
-                val targetIndex = state.messages.itemSnapshotList.items.indexOfFirst {
-                    it.packetId == message.replyId
-                }.takeIf { it != -1 }
+                val targetIndex =
+                    state.messages.itemSnapshotList.indexOfFirst { it?.packetId == message.replyId }.takeIf { it != -1 }
 
                 if (targetIndex != null) {
                     listState.animateScrollToItem(index = targetIndex)
@@ -428,19 +433,23 @@ private fun AutoScrollToBottomPaged(
 }
 
 private fun findFirstVisibleUnreadMessage(messages: LazyPagingItems<Message>, visibleIndex: Int): Message? {
+    val snapshot = messages.itemSnapshotList
+    if (visibleIndex >= snapshot.size) return null
     val firstVisibleUnreadIndex =
-        (visibleIndex until messages.itemCount).firstOrNull { i ->
-            val msg = messages[i]
+        (visibleIndex until snapshot.size).firstOrNull { i ->
+            val msg = snapshot[i]
             msg != null && !msg.read && !msg.fromLocal
         }
-    return firstVisibleUnreadIndex?.let { messages[it] }
+    return firstVisibleUnreadIndex?.let { snapshot[it] }
 }
 
-private fun findLastUnreadMessageIndex(messages: LazyPagingItems<Message>): Int? =
-    (0 until messages.itemCount).lastOrNull { i ->
-        val msg = messages[i]
+private fun findLastUnreadMessageIndex(messages: LazyPagingItems<Message>): Int? {
+    val snapshot = messages.itemSnapshotList
+    return (0 until snapshot.size).lastOrNull { i ->
+        val msg = snapshot[i]
         msg != null && !msg.read && !msg.fromLocal
     }
+}
 
 @OptIn(FlowPreview::class)
 @Composable
