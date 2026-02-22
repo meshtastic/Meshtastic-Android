@@ -16,13 +16,11 @@
  */
 package org.meshtastic.feature.messaging
 
-import android.os.RemoteException
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -41,7 +39,6 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
@@ -50,9 +47,8 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
+import org.meshtastic.feature.messaging.domain.usecase.SendMessageUseCase
 import org.meshtastic.proto.ChannelSet
-import org.meshtastic.proto.Config.DeviceConfig.Role
-import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -70,6 +66,7 @@ constructor(
     private val customEmojiPrefs: CustomEmojiPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
+    private val sendMessageUseCase: SendMessageUseCase,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
@@ -194,46 +191,8 @@ constructor(
      *   broadcasting on channel 0.
      * @param replyId The ID of the message this is a reply to, if any.
      */
-    @Suppress("NestedBlockDepth")
     fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-
-        // if the destination is a node, we need to ensure it's a
-        // favorite so it does not get removed from the on-device node database.
-        if (channel == null) { // no channel specified, so we assume it's a direct message
-            val fwVersion = ourNodeInfo.value?.metadata?.firmware_version
-            val destNode = nodeRepository.getNode(dest)
-            val isClientBase = ourNodeInfo.value?.user?.role == Role.CLIENT_BASE
-
-            val capabilities = Capabilities(fwVersion)
-
-            if (capabilities.canSendVerifiedContacts) {
-                sendSharedContact(destNode)
-            } else {
-                if (!destNode.isFavorite && !isClientBase) {
-                    favoriteNode(destNode)
-                }
-            }
-        }
-
-        // Applying homoglyph encoding to the transmitted string if user has activated the feature
-        // In most cases the value in "str" parameter will already contain the correct
-        // transformed string from the text input. This call here added to make sure that
-        // the feature is effective across all possible message paths (quick-chat, reply, etc.)
-        val dataPacketText: String =
-            if (homoglyphEncodingPrefs.homoglyphEncodingEnabled) {
-                HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(str)
-            } else {
-                str
-            }
-
-        val p =
-            DataPacket(dest, channel ?: 0, dataPacketText, replyId).apply {
-                from = ourNodeInfo.value?.user?.id ?: DataPacket.ID_LOCAL
-            }
-        sendDataPacket(p)
+        viewModelScope.launch { sendMessageUseCase.invoke(str, contactKey, replyId) }
     }
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) =
@@ -253,30 +212,4 @@ constructor(
             val unreadCount = packetRepository.getUnreadCount(contact)
             if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
         }
-
-    private fun favoriteNode(node: Node) = viewModelScope.launch {
-        try {
-            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
-        } catch (ex: RemoteException) {
-            Logger.e(ex) { "Favorite node error" }
-        }
-    }
-
-    private fun sendSharedContact(node: Node) = viewModelScope.launch {
-        try {
-            val contact =
-                SharedContact(node_num = node.num, user = node.user, manually_verified = node.manuallyVerified)
-            serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
-        } catch (ex: RemoteException) {
-            Logger.e(ex) { "Send shared contact error" }
-        }
-    }
-
-    private fun sendDataPacket(p: DataPacket) {
-        try {
-            serviceRepository.meshService?.send(p)
-        } catch (ex: RemoteException) {
-            Logger.e { "Send DataPacket error: ${ex.message}" }
-        }
-    }
 }

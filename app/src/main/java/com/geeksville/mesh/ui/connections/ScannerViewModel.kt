@@ -18,16 +18,13 @@ package com.geeksville.mesh.ui.connections
 
 import android.app.Application
 import android.content.Context
-import android.hardware.usb.UsbManager
 import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.geeksville.mesh.domain.usecase.GetDiscoveredDevicesUseCase
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.model.getMeshtasticShortName
-import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
 import com.geeksville.mesh.service.MeshService
@@ -36,25 +33,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.DatabaseManager
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.meshtastic
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -66,12 +56,9 @@ constructor(
     private val serviceRepository: ServiceRepository,
     private val bluetoothRepository: BluetoothRepository,
     private val usbRepository: UsbRepository,
-    private val usbManagerLazy: dagger.Lazy<UsbManager>,
-    private val networkRepository: NetworkRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val recentAddressesDataSource: RecentAddressesDataSource,
-    private val nodeRepository: NodeRepository,
-    private val databaseManager: DatabaseManager,
+    private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
 ) : ViewModel() {
     private val context: Context
         get() = application.applicationContext
@@ -81,142 +68,32 @@ constructor(
     private val _errorText = MutableStateFlow<String?>(null)
     val errorText: StateFlow<String?> = _errorText.asStateFlow()
 
-    private val nodeDb: StateFlow<Map<Int, Node>> = nodeRepository.nodeDBbyNum
-
-    private val bondedBleDevicesFlow: StateFlow<List<DeviceListEntry.Ble>> =
-        bluetoothRepository.state
-            .map { ble -> ble.bondedDevices.map { DeviceListEntry.Ble(it) } }
-            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    // Flow for discovered TCP devices, using recent addresses for potential name enrichment
-    private val processedDiscoveredTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
-        combine(networkRepository.resolvedList, recentAddressesDataSource.recentAddresses) { tcpServices, recentList ->
-            val recentMap = recentList.associateBy({ it.address }) { it.name }
-            tcpServices
-                .map { service ->
-                    val address = "t${service.toAddressString()}"
-                    val txtRecords = service.attributes // Map<String, ByteArray?>
-                    val shortNameBytes = txtRecords["shortname"]
-                    val idBytes = txtRecords["id"]
-
-                    val shortName =
-                        shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: getString(Res.string.meshtastic)
-                    val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
-                    var displayName = recentMap[address] ?: shortName
-                    if (deviceId != null && (displayName.split("_").none { it == deviceId })) {
-                        displayName += "_$deviceId"
-                    }
-                    DeviceListEntry.Tcp(displayName, address)
-                }
-                .sortedBy { it.name }
-        }
-            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+    private val discoveredDevicesFlow =
+        showMockInterface
+            .flatMapLatest { showMock -> getDiscoveredDevicesUseCase.invoke(showMock) }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     /** A combined list of bonded BLE devices for the UI. */
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(bondedBleDevicesFlow, nodeDb) { bonded, db ->
-            bonded
-                .map { entry: DeviceListEntry.Ble ->
-                    val matchingNode =
-                        if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                            db.values.find { node ->
-                                val suffix = entry.peripheral.getMeshtasticShortName()?.lowercase(Locale.ROOT)
-                                suffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
-                            }
-                        } else {
-                            null
-                        }
-                    entry.copy(node = matchingNode)
-                }
-                .sortedBy { it.name }
-        }
-            .stateInWhileSubscribed(initialValue = emptyList())
-
-    private val usbDevicesFlow: StateFlow<List<DeviceListEntry.Usb>> =
-        usbRepository.serialDevices
-            .map { usb -> usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.get(), d) } }
-            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    val mockDevice = DeviceListEntry.Mock("Demo Mode")
+        discoveredDevicesFlow
+            .map { it?.bleDevices ?: emptyList() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /** UI StateFlow for USB devices. */
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(usbDevicesFlow, showMockInterface) { usb, showMock ->
-            val all: List<DeviceListEntry> = usb + if (showMock) listOf(mockDevice) else emptyList()
-            all.map { entry ->
-                val matchingNode =
-                    if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                        nodeDb.value.values.find { node ->
-                            // Hard to match USB to node without connection, but we can try matching by name if it
-                            // follows Meshtastic pattern
-                            val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
-                            suffix != null &&
-                                suffix.length >= suffixLength &&
-                                node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
-                        }
-                    } else {
-                        null
-                    }
-                entry.copy(node = matchingNode)
-            }
-        }
-            .stateInWhileSubscribed(initialValue = if (showMockInterface.value) listOf(mockDevice) else emptyList())
-
-    // Flow for recent TCP devices, filtered to exclude any currently discovered devices
-    private val filteredRecentTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
-        combine(recentAddressesDataSource.recentAddresses, processedDiscoveredTcpDevicesFlow) {
-                recentList,
-                discoveredDevices,
-            ->
-            val discoveredDeviceAddresses = discoveredDevices.map { it.fullAddress }.toSet()
-            recentList
-                .filterNot { recentAddress -> discoveredDeviceAddresses.contains(recentAddress.address) }
-                .map { recentAddress -> DeviceListEntry.Tcp(recentAddress.name, recentAddress.address) }
-                .sortedBy { it.name }
-        }
-            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
-
-    private val suffixLength = 4
+        discoveredDevicesFlow.map { it?.usbDevices ?: emptyList() }.stateInWhileSubscribed(initialValue = emptyList())
 
     /** UI StateFlow for discovered TCP devices. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(processedDiscoveredTcpDevicesFlow, networkRepository.resolvedList, nodeDb) { devices, resolved, db ->
-            devices.map { entry ->
-                val matchingNode =
-                    if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                        val resolvedService = resolved.find { "t${it.toAddressString()}" == entry.fullAddress }
-                        val deviceId = resolvedService?.attributes?.get("id")?.let { String(it, Charsets.UTF_8) }
-                        db.values.find { node ->
-                            node.user.id == deviceId || (deviceId != null && node.user.id == "!$deviceId")
-                        }
-                    } else {
-                        null
-                    }
-                entry.copy(node = matchingNode)
-            }
-        }
-            .stateInWhileSubscribed(initialValue = listOf())
+        discoveredDevicesFlow
+            .map { it?.discoveredTcpDevices ?: emptyList() }
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     /** UI StateFlow for recently connected TCP devices that are not currently discovered. */
     val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        combine(filteredRecentTcpDevicesFlow, nodeDb) { devices, db ->
-            devices.map { entry ->
-                val matchingNode =
-                    if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
-                        // For recent TCP, we don't have the TXT records, but maybe the name contains the ID
-                        val suffix = entry.name.split("_").lastOrNull()?.lowercase(Locale.ROOT)
-                        db.values.find { node ->
-                            suffix != null &&
-                                suffix.length >= suffixLength &&
-                                node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
-                        }
-                    } else {
-                        null
-                    }
-                entry.copy(node = matchingNode)
-            }
-        }
-            .stateInWhileSubscribed(initialValue = listOf())
+        discoveredDevicesFlow
+            .map { it?.recentTcpDevices ?: emptyList() }
+            .stateInWhileSubscribed(initialValue = emptyList())
 
     val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
 

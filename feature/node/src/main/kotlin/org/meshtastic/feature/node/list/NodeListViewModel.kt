@@ -29,7 +29,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
@@ -39,12 +38,13 @@ import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
-import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
+import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class NodeListViewModel
 @Inject
@@ -54,6 +54,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     val nodeManagementActions: NodeManagementActions,
+    private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
 ) : ViewModel() {
 
@@ -116,35 +117,7 @@ constructor(
 
     val nodeList: StateFlow<List<Node>> =
         combine(nodeFilter, nodeSortOption, ::Pair)
-            .flatMapLatest { (filter, sort) ->
-                nodeRepository
-                    .getNodes(
-                        sort = sort,
-                        filter = filter.filterText,
-                        includeUnknown = filter.includeUnknown,
-                        onlyOnline = filter.onlyOnline,
-                        onlyDirect = filter.onlyDirect,
-                    )
-                    .map { list ->
-                        list
-                            .filter { node -> node.isIgnored == filter.showIgnored }
-                            .filter { node ->
-                                if (filter.excludeInfrastructure) {
-                                    val role = node.user.role
-                                    val infrastructureRoles =
-                                        listOf(
-                                            Config.DeviceConfig.Role.ROUTER,
-                                            Config.DeviceConfig.Role.REPEATER,
-                                            Config.DeviceConfig.Role.ROUTER_LATE,
-                                            Config.DeviceConfig.Role.CLIENT_BASE,
-                                        )
-                                    role !in infrastructureRoles && !node.isEffectivelyUnmessageable
-                                } else {
-                                    true
-                                }
-                            }
-                    }
-            }
+            .flatMapLatest { (filter, sort) -> getFilteredNodesUseCase.invoke(filter, sort) }
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val unfilteredNodeList: StateFlow<List<Node>> =
