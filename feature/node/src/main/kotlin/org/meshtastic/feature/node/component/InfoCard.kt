@@ -48,6 +48,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.copy
@@ -58,9 +60,9 @@ import org.meshtastic.core.ui.util.thenIf
 fun InfoCard(
     text: String,
     value: String,
-    icon: ImageVector? = null,
-    @DrawableRes iconRes: Int? = null,
     modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    iconRes: DrawableResource? = null,
     rotateIcon: Float = 0f,
 ) {
     val clipboard: Clipboard = LocalClipboard.current
@@ -120,6 +122,6 @@ fun InfoCard(
 }
 
 @Composable
-internal fun DrawableInfoCard(@DrawableRes iconRes: Int, text: String, value: String, rotateIcon: Float = 0f) {
+internal fun DrawableInfoCard(iconRes: DrawableResource, text: String, value: String, rotateIcon: Float = 0f) {
     InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon)
 }

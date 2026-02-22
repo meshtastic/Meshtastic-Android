@@ -17,8 +17,8 @@
 
 package org.meshtastic.feature.node.model
 
-import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
 internal data class VectorMetricInfo(
@@ -31,6 +31,6 @@ internal data class VectorMetricInfo(
 internal data class DrawableMetricInfo(
     val label: StringResource,
     val value: String,
-    @DrawableRes val icon: Int,
+    val icon: DrawableResource,
     val rotateIcon: Float = 0f,
 )

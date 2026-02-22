@@ -47,6 +47,9 @@ import coil3.request.ImageRequest
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_unverified
+import org.meshtastic.core.resources.img_hw_unknown
+
 import org.meshtastic.core.resources.device
 import org.meshtastic.core.resources.hardware
 import org.meshtastic.core.resources.supported
@@ -119,7 +122,7 @@ private fun SupportStatusItem(isSupported: Boolean) {
         if (isSupported) {
             Icons.TwoTone.Verified
         } else {
-            ImageVector.vectorResource(org.meshtastic.feature.node.R.drawable.unverified)
+            org.jetbrains.compose.resources.vectorResource(org.meshtastic.core.resources.Res.drawable.ic_unverified)
         },
         leadingIconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
         trailingIcon = null,
@@ -134,9 +137,9 @@ private fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifi
         model = ImageRequest.Builder(LocalContext.current).data(imageUrl).build(),
         contentScale = ContentScale.Inside,
         contentDescription = deviceHardware.displayName,
-        placeholder = painterResource(org.meshtastic.feature.node.R.drawable.hw_unknown),
-        error = painterResource(org.meshtastic.feature.node.R.drawable.hw_unknown),
-        fallback = painterResource(org.meshtastic.feature.node.R.drawable.hw_unknown),
+        placeholder = org.jetbrains.compose.resources.painterResource(org.meshtastic.core.resources.Res.drawable.img_hw_unknown),
+        error = org.jetbrains.compose.resources.painterResource(org.meshtastic.core.resources.Res.drawable.img_hw_unknown),
+        fallback = org.jetbrains.compose.resources.painterResource(org.meshtastic.core.resources.Res.drawable.img_hw_unknown),
         modifier = modifier.padding(16.dp),
     )
 }

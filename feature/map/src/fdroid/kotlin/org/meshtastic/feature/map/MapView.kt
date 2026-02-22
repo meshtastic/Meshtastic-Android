@@ -131,6 +131,8 @@ import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
+import org.meshtastic.feature.map.R
+
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOverlay
@@ -281,17 +283,18 @@ fun MapView(
             scope.launch { context.showToast(Res.string.location_disabled) }
             return
         }
+
         Logger.d { "user clicked MyLocationNewOverlay ${myLocationOverlay == null}" }
         if (myLocationOverlay == null) {
             myLocationOverlay =
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot)?.let {
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot)?.let {
                         setPersonIcon(it)
                         setPersonAnchor(0.5f, 0.5f)
                     }
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation)?.let {
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -388,7 +391,7 @@ fun MapView(
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
     val markerIcon = remember {
-        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_location_on)
+        AppCompatResources.getDrawable(context, R.drawable.ic_location_on)
     }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {

@@ -47,6 +47,10 @@ import org.meshtastic.core.resources.distance
 import org.meshtastic.core.resources.gas_resistance
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.ic_dew_point
+import org.meshtastic.core.resources.ic_radioactive
+import org.meshtastic.core.resources.ic_soil_moisture
+import org.meshtastic.core.resources.ic_soil_temperature
 import org.meshtastic.core.resources.lux
 import org.meshtastic.core.resources.pressure
 import org.meshtastic.core.resources.radiation
@@ -136,7 +140,7 @@ internal fun EnvironmentMetrics(
                                 DrawableMetricInfo(
                                     Res.string.dew_point,
                                     dewPoint.toTempString(isFahrenheit),
-                                    org.meshtastic.feature.node.R.drawable.ic_outlined_dew_point_24,
+                                    Res.drawable.ic_dew_point,
                                 ),
                             )
                         }
@@ -147,7 +151,7 @@ internal fun EnvironmentMetrics(
                                 DrawableMetricInfo(
                                     Res.string.soil_temperature,
                                     st.toTempString(isFahrenheit),
-                                    org.meshtastic.feature.node.R.drawable.soil_temperature,
+                                    Res.drawable.ic_soil_temperature,
                                 ),
                             )
                         }
@@ -157,7 +161,7 @@ internal fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 Res.string.soil_moisture,
                                 "%d%%".format(sm),
-                                org.meshtastic.feature.node.R.drawable.soil_moisture,
+                                Res.drawable.ic_soil_moisture,
                             ),
                         )
                     }
@@ -166,7 +170,7 @@ internal fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 Res.string.radiation,
                                 "%.1f µR/h".format(r),
-                                org.meshtastic.feature.node.R.drawable.ic_filled_radioactive_24,
+                                Res.drawable.ic_radioactive,
                             ),
                         )
                     }
