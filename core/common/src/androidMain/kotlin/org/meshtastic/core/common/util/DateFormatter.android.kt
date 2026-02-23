@@ -16,16 +16,21 @@
  */
 package org.meshtastic.core.common.util
 
-import android.os.Parcelable
+import android.text.format.DateUtils
+import org.meshtastic.core.common.ContextServices
 
-actual typealias CommonParcelable = Parcelable
+actual object DateFormatter {
+    actual fun formatRelativeTime(timestampMillis: Long): String = DateUtils.getRelativeTimeSpanString(
+        timestampMillis,
+        nowMillis,
+        DateUtils.MINUTE_IN_MILLIS,
+        DateUtils.FORMAT_ABBREV_RELATIVE,
+    )
+        .toString()
 
-actual typealias CommonParcelize = kotlinx.parcelize.Parcelize
-
-actual typealias CommonIgnoredOnParcel = kotlinx.parcelize.IgnoredOnParcel
-
-actual typealias CommonParceler<T> = kotlinx.parcelize.Parceler<T>
-
-actual typealias CommonTypeParceler<T, P> = kotlinx.parcelize.TypeParceler<T, P>
-
-actual typealias CommonParcel = android.os.Parcel
+    actual fun formatDateTime(timestampMillis: Long): String = DateUtils.formatDateTime(
+        ContextServices.app,
+        timestampMillis,
+        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
+    )
+}

@@ -14,18 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.common.util
+package org.meshtastic.core.model
 
-import android.os.Parcelable
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
-actual typealias CommonParcelable = Parcelable
-
-actual typealias CommonParcelize = kotlinx.parcelize.Parcelize
-
-actual typealias CommonIgnoredOnParcel = kotlinx.parcelize.IgnoredOnParcel
-
-actual typealias CommonParceler<T> = kotlinx.parcelize.Parceler<T>
-
-actual typealias CommonTypeParceler<T, P> = kotlinx.parcelize.TypeParceler<T, P>
-
-actual typealias CommonParcel = android.os.Parcel
+class DeviceVersionTest {
+    /** make sure we match the python and device code behavior */
+    @Test
+    fun canParse() {
+        assertEquals(10000, DeviceVersion("1.0.0").asInt)
+        assertEquals(10101, DeviceVersion("1.1.1").asInt)
+        assertEquals(12357, DeviceVersion("1.23.57").asInt)
+        assertEquals(12357, DeviceVersion("1.23.57.abde123").asInt)
+    }
+}

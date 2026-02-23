@@ -18,7 +18,6 @@ package org.meshtastic.feature.map
 
 import android.Manifest
 import android.graphics.Paint
-import android.text.format.DateUtils
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -85,6 +84,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.hasGps
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
@@ -496,12 +496,7 @@ fun MapView(
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if ((pt.locked_to ?: 0) != 0) "\uD83D\uDD12" else ""
-            val time =
-                DateUtils.formatDateTime(
-                    context,
-                    waypoint.received_time,
-                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-                )
+            val time = DateFormatter.formatDateTime(waypoint.received_time)
             val label = (pt.name ?: "") + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if ((pt.icon ?: 0) == 0) 128205 else pt.icon!!))
             val now = nowMillis
@@ -510,14 +505,7 @@ fun MapView(
                 when {
                     (pt.expire ?: 0) == 0 || pt.expire == Int.MAX_VALUE -> "Never"
                     expireTimeMillis <= now -> "Expired"
-                    else ->
-                        DateUtils.getRelativeTimeSpanString(
-                            expireTimeMillis,
-                            now,
-                            DateUtils.MINUTE_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_RELATIVE,
-                        )
-                            .toString()
+                    else -> DateFormatter.formatRelativeTime(expireTimeMillis)
                 }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
@@ -719,6 +707,7 @@ fun MapView(
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             } else {
+                @Suppress("MagicNumber")
                 Column(
                     modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -805,6 +794,7 @@ fun MapView(
                                             text = stringResource(Res.string.show_precision_circle),
                                             modifier = Modifier.weight(1f),
                                         )
+                                        @Suppress("MagicNumber")
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
                                             onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
@@ -1075,7 +1065,8 @@ private const val TRACEROUTE_SINGLE_POINT_ZOOM = 12.0
 private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
 private const val WAYPOINT_ZOOM = 15.0
 
-private fun Double.toRad(): Double = Math.toRadians(this)
+@Suppress("MagicNumber")
+private fun Double.toRad(): Double = this * Math.PI / 180.0
 
 private fun bearingRad(from: GeoPoint, to: GeoPoint): Double {
     val lat1 = from.latitude.toRad()
@@ -1116,6 +1107,8 @@ private fun offsetPolyline(
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]
+
+        @Suppress("MagicNumber")
         val perpendicularHeading = heading + (Math.PI / 2 * sideMultiplier)
         point.offsetPoint(perpendicularHeading, abs(offsetMeters))
     }

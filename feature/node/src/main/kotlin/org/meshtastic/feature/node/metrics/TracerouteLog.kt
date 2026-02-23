@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -40,7 +39,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -49,6 +47,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
@@ -106,7 +105,6 @@ fun TracerouteLogScreen(
     fun getUsername(nodeNum: Int): String =
         with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
 
-    val context = LocalContext.current
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
@@ -151,12 +149,7 @@ fun TracerouteLogScreen(
                     }
                 val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
 
-                val time =
-                    DateUtils.formatDateTime(
-                        context,
-                        log.received_date,
-                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-                    )
+                val time = DateFormatter.formatDateTime(log.received_date)
                 val (text, icon) = route.getTextAndIcon()
                 var expanded by remember { mutableStateOf(false) }
 
@@ -278,12 +271,7 @@ private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
 @PreviewLightDark
 @Composable
 private fun TracerouteItemPreview() {
-    val time =
-        DateUtils.formatDateTime(
-            LocalContext.current,
-            nowMillis,
-            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-        )
+    val time = DateFormatter.formatDateTime(nowMillis)
     AppTheme {
         MetricLogItem(
             icon = MeshtasticIcons.Group,

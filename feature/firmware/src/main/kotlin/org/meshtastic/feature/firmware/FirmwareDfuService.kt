@@ -23,10 +23,10 @@ import android.content.Context
 import kotlinx.coroutines.runBlocking
 import no.nordicsemi.android.dfu.DfuBaseService
 import org.jetbrains.compose.resources.getString
-import org.meshtastic.core.model.BuildConfig
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_channel_description
 import org.meshtastic.core.resources.firmware_update_channel_name
+import org.meshtastic.core.model.util.isDebug as isDebugFlag
 
 class FirmwareDfuService : DfuBaseService() {
     override fun onCreate() {
@@ -57,5 +57,5 @@ class FirmwareDfuService : DfuBaseService() {
         null
     }
 
-    override fun isDebug(): Boolean = BuildConfig.DEBUG
+    override fun isDebug(): Boolean = isDebugFlag
 }

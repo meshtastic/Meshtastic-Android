@@ -16,16 +16,11 @@
  */
 package org.meshtastic.core.common.util
 
-import android.os.Parcelable
+/** Platform-agnostic Date formatter utility. */
+expect object DateFormatter {
+    /** Formats a timestamp into a relative "time ago" string. */
+    fun formatRelativeTime(timestampMillis: Long): String
 
-actual typealias CommonParcelable = Parcelable
-
-actual typealias CommonParcelize = kotlinx.parcelize.Parcelize
-
-actual typealias CommonIgnoredOnParcel = kotlinx.parcelize.IgnoredOnParcel
-
-actual typealias CommonParceler<T> = kotlinx.parcelize.Parceler<T>
-
-actual typealias CommonTypeParceler<T, P> = kotlinx.parcelize.TypeParceler<T, P>
-
-actual typealias CommonParcel = android.os.Parcel
+    /** Formats a timestamp into a localized date and time string. */
+    fun formatDateTime(timestampMillis: Long): String
+}

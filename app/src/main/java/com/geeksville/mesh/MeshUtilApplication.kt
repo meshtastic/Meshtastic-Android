@@ -34,6 +34,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
@@ -58,6 +59,7 @@ open class MeshUtilApplication :
 
     override fun onCreate() {
         super.onCreate()
+        ContextServices.app = this
         initializeMaps(this)
 
         // Schedule periodic MeshLog cleanup

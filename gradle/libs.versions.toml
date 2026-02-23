@@ -50,6 +50,7 @@ detekt = "1.23.8"
 dokka = "2.2.0-Beta"
 devtools-ksp = "2.3.6"
 markdownRenderer = "0.39.2"
+okio = "3.10.2"
 osmdroid-android = "6.1.20"
 spotless = "8.2.1"
 wire = "6.0.0-alpha02"
@@ -208,6 +209,7 @@ nordic-common-scanner-ble = { module = "no.nordicsemi.android.common:scanner-ble
 nordic-common-ui = { module = "no.nordicsemi.android.common:ui", version.ref = "nordic-common" }
 
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }

@@ -14,18 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.common.util
+package org.meshtastic.core.model
 
-import android.os.Parcelable
+import org.junit.Assert
+import org.junit.Test
 
-actual typealias CommonParcelable = Parcelable
+class PositionTest {
+    @Test
+    fun degGood() {
+        Assert.assertEquals(Position.degI(89.0), 890000000)
+        Assert.assertEquals(Position.degI(-89.0), -890000000)
 
-actual typealias CommonParcelize = kotlinx.parcelize.Parcelize
+        Assert.assertEquals(Position.degD(Position.degI(89.0)), 89.0, 0.01)
+        Assert.assertEquals(Position.degD(Position.degI(-89.0)), -89.0, 0.01)
+    }
 
-actual typealias CommonIgnoredOnParcel = kotlinx.parcelize.IgnoredOnParcel
-
-actual typealias CommonParceler<T> = kotlinx.parcelize.Parceler<T>
-
-actual typealias CommonTypeParceler<T, P> = kotlinx.parcelize.TypeParceler<T, P>
-
-actual typealias CommonParcel = android.os.Parcel
+    @Test
+    fun givenPositionCreatedWithoutTime_thenTimeIsSet() {
+        val position = Position(37.1, 121.1, 35)
+        Assert.assertTrue(position.time != 0)
+    }
+}
