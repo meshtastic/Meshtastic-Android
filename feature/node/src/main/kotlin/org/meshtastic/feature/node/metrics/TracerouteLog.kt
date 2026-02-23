@@ -141,6 +141,8 @@ fun TracerouteLogScreen(
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) {
             items(state.tracerouteRequests, key = { it.uuid }) { log ->
+                val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
+                val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
                 val result =
                     remember(state.tracerouteRequests, log.fromRadio.packet?.id) {
                         state.tracerouteResults.find {
@@ -168,7 +170,7 @@ fun TracerouteLogScreen(
                                     res.fromRadio.packet?.getTracerouteResponse(
                                         ::getUsername,
                                         headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                        headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                        headerBack = headerBackStr,
                                     ),
                                     statusGreen = statusGreen,
                                     statusYellow = statusYellow,
@@ -185,7 +187,7 @@ fun TracerouteLogScreen(
                                 ?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                    headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                    headerBack = headerBackStr,
                                 )
                                 ?.let { AnnotatedString(it) }
                         }
@@ -213,9 +215,8 @@ fun TracerouteLogScreen(
                                         ?.packet
                                         ?.getTracerouteResponse(
                                             ::getUsername,
-                                            headerTowards =
-                                            stringResource(Res.string.traceroute_route_towards_dest),
-                                            headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                            headerTowards = headerTowardsStr,
+                                            headerBack = headerBackStr,
                                         )
                                         ?.let {
                                             annotateTraceroute(

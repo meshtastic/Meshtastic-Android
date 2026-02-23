@@ -28,7 +28,25 @@ import org.jetbrains.compose.resources.stringResource
 sealed class UiText {
     data class DynamicString(val value: String) : UiText()
 
-    class Resource(val res: StringResource, vararg val args: Any) : UiText()
+    class Resource(val res: StringResource, vararg val args: Any) : UiText() {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (other == null || this::class != other::class) return false
+
+            other as Resource
+
+            if (res != other.res) return false
+            if (!args.contentEquals(other.args)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = res.hashCode()
+            result = 31 * result + args.contentHashCode()
+            return result
+        }
+    }
 
     @Composable
     fun asString(): String = when (this) {
@@ -36,10 +54,10 @@ sealed class UiText {
         is Resource -> {
             val resolvedArgs =
                 args.map { arg ->
-                    if (arg is StringResource) {
-                        stringResource(arg)
-                    } else {
-                        arg
+                    when (arg) {
+                        is StringResource -> stringResource(arg)
+                        is UiText -> arg.asString()
+                        else -> arg
                     }
                 }
             @Suppress("SpreadOperator")
@@ -53,10 +71,10 @@ sealed class UiText {
         is Resource -> {
             val resolvedArgs =
                 args.map { arg ->
-                    if (arg is StringResource) {
-                        getString(arg)
-                    } else {
-                        arg
+                    when (arg) {
+                        is StringResource -> getString(arg)
+                        is UiText -> arg.resolve()
+                        else -> arg
                     }
                 }
             @Suppress("SpreadOperator")

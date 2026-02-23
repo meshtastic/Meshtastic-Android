@@ -136,6 +136,7 @@ fun NeighborInfoLogScreen(
                     )
                 val text = if (result != null) "Success" else stringResource(Res.string.routing_error_no_response)
                 val icon = if (result != null) MeshtasticIcons.Groups else MeshtasticIcons.PersonOff
+                val header = stringResource(Res.string.neighbor_info)
                 var expanded by remember { mutableStateOf(false) }
 
                 Box {
@@ -148,10 +149,7 @@ fun NeighborInfoLogScreen(
                             result
                                 ?.fromRadio
                                 ?.packet
-                                ?.getNeighborInfoResponse(
-                                    ::getUsername,
-                                    header = stringResource(Res.string.neighbor_info),
-                                )
+                                ?.getNeighborInfoResponse(::getUsername, header = header)
                                 ?.let {
                                     val message =
                                         annotateNeighborInfo(

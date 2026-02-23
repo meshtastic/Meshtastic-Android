@@ -46,7 +46,6 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.FirmwareEdition
-import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
@@ -126,14 +125,8 @@ constructor(
                 firmwareReleaseRepository.alphaRelease,
                 nodeRequestActions.lastTracerouteTimes.map { it[nodeId] },
                 nodeRequestActions.lastRequestNeighborTimes.map { it[nodeId] },
-            ) { args: Array<Any?> ->
-                MetadataGroup(
-                    edition = args[0] as? FirmwareEdition,
-                    stable = args[1] as? FirmwareRelease,
-                    alpha = args[2] as? FirmwareRelease,
-                    trTime = args[3] as? Long,
-                    niTime = args[4] as? Long,
-                )
+            ) { edition, stable, alpha, trTime, niTime ->
+                MetadataGroup(edition = edition, stable = stable, alpha = alpha, trTime = trTime, niTime = niTime)
             }
 
         // 4. Requests History (we still query request logs by the target nodeId)
@@ -207,11 +200,8 @@ constructor(
 
             @Suppress("MagicNumber")
             val nodeName =
-                if (node.user.hw_model == HardwareModel.UNSET) {
-                    UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
-                } else {
-                    UiText.DynamicString(node.user.long_name ?: "")
-                }
+                node.user.long_name?.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
+                    ?: UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
 
             NodeDetailUiState(
                 node = node,
