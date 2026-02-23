@@ -18,11 +18,11 @@
 
 package org.meshtastic.core.model.util
 
-import android.icu.util.LocaleData
-import android.icu.util.ULocale
+import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
-import java.util.Locale
 
+@Suppress("MagicNumber")
 enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: Int) {
     METER("m", multiplier = 1F, DisplayUnits.METRIC.value),
     KILOMETER("km", multiplier = 0.001F, DisplayUnits.METRIC.value),
@@ -31,22 +31,10 @@ enum class DistanceUnit(val symbol: String, val multiplier: Float, val system: I
     ;
 
     companion object {
-        fun getFromLocale(locale: Locale = Locale.getDefault()): DisplayUnits =
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
-                    LocaleData.MeasurementSystem.SI -> DisplayUnits.METRIC
-                    else -> DisplayUnits.IMPERIAL
-                }
-            } else {
-                when (locale.country.uppercase(locale)) {
-                    "US",
-                    "LR",
-                    "MM",
-                    "GB",
-                    -> DisplayUnits.IMPERIAL
-                    else -> DisplayUnits.METRIC
-                }
-            }
+        fun getFromLocale(): DisplayUnits = when (getSystemMeasurementSystem()) {
+            MeasurementSystem.METRIC -> DisplayUnits.METRIC
+            MeasurementSystem.IMPERIAL -> DisplayUnits.IMPERIAL
+        }
     }
 }
 

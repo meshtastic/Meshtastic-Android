@@ -14,11 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model.util
+package org.meshtastic.core.common.util
 
-import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.Position
+/** Platform-agnostic Parcelable interface. */
+expect interface CommonParcelable
 
-/** @return distance in meters along the surface of the earth (ish) */
-@Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+/** Platform-agnostic Parcelize annotation. */
+@Target(AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.BINARY)
+expect annotation class CommonParcelize()

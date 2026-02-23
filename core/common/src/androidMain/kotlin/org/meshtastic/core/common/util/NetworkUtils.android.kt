@@ -14,11 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model.util
+package org.meshtastic.core.common.util
 
-import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.Position
+import android.net.InetAddresses
+import android.os.Build
+import android.util.Patterns
 
-/** @return distance in meters along the surface of the earth (ish) */
-@Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+actual fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
+    false
+} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+    @Suppress("DEPRECATION")
+    Patterns.IP_ADDRESS.matcher(this).matches() || Patterns.DOMAIN_NAME.matcher(this).matches()
+} else {
+    InetAddresses.isNumericAddress(this) || Patterns.DOMAIN_NAME.matcher(this).matches()
+}

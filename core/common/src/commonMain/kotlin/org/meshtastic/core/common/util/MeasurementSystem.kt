@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model.util
+package org.meshtastic.core.common.util
 
-import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.Position
+/** Represents the system's preferred measurement system. */
+enum class MeasurementSystem {
+    METRIC,
+    IMPERIAL,
+}
 
-/** @return distance in meters along the surface of the earth (ish) */
-@Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+/** returns the system's preferred measurement system. */
+expect fun getSystemMeasurementSystem(): MeasurementSystem

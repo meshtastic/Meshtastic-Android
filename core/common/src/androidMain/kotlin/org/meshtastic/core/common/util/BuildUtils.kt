@@ -19,9 +19,9 @@ package org.meshtastic.core.common.util
 import android.os.Build
 
 /** Utility for checking build properties, such as emulator detection. */
-object BuildUtils {
+actual object BuildUtils {
     /** Whether the app is currently running on an emulator. */
-    val isEmulator: Boolean
+    actual val isEmulator: Boolean
         get() =
             Build.FINGERPRINT.startsWith("generic") ||
                 Build.FINGERPRINT.startsWith("unknown") ||
@@ -32,4 +32,7 @@ object BuildUtils {
                 Build.MODEL.contains("Android SDK built for") ||
                 Build.MANUFACTURER.contains("Genymotion") ||
                 Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic")
+
+    actual val sdkInt: Int
+        get() = Build.VERSION.SDK_INT
 }

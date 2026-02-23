@@ -14,11 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model.util
+package org.meshtastic.core.common.util
 
-import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.Position
-
-/** @return distance in meters along the surface of the earth (ish) */
-@Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+/** Validates if the given string is a valid network address (IP or domain). */
+expect fun String?.isValidAddress(): Boolean

@@ -18,10 +18,10 @@ package org.meshtastic.core.model
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
+import org.meshtastic.core.common.util.bearing
+import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.model.util.bearing
-import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.HardwareModel
@@ -223,7 +223,7 @@ data class NodeInfo(
 
     @Suppress("ImplicitDefaultLocale")
     val batteryStr
-        get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
+        get() = if (batteryLevel in 1..100) "$batteryLevel%" else ""
 
     /** true if the device was heard from recently */
     val isOnline: Boolean

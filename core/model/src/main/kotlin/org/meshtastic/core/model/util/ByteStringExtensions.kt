@@ -26,4 +26,5 @@ fun ByteString.encodeToString(): String = base64()
  *
  * @throws IllegalArgumentException if the string is not valid Base64.
  */
-fun String.base64ToByteString(): ByteString = decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string: $this")
+fun String.base64ToByteString(): ByteString =
+    decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string: $this")

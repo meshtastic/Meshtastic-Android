@@ -14,11 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.model.util
+package org.meshtastic.core.common.util
 
-import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.Position
+/** Utility for checking build properties, such as emulator detection. */
+expect object BuildUtils {
+    /** Whether the app is currently running on an emulator. */
+    val isEmulator: Boolean
 
-/** @return distance in meters along the surface of the earth (ish) */
-@Suppress("MagicNumber")
-fun positionToMeter(a: Position, b: Position): Double = latLongToMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+    /** The SDK version of the current platform. On non-Android platforms, this returns 0. */
+    val sdkInt: Int
+}

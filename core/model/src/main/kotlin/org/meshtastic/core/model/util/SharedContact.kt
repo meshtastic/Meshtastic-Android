@@ -51,6 +51,7 @@ private fun Uri.checkSharedContactUrl() {
     }
 }
 
+@Suppress("ThrowsCount")
 @Throws(MalformedURLException::class)
 private fun decodeSharedContactData(data: String): SharedContact {
     val decodedBytes =

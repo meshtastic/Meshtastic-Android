@@ -17,12 +17,13 @@
 package org.meshtastic.core.database.model
 
 import okio.ByteString
+import org.meshtastic.core.common.util.GPSFormat
+import org.meshtastic.core.common.util.bearing
+import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
-import org.meshtastic.core.model.util.latLongToMeter
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -131,7 +132,7 @@ data class Node(
     // @return bearing to the other position in degrees
     fun bearing(o: Node?): Int? = when {
         validPosition == null || o?.validPosition == null -> null
-        else -> org.meshtastic.core.model.util.bearing(latitude, longitude, o.latitude, o.longitude).toInt()
+        else -> bearing(latitude, longitude, o.latitude, o.longitude).toInt()
     }
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
