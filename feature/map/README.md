@@ -36,7 +36,7 @@ graph TB
   :feature:map -.-> :core:prefs
   :feature:map -.-> :core:proto
   :feature:map -.-> :core:service
-  :feature:map -.-> :core:strings
+  :feature:map -.-> :core:resources
   :feature:map -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

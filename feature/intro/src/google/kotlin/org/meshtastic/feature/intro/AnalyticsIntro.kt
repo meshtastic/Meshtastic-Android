@@ -29,13 +29,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.analytics_notice
-import org.meshtastic.core.strings.analytics_platforms
-import org.meshtastic.core.strings.datadog_link
-import org.meshtastic.core.strings.firebase_link
-import org.meshtastic.core.strings.for_more_information_see_our_privacy_policy
-import org.meshtastic.core.strings.privacy_url
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.analytics_notice
+import org.meshtastic.core.resources.analytics_platforms
+import org.meshtastic.core.resources.datadog_link
+import org.meshtastic.core.resources.firebase_link
+import org.meshtastic.core.resources.for_more_information_see_our_privacy_policy
+import org.meshtastic.core.resources.privacy_url
 import org.meshtastic.core.ui.component.AutoLinkText
 
 @Composable

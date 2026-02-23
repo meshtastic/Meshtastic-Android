@@ -47,12 +47,12 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
-import org.meshtastic.core.strings.delete
-import org.meshtastic.core.strings.message_delivery_status
-import org.meshtastic.core.strings.reply
-import org.meshtastic.core.strings.select
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.select
 
 @Composable
 fun MessageActionsContent(

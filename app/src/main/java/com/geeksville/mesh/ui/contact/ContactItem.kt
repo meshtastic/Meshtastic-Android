@@ -53,10 +53,10 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.Contact
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.sample_message
-import org.meshtastic.core.strings.some_username
-import org.meshtastic.core.strings.unknown_username
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.sample_message
+import org.meshtastic.core.resources.some_username
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet

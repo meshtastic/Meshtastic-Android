@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.clickable
@@ -31,9 +30,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.nodes_at_this_location
-import org.meshtastic.core.strings.okay
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.nodes_at_this_location
+import org.meshtastic.core.resources.okay
 import org.meshtastic.core.ui.component.NodeChip
 import org.meshtastic.feature.map.model.NodeClusterItem
 

@@ -35,7 +35,7 @@ graph TB
   :feature:settings -.-> :core:prefs
   :feature:settings -.-> :core:proto
   :feature:settings -.-> :core:service
-  :feature:settings -.-> :core:strings
+  :feature:settings -.-> :core:resources
   :feature:settings -.-> :core:ui
   :feature:settings -.-> :core:barcode
 

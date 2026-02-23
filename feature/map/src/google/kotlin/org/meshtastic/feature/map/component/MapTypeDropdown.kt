@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.component
 
 import androidx.compose.material.icons.Icons
@@ -29,13 +28,13 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.maps.android.compose.MapType
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.manage_custom_tile_sources
-import org.meshtastic.core.strings.map_type_hybrid
-import org.meshtastic.core.strings.map_type_normal
-import org.meshtastic.core.strings.map_type_satellite
-import org.meshtastic.core.strings.map_type_terrain
-import org.meshtastic.core.strings.selected_map_type
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.manage_custom_tile_sources
+import org.meshtastic.core.resources.map_type_hybrid
+import org.meshtastic.core.resources.map_type_normal
+import org.meshtastic.core.resources.map_type_satellite
+import org.meshtastic.core.resources.map_type_terrain
+import org.meshtastic.core.resources.selected_map_type
 import org.meshtastic.feature.map.MapViewModel
 
 @Suppress("LongMethod")

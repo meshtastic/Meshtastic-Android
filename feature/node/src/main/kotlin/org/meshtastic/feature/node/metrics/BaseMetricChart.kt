@@ -59,9 +59,9 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.info
-import org.meshtastic.core.strings.logs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.info
+import org.meshtastic.core.resources.logs
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh

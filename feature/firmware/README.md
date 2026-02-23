@@ -16,7 +16,7 @@ graph TB
   :feature:firmware -.-> :core:prefs
   :feature:firmware -.-> :core:proto
   :feature:firmware -.-> :core:service
-  :feature:firmware -.-> :core:strings
+  :feature:firmware -.-> :core:resources
   :feature:firmware -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

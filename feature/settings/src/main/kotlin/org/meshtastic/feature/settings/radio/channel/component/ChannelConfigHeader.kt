@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.channel.component
 
 import androidx.compose.foundation.layout.Arrangement
@@ -28,10 +27,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channels
-import org.meshtastic.core.strings.freq
-import org.meshtastic.core.strings.slot
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channels
+import org.meshtastic.core.resources.freq
+import org.meshtastic.core.resources.slot
 import org.meshtastic.core.ui.component.PreferenceCategory
 import org.meshtastic.core.ui.theme.AppTheme
 

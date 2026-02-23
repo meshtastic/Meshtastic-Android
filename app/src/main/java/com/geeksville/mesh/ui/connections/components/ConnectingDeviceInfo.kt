@@ -35,9 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.connecting
-import org.meshtastic.core.strings.disconnect
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

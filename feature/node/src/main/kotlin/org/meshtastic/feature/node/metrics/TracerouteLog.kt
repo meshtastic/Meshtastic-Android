@@ -52,18 +52,17 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.routing_error_no_response
-import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.traceroute_diff
-import org.meshtastic.core.strings.traceroute_direct
-import org.meshtastic.core.strings.traceroute_duration
-import org.meshtastic.core.strings.traceroute_hops
-import org.meshtastic.core.strings.traceroute_log
-import org.meshtastic.core.strings.traceroute_route_back_to_us
-import org.meshtastic.core.strings.traceroute_route_towards_dest
-import org.meshtastic.core.strings.traceroute_time_and_text
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.routing_error_no_response
+import org.meshtastic.core.resources.traceroute
+import org.meshtastic.core.resources.traceroute_diff
+import org.meshtastic.core.resources.traceroute_direct
+import org.meshtastic.core.resources.traceroute_duration
+import org.meshtastic.core.resources.traceroute_hops
+import org.meshtastic.core.resources.traceroute_log
+import org.meshtastic.core.resources.traceroute_route_back_to_us
+import org.meshtastic.core.resources.traceroute_route_towards_dest
+import org.meshtastic.core.resources.traceroute_time_and_text
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -98,7 +97,7 @@ fun TracerouteLogScreen(
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -142,6 +141,8 @@ fun TracerouteLogScreen(
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) {
             items(state.tracerouteRequests, key = { it.uuid }) { log ->
+                val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
+                val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
                 val result =
                     remember(state.tracerouteRequests, log.fromRadio.packet?.id) {
                         state.tracerouteResults.find {
@@ -169,7 +170,7 @@ fun TracerouteLogScreen(
                                     res.fromRadio.packet?.getTracerouteResponse(
                                         ::getUsername,
                                         headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                        headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                        headerBack = headerBackStr,
                                     ),
                                     statusGreen = statusGreen,
                                     statusYellow = statusYellow,
@@ -186,7 +187,7 @@ fun TracerouteLogScreen(
                                 ?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                    headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                    headerBack = headerBackStr,
                                 )
                                 ?.let { AnnotatedString(it) }
                         }
@@ -214,8 +215,8 @@ fun TracerouteLogScreen(
                                         ?.packet
                                         ?.getTracerouteResponse(
                                             ::getUsername,
-                                            headerTowards = getString(Res.string.traceroute_route_towards_dest),
-                                            headerBack = getString(Res.string.traceroute_route_back_to_us),
+                                            headerTowards = headerTowardsStr,
+                                            headerBack = headerBackStr,
                                         )
                                         ?.let {
                                             annotateTraceroute(

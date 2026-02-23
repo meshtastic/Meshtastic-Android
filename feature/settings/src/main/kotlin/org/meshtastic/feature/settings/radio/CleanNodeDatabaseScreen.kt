@@ -41,13 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.clean_node_database_description
-import org.meshtastic.core.strings.clean_node_database_title
-import org.meshtastic.core.strings.clean_nodes_older_than
-import org.meshtastic.core.strings.clean_now
-import org.meshtastic.core.strings.clean_unknown_nodes
-import org.meshtastic.core.strings.nodes_queued_for_deletion
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.clean_node_database_description
+import org.meshtastic.core.resources.clean_node_database_title
+import org.meshtastic.core.resources.clean_nodes_older_than
+import org.meshtastic.core.resources.clean_now
+import org.meshtastic.core.resources.clean_unknown_nodes
+import org.meshtastic.core.resources.nodes_queued_for_deletion
 import org.meshtastic.core.ui.component.NodeChip
 
 /**

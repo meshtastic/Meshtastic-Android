@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.sharing
 
 import androidx.compose.foundation.layout.Column
@@ -43,12 +42,12 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.contact.ContactItem
 import com.geeksville.mesh.ui.contact.ContactsViewModel
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.sample_message
-import org.meshtastic.core.strings.share
-import org.meshtastic.core.strings.share_to
-import org.meshtastic.core.strings.some_username
-import org.meshtastic.core.strings.unknown_username
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.sample_message
+import org.meshtastic.core.resources.share
+import org.meshtastic.core.resources.share_to
+import org.meshtastic.core.resources.some_username
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
 

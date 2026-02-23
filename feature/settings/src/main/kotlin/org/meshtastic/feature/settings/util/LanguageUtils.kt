@@ -23,12 +23,12 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.core.os.LocaleListCompat
 import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.fr_HT
-import org.meshtastic.core.strings.preferences_system_default
-import org.meshtastic.core.strings.pt_BR
-import org.meshtastic.core.strings.zh_CN
-import org.meshtastic.core.strings.zh_TW
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.fr_HT
+import org.meshtastic.core.resources.preferences_system_default
+import org.meshtastic.core.resources.pt_BR
+import org.meshtastic.core.resources.zh_CN
+import org.meshtastic.core.resources.zh_TW
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 

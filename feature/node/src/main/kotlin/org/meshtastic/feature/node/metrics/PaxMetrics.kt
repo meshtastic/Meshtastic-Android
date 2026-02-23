@@ -59,14 +59,13 @@ import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.ble_devices
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.no_pax_metrics_logs
-import org.meshtastic.core.strings.pax
-import org.meshtastic.core.strings.pax_metrics_log
-import org.meshtastic.core.strings.uptime
-import org.meshtastic.core.strings.wifi_devices
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ble_devices
+import org.meshtastic.core.resources.no_pax_metrics_logs
+import org.meshtastic.core.resources.pax
+import org.meshtastic.core.resources.pax_metrics_log
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
@@ -189,7 +188,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

@@ -1,7 +1,7 @@
-# `:core:strings`
+# `:core:resources`
 
 ## Overview
-The `:core:strings` module is the centralized source for all UI strings and localizable resources. It uses the **Compose Multiplatform Resource** library to provide a type-safe way to access strings.
+The `:core:resources` module is the centralized source for all UI strings and localizable resources. It uses the **Compose Multiplatform Resource** library to provide a type-safe way to access strings.
 
 ## Key Features
 
@@ -13,8 +13,8 @@ The library provides a standard way to access strings in Jetpack Compose.
 
 ```kotlin
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.your_string_key
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.your_string_key
 
 Text(text = stringResource(Res.string.your_string_key))
 ```
@@ -24,7 +24,7 @@ Text(text = stringResource(Res.string.your_string_key))
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:strings[strings]:::kmp-library
+  :core:resources[strings]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

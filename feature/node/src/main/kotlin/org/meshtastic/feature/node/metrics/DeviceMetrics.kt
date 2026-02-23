@@ -66,16 +66,15 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.air_util_definition
-import org.meshtastic.core.strings.air_utilization
-import org.meshtastic.core.strings.battery
-import org.meshtastic.core.strings.ch_util_definition
-import org.meshtastic.core.strings.channel_utilization
-import org.meshtastic.core.strings.device_metrics_log
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.uptime
-import org.meshtastic.core.strings.voltage
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_util_definition
+import org.meshtastic.core.resources.air_utilization
+import org.meshtastic.core.resources.battery
+import org.meshtastic.core.resources.ch_util_definition
+import org.meshtastic.core.resources.channel_utilization
+import org.meshtastic.core.resources.device_metrics_log
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
@@ -141,7 +140,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

@@ -57,7 +57,7 @@ fun Project.configureKover() {
 
                     // Suppress generated code
                     packages("hilt_aggregated_deps")
-                    packages("org.meshtastic.core.strings")
+                    packages("org.meshtastic.core.resources")
                 }
             }
         }

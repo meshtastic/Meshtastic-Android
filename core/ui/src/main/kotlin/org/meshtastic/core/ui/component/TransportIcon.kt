@@ -20,11 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.internal
-import org.meshtastic.core.strings.via_api
-import org.meshtastic.core.strings.via_mqtt
-import org.meshtastic.core.strings.via_udp
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.internal
+import org.meshtastic.core.resources.via_api
+import org.meshtastic.core.resources.via_mqtt
+import org.meshtastic.core.resources.via_udp
 import org.meshtastic.core.ui.icon.Api
 import org.meshtastic.core.ui.icon.Cloud
 import org.meshtastic.core.ui.icon.Device

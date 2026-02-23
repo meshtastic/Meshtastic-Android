@@ -25,16 +25,16 @@ import androidx.compose.material.icons.outlined.SettingsInputAntenna
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.bluetooth_feature_config
-import org.meshtastic.core.strings.bluetooth_feature_config_description
-import org.meshtastic.core.strings.bluetooth_feature_discovery
-import org.meshtastic.core.strings.bluetooth_feature_discovery_description
-import org.meshtastic.core.strings.bluetooth_permission
-import org.meshtastic.core.strings.configure_bluetooth_permissions
-import org.meshtastic.core.strings.next
-import org.meshtastic.core.strings.permission_missing_31
-import org.meshtastic.core.strings.settings
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.bluetooth_feature_config
+import org.meshtastic.core.resources.bluetooth_feature_config_description
+import org.meshtastic.core.resources.bluetooth_feature_discovery
+import org.meshtastic.core.resources.bluetooth_feature_discovery_description
+import org.meshtastic.core.resources.bluetooth_permission
+import org.meshtastic.core.resources.configure_bluetooth_permissions
+import org.meshtastic.core.resources.next
+import org.meshtastic.core.resources.permission_missing_31
+import org.meshtastic.core.resources.settings
 
 /**
  * Screen for configuring Bluetooth permissions during the app introduction. It explains why Bluetooth permissions are

@@ -19,19 +19,19 @@ package org.meshtastic.core.ui.util
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.TracerouteMapAvailability
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.label_long_fast
-import org.meshtastic.core.strings.label_long_moderate
-import org.meshtastic.core.strings.label_long_slow
-import org.meshtastic.core.strings.label_long_turbo
-import org.meshtastic.core.strings.label_medium_fast
-import org.meshtastic.core.strings.label_medium_slow
-import org.meshtastic.core.strings.label_short_fast
-import org.meshtastic.core.strings.label_short_slow
-import org.meshtastic.core.strings.label_short_turbo
-import org.meshtastic.core.strings.label_very_long_slow
-import org.meshtastic.core.strings.traceroute_endpoint_missing
-import org.meshtastic.core.strings.traceroute_map_no_data
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.label_long_fast
+import org.meshtastic.core.resources.label_long_moderate
+import org.meshtastic.core.resources.label_long_slow
+import org.meshtastic.core.resources.label_long_turbo
+import org.meshtastic.core.resources.label_medium_fast
+import org.meshtastic.core.resources.label_medium_slow
+import org.meshtastic.core.resources.label_short_fast
+import org.meshtastic.core.resources.label_short_slow
+import org.meshtastic.core.resources.label_short_turbo
+import org.meshtastic.core.resources.label_very_long_slow
+import org.meshtastic.core.resources.traceroute_endpoint_missing
+import org.meshtastic.core.resources.traceroute_map_no_data
 
 val ChannelOption.labelRes: StringResource
     get() =

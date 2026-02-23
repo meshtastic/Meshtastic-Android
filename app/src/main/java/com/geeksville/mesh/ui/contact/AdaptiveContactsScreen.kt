@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.ui.contact
 
 import androidx.activity.compose.BackHandler
@@ -49,8 +48,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.conversations
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.MeshtasticIcons

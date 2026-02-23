@@ -33,9 +33,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.R
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_mountain_flag
 import org.meshtastic.proto.Config
 
 val MeshtasticIcons.HardwareModel: ImageVector
@@ -50,7 +51,7 @@ val MeshtasticIcons.NodeId: ImageVector
 fun MeshtasticIcons.role(role: Config.DeviceConfig.Role?): ImageVector = when (role) {
     Config.DeviceConfig.Role.CLIENT -> Icons.Rounded.Person
     Config.DeviceConfig.Role.CLIENT_MUTE -> Icons.Rounded.PersonOff
-    Config.DeviceConfig.Role.ROUTER -> ImageVector.vectorResource(R.drawable.mountain_flag_24px)
+    Config.DeviceConfig.Role.ROUTER -> vectorResource(Res.drawable.ic_mountain_flag)
     Config.DeviceConfig.Role.TRACKER -> Icons.Rounded.MyLocation
     Config.DeviceConfig.Role.SENSOR -> Icons.Rounded.Sensors
     Config.DeviceConfig.Role.TAK -> Icons.Rounded.MilitaryTech

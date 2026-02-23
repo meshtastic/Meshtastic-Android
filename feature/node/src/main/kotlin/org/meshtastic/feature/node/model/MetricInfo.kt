@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.node.model
 
-import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.StringResource
 
 internal data class VectorMetricInfo(
@@ -31,6 +30,6 @@ internal data class VectorMetricInfo(
 internal data class DrawableMetricInfo(
     val label: StringResource,
     val value: String,
-    @DrawableRes val icon: Int,
+    val icon: DrawableResource,
     val rotateIcon: Float = 0f,
 )

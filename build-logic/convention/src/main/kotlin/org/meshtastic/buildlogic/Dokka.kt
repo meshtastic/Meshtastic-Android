@@ -33,7 +33,7 @@ fun Project.configureDokka() {
                 suppress.set(true)
             }
             perPackageOption {
-                matchingRegex.set("org.meshtastic.core.strings.*")
+                matchingRegex.set("org.meshtastic.core.resources.*")
                 suppress.set(true)
             }
 

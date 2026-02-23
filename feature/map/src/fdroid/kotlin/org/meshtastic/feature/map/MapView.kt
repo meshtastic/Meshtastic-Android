@@ -89,38 +89,38 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.calculating
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.clear
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.delete_for_everyone
-import org.meshtastic.core.strings.delete_for_me
-import org.meshtastic.core.strings.expires
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.location_disabled
-import org.meshtastic.core.strings.map_cache_info
-import org.meshtastic.core.strings.map_cache_manager
-import org.meshtastic.core.strings.map_cache_size
-import org.meshtastic.core.strings.map_cache_tiles
-import org.meshtastic.core.strings.map_clear_tiles
-import org.meshtastic.core.strings.map_download_complete
-import org.meshtastic.core.strings.map_download_errors
-import org.meshtastic.core.strings.map_download_region
-import org.meshtastic.core.strings.map_filter
-import org.meshtastic.core.strings.map_node_popup_details
-import org.meshtastic.core.strings.map_offline_manager
-import org.meshtastic.core.strings.map_purge_fail
-import org.meshtastic.core.strings.map_purge_success
-import org.meshtastic.core.strings.map_style_selection
-import org.meshtastic.core.strings.map_subDescription
-import org.meshtastic.core.strings.map_tile_source
-import org.meshtastic.core.strings.only_favorites
-import org.meshtastic.core.strings.show_precision_circle
-import org.meshtastic.core.strings.show_waypoints
-import org.meshtastic.core.strings.toggle_my_position
-import org.meshtastic.core.strings.waypoint_delete
-import org.meshtastic.core.strings.you
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.calculating
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.delete_for_everyone
+import org.meshtastic.core.resources.delete_for_me
+import org.meshtastic.core.resources.expires
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.map_cache_info
+import org.meshtastic.core.resources.map_cache_manager
+import org.meshtastic.core.resources.map_cache_size
+import org.meshtastic.core.resources.map_cache_tiles
+import org.meshtastic.core.resources.map_clear_tiles
+import org.meshtastic.core.resources.map_download_complete
+import org.meshtastic.core.resources.map_download_errors
+import org.meshtastic.core.resources.map_download_region
+import org.meshtastic.core.resources.map_filter
+import org.meshtastic.core.resources.map_node_popup_details
+import org.meshtastic.core.resources.map_offline_manager
+import org.meshtastic.core.resources.map_purge_fail
+import org.meshtastic.core.resources.map_purge_success
+import org.meshtastic.core.resources.map_style_selection
+import org.meshtastic.core.resources.map_subDescription
+import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.only_favorites
+import org.meshtastic.core.resources.show_precision_circle
+import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.resources.waypoint_delete
+import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.TracerouteColors
@@ -281,18 +281,18 @@ fun MapView(
             scope.launch { context.showToast(Res.string.location_disabled) }
             return
         }
+
         Logger.d { "user clicked MyLocationNewOverlay ${myLocationOverlay == null}" }
         if (myLocationOverlay == null) {
             myLocationOverlay =
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot_24)
-                        ?.let {
-                            setPersonIcon(it)
-                            setPersonAnchor(0.5f, 0.5f)
-                        }
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation_24)?.let {
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot)?.let {
+                        setPersonIcon(it)
+                        setPersonAnchor(0.5f, 0.5f)
+                    }
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -388,9 +388,7 @@ fun MapView(
     val traceroutePolylines = remember { mutableStateListOf<Polyline>() }
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
-    val markerIcon = remember {
-        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24)
-    }
+    val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_location_on) }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }

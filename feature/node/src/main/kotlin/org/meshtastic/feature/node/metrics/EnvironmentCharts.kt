@@ -33,15 +33,15 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.baro_pressure
-import org.meshtastic.core.strings.humidity
-import org.meshtastic.core.strings.iaq
-import org.meshtastic.core.strings.lux
-import org.meshtastic.core.strings.soil_moisture
-import org.meshtastic.core.strings.soil_temperature
-import org.meshtastic.core.strings.temperature
-import org.meshtastic.core.strings.uv_lux
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.baro_pressure
+import org.meshtastic.core.resources.humidity
+import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.soil_moisture
+import org.meshtastic.core.resources.soil_temperature
+import org.meshtastic.core.resources.temperature
+import org.meshtastic.core.resources.uv_lux
 import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")

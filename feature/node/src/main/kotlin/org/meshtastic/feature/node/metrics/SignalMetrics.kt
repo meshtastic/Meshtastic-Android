@@ -58,13 +58,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.rssi
-import org.meshtastic.core.strings.rssi_definition
-import org.meshtastic.core.strings.signal_quality
-import org.meshtastic.core.strings.snr
-import org.meshtastic.core.strings.snr_definition
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.rssi_definition
+import org.meshtastic.core.resources.signal_quality
+import org.meshtastic.core.resources.snr
+import org.meshtastic.core.resources.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
@@ -98,7 +97,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

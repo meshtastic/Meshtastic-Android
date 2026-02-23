@@ -59,13 +59,12 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.disk_free_indexed
-import org.meshtastic.core.strings.free_memory
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.load_indexed
-import org.meshtastic.core.strings.uptime
-import org.meshtastic.core.strings.user_string
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.disk_free_indexed
+import org.meshtastic.core.resources.free_memory
+import org.meshtastic.core.resources.load_indexed
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.user_string
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.DataArray
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -88,7 +87,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

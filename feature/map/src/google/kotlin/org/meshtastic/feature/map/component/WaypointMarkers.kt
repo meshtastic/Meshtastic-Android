@@ -25,8 +25,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import kotlinx.coroutines.launch
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.locked
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.locked
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.Waypoint

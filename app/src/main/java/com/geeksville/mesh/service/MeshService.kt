@@ -107,7 +107,19 @@ class MeshService : Service() {
     }
 
     override fun onCreate() {
-        super.onCreate()
+        try {
+            super.onCreate()
+        } catch (e: IllegalStateException) {
+            // Hilt can throw IllegalStateException in tests if the component is not created.
+            // This can happen if the service is started by the system (e.g. after a crash or on boot)
+            // before the test rule has a chance to create the component.
+            if (e.message?.contains("HiltAndroidRule") == true) {
+                Logger.w(e) { "MeshService created before Hilt component was ready in test. Stopping service." }
+                stopSelf()
+                return
+            }
+            throw e
+        }
         Logger.i { "Creating mesh service" }
         serviceNotifications.initChannels()
 

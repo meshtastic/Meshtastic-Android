@@ -22,8 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channel
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel
 import org.meshtastic.core.ui.icon.Channel
 import org.meshtastic.core.ui.icon.Counter0
 import org.meshtastic.core.ui.icon.Counter1

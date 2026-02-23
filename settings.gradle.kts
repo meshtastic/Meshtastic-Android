@@ -33,7 +33,7 @@ include(
     ":core:prefs",
     ":core:proto",
     ":core:service",
-    ":core:strings",
+    ":core:resources",
     ":core:ui",
     ":feature:intro",
     ":feature:messaging",

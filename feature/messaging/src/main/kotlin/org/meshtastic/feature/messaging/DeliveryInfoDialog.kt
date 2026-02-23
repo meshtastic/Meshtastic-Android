@@ -29,10 +29,10 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.relays
-import org.meshtastic.core.strings.resend
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.relays
+import org.meshtastic.core.resources.resend
 import org.meshtastic.core.ui.component.MeshtasticDialog
 
 @Suppress("UnusedParameter")

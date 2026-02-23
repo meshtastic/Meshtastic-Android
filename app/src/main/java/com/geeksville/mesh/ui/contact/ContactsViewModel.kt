@@ -39,9 +39,9 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.model.util.getShortDate
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel_name
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channel_name
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 import javax.inject.Inject

@@ -91,50 +91,51 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.back
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.chirpy
-import org.meshtastic.core.strings.dont_show_again_for_device
-import org.meshtastic.core.strings.firmware_update_almost_there
-import org.meshtastic.core.strings.firmware_update_alpha
-import org.meshtastic.core.strings.firmware_update_checking
-import org.meshtastic.core.strings.firmware_update_currently_installed
-import org.meshtastic.core.strings.firmware_update_device
-import org.meshtastic.core.strings.firmware_update_disclaimer_chirpy_says
-import org.meshtastic.core.strings.firmware_update_disclaimer_text
-import org.meshtastic.core.strings.firmware_update_disclaimer_title
-import org.meshtastic.core.strings.firmware_update_disconnect_warning
-import org.meshtastic.core.strings.firmware_update_do_not_close
-import org.meshtastic.core.strings.firmware_update_done
-import org.meshtastic.core.strings.firmware_update_error
-import org.meshtastic.core.strings.firmware_update_hang_tight
-import org.meshtastic.core.strings.firmware_update_keep_device_close
-import org.meshtastic.core.strings.firmware_update_latest
-import org.meshtastic.core.strings.firmware_update_local_file
-import org.meshtastic.core.strings.firmware_update_method_detail
-import org.meshtastic.core.strings.firmware_update_rak4631_bootloader_hint
-import org.meshtastic.core.strings.firmware_update_release_notes
-import org.meshtastic.core.strings.firmware_update_retry
-import org.meshtastic.core.strings.firmware_update_save_dfu_file
-import org.meshtastic.core.strings.firmware_update_select_file
-import org.meshtastic.core.strings.firmware_update_source_local
-import org.meshtastic.core.strings.firmware_update_stable
-import org.meshtastic.core.strings.firmware_update_success
-import org.meshtastic.core.strings.firmware_update_taking_a_while
-import org.meshtastic.core.strings.firmware_update_target
-import org.meshtastic.core.strings.firmware_update_title
-import org.meshtastic.core.strings.firmware_update_unknown_release
-import org.meshtastic.core.strings.firmware_update_usb_bootloader_warning
-import org.meshtastic.core.strings.firmware_update_usb_instruction_text
-import org.meshtastic.core.strings.firmware_update_usb_instruction_title
-import org.meshtastic.core.strings.firmware_update_verification_failed
-import org.meshtastic.core.strings.firmware_update_verifying
-import org.meshtastic.core.strings.firmware_update_waiting_reconnect
-import org.meshtastic.core.strings.i_know_what_i_m_doing
-import org.meshtastic.core.strings.learn_more
-import org.meshtastic.core.strings.okay
-import org.meshtastic.core.strings.save
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.back
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.chirpy
+import org.meshtastic.core.resources.dont_show_again_for_device
+import org.meshtastic.core.resources.firmware_update_almost_there
+import org.meshtastic.core.resources.firmware_update_alpha
+import org.meshtastic.core.resources.firmware_update_checking
+import org.meshtastic.core.resources.firmware_update_currently_installed
+import org.meshtastic.core.resources.firmware_update_device
+import org.meshtastic.core.resources.firmware_update_disclaimer_chirpy_says
+import org.meshtastic.core.resources.firmware_update_disclaimer_text
+import org.meshtastic.core.resources.firmware_update_disclaimer_title
+import org.meshtastic.core.resources.firmware_update_disconnect_warning
+import org.meshtastic.core.resources.firmware_update_do_not_close
+import org.meshtastic.core.resources.firmware_update_done
+import org.meshtastic.core.resources.firmware_update_error
+import org.meshtastic.core.resources.firmware_update_hang_tight
+import org.meshtastic.core.resources.firmware_update_keep_device_close
+import org.meshtastic.core.resources.firmware_update_latest
+import org.meshtastic.core.resources.firmware_update_local_file
+import org.meshtastic.core.resources.firmware_update_method_detail
+import org.meshtastic.core.resources.firmware_update_rak4631_bootloader_hint
+import org.meshtastic.core.resources.firmware_update_release_notes
+import org.meshtastic.core.resources.firmware_update_retry
+import org.meshtastic.core.resources.firmware_update_save_dfu_file
+import org.meshtastic.core.resources.firmware_update_select_file
+import org.meshtastic.core.resources.firmware_update_source_local
+import org.meshtastic.core.resources.firmware_update_stable
+import org.meshtastic.core.resources.firmware_update_success
+import org.meshtastic.core.resources.firmware_update_taking_a_while
+import org.meshtastic.core.resources.firmware_update_target
+import org.meshtastic.core.resources.firmware_update_title
+import org.meshtastic.core.resources.firmware_update_unknown_release
+import org.meshtastic.core.resources.firmware_update_usb_bootloader_warning
+import org.meshtastic.core.resources.firmware_update_usb_instruction_text
+import org.meshtastic.core.resources.firmware_update_usb_instruction_title
+import org.meshtastic.core.resources.firmware_update_verification_failed
+import org.meshtastic.core.resources.firmware_update_verifying
+import org.meshtastic.core.resources.firmware_update_waiting_reconnect
+import org.meshtastic.core.resources.i_know_what_i_m_doing
+import org.meshtastic.core.resources.img_chirpy
+import org.meshtastic.core.resources.learn_more
+import org.meshtastic.core.resources.okay
+import org.meshtastic.core.resources.save
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.icon.Bluetooth
 import org.meshtastic.core.ui.icon.CheckCircle
@@ -336,7 +337,9 @@ private fun FirmwareUpdateContent(
                 is FirmwareUpdateState.Verifying -> VerifyingState()
                 is FirmwareUpdateState.VerificationFailed ->
                     VerificationFailedState(onRetry = actions.onStartUpdate, onIgnore = actions.onDone)
+
                 is FirmwareUpdateState.Error -> ErrorState(error = state.error, onRetry = actions.onRetry)
+
                 is FirmwareUpdateState.Success -> SuccessState(onDone = actions.onDone)
                 is FirmwareUpdateState.AwaitingFileSave -> AwaitingFileSaveState(state, actions.onSaveFile)
             }
@@ -493,7 +496,7 @@ private fun ChirpyCard() {
                 AsyncImage(
                     model =
                     ImageRequest.Builder(LocalContext.current)
-                        .data(org.meshtastic.core.ui.R.drawable.chirpy)
+                        .data(Res.drawable.img_chirpy)
                         .crossfade(true)
                         .build(),
                     contentScale = ContentScale.Fit,

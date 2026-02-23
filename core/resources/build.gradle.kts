@@ -29,5 +29,5 @@ kotlin {
 
 compose.resources {
     publicResClass = true
-    packageOfResClass = "org.meshtastic.core.strings"
+    packageOfResClass = "org.meshtastic.core.resources"
 }

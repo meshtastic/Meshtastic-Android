@@ -24,9 +24,9 @@ import kotlinx.coroutines.runBlocking
 import no.nordicsemi.android.dfu.DfuBaseService
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.model.BuildConfig
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.firmware_update_channel_description
-import org.meshtastic.core.strings.firmware_update_channel_name
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.firmware_update_channel_description
+import org.meshtastic.core.resources.firmware_update_channel_name
 
 class FirmwareDfuService : DfuBaseService() {
     override fun onCreate() {

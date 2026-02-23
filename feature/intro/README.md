@@ -20,7 +20,7 @@ Dedicated screens for explaining and requesting specific permissions:
 ```mermaid
 graph TB
   :feature:intro[intro]:::android-feature
-  :feature:intro -.-> :core:strings
+  :feature:intro -.-> :core:resources
   :feature:intro -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

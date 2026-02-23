@@ -50,8 +50,8 @@ import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import no.nordicsemi.kotlin.ble.environment.android.compose.LocalEnvironmentOwner
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channel_invalid
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.showToast

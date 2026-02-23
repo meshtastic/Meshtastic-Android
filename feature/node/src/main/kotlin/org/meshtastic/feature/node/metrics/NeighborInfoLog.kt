@@ -45,10 +45,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.getNeighborInfoResponse
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.getString
-import org.meshtastic.core.strings.neighbor_info
-import org.meshtastic.core.strings.routing_error_no_response
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.neighbor_info
+import org.meshtastic.core.resources.routing_error_no_response
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -77,7 +76,7 @@ fun NeighborInfoLogScreen(
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -137,6 +136,7 @@ fun NeighborInfoLogScreen(
                     )
                 val text = if (result != null) "Success" else stringResource(Res.string.routing_error_no_response)
                 val icon = if (result != null) MeshtasticIcons.Groups else MeshtasticIcons.PersonOff
+                val header = stringResource(Res.string.neighbor_info)
                 var expanded by remember { mutableStateOf(false) }
 
                 Box {
@@ -149,10 +149,7 @@ fun NeighborInfoLogScreen(
                             result
                                 ?.fromRadio
                                 ?.packet
-                                ?.getNeighborInfoResponse(
-                                    ::getUsername,
-                                    header = getString(Res.string.neighbor_info),
-                                )
+                                ?.getNeighborInfoResponse(::getUsername, header = header)
                                 ?.let {
                                     val message =
                                         annotateNeighborInfo(

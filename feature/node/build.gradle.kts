@@ -40,7 +40,7 @@ dependencies {
     implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(projects.core.service)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
     implementation(projects.core.ui)
     implementation(projects.core.navigation)
     implementation(projects.feature.map)

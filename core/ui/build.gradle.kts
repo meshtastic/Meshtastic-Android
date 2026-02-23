@@ -35,7 +35,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
 
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.compose)

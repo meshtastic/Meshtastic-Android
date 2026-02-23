@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.radio.component
 
 import androidx.compose.animation.AnimatedVisibility
@@ -40,14 +39,14 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.i_agree
-import org.meshtastic.core.strings.i_agree_to_share_my_location
-import org.meshtastic.core.strings.map_reporting
-import org.meshtastic.core.strings.map_reporting_consent_header
-import org.meshtastic.core.strings.map_reporting_consent_text
-import org.meshtastic.core.strings.map_reporting_interval_seconds
-import org.meshtastic.core.strings.map_reporting_summary
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.i_agree
+import org.meshtastic.core.resources.i_agree_to_share_my_location
+import org.meshtastic.core.resources.map_reporting
+import org.meshtastic.core.resources.map_reporting_consent_header
+import org.meshtastic.core.resources.map_reporting_consent_text
+import org.meshtastic.core.resources.map_reporting_interval_seconds
+import org.meshtastic.core.resources.map_reporting_summary
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.precisionBitsToMeters
