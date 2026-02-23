@@ -77,6 +77,15 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   **`fdroid`**: FOSS version. **Strictly segregate sensitive data** (Crashlytics, Firebase, etc.) out of this flavor.
 -   **Task Example:** `./gradlew assembleFdroidDebug`
 
+### G. Kotlin Multiplatform (KMP) & Decoupling
+-   **Goal:** We are actively moving logic and models from Android-specific modules to KMP modules (`core:common`, `core:model`, `core:proto`) to support future cross-platform expansion.
+-   **Domain Models:** Always place domain models (Data Classes, Enums) in `commonMain` of the respective module.
+-   **Parceling:**
+    -   Use the platform-agnostic `CommonParcelable` and `CommonParcelize` from `core:common`.
+    -   Avoid direct imports of `android.os.Parcelable` or `kotlinx.parcelize.Parcelize` in `commonMain`.
+-   **Platform Abstractions:** Use `expect`/`actual` for platform-specific logic (e.g., `DateFormatter`, `RandomUtils`, `BuildUtils`).
+-   **AIDL Compatibility:** AIDL parcelable declarations for models moved to `commonMain` should be relocated to `:core:api` to ensure proper export to consumer modules.
+
 ## 4. Quality Assurance
 
 ### A. Code Style (Spotless)

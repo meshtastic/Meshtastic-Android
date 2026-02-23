@@ -1,7 +1,10 @@
-# `:core:model`
+# `:core:model` (Meshtastic Domain Models)
 
 ## Overview
-The `:core:model` module contains the domain models and Parcelable data classes used throughout the application and its API. These models are designed to be shared between the service and client applications via AIDL.
+The `:core:model` module is a **Kotlin Multiplatform (KMP)** library containing the domain models and data classes used throughout the application and its API. These models are platform-agnostic and designed to be shared across Android, JVM, and future supported platforms.
+
+## Multiplatform Support
+Models in this module use the `CommonParcelable` and `CommonParcelize` abstractions from `:core:common`. This allows them to maintain Android `Parcelable` compatibility (via `@Parcelize`) while residing in `commonMain` and remaining accessible to non-Android targets.
 
 ## Key Models
 
@@ -14,8 +17,14 @@ The `:core:model` module contains the domain models and Parcelable data classes 
 This module is a core dependency of `core:api` and most feature modules.
 
 ```kotlin
+// In commonMain
 implementation(projects.core.model)
 ```
+
+## Structure
+- **`commonMain`**: Contains the majority of domain models and logic.
+- **`androidMain`**: Contains Android-specific utilities and implementations for `expect` declarations.
+- **`androidUnitTest`**: Contains unit tests that require Android-specific features (like `Parcel` testing via Robolectric).
 
 ## Module dependency graph
 
