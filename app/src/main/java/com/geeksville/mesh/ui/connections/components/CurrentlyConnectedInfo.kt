@@ -118,14 +118,17 @@ fun CurrentlyConnectedInfo(
             Column(modifier = Modifier.weight(1f, fill = true)) {
                 Text(text = node.user.long_name ?: "", style = MaterialTheme.typography.titleMedium)
 
-                node.metadata?.firmware_version?.let { firmwareVersion ->
-                    Text(
-                        text = stringResource(Res.string.firmware_version, firmwareVersion),
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                node.metadata
+                    ?.firmware_version
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { firmwareVersion ->
+                        Text(
+                            text = stringResource(Res.string.firmware_version, firmwareVersion),
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
             }
         }
 

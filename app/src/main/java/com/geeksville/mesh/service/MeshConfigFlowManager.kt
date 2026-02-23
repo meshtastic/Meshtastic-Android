@@ -167,7 +167,7 @@ constructor(
                             -> null
                             else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                         },
-                        firmwareVersion = metadata?.firmware_version,
+                        firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
                         couldUpdate = false,
                         shouldUpdate = false,
                         currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,

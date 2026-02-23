@@ -580,7 +580,8 @@ private fun DeviceInfoCard(
             val currentVersionString =
                 stringResource(
                     Res.string.firmware_update_currently_installed,
-                    currentFirmwareVersion ?: stringResource(Res.string.firmware_update_unknown_release),
+                    currentFirmwareVersion?.takeIf { it.isNotBlank() }
+                        ?: stringResource(Res.string.firmware_update_unknown_release),
                 )
             Text(modifier = Modifier.fillMaxWidth(), text = currentVersionString)
             Spacer(Modifier.height(4.dp))
@@ -825,7 +826,7 @@ private fun VerificationFailedState(onRetry: () -> Unit, onIgnore: () -> Unit) {
         textAlign = TextAlign.Center,
     )
     Spacer(Modifier.height(32.dp))
-    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+    Row(horizontalArrangement = spacedBy(16.dp)) {
         OutlinedButton(onClick = onRetry) {
             Icon(MeshtasticIcons.Refresh, contentDescription = null)
             Spacer(Modifier.width(8.dp))

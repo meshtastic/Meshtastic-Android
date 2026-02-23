@@ -168,8 +168,9 @@ fun ConnectionsScreen(
                 val uiState =
                     when {
                         connectionState.isConnected() && ourNode != null -> 2
-                        connectionState == ConnectionState.Connecting ||
-                            (connectionState == ConnectionState.Disconnected && selectedDevice != "n") -> 1
+                        connectionState.isConnected() ||
+                            connectionState == ConnectionState.Connecting ||
+                            selectedDevice != NO_DEVICE_SELECTED -> 1
 
                         else -> 0
                     }
