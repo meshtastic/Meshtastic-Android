@@ -92,24 +92,25 @@ constructor(
                 val contactKey = packet.contact_key
 
                 // Determine if this is my message (originated on this device)
-                val fromLocal = data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId)
+                val fromLocal = (data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId))
                 val toBroadcast = data.to == DataPacket.ID_BROADCAST
 
                 // grab usernames from NodeInfo
-                val user = getUser(if (fromLocal) data.to else data.from)
-                val node = getNode(if (fromLocal) data.to else data.from)
+                val userId = if (fromLocal) data.to else data.from
+                val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+                val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
-                val shortName = user.short_name ?: ""
+                val shortName = user.short_name
                 val longName =
                     if (toBroadcast) {
                         channelSet.getChannel(data.channel)?.name ?: "Channel ${data.channel}"
                     } else {
-                        user.long_name ?: ""
+                        user.long_name
                     }
 
                 Contact(
                     contactKey = contactKey,
-                    shortName = if (toBroadcast) "${data.channel}" else shortName,
+                    shortName = if (toBroadcast) data.channel.toString() else shortName,
                     longName = longName,
                     lastMessageTime = if (data.time != 0L) data.time else null,
                     lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
@@ -144,24 +145,25 @@ constructor(
                         val contactKey = packet.contact_key
 
                         // Determine if this is my message (originated on this device)
-                        val fromLocal = data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId)
+                        val fromLocal = (data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId))
                         val toBroadcast = data.to == DataPacket.ID_BROADCAST
 
                         // grab usernames from NodeInfo
-                        val user = getUser(if (fromLocal) data.to else data.from)
-                        val node = getNode(if (fromLocal) data.to else data.from)
+                        val userId = if (fromLocal) data.to else data.from
+                        val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
+                        val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
-                        val shortName = user.short_name ?: ""
+                        val shortName = user.short_name
                         val longName =
                             if (toBroadcast) {
                                 channelSet.getChannel(data.channel)?.name ?: "Channel ${data.channel}"
                             } else {
-                                user.long_name ?: ""
+                                user.long_name
                             }
 
                         Contact(
                             contactKey = contactKey,
-                            shortName = if (toBroadcast) "${data.channel}" else shortName,
+                            shortName = if (toBroadcast) data.channel.toString() else shortName,
                             longName = longName,
                             lastMessageTime = if (data.time != 0L) data.time else null,
                             lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
@@ -204,8 +206,6 @@ constructor(
     } else {
         contactKeys.sumOf { contactKey -> packetRepository.getMessageCount(contactKey) }
     }
-
-    private fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     private data class ContactsPagedParams(
         val myNodeNum: Int?,

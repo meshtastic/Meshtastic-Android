@@ -117,16 +117,10 @@ private fun ContactHeader(
     modifier: Modifier = Modifier,
     onNodeChipClick: () -> Unit = {},
 ) {
-    val nodeColors = contact.nodeColors
     val colors =
-        if (nodeColors != null) {
-            AssistChipDefaults.assistChipColors(
-                labelColor = Color(nodeColors.first),
-                containerColor = Color(nodeColors.second),
-            )
-        } else {
-            AssistChipDefaults.assistChipColors()
-        }
+        contact.nodeColors?.let {
+            AssistChipDefaults.assistChipColors(labelColor = Color(it.first), containerColor = Color(it.second))
+        } ?: AssistChipDefaults.assistChipColors()
 
     Row(modifier = modifier.padding(0.dp), verticalAlignment = Alignment.CenterVertically) {
         AssistChip(
