@@ -64,6 +64,7 @@
     <string name="role_lost_and_found_desc">デバイスを見つけやすくするために、デバイス自身の位置情報をメッセージ形式で定期的にデフォルトのチャンネルにブロードキャストします。</string>
     <string name="role_tak_tracker_desc">TAK PLIの自動ブロードキャストを有効にし、ルーチンブロードキャストを削減します。</string>
     <string name="role_router_late_desc">周辺クラスターの通信範囲を拡大させるインフラストラクチャノード。他のすべてのノードが通信し終わった後で、必ずパケットを1回だけ再ブロードキャストする。ノードリストに表示される。</string>
+    <string name="rebroadcast_mode_all">すべて</string>
     <string name="rebroadcast_mode_all_desc">受信メッセージが、参加しているプライベートチャンネル上のもの、または同じLoRaパラメータを持つ別のメッシュからのものであれば再ブロードキャストします。</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">ALLと同じ動作ですが、パケットのデコードをスキップして単純に再ブロードキャストします。 リピーターロールでのみ使用できます。他のロールに設定すると、ALLの動作になります。</string>
     <string name="rebroadcast_mode_local_only_desc">開いている外部メッシュや復号できないメッシュからのメッセージを無視。 ノードのローカルプライマリー/セカンダリーチャンネルでのみメッセージを再ブロードキャスト。</string>
@@ -76,6 +77,7 @@
     <string name="config_device_transmitOverLora_summary">近隣ノード情報(NeighborInfo)をMQTTやPhoneAPIへ送信することに加えて、LoRa無線経由でも送信すべきかどうかを設定します。デフォルトの名前とキーが設定されたチャンネルでは利用できません。</string>
     <!-- Position Config -->
     <string name="gpio">GPIO</string>
+    <string name="debug">デバッグ</string>
     <string name="channel_name">チャンネル名</string>
     <string name="qr_code">QRコード</string>
     <string name="unknown_username">ユーザー名不明</string>
@@ -99,8 +101,10 @@
     <string name="connected_count">接続済み: %1$s オンライン</string>
     <string name="ip_address">IPアドレス</string>
     <string name="ip_port">ポート:</string>
+    <string name="connected">接続済</string>
     <string name="connected_to">Meshtasticデバイスに接続しました
 (%1$s)</string>
+    <string name="connecting">接続中</string>
     <string name="not_connected">接続されていません</string>
     <string name="connected_sleeping">接続しましたが、Meshtasticデバイスはスリープ状態です。</string>
     <string name="app_too_old">アプリを更新して下さい。</string>
@@ -192,6 +196,7 @@
     <string name="remove">削除</string>
     <string name="remove_node_text">このノードから再びデータを受信するまで、このノードはリストに表示されなくなります。</string>
     <string name="mute_notifications">通知をミュート</string>
+    <string name="mute_1_hour">1時間</string>
     <string name="mute_8_hours">8時間</string>
     <string name="mute_1_week">1週間</string>
     <string name="mute_always">常時</string>
@@ -519,11 +524,13 @@
     <string name="i_agree">同意します。</string>
     <string name="should_update_firmware">ファームウェアの更新を推奨します。</string>
     <string name="should_update">最新の修正や機能をご利用いただくために、お使いのノードのファームウェアをアップデートしてください。\n\n最新の安定ファームウェアバージョン: %1$s</string>
+    <string name="disconnect">切断</string>
     <string name="meshtastic">Meshtastic</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">中止</string>
     <string name="message_input_label">メッセージ</string>
     <string name="settings">設定</string>
     <string name="remotely_administrating">"[リモート] %1$s"</string>
@@ -537,6 +544,7 @@
     <string name="error_no_app_to_handle_link">リンクを処理できるアプリケーションがありません。</string>
     <string name="system_settings">システム設定</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_disconnecting">切断中...</string>
     <string name="firmware_update_failed">更新失敗</string>
     <string name="interval_unset">削除</string>
     <!-- Compass -->

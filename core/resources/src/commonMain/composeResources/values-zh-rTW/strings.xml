@@ -385,11 +385,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信號強度指示（RSSI）用於測量天線所接收到信號的功率強度。 RSSI 值越高通常代表連線越強且穩定。</string>
     <string name="iaq_definition">(室內空氣品質) 相對尺度 IAQ 值，由 Bosch BME680 測量。值範圍 0–500。</string>
-    <string name="device_metrics_log">裝置指標</string>
+    <string name="device_metrics_log">裝置計量資料</string>
     <string name="node_map">節點地圖</string>
     <string name="position_log">位置</string>
     <string name="last_position_update">最後位置更新</string>
-    <string name="env_metrics_log">環境指標</string>
+    <string name="env_metrics_log">環境計量資料</string>
     <string name="administration">管理</string>
     <string name="remote_admin">遠端管理</string>
     <string name="bad">不良</string>
@@ -432,7 +432,7 @@
     <string name="remove_favorite">從我的最愛中移除</string>
     <string name="favorite_add">是否將“%1$s”添加為我的最愛節點？</string>
     <string name="favorite_remove">是否從我的最愛節點中删除“%1$s”？</string>
-    <string name="power_metrics_log">電力指標</string>
+    <string name="power_metrics_log">電源計量資料</string>
     <string name="channel_1">頻道1</string>
     <string name="channel_2">頻道2</string>
     <string name="channel_3">頻道3</string>
@@ -810,7 +810,6 @@
     <string name="modules_unlocked">模組已解鎖</string>
     <string name="modules_already_unlocked">模組已解鎖</string>
     <string name="remote">遠端</string>
-    <string name="node_count_template"></string>
     <string name="react">回應</string>
     <string name="disconnect">中斷連線</string>
     <string name="no_network_devices">找不到網路裝置。</string>
@@ -967,6 +966,7 @@
     <string name="system_settings">系統設定</string>
     <string name="no_local_stats">沒有可用的統計資料</string>
     <string name="analytics_notice">我們會收集分析數據以協助改善 Android 應用程式（感謝您的支持），我們將收到匿名化的使用者行為資訊，包括當機報告、應用程式使用畫面等。</string>
+    <string name="analytics_platforms">分析平台:</string>
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
@@ -1094,7 +1094,6 @@
     <string name="filter_regex_pattern">正規表示式</string>
     <string name="filter_whole_word">完整字詞比對</string>
     <string name="filter_filtered_count">已篩選 %1$d 則</string>
-    <string name="filter_show_count"></string>
     <string name="filter_hide_count">隱藏已篩選 %1$d 則</string>
     <string name="filter_message_label">已篩選</string>
     <string name="filter_enable_for_contact">啟用篩選</string>

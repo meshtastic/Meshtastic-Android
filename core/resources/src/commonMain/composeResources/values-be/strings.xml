@@ -140,6 +140,7 @@
     <string name="add">Дадаць</string>
     <string name="edit">Змяніць</string>
     <string name="remove">Прыбраць</string>
+    <string name="mute_1_hour">1 гадзіна</string>
     <string name="mute_8_hours">8 гадзін</string>
     <string name="mute_1_week">1 тыдзень</string>
     <string name="mute_always">Назаўсёды</string>
@@ -224,6 +225,7 @@
     <string name="intro_welcome">Вітаем у</string>
     <string name="phone_location">Месцазнаходжанне тэлефона</string>
     <string name="skip">Прапусціць</string>
+    <string name="settings">налады</string>
     <string name="next">Далей</string>
     <string name="map_type_normal">Звычайная</string>
     <string name="map_type_satellite">Спадарожнік</string>

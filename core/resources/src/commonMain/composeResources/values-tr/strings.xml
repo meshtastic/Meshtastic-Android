@@ -565,6 +565,7 @@
     <string name="one_day">24 Saat</string>
     <string name="two_days">48 Saat</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_disconnecting">Bağlantı Kesiliyor...</string>
     <string name="firmware_update_failed">Güncelleme başarısız</string>
     <string name="interval_unset">Ayarlanmamış</string>
     <!-- Compass -->

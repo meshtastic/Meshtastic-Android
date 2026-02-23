@@ -239,7 +239,6 @@
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Žinutė</string>
-    <string name="nodes_at_this_location"></string>
     <string name="eight_hours">8 Valandos</string>
     <string name="one_day">24 Valandos</string>
     <string name="two_days">48 Valandos</string>

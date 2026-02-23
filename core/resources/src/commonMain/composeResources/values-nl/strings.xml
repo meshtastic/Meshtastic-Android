@@ -429,6 +429,7 @@
     <string name="one_day">24 Uur</string>
     <string name="two_days">48 Uur</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_disconnecting">Verbinding verbreken...</string>
     <string name="firmware_update_failed">Bijwerken mislukt</string>
     <string name="interval_unset">Terugzetten</string>
     <!-- Compass -->
