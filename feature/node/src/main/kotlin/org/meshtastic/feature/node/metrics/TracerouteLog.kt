@@ -53,7 +53,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.routing_error_no_response
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.traceroute_diff
@@ -98,7 +97,7 @@ fun TracerouteLogScreen(
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -214,8 +213,9 @@ fun TracerouteLogScreen(
                                         ?.packet
                                         ?.getTracerouteResponse(
                                             ::getUsername,
-                                            headerTowards = getString(Res.string.traceroute_route_towards_dest),
-                                            headerBack = getString(Res.string.traceroute_route_back_to_us),
+                                            headerTowards =
+                                            stringResource(Res.string.traceroute_route_towards_dest),
+                                            headerBack = stringResource(Res.string.traceroute_route_back_to_us),
                                         )
                                         ?.let {
                                             annotateTraceroute(

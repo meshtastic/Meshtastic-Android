@@ -55,7 +55,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.env_metrics_log
 import org.meshtastic.core.resources.gas_resistance
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.humidity
 import org.meshtastic.core.resources.iaq
 import org.meshtastic.core.resources.iaq_definition
@@ -87,7 +86,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNa
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

@@ -63,7 +63,6 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.loading
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
@@ -103,16 +102,15 @@ fun NodeDetailScreen(
     LaunchedEffect(nodeId) { viewModel.start(nodeId) }
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             if (effect is NodeRequestEffect.ShowFeedback) {
-                @Suppress("SpreadOperator")
-                snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                snackbarHostState.showSnackbar(effect.text.resolve())
             }
         }
     }
-
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     NodeDetailScaffold(
         modifier = modifier,
@@ -149,8 +147,8 @@ private fun NodeDetailScaffold(
         modifier = modifier,
         topBar = {
             MainAppBar(
-                title = getString(Res.string.details),
-                subtitle = node?.user?.long_name ?: "",
+                title = stringResource(Res.string.details),
+                subtitle = uiState.nodeName.asString(),
                 ourNode = uiState.ourNode,
                 showNodeChip = false,
                 canNavigateUp = true,

@@ -69,7 +69,6 @@ import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
 import org.meshtastic.core.resources.channel_3
 import org.meshtastic.core.resources.current
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.power_metrics_log
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
@@ -121,7 +120,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

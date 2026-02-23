@@ -62,7 +62,6 @@ import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disk_free_indexed
 import org.meshtastic.core.resources.free_memory
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.load_indexed
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.user_string
@@ -88,7 +87,7 @@ fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), o
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

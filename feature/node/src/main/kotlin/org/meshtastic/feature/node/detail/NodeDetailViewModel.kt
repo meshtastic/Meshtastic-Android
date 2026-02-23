@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -48,6 +49,7 @@ import javax.inject.Inject
  * UI state for the Node Details screen.
  *
  * @property node The node being viewed, or null if loading.
+ * @property nodeName The display name for the node, resolved in the UI.
  * @property ourNode Information about the locally connected node.
  * @property metricsState Aggregated sensor and signal metrics.
  * @property environmentState Standardized environmental sensor data.
@@ -58,6 +60,7 @@ import javax.inject.Inject
 @androidx.compose.runtime.Stable
 data class NodeDetailUiState(
     val node: Node? = null,
+    val nodeName: UiText = UiText.DynamicString(""),
     val ourNode: Node? = null,
     val metricsState: MetricsState = MetricsState.Empty,
     val environmentState: EnvironmentMetricsState = EnvironmentMetricsState(),

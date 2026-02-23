@@ -68,7 +68,6 @@ import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.clear
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.heading
 import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.longitude
@@ -182,7 +181,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateU
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

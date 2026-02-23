@@ -35,8 +35,8 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.fallback_node_name
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 import org.meshtastic.feature.node.detail.NodeRequestActions
@@ -46,6 +46,7 @@ import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.FirmwareEdition
+import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
@@ -72,9 +73,7 @@ constructor(
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     private fun buildFlow(nodeId: Int, effectiveNodeId: Int): Flow<NodeDetailUiState> {
         val nodeFlow =
-            nodeRepository.nodeDBbyNum
-                .map { it[nodeId] ?: Node.createFallback(nodeId, getString(Res.string.fallback_node_name)) }
-                .distinctUntilChanged()
+            nodeRepository.nodeDBbyNum.map { it[nodeId] ?: Node.createFallback(nodeId, "") }.distinctUntilChanged()
 
         // 1. Logs & Metrics Data
         val metricsLogsFlow =
@@ -206,8 +205,17 @@ constructor(
                 if (metricsState.hasPaxMetrics()) add(LogsType.PAX)
             }
 
+            @Suppress("MagicNumber")
+            val nodeName =
+                if (node.user.hw_model == HardwareModel.UNSET) {
+                    UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
+                } else {
+                    UiText.DynamicString(node.user.long_name ?: "")
+                }
+
             NodeDetailUiState(
                 node = node,
+                nodeName = nodeName,
                 ourNode = identity.ourNode,
                 metricsState = metricsState,
                 environmentState = environmentState,

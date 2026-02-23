@@ -61,7 +61,6 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.ble_devices
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.no_pax_metrics_logs
 import org.meshtastic.core.resources.pax
 import org.meshtastic.core.resources.pax_metrics_log
@@ -189,7 +188,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

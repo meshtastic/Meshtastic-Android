@@ -73,7 +73,6 @@ import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.ch_util_definition
 import org.meshtastic.core.resources.channel_utilization
 import org.meshtastic.core.resources.device_metrics_log
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -141,7 +140,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }

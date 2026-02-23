@@ -46,7 +46,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.getNeighborInfoResponse
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.routing_error_no_response
 import org.meshtastic.core.ui.component.MainAppBar
@@ -77,7 +76,7 @@ fun NeighborInfoLogScreen(
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -151,7 +150,7 @@ fun NeighborInfoLogScreen(
                                 ?.packet
                                 ?.getNeighborInfoResponse(
                                     ::getUsername,
-                                    header = getString(Res.string.neighbor_info),
+                                    header = stringResource(Res.string.neighbor_info),
                                 )
                                 ?.let {
                                     val message =
