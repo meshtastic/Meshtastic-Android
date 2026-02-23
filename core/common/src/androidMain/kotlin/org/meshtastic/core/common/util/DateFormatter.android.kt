@@ -18,6 +18,7 @@ package org.meshtastic.core.common.util
 
 import android.text.format.DateUtils
 import org.meshtastic.core.common.ContextServices
+import java.text.DateFormat
 
 actual object DateFormatter {
     actual fun formatRelativeTime(timestampMillis: Long): String = DateUtils.getRelativeTimeSpanString(
@@ -33,4 +34,15 @@ actual object DateFormatter {
         timestampMillis,
         DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
     )
+
+    actual fun formatShortDate(timestampMillis: Long): String {
+        val now = nowMillis
+        val isWithin24Hours = (now - timestampMillis) <= DateUtils.DAY_IN_MILLIS
+
+        return if (isWithin24Hours) {
+            DateFormat.getTimeInstance(DateFormat.SHORT).format(timestampMillis)
+        } else {
+            DateFormat.getDateInstance(DateFormat.SHORT).format(timestampMillis)
+        }
+    }
 }

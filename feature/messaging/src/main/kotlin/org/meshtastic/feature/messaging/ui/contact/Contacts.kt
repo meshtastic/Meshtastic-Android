@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.ui.contact
+package org.meshtastic.feature.messaging.ui.contact
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -57,8 +58,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.model.UIViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -67,6 +66,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.ContactSettings
+import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.model.util.formatMuteRemainingTime
 import org.meshtastic.core.model.util.getChannel
@@ -106,15 +106,20 @@ import org.meshtastic.core.ui.icon.VolumeUpTwoTone
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.SharedContact
 import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalPermissionsApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod", "LongParameterList")
 @Composable
 fun ContactsScreen(
     onNavigateToShare: () -> Unit,
-    viewModel: ContactsViewModel = hiltViewModel(),
-    uIViewModel: UIViewModel = hiltViewModel(),
+    sharedContactRequested: SharedContact?,
+    requestChannelSet: ChannelSet?,
+    onHandleScannedUri: (Uri, onInvalid: () -> Unit) -> Unit,
+    onClearSharedContactRequested: () -> Unit,
+    onClearRequestChannelUrl: () -> Unit,
+    viewModel: ContactsViewModel = hiltViewModel<ContactsViewModel>(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
@@ -144,7 +149,7 @@ fun ContactsScreen(
                     contactKey = "$ch^all",
                     shortName = "$ch",
                     longName = channels.getChannel(ch)?.name ?: "Channel $ch",
-                    lastMessageTime = "",
+                    lastMessageTime = null,
                     lastMessageText = "",
                     unreadCount = 0,
                     messageCount = 0,
@@ -180,9 +185,7 @@ fun ContactsScreen(
     }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
-    val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-    val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
-    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { uIViewModel.clearRequestChannelUrl() }) }
+    requestChannelSet?.let { ScannedQrCodeDialog(it, onDismiss = { onClearRequestChannelUrl() }) }
 
     // Callback functions for item interaction
     val onContactClick: (Contact) -> Unit = { contact ->
@@ -241,12 +244,10 @@ fun ContactsScreen(
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
                     onImport = { uri ->
-                        uIViewModel.handleScannedUri(uri) {
-                            scope.launch { context.showToast(Res.string.channel_invalid) }
-                        }
+                        onHandleScannedUri(uri) { scope.launch { context.showToast(Res.string.channel_invalid) } }
                     },
                     onShareChannels = onNavigateToShare,
-                    onDismissSharedContact = { uIViewModel.clearSharedContactRequested() },
+                    onDismissSharedContact = { onClearSharedContactRequested() },
                     isContactContext = true,
                 )
             }

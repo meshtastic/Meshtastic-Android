@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.ui.contact
+package org.meshtastic.feature.messaging.ui.contact
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,13 +55,20 @@ import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.messaging.MessageScreen
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.SharedContact
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "LongParameterList")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveContactsScreen(
     navController: NavHostController,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
+    sharedContactRequested: SharedContact?,
+    requestChannelSet: ChannelSet?,
+    onHandleScannedUri: (Uri, onInvalid: () -> Unit) -> Unit,
+    onClearSharedContactRequested: () -> Unit,
+    onClearRequestChannelUrl: () -> Unit,
     initialContactKey: String? = null,
     initialMessage: String = "",
 ) {
@@ -115,6 +123,11 @@ fun AdaptiveContactsScreen(
             AnimatedPane {
                 ContactsScreen(
                     onNavigateToShare = { navController.navigate(ChannelsRoutes.ChannelsGraph) },
+                    sharedContactRequested = sharedContactRequested,
+                    requestChannelSet = requestChannelSet,
+                    onHandleScannedUri = onHandleScannedUri,
+                    onClearSharedContactRequested = onClearSharedContactRequested,
+                    onClearRequestChannelUrl = onClearRequestChannelUrl,
                     onClickNodeChip = {
                         navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
                             launchSingleTop = true

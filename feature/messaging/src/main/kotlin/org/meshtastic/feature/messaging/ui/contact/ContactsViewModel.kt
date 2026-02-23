@@ -14,14 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.ui.contact
+package org.meshtastic.feature.messaging.ui.contact
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import com.geeksville.mesh.model.Contact
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -29,18 +28,15 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
-import org.meshtastic.core.model.util.getShortDate
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.channel_name
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -106,7 +102,7 @@ constructor(
                 val shortName = user.short_name ?: ""
                 val longName =
                     if (toBroadcast) {
-                        channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
+                        channelSet.getChannel(data.channel)?.name ?: "Channel ${data.channel}"
                     } else {
                         user.long_name ?: ""
                     }
@@ -115,7 +111,7 @@ constructor(
                     contactKey = contactKey,
                     shortName = if (toBroadcast) "${data.channel}" else shortName,
                     longName = longName,
-                    lastMessageTime = getShortDate(data.time),
+                    lastMessageTime = if (data.time != 0L) data.time else null,
                     lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
                     unreadCount = packetRepository.getUnreadCount(contactKey),
                     messageCount = packetRepository.getMessageCount(contactKey),
@@ -138,7 +134,6 @@ constructor(
             ContactsPagedParams(myNodeInfo?.myNodeNum, channelSet, settings, myId)
         }
             .flatMapLatest { params ->
-                val myNodeNum = params.myNodeNum
                 val channelSet = params.channelSet
                 val settings = params.settings
                 val myId = params.myId
@@ -159,7 +154,7 @@ constructor(
                         val shortName = user.short_name ?: ""
                         val longName =
                             if (toBroadcast) {
-                                channelSet.getChannel(data.channel)?.name ?: getString(Res.string.channel_name)
+                                channelSet.getChannel(data.channel)?.name ?: "Channel ${data.channel}"
                             } else {
                                 user.long_name ?: ""
                             }
@@ -168,7 +163,7 @@ constructor(
                             contactKey = contactKey,
                             shortName = if (toBroadcast) "${data.channel}" else shortName,
                             longName = longName,
-                            lastMessageTime = getShortDate(data.time),
+                            lastMessageTime = if (data.time != 0L) data.time else null,
                             lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
                             unreadCount = packetRepository.getUnreadCount(contactKey),
                             messageCount = packetRepository.getMessageCount(contactKey),

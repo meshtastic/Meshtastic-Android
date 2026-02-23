@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.ui.contact
+package org.meshtastic.feature.messaging.ui.contact
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -51,8 +51,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.Contact
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.model.Contact
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.resources.some_username
@@ -116,11 +117,12 @@ private fun ContactHeader(
     modifier: Modifier = Modifier,
     onNodeChipClick: () -> Unit = {},
 ) {
+    val nodeColors = contact.nodeColors
     val colors =
-        if (contact.nodeColors != null) {
+        if (nodeColors != null) {
             AssistChipDefaults.assistChipColors(
-                labelColor = Color(contact.nodeColors.first),
-                containerColor = Color(contact.nodeColors.second),
+                labelColor = Color(nodeColors.first),
+                containerColor = Color(nodeColors.second),
             )
         } else {
             AssistChipDefaults.assistChipColors()
@@ -159,7 +161,7 @@ private fun ContactHeader(
             text = contact.longName,
         )
         Text(
-            text = contact.lastMessageTime.orEmpty(),
+            text = contact.lastMessageTime?.let { DateFormatter.formatShortDate(it) }.orEmpty(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.labelSmall,
             modifier = Modifier,
@@ -221,7 +223,7 @@ private fun ContactItemPreview() {
             contactKey = "0^all",
             shortName = stringResource(Res.string.some_username),
             longName = stringResource(Res.string.unknown_username),
-            lastMessageTime = "Mon",
+            lastMessageTime = 0L,
             lastMessageText = stringResource(Res.string.sample_message),
             unreadCount = 2,
             messageCount = 10,
@@ -235,7 +237,7 @@ private fun ContactItemPreview() {
             sampleContact.copy(
                 shortName = "0",
                 longName = "A very long contact name that should be truncated.",
-                lastMessageTime = "15 minutes ago",
+                lastMessageTime = 1000L,
             ),
         )
 

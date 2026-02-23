@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.ui.sharing
+package org.meshtastic.feature.messaging.ui.sharing
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,10 +38,8 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.ui.contact.ContactItem
-import com.geeksville.mesh.ui.contact.ContactsViewModel
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.Contact
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.sample_message
 import org.meshtastic.core.resources.share
@@ -50,6 +48,8 @@ import org.meshtastic.core.resources.some_username
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.feature.messaging.ui.contact.ContactItem
+import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 
 @Composable
 fun ShareScreen(viewModel: ContactsViewModel = hiltViewModel(), onConfirm: (String) -> Unit, onNavigateUp: () -> Unit) {
@@ -116,7 +116,7 @@ private fun ShareScreenPreview() {
                     contactKey = "0^all",
                     shortName = stringResource(Res.string.some_username),
                     longName = stringResource(Res.string.unknown_username),
-                    lastMessageTime = "3 minutes ago",
+                    lastMessageTime = 0L,
                     lastMessageText = stringResource(Res.string.sample_message),
                     unreadCount = 2,
                     messageCount = 10,
