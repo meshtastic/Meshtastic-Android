@@ -168,9 +168,9 @@ internal fun EnvironmentMetrics(
                     radiation?.let { r ->
                         add(
                             DrawableMetricInfo(
-                                Res.string.radiation,
-                                "%.1f µR/h".format(r),
-                                Res.drawable.ic_radioactive,
+                                label = Res.string.radiation,
+                                value = "%.1f µR/h".format(r),
+                                icon = Res.drawable.ic_radioactive,
                             ),
                         )
                     }

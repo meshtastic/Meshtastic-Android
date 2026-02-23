@@ -131,8 +131,6 @@ import org.meshtastic.feature.map.component.CacheLayout
 import org.meshtastic.feature.map.component.DownloadButton
 import org.meshtastic.feature.map.component.EditWaypointDialog
 import org.meshtastic.feature.map.component.MapButton
-import org.meshtastic.feature.map.R
-
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOverlay
@@ -390,9 +388,7 @@ fun MapView(
     val traceroutePolylines = remember { mutableStateListOf<Polyline>() }
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
-    val markerIcon = remember {
-        AppCompatResources.getDrawable(context, R.drawable.ic_location_on)
-    }
+    val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_location_on) }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
