@@ -53,7 +53,7 @@ constructor(
                 hasPermissions = true,
             ),
         )
-    val state: StateFlow<BluetoothState> = _state.asStateFlow()
+    val state: StateFlow<BluetoothState> get() = _state.asStateFlow()
 
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
