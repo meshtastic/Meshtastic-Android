@@ -14,28 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("MagicNumber")
+
 package org.meshtastic.core.model.util
 
-import android.graphics.Bitmap
-import android.net.Uri
-import co.touchlab.kermit.Logger
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.MultiFormatWriter
-import com.google.zxing.common.BitMatrix
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig
-import java.net.MalformedURLException
 
 /**
  * Return a [ChannelSet] that represents the ChannelSet encoded by the URL.
  *
- * @throws MalformedURLException when not recognized as a valid Meshtastic URL
+ * @throws MalformedMeshtasticUrlException when not recognized as a valid Meshtastic URL
  */
-@Throws(MalformedURLException::class)
-fun Uri.toChannelSet(): ChannelSet {
+@Throws(MalformedMeshtasticUrlException::class)
+fun CommonUri.toChannelSet(): ChannelSet {
     val h = host ?: ""
     val isCorrectHost =
         h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
@@ -43,14 +39,15 @@ fun Uri.toChannelSet(): ChannelSet {
     val isCorrectPath = segments.any { it.equals("e", ignoreCase = true) }
 
     if (fragment.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
-        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
+        throw MalformedMeshtasticUrlException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
     val fragmentBase64 = fragment!!.substringBefore('?').replace('-', '+').replace('_', '/')
     val fragmentBytes =
-        fragmentBase64.decodeBase64() ?: throw MalformedURLException("Invalid Base64 in URL fragment: $fragmentBase64")
+        fragmentBase64.decodeBase64()
+            ?: throw MalformedMeshtasticUrlException("Invalid Base64 in URL fragment: $fragmentBase64")
     val url = ChannelSet.ADAPTER.decode(fragmentBytes)
     val shouldAdd =
         fragment?.substringAfter('?', "")?.takeUnless { it.isBlank() }?.equals("add=true")
@@ -84,36 +81,10 @@ fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
  *
  * @param upperCasePrefix portions of the URL can be upper case to make for more efficient QR codes
  */
-fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): Uri {
+fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): CommonUri {
     val channelBytes = ChannelSet.ADAPTER.encode(this)
     val enc = channelBytes.toByteString().base64Url()
     val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""
-    return Uri.parse("$p$query#$enc")
-}
-
-fun ChannelSet.qrCode(shouldAdd: Boolean): Bitmap? = try {
-    val multiFormatWriter = MultiFormatWriter()
-    val bitMatrix =
-        multiFormatWriter.encode(getChannelUrl(false, shouldAdd).toString(), BarcodeFormat.QR_CODE, 960, 960)
-    bitMatrix.toBitmap()
-} catch (ex: Throwable) {
-    Logger.e { "URL was too complex to render as barcode" }
-    null
-}
-
-private fun BitMatrix.toBitmap(): Bitmap {
-    val width = width
-    val height = height
-    val pixels = IntArray(width * height)
-    for (y in 0 until height) {
-        val offset = y * width
-        for (x in 0 until width) {
-            // Black: 0xFF000000, White: 0xFFFFFFFF
-            pixels[offset + x] = if (get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-        }
-    }
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    bitmap.setPixels(pixels, 0, width, 0, 0, width, height)
-    return bitmap
+    return CommonUri.parse("$p$query#$enc")
 }

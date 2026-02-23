@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.model.util
 
-import android.net.Uri
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
 
@@ -29,7 +29,11 @@ import org.meshtastic.proto.SharedContact
  * @param onContact Callback if the URI is a Shared Contact.
  * @return True if the URI was handled (matched a supported path), false otherwise.
  */
-fun handleMeshtasticUri(uri: Uri, onChannel: (Uri) -> Unit = {}, onContact: (Uri) -> Unit = {}): Boolean {
+fun handleMeshtasticUri(
+    uri: CommonUri,
+    onChannel: (CommonUri) -> Unit = {},
+    onContact: (CommonUri) -> Unit = {},
+): Boolean {
     val h = uri.host ?: ""
     val isCorrectHost =
         h.equals(MESHTASTIC_HOST, ignoreCase = true) || h.equals("www.$MESHTASTIC_HOST", ignoreCase = true)
@@ -56,7 +60,7 @@ fun handleMeshtasticUri(uri: Uri, onChannel: (Uri) -> Unit = {}, onContact: (Uri
  * @param onContact Callback when successfully parsed as a [SharedContact].
  * @param onInvalid Callback when parsing fails or the URI is not a Meshtastic URL.
  */
-fun Uri.dispatchMeshtasticUri(
+fun CommonUri.dispatchMeshtasticUri(
     onChannel: (ChannelSet) -> Unit,
     onContact: (SharedContact) -> Unit,
     onInvalid: () -> Unit,

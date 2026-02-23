@@ -27,6 +27,7 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.resources.Res
@@ -43,7 +44,8 @@ import org.meshtastic.proto.SharedContact
 fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     if (contact == null) return
     val contactToShare = SharedContact(user = contact.user, node_num = contact.num)
-    val uri = contactToShare.getSharedContactUrl()
+    val commonUri = contactToShare.getSharedContactUrl()
+    val uri = commonUri.toPlatformUri() as Uri
     QrDialog(title = stringResource(Res.string.share_contact), uri = uri, qrCode = uri.qrCode, onDismiss = onDismiss)
 }
 

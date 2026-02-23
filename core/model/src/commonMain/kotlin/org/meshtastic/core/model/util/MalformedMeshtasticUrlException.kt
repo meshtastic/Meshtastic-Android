@@ -14,19 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.model.util
 
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshPacket
-import javax.inject.Inject
-import javax.inject.Singleton
-import org.meshtastic.core.model.util.MeshDataMapper as CommonMeshDataMapper
-
-@Singleton
-class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManager) {
-    private val commonMapper = CommonMeshDataMapper(nodeManager)
-
-    fun toNodeID(n: Int): String = nodeManager.toNodeID(n)
-
-    fun toDataPacket(packet: MeshPacket): DataPacket? = commonMapper.toDataPacket(packet)
-}
+/** Exception thrown when a Meshtastic URL cannot be parsed. */
+class MalformedMeshtasticUrlException(message: String) : Exception(message)

@@ -14,19 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.common.util
 
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.proto.MeshPacket
-import javax.inject.Inject
-import javax.inject.Singleton
-import org.meshtastic.core.model.util.MeshDataMapper as CommonMeshDataMapper
+/** Platform-agnostic URI representation to decouple core logic from android.net.Uri. */
+expect class CommonUri {
+    val host: String?
+    val fragment: String?
+    val pathSegments: List<String>
 
-@Singleton
-class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManager) {
-    private val commonMapper = CommonMeshDataMapper(nodeManager)
+    fun getQueryParameter(key: String): String?
 
-    fun toNodeID(n: Int): String = nodeManager.toNodeID(n)
+    fun getBooleanQueryParameter(key: String, defaultValue: Boolean): Boolean
 
-    fun toDataPacket(packet: MeshPacket): DataPacket? = commonMapper.toDataPacket(packet)
+    override fun toString(): String
+
+    companion object {
+        fun parse(uriString: String): CommonUri
+    }
 }
+
+/** Extension to convert platform Uri to CommonUri in Android source sets. */
+expect fun CommonUri.toPlatformUri(): Any

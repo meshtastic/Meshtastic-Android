@@ -33,6 +33,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -54,7 +55,7 @@ constructor(
     private val nodeRepository: NodeRepository?,
     private val serviceBroadcasts: MeshServiceBroadcasts?,
     private val serviceNotifications: MeshServiceNotifications?,
-) {
+) : NodeIdLookup {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
@@ -260,9 +261,9 @@ constructor(
         return hasExistingUser && isDefaultName && isDefaultHwModel
     }
 
-    fun toNodeID(n: Int): String = if (n == DataPacket.NODENUM_BROADCAST) {
+    override fun toNodeID(nodeNum: Int): String = if (nodeNum == DataPacket.NODENUM_BROADCAST) {
         DataPacket.ID_BROADCAST
     } else {
-        nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
+        nodeDBbyNodeNum[nodeNum]?.user?.id ?: DataPacket.nodeNumToDefaultId(nodeNum)
     }
 }

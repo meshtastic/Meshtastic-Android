@@ -14,30 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions", "SwallowedException", "TooGenericExceptionCaught")
+
 package org.meshtastic.core.model.util
 
-import android.net.Uri
 import okio.ByteString
 import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
-import java.net.MalformedURLException
 
 /**
  * Return a [SharedContact] that represents the contact encoded by the URL.
  *
- * @throws MalformedURLException when not recognized as a valid Meshtastic URL
+ * @throws MalformedMeshtasticUrlException when not recognized as a valid Meshtastic URL
  */
-@Throws(MalformedURLException::class)
-fun Uri.toSharedContact(): SharedContact {
+@Throws(MalformedMeshtasticUrlException::class)
+fun CommonUri.toSharedContact(): SharedContact {
     checkSharedContactUrl()
     val data = fragment!!.substringBefore('?')
     return decodeSharedContactData(data)
 }
 
-@Throws(MalformedURLException::class)
-private fun Uri.checkSharedContactUrl() {
+@Throws(MalformedMeshtasticUrlException::class)
+private fun CommonUri.checkSharedContactUrl() {
     val h = host?.lowercase() ?: ""
     val isCorrectHost = h == MESHTASTIC_HOST || h == "www.$MESHTASTIC_HOST"
     val segments = pathSegments
@@ -45,14 +46,14 @@ private fun Uri.checkSharedContactUrl() {
 
     val frag = fragment
     if (frag.isNullOrBlank() || !isCorrectHost || !isCorrectPath) {
-        throw MalformedURLException(
+        throw MalformedMeshtasticUrlException(
             "Not a valid Meshtastic URL: host=$h, segments=$segments, hasFragment=${!frag.isNullOrBlank()}",
         )
     }
 }
 
 @Suppress("ThrowsCount")
-@Throws(MalformedURLException::class)
+@Throws(MalformedMeshtasticUrlException::class)
 private fun decodeSharedContactData(data: String): SharedContact {
     val decodedBytes =
         try {
@@ -60,28 +61,25 @@ private fun decodeSharedContactData(data: String): SharedContact {
             val sanitized = data.replace('-', '+').replace('_', '/')
             sanitized.decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string")
         } catch (e: IllegalArgumentException) {
-            val ex =
-                MalformedURLException(
-                    "Failed to Base64 decode SharedContact data ($data): ${e.javaClass.simpleName}: ${e.message}",
-                )
-            ex.initCause(e)
-            throw ex
+            throw MalformedMeshtasticUrlException(
+                "Failed to Base64 decode SharedContact data ($data): ${e.javaClass.simpleName}: ${e.message}",
+            )
         }
 
     return try {
         SharedContact.ADAPTER.decode(decodedBytes)
-    } catch (e: java.io.IOException) {
-        val ex = MalformedURLException("Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}")
-        ex.initCause(e)
-        throw ex
+    } catch (e: Exception) {
+        throw MalformedMeshtasticUrlException(
+            "Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}",
+        )
     }
 }
 
 /** Converts a [SharedContact] to its corresponding URI representation. */
-fun SharedContact.getSharedContactUrl(): Uri {
+fun SharedContact.getSharedContactUrl(): CommonUri {
     val bytes = SharedContact.ADAPTER.encode(this)
     val enc = bytes.toByteString().base64Url()
-    return Uri.parse("$CONTACT_URL_PREFIX$enc")
+    return CommonUri.parse("$CONTACT_URL_PREFIX$enc")
 }
 
 /** Compares two [User] objects and returns a string detailing the differences. */

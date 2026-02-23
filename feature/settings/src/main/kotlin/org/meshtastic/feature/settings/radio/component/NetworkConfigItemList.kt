@@ -43,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.barcode.extractWifiCredentials
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.model.util.handleMeshtasticUri
+import org.meshtastic.core.model.util.toCommonUri
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
@@ -120,7 +121,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBac
         if (contents != null) {
             val handled =
                 handleMeshtasticUri(
-                    uri = contents.toUri(),
+                    uri = contents.toUri().toCommonUri(),
                     onChannel = {}, // No-op, not supported in network config
                     onContact = {}, // No-op, not supported in network config
                 )

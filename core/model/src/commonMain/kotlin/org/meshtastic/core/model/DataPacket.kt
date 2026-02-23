@@ -102,14 +102,14 @@ data class DataPacket(
 
         hopLimit = parcel.readInt()
         channel = parcel.readInt()
-        wantAck = parcel.readInt() != 0
+        wantAck = (parcel.readInt() != 0)
         hopStart = parcel.readInt()
         snr = parcel.readFloat()
         rssi = parcel.readInt()
         replyId = if (parcel.readInt() == 0) null else parcel.readInt()
         relayNode = if (parcel.readInt() == 0) null else parcel.readInt()
         relays = parcel.readInt()
-        viaMqtt = parcel.readInt() != 0
+        viaMqtt = (parcel.readInt() != 0)
         emoji = parcel.readInt()
         sfppHash = ByteStringParceler.create(parcel)
         transportMechanism = parcel.readInt()
