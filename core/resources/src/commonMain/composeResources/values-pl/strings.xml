@@ -390,7 +390,7 @@
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
         <item quantity="few">%d skoki</item>
-        <item quantity="many">%d skoki</item>
+        <item quantity="many">%d skoków</item>
         <item quantity="other">%d skoków</item>
     </plurals>
     <string name="traceroute_diff">Skoki do: %1$d. Skoki od: %2$d</string>
@@ -630,6 +630,7 @@
     <string name="import_label">Import</string>
     <string name="request_neighbor_info">Informacje o sąsiadach (2.7.15+)</string>
     <string name="request_telemetry">Żądanie telemetrii</string>
+    <string name="request_device_metrics">Metryka urządzenia</string>
     <string name="request_environment_metrics">Metryki środowiskowe</string>
     <string name="request_air_quality_metrics">Metryki jakości powietrza</string>
     <string name="request_power_metrics">Metryki zasilania</string>
@@ -638,6 +639,7 @@
     <string name="request_metadata">Metadane</string>
     <string name="firmware">Oprogramowanie</string>
     <string name="use_12h_format">Użyj formatu 12-godzinnego</string>
+    <string name="host_metrics_log">Statystyki hosta</string>
     <string name="connections">Połączenie</string>
     <string name="map">Mapa Sieci</string>
     <string name="conversations">Czaty</string>
@@ -706,7 +708,6 @@
     <string name="skip">Pomiń</string>
     <string name="settings">ustawienia</string>
     <string name="critical_alerts">Alerty krytyczne</string>
-    <string name="critical_alerts_dnd_request_text"></string>
     <string name="next">Dalej</string>
     <string name="grant_permissions">Przyznaj uprawnienia</string>
     <string name="connecting_to_device">Łączenie z urządzeniem</string>

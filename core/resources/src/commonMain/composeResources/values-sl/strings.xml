@@ -224,7 +224,7 @@
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
         <item quantity="two">%dskoka</item>
-        <item quantity="few">%dskoka</item>
+        <item quantity="few">%dskoki</item>
         <item quantity="other">%dskoki</item>
     </plurals>
     <string name="traceroute_diff">Skokov k %1$d Skokov nazaj %2$d</string>

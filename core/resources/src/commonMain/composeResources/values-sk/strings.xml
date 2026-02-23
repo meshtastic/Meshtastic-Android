@@ -437,6 +437,7 @@
     <string name="primary">Primárna</string>
     <string name="secondary">Sekundárna</string>
     <string name="bottom_nav_settings">Nastavenia</string>
+    <string name="meshtastic">Meshtastic</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

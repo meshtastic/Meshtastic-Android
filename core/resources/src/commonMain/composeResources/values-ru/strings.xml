@@ -217,12 +217,12 @@
         <item quantity="one">%1$d час</item>
         <item quantity="few">%1$d часа</item>
         <item quantity="many">%1$d часов</item>
-        <item quantity="other">%1$d часы</item>
+        <item quantity="other">%1$d часа</item>
     </plurals>
     <plurals name="log_retention_days_quantity">
         <item quantity="one">%1$d день</item>
-        <item quantity="few">%1$d дня</item>
-        <item quantity="many">%1$d дней</item>
+        <item quantity="few">%1$d дней</item>
+        <item quantity="many">%1$d дня</item>
         <item quantity="other">%1$d дни</item>
     </plurals>
     <string name="debug_filters">Фильтры</string>
@@ -252,7 +252,7 @@
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_old">Прошивка радиостанции слишком стара для взаимодействия с данным приложением. Чтобы получить больше сведений, посетите <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наше руководство по установке прошивки</a>.</string>
-    <string name="okay">ОК</string>
+    <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="cant_change_no_radio">Не удалось сменить канал, поскольку радиостанция еще не подключена. Пожалуйста, попробуйте еще раз.</string>
     <string name="save_rangetest">Экспортировать пакеты для проверки дальности</string>
@@ -416,7 +416,7 @@
     <plurals name="traceroute_hops">
         <item quantity="one">%1$d хоп</item>
         <item quantity="few">%1$d хопа</item>
-        <item quantity="many">%1$d хопов</item>
+        <item quantity="many">%d хопов</item>
         <item quantity="other">%1$d хопов</item>
     </plurals>
     <string name="traceroute_diff">Нод к %1$d нод назад от %2$d</string>
@@ -982,6 +982,7 @@
     <string name="system_settings">Настройка системы</string>
     <string name="no_local_stats">Статистика недоступна</string>
     <string name="analytics_notice">Аналитика помогает нам улучшить Android приложение (спасибо), мы будем получать анонимизированную информацию о поведении пользователя. В частности: отчеты о сбоях, используемые экраны и пр.</string>
+    <string name="analytics_platforms">Платформы для аналитики:</string>
     <string name="for_more_information_see_our_privacy_policy">Дополнительная информация доступна в нашей политике конфиденциальности.</string>
     <string name="unset">Не задано - 0</string>
     <string name="relayed_by">Ретранслировано: %1$s</string>

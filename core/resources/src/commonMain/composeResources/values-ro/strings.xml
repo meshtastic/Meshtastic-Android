@@ -590,8 +590,13 @@
     <string name="encryption_enabled">Criptare activată</string>
     <string name="json_output_enabled">Ieșire JSON activată</string>
     <string name="tls_enabled">TLS activat</string>
+    <string name="network_config">Rețea</string>
+    <string name="enabled">Activat</string>
     <string name="paxcounter_config">Configurație Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter activat</string>
+    <string name="position_config">Poziție</string>
+    <string name="security_config">Securitate</string>
+    <string name="timeout">Expirat</string>
     <string name="store_forward_enabled"><![CDATA[Reținere și redirecționare activată]]></string>
     <string name="long_name">Nume lung</string>
     <string name="short_name">Nume scurt</string>
@@ -605,8 +610,13 @@
     <string name="radiation">Radiație</string>
     <string name="store_forward_config"><![CDATA[Configurație reținere și redirecționare]]></string>
     <string name="url">URL</string>
+    <string name="request_device_metrics">Valori dispozitiv</string>
+    <string name="request_environment_metrics">Indicatori de mediu</string>
+    <string name="request_power_metrics">Valori putere</string>
     <string name="show_waypoints">Arată repere</string>
     <string name="node_count_template">(%1$d online / %2$d afișate / %3$d în total)</string>
+    <string name="meshtastic">Meshtastic</string>
+    <string name="advanced_title">Avansate</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
@@ -614,6 +624,10 @@
     <string name="message_input_label">Mesaj</string>
     <string name="downlink_feature_description">Mesajele provenite de la o un gateway public de internet sunt redirecționate către rețeaua locală. Datorită politicii de zero salturi, traficul provenit de la serverul MQTT implicit nu se va propaga mai departe de acest dispozitiv.</string>
     <string name="device_telemetry_enabled_summary">Activează/dezactivează modulul de telemetrie al dispozitivului pentru a trimite metrici către rețeaua mesh. Acestea sunt valori nominale. Rețelele mesh congestionate se vor scala automat la intervale mai lungi, în funcție de numărul de noduri online.</string>
+    <string name="one_hour">O oră</string>
+    <string name="eight_hours">8 Ore</string>
+    <string name="one_day">24 Ore</string>
+    <string name="two_days">48 Ore</string>
     <!-- Firmware Update -->
     <string name="firmware_update_failed">Actualizare eșuată</string>
     <string name="interval_unset">Nesetat</string>

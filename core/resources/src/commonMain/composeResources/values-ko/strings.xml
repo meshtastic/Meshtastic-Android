@@ -560,6 +560,7 @@
     <string name="one_day">24 시간</string>
     <string name="two_days">48 시간</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_disconnecting">연결 끊는 중...</string>
     <string name="firmware_update_failed">업데이트 실패</string>
     <string name="interval_unset">해제</string>
     <!-- Compass -->

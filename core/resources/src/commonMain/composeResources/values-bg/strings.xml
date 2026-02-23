@@ -398,6 +398,7 @@
     <string name="telemetry">Телеметрия</string>
     <string name="audio">Аудио</string>
     <string name="remote_hardware">Отдалечен хардуер</string>
+    <string name="paxcounter">Paxcounter</string>
     <string name="audio_config">Конфигуриране на аудиото</string>
     <string name="codec_2_enabled">CODEC 2 е активиран</string>
     <string name="ptt_pin">Пин за РТТ</string>

@@ -334,6 +334,8 @@
     <string name="currently">Jelenleg:</string>
     <string name="mute_status_always">Mindig némítva</string>
     <string name="mute_status_unmuted">Nincs némítva</string>
+    <string name="mute_status_muted_for_days">Némítva ennyi ideig: %1$d nap, %2$.1f óra</string>
+    <string name="mute_status_muted_for_hours">Némítva: %1$.1f óra</string>
     <string name="mute_status_label">Némítás állapota</string>
     <string name="replace">Csere</string>
     <string name="wifi_qr_code_scan">WiFi QR kód szkennelése</string>
@@ -916,9 +918,11 @@
     <string name="system_settings">Rendszerbeállítások</string>
     <string name="no_local_stats">Nem állnak rendelkezésre statisztikák</string>
     <string name="analytics_notice">Analitikai adatokat gyűjtünk az Android alkalmazás fejlesztésének segítésére (köszönjük). Anonimizált információkat kapunk a felhasználói viselkedésről, beleértve a hibajelentéseket, a használt képernyőket stb.</string>
+    <string name="analytics_platforms">Analitikai platformok:</string>
     <string name="for_more_information_see_our_privacy_policy">További információért lásd az adatvédelmi irányelveinket.</string>
     <string name="unset">Nincs beállítva – 0</string>
     <!-- Firmware Update -->
+    <string name="firmware_update_disconnecting">Leválasztás…...</string>
     <string name="firmware_update_failed">A frissítés sikertelen</string>
     <string name="interval_unset">Nincs beállítva</string>
     <plurals name="plurals_hours">

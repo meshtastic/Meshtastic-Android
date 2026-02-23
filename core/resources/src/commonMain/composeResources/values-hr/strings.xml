@@ -158,6 +158,7 @@
     <string name="red">Crveno</string>
     <string name="region_frequency_plan">Regija</string>
     <string name="distance">Udaljenost</string>
+    <string name="meshtastic">Meshtastic</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

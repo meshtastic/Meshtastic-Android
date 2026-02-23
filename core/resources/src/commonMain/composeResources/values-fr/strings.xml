@@ -370,7 +370,7 @@
     <string name="encryption_error">Non-concordance de clé publique</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d'usine ou à une autre action intentionnelle.</string>
     <string name="userinfo">Infos utilisateur</string>
-    <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
+    <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, une mesure utilisée dans les communications pour quantifier le niveau du signal par rapport au niveau du bruit de fond. Dans les systèmes Meshtastic et autres systèmes sans fil, un SNR plus élevé indique un signal plus clair qui peut améliorer la fiabilité et la qualité de la transmission de données.</string>
