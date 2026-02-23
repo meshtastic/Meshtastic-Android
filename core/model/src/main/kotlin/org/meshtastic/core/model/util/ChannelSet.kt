@@ -17,20 +17,17 @@
 package org.meshtastic.core.model.util
 
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
-import android.util.Base64
 import co.touchlab.kermit.Logger
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.common.BitMatrix
+import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.model.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config.LoRaConfig
 import java.net.MalformedURLException
-
-private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
  * Return a [ChannelSet] that represents the ChannelSet encoded by the URL.
@@ -51,8 +48,11 @@ fun Uri.toChannelSet(): ChannelSet {
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
-    val fragmentBytes = Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS)
-    val url = ChannelSet.ADAPTER.decode(fragmentBytes.toByteString())
+    val fragmentBase64 = fragment!!.substringBefore('?')
+        .replace('-', '+')
+        .replace('_', '/')
+    val fragmentBytes = fragmentBase64.decodeBase64() ?: throw MalformedURLException("Invalid Base64 in URL fragment: $fragmentBase64")
+    val url = ChannelSet.ADAPTER.decode(fragmentBytes)
     val shouldAdd =
         fragment?.substringAfter('?', "")?.takeUnless { it.isBlank() }?.equals("add=true")
             ?: getBooleanQueryParameter("add", false)
@@ -87,7 +87,7 @@ fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): Uri {
     val channelBytes = ChannelSet.ADAPTER.encode(this)
-    val enc = Base64.encodeToString(channelBytes, BASE64FLAGS)
+    val enc = channelBytes.toByteString().base64Url()
     val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""
     return Uri.parse("$p$query#$enc")
@@ -110,7 +110,8 @@ private fun BitMatrix.toBitmap(): Bitmap {
     for (y in 0 until height) {
         val offset = y * width
         for (x in 0 until width) {
-            pixels[offset + x] = if (get(x, y)) Color.BLACK else Color.WHITE
+            // Black: 0xFF000000, White: 0xFFFFFFFF
+            pixels[offset + x] = if (get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
         }
     }
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

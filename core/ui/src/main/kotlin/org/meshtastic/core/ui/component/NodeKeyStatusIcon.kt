@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.ui.component
 
-import android.util.Base64
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -198,7 +197,7 @@ private fun KeyStatusDialog(title: StringResource, text: StringResource, key: By
                             if (isMismatch) {
                                 stringResource(Res.string.error)
                             } else {
-                                Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                                key.base64()
                             }
                         Text(
                             text = stringResource(Res.string.config_security_public_key) + ":",

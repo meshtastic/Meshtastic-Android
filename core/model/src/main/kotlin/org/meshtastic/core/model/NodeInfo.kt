@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.model
 
-import android.graphics.Color
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 import org.meshtastic.core.common.util.nowSeconds
@@ -211,7 +210,9 @@ data class NodeInfo(
             val g = (num and 0x00FF00) shr 8
             val b = num and 0x0000FF
             val brightness = ((r * 0.299) + (g * 0.587) + (b * 0.114)) / 255
-            return (if (brightness > 0.5) Color.BLACK else Color.WHITE) to Color.rgb(r, g, b)
+            val foreground = if (brightness > 0.5) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
+            val background = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+            return foreground to background
         }
 
     val batteryLevel

@@ -17,14 +17,12 @@
 package org.meshtastic.core.model.util
 
 import android.net.Uri
-import android.util.Base64
 import okio.ByteString
+import okio.ByteString.Companion.decodeBase64
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 import java.net.MalformedURLException
-
-private const val BASE64FLAGS = Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING
 
 /**
  * Return a [SharedContact] that represents the contact encoded by the URL.
@@ -58,7 +56,8 @@ private fun decodeSharedContactData(data: String): SharedContact {
     val decodedBytes =
         try {
             // We use a more lenient decoding for the input to handle variations from different clients
-            Base64.decode(data, Base64.DEFAULT or Base64.URL_SAFE)
+            val sanitized = data.replace('-', '+').replace('_', '/')
+            sanitized.decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string")
         } catch (e: IllegalArgumentException) {
             val ex =
                 MalformedURLException(
@@ -69,7 +68,7 @@ private fun decodeSharedContactData(data: String): SharedContact {
         }
 
     return try {
-        SharedContact.ADAPTER.decode(decodedBytes.toByteString())
+        SharedContact.ADAPTER.decode(decodedBytes)
     } catch (e: java.io.IOException) {
         val ex = MalformedURLException("Failed to proto decode SharedContact: ${e.javaClass.simpleName}: ${e.message}")
         ex.initCause(e)
@@ -80,7 +79,7 @@ private fun decodeSharedContactData(data: String): SharedContact {
 /** Converts a [SharedContact] to its corresponding URI representation. */
 fun SharedContact.getSharedContactUrl(): Uri {
     val bytes = SharedContact.ADAPTER.encode(this)
-    val enc = Base64.encodeToString(bytes, BASE64FLAGS)
+    val enc = bytes.toByteString().base64Url()
     return Uri.parse("$CONTACT_URL_PREFIX$enc")
 }
 
@@ -130,4 +129,4 @@ fun userFieldsToString(user: User): String {
     return fieldLines.joinToString("\n")
 }
 
-private fun ByteString.base64String(): String = Base64.encodeToString(this.toByteArray(), Base64.DEFAULT).trim()
+private fun ByteString.base64String(): String = base64()

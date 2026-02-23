@@ -16,15 +16,14 @@
  */
 package org.meshtastic.core.model.util
 
-import android.util.Base64
 import okio.ByteString
-import okio.ByteString.Companion.toByteString
+import okio.ByteString.Companion.decodeBase64
 
-fun ByteString.encodeToString(): String = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
+fun ByteString.encodeToString(): String = base64()
 
 /**
  * Decodes a Base64 string into a [ByteString].
  *
  * @throws IllegalArgumentException if the string is not valid Base64.
  */
-fun String.base64ToByteString(): ByteString = Base64.decode(this, Base64.NO_WRAP).toByteString()
+fun String.base64ToByteString(): ByteString = decodeBase64() ?: throw IllegalArgumentException("Invalid Base64 string: $this")
