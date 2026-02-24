@@ -623,6 +623,7 @@
     <string name="wifi_enabled">WiFi aktiviert</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
+    <string name="get_document">Dokument abrufen</string>
     <string name="ethernet_config">Ethernet Einstellungen</string>
     <string name="ethernet_enabled">Ethernet aktiviert</string>
     <string name="ntp_server">NTP Server</string>
@@ -1142,4 +1143,14 @@
     <string name="permission_granted">Berechtigung gewährt</string>
     <string name="permission_denied">Berechtigung verweigert</string>
     <string name="map_style_selection">Auswahl Kartenstil</string>
+    <string name="local_stats_battery">Akku: %1$d%%</string>
+    <string name="local_stats_nodes">Knoten: %1$d online / %2$d gesamt</string>
+    <string name="local_stats_uptime">Laufzeit: %1$s</string>
+    <string name="local_stats_utilization">Kanalauslastung: %1$.2f%% | Sendezeit: %2$.2f%%</string>
+    <string name="local_stats_traffic">Datenverkehr: TX %1$d / RX %2$d (Duplikate: %3$d)</string>
+    <string name="local_stats_relays">Weiterleitungen: %1$d (Abgebrochen: %2$d)</string>
+    <string name="local_stats_diagnostics_prefix">Diagnose %1$s</string>
+    <string name="local_stats_noise">Rauschen %1$d dBm</string>
+    <string name="local_stats_bad">Fehlerhaft %1$d</string>
+    <string name="local_stats_dropped">Verworfen %1$d</string>
 </resources>
