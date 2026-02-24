@@ -102,7 +102,7 @@ class LocalStatsWidget : GlanceAppWidget() {
 
         provideContent {
             val state by stateProvider.state.collectAsState()
-            GlanceTheme { WidgetContent(state) }
+            WidgetContent(state)
         }
     }
 
@@ -119,35 +119,34 @@ class LocalStatsWidget : GlanceAppWidget() {
             val onlineNodes = state.nodes.values.count { it.lastHeard > onlineTimeThreshold() }
             val totalNodes = state.nodes.size
             val uptimeSecs: Long = state.stats?.uptime_seconds?.toLong() ?: metrics?.uptime_seconds?.toLong() ?: 0L
-
-            Scaffold(
-                modifier = GlanceModifier.fillMaxSize(),
-                backgroundColor = GlanceTheme.colors.widgetBackground,
-                titleBar = {
-                    TitleBar(
-                        startIcon = ImageProvider(com.geeksville.mesh.R.drawable.app_icon),
-                        title = stringResource(Res.string.meshtastic_app_name),
-                        actions = {
-                            CircleIconButton(
-                                imageProvider = ImageProvider(com.geeksville.mesh.R.drawable.ic_refresh),
-                                contentDescription = "Refresh",
-                                onClick = actionRunCallback<RefreshLocalStatsAction>(),
-                                backgroundColor = null,
-                            )
-                        },
-                    )
-                },
-            ) {
-                Column(
-                    modifier = GlanceModifier.fillMaxSize().padding(horizontal = 4.dp, vertical = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalAlignment = Alignment.Top,
+            GlanceTheme {
+                Scaffold(
+                    titleBar = {
+                        TitleBar(
+                            startIcon = ImageProvider(com.geeksville.mesh.R.drawable.app_icon),
+                            title = stringResource(Res.string.meshtastic_app_name),
+                            actions = {
+                                CircleIconButton(
+                                    imageProvider = ImageProvider(com.geeksville.mesh.R.drawable.ic_refresh),
+                                    contentDescription = "Refresh",
+                                    onClick = actionRunCallback<RefreshLocalStatsAction>(),
+                                    backgroundColor = null,
+                                )
+                            },
+                        )
+                    },
                 ) {
-                    if (state.connectionState is ConnectionState.Connected) {
-                        StatsContent(state = state, modifier = GlanceModifier.defaultWeight())
-                        Footer(onlineNodes = onlineNodes, totalNodes = totalNodes, uptimeSecs = uptimeSecs)
-                    } else {
-                        Disconnected(state, GlanceModifier.fillMaxSize())
+                    Column(
+                        modifier = GlanceModifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        if (state.connectionState is ConnectionState.Connected) {
+                            StatsContent(state = state, modifier = GlanceModifier.defaultWeight())
+                            Footer(onlineNodes = onlineNodes, totalNodes = totalNodes, uptimeSecs = uptimeSecs)
+                        } else {
+                            Disconnected(state, GlanceModifier.fillMaxSize())
+                        }
                     }
                 }
             }
@@ -168,7 +167,7 @@ class LocalStatsWidget : GlanceAppWidget() {
         val airUtilTx = state.stats?.air_util_tx ?: metrics?.air_util_tx ?: 0f
 
         Column(modifier = modifier) {
-            Row {
+            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 localNode?.let { NodeChip(shortName = it.user.short_name, colors = it.colors) }
                 Spacer(GlanceModifier.width(8.dp))
                 StatRow(
@@ -282,7 +281,10 @@ class LocalStatsWidget : GlanceAppWidget() {
 
     @Composable
     private fun Footer(onlineNodes: Int, totalNodes: Int, uptimeSecs: Long) {
-        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = GlanceModifier.fillMaxWidth().padding(bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Column(modifier = GlanceModifier.defaultWeight(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = stringResource(Res.string.nodes),
@@ -327,7 +329,7 @@ class LocalStatsWidget : GlanceAppWidget() {
     private fun NodeChip(shortName: String, colors: Pair<Int, Int>, modifier: GlanceModifier = GlanceModifier) {
         val (fg, bg) = colors
         Row(
-            modifier = modifier.background(Color(bg)).cornerRadius(4.dp).padding(horizontal = 4.dp, vertical = 2.dp),
+            modifier = modifier.background(Color(bg)).cornerRadius(4.dp).padding(horizontal = 6.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
