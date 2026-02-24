@@ -747,7 +747,7 @@
     <string name="pressure">Pressure</string>
     <string name="gas_resistance">Gas Resistance</string>
     <string name="distance">Distance</string>
-    <string name="lux">Lux</string>
+    <string name="lux">Look</string>
     <string name="wind">Wind</string>
     <string name="weight">Weight</string>
     <string name="radiation">Radiation</string>
@@ -1205,4 +1205,5 @@
     <string name="local_stats_noise">Noise %1$d dBm</string>
     <string name="local_stats_bad">Bad %1$d</string>
     <string name="local_stats_dropped">Dropped %1$d</string>
+    <string name="powered">Powered</string>
 </resources>
