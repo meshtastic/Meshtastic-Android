@@ -18,18 +18,17 @@ package com.geeksville.mesh.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
-import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
+import androidx.glance.appwidget.components.Scaffold
+import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -41,7 +40,6 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
-import androidx.glance.layout.size
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -82,6 +80,7 @@ class LocalStatsWidget : GlanceAppWidget() {
     @InstallIn(SingletonComponent::class)
     interface LocalStatsWidgetEntryPoint {
         fun nodeRepository(): NodeRepository
+
         fun connectionStateHandler(): ConnectionStateHandler
     }
 
@@ -91,12 +90,12 @@ class LocalStatsWidget : GlanceAppWidget() {
         val nodeRepository = entryPoint.nodeRepository()
         val connectionStateHandler = entryPoint.connectionStateHandler()
 
-        provideContent {
-            val myNodeInfo by nodeRepository.myNodeInfo.collectAsState(null)
-            val nodes by nodeRepository.nodeDBbyNum.collectAsState(emptyMap())
-            val connectionState by connectionStateHandler.connectionState.collectAsState()
-            val localStats by nodeRepository.localStats.collectAsState(null)
+        val myNodeInfo = nodeRepository.myNodeInfo.value
+        val nodes = nodeRepository.nodeDBbyNum.value
+        val connectionState = connectionStateHandler.connectionState.value
+        val localStats = nodeRepository.localStats.value
 
+        provideContent {
             GlanceTheme { WidgetContent(myNodeInfo, nodes, connectionState, localStats) }
         }
     }
@@ -107,7 +106,7 @@ class LocalStatsWidget : GlanceAppWidget() {
         myNodeInfo: MyNodeEntity?,
         nodes: Map<Int, Node>,
         connectionState: ConnectionState,
-        stats: org.meshtastic.proto.LocalStats?
+        stats: org.meshtastic.proto.LocalStats?,
     ) {
         val localNode = myNodeInfo?.let { nodes[it.myNodeNum] }
         val metrics = localNode?.deviceMetrics
@@ -122,146 +121,144 @@ class LocalStatsWidget : GlanceAppWidget() {
         val totalNodes = nodes.size
         val uptimeSecs = stats?.uptime_seconds ?: metrics?.uptime_seconds ?: 0L
 
-        Column(
-            modifier = GlanceModifier.fillMaxSize().background(GlanceTheme.colors.surface).padding(8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalAlignment = Alignment.Top,
+        Scaffold(
+            modifier = GlanceModifier.fillMaxSize(),
+            backgroundColor = GlanceTheme.colors.widgetBackground,
+            titleBar = {
+                TitleBar(
+                    startIcon = ImageProvider(com.geeksville.mesh.R.mipmap.ic_launcher),
+                    title = getString(Res.string.meshtastic_app_name),
+                    actions = { localNode?.let { NodeChip(it) } },
+                )
+            },
         ) {
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    provider = ImageProvider(com.geeksville.mesh.R.mipmap.ic_launcher),
-                    contentDescription = null,
-                    modifier = GlanceModifier.size(20.dp).padding(end = 8.dp),
-                )
-                Text(
-                    text = getString(Res.string.meshtastic_app_name),
-                    modifier = GlanceModifier.defaultWeight(),
-                    style =
-                    TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Bold),
-                )
-                localNode?.let { NodeChip(it) }
-            }
-
-            Spacer(GlanceModifier.height(8.dp))
-
-            if (connectionState !is ConnectionState.Connected) {
-                Column(
-                    modifier = GlanceModifier.defaultWeight(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    val statusText =
-                        when (connectionState) {
-                            is ConnectionState.Disconnected -> getString(Res.string.disconnected)
-                            is ConnectionState.Connecting -> getString(Res.string.connecting)
-                            is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
-                            is ConnectionState.Connected -> ""
-                        }
-                    Text(
-                        text = statusText,
-                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 16.sp),
-                    )
-                }
-            } else {
-                Column(modifier = GlanceModifier.fillMaxWidth()) {
-                    // Battery
-                    StatRow(
-                        label = getString(Res.string.battery),
-                        value = batteryText,
-                        progress = (batteryLevel / 100f).coerceIn(0f, 1f),
-                    )
-
-                    Spacer(GlanceModifier.height(4.dp))
-
-                    // Channel Utilization
-                    StatRow(
-                        label = getString(Res.string.channel_utilization),
-                        value = String.format(Locale.ROOT, "%.1f%%", channelUtil),
-                        progress = (channelUtil / 100f).coerceIn(0f, 1f),
-                    )
-
-                    Spacer(GlanceModifier.height(4.dp))
-
-                    // Air Utilization TX
-                    StatRow(
-                        label = getString(Res.string.air_utilization),
-                        value = String.format(Locale.ROOT, "%.1f%%", airUtilTx),
-                        progress = (airUtilTx / 100f).coerceIn(0f, 1f),
-                    )
-                }
-
-                Spacer(GlanceModifier.height(8.dp))
-
-                // Traffic & Relay Stats (Condensed)
-                if (stats != null) {
+            Column(
+                modifier = GlanceModifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalAlignment = Alignment.Top,
+            ) {
+                if (connectionState !is ConnectionState.Connected) {
+                    Column(
+                        modifier = GlanceModifier.defaultWeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        val statusText =
+                            when (connectionState) {
+                                is ConnectionState.Disconnected -> getString(Res.string.disconnected)
+                                is ConnectionState.Connecting -> getString(Res.string.connecting)
+                                is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+                                is ConnectionState.Connected -> ""
+                            }
+                        Text(
+                            text = statusText,
+                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 16.sp),
+                        )
+                    }
+                } else {
                     Column(modifier = GlanceModifier.fillMaxWidth()) {
-                        if (stats.num_packets_tx > 0 || stats.num_packets_rx > 0) {
-                            Text(
-                                text =
-                                getString(
-                                    Res.string.local_stats_traffic,
-                                    stats.num_packets_tx,
-                                    stats.num_packets_rx,
-                                    stats.num_rx_dupe,
-                                ),
-                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                                modifier = GlanceModifier.fillMaxWidth(),
-                            )
-                        }
-                        if (stats.num_tx_relay > 0) {
-                            Text(
-                                text =
-                                getString(
-                                    Res.string.local_stats_relays,
-                                    stats.num_tx_relay,
-                                    stats.num_tx_relay_canceled,
-                                ),
-                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                                modifier = GlanceModifier.fillMaxWidth(),
-                            )
-                        }
+                        // Battery
+                        StatRow(
+                            label = getString(Res.string.battery),
+                            value = batteryText,
+                            progress = (batteryLevel / 100f).coerceIn(0f, 1f),
+                        )
 
-                        // Diagnostics
-                        val diag = mutableListOf<String>()
-                        if (stats.noise_floor != 0) diag.add(getString(Res.string.local_stats_noise, stats.noise_floor))
-                        if (stats.num_packets_rx_bad > 0) {
-                            diag.add(getString(Res.string.local_stats_bad, stats.num_packets_rx_bad))
-                        }
-                        if (stats.num_tx_dropped > 0) {
-                            diag.add(getString(Res.string.local_stats_dropped, stats.num_tx_dropped))
-                        }
+                        Spacer(GlanceModifier.height(4.dp))
 
-                        if (diag.isNotEmpty()) {
-                            Text(
-                                text = getString(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
-                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                                modifier = GlanceModifier.fillMaxWidth(),
-                            )
-                        }
+                        // Channel Utilization
+                        StatRow(
+                            label = getString(Res.string.channel_utilization),
+                            value = String.format(Locale.ROOT, "%.1f%%", channelUtil),
+                            progress = (channelUtil / 100f).coerceIn(0f, 1f),
+                        )
+
+                        Spacer(GlanceModifier.height(4.dp))
+
+                        // Air Utilization TX
+                        StatRow(
+                            label = getString(Res.string.air_utilization),
+                            value = String.format(Locale.ROOT, "%.1f%%", airUtilTx),
+                            progress = (airUtilTx / 100f).coerceIn(0f, 1f),
+                        )
                     }
+
                     Spacer(GlanceModifier.height(8.dp))
-                }
 
-                Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    Column(modifier = GlanceModifier.defaultWeight()) {
-                        Text(
-                            text = "Nodes",
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                        )
-                        Text(
-                            text = "$onlineNodes / $totalNodes",
-                            style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 12.sp),
-                        )
+                    // Traffic & Relay Stats (Condensed)
+                    if (stats != null) {
+                        Column(modifier = GlanceModifier.fillMaxWidth()) {
+                            if (stats.num_packets_tx > 0 || stats.num_packets_rx > 0) {
+                                Text(
+                                    text =
+                                    getString(
+                                        Res.string.local_stats_traffic,
+                                        stats.num_packets_tx,
+                                        stats.num_packets_rx,
+                                        stats.num_rx_dupe,
+                                    ),
+                                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                                    modifier = GlanceModifier.fillMaxWidth(),
+                                )
+                            }
+                            if (stats.num_tx_relay > 0) {
+                                Text(
+                                    text =
+                                    getString(
+                                        Res.string.local_stats_relays,
+                                        stats.num_tx_relay,
+                                        stats.num_tx_relay_canceled,
+                                    ),
+                                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                                    modifier = GlanceModifier.fillMaxWidth(),
+                                )
+                            }
+
+                            // Diagnostics
+                            val diag = mutableListOf<String>()
+                            if (stats.noise_floor != 0) {
+                                diag.add(getString(Res.string.local_stats_noise, stats.noise_floor))
+                            }
+                            if (stats.num_packets_rx_bad > 0) {
+                                diag.add(getString(Res.string.local_stats_bad, stats.num_packets_rx_bad))
+                            }
+                            if (stats.num_tx_dropped > 0) {
+                                diag.add(getString(Res.string.local_stats_dropped, stats.num_tx_dropped))
+                            }
+
+                            if (diag.isNotEmpty()) {
+                                Text(
+                                    text =
+                                    getString(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
+                                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                                    modifier = GlanceModifier.fillMaxWidth(),
+                                )
+                            }
+                        }
+                        Spacer(GlanceModifier.height(8.dp))
                     }
-                    Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.End) {
-                        Text(
-                            text = getString(Res.string.uptime),
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                        )
-                        Text(
-                            text = formatUptime(uptimeSecs.toInt()),
-                            style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 12.sp),
-                        )
+
+                    Row(modifier = GlanceModifier.fillMaxWidth()) {
+                        Column(modifier = GlanceModifier.defaultWeight()) {
+                            Text(
+                                text = "Nodes",
+                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                            )
+                            Text(
+                                text = "$onlineNodes / $totalNodes",
+                                style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 12.sp),
+                            )
+                        }
+                        Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = getString(Res.string.uptime),
+                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                            )
+                            Text(
+                                text = formatUptime(uptimeSecs.toInt()),
+                                style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 12.sp),
+                            )
+                        }
                     }
                 }
             }

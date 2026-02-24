@@ -857,10 +857,11 @@ constructor(
     private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
         val parts = mutableListOf<String>()
         batteryLevel?.let {
-       if (it > 100){
-            parts.add(BULLET + getString(Res.string.powered))
-        } else {
-            parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+            if (it > 100) {
+                parts.add(BULLET + getString(Res.string.powered))
+            } else {
+                parts.add(BULLET + getString(Res.string.local_stats_battery, it))
+            }
         }
         parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
         parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
@@ -894,7 +895,9 @@ constructor(
         battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
         uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
         if (channel_utilization != null || air_util_tx != null) {
-            parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f))
+            parts.add(
+                BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f),
+            )
         }
         return parts.joinToString("\n")
     }
