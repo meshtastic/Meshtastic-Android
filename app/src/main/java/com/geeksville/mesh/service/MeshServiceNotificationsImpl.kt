@@ -57,6 +57,16 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.local_stats_bad
+import org.meshtastic.core.resources.local_stats_battery
+import org.meshtastic.core.resources.local_stats_diagnostics_prefix
+import org.meshtastic.core.resources.local_stats_dropped
+import org.meshtastic.core.resources.local_stats_nodes
+import org.meshtastic.core.resources.local_stats_noise
+import org.meshtastic.core.resources.local_stats_relays
+import org.meshtastic.core.resources.local_stats_traffic
+import org.meshtastic.core.resources.local_stats_uptime
+import org.meshtastic.core.resources.local_stats_utilization
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.mark_as_read
@@ -113,6 +123,7 @@ constructor(
         private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
         private const val STATS_UPDATE_MINUTES = 15
         private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
+        private const val BULLET = "• "
     }
 
     /**
@@ -496,8 +507,9 @@ constructor(
                 .setShowWhen(true)
 
         message?.let {
-            builder.setContentText(it.substringBefore("\n")) // Show first line (Status) in collapsed
-            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it)) // Full stats in expanded
+            // First line of message is used for collapsed view, ensure it doesn't have a bullet
+            builder.setContentText(it.substringBefore("\n").removePrefix(BULLET))
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
         }
 
         nextUpdateAt
@@ -658,7 +670,7 @@ constructor(
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
         val title = getString(Res.string.low_battery_title).format(node.shortName)
-        val batteryLevel = node.deviceTelemetry.device_metrics?.battery_level ?: 0
+        val batteryLevel = node.deviceMetrics?.battery_level ?: 0
         val message = getString(Res.string.low_battery_message).format(node.longName, batteryLevel)
 
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
@@ -836,48 +848,48 @@ constructor(
 
         return IconCompat.createWithBitmap(bitmap)
     }
+
     // endregion
-}
 
-// Extension function to format LocalStats into a readable string.
-private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
-    val parts = mutableListOf<String>()
-    batteryLevel?.let { parts.add("Battery: $it%") }
-    parts.add("Nodes: $num_online_nodes online / $num_total_nodes total")
-    parts.add("Uptime: ${formatUptime(uptime_seconds)}")
-    parts.add("Channel Utilization: %.2f%%".format(channel_utilization))
-    parts.add("Air Utilization TX: %.2f%%".format(air_util_tx))
+    // region Extension Functions (Localized)
 
-    // Traffic Stats (only show if active)
-    if (num_packets_tx > 0 || num_packets_rx > 0) {
-        parts.add("• Packets: TX $num_packets_tx / RX $num_packets_rx")
-    }
-    if (num_rx_dupe > 0) {
-        parts.add("• Duplicates Received: $num_rx_dupe")
-    }
-    if (num_tx_relay > 0) {
-        parts.add("• Packets Relayed: $num_tx_relay (Canceled: $num_tx_relay_canceled)")
+    private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
+        val parts = mutableListOf<String>()
+        batteryLevel?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+        parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
+        parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization, air_util_tx))
+
+        // Traffic Stats
+        if (num_packets_tx > 0 || num_packets_rx > 0) {
+            parts.add(BULLET + getString(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe))
+        }
+        if (num_tx_relay > 0) {
+            parts.add(BULLET + getString(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
+        }
+
+        // Diagnostic Fields
+        val diagnosticParts = mutableListOf<String>()
+        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise, noise_floor))
+        if (num_packets_rx_bad > 0) diagnosticParts.add(getString(Res.string.local_stats_bad, num_packets_rx_bad))
+        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped, num_tx_dropped))
+
+        if (diagnosticParts.isNotEmpty()) {
+            parts.add(
+                BULLET + getString(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
+            )
+        }
+
+        return parts.joinToString("\n")
     }
 
-    // Diagnostic Fields
-    if (noise_floor != 0) {
-        parts.add("• Noise Floor: $noise_floor dBm")
-    }
-    if (num_packets_rx_bad > 0) {
-        parts.add("• Bad Packets Received: $num_packets_rx_bad")
-    }
-    if (num_tx_dropped > 0) {
-        parts.add("• Transmit Packets Dropped: $num_tx_dropped")
+    private fun DeviceMetrics.formatToString(): String {
+        val parts = mutableListOf<String>()
+        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
+        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f))
+        return parts.joinToString("\n")
     }
 
-    return parts.joinToString("\n")
-}
-
-private fun DeviceMetrics.formatToString(): String {
-    val parts = mutableListOf<String>()
-    battery_level?.let { parts.add("Battery: $it%") }
-    uptime_seconds?.let { parts.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { parts.add("Channel Utilization: %.2f%%".format(it)) }
-    air_util_tx?.let { parts.add("Air Utilization TX: %.2f%%".format(it)) }
-    return parts.joinToString("\n")
+    // endregion
 }

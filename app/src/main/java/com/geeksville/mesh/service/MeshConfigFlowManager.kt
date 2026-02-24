@@ -67,6 +67,7 @@ constructor(
         get() = newNodes.size
 
     private var rawMyNodeInfo: MyNodeInfo? = null
+    private var lastMetadata: DeviceMetadata? = null
     private var newMyNodeInfo: MyNodeEntity? = null
     private var myNodeInfo: MyNodeEntity? = null
 
@@ -79,12 +80,20 @@ constructor(
     }
 
     private fun handleConfigOnlyComplete() {
-        Logger.i { "Config-only complete" }
+        Logger.i { "Config-only complete (Stage 1)" }
         if (newMyNodeInfo == null) {
-            Logger.e { "Did not receive a valid config - newMyNodeInfo is null" }
+            Logger.w {
+                "newMyNodeInfo is still null at Stage 1 complete, attempting final regen with last known metadata"
+            }
+            regenMyNodeInfo(lastMetadata)
+        }
+
+        val finalizedInfo = newMyNodeInfo
+        if (finalizedInfo == null) {
+            Logger.e { "Handshake stall: Did not receive a valid MyNodeInfo before Stage 1 complete" }
         } else {
-            myNodeInfo = newMyNodeInfo
-            Logger.i { "myNodeInfo committed successfully" }
+            myNodeInfo = finalizedInfo
+            Logger.i { "myNodeInfo committed successfully (nodeNum=${finalizedInfo.myNodeNum})" }
             connectionManager.onRadioConfigLoaded()
         }
 
@@ -92,6 +101,7 @@ constructor(
             delay(wantConfigDelay)
             sendHeartbeat()
             delay(wantConfigDelay)
+            Logger.i { "Requesting NodeInfo (Stage 2)" }
             connectionManager.startNodeInfoOnly()
         }
     }
@@ -106,7 +116,7 @@ constructor(
     }
 
     private fun handleNodeInfoComplete() {
-        Logger.i { "NodeInfo complete" }
+        Logger.i { "NodeInfo complete (Stage 2)" }
         val entities =
             newNodes.map { info ->
                 nodeManager.installNodeInfo(info, withBroadcast = false)
@@ -134,8 +144,8 @@ constructor(
     fun handleMyInfo(myInfo: MyNodeInfo) {
         Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
         rawMyNodeInfo = myInfo
-        nodeManager.myNodeNum = myInfo.my_node_num ?: 0
-        regenMyNodeInfo()
+        nodeManager.myNodeNum = myInfo.my_node_num
+        regenMyNodeInfo(lastMetadata)
 
         scope.handledLaunch {
             radioConfigRepository.clearChannelSet()
@@ -145,7 +155,8 @@ constructor(
     }
 
     fun handleLocalMetadata(metadata: DeviceMetadata) {
-        Logger.i { "Local Metadata received" }
+        Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
+        lastMetadata = metadata
         regenMyNodeInfo(metadata)
     }
 
@@ -153,36 +164,43 @@ constructor(
         newNodes.add(info)
     }
 
-    private fun regenMyNodeInfo(metadata: DeviceMetadata? = DeviceMetadata()) {
+    private fun regenMyNodeInfo(metadata: DeviceMetadata? = null) {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
-            val mi =
-                with(myInfo) {
-                    MyNodeEntity(
-                        myNodeNum = my_node_num ?: 0,
-                        model =
-                        when (val hwModel = metadata?.hw_model) {
-                            null,
-                            HardwareModel.UNSET,
-                            -> null
-                            else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
-                        },
-                        firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
-                        couldUpdate = false,
-                        shouldUpdate = false,
-                        currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,
-                        messageTimeoutMsec = 300000,
-                        minAppVersion = min_app_version ?: 0,
-                        maxChannels = 8,
-                        hasWifi = metadata?.hasWifi == true,
-                        deviceId = device_id?.utf8() ?: "",
-                        pioEnv = if (myInfo.pio_env.isNullOrEmpty()) null else myInfo.pio_env,
-                    )
+            try {
+                val mi =
+                    with(myInfo) {
+                        MyNodeEntity(
+                            myNodeNum = my_node_num ?: 0,
+                            model =
+                            when (val hwModel = metadata?.hw_model) {
+                                null,
+                                HardwareModel.UNSET,
+                                -> null
+                                else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+                            },
+                            firmwareVersion = metadata?.firmware_version?.takeIf { it.isNotBlank() },
+                            couldUpdate = false,
+                            shouldUpdate = false,
+                            currentPacketId = commandSender.getCurrentPacketId() and 0xffffffffL,
+                            messageTimeoutMsec = 300000,
+                            minAppVersion = min_app_version,
+                            maxChannels = 8,
+                            hasWifi = metadata?.hasWifi == true,
+                            deviceId = device_id.utf8(),
+                            pioEnv = myInfo.pio_env.ifEmpty { null },
+                        )
+                    }
+                if (metadata != null && metadata != DeviceMetadata()) {
+                    scope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
                 }
-            if (metadata != null && metadata != DeviceMetadata()) {
-                scope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
+                newMyNodeInfo = mi
+                Logger.d { "newMyNodeInfo updated: nodeNum=${mi.myNodeNum} model=${mi.model} fw=${mi.firmwareVersion}" }
+            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+                Logger.e(ex) { "Failed to regenMyNodeInfo" }
             }
-            newMyNodeInfo = mi
+        } else {
+            Logger.v { "regenMyNodeInfo skipped: rawMyNodeInfo is null" }
         }
     }
 }
