@@ -20,18 +20,6 @@ import android.os.RemoteException
 import co.touchlab.kermit.Logger
 
 /**
- * Wraps and discards exceptions, but reports them to the crash reporter before logging. Use this for operations that
- * should not crash the process but are still unexpected.
- */
-fun exceptionReporter(inner: () -> Unit) {
-    try {
-        inner()
-    } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
-        Exceptions.report(ex, "exceptionReporter", "Uncaught Exception")
-    }
-}
-
-/**
  * Wraps an operation and converts any thrown exceptions into [RemoteException] for safe return through an AIDL
  * interface.
  */

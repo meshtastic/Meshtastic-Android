@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -39,11 +38,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.getNeighborInfoResponse
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.neighbor_info
@@ -84,8 +83,6 @@ fun NeighborInfoLogScreen(
 
     fun getUsername(nodeNum: Int): String =
         with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
-
-    val context = LocalContext.current
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
@@ -128,12 +125,7 @@ fun NeighborInfoLogScreen(
                         }
                     }
 
-                val time =
-                    DateUtils.formatDateTime(
-                        context,
-                        log.received_date,
-                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-                    )
+                val time = DateFormatter.formatDateTime(log.received_date)
                 val text = if (result != null) "Success" else stringResource(Res.string.routing_error_no_response)
                 val icon = if (result != null) MeshtasticIcons.Groups else MeshtasticIcons.PersonOff
                 val header = stringResource(Res.string.neighbor_info)

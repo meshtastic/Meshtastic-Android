@@ -46,3 +46,15 @@ fun ignoreException(silent: Boolean = false, inner: () -> Unit) {
         }
     }
 }
+
+/**
+ * Wraps and discards exceptions, but reports them to the crash reporter before logging. Use this for operations that
+ * should not crash the process but are still unexpected.
+ */
+fun exceptionReporter(inner: () -> Unit) {
+    try {
+        inner()
+    } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
+        Exceptions.report(ex, "exceptionReporter", "Uncaught Exception")
+    }
+}

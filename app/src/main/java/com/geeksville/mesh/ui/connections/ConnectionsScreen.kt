@@ -16,9 +16,6 @@
  */
 package com.geeksville.mesh.ui.connections
 
-import android.net.InetAddresses
-import android.os.Build
-import android.util.Patterns
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -86,15 +83,6 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.Config
 import kotlin.uuid.ExperimentalUuidApi
-
-fun String?.isValidAddress(): Boolean = if (this.isNullOrBlank()) {
-    false
-} else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-    @Suppress("DEPRECATION")
-    Patterns.IP_ADDRESS.matcher(this).matches() || Patterns.DOMAIN_NAME.matcher(this).matches()
-} else {
-    InetAddresses.isNumericAddress(this) || Patterns.DOMAIN_NAME.matcher(this).matches()
-}
 
 /**
  * Composable screen for managing device connections (BLE, TCP, USB). It handles permission requests for location and
@@ -180,8 +168,9 @@ fun ConnectionsScreen(
                 val uiState =
                     when {
                         connectionState.isConnected() && ourNode != null -> 2
-                        connectionState == ConnectionState.Connecting ||
-                            (connectionState == ConnectionState.Disconnected && selectedDevice != "n") -> 1
+                        connectionState.isConnected() ||
+                            connectionState == ConnectionState.Connecting ||
+                            selectedDevice != NO_DEVICE_SELECTED -> 1
 
                         else -> 0
                     }

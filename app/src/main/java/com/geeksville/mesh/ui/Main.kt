@@ -507,42 +507,47 @@ private fun VersionChecks(viewModel: UIViewModel) {
                         },
                     )
                 } else {
-                    myFirmwareVersion?.let { fwVersion ->
-                        val curVer = DeviceVersion(fwVersion)
-                        Logger.i {
-                            "[FW_CHECK] Firmware version comparison - " +
-                                "device: $curVer (raw: $fwVersion), " +
-                                "absoluteMin: ${MeshService.absoluteMinDeviceVersion}, " +
-                                "min: ${MeshService.minDeviceVersion}"
-                        }
+                    myFirmwareVersion
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { fwVersion ->
+                            val curVer = DeviceVersion(fwVersion)
+                            Logger.i {
+                                "[FW_CHECK] Firmware version comparison - " +
+                                    "device: $curVer (raw: $fwVersion), " +
+                                    "absoluteMin: ${MeshService.absoluteMinDeviceVersion}, " +
+                                    "min: ${MeshService.minDeviceVersion}"
+                            }
 
-                        if (curVer < MeshService.absoluteMinDeviceVersion) {
-                            Logger.w {
-                                "[FW_CHECK] Firmware too old - " +
-                                    "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}"
+                            if (curVer < MeshService.absoluteMinDeviceVersion) {
+                                Logger.w {
+                                    "[FW_CHECK] Firmware too old - " +
+                                        "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}"
+                                }
+                                val title = getString(Res.string.firmware_too_old)
+                                val message = getString(Res.string.firmware_old)
+                                viewModel.showAlert(
+                                    title = title,
+                                    html = message,
+                                    onConfirm = {
+                                        val service = viewModel.meshService ?: return@showAlert
+                                        MeshService.changeDeviceAddress(context, service, "n")
+                                    },
+                                )
+                            } else if (curVer < MeshService.minDeviceVersion) {
+                                Logger.w {
+                                    "[FW_CHECK] Firmware should update - " +
+                                        "device: $curVer < min: ${MeshService.minDeviceVersion}"
+                                }
+                                val title = getString(Res.string.should_update_firmware)
+                                val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
+                                viewModel.showAlert(title = title, message = message, onConfirm = {})
+                            } else {
+                                Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                             }
-                            val title = getString(Res.string.firmware_too_old)
-                            val message = getString(Res.string.firmware_old)
-                            viewModel.showAlert(
-                                title = title,
-                                html = message,
-                                onConfirm = {
-                                    val service = viewModel.meshService ?: return@showAlert
-                                    MeshService.changeDeviceAddress(context, service, "n")
-                                },
-                            )
-                        } else if (curVer < MeshService.minDeviceVersion) {
-                            Logger.w {
-                                "[FW_CHECK] Firmware should update - " +
-                                    "device: $curVer < min: ${MeshService.minDeviceVersion}"
-                            }
-                            val title = getString(Res.string.should_update_firmware)
-                            val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
-                            viewModel.showAlert(title = title, message = message, onConfirm = {})
-                        } else {
-                            Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                         }
-                    } ?: run { Logger.w { "[FW_CHECK] Firmware version is null despite myNodeInfo being present" } }
+                        ?: run {
+                            Logger.w { "[FW_CHECK] Firmware version is null or blank despite myNodeInfo being present" }
+                        }
                 }
             } ?: run { Logger.d { "[FW_CHECK] myNodeInfo is null, skipping firmware check" } }
         } else {

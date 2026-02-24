@@ -15,10 +15,10 @@ dependencies {
     // The core AIDL interface and Intent constants
     implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-api:v2.x.x")
     
-    // Data models (DataPacket, MeshUser, NodeInfo, etc.)
+    // Data models (DataPacket, MeshUser, NodeInfo, etc.) - Kotlin Multiplatform
     implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:v2.x.x")
     
-    // Protobuf definitions (PortNum, Telemetry, etc.)
+    // Protobuf definitions (PortNum, Telemetry, etc.) - Kotlin Multiplatform
     implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-proto:v2.x.x")
 }
 ```

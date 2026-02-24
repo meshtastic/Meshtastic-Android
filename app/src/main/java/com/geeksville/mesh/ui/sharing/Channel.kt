@@ -16,6 +16,7 @@
  */
 package com.geeksville.mesh.ui.sharing
 
+import android.net.Uri
 import android.os.RemoteException
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -68,6 +69,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode
@@ -299,10 +301,10 @@ fun ChannelScreen(
 
 @Composable
 private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
-    val url = channelSet.getChannelUrl(shouldAddChannel)
+    val commonUri = channelSet.getChannelUrl(shouldAddChannel)
     QrDialog(
         title = stringResource(Res.string.share_channels_qr),
-        uri = url,
+        uri = commonUri.toPlatformUri() as Uri,
         qrCode = channelSet.qrCode(shouldAddChannel),
         onDismiss = onDismiss,
     )

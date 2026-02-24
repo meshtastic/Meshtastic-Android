@@ -50,9 +50,9 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.ui.connections.ScannerViewModel
-import com.geeksville.mesh.ui.connections.isValidAddress
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.isValidAddress
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device
 import org.meshtastic.core.resources.address

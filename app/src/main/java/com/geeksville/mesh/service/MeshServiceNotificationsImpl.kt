@@ -44,6 +44,7 @@ import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
@@ -56,6 +57,16 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.local_stats_bad
+import org.meshtastic.core.resources.local_stats_battery
+import org.meshtastic.core.resources.local_stats_diagnostics_prefix
+import org.meshtastic.core.resources.local_stats_dropped
+import org.meshtastic.core.resources.local_stats_nodes
+import org.meshtastic.core.resources.local_stats_noise
+import org.meshtastic.core.resources.local_stats_relays
+import org.meshtastic.core.resources.local_stats_traffic
+import org.meshtastic.core.resources.local_stats_uptime
+import org.meshtastic.core.resources.local_stats_utilization
 import org.meshtastic.core.resources.low_battery_message
 import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.mark_as_read
@@ -112,6 +123,7 @@ constructor(
         private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
         private const val STATS_UPDATE_MINUTES = 15
         private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
+        private const val BULLET = "• "
     }
 
     /**
@@ -270,35 +282,59 @@ constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    var cachedTelemetry: Telemetry? = null
-    var cachedLocalStats: LocalStats? = null
-    var nextStatsUpdateMillis: Long = 0
-    var cachedMessage: String? = null
+    private var cachedDeviceMetrics: DeviceMetrics? = null
+    private var cachedLocalStats: LocalStats? = null
+    private var nextStatsUpdateMillis: Long = 0
+    private var cachedMessage: String? = null
 
     // region Public Notification Methods
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification {
-        val hasLocalStats = telemetry?.local_stats != null
-        val hasDeviceMetrics = telemetry?.device_metrics != null
+        // Update caches if telemetry is provided
+        telemetry?.let { t ->
+            t.local_stats?.let { stats ->
+                cachedLocalStats = stats
+                nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
+            }
+            t.device_metrics?.let { metrics -> cachedDeviceMetrics = metrics }
+        }
+
+        // Seeding from database if caches are still null (e.g. on restart or reconnection)
+        if (cachedLocalStats == null || cachedDeviceMetrics == null) {
+            val repo = nodeRepository.get()
+            val myNodeNum = repo.myNodeInfo.value?.myNodeNum
+            if (myNodeNum != null) {
+                // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
+                // and we only do this once if the cache is empty.
+                val nodes = runBlocking { repo.getNodeDBbyNum().first() }
+                nodes[myNodeNum]?.let { entity ->
+                    if (cachedDeviceMetrics == null) {
+                        cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
+                    }
+                    if (cachedLocalStats == null) {
+                        cachedLocalStats = entity.deviceTelemetry.local_stats
+                    }
+                }
+            }
+        }
+
+        val stats = cachedLocalStats
+        val metrics = cachedDeviceMetrics
+
         val message =
             when {
-                hasLocalStats -> {
-                    val localStatsMessage = telemetry?.local_stats?.formatToString()
-                    cachedTelemetry = telemetry
-                    nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
-                    localStatsMessage
-                }
-                cachedTelemetry == null && hasDeviceMetrics -> {
-                    val deviceMetricsMessage = telemetry?.device_metrics?.formatToString()
-                    if (cachedLocalStats == null) {
-                        cachedTelemetry = telemetry
-                    }
-                    nextStatsUpdateMillis = nowMillis
-                    deviceMetricsMessage
-                }
+                stats != null -> stats.formatToString(metrics?.battery_level)
+                metrics != null -> metrics.formatToString()
                 else -> null
             }
 
-        cachedMessage = message ?: cachedMessage ?: getString(Res.string.no_local_stats)
+        // Only update cachedMessage if we have something new, otherwise keep what we have.
+        // Fallback to "No Stats Available" only if we truly have nothing.
+        if (message != null) {
+            cachedMessage = message
+        } else if (cachedMessage == null) {
+            cachedMessage = getString(Res.string.no_local_stats)
+        }
 
         val notification =
             createServiceStateNotification(
@@ -471,7 +507,8 @@ constructor(
                 .setShowWhen(true)
 
         message?.let {
-            builder.setContentText(it)
+            // First line of message is used for collapsed view, ensure it doesn't have a bullet
+            builder.setContentText(it.substringBefore("\n").removePrefix(BULLET))
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
         }
 
@@ -633,7 +670,7 @@ constructor(
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
         val title = getString(Res.string.low_battery_title).format(node.shortName)
-        val batteryLevel = node.deviceTelemetry?.device_metrics?.battery_level ?: 0
+        val batteryLevel = node.deviceMetrics?.battery_level ?: 0
         val message = getString(Res.string.low_battery_message).format(node.longName, batteryLevel)
 
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
@@ -811,23 +848,48 @@ constructor(
 
         return IconCompat.createWithBitmap(bitmap)
     }
+
     // endregion
-}
 
-// Extension function to format LocalStats into a readable string.
-private fun LocalStats.formatToString(): String {
-    val parts = mutableListOf<String>()
-    parts.add("Uptime: ${formatUptime(uptime_seconds)}")
-    parts.add("ChUtil: %.2f%%".format(channel_utilization))
-    parts.add("AirUtilTX: %.2f%%".format(air_util_tx))
-    return parts.joinToString("\n")
-}
+    // region Extension Functions (Localized)
 
-private fun DeviceMetrics.formatToString(): String {
-    val parts = mutableListOf<String>()
-    battery_level?.let { parts.add("Battery Level: $it") }
-    uptime_seconds?.let { parts.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { parts.add("ChUtil: %.2f%%".format(it)) }
-    air_util_tx?.let { parts.add("AirUtilTX: %.2f%%".format(it)) }
-    return parts.joinToString("\n")
+    private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
+        val parts = mutableListOf<String>()
+        batteryLevel?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+        parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
+        parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization, air_util_tx))
+
+        // Traffic Stats
+        if (num_packets_tx > 0 || num_packets_rx > 0) {
+            parts.add(BULLET + getString(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe))
+        }
+        if (num_tx_relay > 0) {
+            parts.add(BULLET + getString(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
+        }
+
+        // Diagnostic Fields
+        val diagnosticParts = mutableListOf<String>()
+        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise, noise_floor))
+        if (num_packets_rx_bad > 0) diagnosticParts.add(getString(Res.string.local_stats_bad, num_packets_rx_bad))
+        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped, num_tx_dropped))
+
+        if (diagnosticParts.isNotEmpty()) {
+            parts.add(
+                BULLET + getString(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
+            )
+        }
+
+        return parts.joinToString("\n")
+    }
+
+    private fun DeviceMetrics.formatToString(): String {
+        val parts = mutableListOf<String>()
+        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
+        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f))
+        return parts.joinToString("\n")
+    }
+
+    // endregion
 }

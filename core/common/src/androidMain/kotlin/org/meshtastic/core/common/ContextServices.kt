@@ -17,6 +17,7 @@
 package org.meshtastic.core.common
 
 import android.Manifest
+import android.app.Application
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.IntentFilter
@@ -24,6 +25,11 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
 import androidx.core.content.ContextCompat
+
+/** Global accessor for Android Application. Must be initialized at app startup. */
+object ContextServices {
+    lateinit var app: Application
+}
 
 /** Checks if the device has a GPS receiver. */
 fun Context.hasGps(): Boolean {
