@@ -623,6 +623,7 @@
     <string name="wifi_enabled">WiFi käytössä</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
+    <string name="get_document">Hae asiakirja</string>
     <string name="ethernet_config">Verkon asetukset</string>
     <string name="ethernet_enabled">Ethernet käytössä</string>
     <string name="ntp_server">NTP palvelin</string>
@@ -1143,4 +1144,14 @@
     <string name="permission_granted">Lupa myönnetty</string>
     <string name="permission_denied">Lupa evätty</string>
     <string name="map_style_selection">Karttatyylin valinta</string>
+    <string name="local_stats_battery">Akku: %1$d%%</string>
+    <string name="local_stats_nodes">Laitteet: %1$d verkossa / %2$d yhteensä</string>
+    <string name="local_stats_uptime">Käyttöaika: %1$s</string>
+    <string name="local_stats_utilization">Kanavan käytöaste: %1$.2f%% | Lähestysajan käyttöaste: %2$.2f%%</string>
+    <string name="local_stats_traffic">Liikenne: Lähetetyt %1$d / Vastaanotetut %2$d (Kaksoiskappaleet: %3$d)</string>
+    <string name="local_stats_relays">Välitetyt: %1$d (Peruutetut: %2$d)</string>
+    <string name="local_stats_diagnostics_prefix">Vianmääritys: %1$s</string>
+    <string name="local_stats_noise">Kohinataso %1$d dBm</string>
+    <string name="local_stats_bad">Huonot %1$d</string>
+    <string name="local_stats_dropped">Hylätyt paketit %1$d</string>
 </resources>
