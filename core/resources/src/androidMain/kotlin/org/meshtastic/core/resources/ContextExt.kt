@@ -42,5 +42,6 @@ fun getString(stringResource: StringResource, vararg formatArgs: Any): String = 
     // Compose Multiplatform doesn't fully support complex formatting like %.2f
     // Fetch the raw string and format it using standard Java String.format.
     val rawString = org.jetbrains.compose.resources.getString(stringResource)
+    @Suppress("SpreadOperator")
     String.format(java.util.Locale.getDefault(), rawString, *resolvedArgs)
 }

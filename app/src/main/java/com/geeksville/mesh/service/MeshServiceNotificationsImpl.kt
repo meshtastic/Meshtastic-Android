@@ -857,7 +857,7 @@ constructor(
     private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
         val parts = mutableListOf<String>()
         batteryLevel?.let {
-            if (it > 100) {
+            if (it > MAX_BATTERY_LEVEL) {
                 parts.add(BULLET + getString(Res.string.powered))
             } else {
                 parts.add(BULLET + getString(Res.string.local_stats_battery, it))
