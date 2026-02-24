@@ -31,9 +31,7 @@ implementation(projects.core.model)
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:model[model]:::android-library
-  :core:model --> :core:proto
-  :core:model --> :core:common
+  :core:model[model]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
