@@ -81,6 +81,17 @@ constructor(
     val myId: StateFlow<String?>
         get() = _myId
 
+    private val _localStats = MutableStateFlow<org.meshtastic.proto.LocalStats?>(null)
+
+    /** The latest local stats telemetry received from the locally connected node. */
+    val localStats: StateFlow<org.meshtastic.proto.LocalStats?>
+        get() = _localStats
+
+    /** Update the cached local stats telemetry. */
+    fun updateLocalStats(stats: org.meshtastic.proto.LocalStats) {
+        _localStats.value = stats
+    }
+
     /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
     val nodeDBbyNum: StateFlow<Map<Int, Node>> =
         nodeInfoReadDataSource

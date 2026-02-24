@@ -296,6 +296,7 @@ constructor(
     }
 
     fun updateTelemetry(telemetry: Telemetry) {
+        telemetry.local_stats?.let { nodeRepository.updateLocalStats(it) }
         updateStatusNotification(telemetry)
         scope.handledLaunch { LocalStatsWidget().updateAll(context) }
     }

@@ -95,18 +95,22 @@ class LocalStatsWidget : GlanceAppWidget() {
             val myNodeInfo by nodeRepository.myNodeInfo.collectAsState(null)
             val nodes by nodeRepository.nodeDBbyNum.collectAsState(emptyMap())
             val connectionState by connectionStateHandler.connectionState.collectAsState()
+            val localStats by nodeRepository.localStats.collectAsState(null)
 
-            GlanceTheme { WidgetContent(myNodeInfo, nodes, connectionState) }
+            GlanceTheme { WidgetContent(myNodeInfo, nodes, connectionState, localStats) }
         }
     }
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     @androidx.compose.runtime.Composable
-    private fun WidgetContent(myNodeInfo: MyNodeEntity?, nodes: Map<Int, Node>, connectionState: ConnectionState) {
+    private fun WidgetContent(
+        myNodeInfo: MyNodeEntity?,
+        nodes: Map<Int, Node>,
+        connectionState: ConnectionState,
+        stats: org.meshtastic.proto.LocalStats?
+    ) {
         val localNode = myNodeInfo?.let { nodes[it.myNodeNum] }
-        val telemetry = localNode?.toEntity()?.deviceTelemetry
         val metrics = localNode?.deviceMetrics
-        val stats = telemetry?.local_stats
 
         val batteryLevel = metrics?.battery_level ?: 0
         val isPowered = batteryLevel > 100

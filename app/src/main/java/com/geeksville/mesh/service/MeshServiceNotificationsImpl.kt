@@ -313,7 +313,7 @@ constructor(
                         cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
                     }
                     if (cachedLocalStats == null) {
-                        cachedLocalStats = entity.deviceTelemetry.local_stats
+                        cachedLocalStats = repo.localStats.value
                     }
                 }
             }
