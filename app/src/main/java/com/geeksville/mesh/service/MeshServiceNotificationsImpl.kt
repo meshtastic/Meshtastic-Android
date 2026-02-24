@@ -44,6 +44,7 @@ import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
@@ -270,35 +271,59 @@ constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    var cachedTelemetry: Telemetry? = null
-    var cachedLocalStats: LocalStats? = null
-    var nextStatsUpdateMillis: Long = 0
-    var cachedMessage: String? = null
+    private var cachedDeviceMetrics: DeviceMetrics? = null
+    private var cachedLocalStats: LocalStats? = null
+    private var nextStatsUpdateMillis: Long = 0
+    private var cachedMessage: String? = null
 
     // region Public Notification Methods
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification {
-        val hasLocalStats = telemetry?.local_stats != null
-        val hasDeviceMetrics = telemetry?.device_metrics != null
+        // Update caches if telemetry is provided
+        telemetry?.let { t ->
+            t.local_stats?.let { stats ->
+                cachedLocalStats = stats
+                nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
+            }
+            t.device_metrics?.let { metrics -> cachedDeviceMetrics = metrics }
+        }
+
+        // Seeding from database if caches are still null (e.g. on restart or reconnection)
+        if (cachedLocalStats == null || cachedDeviceMetrics == null) {
+            val repo = nodeRepository.get()
+            val myNodeNum = repo.myNodeInfo.value?.myNodeNum
+            if (myNodeNum != null) {
+                // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
+                // and we only do this once if the cache is empty.
+                val nodes = runBlocking { repo.getNodeDBbyNum().first() }
+                nodes[myNodeNum]?.let { entity ->
+                    if (cachedDeviceMetrics == null) {
+                        cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
+                    }
+                    if (cachedLocalStats == null) {
+                        cachedLocalStats = entity.deviceTelemetry.local_stats
+                    }
+                }
+            }
+        }
+
+        val stats = cachedLocalStats
+        val metrics = cachedDeviceMetrics
+
         val message =
             when {
-                hasLocalStats -> {
-                    val localStatsMessage = telemetry?.local_stats?.formatToString()
-                    cachedTelemetry = telemetry
-                    nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
-                    localStatsMessage
-                }
-                cachedTelemetry == null && hasDeviceMetrics -> {
-                    val deviceMetricsMessage = telemetry?.device_metrics?.formatToString()
-                    if (cachedLocalStats == null) {
-                        cachedTelemetry = telemetry
-                    }
-                    nextStatsUpdateMillis = nowMillis
-                    deviceMetricsMessage
-                }
+                stats != null -> stats.formatToString(metrics?.battery_level)
+                metrics != null -> metrics.formatToString()
                 else -> null
             }
 
-        cachedMessage = message ?: cachedMessage ?: getString(Res.string.no_local_stats)
+        // Only update cachedMessage if we have something new, otherwise keep what we have.
+        // Fallback to "No Stats Available" only if we truly have nothing.
+        if (message != null) {
+            cachedMessage = message
+        } else if (cachedMessage == null) {
+            cachedMessage = getString(Res.string.no_local_stats)
+        }
 
         val notification =
             createServiceStateNotification(
@@ -471,8 +496,8 @@ constructor(
                 .setShowWhen(true)
 
         message?.let {
-            builder.setContentText(it)
-            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
+            builder.setContentText(it.substringBefore("\n")) // Show first line (Status) in collapsed
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it)) // Full stats in expanded
         }
 
         nextUpdateAt
@@ -633,7 +658,7 @@ constructor(
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
         val title = getString(Res.string.low_battery_title).format(node.shortName)
-        val batteryLevel = node.deviceTelemetry?.device_metrics?.battery_level ?: 0
+        val batteryLevel = node.deviceTelemetry.device_metrics?.battery_level ?: 0
         val message = getString(Res.string.low_battery_message).format(node.longName, batteryLevel)
 
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
@@ -815,19 +840,44 @@ constructor(
 }
 
 // Extension function to format LocalStats into a readable string.
-private fun LocalStats.formatToString(): String {
+private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
     val parts = mutableListOf<String>()
+    batteryLevel?.let { parts.add("Battery: $it%") }
+    parts.add("Nodes: $num_online_nodes online / $num_total_nodes total")
     parts.add("Uptime: ${formatUptime(uptime_seconds)}")
-    parts.add("ChUtil: %.2f%%".format(channel_utilization))
-    parts.add("AirUtilTX: %.2f%%".format(air_util_tx))
+    parts.add("Channel Utilization: %.2f%%".format(channel_utilization))
+    parts.add("Air Utilization TX: %.2f%%".format(air_util_tx))
+
+    // Traffic Stats (only show if active)
+    if (num_packets_tx > 0 || num_packets_rx > 0) {
+        parts.add("• Packets: TX $num_packets_tx / RX $num_packets_rx")
+    }
+    if (num_rx_dupe > 0) {
+        parts.add("• Duplicates Received: $num_rx_dupe")
+    }
+    if (num_tx_relay > 0) {
+        parts.add("• Packets Relayed: $num_tx_relay (Canceled: $num_tx_relay_canceled)")
+    }
+
+    // Diagnostic Fields
+    if (noise_floor != 0) {
+        parts.add("• Noise Floor: $noise_floor dBm")
+    }
+    if (num_packets_rx_bad > 0) {
+        parts.add("• Bad Packets Received: $num_packets_rx_bad")
+    }
+    if (num_tx_dropped > 0) {
+        parts.add("• Transmit Packets Dropped: $num_tx_dropped")
+    }
+
     return parts.joinToString("\n")
 }
 
 private fun DeviceMetrics.formatToString(): String {
     val parts = mutableListOf<String>()
-    battery_level?.let { parts.add("Battery Level: $it") }
+    battery_level?.let { parts.add("Battery: $it%") }
     uptime_seconds?.let { parts.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { parts.add("ChUtil: %.2f%%".format(it)) }
-    air_util_tx?.let { parts.add("AirUtilTX: %.2f%%".format(it)) }
+    channel_utilization?.let { parts.add("Channel Utilization: %.2f%%".format(it)) }
+    air_util_tx?.let { parts.add("Air Utilization TX: %.2f%%".format(it)) }
     return parts.joinToString("\n")
 }

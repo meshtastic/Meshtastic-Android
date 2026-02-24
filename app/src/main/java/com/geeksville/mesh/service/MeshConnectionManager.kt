@@ -83,6 +83,9 @@ constructor(
         this.scope = scope
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
+        // Ensure notification title and content stay in sync with state changes
+        connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
                 locationRequestsJob?.cancel()
@@ -134,7 +137,6 @@ constructor(
             is ConnectionState.DeviceSleep -> handleDeviceSleep()
             is ConnectionState.Disconnected -> handleDisconnected()
         }
-        updateStatusNotification()
     }
 
     private fun handleConnected() {
@@ -145,7 +147,9 @@ constructor(
         serviceBroadcasts.broadcastConnection()
         Logger.d { "Starting connect" }
         connectTimeMsec = nowMillis
-        scope.handledLaunch { nodeRepository.clearMyNodeInfo() }
+        // We do NOT clear my node info here because it causes a state loop where we never transition to Connected
+        // due to flow observations on myNodeInfo triggering logic that relies on a stable nodeNum.
+        // The repository will clear/update it properly during the config flow.
         startConfigOnly()
     }
 
@@ -235,8 +239,6 @@ constructor(
                 historyManager.requestHistoryReplay("onNodeDbReady", myNodeNum, it, "Unknown")
             }
         }
-
-        updateStatusNotification()
     }
 
     private fun reportConnection() {
