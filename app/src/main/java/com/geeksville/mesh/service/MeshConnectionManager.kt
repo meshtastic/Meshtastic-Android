@@ -17,8 +17,12 @@
 package com.geeksville.mesh.service
 
 import android.app.Notification
+import android.content.Context
+import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.widget.LocalStatsWidget
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +65,7 @@ import kotlin.time.DurationUnit
 class MeshConnectionManager
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionStateHolder: ConnectionStateHandler,
     private val serviceBroadcasts: MeshServiceBroadcasts,
@@ -87,7 +92,12 @@ constructor(
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
-        connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+        connectionStateHolder.connectionState
+            .onEach {
+                updateStatusNotification()
+                LocalStatsWidget().updateAll(context)
+            }
+            .launchIn(scope)
 
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
@@ -287,6 +297,7 @@ constructor(
 
     fun updateTelemetry(telemetry: Telemetry) {
         updateStatusNotification(telemetry)
+        scope.handledLaunch { LocalStatsWidget().updateAll(context) }
     }
 
     fun updateStatusNotification(telemetry: Telemetry? = null): Notification {
