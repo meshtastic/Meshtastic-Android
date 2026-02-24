@@ -163,77 +163,81 @@ class LocalStatsWidget : GlanceAppWidget() {
                     )
                 }
             } else {
-                // Battery
-                StatRow(
-                    label = getString(Res.string.battery),
-                    value = batteryText,
-                    progress = (batteryLevel / 100f).coerceIn(0f, 1f),
-                )
+                Column(modifier = GlanceModifier.fillMaxWidth()) {
+                    // Battery
+                    StatRow(
+                        label = getString(Res.string.battery),
+                        value = batteryText,
+                        progress = (batteryLevel / 100f).coerceIn(0f, 1f),
+                    )
 
-                Spacer(GlanceModifier.height(4.dp))
+                    Spacer(GlanceModifier.height(4.dp))
 
-                // Channel Utilization
-                StatRow(
-                    label = getString(Res.string.channel_utilization),
-                    value = String.format(Locale.ROOT, "%.1f%%", channelUtil),
-                    progress = (channelUtil / 100f).coerceIn(0f, 1f),
-                )
+                    // Channel Utilization
+                    StatRow(
+                        label = getString(Res.string.channel_utilization),
+                        value = String.format(Locale.ROOT, "%.1f%%", channelUtil),
+                        progress = (channelUtil / 100f).coerceIn(0f, 1f),
+                    )
 
-                Spacer(GlanceModifier.height(4.dp))
+                    Spacer(GlanceModifier.height(4.dp))
 
-                // Air Utilization TX
-                StatRow(
-                    label = getString(Res.string.air_utilization),
-                    value = String.format(Locale.ROOT, "%.1f%%", airUtilTx),
-                    progress = (airUtilTx / 100f).coerceIn(0f, 1f),
-                )
+                    // Air Utilization TX
+                    StatRow(
+                        label = getString(Res.string.air_utilization),
+                        value = String.format(Locale.ROOT, "%.1f%%", airUtilTx),
+                        progress = (airUtilTx / 100f).coerceIn(0f, 1f),
+                    )
+                }
 
                 Spacer(GlanceModifier.height(8.dp))
 
                 // Traffic & Relay Stats (Condensed)
                 if (stats != null) {
-                    if (stats.num_packets_tx > 0 || stats.num_packets_rx > 0) {
-                        Text(
-                            text =
-                            getString(
-                                Res.string.local_stats_traffic,
-                                stats.num_packets_tx,
-                                stats.num_packets_rx,
-                                stats.num_rx_dupe,
-                            ),
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                            modifier = GlanceModifier.fillMaxWidth(),
-                        )
-                    }
-                    if (stats.num_tx_relay > 0) {
-                        Text(
-                            text =
-                            getString(
-                                Res.string.local_stats_relays,
-                                stats.num_tx_relay,
-                                stats.num_tx_relay_canceled,
-                            ),
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                            modifier = GlanceModifier.fillMaxWidth(),
-                        )
-                    }
+                    Column(modifier = GlanceModifier.fillMaxWidth()) {
+                        if (stats.num_packets_tx > 0 || stats.num_packets_rx > 0) {
+                            Text(
+                                text =
+                                getString(
+                                    Res.string.local_stats_traffic,
+                                    stats.num_packets_tx,
+                                    stats.num_packets_rx,
+                                    stats.num_rx_dupe,
+                                ),
+                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                                modifier = GlanceModifier.fillMaxWidth(),
+                            )
+                        }
+                        if (stats.num_tx_relay > 0) {
+                            Text(
+                                text =
+                                getString(
+                                    Res.string.local_stats_relays,
+                                    stats.num_tx_relay,
+                                    stats.num_tx_relay_canceled,
+                                ),
+                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                                modifier = GlanceModifier.fillMaxWidth(),
+                            )
+                        }
 
-                    // Diagnostics
-                    val diag = mutableListOf<String>()
-                    if (stats.noise_floor != 0) diag.add(getString(Res.string.local_stats_noise, stats.noise_floor))
-                    if (stats.num_packets_rx_bad > 0) {
-                        diag.add(getString(Res.string.local_stats_bad, stats.num_packets_rx_bad))
-                    }
-                    if (stats.num_tx_dropped > 0) {
-                        diag.add(getString(Res.string.local_stats_dropped, stats.num_tx_dropped))
-                    }
+                        // Diagnostics
+                        val diag = mutableListOf<String>()
+                        if (stats.noise_floor != 0) diag.add(getString(Res.string.local_stats_noise, stats.noise_floor))
+                        if (stats.num_packets_rx_bad > 0) {
+                            diag.add(getString(Res.string.local_stats_bad, stats.num_packets_rx_bad))
+                        }
+                        if (stats.num_tx_dropped > 0) {
+                            diag.add(getString(Res.string.local_stats_dropped, stats.num_tx_dropped))
+                        }
 
-                    if (diag.isNotEmpty()) {
-                        Text(
-                            text = getString(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                            modifier = GlanceModifier.fillMaxWidth(),
-                        )
+                        if (diag.isNotEmpty()) {
+                            Text(
+                                text = getString(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
+                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                                modifier = GlanceModifier.fillMaxWidth(),
+                            )
+                        }
                     }
                     Spacer(GlanceModifier.height(8.dp))
                 }
