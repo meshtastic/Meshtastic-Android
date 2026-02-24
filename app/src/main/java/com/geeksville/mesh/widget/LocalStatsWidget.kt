@@ -144,17 +144,18 @@ class LocalStatsWidget : GlanceAppWidget() {
                 Column(
                     modifier = GlanceModifier.defaultWeight(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    val statusText = when (connectionState) {
-                        is ConnectionState.Disconnected -> getString(Res.string.disconnected)
-                        is ConnectionState.Connecting -> getString(Res.string.connecting)
-                        is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
-                        is ConnectionState.Connected -> "" // Handled by outer condition
-                    }
+                    val statusText =
+                        when (connectionState) {
+                            is ConnectionState.Disconnected -> getString(Res.string.disconnected)
+                            is ConnectionState.Connecting -> getString(Res.string.connecting)
+                            is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+                            is ConnectionState.Connected -> ""
+                        }
                     Text(
                         text = statusText,
-                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 16.sp)
+                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 16.sp),
                     )
                 }
             } else {
@@ -203,7 +204,11 @@ class LocalStatsWidget : GlanceAppWidget() {
                     if (stats.num_tx_relay > 0) {
                         Text(
                             text =
-                            getString(Res.string.local_stats_relays, stats.num_tx_relay, stats.num_tx_relay_canceled),
+                            getString(
+                                Res.string.local_stats_relays,
+                                stats.num_tx_relay,
+                                stats.num_tx_relay_canceled,
+                            ),
                             style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                             modifier = GlanceModifier.fillMaxWidth(),
                         )
@@ -215,7 +220,9 @@ class LocalStatsWidget : GlanceAppWidget() {
                     if (stats.num_packets_rx_bad > 0) {
                         diag.add(getString(Res.string.local_stats_bad, stats.num_packets_rx_bad))
                     }
-                    if (stats.num_tx_dropped > 0) diag.add(getString(Res.string.local_stats_dropped, stats.num_tx_dropped))
+                    if (stats.num_tx_dropped > 0) {
+                        diag.add(getString(Res.string.local_stats_dropped, stats.num_tx_dropped))
+                    }
 
                     if (diag.isNotEmpty()) {
                         Text(
