@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "9710",
-      "title": "Add T114 indexed display system with color palette and overlay queue",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9710",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
       "id": "9709",
       "title": "platform: nrf52: Fix typo in BLEDfuSecure filename",
       "page_url": "https://github.com/meshtastic/firmware/pull/9709",
