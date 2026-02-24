@@ -28,13 +28,19 @@ fun getString(stringResource: StringResource): String = runBlocking {
 /** Retrieves a formatted string from the [StringResource] in a blocking manner. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
     val resolvedArgs =
-        formatArgs.map { arg ->
-            if (arg is StringResource) {
-                getString(arg)
-            } else {
-                arg
+        formatArgs
+            .map { arg ->
+                if (arg is StringResource) {
+                    // Resolve nested StringResources recursively
+                    getString(arg)
+                } else {
+                    arg
+                }
             }
-        }
-    @Suppress("SpreadOperator")
-    org.jetbrains.compose.resources.getString(stringResource, *resolvedArgs.toTypedArray())
+            .toTypedArray()
+
+    // Compose Multiplatform doesn't fully support complex formatting like %.2f
+    // Fetch the raw string and format it using standard Java String.format.
+    val rawString = org.jetbrains.compose.resources.getString(stringResource)
+    String.format(java.util.Locale.getDefault(), rawString, *resolvedArgs)
 }
