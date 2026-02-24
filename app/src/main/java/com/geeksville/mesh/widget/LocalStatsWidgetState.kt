@@ -64,5 +64,16 @@ constructor(
                 localNode = localNode,
             )
         }
-            .stateIn(scope = scope, started = SharingStarted.Eagerly, initialValue = LocalStatsWidgetUiState())
+            .stateIn(
+                scope = scope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue =
+                LocalStatsWidgetUiState(
+                    connectionState = serviceRepository.connectionState.value,
+                    myNodeInfo = nodeRepository.myNodeInfo.value,
+                    nodes = nodeRepository.nodeDBbyNum.value,
+                    stats = nodeRepository.localStats.value,
+                    localNode = nodeRepository.ourNodeInfo.value,
+                ),
+            )
 }

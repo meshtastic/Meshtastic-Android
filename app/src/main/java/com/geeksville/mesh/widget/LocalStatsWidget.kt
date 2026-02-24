@@ -33,6 +33,8 @@ import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
 import androidx.glance.appwidget.SizeMode
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.components.Scaffold
 import androidx.glance.appwidget.components.TitleBar
 import androidx.glance.appwidget.cornerRadius
@@ -101,9 +103,9 @@ class LocalStatsWidget : GlanceAppWidget() {
     @Composable
     private fun WidgetContent(state: LocalStatsWidgetUiState) {
         val size = LocalSize.current
-        val isCondensedHeight = size.height < 170.dp
-        val isVeryCondensedHeight = size.height < 110.dp
-        val isCondensedWidth = size.width < 150.dp
+        val isCondensedHeight = size.height < 130.dp
+        val isVeryCondensedHeight = size.height < 90.dp
+        val isCondensedWidth = size.width < 140.dp
         val isVeryCondensedWidth = size.width < 100.dp
 
         val localNode = state.localNode
@@ -127,9 +129,12 @@ class LocalStatsWidget : GlanceAppWidget() {
                     startIcon = ImageProvider(com.geeksville.mesh.R.drawable.app_icon),
                     title = if (isCondensedWidth) "" else getString(Res.string.meshtastic_app_name),
                     actions = {
-                        if (!isCondensedWidth && localNode != null) {
-                            NodeChip(localNode.user.short_name, localNode.colors)
-                        }
+                        CircleIconButton(
+                            imageProvider = ImageProvider(com.geeksville.mesh.R.drawable.ic_refresh),
+                            contentDescription = "Refresh",
+                            onClick = actionRunCallback<RefreshLocalStatsAction>(),
+                            backgroundColor = null,
+                        )
                     },
                 )
             },
@@ -139,11 +144,6 @@ class LocalStatsWidget : GlanceAppWidget() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalAlignment = Alignment.Top,
             ) {
-                if (isCondensedWidth && localNode != null) {
-                    NodeChip(localNode.user.short_name, localNode.colors)
-                    Spacer(GlanceModifier.height(2.dp))
-                }
-
                 if (state.connectionState !is ConnectionState.Connected) {
                     Column(
                         modifier = GlanceModifier.defaultWeight(),
@@ -198,7 +198,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                     }
 
                     if (!isCondensedHeight) {
-                        Spacer(GlanceModifier.height(2.dp))
+                        Spacer(GlanceModifier.height(1.dp))
 
                         if (state.stats != null) {
                             Column(modifier = GlanceModifier.fillMaxWidth()) {
@@ -217,7 +217,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                                     )
                                 }
 
-                                if (size.height > 190.dp) {
+                                if (size.height > 140.dp) {
                                     if (state.stats.num_tx_relay > 0) {
                                         Text(
                                             text =
@@ -329,7 +329,7 @@ class LocalStatsWidget : GlanceAppWidget() {
 
     @Composable
     private fun StatRow(label: String, value: String, progress: Float, condensed: Boolean = false) {
-        val verticalPadding = if (condensed) 1.dp else 2.dp
+        val verticalPadding = if (condensed) 0.dp else 1.dp
         Column(modifier = GlanceModifier.fillMaxWidth().padding(vertical = verticalPadding)) {
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -348,7 +348,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                 )
             }
             if (!condensed) {
-                Spacer(GlanceModifier.height(2.dp))
+                Spacer(GlanceModifier.height(1.dp))
                 LinearProgressIndicator(
                     progress = progress,
                     modifier = GlanceModifier.fillMaxWidth().height(3.dp).cornerRadius(2.dp),
