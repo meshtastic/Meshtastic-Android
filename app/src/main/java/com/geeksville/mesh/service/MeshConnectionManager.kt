@@ -99,6 +99,11 @@ constructor(
             }
             .launchIn(scope)
 
+        // Ensure widget is updated when our local node info (metrics) or local stats update
+        nodeRepository.ourNodeInfo.onEach { LocalStatsWidget().updateAll(context) }.launchIn(scope)
+
+        nodeRepository.localStats.onEach { LocalStatsWidget().updateAll(context) }.launchIn(scope)
+
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
                 locationRequestsJob?.cancel()
