@@ -21,8 +21,8 @@ import co.touchlab.kermit.Severity
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.mock.mock
@@ -37,20 +37,23 @@ import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
+import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
+import org.meshtastic.core.ble.BleError
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
+import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class NordicBleInterfaceTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val address = "00:11:22:33:44:55"
-
-    private fun UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Before
     fun setup() {
@@ -66,7 +69,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `full connection and notification flow`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
         val service = mockk<RadioInterfaceService>(relaxed = true)
 
         var fromNumHandle: Int = -1
@@ -107,28 +111,28 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             Characteristic(
-                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                uuid = TORADIO_CHARACTERISTIC,
                                 properties =
                                 CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
                                 permission = Permission.WRITE,
                             )
                             fromNumHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                    uuid = FROMNUM_CHARACTERISTIC,
                                     properties = setOf(CharacteristicProperty.NOTIFY),
                                     permission = Permission.READ,
                                 )
                             fromRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = FROMRADIO_CHARACTERISTIC,
                                     properties = setOf(CharacteristicProperty.READ),
                                     permission = Permission.READ,
                                 )
                             logRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = LOGRADIO_CHARACTERISTIC,
                                     properties = setOf(CharacteristicProperty.NOTIFY),
                                     permission = Permission.READ,
                                 )
@@ -143,7 +147,7 @@ class NordicBleInterfaceTest {
         centralManager.getBondedPeripherals().forEach { println("Found bonded peripheral: ${it.address}") }
 
         // Give it a moment to stabilize
-        delay(100.milliseconds)
+        advanceUntilIdle()
 
         // Create the interface
         println("Creating NordicBleInterface")
@@ -157,7 +161,7 @@ class NordicBleInterfaceTest {
 
         // Wait for connection and discovery
         println("Waiting for connection...")
-        delay(2000.milliseconds)
+        advanceUntilIdle()
 
         println("Verifying onConnect...")
         verify(timeout = 5000) { service.onConnect() }
@@ -170,13 +174,13 @@ class NordicBleInterfaceTest {
         otaPeripheral.simulateValueUpdate(fromNumHandle, byteArrayOf(0x01))
 
         // Wait for drain to start
-        delay(500.milliseconds)
+        advanceUntilIdle()
 
         // Simulate a log radio notification
         val logData = "test log".toByteArray()
         otaPeripheral.simulateValueUpdate(logRadioHandle, logData)
 
-        delay(500.milliseconds)
+        advanceUntilIdle()
 
         // Explicitly stub handleFromRadio just in case relaxed mock fails
         io.mockk.every { service.handleFromRadio(any()) } returns Unit
@@ -189,7 +193,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `handleSendToRadio writes to toRadioCharacteristic`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
         val service = mockk<RadioInterfaceService>(relaxed = true)
 
         var toRadioHandle: Int = -1
@@ -240,10 +245,10 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             toRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = TORADIO_CHARACTERISTIC,
                                     properties =
                                     setOf(
                                         CharacteristicProperty.WRITE,
@@ -257,17 +262,17 @@ class NordicBleInterfaceTest {
                                     }
                             // Add other required chars to avoid discovery failure
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = FROMNUM_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = FROMRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = LOGRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -277,7 +282,7 @@ class NordicBleInterfaceTest {
             }
 
         centralManager.simulatePeripherals(listOf(peripheralSpec))
-        delay(100.milliseconds)
+        advanceUntilIdle()
 
         val nordicInterface =
             NordicBleInterface(
@@ -288,7 +293,7 @@ class NordicBleInterfaceTest {
             )
 
         // Wait for connection
-        delay(1000.milliseconds)
+        advanceUntilIdle()
         verify(timeout = 2000) { service.onConnect() }
 
         // Test writing
@@ -296,7 +301,7 @@ class NordicBleInterfaceTest {
         nordicInterface.handleSendToRadio(dataToSend)
 
         // Give it time to process
-        delay(500.milliseconds)
+        advanceUntilIdle()
 
         assert(writtenValue != null) { "Value should have been written" }
         assert(writtenValue!!.contentEquals(dataToSend)) {
@@ -308,7 +313,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `disconnection triggers onDisconnect`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Mock service
         val service = mockk<RadioInterfaceService>(relaxed = true)
@@ -338,9 +344,9 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             Characteristic(
-                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                uuid = TORADIO_CHARACTERISTIC,
                                 properties =
                                 setOf(
                                     CharacteristicProperty.WRITE,
@@ -349,17 +355,17 @@ class NordicBleInterfaceTest {
                                 permission = Permission.WRITE,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = FROMNUM_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = FROMRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = LOGRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -369,7 +375,7 @@ class NordicBleInterfaceTest {
             }
 
         centralManager.simulatePeripherals(listOf(peripheralSpec))
-        delay(100.milliseconds)
+        advanceUntilIdle()
 
         val nordicInterface =
             NordicBleInterface(
@@ -380,7 +386,7 @@ class NordicBleInterfaceTest {
             )
 
         // Wait for connection
-        delay(1000.milliseconds)
+        advanceUntilIdle()
         verify(timeout = 2000) { service.onConnect() }
 
         // Find the connected peripheral from CentralManager to trigger disconnect
@@ -390,7 +396,7 @@ class NordicBleInterfaceTest {
         connectedPeripheral.disconnect()
 
         // Wait for disconnect event propagation
-        delay(1000.milliseconds)
+        advanceUntilIdle()
 
         // Verify onDisconnect was called on the service
         // NordicBleInterface calls onDisconnect(BleError.Disconnected)
@@ -401,7 +407,8 @@ class NordicBleInterfaceTest {
 
     @Test
     fun `discovery fails if required characteristic missing`() = runTest(testDispatcher) {
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Mock service
         val service = mockk<RadioInterfaceService>(relaxed = true)
@@ -429,27 +436,27 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             // OMIT toRadio characteristic to force failure
                                 /*
                                 Characteristic(
-                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = TORADIO_CHARACTERISTIC,
                                     properties = setOf(CharacteristicProperty.WRITE, CharacteristicProperty.WRITE_WITHOUT_RESPONSE),
                                     permission = Permission.WRITE
                                 )
                                  */
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = FROMNUM_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = FROMRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = LOGRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -459,7 +466,7 @@ class NordicBleInterfaceTest {
             }
 
         centralManager.simulatePeripherals(listOf(peripheralSpec))
-        delay(100.milliseconds)
+        advanceUntilIdle()
 
         val nordicInterface =
             NordicBleInterface(
@@ -470,7 +477,7 @@ class NordicBleInterfaceTest {
             )
 
         // Wait for connection and eventual failure
-        delay(1000.milliseconds)
+        advanceUntilIdle()
 
         // Verify that discovery failed
         verify { service.onDisconnect(any<BleError.DiscoveryFailed>()) }
@@ -481,7 +488,8 @@ class NordicBleInterfaceTest {
     @Test
     fun `write exception triggers disconnect`() = runTest(testDispatcher) {
         val uniqueAddress = "11:22:33:44:55:66"
-        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Mock service
         val service = mockk<RadioInterfaceService>(relaxed = true)
@@ -513,9 +521,9 @@ class NordicBleInterfaceTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             Characteristic(
-                                uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                uuid = TORADIO_CHARACTERISTIC,
                                 properties =
                                 setOf(
                                     CharacteristicProperty.WRITE,
@@ -524,17 +532,17 @@ class NordicBleInterfaceTest {
                                 permission = Permission.WRITE,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = FROMNUM_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = FROMRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = LOGRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -544,7 +552,7 @@ class NordicBleInterfaceTest {
             }
 
         centralManager.simulatePeripherals(listOf(peripheralSpec))
-        delay(1000.milliseconds)
+        advanceUntilIdle()
 
         val nordicInterface =
             NordicBleInterface(
@@ -555,17 +563,106 @@ class NordicBleInterfaceTest {
             )
 
         // Wait for connection
-        delay(1000.milliseconds)
+        advanceUntilIdle()
         verify(timeout = 2000) { service.onConnect() }
 
         // Trigger write which will fail
         nordicInterface.handleSendToRadio(byteArrayOf(0x01))
 
-        // Wait for error propagation
-        delay(500.milliseconds)
+        // Wait for error propagation (retries take time!)
+        // 3 attempts with 500ms delay between them = ~1000ms+
+        advanceUntilIdle()
 
         // Verify onDisconnect was called with error
         verify { service.onDisconnect(any<BleError>()) }
+
+        nordicInterface.close()
+    }
+
+    @Test
+    fun `fromRadioSync flow prefers Indicate characteristic`() = runTest(testDispatcher) {
+        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
+        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
+        val service = mockk<RadioInterfaceService>(relaxed = true)
+
+        var syncCharHandle: Int = -1
+        val payload = byteArrayOf(0xDE.toByte(), 0xAD.toByte())
+
+        val eventHandler =
+            object : PeripheralSpecEventHandler {
+                override fun onConnectionRequest(preferredPhy: List<no.nordicsemi.kotlin.ble.core.Phy>) =
+                    ConnectionResult.Accept
+
+                override fun onReadRequest(characteristic: MockRemoteCharacteristic): ReadResponse =
+                    ReadResponse.Success(byteArrayOf())
+            }
+
+        val peripheralSpec =
+            PeripheralSpec.simulatePeripheral(identifier = address, proximity = Proximity.IMMEDIATE) {
+                advertising(
+                    parameters = LegacyAdvertisingSetParameters(connectable = true, interval = 100.milliseconds),
+                ) {
+                    CompleteLocalName("Meshtastic_Sync")
+                }
+                connectable(
+                    name = "Meshtastic_Sync",
+                    isBonded = true,
+                    eventHandler = eventHandler,
+                    cachedServices = {
+                        Service(uuid = SERVICE_UUID) {
+                            Characteristic(
+                                uuid = TORADIO_CHARACTERISTIC,
+                                properties = setOf(CharacteristicProperty.WRITE),
+                                permission = Permission.WRITE,
+                            )
+                            Characteristic(
+                                uuid = FROMNUM_CHARACTERISTIC,
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = FROMRADIO_CHARACTERISTIC,
+                                properties = setOf(CharacteristicProperty.READ),
+                                permission = Permission.READ,
+                            )
+                            Characteristic(
+                                uuid = LOGRADIO_CHARACTERISTIC,
+                                properties = setOf(CharacteristicProperty.NOTIFY),
+                                permission = Permission.READ,
+                            )
+                            // NEW: Provide the Sync characteristic
+                            syncCharHandle =
+                                Characteristic(
+                                    uuid = FROMRADIOSYNC_CHARACTERISTIC,
+                                    properties = setOf(CharacteristicProperty.INDICATE),
+                                    permission = Permission.READ,
+                                )
+                        }
+                    },
+                )
+            }
+
+        centralManager.simulatePeripherals(listOf(peripheralSpec))
+        advanceUntilIdle()
+
+        val nordicInterface =
+            NordicBleInterface(
+                serviceScope = this,
+                centralManager = centralManager,
+                service = service,
+                address = address,
+            )
+
+        // Wait for connection and discovery
+        advanceUntilIdle()
+        verify(timeout = 2000) { service.onConnect() }
+
+        // Simulate an indication from FROMRADIOSYNC
+        peripheralSpec.simulateValueUpdate(syncCharHandle, payload)
+        advanceUntilIdle()
+
+        // Verify handleFromRadio was called directly with the payload
+        verify(timeout = 2000) { service.handleFromRadio(p = payload) }
 
         nordicInterface.close()
     }

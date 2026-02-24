@@ -47,23 +47,23 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.ui.connections.isValidAddress
+import com.geeksville.mesh.ui.connections.ScannerViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.isValidAddress
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.add_network_device
+import org.meshtastic.core.resources.address
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.confirm_forget_connection
+import org.meshtastic.core.resources.discovered_network_devices
+import org.meshtastic.core.resources.forget_connection
+import org.meshtastic.core.resources.ip_port
+import org.meshtastic.core.resources.no_network_devices
+import org.meshtastic.core.resources.recent_network_devices
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.add_network_device
-import org.meshtastic.core.strings.address
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.confirm_forget_connection
-import org.meshtastic.core.strings.discovered_network_devices
-import org.meshtastic.core.strings.forget_connection
-import org.meshtastic.core.strings.ip_port
-import org.meshtastic.core.strings.no_network_devices
-import org.meshtastic.core.strings.recent_network_devices
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.theme.AppTheme
 
@@ -75,7 +75,7 @@ fun NetworkDevices(
     discoveredNetworkDevices: List<DeviceListEntry>,
     recentNetworkDevices: List<DeviceListEntry>,
     selectedDevice: String,
-    scanModel: BTScanModel,
+    scanModel: ScannerViewModel,
 ) {
     val searchDialogState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -108,9 +108,33 @@ fun NetworkDevices(
         }
     }
 
+    NetworkDevicesInternal(
+        connectionState = connectionState,
+        discoveredNetworkDevices = discoveredNetworkDevices,
+        recentNetworkDevices = recentNetworkDevices,
+        selectedDevice = selectedDevice,
+        onSelect = scanModel::onSelected,
+        onDelete = { device ->
+            deviceToDelete = device
+            showDeleteDialog = true
+        },
+        onClickAdd = { showSearchDialog = true },
+    )
+}
+
+@Composable
+private fun NetworkDevicesInternal(
+    connectionState: ConnectionState,
+    discoveredNetworkDevices: List<DeviceListEntry>,
+    recentNetworkDevices: List<DeviceListEntry>,
+    selectedDevice: String,
+    onSelect: (DeviceListEntry) -> Unit,
+    onDelete: (DeviceListEntry) -> Unit,
+    onClickAdd: () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         val addButton: @Composable () -> Unit = {
-            Button(onClick = { showSearchDialog = true }) {
+            Button(onClick = onClickAdd) {
                 Icon(
                     imageVector = Icons.Rounded.Add,
                     contentDescription = stringResource(Res.string.add_network_device),
@@ -134,11 +158,8 @@ fun NetworkDevices(
                         title = stringResource(Res.string.recent_network_devices),
                         connectionState = connectionState,
                         selectedDevice = selectedDevice,
-                        onSelect = scanModel::onSelected,
-                        onDelete = { device ->
-                            deviceToDelete = device
-                            showDeleteDialog = true
-                        },
+                        onSelect = onSelect,
+                        onDelete = onDelete,
                     )
                 }
 
@@ -147,7 +168,7 @@ fun NetworkDevices(
                         title = stringResource(Res.string.discovered_network_devices),
                         connectionState = connectionState,
                         selectedDevice = selectedDevice,
-                        onSelect = scanModel::onSelected,
+                        onSelect = onSelect,
                     )
                 }
 
@@ -262,4 +283,24 @@ private fun SearchDialogPreview() {
 @Composable
 private fun ConfirmDeleteDialogPreview() {
     AppTheme { ConfirmDeleteDialog(fullAddressToDelete = "", onHideDialog = {}, onConfirm = {}) }
+}
+
+@PreviewLightDark
+@Composable
+private fun NetworkDevicesPreview() {
+    AppTheme {
+        NetworkDevicesInternal(
+            connectionState = ConnectionState.Disconnected,
+            discoveredNetworkDevices = listOf(DeviceListEntry.Tcp("Meshtastic", "t192.168.1.3")),
+            recentNetworkDevices =
+            listOf(
+                DeviceListEntry.Tcp("Home Node", "t192.168.1.100"),
+                DeviceListEntry.Tcp("Office", "t192.168.1.101"),
+            ),
+            selectedDevice = "",
+            onSelect = {},
+            onDelete = {},
+            onClickAdd = {},
+        )
+    }
 }

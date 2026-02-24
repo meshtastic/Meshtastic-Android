@@ -19,7 +19,6 @@
 package org.meshtastic.core.ui.component
 
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import co.touchlab.kermit.Logger
@@ -28,10 +27,11 @@ import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.share_contact
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.share_contact
 import org.meshtastic.proto.SharedContact
 
 /**
@@ -44,7 +44,8 @@ import org.meshtastic.proto.SharedContact
 fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     if (contact == null) return
     val contactToShare = SharedContact(user = contact.user, node_num = contact.num)
-    val uri = contactToShare.getSharedContactUrl()
+    val commonUri = contactToShare.getSharedContactUrl()
+    val uri = commonUri.toPlatformUri() as Uri
     QrDialog(title = stringResource(Res.string.share_contact), uri = uri, qrCode = uri.qrCode, onDismiss = onDismiss)
 }
 
@@ -80,7 +81,8 @@ private fun BitMatrix.toBitmap(): Bitmap {
     for (y in 0 until height) {
         val offset = y * width
         for (x in 0 until width) {
-            pixels[offset + x] = if (get(x, y)) Color.BLACK else Color.WHITE
+            // Black: 0xFF000000, White: 0xFFFFFFFF
+            pixels[offset + x] = if (get(x, y)) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
         }
     }
     val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

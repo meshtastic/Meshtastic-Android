@@ -5,7 +5,19 @@
 <!--region graph-->
 ```mermaid
 graph TB
-  :feature:firmware[firmware]:::null
+  :feature:firmware[firmware]:::android-feature
+  :feature:firmware -.-> :core:ble
+  :feature:firmware -.-> :core:common
+  :feature:firmware -.-> :core:data
+  :feature:firmware -.-> :core:database
+  :feature:firmware -.-> :core:datastore
+  :feature:firmware -.-> :core:model
+  :feature:firmware -.-> :core:navigation
+  :feature:firmware -.-> :core:prefs
+  :feature:firmware -.-> :core:proto
+  :feature:firmware -.-> :core:service
+  :feature:firmware -.-> :core:resources
+  :feature:firmware -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

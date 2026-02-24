@@ -33,17 +33,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.env_metrics_log
-import org.meshtastic.core.strings.humidity
-import org.meshtastic.core.strings.iaq
-import org.meshtastic.core.strings.node_id
-import org.meshtastic.core.strings.pax
-import org.meshtastic.core.strings.pax_metrics_log
-import org.meshtastic.core.strings.role
-import org.meshtastic.core.strings.soil_moisture
-import org.meshtastic.core.strings.soil_temperature
-import org.meshtastic.core.strings.temperature
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.env_metrics_log
+import org.meshtastic.core.resources.humidity
+import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.node_id
+import org.meshtastic.core.resources.pax
+import org.meshtastic.core.resources.pax_metrics_log
+import org.meshtastic.core.resources.role
+import org.meshtastic.core.resources.soil_moisture
+import org.meshtastic.core.resources.soil_temperature
+import org.meshtastic.core.resources.temperature
 
 @Composable
 fun TemperatureInfo(

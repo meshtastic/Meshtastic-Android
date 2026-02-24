@@ -48,10 +48,10 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.exchange_position
-import org.meshtastic.core.strings.open_compass
-import org.meshtastic.core.strings.position
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.exchange_position
+import org.meshtastic.core.resources.open_compass
+import org.meshtastic.core.resources.position
 import org.meshtastic.feature.node.model.LogsType
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction

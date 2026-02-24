@@ -32,12 +32,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.manage_map_layers
-import org.meshtastic.core.strings.map_filter
-import org.meshtastic.core.strings.map_tile_source
-import org.meshtastic.core.strings.orient_north
-import org.meshtastic.core.strings.toggle_my_position
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.manage_map_layers
+import org.meshtastic.core.resources.map_filter
+import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.orient_north
+import org.meshtastic.core.resources.toggle_my_position
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.MapViewModel
 

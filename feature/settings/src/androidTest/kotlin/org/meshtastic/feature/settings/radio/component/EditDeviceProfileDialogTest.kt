@@ -21,14 +21,14 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.meshtastic.core.strings.getString
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.save
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.save
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.Position
 

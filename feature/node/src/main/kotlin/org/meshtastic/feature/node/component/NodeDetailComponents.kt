@@ -53,8 +53,8 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
 
 @Composable
 internal fun SectionCard(

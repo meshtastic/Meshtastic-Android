@@ -45,6 +45,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.json.JSONObject
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -53,20 +54,19 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.cant_shutdown
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.cant_shutdown
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
-import org.meshtastic.feature.settings.util.UiText
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
@@ -683,7 +683,7 @@ constructor(
 
     private fun sendError(error: String) = setResponseStateError(UiText.DynamicString(error))
 
-    private fun sendError(id: StringResource) = setResponseStateError(UiText.StringResource(id))
+    private fun sendError(id: StringResource) = setResponseStateError(UiText.Resource(id))
 
     private fun setResponseStateError(error: UiText) {
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }

@@ -189,15 +189,27 @@
   },
   "pullRequests": [
     {
-      "id": "9675",
-      "title": "add FromRadioSync BLE characteristic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9675",
+      "id": "9710",
+      "title": "Add T114 indexed display system with color palette and overlay queue",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9710",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9668",
-      "title": "Fix/rak3401 button",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9668",
+      "id": "9709",
+      "title": "platform: nrf52: Fix typo in BLEDfuSecure filename",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9709",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9706",
+      "title": "Add VL53L0 distance sensor.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9706",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9675",
+      "title": "add FromRadioSync BLE characteristic",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9675",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
@@ -210,12 +222,6 @@
       "id": "9586",
       "title": "feat(esp32): add support for Native ESP32 Ethernet and WT32-ETH01 variant",
       "page_url": "https://github.com/meshtastic/firmware/pull/9586",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9509",
-      "title": "fix(power): reset LPF when adc_multiplier_override changes at runtime",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9509",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]

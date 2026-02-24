@@ -34,7 +34,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -54,7 +53,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -66,13 +64,13 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channel_1
-import org.meshtastic.core.strings.channel_2
-import org.meshtastic.core.strings.channel_3
-import org.meshtastic.core.strings.current
-import org.meshtastic.core.strings.power_metrics_log
-import org.meshtastic.core.strings.voltage
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel_1
+import org.meshtastic.core.resources.channel_2
+import org.meshtastic.core.resources.channel_3
+import org.meshtastic.core.resources.current
+import org.meshtastic.core.resources.power_metrics_log
+import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.InfantryBlue
 import org.meshtastic.feature.node.detail.NodeRequestEffect
@@ -122,7 +120,7 @@ fun PowerMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigate
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -311,8 +309,8 @@ private fun PowerMetricsChart(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
+@Suppress("CyclomaticComplexMethod")
 private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
     Card(
@@ -336,7 +334,8 @@ private fun PowerMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick:
                         Row {
                             Text(
                                 text = DATE_TIME_FORMAT.format(time),
-                                style = MaterialTheme.typography.titleMediumEmphasized,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
                             )
                         }
 

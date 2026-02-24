@@ -24,9 +24,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.altitude
-import org.meshtastic.core.strings.elevation_suffix
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.altitude
+import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.ui.icon.Elevation
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits

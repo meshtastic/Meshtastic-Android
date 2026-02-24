@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
@@ -33,9 +32,9 @@ import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.DistanceUnit
 import org.meshtastic.core.model.util.toDistanceString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.position_enabled
-import org.meshtastic.core.strings.precise_location
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.position_enabled
+import org.meshtastic.core.resources.precise_location
 import kotlin.math.pow
 import kotlin.math.roundToInt
 

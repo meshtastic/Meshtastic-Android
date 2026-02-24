@@ -34,7 +34,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -46,10 +45,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
@@ -59,12 +58,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.rssi
-import org.meshtastic.core.strings.rssi_definition
-import org.meshtastic.core.strings.signal_quality
-import org.meshtastic.core.strings.snr
-import org.meshtastic.core.strings.snr_definition
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.rssi_definition
+import org.meshtastic.core.resources.signal_quality
+import org.meshtastic.core.resources.snr
+import org.meshtastic.core.resources.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
@@ -98,7 +97,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -261,7 +260,6 @@ private fun SignalMetricsChart(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = (meshPacket.rx_time ?: 0).toLong() * MS_PER_SEC
@@ -288,7 +286,8 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
                                     text = DATE_TIME_FORMAT.format(time),
-                                    style = MaterialTheme.typography.titleMediumEmphasized,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
                                 )
                             }
 

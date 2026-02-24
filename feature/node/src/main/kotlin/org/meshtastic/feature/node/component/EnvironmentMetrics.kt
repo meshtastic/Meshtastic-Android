@@ -40,23 +40,27 @@ import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.model.util.toSmallDistanceString
 import org.meshtastic.core.model.util.toSpeedString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.current
-import org.meshtastic.core.strings.dew_point
-import org.meshtastic.core.strings.distance
-import org.meshtastic.core.strings.gas_resistance
-import org.meshtastic.core.strings.humidity
-import org.meshtastic.core.strings.iaq
-import org.meshtastic.core.strings.lux
-import org.meshtastic.core.strings.pressure
-import org.meshtastic.core.strings.radiation
-import org.meshtastic.core.strings.soil_moisture
-import org.meshtastic.core.strings.soil_temperature
-import org.meshtastic.core.strings.temperature
-import org.meshtastic.core.strings.uv_lux
-import org.meshtastic.core.strings.voltage
-import org.meshtastic.core.strings.weight
-import org.meshtastic.core.strings.wind
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.current
+import org.meshtastic.core.resources.dew_point
+import org.meshtastic.core.resources.distance
+import org.meshtastic.core.resources.gas_resistance
+import org.meshtastic.core.resources.humidity
+import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.ic_dew_point
+import org.meshtastic.core.resources.ic_radioactive
+import org.meshtastic.core.resources.ic_soil_moisture
+import org.meshtastic.core.resources.ic_soil_temperature
+import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.pressure
+import org.meshtastic.core.resources.radiation
+import org.meshtastic.core.resources.soil_moisture
+import org.meshtastic.core.resources.soil_temperature
+import org.meshtastic.core.resources.temperature
+import org.meshtastic.core.resources.uv_lux
+import org.meshtastic.core.resources.voltage
+import org.meshtastic.core.resources.weight
+import org.meshtastic.core.resources.wind
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.Config
@@ -136,7 +140,7 @@ internal fun EnvironmentMetrics(
                                 DrawableMetricInfo(
                                     Res.string.dew_point,
                                     dewPoint.toTempString(isFahrenheit),
-                                    org.meshtastic.feature.node.R.drawable.ic_outlined_dew_point_24,
+                                    Res.drawable.ic_dew_point,
                                 ),
                             )
                         }
@@ -147,7 +151,7 @@ internal fun EnvironmentMetrics(
                                 DrawableMetricInfo(
                                     Res.string.soil_temperature,
                                     st.toTempString(isFahrenheit),
-                                    org.meshtastic.feature.node.R.drawable.soil_temperature,
+                                    Res.drawable.ic_soil_temperature,
                                 ),
                             )
                         }
@@ -157,16 +161,16 @@ internal fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 Res.string.soil_moisture,
                                 "%d%%".format(sm),
-                                org.meshtastic.feature.node.R.drawable.soil_moisture,
+                                Res.drawable.ic_soil_moisture,
                             ),
                         )
                     }
                     radiation?.let { r ->
                         add(
                             DrawableMetricInfo(
-                                Res.string.radiation,
-                                "%.1f µR/h".format(r),
-                                org.meshtastic.feature.node.R.drawable.ic_filled_radioactive_24,
+                                label = Res.string.radiation,
+                                value = "%.1f µR/h".format(r),
+                                icon = Res.drawable.ic_radioactive,
                             ),
                         )
                     }

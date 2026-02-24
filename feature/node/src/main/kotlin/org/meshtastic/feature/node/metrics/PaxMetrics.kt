@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -41,11 +40,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import com.patrykandpatrick.vico.compose.cartesian.VicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
@@ -55,18 +54,18 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.model.util.toDate
-import org.meshtastic.core.model.util.toInstant
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.ble_devices
-import org.meshtastic.core.strings.no_pax_metrics_logs
-import org.meshtastic.core.strings.pax
-import org.meshtastic.core.strings.pax_metrics_log
-import org.meshtastic.core.strings.uptime
-import org.meshtastic.core.strings.wifi_devices
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ble_devices
+import org.meshtastic.core.resources.no_pax_metrics_logs
+import org.meshtastic.core.resources.pax
+import org.meshtastic.core.resources.pax_metrics_log
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.wifi_devices
 import org.meshtastic.core.ui.component.IconInfo
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Paxcount
@@ -189,7 +188,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel(), onNav
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -282,7 +281,6 @@ fun PaxcountInfo(
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, dateFormat: DateFormat, isSelected: Boolean, onClick: () -> Unit) {
     Card(
@@ -301,7 +299,8 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, dateFormat: DateFormat, isS
         Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
             Text(
                 text = dateFormat.format(log.received_date.toInstant().toDate()),
-                style = MaterialTheme.typography.titleMediumEmphasized,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth(),
             )

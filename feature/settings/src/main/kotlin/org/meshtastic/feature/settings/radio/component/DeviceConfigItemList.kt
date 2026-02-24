@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.foundation.clickable
@@ -45,7 +43,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -53,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -64,54 +60,54 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import no.nordicsemi.android.common.core.registerReceiver
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.systemTimeZone
 import org.meshtastic.core.model.util.toPosixString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.accept
-import org.meshtastic.core.strings.are_you_sure
-import org.meshtastic.core.strings.button_gpio
-import org.meshtastic.core.strings.buzzer_gpio
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.config_device_doubleTapAsButtonPress_summary
-import org.meshtastic.core.strings.config_device_ledHeartbeatEnabled_summary
-import org.meshtastic.core.strings.config_device_tripleClickAsAdHocPing_summary
-import org.meshtastic.core.strings.config_device_tzdef_summary
-import org.meshtastic.core.strings.config_device_use_phone_tz
-import org.meshtastic.core.strings.device
-import org.meshtastic.core.strings.double_tap_as_button_press
-import org.meshtastic.core.strings.gpio
-import org.meshtastic.core.strings.hardware
-import org.meshtastic.core.strings.i_know_what_i_m_doing
-import org.meshtastic.core.strings.led_heartbeat
-import org.meshtastic.core.strings.nodeinfo_broadcast_interval
-import org.meshtastic.core.strings.options
-import org.meshtastic.core.strings.rebroadcast_mode
-import org.meshtastic.core.strings.rebroadcast_mode_all_desc
-import org.meshtastic.core.strings.rebroadcast_mode_all_skip_decoding_desc
-import org.meshtastic.core.strings.rebroadcast_mode_core_portnums_only_desc
-import org.meshtastic.core.strings.rebroadcast_mode_known_only_desc
-import org.meshtastic.core.strings.rebroadcast_mode_local_only_desc
-import org.meshtastic.core.strings.rebroadcast_mode_none_desc
-import org.meshtastic.core.strings.role
-import org.meshtastic.core.strings.role_client_base_desc
-import org.meshtastic.core.strings.role_client_desc
-import org.meshtastic.core.strings.role_client_hidden_desc
-import org.meshtastic.core.strings.role_client_mute_desc
-import org.meshtastic.core.strings.role_lost_and_found_desc
-import org.meshtastic.core.strings.role_repeater_desc
-import org.meshtastic.core.strings.role_router_client_desc
-import org.meshtastic.core.strings.role_router_desc
-import org.meshtastic.core.strings.role_router_late_desc
-import org.meshtastic.core.strings.role_sensor_desc
-import org.meshtastic.core.strings.role_tak_desc
-import org.meshtastic.core.strings.role_tak_tracker_desc
-import org.meshtastic.core.strings.role_tracker_desc
-import org.meshtastic.core.strings.router_role_confirmation_text
-import org.meshtastic.core.strings.time_zone
-import org.meshtastic.core.strings.triple_click_adhoc_ping
-import org.meshtastic.core.strings.unrecognized
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.accept
+import org.meshtastic.core.resources.are_you_sure
+import org.meshtastic.core.resources.button_gpio
+import org.meshtastic.core.resources.buzzer_gpio
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.config_device_doubleTapAsButtonPress_summary
+import org.meshtastic.core.resources.config_device_ledHeartbeatEnabled_summary
+import org.meshtastic.core.resources.config_device_tripleClickAsAdHocPing_summary
+import org.meshtastic.core.resources.config_device_tzdef_summary
+import org.meshtastic.core.resources.config_device_use_phone_tz
+import org.meshtastic.core.resources.device
+import org.meshtastic.core.resources.double_tap_as_button_press
+import org.meshtastic.core.resources.gpio
+import org.meshtastic.core.resources.hardware
+import org.meshtastic.core.resources.i_know_what_i_m_doing
+import org.meshtastic.core.resources.led_heartbeat
+import org.meshtastic.core.resources.nodeinfo_broadcast_interval
+import org.meshtastic.core.resources.options
+import org.meshtastic.core.resources.rebroadcast_mode
+import org.meshtastic.core.resources.rebroadcast_mode_all_desc
+import org.meshtastic.core.resources.rebroadcast_mode_all_skip_decoding_desc
+import org.meshtastic.core.resources.rebroadcast_mode_core_portnums_only_desc
+import org.meshtastic.core.resources.rebroadcast_mode_known_only_desc
+import org.meshtastic.core.resources.rebroadcast_mode_local_only_desc
+import org.meshtastic.core.resources.rebroadcast_mode_none_desc
+import org.meshtastic.core.resources.role
+import org.meshtastic.core.resources.role_client_base_desc
+import org.meshtastic.core.resources.role_client_desc
+import org.meshtastic.core.resources.role_client_hidden_desc
+import org.meshtastic.core.resources.role_client_mute_desc
+import org.meshtastic.core.resources.role_lost_and_found_desc
+import org.meshtastic.core.resources.role_repeater_desc
+import org.meshtastic.core.resources.role_router_client_desc
+import org.meshtastic.core.resources.role_router_desc
+import org.meshtastic.core.resources.role_router_late_desc
+import org.meshtastic.core.resources.role_sensor_desc
+import org.meshtastic.core.resources.role_tak_desc
+import org.meshtastic.core.resources.role_tak_tracker_desc
+import org.meshtastic.core.resources.role_tracker_desc
+import org.meshtastic.core.resources.router_role_confirmation_text
+import org.meshtastic.core.resources.time_zone
+import org.meshtastic.core.resources.triple_click_adhoc_ping
+import org.meshtastic.core.resources.unrecognized
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.InsetDivider
@@ -123,6 +119,7 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
+import java.time.ZoneId
 
 private val Config.DeviceConfig.Role.description: StringResource
     get() =
@@ -261,20 +258,11 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack
         }
         item {
             TitledCard(title = stringResource(Res.string.time_zone)) {
-                val context = LocalContext.current
-                val appTzPosixString by
-                    produceState(initialValue = systemTimeZone.toPosixString()) {
-                        val receiver =
-                            object : BroadcastReceiver() {
-                                override fun onReceive(context: Context, intent: Intent) {
-                                    if (intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
-                                        value = systemTimeZone.toPosixString()
-                                    }
-                                }
-                            }
-                        context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
-                        awaitDispose { context.unregisterReceiver(receiver) }
-                    }
+                var appTzPosixString by remember { mutableStateOf(ZoneId.systemDefault().toPosixString()) }
+
+                registerReceiver(IntentFilter(Intent.ACTION_TIMEZONE_CHANGED)) {
+                    appTzPosixString = ZoneId.systemDefault().toPosixString()
+                }
 
                 EditTextPreference(
                     title = "",

@@ -25,13 +25,13 @@ import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import okio.ByteString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.proto.ChannelSettings
 
 @Suppress("TooManyFunctions")

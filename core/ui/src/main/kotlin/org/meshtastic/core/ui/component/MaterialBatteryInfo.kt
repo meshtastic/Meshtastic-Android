@@ -39,8 +39,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.unknown
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.icon.BatteryEmpty
 import org.meshtastic.core.ui.icon.BatteryUnknown
 import org.meshtastic.core.ui.icon.MeshtasticIcons

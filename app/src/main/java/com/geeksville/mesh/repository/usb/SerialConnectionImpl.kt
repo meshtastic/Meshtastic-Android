@@ -18,16 +18,15 @@ package com.geeksville.mesh.repository.usb
 
 import android.hardware.usb.UsbManager
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.util.SerialInputOutputManager
-import org.meshtastic.core.model.util.await
+import org.meshtastic.core.common.util.ignoreException
 import java.nio.BufferOverflowException
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.time.Duration.Companion.seconds
 
 internal class SerialConnectionImpl(
     private val usbManagerLazy: dagger.Lazy<UsbManager?>,
@@ -65,7 +64,7 @@ internal class SerialConnectionImpl(
         // Allow a short amount of time for the manager to quit (so the port can be cleanly closed)
         if (waitForStopped) {
             Logger.d { "Waiting for USB manager to stop..." }
-            ignoreException(silent = true) { closedLatch.await(1.seconds) }
+            ignoreException(silent = true) { closedLatch.await(1, TimeUnit.SECONDS) }
         }
     }
 

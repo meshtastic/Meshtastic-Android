@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
@@ -27,7 +28,6 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.TimeConstants
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import javax.inject.Inject
 import javax.inject.Singleton

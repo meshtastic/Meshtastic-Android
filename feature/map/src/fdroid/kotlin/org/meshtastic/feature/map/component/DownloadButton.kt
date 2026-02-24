@@ -30,8 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.map_download_region
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.map_download_region
 
 @Composable
 fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {

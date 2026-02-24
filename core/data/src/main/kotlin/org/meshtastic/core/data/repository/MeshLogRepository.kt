@@ -25,11 +25,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo

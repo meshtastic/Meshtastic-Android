@@ -16,13 +16,12 @@
  */
 package org.meshtastic.core.ui.util
 
-import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.unknown_age
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.unknown_age
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.MeshPacket
@@ -40,11 +39,7 @@ fun Position.formatPositionTime(): String {
         if (isOlderThanSixMonths) {
             stringResource(Res.string.unknown_age)
         } else {
-            DateUtils.formatDateTime(
-                LocalContext.current,
-                (time ?: 0) * SECONDS_TO_MILLIS,
-                DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-            )
+            DateFormatter.formatDateTime((time ?: 0) * SECONDS_TO_MILLIS)
         }
     return timeText
 }

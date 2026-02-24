@@ -19,6 +19,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 | :--- | :--- |
 | `app/` | Main application module. Contains `MainActivity`, `AppNavigation`, and Hilt entry points. Uses package `com.geeksville.mesh`. |
 | `core/` | Shared library modules. Most code here uses package `org.meshtastic.core.*`. |
+| `core/ble/` | **New:** Bluetooth Low Energy stack using Nordic libraries. |
 | `core/strings/` | **Crucial:** Centralized string resources using Compose Multiplatform Resources. |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`). Each is a standalone Gradle module. Uses package `org.meshtastic.feature.*`. |
 | `build-logic/` | Custom Gradle convention plugins. Defines build logic for the entire project. |
@@ -31,13 +32,13 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   **Material 3:** The app uses Material 3. Look for ways to use **Material 3 Expressive** components where appropriate.
 -   **Strings:**
     -   Do **not** use `app/src/main/res/values/strings.xml` for UI strings.
-    -   Use the **Compose Multiplatform Resource** library in `core/strings`.
-    -   **Definition:** Add strings to `core/strings/src/commonMain/composeResources/values/strings.xml`.
+    -   Use the **Compose Multiplatform Resource** library in `core:resources`.
+    -   **Definition:** Add strings to `core/resources/src/commonMain/composeResources/values/strings.xml`.
     -   **Usage:**
         ```kotlin
         import org.jetbrains.compose.resources.stringResource
-        import org.meshtastic.core.strings.Res
-        import org.meshtastic.core.strings.your_string_key
+        import org.meshtastic.core.resources.Res
+        import org.meshtastic.core.resources.your_string_key
 
         Text(text = stringResource(Res.string.your_string_key))
         ```
@@ -58,16 +59,32 @@ This file serves as a comprehensive guide for AI agents and developers working o
 -   Routes are defined in `core/navigation` (e.g., `ContactsRoutes`, `SettingsRoutes`).
 -   The main `NavHost` is located in `app/src/main/java/com/geeksville/mesh/ui/Main.kt`.
 
-### D. Dependency Management
+### D. Bluetooth (BLE)
+-   **Library:** Uses **Nordic Semiconductor's Kotlin BLE Library** and **Android Common Libraries**.
+-   **Location:** Core logic resides in `core/ble`.
+-   **Key Classes:** `BluetoothRepository`, `NordicBleInterface`, `BleConnection`.
+-   **Usage:** Use `BluetoothRepository` for scanning and bonding. Use `BleConnection` for managing connections. Avoid legacy `BluetoothAdapter` APIs directly.
+-   **Environment Mocking:** Use `LocalEnvironmentOwner` and `MockAndroidEnvironment` to test UI hardware reactions without a real device.
+
+### E. Dependency Management
 -   **Never** hardcode versions in `build.gradle.kts` files.
 -   **Action:** Add the library and version to `gradle/libs.versions.toml`.
 -   **Action:** Apply plugins using the alias from the catalog (e.g., `alias(libs.plugins.meshtastic.android.library)`).
 -   **Alpha Libraries:** Do not be shy about using alpha libraries from Google if they provide necessary features.
 
-### E. Build Variants (Flavors)
+### F. Build Variants (Flavors)
 -   **`google`**: Includes Google Play Services (Maps, Firebase, Crashlytics).
 -   **`fdroid`**: FOSS version. **Strictly segregate sensitive data** (Crashlytics, Firebase, etc.) out of this flavor.
 -   **Task Example:** `./gradlew assembleFdroidDebug`
+
+### G. Kotlin Multiplatform (KMP) & Decoupling
+-   **Goal:** We are actively moving logic and models from Android-specific modules to KMP modules (`core:common`, `core:model`, `core:proto`) to support future cross-platform expansion.
+-   **Domain Models:** Always place domain models (Data Classes, Enums) in `commonMain` of the respective module.
+-   **Parceling:**
+    -   Use the platform-agnostic `CommonParcelable` and `CommonParcelize` from `core:common`.
+    -   Avoid direct imports of `android.os.Parcelable` or `kotlinx.parcelize.Parcelize` in `commonMain`.
+-   **Platform Abstractions:** Use `expect`/`actual` for platform-specific logic (e.g., `DateFormatter`, `RandomUtils`, `BuildUtils`).
+-   **AIDL Compatibility:** AIDL parcelable declarations for models moved to `commonMain` should be relocated to `:core:api` to ensure proper export to consumer modules.
 
 ## 4. Quality Assurance
 
@@ -83,7 +100,10 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
 ### C. Testing
 -   **Unit Tests:** JUnit 4/5 in `src/test/java`. Run with `./gradlew test`.
--   **UI Tests:** Espresso/Compose in `src/androidTest/java`. Run with `./gradlew connectedAndroidTest`.
+-   **Compose UI Tests (JVM):** Preferred for component testing. Use **Robolectric** in `src/test/java`.
+    -   **Important:** Annotate with `@Config(sdk = [34])` if using Java 17 to avoid SDK 35 compatibility issues.
+    -   **Best Practice:** Pass mocked ViewModels to Composables instead of using Hilt in Robolectric tests.
+-   **Instrumented Tests:** For full E2E or Hilt integration tests, use `src/androidTest/java`. Run with `./gradlew connectedAndroidTest`.
 -   **Feature Test:** `./gradlew feature:settings:testGoogleDebug`
 
 ## 5. Agent Workflow
@@ -91,7 +111,7 @@ This file serves as a comprehensive guide for AI agents and developers working o
 1.  **Explore First:** Before making changes, read `gradle/libs.versions.toml` and the relevant `build.gradle.kts` to understand the environment.
 2.  **Plan:** Identify which modules (`core` or `feature`) need modification.
 3.  **Implement:**
-    -   If adding a string, modify `core/strings`.
+    -   If adding a string, modify `core:resources`.
     -   If adding a dependency, modify `libs.versions.toml` first.
 4.  **Verify:**
     -   Run `./gradlew spotlessApply` (Essential!).
@@ -107,8 +127,14 @@ This file serves as a comprehensive guide for AI agents and developers working o
 
 ## 7. Troubleshooting
 
--   **Missing Strings:** If `Res.string.xyz` is unresolved, ensure you have imported `org.meshtastic.core.strings.Res` and the specific string property, and that you have run a build to generate the resources.
+-   **Missing Strings:** If `Res.string.xyz` is unresolved, ensure you have imported `org.meshtastic.core.resources.Res` and the specific string property, and that you have run a build to generate the resources.
 -   **Build Errors:** Check `gradle/libs.versions.toml` for version conflicts. Use `build-logic` conventions to ensure plugins are applied correctly.
 
 ---
 *Refer to `CONTRIBUTING.md` for human-centric processes like Code of Conduct and Pull Request etiquette.*
+
+### E. Resources and Assets
+-   **Centralization:** All global app resources (Strings, Drawables, Fonts, raw files) should be placed in `:core:resources`.
+-   **Module Path:** `core/resources/src/commonMain/composeResources/`
+-   **Decentralization:** Feature-specific strings and assets can (and should) be housed in their respective feature module's `composeResources` directory to maintain modular boundaries and clean architectural dependency graphs. Crowdin localization handles globbing `/**/composeResources/values/strings.xml` perfectly.
+-   **Drawables:** Use `painterResource(Res.drawable.your_icon)` to access cross-platform drawables. Name them consistently (`ic_` for icons, `img_` for artwork). Avoid putting standard Drawables or Vectors in legacy Android `res/drawable` folders unless strictly required by a legacy library (like `OsmDroid` map markers) or the OS layer (like `app_icon.xml`).

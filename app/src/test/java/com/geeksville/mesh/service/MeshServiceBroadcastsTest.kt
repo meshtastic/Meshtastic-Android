@@ -28,8 +28,10 @@ import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
 class MeshServiceBroadcastsTest {
 
     private lateinit var context: Context

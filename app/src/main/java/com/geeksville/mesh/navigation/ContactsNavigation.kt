@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.navigation
 
+import androidx.compose.runtime.getValue
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import com.geeksville.mesh.ui.contact.AdaptiveContactsScreen
-import com.geeksville.mesh.ui.sharing.ShareScreen
+import com.geeksville.mesh.model.UIViewModel
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.QuickChatScreen
+import org.meshtastic.feature.messaging.ui.contact.AdaptiveContactsScreen
+import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopEvents: Flow<ScrollToTopEvent>) {
@@ -37,7 +40,19 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
         composable<ContactsRoutes.Contacts>(
             deepLinks = listOf(navDeepLink<ContactsRoutes.Contacts>(basePath = "$DEEP_LINK_BASE_URI/contacts")),
         ) {
-            AdaptiveContactsScreen(navController = navController, scrollToTopEvents = scrollToTopEvents)
+            val uiViewModel: UIViewModel = hiltViewModel()
+            val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+            val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+
+            AdaptiveContactsScreen(
+                navController = navController,
+                scrollToTopEvents = scrollToTopEvents,
+                sharedContactRequested = sharedContactRequested,
+                requestChannelSet = requestChannelSet,
+                onHandleScannedUri = uiViewModel::handleScannedUri,
+                onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+                onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
+            )
         }
         composable<ContactsRoutes.Messages>(
             deepLinks =
@@ -49,9 +64,18 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
             ),
         ) { backStackEntry ->
             val args = backStackEntry.toRoute<ContactsRoutes.Messages>()
+            val uiViewModel: UIViewModel = hiltViewModel()
+            val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+            val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+
             AdaptiveContactsScreen(
                 navController = navController,
                 scrollToTopEvents = scrollToTopEvents,
+                sharedContactRequested = sharedContactRequested,
+                requestChannelSet = requestChannelSet,
+                onHandleScannedUri = uiViewModel::handleScannedUri,
+                onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+                onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
                 initialContactKey = args.contactKey,
                 initialMessage = args.message,
             )

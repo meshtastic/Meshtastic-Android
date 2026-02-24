@@ -28,6 +28,7 @@ import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.MeshtasticDatabase
@@ -35,7 +36,6 @@ import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.EnvironmentMetrics
@@ -43,7 +43,7 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 class MeshLogRepositoryTest {
 
@@ -73,7 +73,7 @@ class MeshLogRepositoryTest {
 
         val meshLog =
             MeshLog(
-                uuid = UUID.randomUUID().toString(),
+                uuid = Uuid.random().toString(),
                 message_type = "telemetry",
                 received_date = nowMillis,
                 raw_message = "",
@@ -100,7 +100,7 @@ class MeshLogRepositoryTest {
 
         val meshLog =
             MeshLog(
-                uuid = UUID.randomUUID().toString(),
+                uuid = Uuid.random().toString(),
                 message_type = "telemetry",
                 received_date = nowMillis,
                 raw_message = "",

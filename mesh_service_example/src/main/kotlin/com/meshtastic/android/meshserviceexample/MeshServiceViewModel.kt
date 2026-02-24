@@ -26,14 +26,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.model.util.toDate
-import org.meshtastic.core.model.util.toInstant
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.proto.PortNum
 import java.text.SimpleDateFormat

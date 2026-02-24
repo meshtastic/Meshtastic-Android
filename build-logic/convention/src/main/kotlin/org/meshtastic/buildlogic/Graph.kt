@@ -96,34 +96,40 @@ internal fun Project.configureGraphTasks() {
         .map { it.split(",").toSet() }
         .orElse(setOf("api", "implementation", "baselineProfile", "testedApks"))
 
+    val targetProjectPath = path
+
     val dumpTask = tasks.register<GraphDumpTask>("graphDump") {
-        projectPath.set(this@configureGraphTasks.path)
+        projectPath.set(targetProjectPath)
         
-        val deps = mutableMapOf<String, Set<Pair<String, String>>>()
-        val projectPlugins = mutableMapOf<String, PluginType>()
-        
-        projectPlugins[path] = PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
-        
-        val projectDeps = mutableSetOf<Pair<String, String>>()
-        this@configureGraphTasks.configurations.forEach { config ->
-            if (config.name in supportedConfigurations.get()) {
+        dependenciesData.set(providers.provider {
+            val deps = mutableMapOf<String, Set<Pair<String, String>>>()
+            val projectDeps = mutableSetOf<Pair<String, String>>()
+            configurations.filter { it.name in supportedConfigurations.get() }.forEach { config ->
                 config.dependencies.withType<ProjectDependency>().forEach { dep ->
-                    // Fallback to simpler access or path if available.
-                    val depPath = dep.path
-                    projectDeps.add(config.name to depPath)
+                    projectDeps.add(config.name to dep.path)
                 }
             }
-        }
-        deps[path] = projectDeps
-        
-        dependenciesData.set(deps)
-        pluginsData.set(projectPlugins)
+            deps[targetProjectPath] = projectDeps
+            deps
+        })
+
+        pluginsData.set(providers.provider {
+            val projectPlugins = mutableMapOf<String, PluginType>()
+            val type = when {
+                pluginManager.hasPlugin("meshtastic.android.application") || pluginManager.hasPlugin("meshtastic.android.application.compose") -> PluginType.AndroidApplication
+                targetProjectPath.startsWith(":feature:") -> PluginType.AndroidFeature
+                else -> PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
+            }
+            projectPlugins[targetProjectPath] = type
+            projectPlugins
+        })
+
         output.set(layout.buildDirectory.file("mermaid/graph.txt"))
         legend.set(layout.buildDirectory.file("mermaid/legend.txt"))
     }
 
     tasks.register<GraphUpdateTask>("graphUpdate") {
-        projectPath.set(this@configureGraphTasks.path)
+        projectPath.set(targetProjectPath)
         input.set(dumpTask.flatMap { it.output })
         legend.set(dumpTask.flatMap { it.legend })
         output.set(layout.projectDirectory.file("README.md"))
@@ -180,6 +186,7 @@ private abstract class GraphDumpTask : DefaultTask() {
         appendLine("    direction TB")
         appendLine("    L1[Application]:::android-application")
         appendLine("    L2[Library]:::android-library")
+        appendLine("    L3[Feature]:::android-feature")
         appendLine("  end")
         PluginType.entries.forEach { appendLine("classDef ${it.ref} ${it.style};") }
     }
@@ -203,7 +210,13 @@ private abstract class GraphUpdateTask : DefaultTask() {
         val readme = output.get().asFile
         if (!readme.exists()) return
         val mermaid = input.get().asFile.readText()
-        // Update logic...
-        readme.writeText(readme.readText().replace(Regex("<!--region graph-->.*?<!--endregion-->", DOT_MATCHES_ALL), "<!--region graph-->\n```mermaid\n$mermaid\n```\n<!--endregion-->"))
+        val currentContent = readme.readText()
+        val newContent = currentContent.replace(
+            Regex("<!--region graph-->.*?<!--endregion-->", DOT_MATCHES_ALL), 
+            "<!--region graph-->\n```mermaid\n$mermaid\n```\n<!--endregion-->"
+        )
+        if (currentContent != newContent) {
+            readme.writeText(newContent)
+        }
     }
 }

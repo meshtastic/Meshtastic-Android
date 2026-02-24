@@ -128,6 +128,21 @@ configure<ApplicationExtension> {
         }
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
 
+        val disableSplits =
+            project.gradle.startParameter.taskNames.any {
+                it.contains("bundle", ignoreCase = true) || it.contains("google", ignoreCase = true)
+            }
+
+        // Enable ABI splits to generate smaller APKs per architecture for F-Droid/IzzyOnDroid
+        splits {
+            abi {
+                isEnable = !disableSplits
+                reset()
+                include("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+                isUniversalApk = true
+            }
+        }
+
         dependenciesInfo {
             // Disables dependency metadata when building APKs (for IzzyOnDroid/F-Droid)
             includeInApk = false
@@ -141,8 +156,12 @@ configure<ApplicationExtension> {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
-        named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
-        named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
+        configureEach {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) $name"
+            if (name == "google") {
+                manifestPlaceholders["MAPS_API_KEY"] = "dummy"
+            }
+        }
     }
 
     buildTypes {
@@ -158,6 +177,8 @@ configure<ApplicationExtension> {
         }
     }
     bundle { language { enableSplit = false } }
+
+    testOptions { unitTests { isIncludeAndroidResources = true } }
 }
 
 secrets {
@@ -166,15 +187,10 @@ secrets {
 }
 
 androidComponents {
-    onVariants(selector().all()) { variant ->
-        if (variant.name == "fdroidDebug") {
-            variant.applicationId = "com.geeksville.mesh.fdroid.debug"
-        }
-
-        if (variant.name == "googleDebug") {
-            variant.applicationId = "com.geeksville.mesh.google.debug"
-        }
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.flavorName?.let { flavor -> variant.applicationId = "com.geeksville.mesh.$flavor.debug" }
     }
+
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
@@ -195,6 +211,7 @@ project.afterEvaluate {
 
 dependencies {
     implementation(projects.core.analytics)
+    implementation(projects.core.ble)
     implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.database)
@@ -207,7 +224,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
     implementation(projects.core.ui)
     implementation(projects.core.barcode)
     implementation(projects.feature.intro)
@@ -225,9 +242,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -246,6 +261,11 @@ dependencies {
     implementation(libs.kermit)
 
     implementation(libs.nordic.client.android)
+    implementation(libs.nordic.common.core)
+    implementation(libs.nordic.common.permissions.ble)
+    implementation(libs.nordic.common.permissions.notification)
+    implementation(libs.nordic.common.scanner.ble)
+    implementation(libs.nordic.common.ui)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -259,16 +279,20 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    androidTestImplementation(libs.nordic.client.android.mock)
+    androidTestImplementation(libs.nordic.core.mock)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.nordic.client.android.mock)
-    testImplementation(libs.nordic.client.mock)
+    testImplementation(libs.nordic.client.core.mock)
     testImplementation(libs.nordic.core.mock)
-    testImplementation(libs.nordic.core.android.mock)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.ext.junit)
 }
 
 aboutLibraries {

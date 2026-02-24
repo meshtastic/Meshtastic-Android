@@ -19,6 +19,7 @@ package org.meshtastic.core.data.repository
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.FirmwareReleaseJsonDataSource
 import org.meshtastic.core.data.datasource.FirmwareReleaseLocalDataSource
 import org.meshtastic.core.database.entity.FirmwareRelease
@@ -26,7 +27,6 @@ import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.model.util.TimeConstants
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -67,9 +67,11 @@ constructor(
         // 1. Emit cached data first, regardless of staleness.
         // This gives the UI something to show immediately.
         val cachedRelease = localDataSource.getLatestRelease(releaseType)
-        cachedRelease?.let {
-            Logger.d { "Emitting cached firmware for $releaseType (isStale=${it.isStale()})" }
-            emit(it.asExternalModel())
+        if (cachedRelease != null) {
+            Logger.d { "Emitting cached firmware for $releaseType (isStale=${cachedRelease.isStale()})" }
+            emit(cachedRelease.asExternalModel())
+        } else {
+            emit(null)
         }
 
         // 2. If the cache was fresh and we are not forcing a refresh, we're done.

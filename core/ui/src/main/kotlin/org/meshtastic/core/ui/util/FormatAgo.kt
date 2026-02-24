@@ -16,12 +16,12 @@
  */
 package org.meshtastic.core.ui.util
 
-import android.text.format.DateUtils
-import com.meshtastic.core.strings.getString
-import org.meshtastic.core.model.util.nowMillis
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.now
-import org.meshtastic.core.strings.unknown
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.now
+import org.meshtastic.core.resources.unknown
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -29,9 +29,8 @@ import kotlin.time.Duration.Companion.seconds
 /**
  * Formats a given Unix timestamp (in seconds) into a relative "time ago" string.
  *
- * For durations less than a minute, it returns "now". For longer durations, it uses Android's
- * `DateUtils.getRelativeTimeSpanString` to generate a concise, localized, and abbreviated representation (e.g., "5m
- * ago", "2h ago").
+ * For durations less than a minute, it returns "now". For longer durations, it uses DateFormatter to generate a
+ * concise, localized representation (e.g., "5m ago", "2h ago").
  *
  * @param lastSeenUnixSeconds The Unix timestamp in seconds to be formatted.
  * @return A [String] representing the relative time that has passed.
@@ -46,12 +45,6 @@ fun formatAgo(lastSeenUnixSeconds: Int): String {
     return if (diff < 1.minutes) {
         getString(Res.string.now)
     } else {
-        DateUtils.getRelativeTimeSpanString(
-            lastSeenDuration.inWholeMilliseconds,
-            currentDuration.inWholeMilliseconds,
-            DateUtils.MINUTE_IN_MILLIS,
-            DateUtils.FORMAT_ABBREV_RELATIVE,
-        )
-            .toString()
+        DateFormatter.formatRelativeTime(lastSeenDuration.inWholeMilliseconds)
     }
 }

@@ -17,14 +17,14 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
-import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import java.util.Locale

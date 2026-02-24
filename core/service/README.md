@@ -1,11 +1,34 @@
 # `:core:service`
 
+## Overview
+The `:core:service` module contains the abstractions and client-side logic for interacting with the main Meshtastic Android Service.
+
+## Key Components
+
+### 1. `ServiceClient`
+The main entry point for other parts of the app (or third-party apps) to bind to and interact with the mesh service via AIDL.
+
+### 2. `ServiceRepository`
+A high-level repository that wraps the service connection and exposes reactive `Flow`s for connection status and data arrival.
+
+### 3. `ConnectionState`
+An enum representing the current state of the radio connection (`Connected`, `Disconnected`, `DeviceSleep`, etc.).
+
+### 4. `ServiceAction`
+Defines Intent actions for starting, stopping, and interacting with the background service.
+
 ## Module dependency graph
 
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:service[service]:::null
+  :core:service[service]:::android-library
+  :core:service --> :core:api
+  :core:service -.-> :core:common
+  :core:service -.-> :core:database
+  :core:service -.-> :core:model
+  :core:service -.-> :core:prefs
+  :core:service -.-> :core:proto
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

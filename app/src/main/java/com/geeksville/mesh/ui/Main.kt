@@ -18,8 +18,6 @@
 
 package com.geeksville.mesh.ui
 
-import android.Manifest
-import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.Animatable
@@ -81,7 +79,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.channelsGraph
 import com.geeksville.mesh.navigation.connectionsGraph
@@ -93,12 +90,11 @@ import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.DeviceType
+import com.geeksville.mesh.ui.connections.ScannerViewModel
 import com.geeksville.mesh.ui.connections.components.ConnectionsNavIcon
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -110,26 +106,26 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_too_old
+import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.connected
+import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.connections
+import org.meshtastic.core.resources.conversations
+import org.meshtastic.core.resources.device_sleeping
+import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.firmware_old
+import org.meshtastic.core.resources.firmware_too_old
+import org.meshtastic.core.resources.map
+import org.meshtastic.core.resources.must_update
+import org.meshtastic.core.resources.nodes
+import org.meshtastic.core.resources.okay
+import org.meshtastic.core.resources.should_update
+import org.meshtastic.core.resources.should_update_firmware
+import org.meshtastic.core.resources.traceroute
+import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.app_too_old
-import org.meshtastic.core.strings.bottom_nav_settings
-import org.meshtastic.core.strings.connected
-import org.meshtastic.core.strings.connecting
-import org.meshtastic.core.strings.connections
-import org.meshtastic.core.strings.conversations
-import org.meshtastic.core.strings.device_sleeping
-import org.meshtastic.core.strings.disconnected
-import org.meshtastic.core.strings.firmware_old
-import org.meshtastic.core.strings.firmware_too_old
-import org.meshtastic.core.strings.map
-import org.meshtastic.core.strings.must_update
-import org.meshtastic.core.strings.nodes
-import org.meshtastic.core.strings.okay
-import org.meshtastic.core.strings.should_update
-import org.meshtastic.core.strings.should_update_firmware
-import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.view_on_map
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations
@@ -161,10 +157,10 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanModel = hiltViewModel()) {
+fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) } }
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
@@ -172,16 +168,11 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-        LaunchedEffect(connectionState, notificationPermissionState) {
-            if (connectionState == ConnectionState.Connected && !notificationPermissionState.status.isGranted) {
-                notificationPermissionState.launchPermissionRequest()
-            }
-        }
-    }
-
     if (connectionState == ConnectionState.Connected) {
+        RequestNotificationPermission {
+            // Nordic handled the trigger for POST_NOTIFICATIONS when connected
+        }
+
         sharedContactRequested?.let {
             SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
         }
@@ -516,42 +507,47 @@ private fun VersionChecks(viewModel: UIViewModel) {
                         },
                     )
                 } else {
-                    myFirmwareVersion?.let { fwVersion ->
-                        val curVer = DeviceVersion(fwVersion)
-                        Logger.i {
-                            "[FW_CHECK] Firmware version comparison - " +
-                                "device: $curVer (raw: $fwVersion), " +
-                                "absoluteMin: ${MeshService.absoluteMinDeviceVersion}, " +
-                                "min: ${MeshService.minDeviceVersion}"
-                        }
+                    myFirmwareVersion
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { fwVersion ->
+                            val curVer = DeviceVersion(fwVersion)
+                            Logger.i {
+                                "[FW_CHECK] Firmware version comparison - " +
+                                    "device: $curVer (raw: $fwVersion), " +
+                                    "absoluteMin: ${MeshService.absoluteMinDeviceVersion}, " +
+                                    "min: ${MeshService.minDeviceVersion}"
+                            }
 
-                        if (curVer < MeshService.absoluteMinDeviceVersion) {
-                            Logger.w {
-                                "[FW_CHECK] Firmware too old - " +
-                                    "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}"
+                            if (curVer < MeshService.absoluteMinDeviceVersion) {
+                                Logger.w {
+                                    "[FW_CHECK] Firmware too old - " +
+                                        "device: $curVer < absoluteMin: ${MeshService.absoluteMinDeviceVersion}"
+                                }
+                                val title = getString(Res.string.firmware_too_old)
+                                val message = getString(Res.string.firmware_old)
+                                viewModel.showAlert(
+                                    title = title,
+                                    html = message,
+                                    onConfirm = {
+                                        val service = viewModel.meshService ?: return@showAlert
+                                        MeshService.changeDeviceAddress(context, service, "n")
+                                    },
+                                )
+                            } else if (curVer < MeshService.minDeviceVersion) {
+                                Logger.w {
+                                    "[FW_CHECK] Firmware should update - " +
+                                        "device: $curVer < min: ${MeshService.minDeviceVersion}"
+                                }
+                                val title = getString(Res.string.should_update_firmware)
+                                val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
+                                viewModel.showAlert(title = title, message = message, onConfirm = {})
+                            } else {
+                                Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                             }
-                            val title = getString(Res.string.firmware_too_old)
-                            val message = getString(Res.string.firmware_old)
-                            viewModel.showAlert(
-                                title = title,
-                                html = message,
-                                onConfirm = {
-                                    val service = viewModel.meshService ?: return@showAlert
-                                    MeshService.changeDeviceAddress(context, service, "n")
-                                },
-                            )
-                        } else if (curVer < MeshService.minDeviceVersion) {
-                            Logger.w {
-                                "[FW_CHECK] Firmware should update - " +
-                                    "device: $curVer < min: ${MeshService.minDeviceVersion}"
-                            }
-                            val title = getString(Res.string.should_update_firmware)
-                            val message = getString(Res.string.should_update, latestStableFirmwareRelease.asString)
-                            viewModel.showAlert(title = title, message = message, onConfirm = {})
-                        } else {
-                            Logger.i { "[FW_CHECK] Firmware version OK - device: $curVer meets requirements" }
                         }
-                    } ?: run { Logger.w { "[FW_CHECK] Firmware version is null despite myNodeInfo being present" } }
+                        ?: run {
+                            Logger.w { "[FW_CHECK] Firmware version is null or blank despite myNodeInfo being present" }
+                        }
                 }
             } ?: run { Logger.d { "[FW_CHECK] myNodeInfo is null, skipping firmware check" } }
         } else {

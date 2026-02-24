@@ -25,10 +25,8 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.util.toRemoteExceptions
+import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +36,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.common.hasLocationPermission
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
@@ -107,7 +107,19 @@ class MeshService : Service() {
     }
 
     override fun onCreate() {
-        super.onCreate()
+        try {
+            super.onCreate()
+        } catch (e: IllegalStateException) {
+            // Hilt can throw IllegalStateException in tests if the component is not created.
+            // This can happen if the service is started by the system (e.g. after a crash or on boot)
+            // before the test rule has a chance to create the component.
+            if (e.message?.contains("HiltAndroidRule") == true) {
+                Logger.w(e) { "MeshService created before Hilt component was ready in test. Stopping service." }
+                stopSelf()
+                return
+            }
+            throw e
+        }
         Logger.i { "Creating mesh service" }
         serviceNotifications.initChannels()
 

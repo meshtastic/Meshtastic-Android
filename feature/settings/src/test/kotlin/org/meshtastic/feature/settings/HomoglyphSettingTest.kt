@@ -22,12 +22,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.meshtastic.core.strings.getString
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.use_homoglyph_characters_encoding
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.use_homoglyph_characters_encoding
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Locale

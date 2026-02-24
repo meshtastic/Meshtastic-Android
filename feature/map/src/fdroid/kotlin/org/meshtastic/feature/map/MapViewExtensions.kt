@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import org.meshtastic.core.ui.R
 import org.meshtastic.proto.Position
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -125,7 +124,7 @@ fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: ()
 }
 
 fun MapView.addPositionMarkers(positions: List<Position>, onClick: () -> Unit): List<Marker> {
-    val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation_24)
+    val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation)
     val markers =
         positions.map {
             Marker(this).apply {

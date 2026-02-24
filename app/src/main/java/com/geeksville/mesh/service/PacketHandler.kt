@@ -17,7 +17,6 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
@@ -28,12 +27,13 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.model.util.nowMillis
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ConnectionState
@@ -41,13 +41,13 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
-import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -90,7 +90,7 @@ constructor(
         if (packet?.decoded != null) {
             val packetToSave =
                 MeshLog(
-                    uuid = UUID.randomUUID().toString(),
+                    uuid = Uuid.random().toString(),
                     message_type = "Packet",
                     received_date = nowMillis,
                     raw_message = packet.toString(),

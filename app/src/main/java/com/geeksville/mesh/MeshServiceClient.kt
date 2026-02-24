@@ -17,21 +17,21 @@
 package com.geeksville.mesh
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity.BIND_ABOVE_CLIENT
-import androidx.appcompat.app.AppCompatActivity.BIND_AUTO_CREATE
+import android.content.Context.BIND_ABOVE_CLIENT
+import android.content.Context.BIND_AUTO_CREATE
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.android.BindFailedException
-import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.concurrent.SequentialJob
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.SequentialJob
+import org.meshtastic.core.service.BindFailedException
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.ServiceClient
 import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 
@@ -84,6 +84,12 @@ constructor(
         }
     }
 
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        Logger.d { "Lifecycle: ON_STOP" }
+        close()
+    }
+
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
         Logger.d { "Lifecycle: ON_DESTROY" }
@@ -103,6 +109,6 @@ constructor(
             Logger.e { "Failed to start service from activity - but ignoring because bind will work: ${ex.message}" }
         }
 
-        connect(context, MeshService.createIntent(context), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
+        connect(context, MeshService.createIntent(context), BIND_AUTO_CREATE or BIND_ABOVE_CLIENT)
     }
 }

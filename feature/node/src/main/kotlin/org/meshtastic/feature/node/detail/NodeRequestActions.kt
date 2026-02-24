@@ -27,29 +27,29 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.model.util.nowMillis
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.UiText
+import org.meshtastic.core.resources.neighbor_info
+import org.meshtastic.core.resources.position
+import org.meshtastic.core.resources.request_air_quality_metrics
+import org.meshtastic.core.resources.request_device_metrics
+import org.meshtastic.core.resources.request_environment_metrics
+import org.meshtastic.core.resources.request_host_metrics
+import org.meshtastic.core.resources.request_pax_metrics
+import org.meshtastic.core.resources.request_power_metrics
+import org.meshtastic.core.resources.requesting_from
+import org.meshtastic.core.resources.signal_quality
+import org.meshtastic.core.resources.traceroute
+import org.meshtastic.core.resources.user_info
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.neighbor_info
-import org.meshtastic.core.strings.position
-import org.meshtastic.core.strings.request_air_quality_metrics
-import org.meshtastic.core.strings.request_device_metrics
-import org.meshtastic.core.strings.request_environment_metrics
-import org.meshtastic.core.strings.request_host_metrics
-import org.meshtastic.core.strings.request_pax_metrics
-import org.meshtastic.core.strings.request_power_metrics
-import org.meshtastic.core.strings.requesting_from
-import org.meshtastic.core.strings.signal_quality
-import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.user_info
 import javax.inject.Inject
 import javax.inject.Singleton
 
 sealed class NodeRequestEffect {
-    data class ShowFeedback(val resource: StringResource, val args: List<Any> = emptyList()) : NodeRequestEffect()
+    data class ShowFeedback(val text: UiText) : NodeRequestEffect()
 }
 
 @Singleton
@@ -70,7 +70,9 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
             try {
                 serviceRepository.meshService?.requestUserInfo(destNum)
                 _effects.emit(
-                    NodeRequestEffect.ShowFeedback(Res.string.requesting_from, listOf(Res.string.user_info, longName)),
+                    NodeRequestEffect.ShowFeedback(
+                        UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName),
+                    ),
                 )
             } catch (ex: android.os.RemoteException) {
                 Logger.e { "Request NodeInfo error: ${ex.message}" }
@@ -87,8 +89,7 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
                 _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
                 _effects.emit(
                     NodeRequestEffect.ShowFeedback(
-                        Res.string.requesting_from,
-                        listOf(Res.string.neighbor_info, longName),
+                        UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName),
                     ),
                 )
             } catch (ex: android.os.RemoteException) {
@@ -108,7 +109,9 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
             try {
                 serviceRepository.meshService?.requestPosition(destNum, position)
                 _effects.emit(
-                    NodeRequestEffect.ShowFeedback(Res.string.requesting_from, listOf(Res.string.position, longName)),
+                    NodeRequestEffect.ShowFeedback(
+                        UiText.Resource(Res.string.requesting_from, Res.string.position, longName),
+                    ),
                 )
             } catch (ex: android.os.RemoteException) {
                 Logger.e { "Request position error: ${ex.message}" }
@@ -134,7 +137,9 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
                         TelemetryType.PAX -> Res.string.request_pax_metrics
                     }
 
-                _effects.emit(NodeRequestEffect.ShowFeedback(Res.string.requesting_from, listOf(typeRes, longName)))
+                _effects.emit(
+                    NodeRequestEffect.ShowFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName)),
+                )
             } catch (ex: android.os.RemoteException) {
                 Logger.e { "Request telemetry error: ${ex.message}" }
             }
@@ -149,7 +154,9 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
                 serviceRepository.meshService?.requestTraceroute(packetId, destNum)
                 _lastTracerouteTimes.update { it + (destNum to nowMillis) }
                 _effects.emit(
-                    NodeRequestEffect.ShowFeedback(Res.string.requesting_from, listOf(Res.string.traceroute, longName)),
+                    NodeRequestEffect.ShowFeedback(
+                        UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName),
+                    ),
                 )
             } catch (ex: android.os.RemoteException) {
                 Logger.e { "Request traceroute error: ${ex.message}" }
