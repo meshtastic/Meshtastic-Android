@@ -135,6 +135,21 @@
             android:name="google_analytics_default_allow_ad_personalization_signals"
             android:value="false" />
 
+        <!-- Disable SSAID collection to reduce PII footprint -->
+        <meta-data
+            android:name="google_analytics_ssaid_collection_enabled"
+            android:value="false" />
+
+        <!-- Disable automatic screen reporting to reduce background noise -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
+
+        <!-- Set default analytics storage consent to denied for Advanced Consent Mode -->
+        <meta-data
+            android:name="google_analytics_default_allow_analytics_storage"
+            android:value="false" />
+
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.service.MeshService"
