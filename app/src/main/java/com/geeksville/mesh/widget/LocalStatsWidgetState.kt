@@ -27,6 +27,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatUptime
@@ -47,6 +49,7 @@ import org.meshtastic.core.resources.local_stats_heap_value
 import org.meshtastic.core.resources.local_stats_noise
 import org.meshtastic.core.resources.local_stats_relays
 import org.meshtastic.core.resources.local_stats_traffic
+import org.meshtastic.core.resources.local_stats_updated_at
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.powered
@@ -67,6 +70,7 @@ data class LocalStatsWidgetUiState(
     val appName: String = "",
     val nodesLabel: String = "",
     val uptimeLabel: String = "",
+    val updatedLabel: String = "",
 
     // Node Identity
     val nodeShortName: String? = null,
@@ -97,6 +101,7 @@ data class LocalStatsWidgetUiState(
     // Footer
     val nodeCountText: String = "",
     val uptimeText: String = "",
+    val updatedText: String = "",
 )
 
 @Singleton
@@ -230,6 +235,7 @@ constructor(
             stats?.let { getStringSuspend(Res.string.local_stats_heap, it.heap_free_bytes, it.heap_total_bytes) },
             nodeCountText = "$onlineNodes/$totalNodes",
             uptimeText = formatUptime(uptimeSecs.toInt()),
+            updatedText = getStringSuspend(Res.string.local_stats_updated_at, DateFormatter.formatShortDate(nowMillis)),
         )
     }
 }

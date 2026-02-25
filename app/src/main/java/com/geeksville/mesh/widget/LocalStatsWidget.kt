@@ -244,44 +244,50 @@ class LocalStatsWidget : GlanceAppWidget() {
 
     @Composable
     private fun Footer(state: LocalStatsWidgetUiState) {
-        Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(modifier = GlanceModifier.defaultWeight(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = state.nodesLabel,
-                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                )
-                Text(
-                    text = state.nodeCountText,
-                    maxLines = 1,
-                    style =
-                    TextStyle(
-                        color = GlanceTheme.colors.onSurface,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                    ),
-                )
-            }
-            Column(
-                modifier = GlanceModifier.defaultWeight(),
-                horizontalAlignment = Alignment.End,
+        Column(modifier = GlanceModifier.fillMaxWidth()) {
+            Row(
+                modifier = GlanceModifier.fillMaxWidth().padding(top = 2.dp, bottom = 2.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
+                Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = state.nodesLabel,
+                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                    )
+                    Text(
+                        text = state.nodeCountText,
+                        maxLines = 1,
+                        style =
+                        TextStyle(
+                            color = GlanceTheme.colors.onSurface,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                    )
+                }
+                Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = state.uptimeLabel,
+                        style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
+                    )
+                    Text(
+                        text = state.uptimeText,
+                        maxLines = 1,
+                        style =
+                        TextStyle(
+                            color = GlanceTheme.colors.onSurface,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                    )
+                }
+            }
+            Row(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = state.uptimeLabel,
-                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
-                )
-                Text(
-                    text = state.uptimeText,
+                    text = "${state.updatedLabel} ${state.updatedText}",
+                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 8.sp),
+                    modifier = GlanceModifier.padding(bottom = 2.dp),
                     maxLines = 1,
-                    style =
-                    TextStyle(
-                        color = GlanceTheme.colors.onSurface,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
-                    ),
                 )
             }
         }
@@ -379,4 +385,6 @@ val mockState =
         trafficText = "TX: 145 | RX: 892 | D: 42",
         nodeCountText = "2/3",
         uptimeText = "2d 0h",
+        updatedLabel = "Updated",
+        updatedText = "5m ago",
     )

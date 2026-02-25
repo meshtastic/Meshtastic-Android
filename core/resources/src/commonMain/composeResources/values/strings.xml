@@ -1207,5 +1207,6 @@
     <string name="local_stats_dropped">Dropped %1$d</string>
     <string name="local_stats_heap">Heap</string>
     <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">Updated %1$s</string>
     <string name="powered">Powered</string>
 </resources>
