@@ -315,9 +315,7 @@ internal fun MessageItem(
                         TransportIcon(
                             transport = message.transportMechanism,
                             viaMqtt = message.viaMqtt,
-                            modifier = Modifier
-                                .size(16.dp)
-                                .padding(start = 4.dp),
+                            modifier = Modifier.size(16.dp).padding(start = 4.dp),
                         )
                     }
                     if (containsBel) {
