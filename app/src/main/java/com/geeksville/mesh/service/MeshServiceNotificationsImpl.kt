@@ -61,6 +61,8 @@ import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
 import org.meshtastic.core.resources.local_stats_dropped
+import org.meshtastic.core.resources.local_stats_heap
+import org.meshtastic.core.resources.local_stats_heap_value
 import org.meshtastic.core.resources.local_stats_nodes
 import org.meshtastic.core.resources.local_stats_noise
 import org.meshtastic.core.resources.local_stats_relays
@@ -866,6 +868,15 @@ constructor(
         parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
         parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
         parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization, air_util_tx))
+
+        if (heap_free_bytes > 0 || heap_total_bytes > 0) {
+            parts.add(
+                BULLET +
+                    getString(Res.string.local_stats_heap) +
+                    ": " +
+                    getString(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
+            )
+        }
 
         // Traffic Stats
         if (num_packets_tx > 0 || num_packets_rx > 0) {
