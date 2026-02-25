@@ -17,7 +17,7 @@
 package org.meshtastic.feature.messaging.ui.contact
 
 import android.net.Uri
-import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -93,7 +94,16 @@ fun AdaptiveContactsScreen(
         }
     }
 
-    BackHandler(enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail) { handleBack() }
+    PredictiveBackHandler(
+        enabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail,
+    ) { progress ->
+        try {
+            progress.collect { /* Predictive back progress could be used here to drive UI if scaffold supported it */ }
+            handleBack()
+        } catch (_: CancellationException) {
+            // Gesture cancelled
+        }
+    }
 
     LaunchedEffect(initialContactKey) {
         if (initialContactKey != null) {

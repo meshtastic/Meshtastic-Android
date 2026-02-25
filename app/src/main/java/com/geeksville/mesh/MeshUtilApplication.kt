@@ -17,12 +17,17 @@
 package com.geeksville.mesh
 
 import android.app.Application
+import android.appwidget.AppWidgetProviderInfo
+import android.os.Build
+import androidx.collection.intSetOf
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
+import com.geeksville.mesh.widget.LocalStatsWidgetReceiver
 import com.geeksville.mesh.worker.MeshLogCleanupWorker
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -31,8 +36,11 @@ import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
@@ -40,6 +48,7 @@ import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
 /**
@@ -64,6 +73,45 @@ open class MeshUtilApplication :
 
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()
+
+        // Generate and publish widget preview for Android 15+ widget picker
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            applicationScope.launch {
+                suspend fun pushPreview() {
+                    try {
+                        Logger.i { "Pushing generated widget preview..." }
+                        val result =
+                            GlanceAppWidgetManager(this@MeshUtilApplication)
+                                .setWidgetPreviews(
+                                    LocalStatsWidgetReceiver::class,
+                                    intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
+                                )
+                        Logger.i { "setWidgetPreviews result: $result" }
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                        Logger.e(e) { "Failed to set widget preview" }
+                    }
+                }
+
+                pushPreview()
+
+                val entryPoint =
+                    EntryPointAccessors.fromApplication(
+                        this@MeshUtilApplication,
+                        com.geeksville.mesh.widget.LocalStatsWidget.LocalStatsWidgetEntryPoint::class.java,
+                    )
+                try {
+                    // Wait for real data for up to 30 seconds before pushing an updated preview
+                    withTimeout(30.seconds) {
+                        entryPoint.widgetStateProvider().state.first { it.showContent && it.nodeShortName != null }
+                    }
+
+                    Logger.i { "Real node data acquired. Pushing updated widget preview." }
+                    pushPreview()
+                } catch (e: TimeoutCancellationException) {
+                    Logger.i(e) { "Timed out waiting for real node data for widget preview." }
+                }
+            }
+        }
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)

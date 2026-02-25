@@ -17,17 +17,23 @@
 package com.geeksville.mesh.service
 
 import android.app.Notification
+import android.content.Context
+import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
+import com.geeksville.mesh.widget.LocalStatsWidget
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
@@ -61,6 +67,7 @@ import kotlin.time.DurationUnit
 class MeshConnectionManager
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionStateHolder: ConnectionStateHandler,
     private val serviceBroadcasts: MeshServiceBroadcasts,
@@ -82,12 +89,23 @@ constructor(
     private var handshakeTimeout: Job? = null
     private var connectTimeMsec = 0L
 
+    @OptIn(FlowPreview::class)
     fun start(scope: CoroutineScope) {
         this.scope = scope
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
         connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+
+        // Kickstart the widget composition. The widget internally uses collectAsState()
+        // and its own sampled StateFlow to drive updates automatically without excessive IPC and recreation.
+        scope.launch {
+            try {
+                LocalStatsWidget().updateAll(context)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
+            }
+        }
 
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
@@ -286,6 +304,7 @@ constructor(
     }
 
     fun updateTelemetry(telemetry: Telemetry) {
+        telemetry.local_stats?.let { nodeRepository.updateLocalStats(it) }
         updateStatusNotification(telemetry)
     }
 
