@@ -623,6 +623,7 @@
     <string name="wifi_enabled">Wifi lubatud</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
+    <string name="get_document">Lae dokument</string>
     <string name="ethernet_config">Etherneti valikud</string>
     <string name="ethernet_enabled">Ethernet lubatud</string>
     <string name="ntp_server">NTP server</string>
@@ -1142,4 +1143,14 @@
     <string name="permission_granted">Luba antud</string>
     <string name="permission_denied">Luba mitte antud</string>
     <string name="map_style_selection">Kaardi stiilis valik</string>
+    <string name="local_stats_battery">Aku: %1$d%%</string>
+    <string name="local_stats_nodes">Sõlmed: %1$d võrgus / %2$d kokku</string>
+    <string name="local_stats_uptime">Töös: %1$s</string>
+    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
+    <string name="local_stats_traffic">Ühendus: TX %1$d / RX %2$d (Dupes: %3$d)</string>
+    <string name="local_stats_relays">Vahendatud: %1$d (Tühistatud: %2$d)</string>
+    <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
+    <string name="local_stats_noise">Müra %1$d dBm</string>
+    <string name="local_stats_bad">Paha %1$d</string>
+    <string name="local_stats_dropped">Kukkunud %1$d</string>
 </resources>
