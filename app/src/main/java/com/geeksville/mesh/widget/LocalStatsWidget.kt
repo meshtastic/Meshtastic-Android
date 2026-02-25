@@ -92,7 +92,18 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        provideContent { WidgetContent(mockState) }
+        val entryPoint =
+            EntryPointAccessors.fromApplication(context.applicationContext, LocalStatsWidgetEntryPoint::class.java)
+        val stateProvider = entryPoint.widgetStateProvider()
+        val currentState = stateProvider.state.value
+
+        val stateToRender =
+            if (currentState.showContent && currentState.nodeShortName != null) {
+                currentState
+            } else {
+                mockState
+            }
+        provideContent { WidgetContent(stateToRender) }
     }
 
     @Composable

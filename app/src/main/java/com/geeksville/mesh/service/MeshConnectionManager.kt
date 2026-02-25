@@ -32,8 +32,8 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
@@ -97,11 +97,15 @@ constructor(
         // Ensure notification title and content stay in sync with state changes
         connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
 
-        // Consolidate widget updates to avoid redundancy and excessive IPC.
-        // The widget re-collects state via LocalStatsWidgetStateProvider which already has its own internal sampling.
-        merge(connectionStateHolder.connectionState, nodeRepository.ourNodeInfo, nodeRepository.localStats)
-            .onEach { LocalStatsWidget().updateAll(context) }
-            .launchIn(scope)
+        // Kickstart the widget composition. The widget internally uses collectAsState()
+        // and its own sampled StateFlow to drive updates automatically without excessive IPC and recreation.
+        scope.launch {
+            try {
+                LocalStatsWidget().updateAll(context)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
+            }
+        }
 
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->

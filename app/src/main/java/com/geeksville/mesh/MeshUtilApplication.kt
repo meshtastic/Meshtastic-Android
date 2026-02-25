@@ -37,6 +37,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.meshtastic.core.common.ContextServices
@@ -73,18 +74,32 @@ open class MeshUtilApplication :
         // Generate and publish widget preview for Android 15+ widget picker
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
             applicationScope.launch {
-                try {
-                    Logger.i { "Pushing generated widget preview..." }
-                    val result =
-                        GlanceAppWidgetManager(this@MeshUtilApplication)
-                            .setWidgetPreviews(
-                                LocalStatsWidgetReceiver::class,
-                                intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
-                            )
-                    Logger.i { "setWidgetPreviews result: $result" }
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    Logger.e(e) { "Failed to set widget preview" }
+                suspend fun pushPreview() {
+                    try {
+                        Logger.i { "Pushing generated widget preview..." }
+                        val result =
+                            GlanceAppWidgetManager(this@MeshUtilApplication)
+                                .setWidgetPreviews(
+                                    LocalStatsWidgetReceiver::class,
+                                    intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
+                                )
+                        Logger.i { "setWidgetPreviews result: $result" }
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                        Logger.e(e) { "Failed to set widget preview" }
+                    }
                 }
+
+                pushPreview()
+
+                val entryPoint =
+                    EntryPointAccessors.fromApplication(
+                        this@MeshUtilApplication,
+                        com.geeksville.mesh.widget.LocalStatsWidget.LocalStatsWidgetEntryPoint::class.java,
+                    )
+                entryPoint.widgetStateProvider().state.first { it.showContent && it.nodeShortName != null }
+
+                Logger.i { "Real node data acquired. Pushing updated widget preview." }
+                pushPreview()
             }
         }
 

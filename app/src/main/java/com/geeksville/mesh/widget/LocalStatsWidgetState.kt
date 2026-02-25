@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
@@ -124,7 +123,6 @@ constructor(
         ) { connectionState, (totalNodes, onlineNodes), stats, localNode ->
             StateInput(connectionState, totalNodes, onlineNodes, stats, localNode)
         }
-            .sample(2000) // Don't update the widget more than once every 2 seconds
             .map { input ->
                 mapToUiState(input.connectionState, input.totalNodes, input.onlineNodes, input.stats, input.localNode)
             }
