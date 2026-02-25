@@ -67,11 +67,6 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.meshtastic_app_name
-import org.meshtastic.core.resources.nodes
-import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.service.ConnectionState
 
 class LocalStatsWidget : GlanceAppWidget() {
@@ -113,7 +108,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                     titleBar = {
                         TitleBar(
                             startIcon = ImageProvider(com.geeksville.mesh.R.drawable.app_icon),
-                            title = stringResource(Res.string.meshtastic_app_name),
+                            title = state.appName,
                             actions = {
                                 CircleIconButton(
                                     imageProvider = ImageProvider(com.geeksville.mesh.R.drawable.ic_refresh),
@@ -244,7 +239,7 @@ class LocalStatsWidget : GlanceAppWidget() {
         ) {
             Column(modifier = GlanceModifier.defaultWeight(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = stringResource(Res.string.nodes),
+                    text = state.nodesLabel,
                     style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                 )
                 Text(
@@ -264,7 +259,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = stringResource(Res.string.uptime),
+                    text = state.uptimeLabel,
                     style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                 )
                 Text(
@@ -356,6 +351,9 @@ val mockState =
     LocalStatsWidgetUiState(
         connectionState = ConnectionState.Connected,
         showContent = true,
+        appName = "Meshtastic",
+        nodesLabel = "Nodes",
+        uptimeLabel = "Uptime",
         nodeShortName = "ME",
         nodeColors = 0xFFFFFFFF.toInt() to 0xFF000000.toInt(),
         batteryLabel = "Battery",

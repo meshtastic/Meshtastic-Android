@@ -25,8 +25,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
@@ -50,7 +48,10 @@ import org.meshtastic.core.resources.local_stats_heap_value
 import org.meshtastic.core.resources.local_stats_noise
 import org.meshtastic.core.resources.local_stats_relays
 import org.meshtastic.core.resources.local_stats_traffic
+import org.meshtastic.core.resources.meshtastic_app_name
+import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.powered
+import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
@@ -62,6 +63,11 @@ data class LocalStatsWidgetUiState(
     val statusText: String = "",
     val isConnecting: Boolean = false,
     val showContent: Boolean = false,
+
+    // Static Strings (Resolved in provider for Glance stability)
+    val appName: String = "",
+    val nodesLabel: String = "",
+    val uptimeLabel: String = "",
 
     // Node Identity
     val nodeShortName: String? = null,
@@ -119,18 +125,8 @@ constructor(
             StateInput(connectionState, totalNodes, onlineNodes, stats, localNode)
         }
             .sample(2000) // Don't update the widget more than once every 2 seconds
-            .flatMapLatest { input ->
-                flow {
-                    emit(
-                        mapToUiState(
-                            input.connectionState,
-                            input.totalNodes,
-                            input.onlineNodes,
-                            input.stats,
-                            input.localNode,
-                        ),
-                    )
-                }
+            .map { input ->
+                mapToUiState(input.connectionState, input.totalNodes, input.onlineNodes, input.stats, input.localNode)
             }
             .distinctUntilChanged()
             .stateIn(
@@ -191,6 +187,9 @@ constructor(
             statusText = statusText,
             isConnecting = connectionState is ConnectionState.Connecting,
             showContent = connectionState is ConnectionState.Connected,
+            appName = getString(Res.string.meshtastic_app_name),
+            nodesLabel = getString(Res.string.nodes),
+            uptimeLabel = getString(Res.string.uptime),
             nodeShortName = localNode?.user?.short_name,
             nodeColors = localNode?.colors,
             batteryLabel = getString(Res.string.battery),
