@@ -40,6 +40,7 @@ import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -49,6 +50,7 @@ class NodeRepositoryTest {
     private val writeDataSource: NodeInfoWriteDataSource = mockk(relaxed = true)
     private val lifecycle: Lifecycle = mockk(relaxed = true)
     private val lifecycleScope: LifecycleCoroutineScope = mockk()
+    private val localStatsDataSource: LocalStatsDataSource = mockk(relaxed = true)
 
     private val testDispatcher = StandardTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
@@ -88,7 +90,8 @@ class NodeRepositoryTest {
         val myNodeNum = 12345
         myNodeInfoFlow.value = createMyNodeEntity(myNodeNum)
 
-        val repository = NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers)
+        val repository =
+            NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
         testScheduler.runCurrent()
 
         val result = repository.effectiveLogNodeId(myNodeNum).filter { it == MeshLog.NODE_NUM_LOCAL }.first()
@@ -102,7 +105,8 @@ class NodeRepositoryTest {
         val remoteNodeNum = 67890
         myNodeInfoFlow.value = createMyNodeEntity(myNodeNum)
 
-        val repository = NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers)
+        val repository =
+            NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
         testScheduler.runCurrent()
 
         val result = repository.effectiveLogNodeId(remoteNodeNum).first()
@@ -117,7 +121,8 @@ class NodeRepositoryTest {
         val targetNodeNum = 111
 
         myNodeInfoFlow.value = createMyNodeEntity(firstNodeNum)
-        val repository = NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers)
+        val repository =
+            NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
         testScheduler.runCurrent()
 
         // Initially should be mapped to LOCAL because it matches
