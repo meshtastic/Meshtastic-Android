@@ -26,11 +26,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
@@ -87,22 +89,19 @@ constructor(
     private var handshakeTimeout: Job? = null
     private var connectTimeMsec = 0L
 
+    @OptIn(FlowPreview::class)
     fun start(scope: CoroutineScope) {
         this.scope = scope
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
-        connectionStateHolder.connectionState
-            .onEach {
-                updateStatusNotification()
-                LocalStatsWidget().updateAll(context)
-            }
+        connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+
+        // Consolidate widget updates to avoid redundancy and excessive IPC.
+        // The widget re-collects state via LocalStatsWidgetStateProvider which already has its own internal sampling.
+        merge(connectionStateHolder.connectionState, nodeRepository.ourNodeInfo, nodeRepository.localStats)
+            .onEach { LocalStatsWidget().updateAll(context) }
             .launchIn(scope)
-
-        // Ensure widget is updated when our local node info (metrics) or local stats update
-        nodeRepository.ourNodeInfo.onEach { LocalStatsWidget().updateAll(context) }.launchIn(scope)
-
-        nodeRepository.localStats.onEach { LocalStatsWidget().updateAll(context) }.launchIn(scope)
 
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
@@ -303,7 +302,6 @@ constructor(
     fun updateTelemetry(telemetry: Telemetry) {
         telemetry.local_stats?.let { nodeRepository.updateLocalStats(it) }
         updateStatusNotification(telemetry)
-        scope.handledLaunch { LocalStatsWidget().updateAll(context) }
     }
 
     fun updateStatusNotification(telemetry: Telemetry? = null): Notification {

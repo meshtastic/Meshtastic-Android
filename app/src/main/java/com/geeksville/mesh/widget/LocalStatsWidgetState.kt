@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.flow.stateIn
-import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatUptime
@@ -40,6 +39,7 @@ import org.meshtastic.core.resources.channel_utilization
 import org.meshtastic.core.resources.connecting
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.getStringSuspend
 import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
 import org.meshtastic.core.resources.local_stats_dropped
@@ -153,16 +153,16 @@ constructor(
     ): LocalStatsWidgetUiState {
         val statusText =
             when (connectionState) {
-                is ConnectionState.Disconnected -> getString(Res.string.disconnected)
-                is ConnectionState.Connecting -> getString(Res.string.connecting)
-                is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
+                is ConnectionState.Disconnected -> getStringSuspend(Res.string.disconnected)
+                is ConnectionState.Connecting -> getStringSuspend(Res.string.connecting)
+                is ConnectionState.DeviceSleep -> getStringSuspend(Res.string.device_sleeping)
                 is ConnectionState.Connected -> ""
             }
 
         val metrics = localNode?.deviceMetrics
         val batteryLevel = metrics?.battery_level ?: 0
         val isPowered = batteryLevel > 100
-        val batteryValue = if (isPowered) getString(Res.string.powered) else "$batteryLevel%"
+        val batteryValue = if (isPowered) getStringSuspend(Res.string.powered) else "$batteryLevel%"
 
         val channelUtil = stats?.channel_utilization ?: metrics?.channel_utilization ?: 0f
         val airUtilTx = stats?.air_util_tx ?: metrics?.air_util_tx ?: 0f
@@ -170,13 +170,13 @@ constructor(
         val diag = mutableListOf<String>()
         stats?.let {
             if (it.noise_floor != 0) {
-                diag.add(getString(Res.string.local_stats_noise, it.noise_floor))
+                diag.add(getStringSuspend(Res.string.local_stats_noise, it.noise_floor))
             }
             if (it.num_packets_rx_bad > 0) {
-                diag.add(getString(Res.string.local_stats_bad, it.num_packets_rx_bad))
+                diag.add(getStringSuspend(Res.string.local_stats_bad, it.num_packets_rx_bad))
             }
             if (it.num_tx_dropped > 0) {
-                diag.add(getString(Res.string.local_stats_dropped, it.num_tx_dropped))
+                diag.add(getStringSuspend(Res.string.local_stats_dropped, it.num_tx_dropped))
             }
         }
 
@@ -187,39 +187,49 @@ constructor(
             statusText = statusText,
             isConnecting = connectionState is ConnectionState.Connecting,
             showContent = connectionState is ConnectionState.Connected,
-            appName = getString(Res.string.meshtastic_app_name),
-            nodesLabel = getString(Res.string.nodes),
-            uptimeLabel = getString(Res.string.uptime),
+            appName = getStringSuspend(Res.string.meshtastic_app_name),
+            nodesLabel = getStringSuspend(Res.string.nodes),
+            uptimeLabel = getStringSuspend(Res.string.uptime),
             nodeShortName = localNode?.user?.short_name,
             nodeColors = localNode?.colors,
-            batteryLabel = getString(Res.string.battery),
+            batteryLabel = getStringSuspend(Res.string.battery),
             batteryValue = batteryValue,
             batteryProgress = (batteryLevel / 100f).coerceIn(0f, 1f),
-            channelUtilizationLabel = getString(Res.string.channel_utilization),
+            channelUtilizationLabel = getStringSuspend(Res.string.channel_utilization),
             channelUtilizationValue = "%.1f%%".format(channelUtil),
             channelUtilizationProgress = (channelUtil / 100f).coerceIn(0f, 1f),
-            airUtilizationLabel = getString(Res.string.air_utilization),
+            airUtilizationLabel = getStringSuspend(Res.string.air_utilization),
             airUtilizationValue = "%.1f%%".format(airUtilTx),
             airUtilizationProgress = (airUtilTx / 100f).coerceIn(0f, 1f),
             trafficText =
             stats?.let {
-                getString(Res.string.local_stats_traffic, it.num_packets_tx, it.num_packets_rx, it.num_rx_dupe)
+                getStringSuspend(
+                    Res.string.local_stats_traffic,
+                    it.num_packets_tx,
+                    it.num_packets_rx,
+                    it.num_rx_dupe,
+                )
             },
             relayText =
             stats
                 ?.takeIf { it.num_tx_relay > 0 || it.num_tx_relay_canceled > 0 }
-                ?.let { getString(Res.string.local_stats_relays, it.num_tx_relay, it.num_tx_relay_canceled) },
+                ?.let {
+                    getStringSuspend(Res.string.local_stats_relays, it.num_tx_relay, it.num_tx_relay_canceled)
+                },
             diagnosticsText =
             if (diag.isNotEmpty()) {
-                getString(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | "))
+                getStringSuspend(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | "))
             } else {
                 null
             },
             heapFreeBytes = stats?.heap_free_bytes ?: 0,
             heapTotalBytes = stats?.heap_total_bytes ?: 0,
             heapValue =
-            stats?.let { getString(Res.string.local_stats_heap_value, it.heap_free_bytes, it.heap_total_bytes) },
-            heapText = stats?.let { getString(Res.string.local_stats_heap, it.heap_free_bytes, it.heap_total_bytes) },
+            stats?.let {
+                getStringSuspend(Res.string.local_stats_heap_value, it.heap_free_bytes, it.heap_total_bytes)
+            },
+            heapText =
+            stats?.let { getStringSuspend(Res.string.local_stats_heap, it.heap_free_bytes, it.heap_total_bytes) },
             nodeCountText = "$onlineNodes/$totalNodes",
             uptimeText = formatUptime(uptimeSecs.toInt()),
         )
