@@ -58,6 +58,7 @@ import org.meshtastic.core.resources.updated
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.proto.LocalStats
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -145,7 +146,7 @@ constructor(
         val connectionState: ConnectionState,
         val totalNodes: Int,
         val onlineNodes: Int,
-        val stats: org.meshtastic.proto.LocalStats,
+        val stats: LocalStats,
         val localNode: Node?,
     )
 
@@ -154,7 +155,7 @@ constructor(
         connectionState: ConnectionState,
         totalNodes: Int,
         onlineNodes: Int,
-        stats: org.meshtastic.proto.LocalStats,
+        stats: LocalStats,
         localNode: Node?,
     ): LocalStatsWidgetUiState {
         val statusText =
