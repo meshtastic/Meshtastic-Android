@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9749",
+      "title": "Add AEAD (AES-CCM) authenticated encryption for PSK channels",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9749",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9709",
       "title": "platform: nrf52: Fix typo in BLEDfuSecure filename",
       "page_url": "https://github.com/meshtastic/firmware/pull/9709",
@@ -210,12 +216,6 @@
       "id": "9627",
       "title": "Add phone API fanout for multiple clients",
       "page_url": "https://github.com/meshtastic/firmware/pull/9627",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9586",
-      "title": "feat(esp32): add support for Native ESP32 Ethernet and WT32-ETH01 variant",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9586",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
