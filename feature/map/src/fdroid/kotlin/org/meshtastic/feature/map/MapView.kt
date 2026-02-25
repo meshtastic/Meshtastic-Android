@@ -83,7 +83,6 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
-import org.meshtastic.core.common.hasGps
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.Packet
@@ -245,8 +244,6 @@ fun MapView(
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-    val hasGps = remember { context.hasGps() }
 
     // Accompanist permissions state for location
     val locationPermissionsState =
@@ -723,7 +720,7 @@ fun MapView(
                         MapButton(
                             onClick = { mapFilterExpanded = true },
                             icon = Icons.Outlined.Tune,
-                            contentDescription = Res.string.map_filter,
+                            contentDescription = stringResource(Res.string.map_filter),
                         )
                         DropdownMenu(
                             expanded = mapFilterExpanded,
@@ -808,22 +805,20 @@ fun MapView(
                             )
                         }
                     }
-                    if (hasGps) {
-                        MapButton(
-                            icon =
-                            if (myLocationOverlay == null) {
-                                Icons.Outlined.MyLocation
-                            } else {
-                                Icons.Rounded.LocationDisabled
-                            },
-                            contentDescription = stringResource(Res.string.toggle_my_position),
-                        ) {
-                            if (locationPermissionsState.allPermissionsGranted) {
-                                map.toggleMyLocation()
-                            } else {
-                                triggerLocationToggleAfterPermission = true
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }
+                    MapButton(
+                        icon =
+                        if (myLocationOverlay == null) {
+                            Icons.Outlined.MyLocation
+                        } else {
+                            Icons.Rounded.LocationDisabled
+                        },
+                        contentDescription = stringResource(Res.string.toggle_my_position),
+                    ) {
+                        if (locationPermissionsState.allPermissionsGranted) {
+                            map.toggleMyLocation()
+                        } else {
+                            triggerLocationToggleAfterPermission = true
+                            locationPermissionsState.launchMultiplePermissionRequest()
                         }
                     }
                 }
