@@ -451,7 +451,8 @@ fun MapView(
                 properties =
                 MapProperties(
                     mapType = effectiveGoogleMapType,
-                    isMyLocationEnabled = locationPermissionsState.allPermissionsGranted,
+                    isMyLocationEnabled =
+                    isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
                 ),
                 onMapLongClick = { latLng ->
                     if (isConnected) {
