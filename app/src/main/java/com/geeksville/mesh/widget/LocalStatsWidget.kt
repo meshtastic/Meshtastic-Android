@@ -67,6 +67,16 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_utilization
+import org.meshtastic.core.resources.battery
+import org.meshtastic.core.resources.channel_utilization
+import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.meshtastic_app_name
+import org.meshtastic.core.resources.nodes
+import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.updated
+import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.service.ConnectionState
 
 class LocalStatsWidget : GlanceAppWidget() {
@@ -101,7 +111,7 @@ class LocalStatsWidget : GlanceAppWidget() {
             if (currentState.showContent && currentState.nodeShortName != null) {
                 currentState
             } else {
-                mockState
+                createMockWidgetState()
             }
         provideContent { WidgetContent(stateToRender) }
     }
@@ -376,27 +386,27 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 }
 
-val mockState =
-    LocalStatsWidgetUiState(
-        connectionState = ConnectionState.Connected,
-        showContent = true,
-        appName = "Meshtastic",
-        nodesLabel = "Nodes",
-        uptimeLabel = "Uptime",
-        nodeShortName = "ME",
-        nodeColors = 0xFFFFFFFF.toInt() to 0xFF000000.toInt(),
-        batteryLabel = "Battery",
-        batteryValue = "85%",
-        batteryProgress = 0.85f,
-        channelUtilizationLabel = "Channel",
-        channelUtilizationValue = "18.5%",
-        channelUtilizationProgress = 0.185f,
-        airUtilizationLabel = "Air",
-        airUtilizationValue = "3.2%",
-        airUtilizationProgress = 0.032f,
-        trafficText = "TX: 145 | RX: 892 | D: 42",
-        nodeCountText = "2/3",
-        uptimeText = "2d 0h",
-        updatedLabel = "Updated",
-        updatedText = "5m ago",
-    )
+internal suspend fun createMockWidgetState() = LocalStatsWidgetUiState(
+    connectionState = ConnectionState.Connected,
+    showContent = true,
+    appName = getStringSuspend(Res.string.meshtastic_app_name),
+    nodesLabel = getStringSuspend(Res.string.nodes),
+    uptimeLabel = getStringSuspend(Res.string.uptime),
+    updatedLabel = getStringSuspend(Res.string.updated),
+    refreshLabel = getStringSuspend(Res.string.refresh),
+    nodeShortName = "ME",
+    nodeColors = 0xFFFFFFFF.toInt() to 0xFF000000.toInt(),
+    batteryLabel = getStringSuspend(Res.string.battery),
+    batteryValue = "85%",
+    batteryProgress = 0.85f,
+    channelUtilizationLabel = getStringSuspend(Res.string.channel_utilization),
+    channelUtilizationValue = "18.5%",
+    channelUtilizationProgress = 0.185f,
+    airUtilizationLabel = getStringSuspend(Res.string.air_utilization),
+    airUtilizationValue = "3.2%",
+    airUtilizationProgress = 0.032f,
+    trafficText = "TX: 145 | RX: 892 | D: 42",
+    nodeCountText = "2/3",
+    uptimeText = "2d 0h",
+    updatedText = "5m ago",
+)

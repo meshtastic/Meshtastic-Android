@@ -54,25 +54,23 @@ class LocalStatsWidgetStateProviderTest {
     private val localStatsFlow = MutableStateFlow(LocalStats())
     private val ourNodeInfoFlow = MutableStateFlow<Node?>(null)
 
-    // Using mocks but with a very explicit setup to avoid Kover interference
-    private lateinit var nodeRepository: NodeRepository
-    private lateinit var serviceRepository: ServiceRepository
+    private val serviceRepository = mockk<ServiceRepository>(relaxed = true)
+    private val nodeRepository = mockk<NodeRepository>(relaxed = true)
 
     @Before
     fun setUp() {
-        serviceRepository = mockk(relaxed = true)
-        nodeRepository = mockk(relaxed = true)
-
-        every { serviceRepository.connectionState } returns connectionStateFlow
-        every { nodeRepository.nodeDBbyNum } returns nodeDbFlow
-        every { nodeRepository.localStats } returns localStatsFlow
-        every { nodeRepository.ourNodeInfo } returns ourNodeInfoFlow
-
         mockkStatic("org.meshtastic.core.resources.ContextExtKt")
         mockkStatic("org.meshtastic.core.model.util.TimeUtilsKt")
 
         coEvery { getStringSuspend(any()) } returns "Mock String"
         coEvery { getStringSuspend(any(), *anyVararg()) } returns "Mock Formatted String"
+        every { onlineTimeThreshold() } returns 0
+
+        // Explicitly return flows from mocks
+        every { serviceRepository.connectionState } returns connectionStateFlow
+        every { nodeRepository.nodeDBbyNum } returns nodeDbFlow
+        every { nodeRepository.localStats } returns localStatsFlow
+        every { nodeRepository.ourNodeInfo } returns ourNodeInfoFlow
     }
 
     @After
@@ -111,7 +109,6 @@ class LocalStatsWidgetStateProviderTest {
     fun `node count and update timestamp are populated`() = runTest {
         connectionStateFlow.value = ConnectionState.Connected
         nodeDbFlow.value = mapOf(1 to Node(num = 1, lastHeard = 1000))
-        every { onlineTimeThreshold() } returns 0
 
         val provider = LocalStatsWidgetStateProvider(nodeRepository, serviceRepository)
         val state = provider.state.first { it.nodeCountText == "1/1" }
