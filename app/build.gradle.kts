@@ -270,6 +270,7 @@ dependencies {
     implementation(libs.nordic.common.ui)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.androidx.glance.preview)
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)

@@ -17,12 +17,17 @@
 package com.geeksville.mesh
 
 import android.app.Application
+import android.appwidget.AppWidgetProviderInfo
+import android.os.Build
+import androidx.collection.intSetOf
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
+import com.geeksville.mesh.widget.LocalStatsWidgetReceiver
 import com.geeksville.mesh.worker.MeshLogCleanupWorker
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -64,6 +69,24 @@ open class MeshUtilApplication :
 
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()
+
+        // Generate and publish widget preview for Android 15+ widget picker
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            applicationScope.launch {
+                try {
+                    Logger.i { "Pushing generated widget preview..." }
+                    val result =
+                        GlanceAppWidgetManager(this@MeshUtilApplication)
+                            .setWidgetPreviews(
+                                LocalStatsWidgetReceiver::class,
+                                intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
+                            )
+                    Logger.i { "setWidgetPreviews result: $result" }
+                } catch (e: Exception) {
+                    Logger.e(e) { "Failed to set widget preview" }
+                }
+            }
+        }
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)

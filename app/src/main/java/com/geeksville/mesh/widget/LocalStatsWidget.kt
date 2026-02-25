@@ -63,6 +63,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.resources.Res
@@ -83,11 +85,18 @@ import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.proto.DeviceMetrics
+import org.meshtastic.proto.LocalStats
+import org.meshtastic.proto.User
 import java.util.Locale
 
 class LocalStatsWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode = SizeMode.Exact
+    override val previewSizeMode: androidx.glance.appwidget.PreviewSizeMode =
+        SizeMode.Responsive(
+            setOf(androidx.compose.ui.unit.DpSize(110.dp, 110.dp), androidx.compose.ui.unit.DpSize(250.dp, 250.dp)),
+        )
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
@@ -106,8 +115,61 @@ class LocalStatsWidget : GlanceAppWidget() {
         }
     }
 
+    override suspend fun providePreview(context: Context, widgetCategory: Int) {
+        provideContent {
+            val now = nowSeconds.toInt()
+            val mockLocalNode =
+                Node(
+                    num = 1234,
+                    user = User(short_name = "ME", long_name = "Mock Node", id = "!1234"),
+                    deviceMetrics =
+                        DeviceMetrics(
+                            battery_level = 85,
+                            channel_utilization = 18.5f,
+                            air_util_tx = 3.2f,
+                            uptime_seconds = 172800, // 2 days
+                        ),
+                    lastHeard = now,
+                )
+            val mockNode2 =
+                Node(
+                    num = 5678,
+                    user = User(short_name = "WX", long_name = "Weather Station", id = "!5678"),
+                    lastHeard = now - 300, // 5 mins ago
+                )
+            val mockNode3 =
+                Node(
+                    num = 9012,
+                    user = User(short_name = "RP", long_name = "Repeater", id = "!9012"),
+                    lastHeard = now - 86400, // 1 day ago (offline)
+                )
+
+            val mockStats =
+                LocalStats(
+                    uptime_seconds = 172800,
+                    num_packets_tx = 145,
+                    num_packets_rx = 892,
+                    num_rx_dupe = 42,
+                    num_tx_relay = 156,
+                    num_tx_relay_canceled = 12,
+                    noise_floor = -105,
+                    num_packets_rx_bad = 23,
+                    num_tx_dropped = 5,
+                )
+
+            WidgetContent(
+                LocalStatsWidgetUiState(
+                    connectionState = ConnectionState.Connected,
+                    localNode = mockLocalNode,
+                    stats = mockStats,
+                    nodes = mapOf(1234 to mockLocalNode, 5678 to mockNode2, 9012 to mockNode3),
+                ),
+            )
+        }
+    }
+
     @Composable
-    private fun WidgetContent(state: LocalStatsWidgetUiState) {
+    internal fun WidgetContent(state: LocalStatsWidgetUiState) {
         val context = LocalContext.current
         CompositionLocalProvider(
             androidx.compose.ui.platform.LocalContext provides context,
