@@ -26,13 +26,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.LocalSize
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.LinearProgressIndicator
@@ -63,40 +68,16 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.air_utilization
-import org.meshtastic.core.resources.battery
-import org.meshtastic.core.resources.channel_utilization
-import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.device_sleeping
-import org.meshtastic.core.resources.disconnected
-import org.meshtastic.core.resources.local_stats_bad
-import org.meshtastic.core.resources.local_stats_diagnostics_prefix
-import org.meshtastic.core.resources.local_stats_dropped
-import org.meshtastic.core.resources.local_stats_noise
-import org.meshtastic.core.resources.local_stats_relays
-import org.meshtastic.core.resources.local_stats_traffic
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.nodes
-import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.proto.DeviceMetrics
-import org.meshtastic.proto.LocalStats
-import org.meshtastic.proto.User
-import java.util.Locale
 
 class LocalStatsWidget : GlanceAppWidget() {
 
-    override val sizeMode: SizeMode = SizeMode.Exact
-    override val previewSizeMode: androidx.glance.appwidget.PreviewSizeMode =
-        SizeMode.Responsive(
-            setOf(androidx.compose.ui.unit.DpSize(110.dp, 110.dp), androidx.compose.ui.unit.DpSize(250.dp, 250.dp)),
-        )
+    override val sizeMode: SizeMode = SizeMode.Responsive(RESPONSIVE_SIZES)
+    override val previewSizeMode: androidx.glance.appwidget.PreviewSizeMode = SizeMode.Responsive(RESPONSIVE_SIZES)
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
@@ -116,56 +97,7 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        provideContent {
-            val now = nowSeconds.toInt()
-            val mockLocalNode =
-                Node(
-                    num = 1234,
-                    user = User(short_name = "ME", long_name = "Mock Node", id = "!1234"),
-                    deviceMetrics =
-                        DeviceMetrics(
-                            battery_level = 85,
-                            channel_utilization = 18.5f,
-                            air_util_tx = 3.2f,
-                            uptime_seconds = 172800, // 2 days
-                        ),
-                    lastHeard = now,
-                )
-            val mockNode2 =
-                Node(
-                    num = 5678,
-                    user = User(short_name = "WX", long_name = "Weather Station", id = "!5678"),
-                    lastHeard = now - 300, // 5 mins ago
-                )
-            val mockNode3 =
-                Node(
-                    num = 9012,
-                    user = User(short_name = "RP", long_name = "Repeater", id = "!9012"),
-                    lastHeard = now - 86400, // 1 day ago (offline)
-                )
-
-            val mockStats =
-                LocalStats(
-                    uptime_seconds = 172800,
-                    num_packets_tx = 145,
-                    num_packets_rx = 892,
-                    num_rx_dupe = 42,
-                    num_tx_relay = 156,
-                    num_tx_relay_canceled = 12,
-                    noise_floor = -105,
-                    num_packets_rx_bad = 23,
-                    num_tx_dropped = 5,
-                )
-
-            WidgetContent(
-                LocalStatsWidgetUiState(
-                    connectionState = ConnectionState.Connected,
-                    localNode = mockLocalNode,
-                    stats = mockStats,
-                    nodes = mapOf(1234 to mockLocalNode, 5678 to mockNode2, 9012 to mockNode3),
-                ),
-            )
-        }
+        provideContent { WidgetContent(mockState) }
     }
 
     @Composable
@@ -176,11 +108,6 @@ class LocalStatsWidget : GlanceAppWidget() {
             LocalConfiguration provides context.resources.configuration,
             LocalDensity provides Density(context.resources.displayMetrics.density),
         ) {
-            val localNode = state.localNode
-            val metrics = localNode?.deviceMetrics
-            val onlineNodes = state.nodes.values.count { it.lastHeard > onlineTimeThreshold() }
-            val totalNodes = state.nodes.size
-            val uptimeSecs: Long = state.stats?.uptime_seconds?.toLong() ?: metrics?.uptime_seconds?.toLong() ?: 0L
             GlanceTheme {
                 Scaffold(
                     titleBar = {
@@ -197,18 +124,13 @@ class LocalStatsWidget : GlanceAppWidget() {
                             },
                         )
                     },
+                    modifier =
+                    GlanceModifier.fillMaxSize().clickable(actionStartActivity<com.geeksville.mesh.MainActivity>()),
                 ) {
-                    Column(
-                        modifier = GlanceModifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalAlignment = Alignment.Top,
-                    ) {
-                        if (state.connectionState is ConnectionState.Connected) {
-                            StatsContent(state = state, modifier = GlanceModifier.defaultWeight())
-                            Footer(onlineNodes = onlineNodes, totalNodes = totalNodes, uptimeSecs = uptimeSecs)
-                        } else {
-                            Disconnected(state, GlanceModifier.fillMaxSize())
-                        }
+                    if (state.showContent) {
+                        FullStatsContent(state)
+                    } else {
+                        Disconnected(state)
                     }
                 }
             }
@@ -216,125 +138,98 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     @Composable
-    @Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
-    private fun StatsContent(state: LocalStatsWidgetUiState, modifier: GlanceModifier) {
-        val localNode = state.localNode
-        val metrics = localNode?.deviceMetrics
+    private fun FullStatsContent(state: LocalStatsWidgetUiState) {
+        val size = LocalSize.current
+        val isNarrow = size.width < 160.dp
+        val isShort = size.height < 110.dp
+        val isSmall = isNarrow || isShort
+        Column(modifier = GlanceModifier.fillMaxSize()) {
+            // Main Stats Container
+            Column(modifier = GlanceModifier.defaultWeight()) {
+                // Summary Header: Node Chip + Battery
+                Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    state.nodeShortName?.let { name ->
+                        state.nodeColors?.let { colors -> NodeChip(shortName = name, colors = colors) }
+                    }
+                    Spacer(GlanceModifier.width(8.dp))
+                    StatRow(
+                        label = state.batteryLabel,
+                        value = state.batteryValue,
+                        progress = state.batteryProgress,
+                        isSmall = isSmall,
+                        modifier = GlanceModifier.defaultWeight(),
+                    )
+                }
 
-        val batteryLevel = metrics?.battery_level ?: 0
-        val isPowered = batteryLevel > 100
-        val batteryText = if (isPowered) stringResource(Res.string.powered) else "$batteryLevel%"
+                Spacer(GlanceModifier.height(2.dp))
 
-        val channelUtil = state.stats?.channel_utilization ?: metrics?.channel_utilization ?: 0f
-        val airUtilTx = state.stats?.air_util_tx ?: metrics?.air_util_tx ?: 0f
+                // Utilization Stats
 
-        Column(modifier = modifier) {
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                localNode?.let { NodeChip(shortName = it.user.short_name, colors = it.colors) }
-                Spacer(GlanceModifier.width(8.dp))
-                StatRow(
-                    label = stringResource(Res.string.battery),
-                    value = batteryText,
-                    progress = (batteryLevel / 100f).coerceIn(0f, 1f),
-                )
-            }
-            Row(
-                modifier = GlanceModifier.fillMaxWidth().padding(top = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StatRow(
-                    label = stringResource(Res.string.channel_utilization),
-                    value = String.format(Locale.ROOT, "%.1f%%", channelUtil),
-                    progress = (channelUtil / 100f).coerceIn(0f, 1f),
-                    modifier = GlanceModifier.defaultWeight().padding(end = 4.dp),
-                )
-                StatRow(
-                    label = stringResource(Res.string.air_utilization),
-                    value = String.format(Locale.ROOT, "%.1f%%", airUtilTx),
-                    progress = (airUtilTx / 100f).coerceIn(0f, 1f),
-                    modifier = GlanceModifier.defaultWeight().padding(start = 4.dp),
-                )
-            }
-            if (state.stats != null) {
+                Row(modifier = GlanceModifier.fillMaxWidth()) {
+                    StatRow(
+                        label = state.channelUtilizationLabel,
+                        value = state.channelUtilizationValue,
+                        progress = state.channelUtilizationProgress,
+                        isSmall = isSmall,
+                        modifier = GlanceModifier.defaultWeight().padding(end = 4.dp),
+                    )
+                    StatRow(
+                        label = state.airUtilizationLabel,
+                        value = state.airUtilizationValue,
+                        progress = state.airUtilizationProgress,
+                        isSmall = isSmall,
+                        modifier = GlanceModifier.defaultWeight().padding(start = 4.dp),
+                    )
+                }
+
+                // Detailed Traffic/Relay Stats
+                Spacer(GlanceModifier.height(2.dp))
                 Column(modifier = GlanceModifier.fillMaxWidth()) {
-                    if (state.stats.num_packets_tx > 0 || state.stats.num_packets_rx > 0) {
-                        Text(
-                            text =
-                            stringResource(
-                                Res.string.local_stats_traffic,
-                                state.stats.num_packets_tx,
-                                state.stats.num_packets_rx,
-                                state.stats.num_rx_dupe,
-                            ),
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 9.sp),
-                            modifier = GlanceModifier.fillMaxWidth(),
-                            maxLines = 1,
-                        )
-                    }
-
-                    if (state.stats.num_tx_relay > 0) {
-                        Text(
-                            text =
-                            stringResource(
-                                Res.string.local_stats_relays,
-                                state.stats.num_tx_relay,
-                                state.stats.num_tx_relay_canceled,
-                            ),
-                            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 9.sp),
-                            modifier = GlanceModifier.fillMaxWidth(),
-                            maxLines = 1,
-                        )
-
-                        val diag = mutableListOf<String>()
-                        if (state.stats.noise_floor != 0) {
-                            diag.add(stringResource(Res.string.local_stats_noise, state.stats.noise_floor))
-                        }
-                        if (state.stats.num_packets_rx_bad > 0) {
-                            diag.add(stringResource(Res.string.local_stats_bad, state.stats.num_packets_rx_bad))
-                        }
-                        if (state.stats.num_tx_dropped > 0) {
-                            diag.add(stringResource(Res.string.local_stats_dropped, state.stats.num_tx_dropped))
-                        }
-
-                        if (diag.isNotEmpty()) {
-                            Text(
-                                text =
-                                stringResource(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
-                                style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 9.sp),
-                                modifier = GlanceModifier.fillMaxWidth(),
-                                maxLines = 1,
-                            )
-                        }
+                    state.trafficText?.let { StatText(it, isSmall) }
+                    state.relayText?.let { StatText(it, isSmall) }
+                    state.diagnosticsText?.let { StatText(it, isSmall) }
+                    state.heapText?.let {
+                        StatRow(it, state.heapValue, (state.heapFreeBytes.toFloat() / state.heapTotalBytes), isSmall)
                     }
                 }
             }
+
+            // Footer (Nodes + Uptime - Pinned to bottom)
+            Footer(state)
         }
     }
 
     @Composable
-    private fun Disconnected(state: LocalStatsWidgetUiState, modifier: GlanceModifier) {
+    private fun StatText(text: String, isSmall: Boolean) {
+        Text(
+            text = text,
+            style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = if (isSmall) 9.sp else 10.sp),
+            modifier = GlanceModifier.fillMaxWidth(),
+        )
+    }
+
+    @Composable
+    private fun Disconnected(state: LocalStatsWidgetUiState) {
         Column(
-            modifier = modifier,
+            modifier = GlanceModifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            val statusText =
-                when (state.connectionState) {
-                    is ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-                    is ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                    is ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
-                    is ConnectionState.Connected -> ""
-                }
-            if (state.connectionState is ConnectionState.Connecting) {
+            if (state.isConnecting) {
                 CircularProgressIndicator(modifier = GlanceModifier.size(24.dp))
-                Spacer(GlanceModifier.height(8.dp))
+            } else {
+                Image(
+                    provider = ImageProvider(com.geeksville.mesh.R.drawable.app_icon),
+                    contentDescription = null,
+                    modifier = GlanceModifier.size(32.dp),
+                )
             }
             Text(
-                text = statusText,
+                text = state.statusText,
                 style =
                 TextStyle(
                     color = GlanceTheme.colors.onSurfaceVariant,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                 ),
             )
@@ -342,9 +237,9 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun Footer(onlineNodes: Int, totalNodes: Int, uptimeSecs: Long) {
+    private fun Footer(state: LocalStatsWidgetUiState) {
         Row(
-            modifier = GlanceModifier.fillMaxWidth().padding(bottom = 12.dp),
+            modifier = GlanceModifier.fillMaxWidth().padding(top = 2.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = GlanceModifier.defaultWeight(), verticalAlignment = Alignment.CenterVertically) {
@@ -353,7 +248,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                     style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                 )
                 Text(
-                    text = "$onlineNodes/$totalNodes",
+                    text = state.nodeCountText,
                     maxLines = 1,
                     style =
                     TextStyle(
@@ -373,7 +268,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                     style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                 )
                 Text(
-                    text = formatUptime(uptimeSecs.toInt()),
+                    text = state.uptimeText,
                     maxLines = 1,
                     style =
                     TextStyle(
@@ -391,8 +286,14 @@ class LocalStatsWidget : GlanceAppWidget() {
     private fun NodeChip(shortName: String, colors: Pair<Int, Int>, modifier: GlanceModifier = GlanceModifier) {
         val (fg, bg) = colors
         Row(
-            modifier = modifier.background(Color(bg)).cornerRadius(4.dp).padding(horizontal = 6.dp, vertical = 4.dp),
+            modifier =
+            modifier
+                .width(64.dp)
+                .background(Color(bg))
+                .cornerRadius(4.dp)
+                .padding(horizontal = 6.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 text = shortName,
@@ -402,31 +303,71 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     @Composable
-    private fun StatRow(label: String, value: String, progress: Float, modifier: GlanceModifier = GlanceModifier) {
-        Column(modifier = modifier.padding(vertical = 4.dp)) {
+    private fun StatRow(
+        label: String,
+        value: String?,
+        progress: Float,
+        isSmall: Boolean,
+        modifier: GlanceModifier = GlanceModifier,
+    ) {
+        Column(modifier = modifier.padding(vertical = 2.dp)) {
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = label,
-                    style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 11.sp),
-                    modifier = GlanceModifier.defaultWeight(),
-                )
-                Text(
-                    text = value,
                     style =
                     TextStyle(
-                        color = GlanceTheme.colors.onSurface,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium,
+                        color = GlanceTheme.colors.onSurfaceVariant,
+                        fontSize = if (isSmall) 10.sp else 11.sp,
                     ),
+                    modifier = GlanceModifier.defaultWeight(),
                 )
+                value?.let {
+                    Text(
+                        text = it,
+                        style =
+                        TextStyle(
+                            color = GlanceTheme.colors.onSurface,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                    )
+                }
             }
-            Spacer(GlanceModifier.height(1.dp))
+            Spacer(GlanceModifier.height(2.dp))
             LinearProgressIndicator(
                 progress = progress,
-                modifier = GlanceModifier.fillMaxWidth().height(3.dp).cornerRadius(2.dp),
+                modifier = GlanceModifier.fillMaxWidth().height(4.dp).cornerRadius(2.dp),
                 color = GlanceTheme.colors.primary,
                 backgroundColor = GlanceTheme.colors.surfaceVariant,
             )
         }
     }
+
+    companion object {
+        private val SMALL_SQUARE = DpSize(100.dp, 100.dp)
+        private val HORIZONTAL_RECTANGLE = DpSize(250.dp, 100.dp)
+        private val BIG_SQUARE = DpSize(250.dp, 250.dp)
+
+        private val RESPONSIVE_SIZES = setOf(SMALL_SQUARE, HORIZONTAL_RECTANGLE, BIG_SQUARE)
+    }
 }
+
+val mockState =
+    LocalStatsWidgetUiState(
+        connectionState = ConnectionState.Connected,
+        showContent = true,
+        nodeShortName = "ME",
+        nodeColors = 0xFFFFFFFF.toInt() to 0xFF000000.toInt(),
+        batteryLabel = "Battery",
+        batteryValue = "85%",
+        batteryProgress = 0.85f,
+        channelUtilizationLabel = "Channel",
+        channelUtilizationValue = "18.5%",
+        channelUtilizationProgress = 0.185f,
+        airUtilizationLabel = "Air",
+        airUtilizationValue = "3.2%",
+        airUtilizationProgress = 0.032f,
+        trafficText = "TX: 145 | RX: 892 | D: 42",
+        nodeCountText = "2/3",
+        uptimeText = "2d 0h",
+    )

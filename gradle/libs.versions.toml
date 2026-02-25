@@ -79,7 +79,8 @@ androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "d
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version = "1.6.0" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
-androidx-glance-preview = { module = "androidx.glance:glance-appwidget-preview", version.ref = "glance" }
+androidx-glance-appwidget-preview = { module = "androidx.glance:glance-appwidget-preview", version.ref = "glance" }
+androidx-glance-preview = { module = "androidx.glance:glance-preview", version.ref = "glance" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }

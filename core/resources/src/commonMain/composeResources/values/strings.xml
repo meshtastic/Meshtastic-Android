@@ -1199,11 +1199,13 @@
     <string name="local_stats_nodes">Nodes: %1$d online / %2$d total</string>
     <string name="local_stats_uptime">Uptime: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
-    <string name="local_stats_traffic">Traffic: TX %1$d / RX %2$d (Dupes: %3$d)</string>
+    <string name="local_stats_traffic">Traffic: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Relays: %1$d (Canceled: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostics: %1$s</string>
     <string name="local_stats_noise">Noise %1$d dBm</string>
     <string name="local_stats_bad">Bad %1$d</string>
     <string name="local_stats_dropped">Dropped %1$d</string>
+    <string name="local_stats_heap">Heap</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
     <string name="powered">Powered</string>
 </resources>

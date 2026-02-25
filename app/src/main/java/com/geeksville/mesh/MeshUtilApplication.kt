@@ -82,7 +82,7 @@ open class MeshUtilApplication :
                                 intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN),
                             )
                     Logger.i { "setWidgetPreviews result: $result" }
-                } catch (e: Exception) {
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Failed to set widget preview" }
                 }
             }
