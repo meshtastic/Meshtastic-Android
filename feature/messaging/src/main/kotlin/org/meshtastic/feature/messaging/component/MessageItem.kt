@@ -239,11 +239,6 @@ internal fun MessageItem(
                 maxLines = 1,
                 style = MaterialTheme.typography.labelMedium,
             )
-            TransportIcon(
-                transport = message.transportMechanism,
-                viaMqtt = message.viaMqtt,
-                modifier = Modifier.size(16.dp),
-            )
         }
     }
     Surface(
@@ -317,9 +312,14 @@ internal fun MessageItem(
                                 )
                             }
                         }
+                        TransportIcon(
+                            transport = message.transportMechanism,
+                            viaMqtt = message.viaMqtt,
+                            modifier = Modifier.size(16.dp).padding(start = 4.dp),
+                        )
                     }
                     if (containsBel) {
-                        Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
+                        Text(text = "\uD83D\uDD14", modifier = Modifier.padding(start = 4.dp))
                     }
                     if (message.filtered) {
                         Text(
