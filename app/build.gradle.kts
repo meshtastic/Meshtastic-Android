@@ -297,6 +297,7 @@ dependencies {
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.compose.ui.test.junit4)
     testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.androidx.glance.appwidget)
 }
 
 aboutLibraries {
