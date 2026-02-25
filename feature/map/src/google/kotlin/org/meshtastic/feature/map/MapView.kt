@@ -451,8 +451,7 @@ fun MapView(
                 properties =
                 MapProperties(
                     mapType = effectiveGoogleMapType,
-                    isMyLocationEnabled =
-                    isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
+                    isMyLocationEnabled = isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
                 ),
                 onMapLongClick = { latLng ->
                     if (isConnected) {
@@ -479,7 +478,7 @@ fun MapView(
                         jointType = JointType.ROUND,
                         color = TracerouteColors.OutgoingRoute,
                         width = 9f,
-                        zIndex = 1.5f,
+                        zIndex = 3.0f,
                     )
                 }
                 if (tracerouteReturnPoints.size >= 2) {
@@ -488,7 +487,7 @@ fun MapView(
                         jointType = JointType.ROUND,
                         color = TracerouteColors.ReturnRoute,
                         width = 7f,
-                        zIndex = 1.4f,
+                        zIndex = 2.5f,
                     )
                 }
 
@@ -504,26 +503,28 @@ fun MapView(
                         .find { it.num == focusedNodeNum }
                         ?.let { focusedNode ->
                             sortedPositions.forEachIndexed { index, position ->
-                                val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
-                                val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
-                                val color = Color(focusedNode.colors.second).copy(alpha = alpha)
-                                if (index == sortedPositions.lastIndex) {
-                                    MarkerComposable(state = markerState, zIndex = 1f) { NodeChip(node = focusedNode) }
-                                } else {
-                                    MarkerInfoWindowComposable(
-                                        state = markerState,
-                                        title = stringResource(Res.string.position),
-                                        snippet = formatAgo(position.time),
-                                        zIndex = alpha,
-                                        infoContent = {
-                                            PositionInfoWindowContent(position = position, displayUnits = displayUnits)
-                                        },
-                                    ) {
-                                        Icon(
-                                            imageVector = androidx.compose.material.icons.Icons.Rounded.TripOrigin,
-                                            contentDescription = stringResource(Res.string.track_point),
-                                            tint = color,
-                                        )
+                                key(position.time) {
+                                    val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
+                                    val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
+                                    val color = Color(focusedNode.colors.second).copy(alpha = alpha)
+                                    if (index == sortedPositions.lastIndex) {
+                                        MarkerComposable(state = markerState, zIndex = 4f) { NodeChip(node = focusedNode) }
+                                    } else {
+                                        MarkerInfoWindowComposable(
+                                            state = markerState,
+                                            title = stringResource(Res.string.position),
+                                            snippet = formatAgo(position.time),
+                                            zIndex = 1f + alpha,
+                                            infoContent = {
+                                                PositionInfoWindowContent(position = position, displayUnits = displayUnits)
+                                            },
+                                        ) {
+                                            Icon(
+                                                imageVector = androidx.compose.material.icons.Icons.Rounded.TripOrigin,
+                                                contentDescription = stringResource(Res.string.track_point),
+                                                tint = color,
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -537,6 +538,7 @@ fun MapView(
                                         jointType = JointType.ROUND,
                                         color = Color(focusedNode.colors.second).copy(alpha = alpha),
                                         width = 8f,
+                                        zIndex = 0.6f,
                                     )
                                 }
                             }
@@ -569,25 +571,6 @@ fun MapView(
                             }
                             true
                         },
-                    )
-                }
-
-                if (tracerouteForwardPoints.size >= 2) {
-                    Polyline(
-                        points = tracerouteForwardOffsetPoints,
-                        jointType = JointType.ROUND,
-                        color = TracerouteColors.OutgoingRoute,
-                        width = 9f,
-                        zIndex = 2f,
-                    )
-                }
-                if (tracerouteReturnPoints.size >= 2) {
-                    Polyline(
-                        points = tracerouteReturnOffsetPoints,
-                        jointType = JointType.ROUND,
-                        color = TracerouteColors.ReturnRoute,
-                        width = 7f,
-                        zIndex = 1.5f,
                     )
                 }
 

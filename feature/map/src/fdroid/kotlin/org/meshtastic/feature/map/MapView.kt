@@ -42,12 +42,15 @@ import androidx.compose.material.icons.rounded.Lens
 import androidx.compose.material.icons.rounded.LocationDisabled
 import androidx.compose.material.icons.rounded.PinDrop
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.rounded.TripOrigin
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -66,6 +69,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -85,10 +89,16 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.metersIn
+import org.meshtastic.core.model.util.mpsToKmph
+import org.meshtastic.core.model.util.mpsToMph
+import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.clear
@@ -97,7 +107,10 @@ import org.meshtastic.core.resources.delete_for_everyone
 import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.expires
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.heading
+import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.map_cache_info
 import org.meshtastic.core.resources.map_cache_manager
 import org.meshtastic.core.resources.map_cache_size
@@ -115,15 +128,21 @@ import org.meshtastic.core.resources.map_style_selection
 import org.meshtastic.core.resources.map_subDescription
 import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.only_favorites
+import org.meshtastic.core.resources.position
+import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.show_precision_circle
 import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.resources.speed
+import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.resources.track_point
 import org.meshtastic.core.resources.waypoint_delete
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.TracerouteColors
 import org.meshtastic.core.ui.util.formatAgo
+import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.component.CacheLayout
@@ -133,6 +152,7 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -165,12 +185,26 @@ import kotlin.math.sin
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
+    trackMarkers: List<Marker>,
+    trackPolylines: List<Polyline>,
     nodeClusterer: RadiusMarkerClusterer,
 ) {
-    Logger.d { "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints" }
-    overlays.removeAll { it is MarkerWithLabel }
-    // overlays.addAll(nodeMarkers + waypointMarkers)
+    Logger.d {
+        "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints ${trackMarkers.size} tracks"
+    }
+
+    val trackOverlayIds = (trackMarkers + trackPolylines).toSet()
+
+    overlays.removeAll { overlay ->
+        overlay is MarkerWithLabel ||
+            (overlay is Marker && overlay !in nodeClusterer.items && overlay !in trackOverlayIds) ||
+            (overlay is Polyline && overlay !in trackOverlayIds)
+    }
+
     overlays.addAll(waypointMarkers)
+    overlays.addAll(trackPolylines)
+    overlays.addAll(trackMarkers)
+
     nodeClusterer.items.clear()
     nodeClusterer.items.addAll(nodeMarkers)
     nodeClusterer.invalidate()
@@ -668,6 +702,51 @@ fun MapView(
         }
     }
 
+    fun MapView.onTracksChanged(nodeTracks: List<Position>?, focusedNodeNum: Int?): Pair<List<Marker>, List<Polyline>> {
+        if (nodeTracks == null || focusedNodeNum == null) return emptyList<Marker>() to emptyList<Polyline>()
+
+        val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
+        val timeFilteredPositions =
+            nodeTracks.filter {
+                lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
+            }
+        val sortedPositions = timeFilteredPositions.sortedBy { it.time }
+
+        val focusedNode = nodes.find { it.num == focusedNodeNum } ?: return emptyList<Marker>() to emptyList<Polyline>()
+        val color = focusedNode.colors.second
+
+        val trackPolylines = mutableListOf<Polyline>()
+        if (sortedPositions.size > 1) {
+            val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
+            segments.forEachIndexed { index, segmentPoints ->
+                val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
+                val polyline =
+                    Polyline().apply {
+                        setPoints(
+                            segmentPoints.map { GeoPoint((it.latitude_i ?: 0) * 1e-7, (it.longitude_i ?: 0) * 1e-7) },
+                        )
+                        outlinePaint.color = Color(color).copy(alpha = alpha).toArgb()
+                        outlinePaint.strokeWidth = 8f
+                    }
+                trackPolylines.add(polyline)
+            }
+        }
+
+        val trackMarkers =
+            sortedPositions.mapIndexedNotNull { index, position ->
+                if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
+
+                Marker(this).apply {
+                    this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
+                    icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    title = getString(Res.string.position)
+                    snippet = formatAgo(position.time)
+                }
+            }
+        return trackMarkers to trackPolylines
+    }
+
     Scaffold(
         floatingActionButton = {
             DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
@@ -684,10 +763,13 @@ fun MapView(
                 modifier = Modifier.fillMaxSize(),
                 update = { mapView ->
                     mapView.updateTracerouteOverlay(tracerouteForwardOffsetPoints, tracerouteReturnOffsetPoints)
+                    val (trackMarkers, trackPolylines) = mapView.onTracksChanged(nodeTracks, focusedNodeNum)
                     with(mapView) {
                         updateMarkers(
                             onNodesChanged(nodesForMarkers),
                             onWaypointChanged(waypoints.values, selectedWaypointId),
+                            trackMarkers,
+                            trackPolylines,
                             nodeClusterer,
                         )
                     }
