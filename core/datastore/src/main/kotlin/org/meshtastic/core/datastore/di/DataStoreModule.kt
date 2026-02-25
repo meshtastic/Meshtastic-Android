@@ -43,10 +43,12 @@ import org.meshtastic.core.datastore.KEY_SHOW_IGNORED
 import org.meshtastic.core.datastore.KEY_THEME
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
+import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.LocalStats
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -127,6 +129,18 @@ object DataStoreModule {
         serializer = ChannelSetSerializer,
         produceFile = { appContext.dataStoreFile("channel_set.pb") },
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
+        scope = scope,
+    )
+
+    @Singleton
+    @Provides
+    fun provideLocalStatsDataStore(
+        @ApplicationContext appContext: Context,
+        @DataStoreScope scope: CoroutineScope,
+    ): DataStore<LocalStats> = DataStoreFactory.create(
+        serializer = LocalStatsSerializer,
+        produceFile = { appContext.dataStoreFile("local_stats.pb") },
+        corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalStats() }),
         scope = scope,
     )
 }

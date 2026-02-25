@@ -42,11 +42,13 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.HardwareModel
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -57,10 +59,11 @@ import javax.inject.Singleton
 class NodeRepository
 @Inject
 constructor(
-    @ProcessLifecycle processLifecycle: Lifecycle,
+    @ProcessLifecycle private val processLifecycle: Lifecycle,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
+    private val localStatsDataSource: LocalStatsDataSource,
 ) {
     /** Hardware info about our local device (can be null if not connected). */
     val myNodeInfo: StateFlow<MyNodeEntity?> =
@@ -81,15 +84,13 @@ constructor(
     val myId: StateFlow<String?>
         get() = _myId
 
-    private val _localStats = MutableStateFlow<org.meshtastic.proto.LocalStats?>(null)
-
     /** The latest local stats telemetry received from the locally connected node. */
-    val localStats: StateFlow<org.meshtastic.proto.LocalStats?>
-        get() = _localStats
+    val localStats: StateFlow<LocalStats?> =
+        localStatsDataSource.localStatsFlow.stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
 
     /** Update the cached local stats telemetry. */
-    fun updateLocalStats(stats: org.meshtastic.proto.LocalStats) {
-        _localStats.value = stats
+    fun updateLocalStats(stats: LocalStats) {
+        processLifecycle.coroutineScope.launch { localStatsDataSource.setLocalStats(stats) }
     }
 
     /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
