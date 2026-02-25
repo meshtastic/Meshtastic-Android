@@ -256,6 +256,17 @@
         <receiver android:name="com.geeksville.mesh.service.MarkAsReadReceiver"/>
         <receiver android:name="com.geeksville.mesh.service.ReactionReceiver"/>
 
+        <receiver
+            android:name="com.geeksville.mesh.widget.LocalStatsWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/local_stats_widget_info" />
+        </receiver>
+
         <!-- allow for plugin discovery -->
         <activity
             android:name="com.atakmap.app.component"

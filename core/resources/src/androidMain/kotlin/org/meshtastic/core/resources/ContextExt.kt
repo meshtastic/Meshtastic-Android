@@ -18,23 +18,36 @@ package org.meshtastic.core.resources
 
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.getString as composeGetString
 
 /** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */
-fun getString(stringResource: StringResource): String = runBlocking {
-    org.jetbrains.compose.resources.getString(stringResource)
-}
+fun getString(stringResource: StringResource): String = runBlocking { composeGetString(stringResource) }
 
 /** Retrieves a formatted string from the [StringResource] in a blocking manner. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
+    getStringSuspend(stringResource, *formatArgs)
+}
+
+/** Retrieves a string from the [StringResource] in a suspending manner. */
+suspend fun getStringSuspend(stringResource: StringResource): String = composeGetString(stringResource)
+
+/** Retrieves a formatted string from the [StringResource] in a suspending manner. */
+suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: Any): String {
     val resolvedArgs =
-        formatArgs.map { arg ->
-            if (arg is StringResource) {
-                getString(arg)
-            } else {
-                arg
+        formatArgs
+            .map { arg ->
+                if (arg is StringResource) {
+                    // Resolve nested StringResources recursively
+                    getStringSuspend(arg)
+                } else {
+                    arg
+                }
             }
-        }
+            .toTypedArray()
+
+    // Compose Multiplatform doesn't fully support complex formatting like %.2f
+    // Fetch the raw string and format it using standard Java String.format.
+    val rawString = composeGetString(stringResource)
     @Suppress("SpreadOperator")
-    org.jetbrains.compose.resources.getString(stringResource, *resolvedArgs.toTypedArray())
+    return String.format(java.util.Locale.getDefault(), rawString, *resolvedArgs)
 }

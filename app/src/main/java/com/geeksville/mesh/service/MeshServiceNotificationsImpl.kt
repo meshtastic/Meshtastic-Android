@@ -61,6 +61,8 @@ import org.meshtastic.core.resources.local_stats_bad
 import org.meshtastic.core.resources.local_stats_battery
 import org.meshtastic.core.resources.local_stats_diagnostics_prefix
 import org.meshtastic.core.resources.local_stats_dropped
+import org.meshtastic.core.resources.local_stats_heap
+import org.meshtastic.core.resources.local_stats_heap_value
 import org.meshtastic.core.resources.local_stats_nodes
 import org.meshtastic.core.resources.local_stats_noise
 import org.meshtastic.core.resources.local_stats_relays
@@ -81,6 +83,7 @@ import org.meshtastic.core.resources.meshtastic_service_notifications
 import org.meshtastic.core.resources.meshtastic_waypoints_notifications
 import org.meshtastic.core.resources.new_node_seen
 import org.meshtastic.core.resources.no_local_stats
+import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.you
 import org.meshtastic.core.service.MeshServiceNotifications
@@ -312,7 +315,10 @@ constructor(
                         cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
                     }
                     if (cachedLocalStats == null) {
-                        cachedLocalStats = entity.deviceTelemetry.local_stats
+                        // Fallback to DB stats if repository hasn't received any fresh ones yet
+                        cachedLocalStats =
+                            repo.localStats.value.takeIf { it.uptime_seconds != 0 }
+                                ?: entity.deviceTelemetry.local_stats
                     }
                 }
             }
@@ -855,10 +861,25 @@ constructor(
 
     private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
         val parts = mutableListOf<String>()
-        batteryLevel?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+        batteryLevel?.let {
+            if (it > MAX_BATTERY_LEVEL) {
+                parts.add(BULLET + getString(Res.string.powered))
+            } else {
+                parts.add(BULLET + getString(Res.string.local_stats_battery, it))
+            }
+        }
         parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
         parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
         parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization, air_util_tx))
+
+        if (heap_free_bytes > 0 || heap_total_bytes > 0) {
+            parts.add(
+                BULLET +
+                    getString(Res.string.local_stats_heap) +
+                    ": " +
+                    getString(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
+            )
+        }
 
         // Traffic Stats
         if (num_packets_tx > 0 || num_packets_rx > 0) {
@@ -887,7 +908,11 @@ constructor(
         val parts = mutableListOf<String>()
         battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
         uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
-        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f))
+        if (channel_utilization != null || air_util_tx != null) {
+            parts.add(
+                BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f),
+            )
+        }
         return parts.joinToString("\n")
     }
 
