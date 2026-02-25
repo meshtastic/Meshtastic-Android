@@ -85,8 +85,12 @@ constructor(
         get() = _myId
 
     /** The latest local stats telemetry received from the locally connected node. */
-    val localStats: StateFlow<LocalStats?> =
-        localStatsDataSource.localStatsFlow.stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
+    val localStats: StateFlow<LocalStats> =
+        localStatsDataSource.localStatsFlow.stateIn(
+            processLifecycle.coroutineScope,
+            SharingStarted.Eagerly,
+            LocalStats(),
+        )
 
     /** Update the cached local stats telemetry. */
     fun updateLocalStats(stats: LocalStats) {

@@ -88,7 +88,7 @@ class MeshConnectionManagerTest {
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeEntity?>(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow<Node?>(null)
-        every { nodeRepository.localStats } returns MutableStateFlow<LocalStats?>(null)
+        every { nodeRepository.localStats } returns MutableStateFlow<LocalStats>(LocalStats())
 
         manager =
             MeshConnectionManager(

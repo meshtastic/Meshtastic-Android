@@ -315,7 +315,10 @@ constructor(
                         cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
                     }
                     if (cachedLocalStats == null) {
-                        cachedLocalStats = repo.localStats.value
+                        // Fallback to DB stats if repository hasn't received any fresh ones yet
+                        cachedLocalStats =
+                            repo.localStats.value.takeIf { it.uptime_seconds != 0 }
+                                ?: entity.deviceTelemetry.local_stats
                     }
                 }
             }

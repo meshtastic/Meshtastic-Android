@@ -51,7 +51,7 @@ class LocalStatsWidgetStateProviderTest {
 
     private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val nodeDbFlow = MutableStateFlow<Map<Int, Node>>(emptyMap())
-    private val localStatsFlow = MutableStateFlow<LocalStats?>(null)
+    private val localStatsFlow = MutableStateFlow(LocalStats())
     private val ourNodeInfoFlow = MutableStateFlow<Node?>(null)
 
     // Using mocks but with a very explicit setup to avoid Kover interference
@@ -60,8 +60,8 @@ class LocalStatsWidgetStateProviderTest {
 
     @Before
     fun setUp() {
-        serviceRepository = mockk()
-        nodeRepository = mockk()
+        serviceRepository = mockk(relaxed = true)
+        nodeRepository = mockk(relaxed = true)
 
         every { serviceRepository.connectionState } returns connectionStateFlow
         every { nodeRepository.nodeDBbyNum } returns nodeDbFlow
@@ -100,7 +100,7 @@ class LocalStatsWidgetStateProviderTest {
 
         val provider = LocalStatsWidgetStateProvider(nodeRepository, serviceRepository)
         val state =
-            provider.state.first { it.connectionState == ConnectionState.Connected && it.nodeShortName == "ABC" }
+            provider.state.first { (it.connectionState == ConnectionState.Connected) && (it.nodeShortName == "ABC") }
 
         assertTrue(state.showContent)
         assertEquals("ABC", state.nodeShortName)

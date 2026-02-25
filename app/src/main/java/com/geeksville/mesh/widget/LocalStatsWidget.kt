@@ -123,7 +123,7 @@ class LocalStatsWidget : GlanceAppWidget() {
                             actions = {
                                 CircleIconButton(
                                     imageProvider = ImageProvider(com.geeksville.mesh.R.drawable.ic_refresh),
-                                    contentDescription = "Refresh",
+                                    contentDescription = state.refreshLabel,
                                     onClick = actionRunCallback<RefreshLocalStatsAction>(),
                                     backgroundColor = null,
                                 )
@@ -195,7 +195,13 @@ class LocalStatsWidget : GlanceAppWidget() {
                     state.relayText?.let { StatText(it, isSmall) }
                     state.diagnosticsText?.let { StatText(it, isSmall) }
                     state.heapText?.let {
-                        StatRow(it, state.heapValue, (state.heapFreeBytes.toFloat() / state.heapTotalBytes), isSmall)
+                        val heapProgress =
+                            if (state.heapTotalBytes > 0) {
+                                state.heapFreeBytes.toFloat() / state.heapTotalBytes
+                            } else {
+                                0f
+                            }
+                        StatRow(it, state.heapValue, heapProgress, isSmall)
                     }
                 }
             }
@@ -283,8 +289,14 @@ class LocalStatsWidget : GlanceAppWidget() {
                 }
             }
             Row(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                val footerText =
+                    if (state.updatedLabel.isNotEmpty()) {
+                        "${state.updatedLabel} ${state.updatedText}"
+                    } else {
+                        state.updatedText
+                    }
                 Text(
-                    text = "${state.updatedLabel} ${state.updatedText}",
+                    text = footerText,
                     style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 8.sp),
                     modifier = GlanceModifier.padding(bottom = 2.dp),
                     maxLines = 1,

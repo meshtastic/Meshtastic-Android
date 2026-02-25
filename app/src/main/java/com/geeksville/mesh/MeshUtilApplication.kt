@@ -36,9 +36,11 @@ import dagger.hilt.android.HiltAndroidApp
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
@@ -46,6 +48,7 @@ import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
 
 /**
@@ -96,10 +99,17 @@ open class MeshUtilApplication :
                         this@MeshUtilApplication,
                         com.geeksville.mesh.widget.LocalStatsWidget.LocalStatsWidgetEntryPoint::class.java,
                     )
-                entryPoint.widgetStateProvider().state.first { it.showContent && it.nodeShortName != null }
+                try {
+                    // Wait for real data for up to 30 seconds before pushing an updated preview
+                    withTimeout(30.seconds) {
+                        entryPoint.widgetStateProvider().state.first { it.showContent && it.nodeShortName != null }
+                    }
 
-                Logger.i { "Real node data acquired. Pushing updated widget preview." }
-                pushPreview()
+                    Logger.i { "Real node data acquired. Pushing updated widget preview." }
+                    pushPreview()
+                } catch (e: TimeoutCancellationException) {
+                    Logger.i(e) { "Timed out waiting for real node data for widget preview." }
+                }
             }
         }
 
