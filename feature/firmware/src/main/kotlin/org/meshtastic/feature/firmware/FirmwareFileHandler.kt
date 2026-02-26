@@ -24,8 +24,13 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.request.head
+import io.ktor.client.statement.bodyAsChannel
+import io.ktor.http.contentLength
+import io.ktor.http.isSuccess
+import io.ktor.utils.io.jvm.javaio.toInputStream
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileInputStream
@@ -45,7 +50,7 @@ class FirmwareFileHandler
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    private val client: OkHttpClient,
+    private val client: HttpClient,
 ) {
     private val tempDir = File(context.cacheDir, "firmware_update")
 
@@ -60,10 +65,9 @@ constructor(
     }
 
     suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
-        val request = Request.Builder().url(url).head().build()
         try {
-            client.newCall(request).execute().use { response -> response.isSuccessful }
-        } catch (e: IOException) {
+            client.head(url).status.isSuccess()
+        } catch (e: Exception) {
             Logger.w(e) { "Failed to check URL existence: $url" }
             false
         }
@@ -71,28 +75,27 @@ constructor(
 
     suspend fun downloadFile(url: String, fileName: String, onProgress: (Float) -> Unit): File? =
         withContext(Dispatchers.IO) {
-            val request = Request.Builder().url(url).build()
             val response =
                 try {
-                    client.newCall(request).execute()
-                } catch (e: IOException) {
+                    client.get(url)
+                } catch (e: Exception) {
                     Logger.w(e) { "Download failed for $url" }
                     return@withContext null
                 }
 
-            if (!response.isSuccessful) {
-                Logger.w { "Download failed: ${response.code} for $url" }
+            if (!response.status.isSuccess()) {
+                Logger.w { "Download failed: ${response.status.value} for $url" }
                 return@withContext null
             }
 
-            val body = response.body ?: return@withContext null
-            val contentLength = body.contentLength()
+            val body = response.bodyAsChannel()
+            val contentLength = response.contentLength() ?: -1L
 
             if (!tempDir.exists()) tempDir.mkdirs()
 
             val targetFile = File(tempDir, fileName)
 
-            body.byteStream().use { input ->
+            body.toInputStream().use { input ->
                 FileOutputStream(targetFile).use { output ->
                     val buffer = ByteArray(DOWNLOAD_BUFFER_SIZE)
                     var bytesRead: Int

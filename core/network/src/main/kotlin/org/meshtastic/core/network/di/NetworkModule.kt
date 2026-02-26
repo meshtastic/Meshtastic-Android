@@ -30,6 +30,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.meshtastic.core.network.BuildConfig
 import javax.inject.Singleton
@@ -57,5 +62,20 @@ class NetworkModule {
             .logger(logger = if (BuildConfig.DEBUG) DebugLogger(minLevel = Logger.Level.Verbose) else null)
             .crossfade(enable = true)
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(okHttpClient: OkHttpClient): HttpClient = HttpClient(engineFactory = OkHttp) {
+        engine { preconfigured = okHttpClient }
+
+        install(plugin = ContentNegotiation) {
+            json(
+                Json {
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                },
+            )
+        }
     }
 }

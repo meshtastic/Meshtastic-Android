@@ -81,6 +81,12 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
@@ -113,8 +119,7 @@ import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
-import java.util.Locale
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -201,8 +206,16 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
                         onExportLogs = {
-                            val timestamp =
-                                SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(nowMillis.toInstant().toDate())
+                            val format = LocalDateTime.Format {
+                                year()
+                                monthNumber()
+                                day()
+                                char('_')
+                                hour()
+                                minute()
+                                second()
+                            }
+                            val timestamp = fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"
                             exportLogsLauncher.launch(fileName)
                         },

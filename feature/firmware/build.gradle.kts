@@ -33,6 +33,7 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
+    implementation(projects.core.network)
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
@@ -48,6 +49,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kermit)
+    implementation(libs.ktor.client.core)
 
     implementation(libs.nordic.client.android)
     implementation(libs.nordic.dfu)
