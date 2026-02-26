@@ -179,7 +179,7 @@ jobs:
 
       - name: Upload debug artifact
         if: ${{ steps.tasks.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.flavor }}Debug
           path: app/build/outputs/apk/${{ matrix.flavor }}/debug/app-${{ matrix.flavor }}-debug.apk
@@ -195,7 +195,7 @@ jobs:
 
       - name: Upload reports
         if: ${{ always() && inputs.upload_artifacts }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: reports-${{ matrix.flavor }}-api-${{ matrix.api_level }}
           path: |
