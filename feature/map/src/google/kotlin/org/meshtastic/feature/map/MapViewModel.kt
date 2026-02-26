@@ -136,10 +136,10 @@ constructor(
             .mapNotNull { it.config?.display?.units }
             .stateInWhileSubscribed(initialValue = Config.DisplayConfig.DisplayUnits.METRIC)
 
-    fun addCustomTileProvider(name: String, urlTemplate: String) {
+    fun addCustomTileProvider(name: String, urlTemplate: String, localUri: String? = null) {
         viewModelScope.launch {
-            if (name.isBlank() || urlTemplate.isBlank() || !isValidTileUrlTemplate(urlTemplate)) {
-                _errorFlow.emit("Invalid name or URL template for custom tile provider.")
+            if (name.isBlank() || (urlTemplate.isBlank() && localUri == null) || (localUri == null && !isValidTileUrlTemplate(urlTemplate))) {
+                _errorFlow.emit("Invalid name, URL template, or local URI for custom tile provider.")
                 return@launch
             }
             if (customTileProviderConfigs.value.any { it.name.equals(name, ignoreCase = true) }) {
@@ -147,7 +147,27 @@ constructor(
                 return@launch
             }
 
-            val newConfig = CustomTileProviderConfig(name = name, urlTemplate = urlTemplate)
+            var finalLocalUri = localUri
+            if (localUri != null) {
+                try {
+                    val uri = Uri.parse(localUri)
+                    val extension = "mbtiles"
+                    val finalFileName = "mbtiles_${Uuid.random()}.$extension"
+                    val copiedUri = copyFileToInternalStorage(uri, finalFileName)
+                    if (copiedUri != null) {
+                        finalLocalUri = copiedUri.toString()
+                    } else {
+                        _errorFlow.emit("Failed to copy MBTiles file to internal storage.")
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    Logger.withTag("MapViewModel").e(e) { "Error processing local URI" }
+                    _errorFlow.emit("Error processing local URI for MBTiles.")
+                    return@launch
+                }
+            }
+
+            val newConfig = CustomTileProviderConfig(name = name, urlTemplate = urlTemplate, localUri = finalLocalUri)
             customTileProviderRepository.addCustomTileProvider(newConfig)
         }
     }
@@ -156,10 +176,10 @@ constructor(
         viewModelScope.launch {
             if (
                 configToUpdate.name.isBlank() ||
-                configToUpdate.urlTemplate.isBlank() ||
-                !isValidTileUrlTemplate(configToUpdate.urlTemplate)
+                (configToUpdate.urlTemplate.isBlank() && configToUpdate.localUri == null) ||
+                (configToUpdate.localUri == null && !isValidTileUrlTemplate(configToUpdate.urlTemplate))
             ) {
-                _errorFlow.emit("Invalid name or URL template for updating custom tile provider.")
+                _errorFlow.emit("Invalid name, URL template, or local URI for updating custom tile provider.")
                 return@launch
             }
             val existingConfigs = customTileProviderConfigs.value
@@ -195,25 +215,34 @@ constructor(
             val configToRemove = customTileProviderRepository.getCustomTileProviderById(configId)
             customTileProviderRepository.deleteCustomTileProvider(configId)
 
-            if (configToRemove != null && _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate) {
-                _selectedCustomTileProviderUrl.value = null
-                // Also clear from prefs
-                googleMapsPrefs.selectedCustomTileUrl = null
+            if (configToRemove != null) {
+                if (_selectedCustomTileProviderUrl.value == configToRemove.urlTemplate || _selectedCustomTileProviderUrl.value == configToRemove.localUri) {
+                    _selectedCustomTileProviderUrl.value = null
+                    // Also clear from prefs
+                    googleMapsPrefs.selectedCustomTileUrl = null
+                }
+                
+                if (configToRemove.localUri != null) {
+                    val uri = Uri.parse(configToRemove.localUri)
+                    deleteFileToInternalStorage(uri)
+                }
             }
         }
     }
 
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
         if (config != null) {
-            if (!isValidTileUrlTemplate(config.urlTemplate)) {
+            if (!config.isLocal && !isValidTileUrlTemplate(config.urlTemplate)) {
                 Logger.withTag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
                 googleMapsPrefs.selectedCustomTileUrl = null
                 return
             }
-            _selectedCustomTileProviderUrl.value = config.urlTemplate
-            _selectedGoogleMapType.value = MapType.NORMAL // Reset to a default or keep last? For now, reset.
-            googleMapsPrefs.selectedCustomTileUrl = config.urlTemplate
+            // Use localUri if present, otherwise urlTemplate
+            val selectedUrl = config.localUri ?: config.urlTemplate
+            _selectedCustomTileProviderUrl.value = selectedUrl
+            _selectedGoogleMapType.value = MapType.NONE
+            googleMapsPrefs.selectedCustomTileUrl = selectedUrl
             googleMapsPrefs.selectedGoogleMapType = null
         } else {
             _selectedCustomTileProviderUrl.value = null
@@ -228,7 +257,21 @@ constructor(
         googleMapsPrefs.selectedCustomTileUrl = null
     }
 
-    fun createUrlTileProvider(urlString: String): TileProvider? {
+    fun createTileProvider(config: CustomTileProviderConfig?): TileProvider? {
+        if (config == null) return null
+        
+        if (config.isLocal) {
+            val uri = Uri.parse(config.localUri)
+            val file = uri.toFile()
+            if (file.exists()) {
+                return MBTilesProvider(file)
+            } else {
+                Logger.withTag("MapViewModel").e("Local MBTiles file does not exist: ${config.localUri}")
+                return null
+            }
+        }
+        
+        val urlString = config.urlTemplate
         if (!isValidTileUrlTemplate(urlString)) {
             Logger.withTag("MapViewModel")
                 .e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
@@ -296,7 +339,7 @@ constructor(
                 isValidTileUrlTemplate(savedCustomUrl)
             ) {
                 _selectedCustomTileProviderUrl.value = savedCustomUrl
-                _selectedGoogleMapType.value = MapType.NORMAL // Default, as custom is active
+                _selectedGoogleMapType.value = MapType.NONE // MapType.NONE to hide google basemap when using custom provider
             } else {
                 // The saved custom URL is no longer valid or doesn't exist, remove preference
                 googleMapsPrefs.selectedCustomTileUrl = null

@@ -467,7 +467,10 @@ fun MapView(
             ) {
                 key(currentCustomTileProviderUrl) {
                     currentCustomTileProviderUrl?.let { url ->
-                        mapViewModel.createUrlTileProvider(url)?.let { tileProvider ->
+                        val config = mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find { 
+                            it.urlTemplate == url || it.localUri == url 
+                        }
+                        mapViewModel.createTileProvider(config)?.let { tileProvider ->
                             TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                         }
                     }
