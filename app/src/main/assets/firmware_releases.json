@@ -205,12 +205,6 @@
       "title": "add FromRadioSync BLE characteristic",
       "page_url": "https://github.com/meshtastic/firmware/pull/9675",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9627",
-      "title": "Add phone API fanout for multiple clients",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9627",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
