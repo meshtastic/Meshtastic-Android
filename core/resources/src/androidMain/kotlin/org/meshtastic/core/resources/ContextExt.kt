@@ -25,7 +25,7 @@ fun getString(stringResource: StringResource): String = runBlocking { composeGet
 
 /** Retrieves a formatted string from the [StringResource] in a blocking manner. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    getStringSuspend(stringResource, *formatArgs)
+    composeGetString(stringResource, *formatArgs)
 }
 
 /** Retrieves a string from the [StringResource] in a suspending manner. */
@@ -37,7 +37,6 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
         formatArgs
             .map { arg ->
                 if (arg is StringResource) {
-                    // Resolve nested StringResources recursively
                     getStringSuspend(arg)
                 } else {
                     arg
@@ -45,9 +44,6 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
             }
             .toTypedArray()
 
-    // Compose Multiplatform doesn't fully support complex formatting like %.2f
-    // Fetch the raw string and format it using standard Java String.format.
-    val rawString = composeGetString(stringResource)
     @Suppress("SpreadOperator")
-    return String.format(java.util.Locale.getDefault(), rawString, *resolvedArgs)
+    return composeGetString(stringResource, *resolvedArgs)
 }

@@ -28,7 +28,7 @@ mockk = "1.14.9"
 testRetry = "1.6.4"
 
 # Compose Multiplatform
-compose-multiplatform = "1.10.1"
+compose-multiplatform = "1.11.0-alpha03"
 
 # Google
 hilt = "2.59.2"
