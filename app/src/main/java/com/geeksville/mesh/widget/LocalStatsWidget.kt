@@ -67,13 +67,28 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.channel_utilization
-import org.meshtastic.core.resources.getStringSuspend
+import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.device_sleeping
+import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.local_stats_bad
+import org.meshtastic.core.resources.local_stats_diagnostics_prefix
+import org.meshtastic.core.resources.local_stats_dropped
+import org.meshtastic.core.resources.local_stats_heap
+import org.meshtastic.core.resources.local_stats_heap_value
+import org.meshtastic.core.resources.local_stats_noise
+import org.meshtastic.core.resources.local_stats_relays
+import org.meshtastic.core.resources.local_stats_traffic
+import org.meshtastic.core.resources.local_stats_updated_at
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.resources.nodes
+import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.updated
 import org.meshtastic.core.resources.uptime
@@ -129,11 +144,11 @@ class LocalStatsWidget : GlanceAppWidget() {
                     titleBar = {
                         TitleBar(
                             startIcon = ImageProvider(com.geeksville.mesh.R.drawable.app_icon),
-                            title = state.appName,
+                            title = stringResource(Res.string.meshtastic_app_name),
                             actions = {
                                 CircleIconButton(
                                     imageProvider = ImageProvider(com.geeksville.mesh.R.drawable.ic_refresh),
-                                    contentDescription = state.refreshLabel,
+                                    contentDescription = stringResource(Res.string.refresh),
                                     onClick = actionRunCallback<RefreshLocalStatsAction>(),
                                     backgroundColor = null,
                                 )
@@ -154,6 +169,7 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     @Composable
+    @Suppress("LongMethod", "MagicNumber")
     private fun FullStatsContent(state: LocalStatsWidgetUiState) {
         val size = LocalSize.current
         val isNarrow = size.width < 160.dp
@@ -168,13 +184,20 @@ class LocalStatsWidget : GlanceAppWidget() {
                         state.nodeColors?.let { colors -> NodeChip(shortName = name, colors = colors) }
                     }
                     Spacer(GlanceModifier.width(8.dp))
-                    StatRow(
-                        label = state.batteryLabel,
-                        value = state.batteryValue,
-                        progress = state.batteryProgress,
-                        isSmall = isSmall,
-                        modifier = GlanceModifier.defaultWeight(),
-                    )
+                    if (state.hasBattery) {
+                        val isPowered = state.batteryLevel > 100
+                        val batteryValue =
+                            if (isPowered) stringResource(Res.string.powered) else "${state.batteryLevel}%"
+                        StatRow(
+                            label = stringResource(Res.string.battery),
+                            value = batteryValue,
+                            progress = state.batteryProgress,
+                            isSmall = isSmall,
+                            modifier = GlanceModifier.defaultWeight(),
+                        )
+                    } else {
+                        Spacer(GlanceModifier.defaultWeight())
+                    }
                 }
 
                 Spacer(GlanceModifier.height(2.dp))
@@ -183,15 +206,15 @@ class LocalStatsWidget : GlanceAppWidget() {
 
                 Row(modifier = GlanceModifier.fillMaxWidth()) {
                     StatRow(
-                        label = state.channelUtilizationLabel,
-                        value = state.channelUtilizationValue,
+                        label = stringResource(Res.string.channel_utilization),
+                        value = "%.1f%%".format(state.channelUtilization),
                         progress = state.channelUtilizationProgress,
                         isSmall = isSmall,
                         modifier = GlanceModifier.defaultWeight().padding(end = 4.dp),
                     )
                     StatRow(
-                        label = state.airUtilizationLabel,
-                        value = state.airUtilizationValue,
+                        label = stringResource(Res.string.air_utilization),
+                        value = "%.1f%%".format(state.airUtilization),
                         progress = state.airUtilizationProgress,
                         isSmall = isSmall,
                         modifier = GlanceModifier.defaultWeight().padding(start = 4.dp),
@@ -201,17 +224,53 @@ class LocalStatsWidget : GlanceAppWidget() {
                 // Detailed Traffic/Relay Stats
                 Spacer(GlanceModifier.height(2.dp))
                 Column(modifier = GlanceModifier.fillMaxWidth()) {
-                    state.trafficText?.let { StatText(it, isSmall) }
-                    state.relayText?.let { StatText(it, isSmall) }
-                    state.diagnosticsText?.let { StatText(it, isSmall) }
-                    state.heapText?.let {
+                    if (state.hasStats) {
+                        StatText(
+                            stringResource(
+                                Res.string.local_stats_traffic,
+                                state.numPacketsTx,
+                                state.numPacketsRx,
+                                state.numRxDupe,
+                            ),
+                            isSmall,
+                        )
+                        if (state.numTxRelay > 0 || state.numTxRelayCanceled > 0) {
+                            StatText(
+                                stringResource(
+                                    Res.string.local_stats_relays,
+                                    state.numTxRelay,
+                                    state.numTxRelayCanceled,
+                                ),
+                                isSmall,
+                            )
+                        }
+
+                        val diag = mutableListOf<String>()
+                        if (state.noiseFloor != 0) {
+                            diag.add(stringResource(Res.string.local_stats_noise, state.noiseFloor))
+                        }
+                        if (state.numPacketsRxBad > 0) {
+                            diag.add(stringResource(Res.string.local_stats_bad, state.numPacketsRxBad))
+                        }
+                        if (state.numTxDropped > 0) {
+                            diag.add(stringResource(Res.string.local_stats_dropped, state.numTxDropped))
+                        }
+                        if (diag.isNotEmpty()) {
+                            StatText(
+                                stringResource(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
+                                isSmall,
+                            )
+                        }
+
                         val heapProgress =
                             if (state.heapTotalBytes > 0) {
                                 state.heapFreeBytes.toFloat() / state.heapTotalBytes
                             } else {
                                 0f
                             }
-                        StatRow(it, state.heapValue, heapProgress, isSmall)
+                        val heapValue =
+                            stringResource(Res.string.local_stats_heap_value, state.heapFreeBytes, state.heapTotalBytes)
+                        StatRow(stringResource(Res.string.local_stats_heap), heapValue, heapProgress, isSmall)
                     }
                 }
             }
@@ -246,8 +305,15 @@ class LocalStatsWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.size(32.dp),
                 )
             }
+            val statusText =
+                when (state.connectionState) {
+                    is ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
+                    is ConnectionState.Connecting -> stringResource(Res.string.connecting)
+                    is ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
+                    is ConnectionState.Connected -> ""
+                }
             Text(
-                text = state.statusText,
+                text = statusText,
                 style =
                 TextStyle(
                     color = GlanceTheme.colors.onSurfaceVariant,
@@ -258,6 +324,7 @@ class LocalStatsWidget : GlanceAppWidget() {
         }
     }
 
+    @Suppress("LongMethod")
     @Composable
     private fun Footer(state: LocalStatsWidgetUiState) {
         Column(modifier = GlanceModifier.fillMaxWidth()) {
@@ -267,11 +334,11 @@ class LocalStatsWidget : GlanceAppWidget() {
             ) {
                 Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.Start) {
                     Text(
-                        text = state.nodesLabel,
+                        text = stringResource(Res.string.nodes),
                         style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                     )
                     Text(
-                        text = state.nodeCountText,
+                        text = "${state.onlineNodes}/${state.totalNodes}",
                         maxLines = 1,
                         style =
                         TextStyle(
@@ -283,11 +350,11 @@ class LocalStatsWidget : GlanceAppWidget() {
                 }
                 Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.End) {
                     Text(
-                        text = state.uptimeLabel,
+                        text = stringResource(Res.string.uptime),
                         style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 10.sp),
                     )
                     Text(
-                        text = state.uptimeText,
+                        text = formatUptime(state.uptimeSecs.toInt()),
                         maxLines = 1,
                         style =
                         TextStyle(
@@ -299,11 +366,17 @@ class LocalStatsWidget : GlanceAppWidget() {
                 }
             }
             Row(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                val updatedLabel = stringResource(Res.string.updated)
+                val updatedText =
+                    stringResource(
+                        Res.string.local_stats_updated_at,
+                        DateFormatter.formatShortDate(state.updateTimeMillis),
+                    )
                 val footerText =
-                    if (state.updatedLabel.isNotEmpty()) {
-                        "${state.updatedLabel} ${state.updatedText}"
+                    if (updatedLabel.isNotEmpty()) {
+                        "$updatedLabel $updatedText"
                     } else {
-                        state.updatedText
+                        updatedText
                     }
                 Text(
                     text = footerText,
@@ -386,27 +459,24 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 }
 
-internal suspend fun createMockWidgetState() = LocalStatsWidgetUiState(
+internal fun createMockWidgetState() = LocalStatsWidgetUiState(
     connectionState = ConnectionState.Connected,
     showContent = true,
-    appName = getStringSuspend(Res.string.meshtastic_app_name),
-    nodesLabel = getStringSuspend(Res.string.nodes),
-    uptimeLabel = getStringSuspend(Res.string.uptime),
-    updatedLabel = getStringSuspend(Res.string.updated),
-    refreshLabel = getStringSuspend(Res.string.refresh),
     nodeShortName = "ME",
     nodeColors = 0xFFFFFFFF.toInt() to 0xFF000000.toInt(),
-    batteryLabel = getStringSuspend(Res.string.battery),
-    batteryValue = "85%",
+    batteryLevel = 85,
+    hasBattery = true,
     batteryProgress = 0.85f,
-    channelUtilizationLabel = getStringSuspend(Res.string.channel_utilization),
-    channelUtilizationValue = "18.5%",
+    channelUtilization = 18.5f,
     channelUtilizationProgress = 0.185f,
-    airUtilizationLabel = getStringSuspend(Res.string.air_utilization),
-    airUtilizationValue = "3.2%",
+    airUtilization = 3.2f,
     airUtilizationProgress = 0.032f,
-    trafficText = "TX: 145 | RX: 892 | D: 42",
-    nodeCountText = "2/3",
-    uptimeText = "2d 0h",
-    updatedText = "5m ago",
+    hasStats = true,
+    numPacketsTx = 145,
+    numPacketsRx = 892,
+    numRxDupe = 42,
+    totalNodes = 3,
+    onlineNodes = 2,
+    uptimeSecs = 172800L,
+    updateTimeMillis = System.currentTimeMillis() - 300000L,
 )
