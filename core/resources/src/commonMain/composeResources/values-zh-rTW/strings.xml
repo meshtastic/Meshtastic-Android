@@ -76,7 +76,7 @@
     <string name="role_router_client_desc">兼具路由器和用戶端功能的節點。行動裝置不宜使用。</string>
     <string name="role_repeater">Repeater</string>
     <string name="role_repeater_desc">加強網路覆蓋的中繼基地台節點，但轉播時僅添加最低限度的額外負擔（Overhead）。不會顯示在節點列表上。</string>
-    <string name="role_tracker">Repeater</string>
+    <string name="role_tracker">Tracker</string>
     <string name="role_tracker_desc">優先廣播 GPS 位置封包。</string>
     <string name="role_sensor">Sensor</string>
     <string name="role_sensor_desc">優先廣播遙測資料封包。</string>
@@ -189,7 +189,7 @@
     <string name="device_sleeping">設備休眠中</string>
     <string name="connected_count">已連接：線上 %1$s</string>
     <string name="ip_address">IP地址：</string>
-    <string name="ip_port">Ip_ 埠：</string>
+    <string name="ip_port">IP連接埠：</string>
     <string name="connected">已連線</string>
     <string name="connected_to">已連接至設備 (%1$s)</string>
     <string name="connection_status">目前連線：</string>
@@ -761,7 +761,7 @@
     <string name="public_key_changed">公鑰已變更</string>
     <string name="import_label">匯入</string>
     <string name="request">請求</string>
-    <string name="requesting_from">正在向  %1$s 請求 %2$s</string>
+    <string name="requesting_from">正在向 %2$s 請求 %1$s</string>
     <string name="user_info">用戶資訊</string>
     <string name="request_neighbor_info">鄰近節點資訊 (2.7.15+)</string>
     <string name="request_telemetry">請求遙測資料</string>
@@ -996,7 +996,7 @@
     <string name="firmware_update_stable">穩定版</string>
     <string name="firmware_update_alpha">Alpha 測試版</string>
     <string name="firmware_update_disconnect_warning">注意：更新期間將會暫時中斷您的裝置連線。</string>
-    <string name="firmware_update_downloading_percent">正在下載韌體... %1$d%</string>
+    <string name="firmware_update_downloading_percent">正在下載韌體... %1$d%%</string>
     <string name="firmware_update_error">錯誤: %1$s</string>
     <string name="firmware_update_retry">重試</string>
     <string name="firmware_update_success">更新成功！</string>
@@ -1047,7 +1047,7 @@
     <string name="firmware_update_dfu_error">DFU錯誤: %1$s</string>
     <string name="firmware_update_dfu_aborted">DFU 已中止</string>
     <string name="firmware_update_node_info_missing">缺少節點使用者資訊。</string>
-    <string name="firmware_update_battery_low">電量過低 (%1$d%)，請在更新前為您的裝置充電。</string>
+    <string name="firmware_update_battery_low">電量過低 (%1$d%%)，請在更新前為您的裝置充電。</string>
     <string name="firmware_update_retrieval_failed">無法取得韌體檔案。</string>
     <string name="firmware_update_nordic_failed">Nordic DFU 更新失敗</string>
     <string name="firmware_update_usb_failed">USB 更新失敗</string>
@@ -1059,7 +1059,7 @@
     <string name="firmware_update_checking_version">正在檢查裝置版本...</string>
     <string name="firmware_update_starting_ota">正在啟動 OTA 更新...</string>
     <string name="firmware_update_uploading">正在上傳韌體...</string>
-    <string name="firmware_update_uploading_progress">正在上傳韌體... %1$d% (%2$s)</string>
+    <string name="firmware_update_uploading_progress">正在上傳韌體... %1$d%% (%2$s)</string>
     <string name="firmware_update_rebooting_device">正在重新啟動裝置...</string>
     <string name="firmware_update_channel_name">韌體更新</string>
     <string name="firmware_update_channel_description">韌體更新狀態</string>
@@ -1068,13 +1068,13 @@
     <string name="interval_unset">取消設定</string>
     <string name="interval_always_on">保持開啟</string>
     <plurals name="plurals_seconds">
-        <item quantity="other">1秒</item>
+        <item quantity="other">%1$d 秒</item>
     </plurals>
     <plurals name="plurals_minutes">
-        <item quantity="other">1分鐘</item>
+        <item quantity="other">%1$d 分鐘</item>
     </plurals>
     <plurals name="plurals_hours">
-        <item quantity="other">1小時</item>
+        <item quantity="other">%1$d 小時</item>
     </plurals>
     <!-- Compass -->
     <string name="compass_title">指南針</string>
