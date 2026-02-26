@@ -169,6 +169,7 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     @Composable
+    @Suppress("LongMethod", "MagicNumber")
     private fun FullStatsContent(state: LocalStatsWidgetUiState) {
         val size = LocalSize.current
         val isNarrow = size.width < 160.dp
@@ -185,7 +186,8 @@ class LocalStatsWidget : GlanceAppWidget() {
                     Spacer(GlanceModifier.width(8.dp))
                     if (state.hasBattery) {
                         val isPowered = state.batteryLevel > 100
-                        val batteryValue = if (isPowered) stringResource(Res.string.powered) else "${state.batteryLevel}%"
+                        val batteryValue =
+                            if (isPowered) stringResource(Res.string.powered) else "${state.batteryLevel}%"
                         StatRow(
                             label = stringResource(Res.string.battery),
                             value = batteryValue,
@@ -228,18 +230,18 @@ class LocalStatsWidget : GlanceAppWidget() {
                                 Res.string.local_stats_traffic,
                                 state.numPacketsTx,
                                 state.numPacketsRx,
-                                state.numRxDupe
+                                state.numRxDupe,
                             ),
-                            isSmall
+                            isSmall,
                         )
                         if (state.numTxRelay > 0 || state.numTxRelayCanceled > 0) {
                             StatText(
                                 stringResource(
                                     Res.string.local_stats_relays,
                                     state.numTxRelay,
-                                    state.numTxRelayCanceled
+                                    state.numTxRelayCanceled,
                                 ),
-                                isSmall
+                                isSmall,
                             )
                         }
 
@@ -256,20 +258,18 @@ class LocalStatsWidget : GlanceAppWidget() {
                         if (diag.isNotEmpty()) {
                             StatText(
                                 stringResource(Res.string.local_stats_diagnostics_prefix, diag.joinToString(" | ")),
-                                isSmall
+                                isSmall,
                             )
                         }
 
-                        val heapProgress = if (state.heapTotalBytes > 0) {
-                            state.heapFreeBytes.toFloat() / state.heapTotalBytes
-                        } else {
-                            0f
-                        }
-                        val heapValue = stringResource(
-                            Res.string.local_stats_heap_value,
-                            state.heapFreeBytes,
-                            state.heapTotalBytes
-                        )
+                        val heapProgress =
+                            if (state.heapTotalBytes > 0) {
+                                state.heapFreeBytes.toFloat() / state.heapTotalBytes
+                            } else {
+                                0f
+                            }
+                        val heapValue =
+                            stringResource(Res.string.local_stats_heap_value, state.heapFreeBytes, state.heapTotalBytes)
                         StatRow(stringResource(Res.string.local_stats_heap), heapValue, heapProgress, isSmall)
                     }
                 }
@@ -305,12 +305,13 @@ class LocalStatsWidget : GlanceAppWidget() {
                     modifier = GlanceModifier.size(32.dp),
                 )
             }
-            val statusText = when (state.connectionState) {
-                is ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
-                is ConnectionState.Connecting -> stringResource(Res.string.connecting)
-                is ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
-                is ConnectionState.Connected -> ""
-            }
+            val statusText =
+                when (state.connectionState) {
+                    is ConnectionState.Disconnected -> stringResource(Res.string.disconnected)
+                    is ConnectionState.Connecting -> stringResource(Res.string.connecting)
+                    is ConnectionState.DeviceSleep -> stringResource(Res.string.device_sleeping)
+                    is ConnectionState.Connected -> ""
+                }
             Text(
                 text = statusText,
                 style =
@@ -323,6 +324,7 @@ class LocalStatsWidget : GlanceAppWidget() {
         }
     }
 
+    @Suppress("LongMethod")
     @Composable
     private fun Footer(state: LocalStatsWidgetUiState) {
         Column(modifier = GlanceModifier.fillMaxWidth()) {
@@ -365,15 +367,17 @@ class LocalStatsWidget : GlanceAppWidget() {
             }
             Row(modifier = GlanceModifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 val updatedLabel = stringResource(Res.string.updated)
-                val updatedText = stringResource(
-                    Res.string.local_stats_updated_at,
-                    DateFormatter.formatShortDate(state.updateTimeMillis)
-                )
-                val footerText = if (updatedLabel.isNotEmpty()) {
-                    "$updatedLabel $updatedText"
-                } else {
-                    updatedText
-                }
+                val updatedText =
+                    stringResource(
+                        Res.string.local_stats_updated_at,
+                        DateFormatter.formatShortDate(state.updateTimeMillis),
+                    )
+                val footerText =
+                    if (updatedLabel.isNotEmpty()) {
+                        "$updatedLabel $updatedText"
+                    } else {
+                        updatedText
+                    }
                 Text(
                     text = footerText,
                     style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 8.sp),

@@ -20,10 +20,6 @@ import android.content.Context
 import android.net.Uri
 import co.touchlab.kermit.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.withContext
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.head
@@ -31,6 +27,10 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.contentLength
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.jvm.javaio.toInputStream
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceHardware
 import java.io.File
 import java.io.FileInputStream
@@ -67,7 +67,7 @@ constructor(
     suspend fun checkUrlExists(url: String): Boolean = withContext(Dispatchers.IO) {
         try {
             client.head(url).status.isSuccess()
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "Failed to check URL existence: $url" }
             false
         }
@@ -78,7 +78,7 @@ constructor(
             val response =
                 try {
                     client.get(url)
-                } catch (e: Exception) {
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.w(e) { "Download failed for $url" }
                     return@withContext null
                 }

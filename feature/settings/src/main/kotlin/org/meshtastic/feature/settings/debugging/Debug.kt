@@ -81,7 +81,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -90,8 +89,6 @@ import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.toDate
-import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
@@ -206,16 +203,18 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
                         onExportLogs = {
-                            val format = LocalDateTime.Format {
-                                year()
-                                monthNumber()
-                                day()
-                                char('_')
-                                hour()
-                                minute()
-                                second()
-                            }
-                            val timestamp = fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
+                            val format =
+                                LocalDateTime.Format {
+                                    year()
+                                    monthNumber()
+                                    day()
+                                    char('_')
+                                    hour()
+                                    minute()
+                                    second()
+                                }
+                            val timestamp =
+                                fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"
                             exportLogsLauncher.launch(fileName)
                         },
