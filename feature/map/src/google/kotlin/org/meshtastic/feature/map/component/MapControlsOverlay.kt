@@ -56,7 +56,6 @@ fun MapControlsOverlay(
     onManageCustomTileProvidersClicked: () -> Unit, // New parameter
     isNodeMap: Boolean,
     // Location tracking parameters
-    hasLocationPermission: Boolean = false,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     bearing: Float = 0f,
@@ -117,18 +116,16 @@ fun MapControlsOverlay(
             )
 
             // Location tracking button
-            if (hasLocationPermission) {
-                MapButton(
-                    icon =
-                    if (isLocationTrackingEnabled) {
-                        Icons.Rounded.LocationDisabled
-                    } else {
-                        Icons.Outlined.MyLocation
-                    },
-                    contentDescription = stringResource(Res.string.toggle_my_position),
-                    onClick = onToggleLocationTracking,
-                )
-            }
+            MapButton(
+                icon =
+                if (isLocationTrackingEnabled) {
+                    Icons.Rounded.LocationDisabled
+                } else {
+                    Icons.Outlined.MyLocation
+                },
+                contentDescription = stringResource(Res.string.toggle_my_position),
+                onClick = onToggleLocationTracking,
+            )
         },
     )
 }
