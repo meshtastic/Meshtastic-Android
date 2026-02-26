@@ -394,9 +394,33 @@ constructor(
                                     null
                                 }
                             }
-                        _mapLayers.value = loadedItems
-                        if (loadedItems.isNotEmpty()) {
-                            Logger.withTag("MapViewModel").i("Loaded ${loadedItems.size} persisted map layers.")
+                        
+                        val networkItems = googleMapsPrefs.networkMapLayers.mapNotNull { networkString ->
+                            try {
+                                val parts = networkString.split("|:|")
+                                if (parts.size == 3) {
+                                    val id = parts[0]
+                                    val name = parts[1]
+                                    val uri = Uri.parse(parts[2])
+                                    MapLayerItem(
+                                        id = id,
+                                        name = name,
+                                        uri = uri,
+                                        isVisible = !hiddenLayerUrls.contains(uri.toString()),
+                                        layerType = LayerType.KML,
+                                        isNetwork = true
+                                    )
+                                } else {
+                                    null
+                                }
+                            } catch (e: Exception) {
+                                null
+                            }
+                        }
+                        
+                        _mapLayers.value = loadedItems + networkItems
+                        if (_mapLayers.value.isNotEmpty()) {
+                            Logger.withTag("MapViewModel").i("Loaded ${_mapLayers.value.size} persisted map layers.")
                         }
                     }
                 } else {
@@ -450,6 +474,29 @@ constructor(
         }
     }
 
+    fun addNetworkMapLayer(name: String, url: String) {
+        viewModelScope.launch {
+            if (name.isBlank() || url.isBlank()) {
+                _errorFlow.emit("Invalid name or URL for network layer.")
+                return@launch
+            }
+            try {
+                val uri = Uri.parse(url)
+                if (uri.scheme != "http" && uri.scheme != "https") {
+                    _errorFlow.emit("URL must be http or https. Only KML formats are supported currently.")
+                    return@launch
+                }
+                val newItem = MapLayerItem(name = name, uri = uri, layerType = LayerType.KML, isNetwork = true)
+                _mapLayers.value = _mapLayers.value + newItem
+                
+                val networkLayerString = "${newItem.id}|:|${newItem.name}|:|${newItem.uri}"
+                googleMapsPrefs.networkMapLayers = googleMapsPrefs.networkMapLayers + networkLayerString
+            } catch (e: Exception) {
+                _errorFlow.emit("Invalid URL.")
+            }
+        }
+    }
+
     private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? = withContext(Dispatchers.IO) {
         try {
             val inputStream = application.contentResolver.openInputStream(uri)
@@ -499,10 +546,44 @@ constructor(
                 null -> {}
             }
             layerToRemove?.uri?.let { uri ->
-                deleteFileToInternalStorage(uri)
+                if (layerToRemove.isNetwork) {
+                    googleMapsPrefs.networkMapLayers = googleMapsPrefs.networkMapLayers.filterNot { 
+                        it.startsWith("${layerId}|:|") 
+                    }.toSet()
+                } else {
+                    deleteFileToInternalStorage(uri)
+                }
                 googleMapsPrefs.hiddenLayerUrls -= uri.toString()
             }
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
+        }
+    }
+    
+    fun refreshMapLayer(layerId: String) {
+        viewModelScope.launch {
+            val layerToRefresh = _mapLayers.value.find { it.id == layerId } ?: return@launch
+            if (layerToRefresh.isNetwork && layerToRefresh.isVisible) {
+                _mapLayers.update { layers ->
+                    layers.map {
+                        if (it.id == layerId) it.copy(isRefreshing = true) else it
+                    }
+                }
+                
+                // Remove old layer data to trigger reload
+                layerToRefresh.kmlLayerData?.removeLayerFromMap()
+                
+                _mapLayers.update { layers ->
+                    layers.map {
+                        if (it.id == layerId) it.copy(kmlLayerData = null, isRefreshing = false) else it
+                    }
+                }
+            }
+        }
+    }
+
+    fun refreshAllVisibleNetworkLayers() {
+        _mapLayers.value.filter { it.isNetwork && it.isVisible }.forEach {
+            refreshMapLayer(it.id)
         }
     }
 
@@ -524,9 +605,14 @@ constructor(
         val uriToLoad = layerItem.uri ?: return null
         return withContext(Dispatchers.IO) {
             try {
-                application.contentResolver.openInputStream(uriToLoad)
-            } catch (_: Exception) {
-                Logger.d { "MapViewModel: Error opening InputStream from URI: $uriToLoad" }
+                if (layerItem.isNetwork && (uriToLoad.scheme == "http" || uriToLoad.scheme == "https")) {
+                    val url = java.net.URL(uriToLoad.toString())
+                    okio.Okio.source(url.openStream()).buffer().inputStream()
+                } else {
+                    application.contentResolver.openInputStream(uriToLoad)
+                }
+            } catch (e: Exception) {
+                Logger.withTag("MapViewModel").e(e) { "Error opening InputStream from URI: $uriToLoad" }
                 null
             }
         }
@@ -600,4 +686,6 @@ data class MapLayerItem(
     var kmlLayerData: KmlLayer? = null,
     var geoJsonLayerData: GeoJsonLayer? = null,
     val layerType: LayerType,
+    val isNetwork: Boolean = false,
+    val isRefreshing: Boolean = false,
 )

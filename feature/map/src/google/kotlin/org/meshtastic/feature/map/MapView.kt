@@ -654,6 +654,10 @@ fun MapView(
                 )
             }
 
+            val visibleNetworkLayers = mapLayers.filter { it.isNetwork && it.isVisible }
+            val showRefresh = visibleNetworkLayers.isNotEmpty()
+            val isRefreshingLayers = visibleNetworkLayers.any { it.isRefreshing }
+
             MapControlsOverlay(
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
@@ -699,12 +703,22 @@ fun MapView(
                     }
                 },
                 followPhoneBearing = followPhoneBearing,
+                showRefresh = showRefresh,
+                isRefreshing = isRefreshingLayers,
+                onRefresh = { mapViewModel.refreshAllVisibleNetworkLayers() },
             )
         }
     }
     if (showLayersBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
-            CustomMapLayersSheet(mapLayers, onToggleVisibility, onRemoveLayer, onAddLayerClicked)
+            CustomMapLayersSheet(
+                mapLayers = mapLayers,
+                onToggleVisibility = onToggleVisibility,
+                onRemoveLayer = onRemoveLayer,
+                onAddLayerClicked = onAddLayerClicked,
+                onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
+                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) }
+            )
         }
     }
     showClusterItemsDialog?.let {

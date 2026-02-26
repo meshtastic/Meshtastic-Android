@@ -1212,4 +1212,9 @@
     <string name="meshtastic_stats">Meshtastic Stats</string>
     <string name="refresh">Refresh</string>
     <string name="updated">Updated</string>
+
+    <!-- Network Map Layers -->
+    <string name="add_network_layer">Add Network Layer</string>
+    <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml</string>
+    <string name="refresh_layer">Refresh Layer</string>
 </resources>

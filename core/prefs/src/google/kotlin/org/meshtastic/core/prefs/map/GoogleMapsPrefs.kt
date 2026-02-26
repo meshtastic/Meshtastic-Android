@@ -37,6 +37,7 @@ interface GoogleMapsPrefs {
     var cameraZoom: Float
     var cameraTilt: Float
     var cameraBearing: Float
+    var networkMapLayers: Set<String>
 }
 
 @Singleton
@@ -50,4 +51,5 @@ class GoogleMapsPrefsImpl @Inject constructor(@GoogleMapsSharedPreferences prefs
     override var cameraZoom: Float by FloatPrefDelegate(prefs, "camera_zoom", 7f)
     override var cameraTilt: Float by FloatPrefDelegate(prefs, "camera_tilt", 0f)
     override var cameraBearing: Float by FloatPrefDelegate(prefs, "camera_bearing", 0f)
+    override var networkMapLayers: Set<String> by StringSetPrefDelegate(prefs, "network_map_layers", emptySet())
 }
