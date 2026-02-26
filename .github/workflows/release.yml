@@ -197,7 +197,7 @@ jobs:
 
       - name: Attest Google artifacts provenance
         if: always()
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             app/build/outputs/bundle/googleRelease/app-google-release.aab
@@ -264,7 +264,7 @@ jobs:
           retention-days: 1
 
       - name: Attest F-Droid APK provenance
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: app/build/outputs/apk/**/*.apk
 
