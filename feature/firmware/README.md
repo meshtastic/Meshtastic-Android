@@ -13,6 +13,7 @@ graph TB
   :feature:firmware -.-> :core:datastore
   :feature:firmware -.-> :core:model
   :feature:firmware -.-> :core:navigation
+  :feature:firmware -.-> :core:network
   :feature:firmware -.-> :core:prefs
   :feature:firmware -.-> :core:proto
   :feature:firmware -.-> :core:service

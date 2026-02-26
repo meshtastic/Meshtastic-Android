@@ -1,10 +1,11 @@
-Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+Meshtasticは、オープンソースのオフグリッドメッシュ無線とAndroidデバイスを連携させるためのソフトです。 このアプリは Meshtastic プロジェクトのメインクライアントであり、メッシュデバイスの管理や他のユーザーとの通信を可能にします。
 
-For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
+Meshtastic プロジェクトの詳細については、ぜひ公式ウェブサイトをご覧ください：<a href="https://www.meshtastic.org">meshtastic.org</a>。 無線デバイスのファームウェアは別のオープンソースプロジェクトであり、詳しくはこちらをご覧ください：
+<a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>。
 
-<b>Community and Support</b>
+<b>コミュニティとサポート</b>
 
-This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+当プロジェクトは、現時点でベータ版です。 皆様からのフィードバックをお待ちしております！ If you have questions, feedback, or encounter any problems, please join our friendly and active community:
 
 • <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
@@ -12,10 +13,10 @@ This project is currently in beta. We would love to hear from you! If you have q
 
 <b>Documentation</b>
 
-To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
+このアプリと Meshtastic の機能と性能について詳しく知りたい場合は、ぜひ公式ドキュメントをご覧ください：
 <a href="https://meshtastic.org/docs/">View Documentation</a>
 
-<b>Translations</b>
+<b>翻訳</b>
 
 You can help translate the app into your native language using Crowdin:
 <a href="https://crowdin.meshtastic.org/android">https://crowdin.meshtastic.org/android</a>

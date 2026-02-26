@@ -1147,9 +1147,17 @@
     <string name="local_stats_nodes">Sõlmed: %1$d võrgus / %2$d kokku</string>
     <string name="local_stats_uptime">Töös: %1$s</string>
     <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
+    <string name="local_stats_traffic">Liiklus: TX %1$d / RX %2$d (D: %3$d)</string>
     <string name="local_stats_relays">Vahendatud: %1$d (Tühistatud: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
     <string name="local_stats_noise">Müra %1$d dBm</string>
     <string name="local_stats_bad">Paha %1$d</string>
     <string name="local_stats_dropped">Kukkunud %1$d</string>
+    <string name="local_stats_heap">Lasu</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
+    <string name="powered">Toitega</string>
+    <string name="meshtastic_stats">Meshtasticu statistika</string>
+    <string name="refresh">Värskenda</string>
+    <string name="updated">Uuendatud</string>
 </resources>
