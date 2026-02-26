@@ -18,7 +18,6 @@ package org.meshtastic.feature.map.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -32,6 +31,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
+import com.google.maps.android.compose.clustering.ClusteringMarkerProperties
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.feature.map.model.NodeClusterItem
 
@@ -63,10 +63,19 @@ fun NodeClusterMarkers(
         }
     }
 
-    if (mapFilterState.showPrecisionCircle) {
-        nodeClusterItems.forEach { clusterItem ->
-            key(clusterItem.node.num) {
-                // Add a stable key for each circle
+    Clustering(
+        items = nodeClusterItems,
+        onClusterClick = onClusterClick,
+        onClusterItemInfoWindowClick = { item ->
+            navigateToNodeDetails(item.node.num)
+            false
+        },
+        clusterItemContent = { clusterItem -> PulsingNodeChip(node = clusterItem.node) },
+        onClusterManager = { clusterManager ->
+            (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 10
+        },
+        clusterItemDecoration = { clusterItem ->
+            if (mapFilterState.showPrecisionCircle) {
                 clusterItem.getPrecisionMeters()?.let { precisionMeters ->
                     if (precisionMeters > 0) {
                         Circle(
@@ -80,18 +89,7 @@ fun NodeClusterMarkers(
                     }
                 }
             }
-        }
-    }
-    Clustering(
-        items = nodeClusterItems,
-        onClusterClick = onClusterClick,
-        onClusterItemInfoWindowClick = { item ->
-            navigateToNodeDetails(item.node.num)
-            false
-        },
-        clusterItemContent = { clusterItem -> PulsingNodeChip(node = clusterItem.node) },
-        onClusterManager = { clusterManager ->
-            (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 10
+            ClusteringMarkerProperties(zIndex = 1f)
         },
     )
 }
