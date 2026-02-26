@@ -1148,9 +1148,17 @@
     <string name="local_stats_nodes">Laitteet: %1$d verkossa / %2$d yhteensä</string>
     <string name="local_stats_uptime">Käyttöaika: %1$s</string>
     <string name="local_stats_utilization">Kanavan käytöaste: %1$.2f%% | Lähestysajan käyttöaste: %2$.2f%%</string>
+    <string name="local_stats_traffic">Liikenne: Lähetetty %1$d / Vastaanotettu %2$d (Hylätty: %3$d)</string>
     <string name="local_stats_relays">Välitetyt: %1$d (Peruutetut: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Vianmääritys: %1$s</string>
     <string name="local_stats_noise">Kohinataso %1$d dBm</string>
     <string name="local_stats_bad">Huonot %1$d</string>
     <string name="local_stats_dropped">Hylätyt paketit %1$d</string>
+    <string name="local_stats_heap">Vapaan muistin määrä</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
+    <string name="powered">Powered</string>
+    <string name="meshtastic_stats">Meshtastic tilastot</string>
+    <string name="refresh">Päivitä</string>
+    <string name="updated">Päivitetty</string>
 </resources>
