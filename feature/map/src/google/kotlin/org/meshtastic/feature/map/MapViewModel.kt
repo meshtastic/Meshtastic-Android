@@ -279,8 +279,11 @@ constructor(
         }
         return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
+                val subdomains = listOf("a", "b", "c")
+                val subdomain = subdomains[(x + y) % subdomains.size]
                 val formattedUrl =
                     urlString
+                        .replace("{s}", subdomain, ignoreCase = true)
                         .replace("{z}", zoom.toString(), ignoreCase = true)
                         .replace("{x}", x.toString(), ignoreCase = true)
                         .replace("{y}", y.toString(), ignoreCase = true)
