@@ -451,7 +451,8 @@ fun MapView(
                 properties =
                 MapProperties(
                     mapType = effectiveGoogleMapType,
-                    isMyLocationEnabled = isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
+                    isMyLocationEnabled =
+                    isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
                 ),
                 onMapLongClick = { latLng ->
                     if (isConnected) {
@@ -508,7 +509,9 @@ fun MapView(
                                     val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
                                     val color = Color(focusedNode.colors.second).copy(alpha = alpha)
                                     if (index == sortedPositions.lastIndex) {
-                                        MarkerComposable(state = markerState, zIndex = 4f) { NodeChip(node = focusedNode) }
+                                        MarkerComposable(state = markerState, zIndex = 4f) {
+                                            NodeChip(node = focusedNode)
+                                        }
                                     } else {
                                         MarkerInfoWindowComposable(
                                             state = markerState,
@@ -516,7 +519,10 @@ fun MapView(
                                             snippet = formatAgo(position.time),
                                             zIndex = 1f + alpha,
                                             infoContent = {
-                                                PositionInfoWindowContent(position = position, displayUnits = displayUnits)
+                                                PositionInfoWindowContent(
+                                                    position = position,
+                                                    displayUnits = displayUnits,
+                                                )
                                             },
                                         ) {
                                             Icon(
