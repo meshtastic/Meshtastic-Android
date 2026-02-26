@@ -34,8 +34,8 @@ data class NodeClusterItem(
     override fun getSnippet(): String = nodeSnippet
 
     override fun getZIndex(): Float = when {
-        node.num == myNodeNum -> 5.0f  // My node is always highest
-        node.isFavorite -> 5.0f        // Favorites are equally high priority
+        node.num == myNodeNum -> 5.0f // My node is always highest
+        node.isFavorite -> 5.0f // Favorites are equally high priority
         else -> 4.0f
     }
 

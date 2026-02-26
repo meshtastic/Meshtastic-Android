@@ -114,7 +114,7 @@ fun CustomMapLayersSheet(
                                 if (layer.isRefreshing) {
                                     CircularProgressIndicator(
                                         modifier = Modifier.size(24.dp).padding(4.dp),
-                                        strokeWidth = 2.dp
+                                        strokeWidth = 2.dp,
                                     )
                                 } else {
                                     IconButton(onClick = { onRefreshLayer(layer.id) }) {
@@ -173,16 +173,13 @@ fun CustomMapLayersSheet(
             onConfirm = { name, url ->
                 onAddNetworkLayer(name, url)
                 showAddNetworkLayerDialog = false
-            }
+            },
         )
     }
 }
 
 @Composable
-fun AddNetworkLayerDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit,
-) {
+fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
     var name by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
 
@@ -196,7 +193,7 @@ fun AddNetworkLayerDialog(
                     onValueChange = { name = it },
                     label = { Text(stringResource(Res.string.name)) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
                 OutlinedTextField(
                     value = url,
@@ -204,7 +201,7 @@ fun AddNetworkLayerDialog(
                     label = { Text(stringResource(Res.string.url)) },
                     placeholder = { Text(stringResource(Res.string.network_layer_url_hint)) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         },

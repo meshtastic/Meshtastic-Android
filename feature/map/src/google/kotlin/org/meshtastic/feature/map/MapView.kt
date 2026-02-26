@@ -469,9 +469,10 @@ fun MapView(
             ) {
                 key(currentCustomTileProviderUrl) {
                     currentCustomTileProviderUrl?.let { url ->
-                        val config = mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find { 
-                            it.urlTemplate == url || it.localUri == url 
-                        }
+                        val config =
+                            mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
+                                it.urlTemplate == url || it.localUri == url
+                            }
                         mapViewModel.createTileProvider(config)?.let { tileProvider ->
                             TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                         }
@@ -726,7 +727,7 @@ fun MapView(
                 onRemoveLayer = onRemoveLayer,
                 onAddLayerClicked = onAddLayerClicked,
                 onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
-                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) }
+                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
             )
         }
     }

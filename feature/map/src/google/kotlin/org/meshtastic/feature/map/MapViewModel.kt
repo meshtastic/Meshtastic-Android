@@ -138,7 +138,11 @@ constructor(
 
     fun addCustomTileProvider(name: String, urlTemplate: String, localUri: String? = null) {
         viewModelScope.launch {
-            if (name.isBlank() || (urlTemplate.isBlank() && localUri == null) || (localUri == null && !isValidTileUrlTemplate(urlTemplate))) {
+            if (
+                name.isBlank() ||
+                (urlTemplate.isBlank() && localUri == null) ||
+                (localUri == null && !isValidTileUrlTemplate(urlTemplate))
+            ) {
                 _errorFlow.emit("Invalid name, URL template, or local URI for custom tile provider.")
                 return@launch
             }
@@ -216,12 +220,15 @@ constructor(
             customTileProviderRepository.deleteCustomTileProvider(configId)
 
             if (configToRemove != null) {
-                if (_selectedCustomTileProviderUrl.value == configToRemove.urlTemplate || _selectedCustomTileProviderUrl.value == configToRemove.localUri) {
+                if (
+                    _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate ||
+                    _selectedCustomTileProviderUrl.value == configToRemove.localUri
+                ) {
                     _selectedCustomTileProviderUrl.value = null
                     // Also clear from prefs
                     googleMapsPrefs.selectedCustomTileUrl = null
                 }
-                
+
                 if (configToRemove.localUri != null) {
                     val uri = Uri.parse(configToRemove.localUri)
                     deleteFileToInternalStorage(uri)
@@ -259,7 +266,7 @@ constructor(
 
     fun createTileProvider(config: CustomTileProviderConfig?): TileProvider? {
         if (config == null) return null
-        
+
         if (config.isLocal) {
             val uri = Uri.parse(config.localUri)
             val file = uri.toFile()
@@ -270,7 +277,7 @@ constructor(
                 return null
             }
         }
-        
+
         val urlString = config.urlTemplate
         if (!isValidTileUrlTemplate(urlString)) {
             Logger.withTag("MapViewModel")
@@ -342,7 +349,8 @@ constructor(
                 isValidTileUrlTemplate(savedCustomUrl)
             ) {
                 _selectedCustomTileProviderUrl.value = savedCustomUrl
-                _selectedGoogleMapType.value = MapType.NONE // MapType.NONE to hide google basemap when using custom provider
+                _selectedGoogleMapType.value =
+                    MapType.NONE // MapType.NONE to hide google basemap when using custom provider
             } else {
                 // The saved custom URL is no longer valid or doesn't exist, remove preference
                 googleMapsPrefs.selectedCustomTileUrl = null
@@ -397,30 +405,31 @@ constructor(
                                     null
                                 }
                             }
-                        
-                        val networkItems = googleMapsPrefs.networkMapLayers.mapNotNull { networkString ->
-                            try {
-                                val parts = networkString.split("|:|")
-                                if (parts.size == 3) {
-                                    val id = parts[0]
-                                    val name = parts[1]
-                                    val uri = Uri.parse(parts[2])
-                                    MapLayerItem(
-                                        id = id,
-                                        name = name,
-                                        uri = uri,
-                                        isVisible = !hiddenLayerUrls.contains(uri.toString()),
-                                        layerType = LayerType.KML,
-                                        isNetwork = true
-                                    )
-                                } else {
+
+                        val networkItems =
+                            googleMapsPrefs.networkMapLayers.mapNotNull { networkString ->
+                                try {
+                                    val parts = networkString.split("|:|")
+                                    if (parts.size == 3) {
+                                        val id = parts[0]
+                                        val name = parts[1]
+                                        val uri = Uri.parse(parts[2])
+                                        MapLayerItem(
+                                            id = id,
+                                            name = name,
+                                            uri = uri,
+                                            isVisible = !hiddenLayerUrls.contains(uri.toString()),
+                                            layerType = LayerType.KML,
+                                            isNetwork = true,
+                                        )
+                                    } else {
+                                        null
+                                    }
+                                } catch (e: Exception) {
                                     null
                                 }
-                            } catch (e: Exception) {
-                                null
                             }
-                        }
-                        
+
                         _mapLayers.value = loadedItems + networkItems
                         if (_mapLayers.value.isNotEmpty()) {
                             Logger.withTag("MapViewModel").i("Loaded ${_mapLayers.value.size} persisted map layers.")
@@ -491,7 +500,7 @@ constructor(
                 }
                 val newItem = MapLayerItem(name = name, uri = uri, layerType = LayerType.KML, isNetwork = true)
                 _mapLayers.value = _mapLayers.value + newItem
-                
+
                 val networkLayerString = "${newItem.id}|:|${newItem.name}|:|${newItem.uri}"
                 googleMapsPrefs.networkMapLayers = googleMapsPrefs.networkMapLayers + networkLayerString
             } catch (e: Exception) {
@@ -550,9 +559,8 @@ constructor(
             }
             layerToRemove?.uri?.let { uri ->
                 if (layerToRemove.isNetwork) {
-                    googleMapsPrefs.networkMapLayers = googleMapsPrefs.networkMapLayers.filterNot { 
-                        it.startsWith("${layerId}|:|") 
-                    }.toSet()
+                    googleMapsPrefs.networkMapLayers =
+                        googleMapsPrefs.networkMapLayers.filterNot { it.startsWith("$layerId|:|") }.toSet()
                 } else {
                     deleteFileToInternalStorage(uri)
                 }
@@ -561,33 +569,27 @@ constructor(
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
         }
     }
-    
+
     fun refreshMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRefresh = _mapLayers.value.find { it.id == layerId } ?: return@launch
             if (layerToRefresh.isNetwork && layerToRefresh.isVisible) {
                 _mapLayers.update { layers ->
-                    layers.map {
-                        if (it.id == layerId) it.copy(isRefreshing = true) else it
-                    }
+                    layers.map { if (it.id == layerId) it.copy(isRefreshing = true) else it }
                 }
-                
+
                 // Remove old layer data to trigger reload
                 layerToRefresh.kmlLayerData?.removeLayerFromMap()
-                
+
                 _mapLayers.update { layers ->
-                    layers.map {
-                        if (it.id == layerId) it.copy(kmlLayerData = null, isRefreshing = false) else it
-                    }
+                    layers.map { if (it.id == layerId) it.copy(kmlLayerData = null, isRefreshing = false) else it }
                 }
             }
         }
     }
 
     fun refreshAllVisibleNetworkLayers() {
-        _mapLayers.value.filter { it.isNetwork && it.isVisible }.forEach {
-            refreshMapLayer(it.id)
-        }
+        _mapLayers.value.filter { it.isNetwork && it.isVisible }.forEach { refreshMapLayer(it.id) }
     }
 
     private suspend fun deleteFileToInternalStorage(uri: Uri) {

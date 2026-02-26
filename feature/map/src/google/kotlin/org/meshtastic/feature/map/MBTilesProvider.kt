@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map
 
 import android.database.sqlite.SQLiteDatabase
@@ -31,11 +30,7 @@ class MBTilesProvider(private val file: File) : TileProvider {
 
     private fun openDatabase() {
         if (database == null && file.exists()) {
-            database = SQLiteDatabase.openDatabase(
-                file.absolutePath,
-                null,
-                SQLiteDatabase.OPEN_READONLY
-            )
+            database = SQLiteDatabase.openDatabase(file.absolutePath, null, SQLiteDatabase.OPEN_READONLY)
         }
     }
 
@@ -46,10 +41,11 @@ class MBTilesProvider(private val file: File) : TileProvider {
         // Convert Google Maps y coordinate to standard TMS y coordinate
         val tmsY = (1 shl zoom) - 1 - y
 
-        val cursor = db.rawQuery(
-            "SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?",
-            arrayOf(zoom.toString(), x.toString(), tmsY.toString())
-        )
+        val cursor =
+            db.rawQuery(
+                "SELECT tile_data FROM tiles WHERE zoom_level = ? AND tile_column = ? AND tile_row = ?",
+                arrayOf(zoom.toString(), x.toString(), tmsY.toString()),
+            )
 
         if (cursor.moveToFirst()) {
             val tileData = cursor.getBlob(0)

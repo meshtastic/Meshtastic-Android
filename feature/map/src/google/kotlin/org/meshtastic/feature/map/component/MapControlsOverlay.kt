@@ -127,10 +127,7 @@ fun MapControlsOverlay(
             if (showRefresh) {
                 if (isRefreshing) {
                     Box(modifier = Modifier.padding(8.dp)) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            strokeWidth = 2.dp
-                        )
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                     }
                 } else {
                     MapButton(
