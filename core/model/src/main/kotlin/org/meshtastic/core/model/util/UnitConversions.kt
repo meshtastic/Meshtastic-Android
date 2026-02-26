@@ -16,10 +16,7 @@
  */
 package org.meshtastic.core.model.util
 
-import kotlin.math.floor
 import kotlin.math.ln
-import kotlin.math.log10
-import kotlin.math.pow
 import kotlin.math.roundToInt
 
 object UnitConversions {
@@ -62,12 +59,5 @@ object UnitConversions {
      * - 100 millimeters to 0.1 meters
      */
     @Suppress("MagicNumber")
-    fun convertToBaseUnit(number: Float): Float {
-        if (number <= 0) return 0f
-
-        var exponent = floor(log10(number / 1000.0)).toInt()
-        if (exponent.mod(3) != 0 && exponent in -11..11) exponent = (exponent / 3) * 3
-
-        return number / 10f.pow(exponent)
-    }
+    fun convertToBaseUnit(number: Float): Float = number / 1000f
 }
