@@ -181,7 +181,7 @@ jobs:
 
       - name: Upload Google AAB artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: google-aab
           path: app/build/outputs/bundle/googleRelease/app-google-release.aab
@@ -189,7 +189,7 @@ jobs:
 
       - name: Upload Google APK artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: google-apk
           path: app/build/outputs/apk/**/*.apk
@@ -257,7 +257,7 @@ jobs:
         run: ls -R app/build/outputs/
 
       - name: Upload F-Droid APK artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: fdroid-apk
           path: app/build/outputs/apk/**/*.apk
@@ -279,7 +279,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ./artifacts
 
