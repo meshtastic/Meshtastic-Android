@@ -542,6 +542,7 @@
     <string name="state_broadcast_seconds">Трансляция состояния (в секундах)</string>
     <string name="send_bell_with_alert_message">Отправить колокол с уведомлением</string>
     <string name="friendly_name">Понятное имя</string>
+    <string name="friendly_address">Дружеское обращение</string>
     <string name="gpio_pin_to_monitor">GPIO контакт для мониторинга</string>
     <string name="detection_trigger_type">Тип триггера обнаружения</string>
     <string name="use_input_pullup_mode">Использовать режим INPUT_PULLUP</string>
@@ -630,6 +631,7 @@
     <string name="wifi_enabled">WiFi включен</string>
     <string name="ssid">Название сети</string>
     <string name="psk">Пароль</string>
+    <string name="get_document">Получить документ</string>
     <string name="ethernet_config">Настройки Ethernet</string>
     <string name="ethernet_enabled">Ethernet включен</string>
     <string name="ntp_server">NTP-сервер</string>
@@ -878,6 +880,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Метрики прохожих недоступны</string>
     <string name="wifi_devices">WiFi устройства</string>
+    <string name="ble_devices">Устройства Bluetooth</string>
     <string name="bluetooth_paired_devices">Сопряженные устройства</string>
     <string name="connected_device">Подключённые устройства</string>
     <string name="routing_error_rate_limit_exceeded">Превышен лимит запросов. Пожалуйста, повторите попытку позже.</string>
@@ -890,6 +893,7 @@
     <string name="firmware_edition">Версия прошивки</string>
     <string name="recent_network_devices">Недавние сетевые устройства</string>
     <string name="discovered_network_devices">Найденные сетевые устройства</string>
+    <string name="bluetooth_available_devices">Доступные Bluetooth-устройства</string>
     <string name="get_started">Начать работу</string>
     <string name="intro_welcome">Добро пожаловать в</string>
     <string name="stay_connected_anywhere">Оставайтесь на связи везде</string>
@@ -986,6 +990,12 @@
     <string name="for_more_information_see_our_privacy_policy">Дополнительная информация доступна в нашей политике конфиденциальности.</string>
     <string name="unset">Не задано - 0</string>
     <string name="relayed_by">Ретранслировано: %1$s</string>
+    <plurals name="relays">
+        <item quantity="one">Услышано %1$d ретранслятором</item>
+        <item quantity="few">Услышано %1$d ретрансляторами</item>
+        <item quantity="many">Услышано %1$d ретрансляторами</item>
+        <item quantity="other">Услышано %1$d ретрансляторами</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s обычно поставляется с загрузчиком, который не поддерживает OTA обновления. Может потребоваться прошивка OTA-совместимого загрузчика по USB перед прошивкой OTA.</string>
     <string name="learn_more">Подробности</string>
     <string name="firmware_update_rak4631_bootloader_hint">Для RAK WisBlock RAK4631, используйте прошивальщик от производителя (например, adafruit-nrfutil с предоставленным .zip файлом загрузчика). Копирование файла .uf2 само по себе не обновит загрузчик.</string>
@@ -1033,6 +1043,7 @@
     <string name="chirpy">Щебетун</string>
     <string name="firmware_update_rebooting">Перезагрузка в DFU...</string>
     <string name="firmware_update_waiting_for_device">Ожидание DFU устройства...</string>
+    <string name="firmware_update_copying">Дай пять! Подожди, идет копирование прошивки...</string>
     <string name="firmware_update_save_dfu_file">Пожалуйста, сохраните файл \".uf2\" на вашем устройстве с DFU.</string>
     <string name="firmware_update_flashing">Прошивка устройства, подождите...</string>
     <string name="firmware_update_method_usb">Передача файлов через USB</string>
@@ -1071,6 +1082,18 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Не установлена</string>
     <string name="interval_always_on">Всегда включено</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d секунда</item>
+        <item quantity="few">%1$d секунды</item>
+        <item quantity="many">%1$d секунд</item>
+        <item quantity="other">%1$d секунд</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d минута</item>
+        <item quantity="few">%1$d минуты</item>
+        <item quantity="many">%1$d минут</item>
+        <item quantity="other">%1$d минут</item>
+    </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d час</item>
         <item quantity="few">%1$d часов</item>
@@ -1126,5 +1149,31 @@
     <string name="nfc_disabled">NFC отключен. Пожалуйста, включите его в настройках вашего устройства.</string>
     <string name="all_time">Всё</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Настроить разрешения Bluetooth</string>
+    <string name="connect_to_radio">Подключиться к радио</string>
+    <string name="connect_to_radio_description">Просканируйте и подключитесь к вашей радиостанции Meshtastic.</string>
+    <string name="bluetooth_feature_discovery">Обнаружение</string>
+    <string name="bluetooth_feature_discovery_description">Найдите и определите устройства Meshtastic рядом с вами.</string>
     <string name="bluetooth_feature_config">Настройки</string>
+    <string name="bluetooth_feature_config_description">Беспроводное управление настройками устройства и каналами.</string>
+    <string name="permission_granted">Разрешение получено</string>
+    <string name="permission_denied">Доступ запрещён</string>
+    <string name="map_style_selection">Выбор стиля карты</string>
+    <string name="local_stats_battery">Батарея: %1$d%%</string>
+    <string name="local_stats_nodes">Нод: %1$d онлайн / %2$d всего</string>
+    <string name="local_stats_uptime">Время работы: %1$s</string>
+    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
+    <string name="local_stats_traffic">Traffic: TX %1$d / RX %2$d (D: %3$d)</string>
+    <string name="local_stats_relays">Передано: %1$d (Отменено: %2$d)</string>
+    <string name="local_stats_diagnostics_prefix">Диагностика: %1$s</string>
+    <string name="local_stats_noise">Шум: %1$d дБм</string>
+    <string name="local_stats_bad">Плохие: %1$d</string>
+    <string name="local_stats_dropped">Отброшено: %1$d</string>
+    <string name="local_stats_heap">Куча</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
+    <string name="powered">Питание</string>
+    <string name="meshtastic_stats">Статистика Meshtastic</string>
+    <string name="refresh">Обновить</string>
+    <string name="updated">Обновлено</string>
 </resources>

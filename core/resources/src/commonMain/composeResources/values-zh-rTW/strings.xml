@@ -37,6 +37,9 @@
     <string name="node_sort_last_heard">最近一次收到排序</string>
     <string name="node_sort_via_mqtt">有節點MQTT排序</string>
     <string name="via_mqtt">有節點MQTT排序</string>
+    <string name="via_udp">透過 UDP</string>
+    <string name="via_api">透過 API</string>
+    <string name="internal">內部傳輸</string>
     <string name="node_sort_via_favorite">通過喜好</string>
     <string name="node_filter_show_ignored">僅顯示已忽略的節點</string>
     <string name="unrecognized">無法識別</string>
@@ -145,7 +148,7 @@
     <string name="config_security_debug_log_api_enabled">透過序列埠輸出即時除錯日誌；透過藍牙檢視並匯出已移除定位資訊的設備記錄。</string>
     <!-- Position Config -->
     <string name="position_packet">定位封包</string>
-    <string name="broadcast_interval">Broadcast Interval</string>
+    <string name="broadcast_interval">廣播間隔</string>
     <string name="smart_position">智慧定位</string>
     <string name="minimum_interval">智慧間隔</string>
     <string name="minimum_distance">智慧距離</string>
@@ -179,12 +182,12 @@
     <string name="report">報告</string>
     <string name="pairing_completed">配對完成，開始服務</string>
     <string name="pairing_failed_try_again">配對失敗，請重新選擇</string>
-    <string name="location_disabled">位置訪問已關閉,無法向設備提供位置.</string>
+    <string name="location_disabled">定位服務已關閉，無法向設備提供位置。</string>
     <string name="share">分享</string>
     <string name="new_node_seen">發現新節點： %1$s</string>
     <string name="disconnected">已中斷連線</string>
     <string name="device_sleeping">設備休眠中</string>
-    <string name="connected_count">已連接:%1$s 在線</string>
+    <string name="connected_count">已連接：線上 %1$s</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">Ip_ 埠：</string>
     <string name="connected">已連線</string>
@@ -195,7 +198,7 @@
     <string name="connecting">正在連線</string>
     <string name="not_connected">未連線</string>
     <string name="no_device_selected">未選擇裝置</string>
-    <string name="connected_sleeping">已連接至無線電，但它正在休眠中</string>
+    <string name="connected_sleeping">已連接裝置，但該裝置正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
     <string name="none">無(停用）</string>
@@ -203,7 +206,7 @@
     <string name="acknowledgements">致謝</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
     <string name="contact_invalid">此聯絡人無效，無法新增</string>
-    <string name="debug_panel">除錯面板</string>
+    <string name="debug_panel">偵錯面板</string>
     <string name="debug_decoded_payload">解析封包：</string>
     <string name="debug_logs_export">匯出日誌</string>
     <string name="debug_export_cancelled">已取消匯出</string>
@@ -527,6 +530,7 @@
     <string name="state_broadcast_seconds">狀態廣播間隔 (秒)</string>
     <string name="send_bell_with_alert_message">告警訊息發送提示音</string>
     <string name="friendly_name">顯示名稱</string>
+    <string name="friendly_address">友善地址</string>
     <string name="gpio_pin_to_monitor">螢幕的 GPIO 腳位</string>
     <string name="detection_trigger_type">偵測觸發類型</string>
     <string name="use_input_pullup_mode">使用輸入上拉模式</string>
@@ -615,6 +619,7 @@
     <string name="wifi_enabled">啟用WiFi</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
+    <string name="get_document">取得文件</string>
     <string name="ethernet_config">乙太網路選項</string>
     <string name="ethernet_enabled">啟用以太網</string>
     <string name="ntp_server">時間伺服器</string>
@@ -810,6 +815,7 @@
     <string name="modules_unlocked">模組已解鎖</string>
     <string name="modules_already_unlocked">模組已解鎖</string>
     <string name="remote">遠端</string>
+    <string name="node_count_template">(線上 %1$d / 顯示 %2$d / 總數 %3$d)</string>
     <string name="react">回應</string>
     <string name="disconnect">中斷連線</string>
     <string name="no_network_devices">找不到網路裝置。</string>
@@ -862,6 +868,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
     <string name="wifi_devices">WiFi 裝置</string>
+    <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">已配對的裝置</string>
     <string name="connected_device">連接裝置</string>
     <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
@@ -874,6 +881,7 @@
     <string name="firmware_edition">韌體版本</string>
     <string name="recent_network_devices">最近的網路裝置</string>
     <string name="discovered_network_devices">發現的網路裝置</string>
+    <string name="bluetooth_available_devices">可連接的藍牙裝置</string>
     <string name="get_started">開始使用</string>
     <string name="intro_welcome">歡迎來到</string>
     <string name="stay_connected_anywhere">隨時隨地保持連線</string>
@@ -970,6 +978,9 @@
     <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
+    <plurals name="relays">
+        <item quantity="other">聽到 %1$d 個中繼</item>
+    </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s 裝置出廠時預載的開機載入程式通常不支援 OTA 更新功能。在執行 OTA 韌體更新前,您可能需要先透過 USB 連線刷入具備 OTA 功能的開機載入程式。</string>
     <string name="learn_more">瞭解詳情</string>
     <string name="firmware_update_rak4631_bootloader_hint">針對 RAK WisBlock RAK4631 裝置，必須使用 &apos; 提供的序列埠 DFU（裝置韌體更新）工具進行更新。舉例來說，可以使用 adafruit-nrfutil dfu serial 命令配合提供的 bootloader .zip 壓縮檔。注意：單純複製 .uf2 檔案並不會更新開機載入程式。</string>
@@ -1017,6 +1028,7 @@
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">正在進入 DFU 模式...</string>
     <string name="firmware_update_waiting_for_device">等待裝置進入 DFU 模式...</string>
+    <string name="firmware_update_copying">正在複製韌體⋯⋯記得要強調是史上最快喔！</string>
     <string name="firmware_update_save_dfu_file">請將 .uf2 檔案儲存到您 &apos; 裝置 DFU 磁碟機。</string>
     <string name="firmware_update_flashing">刷入韌體中，請稍等...</string>
     <string name="firmware_update_method_usb">USB 檔案傳輸</string>
@@ -1094,6 +1106,7 @@
     <string name="filter_regex_pattern">正規表示式</string>
     <string name="filter_whole_word">完整字詞比對</string>
     <string name="filter_filtered_count">已篩選 %1$d 則</string>
+    <string name="filter_show_count">顯示 %1$d 個已篩選</string>
     <string name="filter_hide_count">隱藏已篩選 %1$d 則</string>
     <string name="filter_message_label">已篩選</string>
     <string name="filter_enable_for_contact">啟用篩選</string>
@@ -1112,5 +1125,31 @@
     <string name="nfc_disabled">NFC 已停用，請在系統設定中啟用。</string>
     <string name="all_time">全部</string>
     <string name="bluetooth_permission">藍牙</string>
+    <string name="configure_bluetooth_permissions">設定藍牙權限</string>
+    <string name="connect_to_radio">連線至無線電</string>
+    <string name="connect_to_radio_description">掃描並連線至你的 Meshtastic 網狀無線電裝置。</string>
+    <string name="bluetooth_feature_discovery">探索</string>
+    <string name="bluetooth_feature_discovery_description">尋找並識別附近的 Meshtastic 裝置。</string>
     <string name="bluetooth_feature_config">設定</string>
+    <string name="bluetooth_feature_config_description">無線管理你的裝置設定與頻道。</string>
+    <string name="permission_granted">已授予權限</string>
+    <string name="permission_denied">已拒絕權限</string>
+    <string name="map_style_selection">地圖樣式選擇</string>
+    <string name="local_stats_battery">電量：%1$d%%</string>
+    <string name="local_stats_nodes">線上 %1$d / 總計 %2$d</string>
+    <string name="local_stats_uptime">上線時間: %1$s</string>
+    <string name="local_stats_utilization">頻道使用率: %1$.2f% | 空中傳輸佔用率: %2$.2f%</string>
+    <string name="local_stats_traffic">流量: 傳送 %1$d / 接收 %2$d (丟棄: %3$d)</string>
+    <string name="local_stats_relays">中繼: %1$d (取消: %2$d)</string>
+    <string name="local_stats_diagnostics_prefix">診斷: %1$s</string>
+    <string name="local_stats_noise">雜訊 %1$d dBm</string>
+    <string name="local_stats_bad">錯誤 %1$d</string>
+    <string name="local_stats_dropped">已丟棄 %1$d</string>
+    <string name="local_stats_heap">堆積記憶體</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
+    <string name="powered">已供電</string>
+    <string name="meshtastic_stats">Meshtastic 統計</string>
+    <string name="refresh">重新整理</string>
+    <string name="updated">已更新</string>
 </resources>
