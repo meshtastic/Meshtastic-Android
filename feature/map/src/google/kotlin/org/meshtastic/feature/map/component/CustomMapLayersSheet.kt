@@ -16,8 +16,13 @@
  */
 package org.meshtastic.feature.map.component
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -54,6 +59,7 @@ import org.meshtastic.core.resources.map_layer_formats
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.network_layer_url_hint
 import org.meshtastic.core.resources.no_map_layers_loaded
+import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.remove_layer
 import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.show_layer

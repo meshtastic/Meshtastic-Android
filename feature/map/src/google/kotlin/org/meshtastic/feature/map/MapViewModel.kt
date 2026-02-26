@@ -610,7 +610,7 @@ constructor(
             try {
                 if (layerItem.isNetwork && (uriToLoad.scheme == "http" || uriToLoad.scheme == "https")) {
                     val url = java.net.URL(uriToLoad.toString())
-                    okio.Okio.source(url.openStream()).buffer().inputStream()
+                    java.io.BufferedInputStream(url.openStream())
                 } else {
                     application.contentResolver.openInputStream(uriToLoad)
                 }

@@ -307,6 +307,7 @@ fun MapView(
         }
     }
 
+    val myNodeNum = mapViewModel.myNodeNum
     val nodeClusterItems =
         displayNodes.map { node ->
             val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
@@ -315,6 +316,7 @@ fun MapView(
                 nodePosition = latLng,
                 nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
                 nodeSnippet = "${node.user.long_name}",
+                myNodeNum = myNodeNum,
             )
         }
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
@@ -511,8 +513,15 @@ fun MapView(
                                     val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
                                     val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
                                     val color = Color(focusedNode.colors.second).copy(alpha = alpha)
+                                    val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
+                                    val activeNodeZIndex = if (isHighPriority) 5f else 4f
+
                                     if (index == sortedPositions.lastIndex) {
-                                        MarkerComposable(state = markerState, zIndex = 4f) {
+                                        MarkerComposable(
+                                            state = markerState,
+                                            zIndex = activeNodeZIndex,
+                                            alpha = if (isHighPriority) 1.0f else 0.9f,
+                                        ) {
                                             NodeChip(node = focusedNode)
                                         }
                                     } else {

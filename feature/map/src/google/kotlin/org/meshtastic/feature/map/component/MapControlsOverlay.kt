@@ -42,6 +42,7 @@ import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_filter
 import org.meshtastic.core.resources.map_tile_source
 import org.meshtastic.core.resources.orient_north
+import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.MapViewModel
