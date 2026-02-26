@@ -60,7 +60,7 @@ constructor(
     @AppSharedPreferences appPrefs: SharedPreferences,
 ) : AnalyticsPrefs {
     override var analyticsAllowed: Boolean by
-        PrefDelegate(analyticsSharedPreferences, AnalyticsPrefs.KEY_ANALYTICS_ALLOWED, true)
+        PrefDelegate(analyticsSharedPreferences, AnalyticsPrefs.KEY_ANALYTICS_ALLOWED, false)
 
     private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)
 
