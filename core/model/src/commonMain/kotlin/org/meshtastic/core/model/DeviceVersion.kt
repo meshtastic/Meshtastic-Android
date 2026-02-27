@@ -21,15 +21,15 @@ import co.touchlab.kermit.Logger
 /** Provide structured access to parse and compare device version strings */
 data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
 
+    /** The integer representation of the version (e.g., 2.7.12 -> 20712). Calculated once. */
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
-    val asInt
-        get() =
-            try {
-                verStringToInt(asString)
-            } catch (e: Exception) {
-                Logger.w { "Exception while parsing version '$asString', assuming version 0" }
-                0
-            }
+    val asInt: Int =
+        try {
+            verStringToInt(asString)
+        } catch (e: Exception) {
+            Logger.w { "Exception while parsing version '$asString', assuming version 0" }
+            0
+        }
 
     /**
      * Convert a version string of the form 1.23.57 to a comparable integer of the form 12357.
@@ -51,5 +51,5 @@ data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
         return major.toInt() * 10000 + minor.toInt() * 100 + build.toInt()
     }
 
-    override fun compareTo(other: DeviceVersion): Int = asInt - other.asInt
+    override fun compareTo(other: DeviceVersion): Int = asInt.compareTo(other.asInt)
 }

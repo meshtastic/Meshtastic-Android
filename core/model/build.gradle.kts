@@ -25,6 +25,9 @@ plugins {
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
+    @Suppress("UnstableApiUsage")
+    android { androidResources.enable = false }
+
     sourceSets {
         commonMain.dependencies {
             api(projects.core.proto)

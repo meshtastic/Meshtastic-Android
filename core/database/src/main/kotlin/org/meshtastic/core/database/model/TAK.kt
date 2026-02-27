@@ -18,6 +18,30 @@ package org.meshtastic.core.database.model
 
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.tak_role_forwardobserver
+import org.meshtastic.core.resources.tak_role_hq
+import org.meshtastic.core.resources.tak_role_k9
+import org.meshtastic.core.resources.tak_role_medic
+import org.meshtastic.core.resources.tak_role_rto
+import org.meshtastic.core.resources.tak_role_sniper
+import org.meshtastic.core.resources.tak_role_teamlead
+import org.meshtastic.core.resources.tak_role_teammember
+import org.meshtastic.core.resources.tak_role_unspecified
+import org.meshtastic.core.resources.tak_team_blue
+import org.meshtastic.core.resources.tak_team_brown
+import org.meshtastic.core.resources.tak_team_cyan
+import org.meshtastic.core.resources.tak_team_dark_blue
+import org.meshtastic.core.resources.tak_team_dark_green
+import org.meshtastic.core.resources.tak_team_green
+import org.meshtastic.core.resources.tak_team_magenta
+import org.meshtastic.core.resources.tak_team_maroon
+import org.meshtastic.core.resources.tak_team_orange
+import org.meshtastic.core.resources.tak_team_purple
+import org.meshtastic.core.resources.tak_team_red
+import org.meshtastic.core.resources.tak_team_teal
+import org.meshtastic.core.resources.tak_team_unspecified_color
+import org.meshtastic.core.resources.tak_team_white
+import org.meshtastic.core.resources.tak_team_yellow
 import org.meshtastic.proto.MemberRole
 import org.meshtastic.proto.Team
 

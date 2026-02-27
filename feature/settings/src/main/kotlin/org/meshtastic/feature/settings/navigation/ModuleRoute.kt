@@ -49,7 +49,9 @@ import org.meshtastic.core.resources.remote_hardware
 import org.meshtastic.core.resources.serial
 import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.store_forward
+import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.telemetry
+import org.meshtastic.core.resources.traffic_management
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
