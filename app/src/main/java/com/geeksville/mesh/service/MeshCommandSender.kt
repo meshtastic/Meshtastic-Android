@@ -36,6 +36,7 @@ import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.Constants
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.LocalConfig
@@ -44,6 +45,7 @@ import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
+import org.meshtastic.proto.ToRadio
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
@@ -467,6 +469,68 @@ constructor(
             ),
         )
 
+    fun sendTakPassphrase(passphrase: String, boots: Int = 0, hours: Int = 0) {
+        val myNum = nodeManager?.myNodeNum ?: return
+        // The firmware expects slot 2 as an absolute Unix epoch (seconds), not a duration.
+        // Convert hours duration → absolute epoch; 0 hours means no time-based expiry (until=0).
+        val adminKeyList = if (boots > 0 || hours > 0) {
+            val untilEpoch = if (hours > 0) System.currentTimeMillis() / 1000L + hours.toLong() * 3600L else 0L
+            val untilBytes = ByteArray(INT_BYTE_SIZE)
+            untilBytes[0] = (untilEpoch and BYTE_MASK.toLong()).toByte()
+            untilBytes[1] = ((untilEpoch shr BYTE_BITS) and BYTE_MASK.toLong()).toByte()
+            untilBytes[2] = ((untilEpoch shr (BYTE_BITS * 2)) and BYTE_MASK.toLong()).toByte()
+            untilBytes[3] = ((untilEpoch shr (BYTE_BITS * 3)) and BYTE_MASK.toLong()).toByte()
+            listOf(
+                ByteString.EMPTY,                                          // slot 0 unused
+                ByteString.of(boots.coerceIn(1, MAX_BYTE_VALUE).toByte()), // slot 1: boots u8
+                untilBytes.toByteString(),                                 // slot 2: until epoch LE u32
+            )
+        } else {
+            emptyList()
+        }
+        val securityConfig = Config.SecurityConfig(
+            private_key = passphrase.encodeToByteArray().toByteString(),
+            admin_key = adminKeyList,
+        )
+        val adminMessage = AdminMessage(set_config = Config(security = securityConfig))
+        val packet = MeshPacket(
+            to = myNum,
+            id = generatePacketId(),
+            channel = 0,
+            want_ack = true,
+            hop_limit = DEFAULT_HOP_LIMIT,
+            hop_start = DEFAULT_HOP_LIMIT,
+            priority = MeshPacket.Priority.RELIABLE,
+            decoded = Data(
+                portnum = PortNum.ADMIN_APP,
+                payload = adminMessage.encode().toByteString(),
+            ),
+        )
+        packetHandler?.sendToRadio(ToRadio(packet = packet))
+    }
+
+    fun sendTakLockNow() {
+        val myNum = nodeManager?.myNodeNum ?: return
+        val securityConfig = Config.SecurityConfig(
+            private_key = ByteString.of(TAK_LOCK_BYTE),
+        )
+        val adminMessage = AdminMessage(set_config = Config(security = securityConfig))
+        val packet = MeshPacket(
+            to = myNum,
+            id = generatePacketId(),
+            channel = 0,
+            want_ack = true,
+            hop_limit = DEFAULT_HOP_LIMIT,
+            hop_start = DEFAULT_HOP_LIMIT,
+            priority = MeshPacket.Priority.RELIABLE,
+            decoded = Data(
+                portnum = PortNum.ADMIN_APP,
+                payload = adminMessage.encode().toByteString(),
+            ),
+        )
+        packetHandler?.sendToRadio(ToRadio(packet = packet))
+    }
+
     companion object {
         private const val PACKET_ID_MASK = 0xffffffffL
         private const val PACKET_ID_SHIFT_BITS = 32
@@ -478,5 +542,12 @@ constructor(
         private const val HEX_RADIX = 16
 
         private const val DEFAULT_HOP_LIMIT = 3
+
+        private const val MAX_BYTE_VALUE = 255
+        private const val INT_BYTE_SIZE = 4
+        private const val BYTE_MASK = 0xFF
+        private const val BYTE_BITS = 8
+        @Suppress("MagicNumber")
+        private val TAK_LOCK_BYTE = 0xFF.toByte()
     }
 }

@@ -30,6 +30,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import dagger.Lazy
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.NodeRepository
@@ -69,6 +70,7 @@ constructor(
     private val commandSender: MeshCommandSender,
     private val nodeManager: MeshNodeManager,
     private val analytics: PlatformAnalytics,
+    private val takLockHandler: Lazy<TakLockHandler>,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
@@ -142,6 +144,7 @@ constructor(
         Logger.d { "Starting connect" }
         connectTimeMsec = System.currentTimeMillis()
         scope.handledLaunch { nodeRepository.clearMyNodeInfo() }
+        takLockHandler.get().onConnect()
         startConfigOnly()
     }
 
@@ -180,6 +183,7 @@ constructor(
 
     private fun handleDisconnected() {
         connectionStateHolder.setState(ConnectionState.Disconnected)
+        takLockHandler.get().onDisconnect()
         packetHandler.stopPacketQueue()
         locationManager.stop()
         mqttManager.stop()
@@ -192,6 +196,14 @@ constructor(
         analytics.track(EVENT_NUM_NODES, DataPair(KEY_NUM_NODES, nodeManager.nodeDBbyNodeNum.size))
 
         serviceBroadcasts.broadcastConnection()
+    }
+
+    fun clearRadioConfig() {
+        scope.handledLaunch {
+            radioConfigRepository.clearLocalConfig()
+            radioConfigRepository.clearChannelSet()
+            radioConfigRepository.clearLocalModuleConfig()
+        }
     }
 
     fun startConfigOnly() {

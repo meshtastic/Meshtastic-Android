@@ -62,13 +62,14 @@ import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.util.hopLimits
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora ?: Config.LoRaConfig()
-    val primarySettings = state.channelList.getOrNull(0) ?: return
+    val primarySettings = state.channelList.getOrNull(0) ?: ChannelSettings()
     val formState = rememberConfigState(initialValue = loraConfig)
 
     val primaryChannel by remember(formState.value) { mutableStateOf(Channel(primarySettings, formState.value)) }

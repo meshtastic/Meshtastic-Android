@@ -135,6 +135,7 @@ fun SettingsScreen(
 ) {
     val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
     val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
+    val sessionAuthorized by settingsViewModel.sessionAuthorized.collectAsStateWithLifecycle()
     val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
@@ -247,7 +248,7 @@ fun SettingsScreen(
         Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
             RadioConfigItemList(
                 state = state,
-                isManaged = localConfig.security?.is_managed ?: false,
+                isManaged = (localConfig.security?.is_managed ?: false) && !sessionAuthorized,
                 node = destNode,
                 excludedModulesUnlocked = excludedModulesUnlocked,
                 isOtaCapable = isOtaCapable,

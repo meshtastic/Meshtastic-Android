@@ -99,6 +99,9 @@ constructor(
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
+    val sessionAuthorized: StateFlow<Boolean> =
+        serviceRepository.sessionAuthorized.stateInWhileSubscribed(initialValue = false)
+
     val meshService: IMeshService?
         get() = serviceRepository.meshService
 

@@ -117,4 +117,8 @@ open class FakeIMeshService : IMeshService.Stub() {
     override fun requestTelemetry(requestId: Int, destNum: Int, type: Int) {}
 
     override fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {}
+
+    override fun sendTakUnlock(passphrase: String?, bootTtl: Int, hourTtl: Int) {}
+
+    override fun sendTakLockNow() {}
 }

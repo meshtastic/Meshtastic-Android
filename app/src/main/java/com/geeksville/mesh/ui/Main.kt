@@ -113,6 +113,7 @@ import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.service.TakLockState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.app_too_old
 import org.meshtastic.core.strings.bottom_nav_settings
@@ -217,8 +218,37 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
         }
     }
 
+    val takLockState by uIViewModel.takLockState.collectAsStateWithLifecycle()
+    val takTokenInfo by uIViewModel.takTokenInfo.collectAsStateWithLifecycle()
+    LaunchedEffect(takLockState) {
+        if (takLockState is TakLockState.LockNowAcknowledged) {
+            uIViewModel.clearTakLockState()
+            scanModel.disconnect()
+            navController.navigate(TopLevelDestination.Connections.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        }
+    }
+    TakUnlockDialog(
+        takLockState = takLockState,
+        takTokenInfo = takTokenInfo,
+        onSubmit = { pass, boots, hours -> uIViewModel.sendTakUnlock(pass, boots, hours) },
+        onDismiss = {
+            uIViewModel.clearTakLockState()
+            scanModel.disconnect()
+            navController.navigate(TopLevelDestination.Connections.route) {
+                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                launchSingleTop = true
+                restoreState = true
+            }
+        },
+    )
+
     val clientNotification by uIViewModel.clientNotification.collectAsStateWithLifecycle()
     clientNotification?.let { notification ->
+        if (notification.message?.startsWith("TAK_") == true) return@let
         var message = notification.message
         val compromisedKeys =
             if (notification.low_entropy_key != null || notification.duplicated_public_key != null) {

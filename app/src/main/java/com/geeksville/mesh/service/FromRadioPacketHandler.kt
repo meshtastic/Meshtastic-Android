@@ -57,15 +57,23 @@ constructor(
                 router.configFlowManager.handleNodeInfo(nodeInfo)
                 serviceRepository.setStatusMessage("Nodes (${router.configFlowManager.newNodeCount})")
             }
-            configCompleteId != null -> router.configFlowManager.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> {
+                router.configFlowManager.handleConfigComplete(configCompleteId)
+                router.takLockHandler.onConfigComplete()
+            }
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
             config != null -> router.configHandler.handleDeviceConfig(config)
             moduleConfig != null -> router.configHandler.handleModuleConfig(moduleConfig)
             channel != null -> router.configHandler.handleChannel(channel)
             clientNotification != null -> {
-                serviceRepository.setClientNotification(clientNotification)
-                serviceNotifications.showClientNotification(clientNotification)
+                val msg = clientNotification.message
+                if (msg.startsWith("TAK_")) {
+                    router.takLockHandler.handleTakNotification(msg)
+                } else {
+                    serviceRepository.setClientNotification(clientNotification)
+                    serviceNotifications.showClientNotification(clientNotification)
+                }
                 packetHandler.removeResponse(clientNotification.reply_id ?: 0, complete = false)
             }
             // Logging-only variants are handled by MeshMessageProcessor before dispatching here

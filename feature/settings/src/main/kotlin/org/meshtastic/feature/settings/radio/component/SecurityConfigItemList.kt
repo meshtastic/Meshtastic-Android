@@ -28,6 +28,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +42,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
@@ -83,6 +87,7 @@ import java.security.SecureRandom
 @Composable
 fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val takTokenInfo by viewModel.takTokenInfo.collectAsStateWithLifecycle(initialValue = null)
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
@@ -255,6 +260,31 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     onCheckedChange = { formState.value = formState.value.copy(admin_channel_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
+                HorizontalDivider()
+                NodeActionButton(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    title = "Lock Now",
+                    enabled = state.connected,
+                    icon = Icons.TwoTone.Warning,
+                    onClick = { viewModel.sendTakLockNow() },
+                )
+                takTokenInfo?.let { token ->
+                    HorizontalDivider()
+                    val expiryMs = token.expiryEpoch * 1000L
+                    val expiryText = when {
+                        expiryMs <= 0L -> "no time limit"
+                        expiryMs <= System.currentTimeMillis() -> "expired"
+                        else -> {
+                            val fmt = SimpleDateFormat("MMM d yyyy", Locale.getDefault())
+                            "expires ${fmt.format(Date(expiryMs))}"
+                        }
+                    }
+                    Text(
+                        text = "Token: ${token.bootsRemaining} boots remaining, $expiryText",
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    )
+                }
             }
         }
     }

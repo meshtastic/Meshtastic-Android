@@ -243,6 +243,7 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.security.crypto)
     implementation(libs.kermit)
 
     implementation(libs.nordic.client.android)

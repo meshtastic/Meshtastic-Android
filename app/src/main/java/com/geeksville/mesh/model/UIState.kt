@@ -58,6 +58,8 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.service.TakLockState
+import org.meshtastic.core.service.TakTokenInfo
 import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
@@ -68,6 +70,9 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
+
+private const val DEFAULT_BOOT_TTL = 50
+
 
 // Given a human name, strip out the first letter of the first three words and return that as the
 // initials for
@@ -125,6 +130,21 @@ constructor(
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
+    }
+
+    val takLockState: StateFlow<TakLockState> = serviceRepository.takLockState
+    val takTokenInfo: StateFlow<TakTokenInfo?> = serviceRepository.takTokenInfo
+
+    fun sendTakUnlock(passphrase: String, bootTtl: Int = DEFAULT_BOOT_TTL, hourTtl: Int = 0) {
+        serviceRepository.meshService?.sendTakUnlock(passphrase, bootTtl, hourTtl)
+    }
+
+    fun sendTakLockNow() {
+        serviceRepository.meshService?.sendTakLockNow()
+    }
+
+    fun clearTakLockState() {
+        serviceRepository.clearTakLockState()
     }
 
     /**

@@ -48,6 +48,8 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
+    val takLockState = serviceRepository.takLockState
+
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo

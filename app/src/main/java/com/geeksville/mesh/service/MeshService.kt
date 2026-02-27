@@ -378,5 +378,13 @@ class MeshService : Service() {
                 toRemoteExceptions {
                     router.actionHandler.handleRequestRebootOta(requestId, destNum, mode, hash)
                 }
+
+            override fun sendTakUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) = toRemoteExceptions {
+                router.actionHandler.handleSendTakUnlock(passphrase, bootTtl, hourTtl)
+            }
+
+            override fun sendTakLockNow() = toRemoteExceptions {
+                router.actionHandler.handleSendTakLockNow()
+            }
         }
 }

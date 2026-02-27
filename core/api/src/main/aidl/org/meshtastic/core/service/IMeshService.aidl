@@ -189,4 +189,10 @@ interface IMeshService {
     * hash is the 32-byte firmware SHA256 hash (optional, can be null)
     */
     void requestRebootOta(in int requestId, in int destNum, in int mode, in byte []hash);
+
+    /// Send TAK unlock passphrase to the device
+    void sendTakUnlock(in String passphrase, in int bootTtl, in int hourTtl);
+
+    /// Lock the device with TAK lock immediately
+    void sendTakLockNow();
 }

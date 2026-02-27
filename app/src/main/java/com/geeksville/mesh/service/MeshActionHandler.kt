@@ -59,6 +59,7 @@ constructor(
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
+    private val takLockHandler: TakLockHandler,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -328,6 +329,14 @@ constructor(
         commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
             AdminMessage(get_device_connection_status_request = true)
         }
+    }
+
+    fun handleSendTakUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
+        takLockHandler.submitPassphrase(passphrase, bootTtl, hourTtl)
+    }
+
+    fun handleSendTakLockNow() {
+        takLockHandler.lockNow()
     }
 
     fun handleUpdateLastAddress(deviceAddr: String?) {

@@ -70,6 +70,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.service.TakLockState
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.connected
 import org.meshtastic.core.strings.connected_device
@@ -125,7 +126,10 @@ fun ConnectionsScreen(
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
-    val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
+    val takLockState by connectionsViewModel.takLockState.collectAsStateWithLifecycle()
+    // A TAK-locked device sends zeroed config before auth — suppress region-unset until authorized.
+    val isTakAuthorized = takLockState == TakLockState.None || takLockState == TakLockState.Unlocked
+    val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET && isTakAuthorized
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()

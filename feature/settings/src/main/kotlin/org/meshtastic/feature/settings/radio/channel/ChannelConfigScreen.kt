@@ -108,7 +108,7 @@ private fun ChannelConfigScreen(
     enabled: Boolean,
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
-    val primarySettings = settingsList.getOrNull(0) ?: return
+    val primarySettings = settingsList.getOrNull(0) ?: ChannelSettings()
     val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
     val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
     val capabilities by remember(firmwareVersion) { mutableStateOf(Capabilities(firmwareVersion)) }

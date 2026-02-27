@@ -28,8 +28,33 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
 import java.util.concurrent.ConcurrentHashMap
+
 import javax.inject.Inject
 import javax.inject.Singleton
+
+sealed class TakLockState {
+    data object None : TakLockState()
+    data object Locked : TakLockState()
+    data object NeedsProvision : TakLockState()
+    data object Unlocked : TakLockState()
+    /** Lock Now ACK received — client should disconnect immediately, no dialog. */
+    data object LockNowAcknowledged : TakLockState()
+    /** Wrong passphrase — retry immediately. */
+    data object UnlockFailed : TakLockState()
+    /** Too many attempts — must wait [backoffSeconds] before retrying. */
+    data class UnlockBackoff(val backoffSeconds: Int) : TakLockState()
+}
+
+/**
+ * TAK session token metadata parsed from the TAK_UNLOCKED:boots=N:until=EPOCH: notification.
+ *
+ * @param bootsRemaining Number of reboots before the token expires.
+ * @param expiryEpoch Unix epoch seconds; 0 means no time-based expiry.
+ */
+data class TakTokenInfo(
+    val bootsRemaining: Int,
+    val expiryEpoch: Long,
+)
 
 sealed class RetryEvent {
     abstract val packetId: Int
@@ -158,6 +183,38 @@ class ServiceRepository @Inject constructor() {
     suspend fun onServiceAction(action: ServiceAction) {
         _serviceAction.send(action)
     }
+
+    // TAK lock state
+    private val _takLockState: MutableStateFlow<TakLockState> = MutableStateFlow(TakLockState.None)
+    val takLockState: StateFlow<TakLockState>
+        get() = _takLockState
+
+    fun setTakLockState(state: TakLockState) {
+        _takLockState.value = state
+    }
+
+    fun clearTakLockState() {
+        _takLockState.value = TakLockState.None
+    }
+
+    // TAK token info (boots remaining + expiry) from the most recent TAK_UNLOCKED notification
+    private val _takTokenInfo: MutableStateFlow<TakTokenInfo?> = MutableStateFlow(null)
+    val takTokenInfo: StateFlow<TakTokenInfo?>
+        get() = _takTokenInfo
+
+    fun setTakTokenInfo(info: TakTokenInfo?) {
+        _takTokenInfo.value = info
+    }
+
+    // True once TAK passphrase is accepted for this BLE connection; false on disconnect.
+    private val _sessionAuthorized: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val sessionAuthorized: StateFlow<Boolean>
+        get() = _sessionAuthorized
+
+    fun setSessionAuthorized(authorized: Boolean) {
+        _sessionAuthorized.value = authorized
+    }
+
 
     // Retry management
     private val _retryEvents = MutableStateFlow<RetryEvent?>(null)
