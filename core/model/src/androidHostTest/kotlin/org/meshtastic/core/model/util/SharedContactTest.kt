@@ -58,7 +58,7 @@ class SharedContactTest {
         assertEquals("Suzume", contact.user?.long_name)
     }
 
-    @Test(expected = java.net.MalformedURLException::class)
+    @Test(expected = MalformedMeshtasticUrlException::class)
     fun testInvalidHostThrows() {
         val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
         val urlStr = original.getSharedContactUrl().toString().replace("meshtastic.org", "example.com")
@@ -66,7 +66,7 @@ class SharedContactTest {
         url.toSharedContact()
     }
 
-    @Test(expected = java.net.MalformedURLException::class)
+    @Test(expected = MalformedMeshtasticUrlException::class)
     fun testInvalidPathThrows() {
         val original = SharedContact(user = User(long_name = "Suzume"), node_num = 12345)
         val urlStr = original.getSharedContactUrl().toString().replace("/v/", "/wrong/")
@@ -74,21 +74,21 @@ class SharedContactTest {
         url.toSharedContact()
     }
 
-    @Test(expected = java.net.MalformedURLException::class)
+    @Test(expected = MalformedMeshtasticUrlException::class)
     fun testMissingFragmentThrows() {
         val urlStr = "https://meshtastic.org/v/"
         val url = Uri.parse(urlStr)
         url.toSharedContact()
     }
 
-    @Test(expected = java.net.MalformedURLException::class)
+    @Test(expected = MalformedMeshtasticUrlException::class)
     fun testInvalidBase64Throws() {
         val urlStr = "https://meshtastic.org/v/#InvalidBase64!!!!"
         val url = Uri.parse(urlStr)
         url.toSharedContact()
     }
 
-    @Test(expected = java.net.MalformedURLException::class)
+    @Test(expected = MalformedMeshtasticUrlException::class)
     fun testInvalidProtoThrows() {
         // Tag 0 is invalid in Protobuf
         // 0x00 -> Tag 0, Type 0.

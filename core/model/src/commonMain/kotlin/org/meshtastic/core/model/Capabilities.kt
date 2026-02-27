@@ -35,7 +35,7 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val canMuteNode = atLeast(V2_7_18)
 
     /** FIXME: Ability to request neighbor information from other nodes. Disabled until working better. */
-    val canRequestNeighborInfo = atLeast(NEVER)
+    val canRequestNeighborInfo = atLeast(UNRELEASED)
 
     /** Ability to send verified shared contacts. Supported since firmware v2.7.12. */
     val canSendVerifiedContacts = atLeast(V2_7_12)
@@ -73,6 +73,6 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
         private val V2_7_18 = DeviceVersion("2.7.18")
         private val V2_7_19 = DeviceVersion("2.7.19")
         private val V3_0_0 = DeviceVersion("3.0.0")
-        private val NEVER = DeviceVersion("9.9.9")
+        private val UNRELEASED = DeviceVersion("9.9.9")
     }
 }
