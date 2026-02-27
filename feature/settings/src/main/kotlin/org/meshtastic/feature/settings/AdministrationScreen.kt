@@ -17,8 +17,10 @@
 package org.meshtastic.feature.settings
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -47,6 +49,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.settings.radio.AdminRoute
 import org.meshtastic.feature.settings.radio.ExpressiveSection
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.ResponseState
+import org.meshtastic.feature.settings.radio.component.LoadingOverlay
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
 import org.meshtastic.feature.settings.radio.component.WarningDialog
@@ -60,100 +64,105 @@ fun AdministrationScreen(
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val enabled = state.connected && !state.responseState.isWaiting()
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = { viewModel.clearPacketResponse() },
-            onComplete = {
-                viewModel.clearPacketResponse()
-                onBack()
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                MainAppBar(
+                    title = stringResource(Res.string.administration),
+                    subtitle = if (state.isLocal) {
+                        destNode?.user?.long_name
+                    } else {
+                        val remoteName = destNode?.user?.long_name ?: ""
+                        stringResource(Res.string.remotely_administrating, remoteName)
+                    },
+                    ourNode = null,
+                    showNodeChip = false,
+                    canNavigateUp = true,
+                    onNavigateUp = onBack,
+                    actions = {},
+                    onClickChip = {},
+                )
             },
-        )
-    }
-
-    Scaffold(
-        topBar = {
-            MainAppBar(
-                title = stringResource(Res.string.administration),
-                subtitle = if (state.isLocal) {
-                    destNode?.user?.long_name
-                } else {
-                    val remoteName = destNode?.user?.long_name ?: ""
-                    stringResource(Res.string.remotely_administrating, remoteName)
-                },
-                ourNode = null,
-                showNodeChip = false,
-                canNavigateUp = true,
-                onNavigateUp = onBack,
-                actions = {},
-                onClickChip = {},
-            )
-        },
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            ExpressiveSection(
-                title = stringResource(Res.string.administration),
-                titleColor = MaterialTheme.colorScheme.error,
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .verticalScroll(rememberScrollState())
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
-                AdminRoute.entries.forEach { route ->
-                    var showDialog by remember { mutableStateOf(false) }
-                    if (showDialog) {
-                        if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
-                            ShutdownConfirmationDialog(
-                                title = "${stringResource(route.title)}?",
-                                node = destNode,
-                                onDismiss = { showDialog = false },
-                                isShutdown = route == AdminRoute.SHUTDOWN,
-                                onConfirm = { 
-                                    viewModel.setResponseStateLoading(route)
-                                },
-                            )
-                        } else {
-                            WarningDialog(
-                                title = "${stringResource(route.title)}?",
-                                text = {
-                                    if (route == AdminRoute.NODEDB_RESET) {
-                                        Row(
-                                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                        ) {
-                                            Text(text = stringResource(Res.string.preserve_favorites))
-                                            Switch(
-                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                                enabled = enabled,
-                                                checked = state.nodeDbResetPreserveFavorites,
-                                                onCheckedChange = { viewModel.setPreserveFavorites(it) },
-                                            )
+                ExpressiveSection(
+                    title = stringResource(Res.string.administration),
+                    titleColor = MaterialTheme.colorScheme.error,
+                ) {
+                    AdminRoute.entries.forEach { route ->
+                        var showDialog by remember { mutableStateOf(false) }
+                        if (showDialog) {
+                            if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
+                                ShutdownConfirmationDialog(
+                                    title = "${stringResource(route.title)}?",
+                                    node = destNode,
+                                    onDismiss = { showDialog = false },
+                                    isShutdown = route == AdminRoute.SHUTDOWN,
+                                    onConfirm = {
+                                        viewModel.setResponseStateLoading(route)
+                                    },
+                                )
+                            } else {
+                                WarningDialog(
+                                    title = "${stringResource(route.title)}?",
+                                    text = {
+                                        if (route == AdminRoute.NODEDB_RESET) {
+                                            Row(
+                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                                    .fillMaxWidth(),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                            ) {
+                                                Text(text = stringResource(Res.string.preserve_favorites))
+                                                Switch(
+                                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                                                    enabled = enabled,
+                                                    checked = state.nodeDbResetPreserveFavorites,
+                                                    onCheckedChange = { viewModel.setPreserveFavorites(it) },
+                                                )
+                                            }
                                         }
-                                    }
-                                },
-                                onDismiss = { showDialog = false },
-                                onConfirm = { 
-                                    viewModel.setResponseStateLoading(route)
-                                },
-                            )
+                                    },
+                                    onDismiss = { showDialog = false },
+                                    onConfirm = {
+                                        viewModel.setResponseStateLoading(route)
+                                    },
+                                )
+                            }
                         }
-                    }
 
-                    ListItem(
-                        enabled = enabled,
-                        text = stringResource(route.title),
-                        leadingIcon = route.icon,
-                        leadingIconTint = MaterialTheme.colorScheme.error,
-                        textColor = MaterialTheme.colorScheme.error,
-                        trailingIcon = null,
-                    ) {
-                        showDialog = true
+                        ListItem(
+                            enabled = enabled,
+                            text = stringResource(route.title),
+                            leadingIcon = route.icon,
+                            leadingIconTint = MaterialTheme.colorScheme.error,
+                            textColor = MaterialTheme.colorScheme.error,
+                            trailingIcon = null,
+                        ) {
+                            showDialog = true
+                        }
                     }
                 }
             }
+        }
+
+        LoadingOverlay(state = state.responseState)
+
+        if (state.responseState is ResponseState.Success || state.responseState is ResponseState.Error) {
+            PacketResponseStateDialog(
+                state = state.responseState,
+                onDismiss = { viewModel.clearPacketResponse() },
+                onComplete = {
+                    viewModel.clearPacketResponse()
+                    onBack()
+                },
+            )
         }
     }
 }

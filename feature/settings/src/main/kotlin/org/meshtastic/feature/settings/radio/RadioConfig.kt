@@ -157,6 +157,9 @@ fun RadioConfigItemList(
                 text = stringResource(Res.string.administration),
                 leadingIcon = Icons.Rounded.AdminPanelSettings,
                 trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                leadingIconTint = MaterialTheme.colorScheme.error,
+                textColor = MaterialTheme.colorScheme.error,
+                trailingIconTint = MaterialTheme.colorScheme.error,
                 enabled = enabled,
             ) {
                 onNavigate(SettingsRoutes.Administration)

@@ -426,7 +426,7 @@ fun SettingsScreen(
                 ListItem(
                     text = stringResource(Res.string.acknowledgements),
                     leadingIcon = Icons.Rounded.Info,
-                    trailingIcon = null,
+                    trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 ) {
                     onNavigate(SettingsRoutes.About)
                 }

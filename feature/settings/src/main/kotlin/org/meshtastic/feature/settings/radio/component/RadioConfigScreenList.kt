@@ -22,6 +22,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -58,55 +59,58 @@ fun <T : Message<T, *>> RadioConfigScreenList(
 ) {
     val focusManager = LocalFocusManager.current
 
-    if (responseState.isWaiting()) {
-        PacketResponseStateDialog(state = responseState, onDismiss = onDismissPacketResponse)
-    }
+    Box(modifier = modifier) {
+        Scaffold(
+            topBar = {
+                MainAppBar(
+                    title = title,
+                    canNavigateUp = true,
+                    onNavigateUp = onBack,
+                    ourNode = null,
+                    showNodeChip = false,
+                    actions = {},
+                    onClickChip = {},
+                )
+            },
+        ) { innerPadding ->
+            val showFooterButtons = configState.isDirty || additionalDirtyCheck()
 
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            MainAppBar(
-                title = title,
-                canNavigateUp = true,
-                onNavigateUp = onBack,
-                ourNode = null,
-                showNodeChip = false,
-                actions = {},
-                onClickChip = {},
-            )
-        },
-    ) { innerPadding ->
-        val showFooterButtons = configState.isDirty || additionalDirtyCheck()
+            LazyColumn(
+                modifier = Modifier.padding(innerPadding).fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+            ) {
+                content()
 
-        LazyColumn(
-            modifier = Modifier.padding(innerPadding).fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            content()
-
-            item {
-                AnimatedVisibility(
-                    visible = showFooterButtons,
-                    enter = fadeIn() + expandIn(),
-                    exit = fadeOut() + shrinkOut(),
-                ) {
-                    PreferenceFooter(
-                        enabled = enabled && showFooterButtons,
-                        negativeText = stringResource(Res.string.discard_changes),
-                        onNegativeClicked = {
-                            focusManager.clearFocus()
-                            configState.reset()
-                            onDiscard()
-                        },
-                        positiveText = stringResource(Res.string.save_changes),
-                        onPositiveClicked = {
-                            focusManager.clearFocus()
-                            onSave(configState.value)
-                        },
-                    )
+                item {
+                    AnimatedVisibility(
+                        visible = showFooterButtons,
+                        enter = fadeIn() + expandIn(),
+                        exit = fadeOut() + shrinkOut(),
+                    ) {
+                        PreferenceFooter(
+                            enabled = enabled && showFooterButtons,
+                            negativeText = stringResource(Res.string.discard_changes),
+                            onNegativeClicked = {
+                                focusManager.clearFocus()
+                                configState.reset()
+                                onDiscard()
+                            },
+                            positiveText = stringResource(Res.string.save_changes),
+                            onPositiveClicked = {
+                                focusManager.clearFocus()
+                                onSave(configState.value)
+                            },
+                        )
+                    }
                 }
             }
+        }
+
+        LoadingOverlay(state = responseState)
+
+        if (responseState is ResponseState.Success || responseState is ResponseState.Error) {
+            PacketResponseStateDialog(state = responseState, onDismiss = onDismissPacketResponse)
         }
     }
 }

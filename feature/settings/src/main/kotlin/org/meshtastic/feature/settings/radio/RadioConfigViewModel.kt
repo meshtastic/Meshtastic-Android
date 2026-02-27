@@ -858,6 +858,14 @@ constructor(
                 sendAdminRequest(destNum)
             }
             requestIds.update { it.apply { remove(data.request_id) } }
+
+            if (requestIds.value.isEmpty()) {
+                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
+                    clearPacketResponse()
+                } else if (route.isEmpty()) {
+                    setResponseStateSuccess()
+                }
+            }
         }
     }
 }
