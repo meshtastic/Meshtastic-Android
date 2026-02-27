@@ -31,8 +31,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.recalculateWindowInsets
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -448,7 +446,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerVie
         NavHost(
             navController = navController,
             startDestination = NodesRoutes.NodesGraph,
-            modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
+            modifier = Modifier.fillMaxSize(),
         ) {
             contactsGraph(navController, uIViewModel.scrollToTopEventFlow)
             nodesGraph(navController, uIViewModel.scrollToTopEventFlow)
