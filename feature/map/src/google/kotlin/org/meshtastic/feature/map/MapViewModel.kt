@@ -23,15 +23,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
-import com.google.maps.android.data.geojson.GeoJsonLayer
-import com.google.maps.android.data.kml.KmlLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -46,7 +43,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import org.json.JSONObject
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
 import org.meshtastic.core.data.repository.NodeRepository
@@ -253,7 +249,9 @@ constructor(
             googleMapsPrefs.selectedGoogleMapType = null
         } else {
             _selectedCustomTileProviderUrl.value = null
+            _selectedGoogleMapType.value = MapType.NORMAL
             googleMapsPrefs.selectedCustomTileUrl = null
+            googleMapsPrefs.selectedGoogleMapType = MapType.NORMAL.name
         }
     }
 
@@ -264,44 +262,68 @@ constructor(
         googleMapsPrefs.selectedCustomTileUrl = null
     }
 
-    fun createTileProvider(config: CustomTileProviderConfig?): TileProvider? {
-        if (config == null) return null
+    private var currentTileProvider: TileProvider? = null
 
-        if (config.isLocal) {
-            val uri = Uri.parse(config.localUri)
-            val file = uri.toFile()
-            if (file.exists()) {
-                return MBTilesProvider(file)
-            } else {
-                Logger.withTag("MapViewModel").e("Local MBTiles file does not exist: ${config.localUri}")
-                return null
-            }
-        }
-
-        val urlString = config.urlTemplate
-        if (!isValidTileUrlTemplate(urlString)) {
-            Logger.withTag("MapViewModel")
-                .e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
+    fun getTileProvider(config: CustomTileProviderConfig?): TileProvider? {
+        if (config == null) {
+            (currentTileProvider as? MBTilesProvider)?.close()
+            currentTileProvider = null
             return null
         }
-        return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
-            override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
-                val subdomains = listOf("a", "b", "c")
-                val subdomain = subdomains[(x + y) % subdomains.size]
-                val formattedUrl =
-                    urlString
-                        .replace("{s}", subdomain, ignoreCase = true)
-                        .replace("{z}", zoom.toString(), ignoreCase = true)
-                        .replace("{x}", x.toString(), ignoreCase = true)
-                        .replace("{y}", y.toString(), ignoreCase = true)
-                return try {
-                    URL(formattedUrl)
-                } catch (e: MalformedURLException) {
-                    Logger.withTag("MapViewModel").e(e) { "Malformed URL: $formattedUrl" }
+
+        val selectedUrl = config.localUri ?: config.urlTemplate
+        if (currentTileProvider != null && _selectedCustomTileProviderUrl.value == selectedUrl) {
+            return currentTileProvider
+        }
+
+        // Close previous if it was a local provider
+        (currentTileProvider as? MBTilesProvider)?.close()
+
+        val newProvider =
+            if (config.isLocal) {
+                val uri = Uri.parse(config.localUri)
+                val file =
+                    try {
+                        uri.toFile()
+                    } catch (e: Exception) {
+                        File(uri.path ?: "")
+                    }
+                if (file.exists()) {
+                    MBTilesProvider(file)
+                } else {
+                    Logger.withTag("MapViewModel").e("Local MBTiles file does not exist: ${config.localUri}")
                     null
                 }
+            } else {
+                val urlString = config.urlTemplate
+                if (!isValidTileUrlTemplate(urlString)) {
+                    Logger.withTag("MapViewModel")
+                        .e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
+                    null
+                } else {
+                    object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
+                        override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
+                            val subdomains = listOf("a", "b", "c")
+                            val subdomain = subdomains[(x + y) % subdomains.size]
+                            val formattedUrl =
+                                urlString
+                                    .replace("{s}", subdomain, ignoreCase = true)
+                                    .replace("{z}", zoom.toString(), ignoreCase = true)
+                                    .replace("{x}", x.toString(), ignoreCase = true)
+                                    .replace("{y}", y.toString(), ignoreCase = true)
+                            return try {
+                                URL(formattedUrl)
+                            } catch (e: MalformedURLException) {
+                                Logger.withTag("MapViewModel").e(e) { "Malformed URL: $formattedUrl" }
+                                null
+                            }
+                        }
+                    }
+                }
             }
-        }
+
+        currentTileProvider = newProvider
+        return newProvider
     }
 
     private fun isValidTileUrlTemplate(urlTemplate: String): Boolean = urlTemplate.contains("{z}", ignoreCase = true) &&
@@ -495,10 +517,18 @@ constructor(
             try {
                 val uri = Uri.parse(url)
                 if (uri.scheme != "http" && uri.scheme != "https") {
-                    _errorFlow.emit("URL must be http or https. Only KML formats are supported currently.")
+                    _errorFlow.emit("URL must be http or https.")
                     return@launch
                 }
-                val newItem = MapLayerItem(name = name, uri = uri, layerType = LayerType.KML, isNetwork = true)
+
+                val path = uri.path?.lowercase() ?: ""
+                val layerType =
+                    when {
+                        path.endsWith(".geojson") || path.endsWith(".json") -> LayerType.GEOJSON
+                        else -> LayerType.KML // Default to KML
+                    }
+
+                val newItem = MapLayerItem(name = name, uri = uri, layerType = layerType, isNetwork = true)
                 _mapLayers.value = _mapLayers.value + newItem
 
                 val networkLayerString = "${newItem.id}|:|${newItem.name}|:|${newItem.uri}"
@@ -552,11 +582,6 @@ constructor(
     fun removeMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
-            when (layerToRemove?.layerType) {
-                LayerType.KML -> layerToRemove.kmlLayerData?.removeLayerFromMap()
-                LayerType.GEOJSON -> layerToRemove.geoJsonLayerData?.removeLayerFromMap()
-                null -> {}
-            }
             layerToRemove?.uri?.let { uri ->
                 if (layerToRemove.isNetwork) {
                     googleMapsPrefs.networkMapLayers =
@@ -572,19 +597,10 @@ constructor(
 
     fun refreshMapLayer(layerId: String) {
         viewModelScope.launch {
-            val layerToRefresh = _mapLayers.value.find { it.id == layerId } ?: return@launch
-            if (layerToRefresh.isNetwork && layerToRefresh.isVisible) {
-                _mapLayers.update { layers ->
-                    layers.map { if (it.id == layerId) it.copy(isRefreshing = true) else it }
-                }
-
-                // Remove old layer data to trigger reload
-                layerToRefresh.kmlLayerData?.removeLayerFromMap()
-
-                _mapLayers.update { layers ->
-                    layers.map { if (it.id == layerId) it.copy(kmlLayerData = null, isRefreshing = false) else it }
-                }
-            }
+            _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isRefreshing = true) else it } }
+            // By resetting the layer data in the UI (implied by just refreshing),
+            // we trigger a reload in the Composable.
+            _mapLayers.update { layers -> layers.map { if (it.id == layerId) it.copy(isRefreshing = false) else it } }
         }
     }
 
@@ -606,7 +622,7 @@ constructor(
     }
 
     @Suppress("Recycle")
-    private suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
+    suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
         val uriToLoad = layerItem.uri ?: return null
         return withContext(Dispatchers.IO) {
             try {
@@ -623,58 +639,9 @@ constructor(
         }
     }
 
-    suspend fun loadMapLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem) {
-        if (layerItem.kmlLayerData != null || layerItem.geoJsonLayerData != null) return
-        try {
-            when (layerItem.layerType) {
-                LayerType.KML -> loadKmlLayerIfNeeded(layerItem, map)
-
-                LayerType.GEOJSON -> loadGeoJsonLayerIfNeeded(layerItem, map)
-            }
-        } catch (e: Exception) {
-            Logger.withTag("MapViewModel").e(e) { "Error loading map layer for ${layerItem.uri}" }
-        }
-    }
-
-    private suspend fun loadKmlLayerIfNeeded(layerItem: MapLayerItem, map: GoogleMap) {
-        val kmlLayer =
-            getInputStreamFromUri(layerItem)?.use {
-                KmlLayer(map, it, application.applicationContext).apply {
-                    if (!layerItem.isVisible) removeLayerFromMap()
-                }
-            }
-        _mapLayers.update { currentLayers ->
-            currentLayers.map {
-                if (it.id == layerItem.id) {
-                    it.copy(kmlLayerData = kmlLayer)
-                } else {
-                    it
-                }
-            }
-        }
-    }
-
-    private suspend fun loadGeoJsonLayerIfNeeded(layerItem: MapLayerItem, map: GoogleMap) {
-        val geoJsonLayer =
-            getInputStreamFromUri(layerItem)?.use { inputStream ->
-                val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
-                GeoJsonLayer(map, jsonObject).apply { if (!layerItem.isVisible) removeLayerFromMap() }
-            }
-        _mapLayers.update { currentLayers ->
-            currentLayers.map {
-                if (it.id == layerItem.id) {
-                    it.copy(geoJsonLayerData = geoJsonLayer)
-                } else {
-                    it
-                }
-            }
-        }
-    }
-
-    fun clearLoadedLayerData() {
-        _mapLayers.update { currentLayers ->
-            currentLayers.map { it.copy(kmlLayerData = null, geoJsonLayerData = null) }
-        }
+    override fun onCleared() {
+        super.onCleared()
+        (currentTileProvider as? MBTilesProvider)?.close()
     }
 }
 
@@ -687,9 +654,7 @@ data class MapLayerItem(
     val id: String = Uuid.random().toString(),
     val name: String,
     val uri: Uri? = null,
-    var isVisible: Boolean = true,
-    var kmlLayerData: KmlLayer? = null,
-    var geoJsonLayerData: GeoJsonLayer? = null,
+    val isVisible: Boolean = true,
     val layerType: LayerType,
     val isNetwork: Boolean = false,
     val isRefreshing: Boolean = false,

@@ -29,7 +29,7 @@ class IntroViewModel @Inject constructor() : ViewModel() {
      * Determines the next navigation key based on the current key and the state of permissions. The flow hierarchy is:
      * Core Connection -> Shared Location -> Notifications -> Done.
      */
-    internal fun getNextKey(currentKey: NavKey, allPermissionsGranted: Boolean): NavKey? = when (currentKey) {
+    fun getNextKey(currentKey: NavKey, allPermissionsGranted: Boolean): NavKey? = when (currentKey) {
         is Welcome -> Bluetooth
         is Bluetooth -> Location
         is Location -> Notifications

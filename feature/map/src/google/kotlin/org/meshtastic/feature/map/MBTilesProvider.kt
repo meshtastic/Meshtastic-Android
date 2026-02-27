@@ -21,7 +21,9 @@ import com.google.android.gms.maps.model.Tile
 import com.google.android.gms.maps.model.TileProvider
 import java.io.File
 
-class MBTilesProvider(private val file: File) : TileProvider {
+class MBTilesProvider(private val file: File) :
+    TileProvider,
+    AutoCloseable {
     private var database: SQLiteDatabase? = null
 
     init {
@@ -56,7 +58,7 @@ class MBTilesProvider(private val file: File) : TileProvider {
         return tile ?: TileProvider.NO_TILE
     }
 
-    fun close() {
+    override fun close() {
         database?.close()
         database = null
     }

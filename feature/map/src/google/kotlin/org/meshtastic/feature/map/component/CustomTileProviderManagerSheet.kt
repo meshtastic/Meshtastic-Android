@@ -54,9 +54,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_custom_tile_source
+import org.meshtastic.core.resources.add_local_mbtiles_file
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.delete_custom_tile_source
 import org.meshtastic.core.resources.edit_custom_tile_source
+import org.meshtastic.core.resources.local_mbtiles_file
 import org.meshtastic.core.resources.manage_custom_tile_sources
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.name_cannot_be_empty
@@ -136,7 +138,10 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
                     headlineContent = { Text(config.name) },
                     supportingContent = {
                         if (config.isLocal) {
-                            Text("Local MBTiles File", style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                stringResource(Res.string.local_mbtiles_file),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
                         } else {
                             Text(config.urlTemplate, style = MaterialTheme.typography.bodySmall)
                         }
@@ -190,7 +195,7 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
                     },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Add Local MBTiles File")
+                    Text(stringResource(Res.string.add_local_mbtiles_file))
                 }
             }
         }

@@ -29,15 +29,15 @@ import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import kotlinx.serialization.Serializable
 
-@Serializable internal data object Welcome : NavKey
+@Serializable data object Welcome : NavKey
 
-@Serializable internal data object Bluetooth : NavKey
+@Serializable data object Bluetooth : NavKey
 
-@Serializable internal data object Location : NavKey
+@Serializable data object Location : NavKey
 
-@Serializable internal data object Notifications : NavKey
+@Serializable data object Notifications : NavKey
 
-@Serializable internal data object CriticalAlerts : NavKey
+@Serializable data object CriticalAlerts : NavKey
 
 /**
  * Provides the navigation graph for the application introduction flow. The flow follows the hierarchy of necessity:
@@ -48,7 +48,7 @@ import kotlinx.serialization.Serializable
 @Suppress("LongMethod")
 internal fun introNavGraph(
     backStack: NavBackStack<NavKey>,
-    @Suppress("unused") viewModel: IntroViewModel,
+    viewModel: IntroViewModel,
     notificationPermissionState: PermissionState?,
     bluetoothPermissionState: MultiplePermissionsState,
     locationPermissionState: MultiplePermissionsState,
@@ -56,16 +56,25 @@ internal fun introNavGraph(
 ) = entryProvider {
     val context = LocalContext.current
 
-    entry<Welcome> { WelcomeScreen(onGetStarted = { backStack.add(Bluetooth) }) }
+    fun navigateToNext(current: NavKey, permissionsGranted: Boolean = true) {
+        val next = viewModel.getNextKey(current, permissionsGranted)
+        if (next != null) {
+            backStack.add(next)
+        } else {
+            onDone()
+        }
+    }
+
+    entry<Welcome> { WelcomeScreen(onGetStarted = { navigateToNext(Welcome) }) }
 
     entry<Bluetooth> {
         val isGranted = bluetoothPermissionState.allPermissionsGranted
         BluetoothScreen(
             showNextButton = isGranted,
-            onSkip = { backStack.add(Location) },
+            onSkip = { navigateToNext(Bluetooth) },
             onConfigure = {
                 if (isGranted) {
-                    backStack.add(Location)
+                    navigateToNext(Bluetooth)
                 } else {
                     bluetoothPermissionState.launchMultiplePermissionRequest()
                 }
@@ -77,10 +86,10 @@ internal fun introNavGraph(
         val isGranted = locationPermissionState.allPermissionsGranted
         LocationScreen(
             showNextButton = isGranted,
-            onSkip = { backStack.add(Notifications) },
+            onSkip = { navigateToNext(Location) },
             onConfigure = {
                 if (isGranted) {
-                    backStack.add(Notifications)
+                    navigateToNext(Location)
                 } else {
                     locationPermissionState.launchMultiplePermissionRequest()
                 }
@@ -97,7 +106,7 @@ internal fun introNavGraph(
                 if (notificationPermissionState != null && !isGranted) {
                     notificationPermissionState.launchPermissionRequest()
                 } else {
-                    backStack.add(CriticalAlerts)
+                    navigateToNext(Notifications, permissionsGranted = isGranted)
                 }
             },
         )
