@@ -51,6 +51,7 @@ import org.meshtastic.core.resources.status_message
 import org.meshtastic.core.resources.store_forward
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.proto.AdminMessage
+import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 
 enum class ModuleRoute(
@@ -59,6 +60,7 @@ enum class ModuleRoute(
     val icon: ImageVector?,
     val type: Int = 0,
     val isSupported: (Capabilities) -> Boolean = { true },
+    val isApplicable: (Config.DeviceConfig.Role?) -> Boolean = { true },
 ) {
     MQTT(Res.string.mqtt, SettingsRoutes.MQTT, Icons.Rounded.Cloud, AdminMessage.ModuleConfigType.MQTT_CONFIG.value),
     SERIAL(
@@ -140,18 +142,51 @@ enum class ModuleRoute(
         AdminMessage.ModuleConfigType.STATUSMESSAGE_CONFIG.value,
         isSupported = { it.supportsStatusMessage },
     ),
+    TRAFFIC_MANAGEMENT(
+        Res.string.traffic_management,
+        SettingsRoutes.TrafficManagement,
+        Icons.Rounded.Speed,
+        AdminMessage.ModuleConfigType.TRAFFICMANAGEMENT_CONFIG.value,
+        isSupported = { it.supportsTrafficManagementConfig },
+    ),
+    TAK(
+        Res.string.tak,
+        SettingsRoutes.TAK,
+        Icons.Rounded.People,
+        AdminMessage.ModuleConfigType.TAK_CONFIG.value,
+        isSupported = { it.supportsTakConfig },
+        isApplicable = { it == Config.DeviceConfig.Role.TAK || it == Config.DeviceConfig.Role.TAK_TRACKER },
+    ),
     ;
 
     val bitfield: Int
-        get() = 1 shl ordinal
+        get() =
+            when (this) {
+                MQTT -> 0x0001
+                SERIAL -> 0x0002
+                EXT_NOTIFICATION -> 0x0004
+                STORE_FORWARD -> 0x0008
+                RANGE_TEST -> 0x0010
+                TELEMETRY -> 0x0020
+                CANNED_MESSAGE -> 0x0040
+                AUDIO -> 0x0080
+                REMOTE_HARDWARE -> 0x0100
+                NEIGHBOR_INFO -> 0x0200
+                AMBIENT_LIGHTING -> 0x0400
+                DETECTION_SENSOR -> 0x0800
+                PAXCOUNTER -> 0x1000
+                STATUS_MESSAGE -> 0x0000 // Not excludable yet
+                TRAFFIC_MANAGEMENT -> 0x0000 // Not excludable yet
+                TAK -> 0x0000 // Not excludable yet
+            }
 
     companion object {
-        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> {
+        fun filterExcludedFrom(metadata: DeviceMetadata?, role: Config.DeviceConfig.Role?): List<ModuleRoute> {
             val capabilities = Capabilities(metadata?.firmware_version)
             return entries.filter {
                 val excludedModules = metadata?.excluded_modules ?: 0
                 val isExcluded = (excludedModules and it.bitfield) != 0
-                !isExcluded && it.isSupported(capabilities)
+                !isExcluded && it.isSupported(capabilities) && it.isApplicable(role)
             }
         }
     }

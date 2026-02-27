@@ -62,6 +62,14 @@ data class Capabilities(val firmwareVersion: String?, internal val forceEnableAl
     val supportsStatusMessage: Boolean
         get() = isSupported("2.7.17")
 
+    /** Support for Traffic Management module. Supported since firmware v3.0.0. */
+    val supportsTrafficManagementConfig: Boolean
+        get() = isSupported("3.0.0")
+
+    /** Support for TAK (ATAK) module configuration. Supported since firmware v2.7.19. */
+    val supportsTakConfig: Boolean
+        get() = isSupported("2.7.19")
+
     /** Support for location sharing on secondary channels. Supported since firmware v2.6.10. */
     val supportsSecondaryChannelLocation: Boolean
         get() = isSupported("2.6.10")

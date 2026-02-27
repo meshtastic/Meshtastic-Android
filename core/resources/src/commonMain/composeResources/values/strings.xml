@@ -1212,4 +1212,52 @@
     <string name="meshtastic_stats">Meshtastic Stats</string>
     <string name="refresh">Refresh</string>
     <string name="updated">Updated</string>
+
+    <string name="tak">TAK (ATAK)</string>
+    <string name="tak_config">TAK Configuration</string>
+    <string name="tak_team">Team Color</string>
+    <string name="tak_role">Member Role</string>
+
+    <string name="tak_team_unspecified_color">Unspecified</string>
+    <string name="tak_team_white">White</string>
+    <string name="tak_team_yellow">Yellow</string>
+    <string name="tak_team_orange">Orange</string>
+    <string name="tak_team_magenta">Magenta</string>
+    <string name="tak_team_red">Red</string>
+    <string name="tak_team_maroon">Maroon</string>
+    <string name="tak_team_purple">Purple</string>
+    <string name="tak_team_dark_blue">Dark Blue</string>
+    <string name="tak_team_blue">Blue</string>
+    <string name="tak_team_cyan">Cyan</string>
+    <string name="tak_team_teal">Teal</string>
+    <string name="tak_team_green">Green</string>
+    <string name="tak_team_dark_green">Dark Green</string>
+    <string name="tak_team_brown">Brown</string>
+
+    <string name="tak_role_unspecified">Unspecified</string>
+    <string name="tak_role_teammember">Team Member</string>
+    <string name="tak_role_teamlead">Team Lead</string>
+    <string name="tak_role_hq">Headquarters</string>
+    <string name="tak_role_sniper">Sniper</string>
+    <string name="tak_role_medic">Medic</string>
+    <string name="tak_role_forwardobserver">Forward Observer</string>
+    <string name="tak_role_rto">Radio Telephone Operator</string>
+    <string name="tak_role_k9">Doggo (K9)</string>
+
+    <string name="traffic_management">Traffic Management</string>
+    <string name="traffic_management_config">Traffic Management Configuration</string>
+    <string name="traffic_management_enabled">Module Enabled</string>
+    <string name="traffic_management_position_dedup">Position Deduplication</string>
+    <string name="traffic_management_position_precision">Position Precision (bits)</string>
+    <string name="traffic_management_position_min_interval">Min Position Interval (secs)</string>
+    <string name="traffic_management_nodeinfo_direct_response">NodeInfo Direct Response</string>
+    <string name="traffic_management_nodeinfo_direct_response_max_hops">Max Hops for Direct Response</string>
+    <string name="traffic_management_rate_limit_enabled">Rate Limiting</string>
+    <string name="traffic_management_rate_limit_window">Rate Limit Window (secs)</string>
+    <string name="traffic_management_rate_limit_max_packets">Max Packets in Window</string>
+    <string name="traffic_management_drop_unknown_enabled">Drop Unknown Packets</string>
+    <string name="traffic_management_unknown_packet_threshold">Unknown Packet Threshold</string>
+    <string name="traffic_management_exhaust_hop_telemetry">Local-only Telemetry (Relays)</string>
+    <string name="traffic_management_exhaust_hop_position">Local-only Position (Relays)</string>
+    <string name="traffic_management_router_preserve_hops">Preserve Router Hops</string>
 </resources>
