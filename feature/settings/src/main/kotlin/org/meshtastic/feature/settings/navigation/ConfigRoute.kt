@@ -93,7 +93,7 @@ enum class ConfigRoute(val title: StringResource, val route: Route, val icon: Im
             }
         }
 
-        val radioConfigRoutes = listOf(LORA, CHANNELS, SECURITY)
+        val radioConfigRoutes = listOf(USER, LORA, CHANNELS, SECURITY)
 
         fun deviceConfigRoutes(metadata: DeviceMetadata?): List<ConfigRoute> =
             filterExcludedFrom(metadata) - radioConfigRoutes

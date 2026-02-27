@@ -609,12 +609,8 @@ constructor(
         val destNum = destNode.value?.num ?: return
 
         _radioConfigState.update {
-            RadioConfigState(
-                isLocal = it.isLocal,
-                connected = it.connected,
+            it.copy(
                 route = route.name,
-                metadata = it.metadata,
-                nodeDbResetPreserveFavorites = it.nodeDbResetPreserveFavorites,
                 responseState = ResponseState.Loading(),
             )
         }

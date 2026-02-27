@@ -28,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -59,7 +60,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.core.os.ConfigurationCompat
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -106,14 +106,14 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchListItem
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.showToast
-import org.meshtastic.feature.settings.navigation.getNavRouteFrom
+import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.ModuleRoute
+import org.meshtastic.feature.settings.radio.ExpressiveSection
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
-import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
@@ -125,8 +125,8 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun SettingsScreen(
-    settingsViewModel: SettingsViewModel = hiltViewModel(),
-    viewModel: RadioConfigViewModel = hiltViewModel(),
+    settingsViewModel: SettingsViewModel,
+    viewModel: RadioConfigViewModel,
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
 ) {
@@ -137,23 +137,6 @@ fun SettingsScreen(
     val isOtaCapable by settingsViewModel.isOtaCapable.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    var isWaiting by remember { mutableStateOf(false) }
-    if (isWaiting) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = {
-                isWaiting = false
-                viewModel.clearPacketResponse()
-            },
-            onComplete = {
-                getNavRouteFrom(state.route)?.let { route ->
-                    isWaiting = false
-                    viewModel.clearPacketResponse()
-                    onNavigate(route)
-                }
-            },
-        )
-    }
 
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
@@ -241,17 +224,26 @@ fun SettingsScreen(
             )
         },
     ) { paddingValues ->
-        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security?.is_managed ?: false,
                 node = destNode,
-                excludedModulesUnlocked = excludedModulesUnlocked,
                 isOtaCapable = isOtaCapable,
                 onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },
                 onRouteClick = { route ->
-                    isWaiting = true
-                    viewModel.setResponseStateLoading(route)
+                    val navRoute = when (route) {
+                        is ConfigRoute -> route.route
+                        is ModuleRoute -> route.route
+                        else -> null
+                    }
+                    navRoute?.let { onNavigate(it) }
                 },
                 onImport = {
                     viewModel.clearPacketResponse()
@@ -273,7 +265,7 @@ fun SettingsScreen(
 
             val context = LocalContext.current
 
-            TitledCard(title = stringResource(Res.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
+            ExpressiveSection(title = stringResource(Res.string.app_settings)) {
                 if (state.analyticsAvailable) {
                     val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
                     SwitchListItem(

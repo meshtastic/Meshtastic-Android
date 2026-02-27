@@ -18,32 +18,33 @@ package org.meshtastic.feature.settings.radio
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.AdminPanelSettings
+import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.PowerSettingsNew
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Upload
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
@@ -66,18 +67,13 @@ import org.meshtastic.core.resources.import_configuration
 import org.meshtastic.core.resources.message_device_managed
 import org.meshtastic.core.resources.module_settings
 import org.meshtastic.core.resources.nodedb_reset
-import org.meshtastic.core.resources.preserve_favorites
 import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.navigation.ModuleRoute
-import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialog
-import org.meshtastic.feature.settings.radio.component.WarningDialog
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -86,7 +82,6 @@ fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
     node: Node? = null,
-    excludedModulesUnlocked: Boolean = false,
     isOtaCapable: Boolean = false,
     onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
@@ -95,20 +90,9 @@ fun RadioConfigItemList(
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
-    var modules by remember {
-        mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata, state.radioConfig.device?.role))
-    }
 
-    LaunchedEffect(excludedModulesUnlocked, state.metadata, state.radioConfig.device?.role) {
-        if (excludedModulesUnlocked) {
-            modules = ModuleRoute.entries
-        } else {
-            modules = ModuleRoute.filterExcludedFrom(state.metadata, state.radioConfig.device?.role)
-        }
-    }
-
-    Column {
-        TitledCard(title = stringResource(Res.string.radio_configuration)) {
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
             if (isManaged) {
                 ManagedMessage()
             }
@@ -117,126 +101,123 @@ fun RadioConfigItemList(
             }
         }
 
-        TitledCard(title = stringResource(Res.string.device_configuration), modifier = Modifier.padding(top = 16.dp)) {
+        ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
             if (isManaged) {
                 ManagedMessage()
             }
-            ConfigRoute.deviceConfigRoutes(state.metadata).forEach {
-                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
-            }
-        }
-
-        TitledCard(title = stringResource(Res.string.module_settings), modifier = Modifier.padding(top = 16.dp)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-
-            modules.forEach {
-                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
-            }
-        }
-    }
-
-    if (state.isLocal) {
-        TitledCard(title = stringResource(Res.string.backup_restore), modifier = Modifier.padding(top = 16.dp)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-
             ListItem(
-                text = stringResource(Res.string.import_configuration),
-                leadingIcon = Icons.Rounded.Download,
+                text = stringResource(Res.string.device_configuration),
+                leadingIcon = Icons.Rounded.AppSettingsAlt,
+                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 enabled = enabled,
-                onClick = onImport,
-            )
-            ListItem(
-                text = stringResource(Res.string.export_configuration),
-                leadingIcon = Icons.Rounded.Upload,
-                enabled = enabled,
-                onClick = onExport,
-            )
-        }
-    }
-
-    TitledCard(title = stringResource(Res.string.administration), modifier = Modifier.padding(top = 16.dp)) {
-        AdminRoute.entries.forEach { route ->
-            var showDialog by remember { mutableStateOf(false) }
-            if (showDialog) {
-                // Use enhanced confirmation for SHUTDOWN and REBOOT
-                if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
-                    ShutdownConfirmationDialog(
-                        title = "${stringResource(route.title)}?",
-                        node = node,
-                        onDismiss = { showDialog = false },
-                        isShutdown = route == AdminRoute.SHUTDOWN,
-                        onConfirm = { onRouteClick(route) },
-                    )
-                } else {
-                    WarningDialog(
-                        title = "${stringResource(route.title)}?",
-                        text = {
-                            if (route == AdminRoute.NODEDB_RESET) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                ) {
-                                    Text(text = stringResource(Res.string.preserve_favorites))
-                                    Switch(
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                        enabled = enabled,
-                                        checked = state.nodeDbResetPreserveFavorites,
-                                        onCheckedChange = onPreserveFavoritesToggle,
-                                    )
-                                }
-                            }
-                        },
-                        onDismiss = { showDialog = false },
-                        onConfirm = { onRouteClick(route) },
-                    )
-                }
-            }
-
-            ListItem(
-                enabled = enabled,
-                text = stringResource(route.title),
-                leadingIcon = route.icon,
-                trailingIcon = null,
             ) {
-                showDialog = true
+                onNavigate(SettingsRoutes.DeviceConfiguration)
             }
         }
-    }
 
-    if (state.isLocal) {
-        TitledCard(title = stringResource(Res.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
+        ExpressiveSection(title = stringResource(Res.string.module_settings)) {
             if (isManaged) {
                 ManagedMessage()
             }
+            ListItem(
+                text = stringResource(Res.string.module_settings),
+                leadingIcon = Icons.Rounded.Settings,
+                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                enabled = enabled,
+            ) {
+                onNavigate(SettingsRoutes.ModuleConfiguration)
+            }
+        }
 
-            if (isOtaCapable) {
+        if (state.isLocal) {
+            ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
+                if (isManaged) {
+                    ManagedMessage()
+                }
+
                 ListItem(
-                    text = stringResource(Res.string.firmware_update_title),
-                    leadingIcon = Icons.Rounded.SystemUpdate,
+                    text = stringResource(Res.string.import_configuration),
+                    leadingIcon = Icons.Rounded.Download,
                     enabled = enabled,
-                    onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+                    onClick = onImport,
+                )
+                ListItem(
+                    text = stringResource(Res.string.export_configuration),
+                    leadingIcon = Icons.Rounded.Upload,
+                    enabled = enabled,
+                    onClick = onExport,
                 )
             }
-
-            ListItem(
-                text = stringResource(Res.string.clean_node_database_title),
-                leadingIcon = Icons.Rounded.CleaningServices,
-                enabled = enabled,
-                onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
-            )
-
-            ListItem(
-                text = stringResource(Res.string.debug_panel),
-                leadingIcon = Icons.Rounded.BugReport,
-                enabled = enabled,
-                onClick = { onNavigate(SettingsRoutes.DebugPanel) },
-            )
         }
+
+        ExpressiveSection(
+            title = stringResource(Res.string.administration),
+        ) {
+            ListItem(
+                text = stringResource(Res.string.administration),
+                leadingIcon = Icons.Rounded.AdminPanelSettings,
+                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                enabled = enabled,
+            ) {
+                onNavigate(SettingsRoutes.Administration)
+            }
+        }
+
+        if (state.isLocal) {
+            ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
+                if (isManaged) {
+                    ManagedMessage()
+                }
+
+                if (isOtaCapable) {
+                    ListItem(
+                        text = stringResource(Res.string.firmware_update_title),
+                        leadingIcon = Icons.Rounded.SystemUpdate,
+                        enabled = enabled,
+                        onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+                    )
+                }
+
+                ListItem(
+                    text = stringResource(Res.string.clean_node_database_title),
+                    leadingIcon = Icons.Rounded.CleaningServices,
+                    enabled = enabled,
+                    onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+                )
+
+                ListItem(
+                    text = stringResource(Res.string.debug_panel),
+                    leadingIcon = Icons.Rounded.BugReport,
+                    enabled = enabled,
+                    onClick = { onNavigate(SettingsRoutes.DebugPanel) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpressiveSection(
+    title: String,
+    modifier: Modifier = Modifier,
+    titleColor: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = titleColor,
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+            ),
+            content = content,
+        )
     }
 }
 
