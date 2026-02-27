@@ -930,9 +930,7 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybride</string>
     <string name="manage_map_layers">Gérer les calques de la carte</string>
-    <string name="map_layer_formats">Les calques personnalisés prennent en charge les fichiers .kml, .kmz ou GeoJSON.</string>
     <string name="map_layers_title">Couches cartographiques</string>
-    <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
     <string name="add_layer_button">Ajouter un calque</string>
     <string name="hide_layer">Ajouter un calque</string>
     <string name="show_layer">Afficher le calque</string>
@@ -941,10 +939,6 @@
     <string name="nodes_at_this_location">Nœuds à cet emplacement</string>
     <string name="selected_map_type">Type de carte sélectionné</string>
     <string name="manage_custom_tile_sources">Gérer les sources de tuiles personnalisées</string>
-    <string name="add_custom_tile_source">Ajouter une source de tuile personnalisée</string>
-    <string name="no_custom_tile_sources_found">Aucune source de tuiles personnalisée</string>
-    <string name="edit_custom_tile_source">Modifier la source de tuile personnalisée</string>
-    <string name="delete_custom_tile_source">Supprimer la source de tuile personnalisée</string>
     <string name="name_cannot_be_empty">Le nom ne peut pas être vide.</string>
     <string name="provider_name_exists">Le nom du fournisseur existe déjà.</string>
     <string name="url_cannot_be_empty">URL ne peut être vide.</string>
@@ -1157,4 +1151,5 @@
     <string name="meshtastic_stats">Statistiques Meshtastiques</string>
     <string name="refresh">Actualiser</string>
     <string name="updated">Mis à jour</string>
+    <!-- Network Map Layers -->
 </resources>

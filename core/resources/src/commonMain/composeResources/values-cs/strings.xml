@@ -805,9 +805,7 @@
     <string name="map_type_terrain">Terénní</string>
     <string name="map_type_hybrid">Hybridní</string>
     <string name="manage_map_layers">Správa vrstev mapy</string>
-    <string name="map_layer_formats">Vlastní vrstvy podporují soubory .kml, .kmz nebo GeoJSON.</string>
     <string name="map_layers_title">Mapové vrstvy</string>
-    <string name="no_map_layers_loaded">Žádné vlastní vrstvy nenačteny.</string>
     <string name="add_layer_button">Přidat vrstvu</string>
     <string name="hide_layer">Skrýt vrstvu</string>
     <string name="show_layer">Zobrazit vrstvu</string>
@@ -815,10 +813,6 @@
     <string name="add_layer">Přidat vrstvu</string>
     <string name="nodes_at_this_location">Uzly na tomto místě</string>
     <string name="manage_custom_tile_sources">Správa vlastních zdrojů dlaždic</string>
-    <string name="add_custom_tile_source">Přidat vlastní zdroj dlaždic</string>
-    <string name="no_custom_tile_sources_found">Žádné vlastní zdroje dlaždic</string>
-    <string name="edit_custom_tile_source">Upravit vlastní zdroj dlaždic</string>
-    <string name="delete_custom_tile_source">Odstranit vlastní zdroj dlaždic</string>
     <string name="url_cannot_be_empty">Adresa URL nesmí být prázdná.</string>
     <string name="url_template">URL šablona</string>
     <string name="track_point">bod trasy</string>
@@ -967,4 +961,5 @@
     <string name="nfc_disabled">NFC je zakázáno. Povolte jej v nastavení systému.</string>
     <string name="all_time">Vše</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <!-- Network Map Layers -->
 </resources>

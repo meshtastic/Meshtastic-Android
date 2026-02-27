@@ -206,4 +206,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <string name="bluetooth_permission">Bluetooth</string>
+    <!-- Network Map Layers -->
 </resources>

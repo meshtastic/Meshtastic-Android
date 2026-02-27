@@ -720,9 +720,7 @@
     <string name="map_type_terrain">Терен</string>
     <string name="map_type_hybrid">Хибриден</string>
     <string name="manage_map_layers">Управление на слоевете на картата</string>
-    <string name="map_layer_formats">Персонализираните слоеве поддържат .kml, .kmz или GeoJSON файлове.</string>
     <string name="map_layers_title">Слоеве на картата</string>
-    <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
     <string name="add_layer_button">Добавяне на слой</string>
     <string name="hide_layer">Скриване на слоя</string>
     <string name="show_layer">Показване на слой</string>
@@ -866,4 +864,5 @@
     <string name="all_time">Всички</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
+    <!-- Network Map Layers -->
 </resources>

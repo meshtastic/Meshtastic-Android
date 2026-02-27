@@ -811,4 +811,5 @@
     <string name="all_time">Wszystkie</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Konfiguracja</string>
+    <!-- Network Map Layers -->
 </resources>

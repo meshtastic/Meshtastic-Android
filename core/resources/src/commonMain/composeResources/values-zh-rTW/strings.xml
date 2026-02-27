@@ -929,9 +929,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地圖圖層</string>
-    <string name="map_layer_formats">自訂圖層支援 .kml、.kmz 或 GeoJSON 檔案。</string>
     <string name="map_layers_title">地圖圖層</string>
-    <string name="no_map_layers_loaded">未載入自訂圖層。</string>
     <string name="add_layer_button">添加圖層</string>
     <string name="hide_layer">隱藏圖層</string>
     <string name="show_layer">顯示圖層</string>
@@ -940,10 +938,6 @@
     <string name="nodes_at_this_location">位於此處的節點</string>
     <string name="selected_map_type">已選擇的地圖類型</string>
     <string name="manage_custom_tile_sources">管理自定義圖磚來源</string>
-    <string name="add_custom_tile_source">加入自定義圖磚來源</string>
-    <string name="no_custom_tile_sources_found">沒有自定義圖專來源</string>
-    <string name="edit_custom_tile_source">編輯自定義圖磚來源</string>
-    <string name="delete_custom_tile_source">刪除自定義圖磚來源</string>
     <string name="name_cannot_be_empty">名稱不得空白。</string>
     <string name="provider_name_exists">服務供應商名稱已存在。</string>
     <string name="url_cannot_be_empty">URL 不得空白。</string>
@@ -1152,4 +1146,5 @@
     <string name="meshtastic_stats">Meshtastic 統計</string>
     <string name="refresh">重新整理</string>
     <string name="updated">已更新</string>
+    <!-- Network Map Layers -->
 </resources>

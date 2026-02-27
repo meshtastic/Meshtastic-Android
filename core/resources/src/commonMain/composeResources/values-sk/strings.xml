@@ -459,4 +459,5 @@
     <!-- Message Filter -->
     <string name="all_time">Všetky</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <!-- Network Map Layers -->
 </resources>

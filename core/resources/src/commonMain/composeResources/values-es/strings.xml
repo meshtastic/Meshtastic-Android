@@ -832,9 +832,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Híbrido</string>
     <string name="manage_map_layers">Administrar capas de mapa</string>
-    <string name="map_layer_formats">Las capas personalizadas soportan archivos .kml, .kmz, o GeoJSON.</string>
     <string name="map_layers_title">Capas del mapa</string>
-    <string name="no_map_layers_loaded">No se cargaron capas personalizadas.</string>
     <string name="add_layer_button">Añadir capa</string>
     <string name="hide_layer">Ocultar capa</string>
     <string name="show_layer">Mostrar capa</string>
@@ -912,4 +910,5 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="all_time">Todos</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Configuración</string>
+    <!-- Network Map Layers -->
 </resources>

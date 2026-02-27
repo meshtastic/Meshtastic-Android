@@ -887,9 +887,7 @@
     <string name="map_type_terrain">Terräng</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Hantera kartlager</string>
-    <string name="map_layer_formats">Anpassade lager stödjer .kml, .kmz, eller GeoJSON-filer.</string>
     <string name="map_layers_title">Kartlager</string>
-    <string name="no_map_layers_loaded">Inga anpassade lager inlästa.</string>
     <string name="add_layer_button">Lägg till lager</string>
     <string name="hide_layer">Dölj lager</string>
     <string name="show_layer">Visa lager</string>
@@ -898,10 +896,6 @@
     <string name="nodes_at_this_location">Noder på denna plats</string>
     <string name="selected_map_type">Vald karttyp</string>
     <string name="manage_custom_tile_sources">Hantera kartkällor</string>
-    <string name="add_custom_tile_source">Lägg till kartkälla</string>
-    <string name="no_custom_tile_sources_found">Inga kartkällor</string>
-    <string name="edit_custom_tile_source">Redigera kartkälla</string>
-    <string name="delete_custom_tile_source">Ta bort kartkälla</string>
     <string name="name_cannot_be_empty">Namn kan inte vara tomt.</string>
     <string name="provider_name_exists">Leverantörens namn finns redan.</string>
     <string name="url_cannot_be_empty">URL kan inte vara odefinierad.</string>
@@ -1036,4 +1030,5 @@
     <string name="all_time">Alla</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Konfiguration</string>
+    <!-- Network Map Layers -->
 </resources>

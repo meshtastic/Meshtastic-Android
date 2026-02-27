@@ -873,9 +873,7 @@
     <string name="map_type_terrain">Domborzat</string>
     <string name="map_type_hybrid">Hibrid</string>
     <string name="manage_map_layers">Térképrétegek kezelése</string>
-    <string name="map_layer_formats">Az egyéni rétegek .kml, .kmz vagy GeoJSON fájlokat támogatnak.</string>
     <string name="map_layers_title">Térképrétegek</string>
-    <string name="no_map_layers_loaded">Nincsenek betöltött egyéni rétegek.</string>
     <string name="add_layer_button">Réteg hozzáadása</string>
     <string name="hide_layer">Réteg elrejtése</string>
     <string name="show_layer">Réteg megjelenítése</string>
@@ -884,10 +882,6 @@
     <string name="nodes_at_this_location">Csomópontok ezen a helyen</string>
     <string name="selected_map_type">Kiválasztott térképtípus</string>
     <string name="manage_custom_tile_sources">Egyéni csempeforrások kezelése</string>
-    <string name="add_custom_tile_source">Egyéni csempeforrás hozzáadása</string>
-    <string name="no_custom_tile_sources_found">Nincsenek egyéni csempeforrások</string>
-    <string name="edit_custom_tile_source">Egyéni csempeforrás szerkesztése</string>
-    <string name="delete_custom_tile_source">Egyéni csempeforrás törlése</string>
     <string name="name_cannot_be_empty">A név nem lehet üres.</string>
     <string name="provider_name_exists">A szolgáltató neve már létezik.</string>
     <string name="url_cannot_be_empty">Az URL nem lehet üres.</string>
@@ -933,4 +927,5 @@
     <!-- Message Filter -->
     <string name="all_time">Összes</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <!-- Network Map Layers -->
 </resources>
