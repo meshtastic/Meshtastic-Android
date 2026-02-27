@@ -306,7 +306,7 @@ jobs:
           token: ${{ secrets.INTERNAL_BUILDS_HOST_PAT }}
           tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
-          generate_release_notes: true
+          generate_release_notes: false
           files: ./artifacts/*/*
           draft: false
           prerelease: true
