@@ -24,9 +24,7 @@ kotlin {
     @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = true
-        withHostTest {
-            isIncludeAndroidResources = true
-        }
+        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets { commonTest.dependencies { implementation(kotlin("test")) } }

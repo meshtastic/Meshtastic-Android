@@ -28,12 +28,8 @@ kotlin {
     @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
-        withHostTest {
-            isIncludeAndroidResources = true
-        }
-        withDeviceTest {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
+        withHostTest { isIncludeAndroidResources = true }
+        withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
 
     sourceSets {
@@ -51,9 +47,7 @@ kotlin {
             api(libs.androidx.core.ktx)
             implementation(libs.zxing.core)
         }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-        }
+        commonTest.dependencies { implementation(kotlin("test")) }
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.junit)
