@@ -575,4 +575,5 @@
     <string name="all_time">Hepsi</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Yapılandırma</string>
+    <!-- Network Map Layers -->
 </resources>

@@ -91,8 +91,11 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
+import com.google.maps.android.data.geojson.GeoJsonLayer
+import com.google.maps.android.data.kml.KmlLayer
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.json.JSONObject
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.database.model.Node
@@ -265,12 +268,7 @@ fun MapView(
         }
     }
 
-    DisposableEffect(Unit) {
-        onDispose {
-            fusedLocationClient.removeLocationUpdates(locationCallback)
-            mapViewModel.clearLoadedLayerData()
-        }
-    }
+    DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
     val allNodes by mapViewModel.nodesWithPosition.collectAsStateWithLifecycle(listOf())
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
@@ -307,6 +305,7 @@ fun MapView(
         }
     }
 
+    val myNodeNum = mapViewModel.myNodeNum
     val nodeClusterItems =
         displayNodes.map { node ->
             val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
@@ -315,6 +314,7 @@ fun MapView(
                 nodePosition = latLng,
                 nodeTitle = "${node.user.short_name} ${formatAgo(node.position.time)}",
                 nodeSnippet = "${node.user.long_name}",
+                myNodeNum = myNodeNum,
             )
         }
     val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
@@ -467,7 +467,11 @@ fun MapView(
             ) {
                 key(currentCustomTileProviderUrl) {
                     currentCustomTileProviderUrl?.let { url ->
-                        mapViewModel.createUrlTileProvider(url)?.let { tileProvider ->
+                        val config =
+                            mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle().value.find {
+                                it.urlTemplate == url || it.localUri == url
+                            }
+                        mapViewModel.getTileProvider(config)?.let { tileProvider ->
                             TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                         }
                     }
@@ -508,8 +512,15 @@ fun MapView(
                                     val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
                                     val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
                                     val color = Color(focusedNode.colors.second).copy(alpha = alpha)
+                                    val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
+                                    val activeNodeZIndex = if (isHighPriority) 5f else 4f
+
                                     if (index == sortedPositions.lastIndex) {
-                                        MarkerComposable(state = markerState, zIndex = 4f) {
+                                        MarkerComposable(
+                                            state = markerState,
+                                            zIndex = activeNodeZIndex,
+                                            alpha = if (isHighPriority) 1.0f else 0.9f,
+                                        ) {
                                             NodeChip(node = focusedNode)
                                         }
                                     } else {
@@ -590,34 +601,7 @@ fun MapView(
                     selectedWaypointId = selectedWaypointId,
                 )
 
-                MapEffect(mapLayers) { map ->
-                    mapLayers.forEach { layerItem ->
-                        coroutineScope.launch {
-                            mapViewModel.loadMapLayerIfNeeded(map, layerItem)
-                            when (layerItem.layerType) {
-                                LayerType.KML -> {
-                                    layerItem.kmlLayerData?.let { kmlLayer ->
-                                        if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
-                                            kmlLayer.addLayerToMap()
-                                        } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
-                                            kmlLayer.removeLayerFromMap()
-                                        }
-                                    }
-                                }
-
-                                LayerType.GEOJSON -> {
-                                    layerItem.geoJsonLayerData?.let { geoJsonLayer ->
-                                        if (layerItem.isVisible && !geoJsonLayer.isLayerOnMap) {
-                                            geoJsonLayer.addLayerToMap()
-                                        } else if (!layerItem.isVisible && geoJsonLayer.isLayerOnMap) {
-                                            geoJsonLayer.removeLayerFromMap()
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                mapLayers.forEach { layerItem -> key(layerItem.id) { MapLayerOverlay(layerItem, mapViewModel) } }
             }
 
             ScaleBar(
@@ -650,6 +634,10 @@ fun MapView(
                     onDismissRequest = { editingWaypoint = null },
                 )
             }
+
+            val visibleNetworkLayers = mapLayers.filter { it.isNetwork && it.isVisible }
+            val showRefresh = visibleNetworkLayers.isNotEmpty()
+            val isRefreshingLayers = visibleNetworkLayers.any { it.isRefreshing }
 
             MapControlsOverlay(
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
@@ -696,12 +684,22 @@ fun MapView(
                     }
                 },
                 followPhoneBearing = followPhoneBearing,
+                showRefresh = showRefresh,
+                isRefreshing = isRefreshingLayers,
+                onRefresh = { mapViewModel.refreshAllVisibleNetworkLayers() },
             )
         }
     }
     if (showLayersBottomSheet) {
         ModalBottomSheet(onDismissRequest = { showLayersBottomSheet = false }) {
-            CustomMapLayersSheet(mapLayers, onToggleVisibility, onRemoveLayer, onAddLayerClicked)
+            CustomMapLayersSheet(
+                mapLayers = mapLayers,
+                onToggleVisibility = onToggleVisibility,
+                onRemoveLayer = onRemoveLayer,
+                onAddLayerClicked = onAddLayerClicked,
+                onRefreshLayer = { mapViewModel.refreshMapLayer(it) },
+                onAddNetworkLayer = { name, url -> mapViewModel.addNetworkMapLayer(name, url) },
+            )
         }
     }
     showClusterItemsDialog?.let {
@@ -717,6 +715,52 @@ fun MapView(
     if (showCustomTileManagerSheet) {
         ModalBottomSheet(onDismissRequest = { showCustomTileManagerSheet = false }) {
             CustomTileProviderManagerSheet(mapViewModel = mapViewModel)
+        }
+    }
+}
+
+@Composable
+private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel) {
+    val context = LocalContext.current
+    var currentLayer by remember { mutableStateOf<com.google.maps.android.data.Layer?>(null) }
+
+    MapEffect(layerItem.id, layerItem.isRefreshing) { map ->
+        val inputStream = mapViewModel.getInputStreamFromUri(layerItem) ?: return@MapEffect
+        val layer =
+            try {
+                when (layerItem.layerType) {
+                    LayerType.KML -> KmlLayer(map, inputStream, context)
+                    LayerType.GEOJSON ->
+                        GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() }))
+                }
+            } catch (e: Exception) {
+                Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
+                null
+            }
+
+        layer?.let {
+            if (layerItem.isVisible) {
+                it.addLayerToMap()
+            }
+            currentLayer = it
+        }
+    }
+
+    DisposableEffect(layerItem.id) {
+        onDispose {
+            currentLayer?.removeLayerFromMap()
+            currentLayer = null
+        }
+    }
+
+    // Handle visibility changes without reloading the whole layer if possible,
+    // though KmlLayer.addLayerToMap() / removeLayerFromMap() is what we have.
+    LaunchedEffect(layerItem.isVisible) {
+        val layer = currentLayer ?: return@LaunchedEffect
+        if (layerItem.isVisible) {
+            if (!layer.isLayerOnMap) layer.addLayerToMap()
+        } else {
+            if (layer.isLayerOnMap) layer.removeLayerFromMap()
         }
     }
 }

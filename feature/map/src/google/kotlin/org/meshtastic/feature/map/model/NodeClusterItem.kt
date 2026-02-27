@@ -20,15 +20,24 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
 import org.meshtastic.core.database.model.Node
 
-data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTitle: String, val nodeSnippet: String) :
-    ClusterItem {
+data class NodeClusterItem(
+    val node: Node,
+    val nodePosition: LatLng,
+    val nodeTitle: String,
+    val nodeSnippet: String,
+    val myNodeNum: Int? = null,
+) : ClusterItem {
     override fun getPosition(): LatLng = nodePosition
 
     override fun getTitle(): String = nodeTitle
 
     override fun getSnippet(): String = nodeSnippet
 
-    override fun getZIndex(): Float? = null
+    override fun getZIndex(): Float = when {
+        node.num == myNodeNum -> 5.0f // My node is always highest
+        node.isFavorite -> 5.0f // Favorites are equally high priority
+        else -> 4.0f
+    }
 
     fun getPrecisionMeters(): Double? {
         val precisionMap =

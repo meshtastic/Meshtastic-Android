@@ -714,6 +714,7 @@
     <string name="long_name">Langer Name</string>
     <string name="short_name">Kurzname</string>
     <string name="hardware_model">Geräte-Modell</string>
+    <string name="licensed_amateur_radio">Lizenzierter Amateurfunker</string>
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
     <string name="dew_point">Taupunkt</string>
     <string name="pressure">Druck</string>
@@ -932,9 +933,9 @@
     <string name="map_type_terrain">Gelände</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Kartenebenen verwalten</string>
-    <string name="map_layer_formats">Benutzerdefinierte Ebenen unterstützen .kml, .kmz oder GeoJSON Dateien.</string>
+    <string name="map_layer_formats">Kartenebenen unterstützen kml, kmz oder GeoJSON Format.</string>
     <string name="map_layers_title">Kartenebenen</string>
-    <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
+    <string name="no_map_layers_loaded">Keine Kartenebenen geladen.</string>
     <string name="add_layer_button">Ebene hinzufügen</string>
     <string name="hide_layer">Ebene ausblenden</string>
     <string name="show_layer">Ebene anzeigen</string>
@@ -943,10 +944,10 @@
     <string name="nodes_at_this_location">Knoten an diesem Standort</string>
     <string name="selected_map_type">Ausgewählter Kartentyp</string>
     <string name="manage_custom_tile_sources">Benutzerdefinierte Kachelquellen verwalten</string>
-    <string name="add_custom_tile_source">Benutzerdefinierte Kachelquelle hinzufügen</string>
-    <string name="no_custom_tile_sources_found">Keine benutzerdefinierten Kachelquellen</string>
-    <string name="edit_custom_tile_source">Benutzerdefinierte Kachelquelle bearbeiten</string>
-    <string name="delete_custom_tile_source">Benutzerdefinierte Kachelquelle löschen</string>
+    <string name="add_custom_tile_source">Netzwerk Kachelquelle hinzufügen</string>
+    <string name="no_custom_tile_sources_found">Keine eigenen Kachelquellen gefunden.</string>
+    <string name="edit_custom_tile_source">Netzwerk Kachelquelle bearbeiten</string>
+    <string name="delete_custom_tile_source">Netzwerk Kachelquelle löschen</string>
     <string name="name_cannot_be_empty">Name darf nicht leer sein.</string>
     <string name="provider_name_exists">Der Name des Anbieters existiert bereits.</string>
     <string name="url_cannot_be_empty">URL darf nicht leer sein.</string>
@@ -1146,10 +1147,25 @@
     <string name="local_stats_nodes">Knoten: %1$d online / %2$d gesamt</string>
     <string name="local_stats_uptime">Laufzeit: %1$s</string>
     <string name="local_stats_utilization">Kanalauslastung: %1$.2f%% | Sendezeit: %2$.2f%%</string>
+    <string name="local_stats_traffic">Datenverkehr: TX %1$d / RX %2$d (Duplikate: %3$d)</string>
     <string name="local_stats_relays">Weiterleitungen: %1$d (Abgebrochen: %2$d)</string>
     <string name="local_stats_diagnostics_prefix">Diagnose %1$s</string>
     <string name="local_stats_noise">Rauschen %1$d dBm</string>
     <string name="local_stats_bad">Fehlerhaft %1$d</string>
     <string name="local_stats_dropped">Verworfen %1$d</string>
+    <string name="local_stats_heap">Heap</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
     <string name="powered">Angeschaltet</string>
+    <string name="meshtastic_stats">Meshtastic Statistiken</string>
+    <string name="refresh">Aktualisieren</string>
+    <string name="updated">Aktualisiert</string>
+    <!-- Network Map Layers -->
+    <string name="add_network_layer">Netzwerkebene hinzufügen</string>
+    <string name="refresh_layer">Ebene aktualisieren</string>
+    <string name="local_mbtiles_file">Lokale MB Kacheldatei</string>
+    <string name="add_local_mbtiles_file">Lokale MB Kacheldatei hinzufügen</string>
+    <string name="error_invalid_custom_provider">Ungültiger Name, URL oder lokale URI für benutzerdefinierten Kachelanbieter.</string>
+    <string name="error_provider_exists">Ein benutzerdefinierter Kachelanbieter mit diesem Namen existiert bereits.</string>
+    <string name="error_copy_mbtiles_failed">Fehler beim Kopieren der MB Kacheldatei in den internen Speicher.</string>
 </resources>

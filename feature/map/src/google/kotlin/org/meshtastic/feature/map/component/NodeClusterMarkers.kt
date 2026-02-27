@@ -89,7 +89,8 @@ fun NodeClusterMarkers(
                     }
                 }
             }
-            ClusteringMarkerProperties(zIndex = 1f)
+            // Use the item's own priority-based zIndex (5f for My Node/Favorites, 4f for others)
+            ClusteringMarkerProperties(zIndex = clusterItem.getZIndex())
         },
     )
 }

@@ -195,13 +195,17 @@ jobs:
           path: app/build/outputs/apk/**/*.apk
           retention-days: 1
 
-      - name: Attest Google artifacts provenance
+      - name: Attest Google AAB provenance
         if: always()
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: |
-            app/build/outputs/bundle/googleRelease/app-google-release.aab
-            app/build/outputs/apk/**/*.apk
+          subject-path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+
+      - name: Attest Google APK provenance
+        if: always()
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: app/build/outputs/apk/**/*.apk
 
   release-fdroid:
     runs-on: ubuntu-latest
@@ -257,6 +261,7 @@ jobs:
         run: ls -R app/build/outputs/
 
       - name: Upload F-Droid APK artifact
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: fdroid-apk
@@ -264,6 +269,7 @@ jobs:
           retention-days: 1
 
       - name: Attest F-Droid APK provenance
+        if: always()
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: app/build/outputs/apk/**/*.apk
@@ -300,7 +306,7 @@ jobs:
           token: ${{ secrets.INTERNAL_BUILDS_HOST_PAT }}
           tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
-          generate_release_notes: true
+          generate_release_notes: false
           files: ./artifacts/*/*
           draft: false
           prerelease: true

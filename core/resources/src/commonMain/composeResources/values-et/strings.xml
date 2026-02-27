@@ -714,6 +714,7 @@
     <string name="long_name">Täis nimi</string>
     <string name="short_name">Lühi nimi</string>
     <string name="hardware_model">Seadme mudel</string>
+    <string name="licensed_amateur_radio">Litsentseeritud raadioamatöör (Ham)</string>
     <string name="licensed_amateur_radio_text">Selle valiku lubamine keelab krüpteerimise ja ei ühildu Meshtastic vaikevõrguga.</string>
     <string name="dew_point">Kastepunkt</string>
     <string name="pressure">Õhurõhk</string>
@@ -932,9 +933,7 @@
     <string name="map_type_terrain">Maastik</string>
     <string name="map_type_hybrid">Hübriid</string>
     <string name="manage_map_layers">Halda kaardikihte</string>
-    <string name="map_layer_formats">Kohandatud kihid toetavad .kml, .kmz või GeoJSON-faile.</string>
     <string name="map_layers_title">Kaardikihid</string>
-    <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
     <string name="add_layer_button">Lisa kiht</string>
     <string name="hide_layer">Peida kiht</string>
     <string name="show_layer">Näita kiht</string>
@@ -943,10 +942,6 @@
     <string name="nodes_at_this_location">Sõlmed siin asukohas</string>
     <string name="selected_map_type">Vali kaardi tüüp</string>
     <string name="manage_custom_tile_sources">Halda kohandatud kardikihti</string>
-    <string name="add_custom_tile_source">Lisa kohandatud kardikiht</string>
-    <string name="no_custom_tile_sources_found">Kohandatud kardikihte ei ole</string>
-    <string name="edit_custom_tile_source">Muuda kohandatud kardikihti</string>
-    <string name="delete_custom_tile_source">Kustuta kohandatud kardikiht</string>
     <string name="name_cannot_be_empty">Nimi ei tohi olla tühi.</string>
     <string name="provider_name_exists">Teenusepakkuja nimi on olemas.</string>
     <string name="url_cannot_be_empty">URL ei tohi olla tühi.</string>
@@ -1159,4 +1154,5 @@
     <string name="meshtastic_stats">Meshtasticu statistika</string>
     <string name="refresh">Värskenda</string>
     <string name="updated">Uuendatud</string>
+    <!-- Network Map Layers -->
 </resources>

@@ -712,6 +712,7 @@
     <string name="long_name">长名称</string>
     <string name="short_name">短名称</string>
     <string name="hardware_model">硬件型号</string>
+    <string name="licensed_amateur_radio">业余无线电模式（HAM）</string>
     <string name="licensed_amateur_radio_text">启用此选项将禁用加密并且不兼容默认的Meshtastic网络。</string>
     <string name="dew_point">结露点</string>
     <string name="pressure">气压</string>
@@ -929,9 +930,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地图图层</string>
-    <string name="map_layer_formats">自定义图层支持 .kml, .kmz, 或 GeoJSON 文件。</string>
     <string name="map_layers_title">地图图层</string>
-    <string name="no_map_layers_loaded">没有自定义图层被加载。</string>
     <string name="add_layer_button">添加图层</string>
     <string name="hide_layer">隐藏图层</string>
     <string name="show_layer">显示图层</string>
@@ -940,10 +939,6 @@
     <string name="nodes_at_this_location">在此位置的节点</string>
     <string name="selected_map_type">所选地图类型</string>
     <string name="manage_custom_tile_sources">管理自定义瓦片源</string>
-    <string name="add_custom_tile_source">添加自定义瓦片源</string>
-    <string name="no_custom_tile_sources_found">没有自定义瓦片源</string>
-    <string name="edit_custom_tile_source">编辑自定义瓦片源</string>
-    <string name="delete_custom_tile_source">删除自定义瓦片源</string>
     <string name="name_cannot_be_empty">名称不能为空。</string>
     <string name="provider_name_exists">服务提供商名已存在。</string>
     <string name="url_cannot_be_empty">URL 不能为空。</string>
@@ -1158,4 +1153,5 @@
     <string name="meshtastic_stats">Meshtastic 统计</string>
     <string name="refresh">刷新</string>
     <string name="updated">更新</string>
+    <!-- Network Map Layers -->
 </resources>

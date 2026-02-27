@@ -554,4 +554,5 @@
     <string name="all_time">Tudo</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Configuração</string>
+    <!-- Network Map Layers -->
 </resources>

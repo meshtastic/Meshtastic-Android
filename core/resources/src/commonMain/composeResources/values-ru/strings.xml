@@ -940,9 +940,7 @@
     <string name="map_type_terrain">Ландшафт</string>
     <string name="map_type_hybrid">Смешанный</string>
     <string name="manage_map_layers">Управление Слоями Карты</string>
-    <string name="map_layer_formats">Пользовательские слои поддерживают файлы .kml, .kmz или GeoJSON.</string>
     <string name="map_layers_title">Слои карты</string>
-    <string name="no_map_layers_loaded">Пользовательские слои не загружены.</string>
     <string name="add_layer_button">Добавить слой</string>
     <string name="hide_layer">Скрыть слой</string>
     <string name="show_layer">Показать слой</string>
@@ -951,10 +949,6 @@
     <string name="nodes_at_this_location">Ноды в этом месте</string>
     <string name="selected_map_type">Выбранный тип карты</string>
     <string name="manage_custom_tile_sources">Управление собственными источниками плиток</string>
-    <string name="add_custom_tile_source">Добавить свой источник плиток</string>
-    <string name="no_custom_tile_sources_found">Нет пользовательских источников плиток</string>
-    <string name="edit_custom_tile_source">Изменить свой источник плиток</string>
-    <string name="delete_custom_tile_source">Удалить свой источник плиток</string>
     <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
     <string name="provider_name_exists">Имя провайдера уже существует.</string>
     <string name="url_cannot_be_empty">URL не может быть пустым.</string>
@@ -1175,4 +1169,5 @@
     <string name="meshtastic_stats">Статистика Meshtastic</string>
     <string name="refresh">Обновить</string>
     <string name="updated">Обновлено</string>
+    <!-- Network Map Layers -->
 </resources>

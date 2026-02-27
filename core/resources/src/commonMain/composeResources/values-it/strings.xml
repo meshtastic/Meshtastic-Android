@@ -838,9 +838,7 @@
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Ibrido</string>
     <string name="manage_map_layers">Gestisci livelli della mappa</string>
-    <string name="map_layer_formats">I livelli personalizzati supportano file .kml, .kmz o GeoJSON.</string>
     <string name="map_layers_title">Livelli della mappa</string>
-    <string name="no_map_layers_loaded">Nessun livello personalizzato caricato.</string>
     <string name="add_layer_button">Aggiungi livello</string>
     <string name="hide_layer">Nascondi livello</string>
     <string name="show_layer">Mostra livello</string>
@@ -849,10 +847,6 @@
     <string name="nodes_at_this_location">Nodi in questa posizione</string>
     <string name="selected_map_type">Tipo di mappa selezionata</string>
     <string name="manage_custom_tile_sources">Gestisci sorgenti Tile personalizzati</string>
-    <string name="add_custom_tile_source">Aggiungi sorgente Tile Personalizzato</string>
-    <string name="no_custom_tile_sources_found">Nessuna Sorgente Personalizzata dei Tile</string>
-    <string name="edit_custom_tile_source">Modifica sorgenti Tile personalizzati</string>
-    <string name="delete_custom_tile_source">Elimina sorgenti Tile personalizzati</string>
     <string name="name_cannot_be_empty">Il nome non può essere vuoto.</string>
     <string name="provider_name_exists">Il nome del provider esiste.</string>
     <string name="url_cannot_be_empty">L'URL non può essere vuoto.</string>
@@ -947,4 +941,5 @@
     <string name="all_time">Tutti</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Configurazione</string>
+    <!-- Network Map Layers -->
 </resources>
