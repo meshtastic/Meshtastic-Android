@@ -97,7 +97,7 @@
     <string name="rebroadcast_mode_local_only">僅限本地</string>
     <string name="rebroadcast_mode_local_only_desc">忽略來自開放的或無法解密的外部 Mesh 觀察到的訊息。僅轉播來自本地節點的主要/次要頻道的訊息。</string>
     <string name="rebroadcast_mode_known_only">僅限已知節點</string>
-    <string name="rebroadcast_mode_known_only_desc">近似於 LOCAL_ONLY 角色，將忽略來自外部Mesh節點的訊息，同時也忽略已知節點列表以外節點的訊息。</string>
+    <string name="rebroadcast_mode_known_only_desc">近似於 LOCAL_ONLY 角色，將忽略來自外部 Mesh 節點的訊息，同時也忽略已知節點列表以外節點的訊息。</string>
     <string name="rebroadcast_mode_none">無</string>
     <string name="rebroadcast_mode_none_desc">僅允許 SENSOR、TRACKER 和 TAK_TRACKER 角色，與 CLIENT_MUTE 角色不同，此模式將禁止所有重新廣播行為。</string>
     <string name="rebroadcast_mode_core_portnums_only">僅轉發基本通訊封包</string>
@@ -121,18 +121,18 @@
     <string name="config_lora_modem_preset_summary">可選的預設參數組，預設值是 Long Fast。</string>
     <string name="config_lora_hop_limit_summary">設定訊息的最大跳數，預設為 3。注意：增加跳數將導致網路擁塞，建議謹慎使用。此外，0 跳的廣播訊息將不會收到確認 (ACK)。</string>
     <string name="config_lora_frequency_slot_summary">節點工作頻率是透過地區、預設參數組和此欄位計算的。當設為 0 時，時隙將根據主頻道名稱自動計算，並會與公共預設時隙不同。若同時配置了私人主頻道和公共副頻道，請務必切換回公共預設時隙。</string>
-    <string name="label_very_long_slow">Very Long Range - Slow</string>
-    <string name="label_long_fast">Long Range - Fast</string>
-    <string name="label_long_turbo">長距離 - 快速模式</string>
-    <string name="label_long_moderate">Long Range - Moderate</string>
-    <string name="label_long_slow">Long Range - Slow</string>
-    <string name="label_medium_fast">Medium Range - Fast</string>
-    <string name="label_medium_slow">Medium Range - Slow</string>
-    <string name="label_short_turbo">Short Range - Turbo</string>
-    <string name="label_short_fast">Short Range - Fast</string>
-    <string name="label_short_slow">Short Range - Slow</string>
-    <string name="config_network_wifi_enabled_summary">啟用 Wi-Fi 後，藍牙與應用程式的連線將會停用。</string>
-    <string name="config_network_eth_enabled_summary">啟用乙太網路會導致與 App 的藍牙連線中斷。此外，TCP 節點連線在 Apple 設備上不可用。</string>
+    <string name="label_very_long_slow">Very Long - Slow</string>
+    <string name="label_long_fast">Long - Fast</string>
+    <string name="label_long_turbo">Long - Turbo</string>
+    <string name="label_long_moderate">Long - Moderate</string>
+    <string name="label_long_slow">Long - Slow</string>
+    <string name="label_medium_fast">Medium - Fast</string>
+    <string name="label_medium_slow">Medium - Slow</string>
+    <string name="label_short_turbo">Short - Turbo</string>
+    <string name="label_short_fast">Short - Fast</string>
+    <string name="label_short_slow">Short - Slow</string>
+    <string name="config_network_wifi_enabled_summary">啟用 Wi-Fi 後，節點裝置的藍牙連線功能將會停用。</string>
+    <string name="config_network_eth_enabled_summary">啟用乙太網路後，節點裝置的藍牙連線功能將會停用。此外，TCP 節點連線在 Apple 設備上無法使用。</string>
     <string name="config_network_udp_enabled_summary">允許透過本地網路上的 UDP 廣播封包。</string>
     <string name="config_position_broadcast_secs_summary">位置廣播的最大間隔時間。</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">滿足最小距離限制時，位置更新的最快發送間隔。</string>
@@ -161,7 +161,7 @@
     <string name="gps_transmit_gpio">GPS 傳送腳位</string>
     <string name="gps_en_gpio">GPS 啟用腳位</string>
     <string name="gpio">腳位</string>
-    <string name="debug">调试</string>
+    <string name="debug">除錯</string>
     <string name="channel">頻道</string>
     <string name="channel_name">頻道名稱</string>
     <string name="qr_code">QRCODE</string>
@@ -178,7 +178,7 @@
     <string name="permission_missing">Meshtastic需要啟用定位及藍芽才能尋找新裝置，可以選擇在不使用時停用。</string>
     <string name="report_bug">回報BUG</string>
     <string name="report_a_bug">回報問題</string>
-    <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 https://github.com/orgs/meshtastic/discussions 上貼文，以便我們可以將報告與您發現的問題匹配。</string>
+    <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 https://github.com/orgs/meshtastic/discussions 上貼文，以便我們可以將報告與您發現的問題比對。</string>
     <string name="report">報告</string>
     <string name="pairing_completed">配對完成，開始服務</string>
     <string name="pairing_failed_try_again">配對失敗，請重新選擇</string>
@@ -189,7 +189,7 @@
     <string name="device_sleeping">設備休眠中</string>
     <string name="connected_count">已連接：線上 %1$s</string>
     <string name="ip_address">IP地址：</string>
-    <string name="ip_port">Ip_ 埠：</string>
+    <string name="ip_port">IP連接埠：</string>
     <string name="connected">已連線</string>
     <string name="connected_to">已連接至設備 (%1$s)</string>
     <string name="connection_status">目前連線：</string>
@@ -201,7 +201,7 @@
     <string name="connected_sleeping">已連接裝置，但該裝置正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>
     <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
-    <string name="none">無(停用）</string>
+    <string name="none">無（停用）</string>
     <string name="meshtastic_service_notifications">服務通知</string>
     <string name="acknowledgements">致謝</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
@@ -263,7 +263,7 @@
     <string name="theme_system">系統預設</string>
     <string name="choose_theme">選擇主題</string>
     <string name="provide_location_to_mesh">將手機位置提供給Mesh網路</string>
-    <string name="use_homoglyph_characters_encoding">西里爾字母緊湊編碼</string>
+    <string name="use_homoglyph_characters_encoding">使用同形異意字元編碼處理西里爾字母</string>
     <plurals name="delete_messages">
         <item quantity="other">刪除 %1$s 訊息?</item>
     </plurals>
@@ -286,12 +286,12 @@
     <string name="cant_shutdown">此裝置不支援關機功能</string>
     <string name="shutdown_warning">⚠️ 這將會關閉節點。需要實體操作才能重新開啟。</string>
     <string name="shutdown_critical_node">⚠️ 這是關鍵基礎設施節點。請輸入節點名稱以確認：</string>
-    <string name="shutdown_node_name">裝置: %1$s</string>
-    <string name="shutdown_type_name">請輸入: %1$s</string>
+    <string name="shutdown_node_name">裝置：%1$s</string>
+    <string name="shutdown_type_name">請輸入：%1$s</string>
     <string name="reboot">重新開機</string>
     <string name="traceroute">路由追蹤</string>
     <string name="intro_show">顯示介紹指南</string>
-    <string name="message">訊息:</string>
+    <string name="message">訊息：</string>
     <string name="quick_chat">快速聊天選項</string>
     <string name="quick_chat_new">新的快速聊天</string>
     <string name="quick_chat_edit">編輯快速聊天</string>
@@ -303,7 +303,7 @@
     <string name="factory_reset">恢復出廠設置</string>
     <string name="bluetooth_disabled">藍芽已關閉，請至手機設定內開啟藍芽功能。</string>
     <string name="open_settings">開啟設定</string>
-    <string name="firmware_version">韌體版本: %1$s</string>
+    <string name="firmware_version">韌體版本：%1$s</string>
     <string name="permission_missing_31">Meshtastic 應用程式需要啟用「鄰近裝置」權限，才能透過藍牙尋找並連接到裝置，可以選擇在不使用時停用。</string>
     <string name="direct_message">直通訊息</string>
     <string name="nodedb_reset">重設節點資料庫</string>
@@ -314,7 +314,7 @@
     <string name="ignore_add">將 '%1$s' 加入忽略清單嗎？</string>
     <string name="ignore_remove">從忽略清單中移除 '%1$s' 嗎？</string>
     <string name="map_select_download_region">選擇下載地區</string>
-    <string name="map_tile_download_estimate">圖磚下載估計:</string>
+    <string name="map_tile_download_estimate">圖磚下載估計：</string>
     <string name="map_start_download">開始下載</string>
     <string name="exchange_position">交換位置</string>
     <string name="close">關閉</string>
@@ -329,14 +329,14 @@
     <string name="map_clear_tiles">清除下載的圖磚</string>
     <string name="map_tile_source">圖磚來源</string>
     <string name="map_purge_success">清除 %1$s 的 SQL 快取</string>
-    <string name="map_purge_fail">SQL快取清除失敗，請查看logcat以獲取詳細資訊。</string>
+    <string name="map_purge_fail">SQL快取清除失敗，請查看 logcat 以獲取詳細資訊。</string>
     <string name="map_cache_manager">快取管理</string>
     <string name="map_download_complete">下載已完成！</string>
     <string name="map_download_errors">下載完成，但有 %1$d 個錯誤</string>
     <string name="map_cache_tiles">%1$d 圖磚</string>
     <string name="map_subDescription">方位：%1$d° 距離：%2$s</string>
     <string name="waypoint_edit">編輯航點</string>
-    <string name="waypoint_delete">刪除航點?</string>
+    <string name="waypoint_delete">刪除航點？</string>
     <string name="waypoint_new">新建航點</string>
     <string name="waypoint_received">收到編輯航點：%1$s</string>
     <string name="error_duty_cycle">達到循環工作週期限制。目前無法發送訊息，請稍後再試。</string>
@@ -356,8 +356,8 @@
     <string name="mute_add">將「%1$s」的通知設為靜音？</string>
     <string name="mute_remove">取消「%1$s」的通知靜音？</string>
     <string name="replace">替換</string>
-    <string name="wifi_qr_code_scan">掃描WiFi QR code</string>
-    <string name="wifi_qr_code_error">錯誤的 WiFi 驗證QR code格式</string>
+    <string name="wifi_qr_code_scan">掃描Wi-Fi QR code</string>
+    <string name="wifi_qr_code_error">錯誤的 Wi-Fi 驗證QR code格式</string>
     <string name="navigate_back">返回上一頁</string>
     <string name="battery">電池</string>
     <string name="channel_utilization">頻道利用率</string>
@@ -414,10 +414,10 @@
     <string name="view_on_map">在地圖上檢視</string>
     <string name="traceroute_map_no_data">此路由追蹤尚未包含任何可標記於地圖的節點。</string>
     <string name="traceroute_showing_nodes">顯示 %1$d / %2$d 個節點</string>
-    <string name="traceroute_duration">持續時間: %1$s 秒</string>
+    <string name="traceroute_duration">持續時間：%1$s 秒</string>
     <string name="traceroute_time_and_text">%1$s - %2$s</string>
-    <string name="traceroute_route_towards_dest">追蹤至目的地的路由: \n\n</string>
-    <string name="traceroute_route_back_to_us">追蹤回到本機的路由: \n\n</string>
+    <string name="traceroute_route_towards_dest">追蹤至目的地的路由：\n\n</string>
+    <string name="traceroute_route_back_to_us">追蹤回到本機的路由：\n\n</string>
     <string name="one_hour_short">1小時</string>
     <string name="twenty_four_hours">二十四小時</string>
     <string name="forty_eight_hours">四十八小時</string>
@@ -446,16 +446,16 @@
     <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
     <string name="low_battery_message">節點 %1$s 電量過低 (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">低電量通知</string>
-    <string name="low_battery_title">低電量:%1$s</string>
+    <string name="low_battery_title">低電量：%1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低電量通知(收藏節點)</string>
     <string name="baro_pressure">氣壓</string>
     <string name="udp_enabled">已啟用</string>
     <string name="udp_broadcast">UDP 廣播</string>
-    <string name="udp_config">UDP設置</string>
+    <string name="udp_config">UDP 設置</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>最後接收: %2$s<br>最後位置: %3$s<br>電量: %4$s]]></string>
     <string name="toggle_my_position">切換我的位置</string>
-    <string name="orient_north">以北為上</string>
-    <string name="user">用戶</string>
+    <string name="orient_north">定位朝北</string>
+    <string name="user">使用者</string>
     <string name="channels">頻道</string>
     <string name="device">裝置</string>
     <string name="position">位置</string>
@@ -463,8 +463,8 @@
     <string name="network">網路</string>
     <string name="display">顯示</string>
     <string name="lora">LoRa</string>
-    <string name="bluetooth">藍芽</string>
-    <string name="security">安全</string>
+    <string name="bluetooth">藍牙</string>
+    <string name="security">安全性</string>
     <string name="mqtt">MQTT</string>
     <string name="serial">序列埠</string>
     <string name="external_notification">外部通知</string>
@@ -541,7 +541,7 @@
     <string name="rebroadcast_mode">轉發模式</string>
     <string name="nodeinfo_broadcast_interval">節點資訊廣播間隔</string>
     <string name="double_tap_as_button_press">雙擊觸發按鈕功能</string>
-    <string name="triple_click_adhoc_ping">三擊執行臨時 Ping</string>
+    <string name="triple_click_adhoc_ping">三擊執行 Ad Hoc Ping</string>
     <string name="time_zone">時區</string>
     <string name="led_heartbeat">LED 心跳指示</string>
     <string name="display_config">裝置列表</string>
@@ -616,7 +616,7 @@
     <string name="network_config">網路</string>
     <string name="wifi_config">Wi-Fi 選項</string>
     <string name="enabled">已啟用</string>
-    <string name="wifi_enabled">啟用WiFi</string>
+    <string name="wifi_enabled">啟用Wi-Fi</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
     <string name="get_document">取得文件</string>
@@ -628,12 +628,12 @@
     <string name="ip">IP</string>
     <string name="gateway">網閘</string>
     <string name="subnet">子網路</string>
-    <string name="paxcounter_config">Paxcount設置</string>
-    <string name="paxcounter_enabled">啟用Paxcount</string>
+    <string name="paxcounter_config">人流計數（Paxcount）設置</string>
+    <string name="paxcounter_enabled">已啟用人流計數（Paxcount）</string>
     <string name="status_message">狀態訊息</string>
     <string name="status_message_config">狀態訊息設定</string>
     <string name="node_status_summary">實際狀態字串</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 閾值(預設為-80)</string>
+    <string name="wifi_rssi_threshold_defaults_to_80">Wi-Fi RSSI 閾值(預設為-80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">藍牙 RSSI 閾值(預設為-80)</string>
     <string name="position_config">位置</string>
     <string name="position_broadcast_interval_seconds">位置廣播間隔（秒）</string>
@@ -678,7 +678,7 @@
     <string name="admin_key">管理員金鑰</string>
     <string name="managed_mode">託管模式</string>
     <string name="serial_console">序列控制台</string>
-    <string name="debug_log_api_enabled">啟用調適日誌 API</string>
+    <string name="debug_log_api_enabled">啟用除錯日誌 API</string>
     <string name="legacy_admin_channel">舊版管理頻道</string>
     <string name="serial_config">序列埠設定</string>
     <string name="serial_enabled">啟用序列埠</string>
@@ -731,10 +731,10 @@
     <string name="node_number">節點編號</string>
     <string name="user_id">使用者 ID</string>
     <string name="uptime">運行時間</string>
-    <string name="load_indexed">負載:%1$d</string>
+    <string name="load_indexed">負載：%1$d</string>
     <string name="fetching_channel_indexed">正在取得頻道 %1$d / %2$d</string>
     <string name="fetching_config">正在取得 %1$s</string>
-    <string name="disk_free_indexed">硬碟可用空間:%1$d</string>
+    <string name="disk_free_indexed">硬碟可用空間：%1$d</string>
     <string name="timestamp">時間戳記</string>
     <string name="heading">航向</string>
     <string name="speed">速度</string>
@@ -847,7 +847,7 @@
     <string name="security_icon_insecure_precise_only">未加密頻道，精確定位</string>
     <string name="security_icon_help_red_open_lock">紅色開鎖表示該頻道未進行安全加密，啟用了精確定位資訊，且未使用任何金鑰或使用 1 位元組已知金鑰。</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <string name="security_icon_warning_precise_mqtt">警告：未加密頻道，精確定位 &amp; MQTT Uplink</string>
+    <string name="security_icon_warning_precise_mqtt">警告：未加密頻道，已啟用精確定位 &amp; MQTT Uplink</string>
     <string name="security_icon_help_warning_precise_mqtt">帶有警告的紅色開鎖表示該頻道未進行安全加密，啟用了精確定位資訊，且正在透過MQTT上傳資料至網路，以及未使用任何金鑰或使用 1 位元組已知金鑰。</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">頻道安全性</string>
@@ -867,7 +867,7 @@
     <string name="pax_metrics_log">PAX 人流計量</string>
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">無可用的 PAX 人流計量資料。</string>
-    <string name="wifi_devices">WiFi 裝置</string>
+    <string name="wifi_devices">Wi-Fi 裝置</string>
     <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">已配對的裝置</string>
     <string name="connected_device">連接裝置</string>
@@ -929,7 +929,9 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地圖圖層</string>
+    <string name="map_layer_formats">自訂圖層支援 .kml、.kmz 或 GeoJSON 檔案。</string>
     <string name="map_layers_title">地圖圖層</string>
+    <string name="no_map_layers_loaded">未載入自訂圖層。</string>
     <string name="add_layer_button">添加圖層</string>
     <string name="hide_layer">隱藏圖層</string>
     <string name="show_layer">顯示圖層</string>
@@ -938,6 +940,10 @@
     <string name="nodes_at_this_location">位於此處的節點</string>
     <string name="selected_map_type">已選擇的地圖類型</string>
     <string name="manage_custom_tile_sources">管理自定義圖磚來源</string>
+    <string name="add_custom_tile_source">加入自定義圖磚來源</string>
+    <string name="no_custom_tile_sources_found">沒有自定義圖專來源</string>
+    <string name="edit_custom_tile_source">編輯自定義圖磚來源</string>
+    <string name="delete_custom_tile_source">刪除自定義圖磚來源</string>
     <string name="name_cannot_be_empty">名稱不得空白。</string>
     <string name="provider_name_exists">服務供應商名稱已存在。</string>
     <string name="url_cannot_be_empty">URL 不得空白。</string>
@@ -968,8 +974,8 @@
     <string name="system_settings">系統設定</string>
     <string name="no_local_stats">沒有可用的統計資料</string>
     <string name="analytics_notice">我們會收集分析數據以協助改善 Android 應用程式（感謝您的支持），我們將收到匿名化的使用者行為資訊，包括當機報告、應用程式使用畫面等。</string>
-    <string name="analytics_platforms">分析平台:</string>
-    <string name="for_more_information_see_our_privacy_policy">欲了解更多資訊，請查閱我們的隱私權政策。</string>
+    <string name="analytics_platforms">分析平台：</string>
+    <string name="for_more_information_see_our_privacy_policy">如欲了解更多資訊，請查閱我們的隱私權政策。</string>
     <string name="unset">預設值 - 0</string>
     <string name="relayed_by">經由：%1$s</string>
     <plurals name="relays">
@@ -977,8 +983,9 @@
     </plurals>
     <string name="firmware_update_usb_bootloader_warning">%1$s 裝置出廠時預載的開機載入程式通常不支援 OTA 更新功能。在執行 OTA 韌體更新前,您可能需要先透過 USB 連線刷入具備 OTA 功能的開機載入程式。</string>
     <string name="learn_more">瞭解詳情</string>
-    <string name="firmware_update_rak4631_bootloader_hint">針對 RAK WisBlock RAK4631 裝置，必須使用 ' 提供的序列埠 DFU（裝置韌體更新）工具進行更新。舉例來說，可以使用 adafruit-nrfutil dfu serial 命令配合提供的 bootloader .zip 壓縮檔。注意：單純複製 .uf2 檔案並不會更新開機載入程式。</string>
-    <string name="dont_show_again_for_device">' 此裝置不再顯示</string>
+    <string name="firmware_update_rak4631_bootloader_hint">針對 RAK WisBlock RAK4631 裝置，必須使用原廠提供的序列埠 DFU（裝置韌體更新）工具進行更新。舉例來說，可以搭配使用 adafruit-nrfutil dfu serial 隨附的 bootloader.zip 壓縮檔。注意：單純複製 .uf2 檔案並不會更新開機載入程式（Bootloader）。
+  </string>
+    <string name="dont_show_again_for_device">不再顯示此裝置的提示</string>
     <string name="preserve_favorites">保留我的最愛？</string>
     <string name="usb_devices">USB 裝置</string>
     <!-- Firmware Update -->
@@ -1014,27 +1021,27 @@
     <string name="firmware_update_taking_a_while">處理中，請稍候⋯⋯</string>
     <string name="firmware_update_select_file">選擇本機檔案</string>
     <string name="firmware_update_local_file">本機檔案</string>
-    <string name="firmware_update_source_local">來源: 本機檔案</string>
+    <string name="firmware_update_source_local">來源：本機檔案</string>
     <string name="firmware_update_unknown_release">無法識別的遠端版本</string>
     <string name="firmware_update_disclaimer_title">更新警告</string>
-    <string name="firmware_update_disclaimer_text">您即將為裝置刷入新韌體，此過程存在風險。\n\n 請確保裝置電量充足。\n 請將裝置保持在手機附近。\n  更新期間請勿關閉應用程式。\n\n 請確認您已為您的硬體選擇正確的韌體。</string>
-    <string name="firmware_update_disclaimer_chirpy_says">Chirpy 小提醒：「別忘了準備梯子！」</string>
+    <string name="firmware_update_disclaimer_text">您即將為裝置刷入新韌體，此過程存在風險。\n\n• 請確保裝置電量充足。\n• 請將裝置保持在手機附近。\n• 更新期間請勿關閉應用程式。\n\n請確認您已為您的硬體選擇正確的韌體。</string>
+    <string name="firmware_update_disclaimer_chirpy_says">Chirpy 小提醒：「緊握扶手！」</string>
     <string name="chirpy">Chirpy</string>
     <string name="firmware_update_rebooting">正在進入 DFU 模式⋯⋯</string>
     <string name="firmware_update_waiting_for_device">等待裝置進入 DFU 模式⋯⋯</string>
     <string name="firmware_update_copying">正在複製韌體⋯⋯記得要強調是史上最快喔！</string>
-    <string name="firmware_update_save_dfu_file">請將 .uf2 檔案儲存到您 ' 裝置 DFU 磁碟機。</string>
+    <string name="firmware_update_save_dfu_file">請將 .uf2 檔案複製到您裝置 DFU 的磁碟機。</string>
     <string name="firmware_update_flashing">刷入韌體中，請稍等⋯⋯</string>
     <string name="firmware_update_method_usb">USB 檔案傳輸</string>
     <string name="firmware_update_method_ble">BLE OTA</string>
-    <string name="firmware_update_method_wifi">WiFi OTA</string>
+    <string name="firmware_update_method_wifi">Wi-Fi OTA</string>
     <string name="firmware_update_method_detail">更新方式 %1$s</string>
     <string name="firmware_update_usb_instruction_title">選擇 DFU USB 磁碟機</string>
-    <string name="firmware_update_usb_instruction_text">您的裝置已重新啟動進入 DFU 模式，應該會顯示為 USB 磁碟機（例如：RAK4631）。\n\n 當檔案選擇器開啟時，請選擇該磁碟機的根目錄以儲存韌體檔案。</string>
+    <string name="firmware_update_usb_instruction_text">您的裝置已重新啟動進入 DFU 模式，應該會顯示為 USB 磁碟機（例如：RAK4631）。\n\n當檔案管理器開啟時，請選擇該磁碟機的根目錄以儲存韌體檔案。</string>
     <string name="firmware_update_verifying">正在驗證更新⋯⋯</string>
     <string name="firmware_update_verification_failed">驗證逾時。裝置未能在時限內重新連線。</string>
     <string name="firmware_update_waiting_reconnect">等待裝置重新連線⋯⋯</string>
-    <string name="firmware_update_target">目標裝置: %1$s</string>
+    <string name="firmware_update_target">目標裝置：%1$s</string>
     <string name="firmware_update_release_notes">版本說明</string>
     <string name="firmware_update_unknown_error">未知錯誤</string>
     <string name="firmware_update_local_failed">本機更新失敗</string>
@@ -1047,9 +1054,9 @@
     <string name="firmware_update_usb_failed">USB 更新失敗</string>
     <string name="firmware_update_hash_rejected">韌體雜湊值遭拒。裝置可能需要雜湊值配置或開機載入程式更新。</string>
     <string name="firmware_update_ota_failed">OTA 更新失敗: %1$s</string>
-    <string name="firmware_update_loading">Loading firmware⋯⋯</string>
+    <string name="firmware_update_loading">正在載入韌體⋯⋯</string>
     <string name="firmware_update_waiting_reboot">等待裝置重新啟動至 OTA 模式⋯⋯</string>
-    <string name="firmware_update_connecting_attempt">正在連線至裝置(第 %1$d / %2$d次嘗試 )⋯⋯</string>
+    <string name="firmware_update_connecting_attempt">正在連線至裝置(第 %1$d / %2$d次嘗試)⋯⋯</string>
     <string name="firmware_update_checking_version">正在檢查裝置版本⋯⋯</string>
     <string name="firmware_update_starting_ota">正在啟動 OTA 更新⋯⋯</string>
     <string name="firmware_update_uploading">正在上傳韌體⋯⋯</string>
@@ -1073,8 +1080,8 @@
     <!-- Compass -->
     <string name="compass_title">指南針</string>
     <string name="open_compass">開啟指南針</string>
-    <string name="compass_distance">距離: %1$s</string>
-    <string name="compass_bearing">方位: %1$s</string>
+    <string name="compass_distance">距離：%1$s</string>
+    <string name="compass_bearing">方位：%1$s</string>
     <string name="compass_bearing_na">方位：無資料</string>
     <string name="compass_no_magnetometer"> 此裝置沒有指南針感測器，無法取得方向資訊。</string>
     <string name="compass_no_location_permission">需要位置權限才能顯示距離和方位。</string>
@@ -1147,4 +1154,11 @@
     <string name="refresh">重新整理</string>
     <string name="updated">已更新</string>
     <!-- Network Map Layers -->
+    <string name="add_network_layer">新增線上圖層</string>
+    <string name="refresh_layer">重新整理圖層</string>
+    <string name="local_mbtiles_file">本機 MBTiles 檔案</string>
+    <string name="add_local_mbtiles_file">新增本機 MBTiles 檔案</string>
+    <string name="error_invalid_custom_provider">自訂圖磚來源的名稱、URL 範本或本機 URI 無效。</string>
+    <string name="error_provider_exists">已存在相同名稱的自訂圖磚來源。</string>
+    <string name="error_copy_mbtiles_failed">無法將 MBTiles 檔案複製至內部儲存空間。</string>
 </resources>
