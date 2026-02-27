@@ -712,6 +712,7 @@
     <string name="long_name">长名称</string>
     <string name="short_name">短名称</string>
     <string name="hardware_model">硬件型号</string>
+    <string name="licensed_amateur_radio">业余无线电模式（HAM）</string>
     <string name="licensed_amateur_radio_text">启用此选项将禁用加密并且不兼容默认的Meshtastic网络。</string>
     <string name="dew_point">结露点</string>
     <string name="pressure">气压</string>
