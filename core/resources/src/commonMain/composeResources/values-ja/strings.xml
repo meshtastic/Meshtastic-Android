@@ -21,7 +21,11 @@
     <string name="fallback_node_name">Meshtastic</string>
     <string name="node_filter_placeholder">絞り込み</string>
     <string name="desc_node_filter_clear">ノードフィルターをクリアします</string>
+    <string name="node_filter_title">絞り込み</string>
     <string name="node_filter_include_unknown">不明なものを含める</string>
+    <string name="node_filter_exclude_infrastructure">インフラを除外</string>
+    <string name="node_filter_only_online">オフラインノードを非表示</string>
+    <string name="node_filter_only_direct">ダイレクトノードのみ表示</string>
     <string name="node_filter_show_details">詳細を表示</string>
     <string name="node_sort_title">並べ替え</string>
     <string name="node_sort_button">ノードの並べ替えオプション</string>
@@ -33,6 +37,8 @@
     <string name="node_sort_via_mqtt">MQTT経由</string>
     <string name="via_mqtt">MQTT経由</string>
     <string name="via_udp">UDP 経由</string>
+    <string name="via_api">API 経由</string>
+    <string name="internal">内部</string>
     <string name="node_sort_via_favorite">お気に入り経由</string>
     <string name="unrecognized">不明</string>
     <string name="message_status_enroute">相手の受信確認待ち</string>
@@ -460,6 +466,7 @@
     <string name="user_config">ユーザー設定</string>
     <string name="node_id">ノード ID</string>
     <string name="hardware_model">ハードウェアのモデル</string>
+    <string name="licensed_amateur_radio">アマチュア無線従事者 (ハム/HAM)</string>
     <string name="licensed_amateur_radio_text">このオプションを有効にすると、暗号化が無効になりデフォルトのMeshtasticネットワークと互換性が無くなります。</string>
     <string name="dew_point">露点</string>
     <string name="pressure">気圧</string>
