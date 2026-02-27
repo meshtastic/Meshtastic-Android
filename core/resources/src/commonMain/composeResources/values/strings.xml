@@ -970,9 +970,9 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Manage Map Layers</string>
-    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
+    <string name="map_layer_formats">Map layers support .kml, .kmz, or GeoJSON formats.</string>
     <string name="map_layers_title">Map Layers</string>
-    <string name="no_map_layers_loaded">No custom layers loaded.</string>
+    <string name="no_map_layers_loaded">No map layers loaded.</string>
     <string name="add_layer_button">Add Layer</string>
     <string name="hide_layer">Hide Layer</string>
     <string name="show_layer">Show Layer</string>
@@ -981,16 +981,16 @@
     <string name="nodes_at_this_location">Nodes at this location</string>
     <string name="selected_map_type">Selected Map Type</string>
     <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
-    <string name="add_custom_tile_source">Add Custom Tile Source</string>
-    <string name="no_custom_tile_sources_found">No Custom Tile Sources</string>
-    <string name="edit_custom_tile_source">Edit Custom Tile Source</string>
-    <string name="delete_custom_tile_source">Delete Custom Tile Source</string>
+    <string name="add_custom_tile_source">Add Network Tile Source</string>
+    <string name="no_custom_tile_sources_found">No custom tile sources found.</string>
+    <string name="edit_custom_tile_source">Edit Network Tile Source</string>
+    <string name="delete_custom_tile_source">Delete Network Tile Source</string>
     <string name="name_cannot_be_empty">Name cannot be empty.</string>
     <string name="provider_name_exists">Provider name exists.</string>
     <string name="url_cannot_be_empty">URL cannot be empty.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
-    <string name="url_template_hint" translatable="false">https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="url_template_hint" translatable="false">https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <string name="track_point">track point</string>
     <string name="app_settings">App</string>
     <string name="app_version">Version</string>
@@ -1212,4 +1212,15 @@
     <string name="meshtastic_stats">Meshtastic Stats</string>
     <string name="refresh">Refresh</string>
     <string name="updated">Updated</string>
+
+    <!-- Network Map Layers -->
+    <string name="add_network_layer">Add Network Layer</string>
+    <string name="network_layer_url_hint" translatable="false">https://example.com/map.kml or .geojson</string>
+    <string name="refresh_layer">Refresh Layer</string>
+
+    <string name="local_mbtiles_file">Local MBTiles File</string>
+    <string name="add_local_mbtiles_file">Add Local MBTiles File</string>
+    <string name="error_invalid_custom_provider">Invalid name, URL template, or local URI for custom tile provider.</string>
+    <string name="error_provider_exists">A custom tile provider with this name already exists.</string>
+    <string name="error_copy_mbtiles_failed">Failed to copy MBTiles file to internal storage.</string>
 </resources>

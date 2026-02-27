@@ -16,150 +16,60 @@
  */
 package org.meshtastic.feature.intro
 
-import android.content.Intent
-import android.provider.Settings
+import android.Manifest
+import android.os.Build
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import kotlinx.serialization.Serializable
-import no.nordicsemi.android.common.permissions.ble.RequireBluetooth
-import no.nordicsemi.android.common.permissions.ble.RequireLocation
-import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.permission_denied
-import org.meshtastic.core.resources.permission_granted
-import org.meshtastic.core.ui.util.showToast
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 
 /**
- * Composable function for the main application introduction screen. This screen guides the user through initial setup
- * steps like granting permissions.
+ * Main application introduction screen. This Composable hosts the navigation flow and hoists the permission states.
  *
  * @param onDone Callback invoked when the introduction flow is completed.
+ * @param viewModel ViewModel for tracking the introduction flow state.
  */
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AppIntroductionScreen(onDone: () -> Unit) {
-    val context = LocalContext.current
+fun AppIntroductionScreen(onDone: () -> Unit, @Suppress("unused") viewModel: IntroViewModel = hiltViewModel()) {
+    val notificationPermissionState: PermissionState? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            null
+        }
+
+    val locationPermissions =
+        listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    val locationPermissionState = rememberMultiplePermissionsState(permissions = locationPermissions)
+
+    val bluetoothPermissions =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            // On older versions, location permission is used for scanning.
+            emptyList()
+        }
+    val bluetoothPermissionState = rememberMultiplePermissionsState(permissions = bluetoothPermissions)
+
     val backStack = rememberNavBackStack(Welcome)
 
-    NavDisplay(
+    NavDisplay<NavKey>(
         backStack = backStack,
         onBack = { backStack.removeLastOrNull() },
         entryProvider =
-        entryProvider {
-            entry<Welcome> { WelcomeScreen(onGetStarted = { backStack.add(Notifications) }) }
-
-            entry<Notifications> {
-                var isConfiguring by remember { mutableStateOf(false) }
-
-                if (isConfiguring) {
-                    RequestNotificationPermission { canShowNotifications ->
-                        LaunchedEffect(canShowNotifications) {
-                            if (canShowNotifications == true) {
-                                context.showToast(Res.string.permission_granted)
-                            } else if (canShowNotifications == false) {
-                                context.showToast(Res.string.permission_denied)
-                            }
-                        }
-
-                        NotificationsScreen(
-                            showNextButton = canShowNotifications == true,
-                            onSkip = { backStack.add(Bluetooth) },
-                            onConfigure = {
-                                if (canShowNotifications == true) {
-                                    backStack.add(CriticalAlerts)
-                                }
-                            },
-                        )
-                    }
-                } else {
-                    NotificationsScreen(
-                        showNextButton = false,
-                        onSkip = { backStack.add(Bluetooth) },
-                        onConfigure = { isConfiguring = true },
-                    )
-                }
-            }
-
-            entry<CriticalAlerts> {
-                CriticalAlertsScreen(
-                    onSkip = { backStack.add(Bluetooth) },
-                    onConfigure = {
-                        val intent =
-                            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
-                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
-                            }
-                        context.startActivity(intent)
-                        backStack.add(Bluetooth)
-                    },
-                )
-            }
-
-            entry<Bluetooth> {
-                var isConfiguring by remember { mutableStateOf(false) }
-
-                if (isConfiguring) {
-                    RequireBluetooth {
-                        LaunchedEffect(Unit) {
-                            context.showToast(Res.string.permission_granted)
-                            backStack.add(Location)
-                        }
-                    }
-                } else {
-                    BluetoothScreen(
-                        showNextButton = false,
-                        onSkip = { backStack.add(Location) },
-                        onConfigure = { isConfiguring = true },
-                    )
-                }
-            }
-
-            entry<Location> {
-                var isConfiguring by remember { mutableStateOf(false) }
-
-                if (isConfiguring) {
-                    RequireLocation { isLocationRequiredAndDisabled ->
-                        LaunchedEffect(isLocationRequiredAndDisabled) {
-                            if (!isLocationRequiredAndDisabled) {
-                                context.showToast(Res.string.permission_granted)
-                            } else {
-                                context.showToast(Res.string.permission_denied)
-                            }
-                        }
-
-                        LocationScreen(
-                            showNextButton = !isLocationRequiredAndDisabled,
-                            onSkip = onDone,
-                            onConfigure = {
-                                if (!isLocationRequiredAndDisabled) {
-                                    onDone()
-                                }
-                            },
-                        )
-                    }
-                } else {
-                    LocationScreen(showNextButton = false, onSkip = onDone, onConfigure = { isConfiguring = true })
-                }
-            }
-        },
+        introNavGraph(
+            backStack = backStack,
+            viewModel = viewModel,
+            notificationPermissionState = notificationPermissionState,
+            bluetoothPermissionState = bluetoothPermissionState,
+            locationPermissionState = locationPermissionState,
+            onDone = onDone,
+        ),
     )
 }
-
-@Serializable private data object Welcome : NavKey
-
-@Serializable private data object Notifications : NavKey
-
-@Serializable private data object CriticalAlerts : NavKey
-
-@Serializable private data object Bluetooth : NavKey
-
-@Serializable private data object Location : NavKey

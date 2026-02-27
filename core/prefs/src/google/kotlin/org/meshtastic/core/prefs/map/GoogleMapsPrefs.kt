@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.prefs.map
 
 import android.content.SharedPreferences
@@ -37,6 +36,7 @@ interface GoogleMapsPrefs {
     var cameraZoom: Float
     var cameraTilt: Float
     var cameraBearing: Float
+    var networkMapLayers: Set<String>
 }
 
 @Singleton
@@ -50,4 +50,5 @@ class GoogleMapsPrefsImpl @Inject constructor(@GoogleMapsSharedPreferences prefs
     override var cameraZoom: Float by FloatPrefDelegate(prefs, "camera_zoom", 7f)
     override var cameraTilt: Float by FloatPrefDelegate(prefs, "camera_tilt", 0f)
     override var cameraBearing: Float by FloatPrefDelegate(prefs, "camera_bearing", 0f)
+    override var networkMapLayers: Set<String> by StringSetPrefDelegate(prefs, "network_map_layers", emptySet())
 }

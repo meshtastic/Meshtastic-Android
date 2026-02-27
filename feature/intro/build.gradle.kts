@@ -24,17 +24,27 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.feature.intro" }
+configure<LibraryExtension> {
+    namespace = "org.meshtastic.feature.intro"
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+}
 
 dependencies {
     implementation(projects.core.resources)
     implementation(projects.core.ui)
 
+    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
-    implementation(libs.nordic.common.permissions.ble)
-    implementation(libs.nordic.common.permissions.notification)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 }

@@ -16,6 +16,9 @@
  */
 package org.meshtastic.feature.map.component
 
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -51,9 +54,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_custom_tile_source
+import org.meshtastic.core.resources.add_local_mbtiles_file
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.delete_custom_tile_source
 import org.meshtastic.core.resources.edit_custom_tile_source
+import org.meshtastic.core.resources.local_mbtiles_file
 import org.meshtastic.core.resources.manage_custom_tile_sources
 import org.meshtastic.core.resources.name
 import org.meshtastic.core.resources.name_cannot_be_empty
@@ -75,6 +80,21 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
     var editingConfig by remember { mutableStateOf<CustomTileProviderConfig?>(null) }
     var showEditDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    val mbtilesPickerLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                result.data?.data?.let { uri ->
+                    val fileName = uri.getFileName(context)
+                    val baseName = fileName.substringBeforeLast('.')
+                    mapViewModel.addCustomTileProvider(
+                        name = baseName,
+                        urlTemplate = "", // Empty for local
+                        localUri = uri.toString(),
+                    )
+                }
+            }
+        }
 
     LaunchedEffect(Unit) { mapViewModel.errorFlow.collectLatest { errorMessage -> context.showToast(errorMessage) } }
 
@@ -116,7 +136,16 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
             items(customTileProviders, key = { it.id }) { config ->
                 ListItem(
                     headlineContent = { Text(config.name) },
-                    supportingContent = { Text(config.urlTemplate, style = MaterialTheme.typography.bodySmall) },
+                    supportingContent = {
+                        if (config.isLocal) {
+                            Text(
+                                stringResource(Res.string.local_mbtiles_file),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        } else {
+                            Text(config.urlTemplate, style = MaterialTheme.typography.bodySmall)
+                        }
+                    },
                     trailingContent = {
                         Row {
                             IconButton(
@@ -144,14 +173,30 @@ fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
         }
 
         item {
-            Button(
-                onClick = {
-                    editingConfig = null
-                    showEditDialog = true
-                },
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-            ) {
-                Text(stringResource(Res.string.add_custom_tile_source))
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = {
+                        editingConfig = null
+                        showEditDialog = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(Res.string.add_custom_tile_source))
+                }
+
+                Button(
+                    onClick = {
+                        val intent =
+                            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                                addCategory(Intent.CATEGORY_OPENABLE)
+                                type = "*/*"
+                            }
+                        mbtilesPickerLauncher.launch(intent)
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(Res.string.add_local_mbtiles_file))
+                }
             }
         }
     }
@@ -262,3 +307,18 @@ private fun validateUrl(url: String, emptyUrlError: String, mustContainPlacehold
     } else {
         null
     }
+
+private fun android.net.Uri.getFileName(context: android.content.Context): String {
+    var name = this.lastPathSegment ?: "mbtiles_file"
+    if (this.scheme == "content") {
+        context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val displayNameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (displayNameIndex != -1) {
+                    name = cursor.getString(displayNameIndex)
+                }
+            }
+        }
+    }
+    return name
+}

@@ -69,7 +69,6 @@ open class MeshUtilApplication :
     override fun onCreate() {
         super.onCreate()
         ContextServices.app = this
-        initializeMaps(this)
 
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()

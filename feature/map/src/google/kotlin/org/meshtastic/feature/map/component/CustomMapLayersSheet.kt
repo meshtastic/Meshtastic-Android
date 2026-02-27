@@ -16,36 +16,55 @@
  */
 package org.meshtastic.feature.map.component
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_layer
+import org.meshtastic.core.resources.add_network_layer
+import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.hide_layer
 import org.meshtastic.core.resources.manage_map_layers
 import org.meshtastic.core.resources.map_layer_formats
+import org.meshtastic.core.resources.name
+import org.meshtastic.core.resources.network_layer_url_hint
 import org.meshtastic.core.resources.no_map_layers_loaded
+import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.remove_layer
+import org.meshtastic.core.resources.save
 import org.meshtastic.core.resources.show_layer
+import org.meshtastic.core.resources.url
+import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.map.MapLayerItem
 
 @Suppress("LongMethod")
@@ -56,7 +75,10 @@ fun CustomMapLayersSheet(
     onToggleVisibility: (String) -> Unit,
     onRemoveLayer: (String) -> Unit,
     onAddLayerClicked: () -> Unit,
+    onRefreshLayer: (String) -> Unit,
+    onAddNetworkLayer: (String, String) -> Unit,
 ) {
+    var showAddNetworkLayerDialog by remember { mutableStateOf(false) }
     LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
@@ -87,7 +109,22 @@ fun CustomMapLayersSheet(
                 ListItem(
                     headlineContent = { Text(layer.name) },
                     trailingContent = {
-                        Row {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (layer.isNetwork) {
+                                if (layer.isRefreshing) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp).padding(4.dp),
+                                        strokeWidth = 2.dp,
+                                    )
+                                } else {
+                                    IconButton(onClick = { onRefreshLayer(layer.id) }) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Refresh,
+                                            contentDescription = stringResource(Res.string.refresh),
+                                        )
+                                    }
+                                }
+                            }
                             IconButton(onClick = { onToggleVisibility(layer.id) }) {
                                 Icon(
                                     imageVector =
@@ -119,9 +156,57 @@ fun CustomMapLayersSheet(
             }
         }
         item {
-            Button(modifier = Modifier.fillMaxWidth().padding(16.dp), onClick = onAddLayerClicked) {
-                Text(stringResource(Res.string.add_layer))
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(modifier = Modifier.fillMaxWidth(), onClick = onAddLayerClicked) {
+                    Text(stringResource(Res.string.add_layer))
+                }
+                Button(modifier = Modifier.fillMaxWidth(), onClick = { showAddNetworkLayerDialog = true }) {
+                    Text(stringResource(Res.string.add_network_layer))
+                }
             }
         }
     }
+
+    if (showAddNetworkLayerDialog) {
+        AddNetworkLayerDialog(
+            onDismiss = { showAddNetworkLayerDialog = false },
+            onConfirm = { name, url ->
+                onAddNetworkLayer(name, url)
+                showAddNetworkLayerDialog = false
+            },
+        )
+    }
+}
+
+@Composable
+fun AddNetworkLayerDialog(onDismiss: () -> Unit, onConfirm: (String, String) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var url by remember { mutableStateOf("") }
+
+    MeshtasticDialog(
+        onDismiss = onDismiss,
+        title = stringResource(Res.string.add_network_layer),
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(stringResource(Res.string.name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { url = it },
+                    label = { Text(stringResource(Res.string.url)) },
+                    placeholder = { Text(stringResource(Res.string.network_layer_url_hint)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        onConfirm = { onConfirm(name, url) },
+        confirmTextRes = Res.string.save,
+        dismissTextRes = Res.string.cancel,
+    )
 }

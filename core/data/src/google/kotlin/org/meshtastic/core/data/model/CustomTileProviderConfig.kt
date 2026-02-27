@@ -24,4 +24,8 @@ data class CustomTileProviderConfig(
     val id: String = Uuid.random().toString(),
     val name: String,
     val urlTemplate: String,
-)
+    val localUri: String? = null,
+) {
+    val isLocal: Boolean
+        get() = localUri != null
+}
