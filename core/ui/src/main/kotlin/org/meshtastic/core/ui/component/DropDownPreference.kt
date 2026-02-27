@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ fun <T : Enum<T>> DropDownPreference(
     modifier: Modifier = Modifier,
     summary: String? = null,
     itemIcon: @Composable ((T) -> ImageVector)? = null,
+    itemColor: @Composable ((T) -> Color)? = null,
     itemLabel: @Composable ((T) -> String)? = null,
 ) {
     val enumConstants =
@@ -63,7 +66,8 @@ fun <T : Enum<T>> DropDownPreference(
         enumConstants.map {
             val label = itemLabel?.invoke(it) ?: it.name
             val icon = itemIcon?.invoke(it)
-            DropDownItem(it, label, icon)
+            val color = itemColor?.invoke(it)
+            DropDownItem(it, label, icon, color)
         }
 
     DropDownPreference(
@@ -77,7 +81,7 @@ fun <T : Enum<T>> DropDownPreference(
     )
 }
 
-data class DropDownItem<T>(val value: T, val label: String, val icon: ImageVector? = null)
+data class DropDownItem<T>(val value: T, val label: String, val icon: ImageVector? = null, val color: Color? = null)
 
 @JvmName("DropDownPreferencePairs")
 @Composable
@@ -141,7 +145,17 @@ fun <T> DropDownPreference(
                             modifier = Modifier.size(24.dp),
                         )
                     }
-                },
+                }
+                    ?: currentItem?.color?.let {
+                        {
+                            Icon(
+                                painter = ColorPainter(it),
+                                contentDescription = currentItem.label,
+                                modifier = Modifier.size(24.dp),
+                                tint = Color.Unspecified,
+                            )
+                        }
+                    },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 colors = ExposedDropdownMenuDefaults.textFieldColors(),
                 enabled = enabled,
@@ -157,8 +171,20 @@ fun <T> DropDownPreference(
                     DropdownMenuItem(
                         text = {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                selectionOption.icon?.let {
-                                    Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp))
+                                if (selectionOption.icon != null) {
+                                    Icon(
+                                        imageVector = selectionOption.icon,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                } else if (selectionOption.color != null) {
+                                    Icon(
+                                        painter = ColorPainter(selectionOption.color),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                        tint = Color.Unspecified,
+                                    )
                                     Spacer(modifier = Modifier.width(12.dp))
                                 }
                                 Text(selectionOption.label)

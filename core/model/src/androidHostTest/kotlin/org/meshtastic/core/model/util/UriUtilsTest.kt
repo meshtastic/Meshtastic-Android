@@ -32,7 +32,7 @@ class UriUtilsTest {
 
     @Test
     fun `handleMeshtasticUri handles channel share uri`() {
-        val uri = Uri.parse("https://meshtastic.org/e/somechannel")
+        val uri = Uri.parse("https://meshtastic.org/e/somechannel").toCommonUri()
         var channelCalled = false
         val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
         assertTrue("Should handle channel URI", handled)
@@ -41,7 +41,7 @@ class UriUtilsTest {
 
     @Test
     fun `handleMeshtasticUri handles contact share uri`() {
-        val uri = Uri.parse("https://meshtastic.org/v/somecontact")
+        val uri = Uri.parse("https://meshtastic.org/v/somecontact").toCommonUri()
         var contactCalled = false
         val handled = handleMeshtasticUri(uri, onContact = { contactCalled = true })
         assertTrue("Should handle contact URI", handled)
@@ -50,21 +50,21 @@ class UriUtilsTest {
 
     @Test
     fun `handleMeshtasticUri ignores other hosts`() {
-        val uri = Uri.parse("https://example.com/e/somechannel")
+        val uri = Uri.parse("https://example.com/e/somechannel").toCommonUri()
         val handled = handleMeshtasticUri(uri)
         assertFalse("Should not handle other hosts", handled)
     }
 
     @Test
     fun `handleMeshtasticUri ignores other paths`() {
-        val uri = Uri.parse("https://meshtastic.org/other/path")
+        val uri = Uri.parse("https://meshtastic.org/other/path").toCommonUri()
         val handled = handleMeshtasticUri(uri)
         assertFalse("Should not handle unknown paths", handled)
     }
 
     @Test
     fun `handleMeshtasticUri handles case insensitivity`() {
-        val uri = Uri.parse("https://MESHTASTIC.ORG/E/somechannel")
+        val uri = Uri.parse("https://MESHTASTIC.ORG/E/somechannel").toCommonUri()
         var channelCalled = false
         val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
         assertTrue("Should handle mixed case URI", handled)
@@ -73,7 +73,7 @@ class UriUtilsTest {
 
     @Test
     fun `handleMeshtasticUri handles www host`() {
-        val uri = Uri.parse("https://www.meshtastic.org/e/somechannel")
+        val uri = Uri.parse("https://www.meshtastic.org/e/somechannel").toCommonUri()
         var channelCalled = false
         val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
         assertTrue("Should handle www host", handled)
@@ -82,7 +82,7 @@ class UriUtilsTest {
 
     @Test
     fun `handleMeshtasticUri handles long channel path`() {
-        val uri = Uri.parse("https://meshtastic.org/channel/e/somechannel")
+        val uri = Uri.parse("https://meshtastic.org/channel/e/somechannel").toCommonUri()
         var channelCalled = false
         val handled = handleMeshtasticUri(uri, onChannel = { channelCalled = true })
         assertTrue("Should handle long channel path", handled)
@@ -91,7 +91,7 @@ class UriUtilsTest {
 
     @Test
     fun `handleMeshtasticUri handles long contact path`() {
-        val uri = Uri.parse("https://meshtastic.org/contact/v/somecontact")
+        val uri = Uri.parse("https://meshtastic.org/contact/v/somecontact").toCommonUri()
         var contactCalled = false
         val handled = handleMeshtasticUri(uri, onContact = { contactCalled = true })
         assertTrue("Should handle long contact path", handled)

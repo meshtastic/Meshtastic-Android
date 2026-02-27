@@ -18,7 +18,7 @@ package org.meshtastic.core.model
 
 import androidx.core.os.LocaleListCompat
 import org.junit.After
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.proto.Config
@@ -50,16 +50,16 @@ class NodeInfoTest {
 
     @Test
     fun distanceGood() {
-        Assert.assertEquals(node[1].distance(node[2]), 1111)
-        Assert.assertEquals(node[1].distance(node[3]), 111)
-        Assert.assertEquals(node[1].distance(node[4]), 1779)
+        assertEquals(1111, node[1].distance(node[2]))
+        assertEquals(111, node[1].distance(node[3]))
+        assertEquals(1779, node[1].distance(node[4]))
     }
 
     @Test
     fun distanceStrGood() {
-        Assert.assertEquals(node[1].distanceStr(node[2], Config.DisplayConfig.DisplayUnits.METRIC.value), "1.1 km")
-        Assert.assertEquals(node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.METRIC.value), "111 m")
-        Assert.assertEquals(node[1].distanceStr(node[4], Config.DisplayConfig.DisplayUnits.IMPERIAL.value), "1.1 mi")
-        Assert.assertEquals(node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.IMPERIAL.value), "364 ft")
+        assertEquals("1.1 km", node[1].distanceStr(node[2], Config.DisplayConfig.DisplayUnits.METRIC.value))
+        assertEquals("111 m", node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.METRIC.value))
+        assertEquals("1.1 mi", node[1].distanceStr(node[4], Config.DisplayConfig.DisplayUnits.IMPERIAL.value))
+        assertEquals("364 ft", node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.IMPERIAL.value))
     }
 }

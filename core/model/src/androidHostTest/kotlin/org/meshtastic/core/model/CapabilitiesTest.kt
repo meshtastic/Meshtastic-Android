@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.model
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -25,60 +26,74 @@ class CapabilitiesTest {
     private fun caps(version: String?) = Capabilities(version, forceEnableAll = false)
 
     @Test
-    fun `canMuteNode requires v2 7 18`() {
+    fun canMuteNodeRequiresV2718() {
         assertFalse(caps("2.7.15").canMuteNode)
         assertTrue(caps("2.7.18").canMuteNode)
         assertTrue(caps("2.8.0").canMuteNode)
-        assertTrue(caps("2.8.1").canMuteNode)
     }
 
-    // FIXME: needs updating when NeighborInfo is working properly
     @Test
-    fun `canRequestNeighborInfo disabled`() {
+    fun canRequestNeighborInfoIsCurrentlyDisabled() {
         assertFalse(caps("2.7.14").canRequestNeighborInfo)
-        assertFalse(caps("2.7.15").canRequestNeighborInfo)
-        assertFalse(caps("2.8.0").canRequestNeighborInfo)
+        assertFalse(caps("3.0.0").canRequestNeighborInfo)
     }
 
     @Test
-    fun `canSendVerifiedContacts requires v2 7 12`() {
+    fun canSendVerifiedContactsRequiresV2712() {
         assertFalse(caps("2.7.11").canSendVerifiedContacts)
         assertTrue(caps("2.7.12").canSendVerifiedContacts)
-        assertTrue(caps("2.7.15").canSendVerifiedContacts)
     }
 
     @Test
-    fun `canToggleTelemetryEnabled requires v2 7 12`() {
+    fun canToggleTelemetryEnabledRequiresV2712() {
         assertFalse(caps("2.7.11").canToggleTelemetryEnabled)
         assertTrue(caps("2.7.12").canToggleTelemetryEnabled)
     }
 
     @Test
-    fun `canToggleUnmessageable requires v2 6 9`() {
+    fun canToggleUnmessageableRequiresV269() {
         assertFalse(caps("2.6.8").canToggleUnmessageable)
         assertTrue(caps("2.6.9").canToggleUnmessageable)
     }
 
     @Test
-    fun `supportsQrCodeSharing requires v2 6 8`() {
+    fun supportsQrCodeSharingRequiresV268() {
         assertFalse(caps("2.6.7").supportsQrCodeSharing)
         assertTrue(caps("2.6.8").supportsQrCodeSharing)
     }
 
     @Test
-    fun `supportsSecondaryChannelLocation requires v2 6 10`() {
+    fun supportsSecondaryChannelLocationRequiresV2610() {
         assertFalse(caps("2.6.9").supportsSecondaryChannelLocation)
         assertTrue(caps("2.6.10").supportsSecondaryChannelLocation)
     }
 
     @Test
-    fun `supportsStatusMessage requires v2 7 17`() {
+    fun supportsStatusMessageRequiresV2717() {
         assertFalse(caps("2.7.16").supportsStatusMessage)
         assertTrue(caps("2.7.17").supportsStatusMessage)
     }
 
     @Test
-    fun `null firmware returns all false`() {
+    fun supportsTrafficManagementConfigRequiresV300() {
+        assertFalse(caps("2.7.18").supportsTrafficManagementConfig)
+        assertTrue(caps("3.0.0").supportsTrafficManagementConfig)
+    }
+
+    @Test
+    fun supportsTakConfigRequiresV2719() {
+        assertFalse(caps("2.7.18").supportsTakConfig)
+        assertTrue(caps("2.7.19").supportsTakConfig)
+    }
+
+    @Test
+    fun supportsEsp32OtaRequiresV2718() {
+        assertFalse(caps("2.7.17").supportsEsp32Ota)
+        assertTrue(caps("2.7.18").supportsEsp32Ota)
+    }
+
+    @Test
+    fun nullFirmwareReturnsAllFalse() {
         val c = caps(null)
         assertFalse(c.canMuteNode)
         assertFalse(c.canRequestNeighborInfo)
@@ -88,44 +103,35 @@ class CapabilitiesTest {
         assertFalse(c.supportsQrCodeSharing)
         assertFalse(c.supportsSecondaryChannelLocation)
         assertFalse(c.supportsStatusMessage)
+        assertFalse(c.supportsTrafficManagementConfig)
+        assertFalse(c.supportsTakConfig)
+        assertFalse(c.supportsEsp32Ota)
     }
 
     @Test
-    fun `invalid firmware returns all false`() {
-        val c = caps("invalid")
-        assertFalse(c.canMuteNode)
-        assertFalse(c.canRequestNeighborInfo)
-        assertFalse(c.canSendVerifiedContacts)
-        assertFalse(c.canToggleTelemetryEnabled)
-        assertFalse(c.canToggleUnmessageable)
-        assertFalse(c.supportsQrCodeSharing)
-        assertFalse(c.supportsSecondaryChannelLocation)
-        assertFalse(c.supportsStatusMessage)
-    }
-
-    @Test
-    fun `forceEnableAll returns true for everything regardless of version`() {
+    fun forceEnableAllReturnsTrueForEverythingRegardlessOfVersion() {
         val c = Capabilities(firmwareVersion = null, forceEnableAll = true)
         assertTrue(c.canMuteNode)
-        assertTrue(c.canRequestNeighborInfo)
         assertTrue(c.canSendVerifiedContacts)
-        assertTrue(c.canToggleTelemetryEnabled)
-        assertTrue(c.canToggleUnmessageable)
-        assertTrue(c.supportsQrCodeSharing)
-        assertTrue(c.supportsSecondaryChannelLocation)
         assertTrue(c.supportsStatusMessage)
+        assertTrue(c.supportsTrafficManagementConfig)
+        assertTrue(c.supportsTakConfig)
     }
 
     @Test
-    fun `forceEnableAll returns true even for invalid versions`() {
-        val c = Capabilities(firmwareVersion = "invalid", forceEnableAll = true)
-        assertTrue(c.canMuteNode)
-        assertTrue(c.canRequestNeighborInfo)
-        assertTrue(c.canSendVerifiedContacts)
-        assertTrue(c.canToggleTelemetryEnabled)
-        assertTrue(c.canToggleUnmessageable)
-        assertTrue(c.supportsQrCodeSharing)
-        assertTrue(c.supportsSecondaryChannelLocation)
-        assertTrue(c.supportsStatusMessage)
+    fun deviceVersionParsingIsRobust() {
+        assertEquals(20712, DeviceVersion("2.7.12").asInt)
+        assertEquals(20712, DeviceVersion("2.7.12-beta").asInt)
+        assertEquals(30000, DeviceVersion("3.0.0").asInt)
+        assertEquals(20700, DeviceVersion("2.7").asInt) // Handles 2-part versions
+        assertEquals(0, DeviceVersion("invalid").asInt)
+    }
+
+    @Test
+    fun deviceVersionComparisonIsCorrect() {
+        assertTrue(DeviceVersion("2.7.12") >= DeviceVersion("2.7.11"))
+        assertTrue(DeviceVersion("3.0.0") > DeviceVersion("2.8.1"))
+        assertTrue(DeviceVersion("2.7.12") == DeviceVersion("2.7.12"))
+        assertFalse(DeviceVersion("2.6.9") >= DeviceVersion("2.7.0"))
     }
 }

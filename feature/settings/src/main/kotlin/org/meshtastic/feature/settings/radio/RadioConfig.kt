@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.Download
@@ -97,13 +95,15 @@ fun RadioConfigItemList(
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
-    var modules by remember { mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata)) }
+    var modules by remember {
+        mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata, state.radioConfig.device?.role))
+    }
 
-    LaunchedEffect(excludedModulesUnlocked) {
+    LaunchedEffect(excludedModulesUnlocked, state.metadata, state.radioConfig.device?.role) {
         if (excludedModulesUnlocked) {
             modules = ModuleRoute.entries
         } else {
-            modules = ModuleRoute.filterExcludedFrom(state.metadata)
+            modules = ModuleRoute.filterExcludedFrom(state.metadata, state.radioConfig.device?.role)
         }
     }
 

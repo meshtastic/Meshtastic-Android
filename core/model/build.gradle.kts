@@ -25,6 +25,13 @@ plugins {
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+        withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
+    }
+
     sourceSets {
         commonMain.dependencies {
             api(projects.core.proto)
@@ -37,9 +44,25 @@ kotlin {
         }
         androidMain.dependencies {
             api(libs.androidx.annotation)
+            api(libs.androidx.core.ktx)
             implementation(libs.zxing.core)
         }
         commonTest.dependencies { implementation(kotlin("test")) }
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.mockk)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(kotlin("test"))
+            }
+        }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.test.runner)
+            }
+        }
     }
 }
 
