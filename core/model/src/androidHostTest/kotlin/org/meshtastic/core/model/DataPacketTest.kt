@@ -21,6 +21,7 @@ import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -36,7 +37,7 @@ class DataPacketTest {
         assertEquals(hash, packet.sfppHash)
 
         val packetNoHash = DataPacket(to = "to", channel = 0, text = "hello")
-        assertEquals(null, packetNoHash.sfppHash)
+        assertNull(packetNoHash.sfppHash)
     }
 
     @Test
