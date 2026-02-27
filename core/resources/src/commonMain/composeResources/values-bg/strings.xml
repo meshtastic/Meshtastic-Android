@@ -545,7 +545,6 @@
     <string name="long_name">Дълго име</string>
     <string name="short_name">Кратко име</string>
     <string name="hardware_model">Модел на хардуера</string>
-    <string name="licensed_amateur_radio">Лицензиран радиолюбител (HAM)</string>
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
     <string name="dew_point">Точка на оросяване</string>
     <string name="pressure">Налягане</string>

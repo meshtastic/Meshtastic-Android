@@ -516,7 +516,6 @@
     <string name="long_name">Довга назва</string>
     <string name="short_name">Коротка назва</string>
     <string name="hardware_model">Модель обладнання</string>
-    <string name="licensed_amateur_radio">Ліцензований радіоаматор</string>
     <string name="licensed_amateur_radio_text">Включення цієї опції вимикає шифрування і не сумісне зі стандартною мережею Meshtastic.</string>
     <string name="pressure">Атмосферний тиск</string>
     <string name="distance">Відстань</string>

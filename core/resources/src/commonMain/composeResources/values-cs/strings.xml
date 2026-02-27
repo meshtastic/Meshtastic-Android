@@ -618,7 +618,6 @@
     <string name="long_name">Dlouhé jméno</string>
     <string name="short_name">Krátké jméno</string>
     <string name="hardware_model">Hardwarový model</string>
-    <string name="licensed_amateur_radio">Licencované amatérské rádio (HAM)</string>
     <string name="licensed_amateur_radio_text">Povolení této možnosti zruší šifrování a není kompatibilní se základním nastavením Meshtastic sítě.</string>
     <string name="dew_point">Rosný bod</string>
     <string name="pressure">Tlak</string>

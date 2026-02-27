@@ -714,7 +714,6 @@
     <string name="long_name">Langer Name</string>
     <string name="short_name">Kurzname</string>
     <string name="hardware_model">Geräte-Modell</string>
-    <string name="licensed_amateur_radio">Amateurfunk lizenziert</string>
     <string name="licensed_amateur_radio_text">Das Aktivieren dieser Option deaktiviert die Verschlüsselung und ist nicht mit dem Standardnetzwerk von Meshtastic kompatibel.</string>
     <string name="dew_point">Taupunkt</string>
     <string name="pressure">Druck</string>

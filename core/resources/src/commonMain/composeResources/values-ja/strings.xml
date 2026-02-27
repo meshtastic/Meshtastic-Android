@@ -460,7 +460,6 @@
     <string name="user_config">ユーザー設定</string>
     <string name="node_id">ノード ID</string>
     <string name="hardware_model">ハードウェアのモデル</string>
-    <string name="licensed_amateur_radio">アマチュア無線免許所持者向け (HAM)</string>
     <string name="licensed_amateur_radio_text">このオプションを有効にすると、暗号化が無効になりデフォルトのMeshtasticネットワークと互換性が無くなります。</string>
     <string name="dew_point">露点</string>
     <string name="pressure">気圧</string>

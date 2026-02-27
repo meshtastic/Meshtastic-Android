@@ -643,7 +643,6 @@ Rango de Valores 0 - 500.</string>
     <string name="long_name">Nombre largo</string>
     <string name="short_name">Nombre Corto</string>
     <string name="hardware_model">Modelo del dispositivo</string>
-    <string name="licensed_amateur_radio">Licencia de radioaficionado (no necesaria)</string>
     <string name="licensed_amateur_radio_text">Activando esta opción se desactiva la encriptación y deja de ser compatible con la red de Meshtastic normal.</string>
     <string name="dew_point">Punto de rocío</string>
     <string name="pressure">Presión</string>

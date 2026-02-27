@@ -489,7 +489,6 @@
     <string name="user_config">Configuração do Usuário</string>
     <string name="node_id">ID do Nó</string>
     <string name="hardware_model">Modelo de hardware</string>
-    <string name="licensed_amateur_radio">Rádio Amador Licenciado (HAM)</string>
     <string name="licensed_amateur_radio_text">Ativar esta opção desativa a criptografia e não é compatível com a rede padrão do Meshtastic.</string>
     <string name="dew_point">Ponto de orvalho</string>
     <string name="pressure">Pressão</string>

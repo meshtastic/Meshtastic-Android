@@ -675,7 +675,6 @@
     <string name="long_name">Långt namn</string>
     <string name="short_name">Kort namn</string>
     <string name="hardware_model">Hårdvarumodell</string>
-    <string name="licensed_amateur_radio">Licensierad radioamatör (HAM)</string>
     <string name="licensed_amateur_radio_text">Aktivering detta alternativ inaktiverar kryptering och är inte kompatibelt med standard Meshtastic-nätverk.</string>
     <string name="dew_point">Daggpunkt</string>
     <string name="pressure">Tryck</string>

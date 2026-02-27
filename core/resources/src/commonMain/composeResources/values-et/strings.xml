@@ -714,7 +714,6 @@
     <string name="long_name">Täis nimi</string>
     <string name="short_name">Lühi nimi</string>
     <string name="hardware_model">Seadme mudel</string>
-    <string name="licensed_amateur_radio">Litsentseeritud amatöörraadio (HAM)</string>
     <string name="licensed_amateur_radio_text">Selle valiku lubamine keelab krüpteerimise ja ei ühildu Meshtastic vaikevõrguga.</string>
     <string name="dew_point">Kastepunkt</string>
     <string name="pressure">Õhurõhk</string>

@@ -637,7 +637,6 @@
     <string name="long_name">Nome Lungo</string>
     <string name="short_name">Nome Breve</string>
     <string name="hardware_model">Modello hardware</string>
-    <string name="licensed_amateur_radio">Radioamatori con licenza (HAM)</string>
     <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="pressure">Pressione</string>

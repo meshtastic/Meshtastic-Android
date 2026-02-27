@@ -671,7 +671,6 @@
     <string name="long_name">Hosszú név</string>
     <string name="short_name">Rövid név</string>
     <string name="hardware_model">Hardvermodell</string>
-    <string name="licensed_amateur_radio">Engedélyezett amatőrrádió (HAM)</string>
     <string name="licensed_amateur_radio_text">Ennek az opciónak az engedélyezése letiltja a titkosítást, és nem kompatibilis az alapértelmezett Meshtastic hálózattal.</string>
     <string name="dew_point">Harmatpont</string>
     <string name="pressure">Nyomás</string>

@@ -694,7 +694,6 @@
     <string name="long_name">Nom long</string>
     <string name="short_name">Nom court</string>
     <string name="hardware_model">Modèle de matériel</string>
-    <string name="licensed_amateur_radio">Radioamateur licencié (HAM)</string>
     <string name="licensed_amateur_radio_text">L'activation de cette option désactive le chiffrement et n'est pas compatible avec le réseau Meshtastic par défaut.</string>
     <string name="dew_point">Point de rosée</string>
     <string name="pressure">Pression</string>
