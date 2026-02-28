@@ -181,6 +181,12 @@ constructor(
             .onEach { lc -> if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(radioConfig = lc) } }
             .launchIn(viewModelScope)
 
+        radioConfigRepository.channelSetFlow
+            .onEach { cs ->
+                if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(channelList = cs.settings) }
+            }
+            .launchIn(viewModelScope)
+
         radioConfigRepository.moduleConfigFlow
             .onEach { lmc ->
                 if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(moduleConfig = lmc) }
