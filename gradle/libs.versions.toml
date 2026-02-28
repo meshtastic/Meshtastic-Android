@@ -1,36 +1,38 @@
 [versions]
 # Android
-agp = "9.0.0"
+agp = "9.0.1"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0"
 androidxHilt = "1.3.0"
-androidxTracing = "1.10.2"
+androidxTracing = "1.10.4"
 datastore = "1.2.0"
+glance = "1.2.0-rc01"
 lifecycle = "2.10.0"
 navigation = "2.9.7"
-navigation3 = "1.0.0"
-paging = "3.4.0"
+navigation3 = "1.0.1"
+paging = "3.4.1"
 room = "2.8.4"
 savedstate = "1.4.0"
 
 # Kotlin
 kotlin = "2.3.10"
 kotlinx-coroutines-android = "1.10.2"
+kotlinx-datetime = "0.7.1"
 kotlinx-serialization = "1.10.0"
 ktlint = "1.7.1"
-kover = "0.9.6"
+kover = "0.9.7"
 mockk = "1.14.9"
 testRetry = "1.6.4"
 
 # Compose Multiplatform
-compose-multiplatform = "1.10.0"
+compose-multiplatform = "1.11.0-alpha03"
 
 # Google
-hilt = "2.59.1"
-maps-compose = "8.0.1"
+hilt = "2.59.2"
+maps-compose = "8.2.0"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
@@ -43,23 +45,25 @@ ktor = "3.4.0"
 
 # Other
 aboutlibraries = "13.2.1"
-coil = "3.3.0"
+coil = "3.4.0"
 dd-sdk-android = "3.6.0"
 detekt = "1.23.8"
-devtools-ksp = "2.3.5"
+dokka = "2.2.0-Beta"
+devtools-ksp = "2.3.6"
 markdownRenderer = "0.39.2"
+okio = "3.16.4"
 osmdroid-android = "6.1.20"
 spotless = "8.2.1"
 wire = "6.0.0-alpha02"
-vico = "3.0.0-beta.3"
-# Removed gradle-doctor
+vico = "3.0.1"
 dependency-guard = "0.5.0"
-nordic-ble = "2.0.0-alpha12"
+nordic-ble = "2.0.0-alpha15"
+nordic-common = "2.9.1"
 
 
 [libraries]
 # AndroidX
-androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.3" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version = "1.12.4" }
 androidx-annotation = { module = "androidx.annotation:annotation", version = "1.9.1" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
@@ -74,14 +78,20 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-emoji2-emojipicker = { module = "androidx.emoji2:emoji2-emojipicker", version = "1.6.0" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
+androidx-glance-appwidget-preview = { module = "androidx.glance:glance-appwidget-preview", version.ref = "glance" }
+androidx-glance-preview = { module = "androidx.glance:glance-preview", version.ref = "glance" }
+androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
 androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }
 androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
+androidx-hilt-common = { module = "androidx.hilt:hilt-common", version.ref = "androidxHilt" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-testing = { module = "androidx.lifecycle:lifecycle-runtime-testing", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 androidx-navigation-common = { module = "androidx.navigation:navigation-common", version.ref = "navigation" }
@@ -89,18 +99,18 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "navigation" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-androidx-navigation3-viewmodel = { module = "androidx.navigation3:navigation3-viewmodel", version.ref = "navigation3" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+androidx-savedstate-compose = { module = "androidx.savedstate:savedstate-compose", version.ref = "savedstate" }
 androidx-savedstate-ktx = { module = "androidx.savedstate:savedstate-ktx", version.ref = "savedstate" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.1" }
 
 # AndroidX Compose
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2026.01.01" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2026.02.00" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -123,7 +133,7 @@ compose-multiplatform-resources = { module = "org.jetbrains.compose.components:c
 
 # Google
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.9.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.10.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -142,17 +152,20 @@ truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
 # Jetbrains
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
-dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version = "2.1.0" }
+dokka-gradlePlugin = { module = "org.jetbrains.dokka:dokka-gradle-plugin", version.ref = "dokka" }
 
 
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
+kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines-android" }
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 # Networking
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 okhttp3-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version = "5.3.2" }
@@ -177,12 +190,10 @@ dd-sdk-android-compose = { module = "com.datadoghq:dd-sdk-android-compose", vers
 dd-sdk-android-logs = { module = "com.datadoghq:dd-sdk-android-logs", version.ref = "dd-sdk-android" }
 dd-sdk-android-okhttp = { module = "com.datadoghq:dd-sdk-android-okhttp", version.ref = "dd-sdk-android" }
 dd-sdk-android-rum = { module = "com.datadoghq:dd-sdk-android-rum", version.ref = "dd-sdk-android" }
-dd-sdk-android-session-replay = { module = "com.datadoghq:dd-sdk-android-session-replay", version.ref = "dd-sdk-android" }
-dd-sdk-android-session-replay-compose = { module = "com.datadoghq:dd-sdk-android-session-replay-compose", version.ref = "dd-sdk-android" }
 dd-sdk-android-timber = { module = "com.datadoghq:dd-sdk-android-timber", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace = { module = "com.datadoghq:dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace-otel = { module = "com.datadoghq:dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
-dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-documentation-plugin", version = "2.1.0" }
+dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-documentation-plugin", version.ref = "dokka" }
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
@@ -190,11 +201,21 @@ markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-rend
 material = { module = "com.google.android.material:material", version = "1.13.0" }
 nordic-client-android = { module = "no.nordicsemi.kotlin.ble:client-android", version.ref = "nordic-ble" }
 nordic-client-android-mock = { module = "no.nordicsemi.kotlin.ble:client-android-mock", version.ref = "nordic-ble" }
-nordic-client-mock = { module = "no.nordicsemi.kotlin.ble:client-mock", version.ref = "nordic-ble" }
-nordic-core-android-mock = { module = "no.nordicsemi.kotlin.ble:core-android-mock", version.ref = "nordic-ble" }
+nordic-client-core-mock = { module = "no.nordicsemi.kotlin.ble:client-core-mock", version.ref = "nordic-ble" }
 nordic-core-mock = { module = "no.nordicsemi.kotlin.ble:core-mock", version.ref = "nordic-ble" }
-nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.10.1" }
+nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.11.0" }
+nordic-ble-env-android = { module = "no.nordicsemi.kotlin.ble:environment-android", version.ref = "nordic-ble" }
+nordic-ble-env-android-compose = { module = "no.nordicsemi.kotlin.ble:environment-android-compose", version.ref = "nordic-ble" }
+
+nordic-common-core = { module = "no.nordicsemi.android.common:core", version.ref = "nordic-common" }
+nordic-common-logger = { module = "no.nordicsemi.android.common:logger", version.ref = "nordic-common" }
+nordic-common-permissions-ble = { module = "no.nordicsemi.android.common:permissions-ble", version.ref = "nordic-common" }
+nordic-common-permissions-notification = { module = "no.nordicsemi.android.common:permissions-notification", version.ref = "nordic-common" }
+nordic-common-scanner-ble = { module = "no.nordicsemi.android.common:scanner-ble", version.ref = "nordic-common" }
+nordic-common-ui = { module = "no.nordicsemi.android.common:ui", version.ref = "nordic-common" }
+
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
+okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
@@ -207,11 +228,11 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.0.0" }
+android-tools-common = { module = "com.android.tools:common", version = "32.0.1" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
-datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.22.0" }
+datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.23.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.6" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
@@ -232,7 +253,7 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-compose-multiplatform = { id = "org.jetbrains.compose", version = "1.10.0" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -252,10 +273,10 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
-datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.22.0" }
+datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.23.0" }
 # Removed dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-dokka = { id = "org.jetbrains.dokka", version = "2.1.0" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }

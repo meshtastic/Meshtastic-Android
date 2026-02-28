@@ -39,13 +39,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.add
-import org.meshtastic.core.strings.delete
-import org.meshtastic.core.strings.gpio_pin
-import org.meshtastic.core.strings.ignore_incoming
-import org.meshtastic.core.strings.name
-import org.meshtastic.core.strings.type
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.add
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.gpio_pin
+import org.meshtastic.core.resources.ignore_incoming
+import org.meshtastic.core.resources.name
+import org.meshtastic.core.resources.type
 import org.meshtastic.proto.RemoteHardwarePin
 import org.meshtastic.proto.RemoteHardwarePinType
 

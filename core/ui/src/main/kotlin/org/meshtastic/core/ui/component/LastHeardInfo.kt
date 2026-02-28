@@ -20,13 +20,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.node_sort_last_heard
-import org.meshtastic.core.ui.R
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_antenna
+import org.meshtastic.core.resources.node_sort_last_heard
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
 
@@ -39,7 +39,7 @@ fun LastHeardInfo(
 ) {
     IconInfo(
         modifier = modifier,
-        icon = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
+        icon = vectorResource(Res.drawable.ic_antenna),
         contentDescription = stringResource(Res.string.node_sort_last_heard),
         label = if (showLabel) stringResource(Res.string.node_sort_last_heard) else null,
         text = formatAgo(lastHeard),
@@ -50,5 +50,5 @@ fun LastHeardInfo(
 @PreviewLightDark
 @Composable
 private fun LastHeardInfoPreview() {
-    AppTheme { LastHeardInfo(lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600) }
+    AppTheme { LastHeardInfo(lastHeard = nowSeconds.toInt() - 8600) }
 }

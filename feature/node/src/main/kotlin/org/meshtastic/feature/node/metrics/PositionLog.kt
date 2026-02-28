@@ -61,20 +61,20 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.alt
-import org.meshtastic.core.strings.clear
-import org.meshtastic.core.strings.heading
-import org.meshtastic.core.strings.latitude
-import org.meshtastic.core.strings.longitude
-import org.meshtastic.core.strings.sats
-import org.meshtastic.core.strings.save
-import org.meshtastic.core.strings.speed
-import org.meshtastic.core.strings.timestamp
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.alt
+import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.heading
+import org.meshtastic.core.resources.latitude
+import org.meshtastic.core.resources.longitude
+import org.meshtastic.core.resources.sats
+import org.meshtastic.core.resources.save
+import org.meshtastic.core.resources.speed
+import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -181,7 +181,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateU
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -270,7 +270,7 @@ private val testPosition =
         longitude_i = -953698040,
         altitude = 1230,
         sats_in_view = 7,
-        time = (System.currentTimeMillis() / 1000).toInt(),
+        time = nowSeconds.toInt(),
     )
 
 @Preview(showBackground = true)

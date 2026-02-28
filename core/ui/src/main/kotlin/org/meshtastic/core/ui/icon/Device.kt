@@ -18,13 +18,26 @@ package org.meshtastic.core.ui.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Fingerprint
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.MilitaryTech
+import androidx.compose.material.icons.rounded.MyLocation
+import androidx.compose.material.icons.rounded.Person
+import androidx.compose.material.icons.rounded.PersonOff
 import androidx.compose.material.icons.rounded.Router
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Sensors
+import androidx.compose.material.icons.rounded.VisibilityOff
 import androidx.compose.material.icons.rounded.Work
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+import org.jetbrains.compose.resources.vectorResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.ic_mountain_flag
+import org.meshtastic.proto.Config
 
 val MeshtasticIcons.HardwareModel: ImageVector
     get() = Icons.Rounded.Router
@@ -32,6 +45,23 @@ val MeshtasticIcons.Role: ImageVector
     get() = Icons.Rounded.Work
 val MeshtasticIcons.NodeId: ImageVector
     get() = Icons.Rounded.Fingerprint
+
+/** Returns a specific icon for a given [Config.DeviceConfig.Role]. */
+@Composable
+fun MeshtasticIcons.role(role: Config.DeviceConfig.Role?): ImageVector = when (role) {
+    Config.DeviceConfig.Role.CLIENT -> Icons.Rounded.Person
+    Config.DeviceConfig.Role.CLIENT_MUTE -> Icons.Rounded.PersonOff
+    Config.DeviceConfig.Role.ROUTER -> vectorResource(Res.drawable.ic_mountain_flag)
+    Config.DeviceConfig.Role.TRACKER -> Icons.Rounded.MyLocation
+    Config.DeviceConfig.Role.SENSOR -> Icons.Rounded.Sensors
+    Config.DeviceConfig.Role.TAK -> Icons.Rounded.MilitaryTech
+    Config.DeviceConfig.Role.TAK_TRACKER -> Icons.Rounded.MyLocation
+    Config.DeviceConfig.Role.CLIENT_HIDDEN -> Icons.Rounded.VisibilityOff
+    Config.DeviceConfig.Role.LOST_AND_FOUND -> Icons.Rounded.Search
+    Config.DeviceConfig.Role.CLIENT_BASE -> Icons.Rounded.Home
+    Config.DeviceConfig.Role.ROUTER_LATE -> Icons.Rounded.Router
+    else -> Icons.Rounded.Work
+}
 
 /**
  * This is from Material Symbols.

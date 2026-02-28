@@ -41,11 +41,12 @@ import com.geeksville.mesh.R.raw
 import com.geeksville.mesh.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
 import com.geeksville.mesh.service.ReactionReceiver.Companion.REACT_ACTION
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
-import com.meshtastic.core.strings.getString
 import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.NodeEntity
@@ -53,31 +54,47 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.client_notification
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.local_stats_bad
+import org.meshtastic.core.resources.local_stats_battery
+import org.meshtastic.core.resources.local_stats_diagnostics_prefix
+import org.meshtastic.core.resources.local_stats_dropped
+import org.meshtastic.core.resources.local_stats_heap
+import org.meshtastic.core.resources.local_stats_heap_value
+import org.meshtastic.core.resources.local_stats_nodes
+import org.meshtastic.core.resources.local_stats_noise
+import org.meshtastic.core.resources.local_stats_relays
+import org.meshtastic.core.resources.local_stats_traffic
+import org.meshtastic.core.resources.local_stats_uptime
+import org.meshtastic.core.resources.local_stats_utilization
+import org.meshtastic.core.resources.low_battery_message
+import org.meshtastic.core.resources.low_battery_title
+import org.meshtastic.core.resources.mark_as_read
+import org.meshtastic.core.resources.meshtastic_alerts_notifications
+import org.meshtastic.core.resources.meshtastic_app_name
+import org.meshtastic.core.resources.meshtastic_broadcast_notifications
+import org.meshtastic.core.resources.meshtastic_low_battery_notifications
+import org.meshtastic.core.resources.meshtastic_low_battery_temporary_remote_notifications
+import org.meshtastic.core.resources.meshtastic_messages_notifications
+import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
+import org.meshtastic.core.resources.meshtastic_service_notifications
+import org.meshtastic.core.resources.meshtastic_waypoints_notifications
+import org.meshtastic.core.resources.new_node_seen
+import org.meshtastic.core.resources.no_local_stats
+import org.meshtastic.core.resources.powered
+import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.you
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.SERVICE_NOTIFY_ID
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.client_notification
-import org.meshtastic.core.strings.low_battery_message
-import org.meshtastic.core.strings.low_battery_title
-import org.meshtastic.core.strings.mark_as_read
-import org.meshtastic.core.strings.meshtastic_alerts_notifications
-import org.meshtastic.core.strings.meshtastic_app_name
-import org.meshtastic.core.strings.meshtastic_broadcast_notifications
-import org.meshtastic.core.strings.meshtastic_low_battery_notifications
-import org.meshtastic.core.strings.meshtastic_low_battery_temporary_remote_notifications
-import org.meshtastic.core.strings.meshtastic_messages_notifications
-import org.meshtastic.core.strings.meshtastic_new_nodes_notifications
-import org.meshtastic.core.strings.meshtastic_service_notifications
-import org.meshtastic.core.strings.meshtastic_waypoints_notifications
-import org.meshtastic.core.strings.new_node_seen
-import org.meshtastic.core.strings.no_local_stats
-import org.meshtastic.core.strings.reply
-import org.meshtastic.core.strings.you
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
 import javax.inject.Inject
+import javax.inject.Singleton
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Manages the creation and display of all app notifications.
@@ -86,6 +103,7 @@ import javax.inject.Inject
  * notifications for various events like new messages, alerts, and service status changes.
  */
 @Suppress("TooManyFunctions", "LongParameterList")
+@Singleton
 class MeshServiceNotificationsImpl
 @Inject
 constructor(
@@ -97,7 +115,6 @@ constructor(
     private val notificationManager = context.getSystemService<NotificationManager>()!!
 
     companion object {
-        private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val MAX_BATTERY_LEVEL = 100
         private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
         private const val MAX_HISTORY_MESSAGES = 10
@@ -107,6 +124,9 @@ constructor(
         private const val SUMMARY_ID = 1
         private const val PERSON_ICON_SIZE = 128
         private const val PERSON_ICON_TEXT_SIZE_RATIO = 0.5f
+        private const val STATS_UPDATE_MINUTES = 15
+        private val STATS_UPDATE_INTERVAL = STATS_UPDATE_MINUTES.minutes
+        private const val BULLET = "• "
     }
 
     /**
@@ -265,35 +285,62 @@ constructor(
         notificationManager.createNotificationChannel(channel)
     }
 
-    var cachedTelemetry: Telemetry? = null
-    var cachedLocalStats: LocalStats? = null
-    var nextStatsUpdateMillis: Long = 0
-    var cachedMessage: String? = null
+    private var cachedDeviceMetrics: DeviceMetrics? = null
+    private var cachedLocalStats: LocalStats? = null
+    private var nextStatsUpdateMillis: Long = 0
+    private var cachedMessage: String? = null
 
     // region Public Notification Methods
+    @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
     override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification {
-        val hasLocalStats = telemetry?.local_stats != null
-        val hasDeviceMetrics = telemetry?.device_metrics != null
+        // Update caches if telemetry is provided
+        telemetry?.let { t ->
+            t.local_stats?.let { stats ->
+                cachedLocalStats = stats
+                nextStatsUpdateMillis = nowMillis + STATS_UPDATE_INTERVAL.inWholeMilliseconds
+            }
+            t.device_metrics?.let { metrics -> cachedDeviceMetrics = metrics }
+        }
+
+        // Seeding from database if caches are still null (e.g. on restart or reconnection)
+        if (cachedLocalStats == null || cachedDeviceMetrics == null) {
+            val repo = nodeRepository.get()
+            val myNodeNum = repo.myNodeInfo.value?.myNodeNum
+            if (myNodeNum != null) {
+                // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
+                // and we only do this once if the cache is empty.
+                val nodes = runBlocking { repo.getNodeDBbyNum().first() }
+                nodes[myNodeNum]?.let { entity ->
+                    if (cachedDeviceMetrics == null) {
+                        cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
+                    }
+                    if (cachedLocalStats == null) {
+                        // Fallback to DB stats if repository hasn't received any fresh ones yet
+                        cachedLocalStats =
+                            repo.localStats.value.takeIf { it.uptime_seconds != 0 }
+                                ?: entity.deviceTelemetry.local_stats
+                    }
+                }
+            }
+        }
+
+        val stats = cachedLocalStats
+        val metrics = cachedDeviceMetrics
+
         val message =
             when {
-                hasLocalStats -> {
-                    val localStatsMessage = telemetry?.local_stats?.formatToString()
-                    cachedTelemetry = telemetry
-                    nextStatsUpdateMillis = System.currentTimeMillis() + FIFTEEN_MINUTES_IN_MILLIS
-                    localStatsMessage
-                }
-                cachedTelemetry == null && hasDeviceMetrics -> {
-                    val deviceMetricsMessage = telemetry?.device_metrics?.formatToString()
-                    if (cachedLocalStats == null) {
-                        cachedTelemetry = telemetry
-                    }
-                    nextStatsUpdateMillis = System.currentTimeMillis()
-                    deviceMetricsMessage
-                }
+                stats != null -> stats.formatToString(metrics?.battery_level)
+                metrics != null -> metrics.formatToString()
                 else -> null
             }
 
-        cachedMessage = message ?: cachedMessage ?: getString(Res.string.no_local_stats)
+        // Only update cachedMessage if we have something new, otherwise keep what we have.
+        // Fallback to "No Stats Available" only if we truly have nothing.
+        if (message != null) {
+            cachedMessage = message
+        } else if (cachedMessage == null) {
+            cachedMessage = getString(Res.string.no_local_stats)
+        }
 
         val notification =
             createServiceStateNotification(
@@ -431,7 +478,7 @@ constructor(
     }
 
     override fun showNewNodeSeenNotification(node: NodeEntity) {
-        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name)
+        val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name, node.num)
         notificationManager.notify(node.num, notification)
     }
 
@@ -466,12 +513,13 @@ constructor(
                 .setShowWhen(true)
 
         message?.let {
-            builder.setContentText(it)
+            // First line of message is used for collapsed view, ensure it doesn't have a bullet
+            builder.setContentText(it.substringBefore("\n").removePrefix(BULLET))
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
         }
 
         nextUpdateAt
-            ?.takeIf { it > System.currentTimeMillis() }
+            ?.takeIf { it > nowMillis }
             ?.let {
                 builder.setWhen(it)
                 builder.setUsesChronometer(true)
@@ -579,7 +627,7 @@ constructor(
         isSilent: Boolean,
     ): Notification {
         val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+        val style = NotificationCompat.MessagingStyle(person).addMessage(message, nowMillis, person)
 
         val builder =
             commonBuilder(NotificationType.Waypoint, createOpenWaypointIntent(waypointId))
@@ -588,7 +636,7 @@ constructor(
                 .setStyle(style)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-                .setWhen(System.currentTimeMillis())
+                .setWhen(nowMillis)
                 .setShowWhen(true)
 
         if (isSilent) {
@@ -600,7 +648,7 @@ constructor(
 
     private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
         val person = Person.Builder().setName(name).build()
-        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, System.currentTimeMillis(), person)
+        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, nowMillis, person)
 
         return commonBuilder(NotificationType.Alert, createOpenMessageIntent(contactKey))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -610,14 +658,14 @@ constructor(
             .build()
     }
 
-    private fun createNewNodeSeenNotification(name: String, message: String): Notification {
+    private fun createNewNodeSeenNotification(name: String, message: String, nodeNum: Int): Notification {
         val title = getString(Res.string.new_node_seen).format(name)
         val builder =
-            commonBuilder(NotificationType.NewNode)
+            commonBuilder(NotificationType.NewNode, createOpenNodeDetailIntent(nodeNum))
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setAutoCancel(true)
                 .setContentTitle(title)
-                .setWhen(System.currentTimeMillis())
+                .setWhen(nowMillis)
                 .setShowWhen(true)
                 .setContentText(message)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(message))
@@ -628,10 +676,10 @@ constructor(
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
         val title = getString(Res.string.low_battery_title).format(node.shortName)
-        val batteryLevel = node.deviceTelemetry?.device_metrics?.battery_level ?: 0
+        val batteryLevel = node.deviceMetrics?.battery_level ?: 0
         val message = getString(Res.string.low_battery_message).format(node.longName, batteryLevel)
 
-        return commonBuilder(type)
+        return commonBuilder(type, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -639,7 +687,7 @@ constructor(
             .setContentTitle(title)
             .setContentText(message)
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            .setWhen(System.currentTimeMillis())
+            .setWhen(nowMillis)
             .setShowWhen(true)
             .build()
     }
@@ -684,6 +732,19 @@ constructor(
         return TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
             getPendingIntent(waypointId, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+    }
+
+    private fun createOpenNodeDetailIntent(nodeNum: Int): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/node?destNum=$nodeNum".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
+
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(nodeNum, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
     }
 
@@ -738,7 +799,7 @@ constructor(
             Intent(context, ReactionReceiver::class.java).apply {
                 action = REACT_ACTION
                 putExtra(ReactionReceiver.EXTRA_CONTACT_KEY, contactKey)
-                putExtra(ReactionReceiver.EXTRA_PACKET_ID, packetId)
+                putExtra(ReactionReceiver.EXTRA_REPLY_ID, packetId)
                 putExtra(ReactionReceiver.EXTRA_TO_ID, toId)
                 putExtra(ReactionReceiver.EXTRA_CHANNEL_INDEX, channelIndex)
                 putExtra(ReactionReceiver.EXTRA_EMOJI, "👍")
@@ -793,23 +854,67 @@ constructor(
 
         return IconCompat.createWithBitmap(bitmap)
     }
+
     // endregion
-}
 
-// Extension function to format LocalStats into a readable string.
-private fun LocalStats.formatToString(): String {
-    val parts = mutableListOf<String>()
-    parts.add("Uptime: ${formatUptime(uptime_seconds)}")
-    parts.add("ChUtil: %.2f%%".format(channel_utilization))
-    parts.add("AirUtilTX: %.2f%%".format(air_util_tx))
-    return parts.joinToString("\n")
-}
+    // region Extension Functions (Localized)
 
-private fun DeviceMetrics.formatToString(): String {
-    val parts = mutableListOf<String>()
-    battery_level?.let { parts.add("Battery Level: $it") }
-    uptime_seconds?.let { parts.add("Uptime: ${formatUptime(it)}") }
-    channel_utilization?.let { parts.add("ChUtil: %.2f%%".format(it)) }
-    air_util_tx?.let { parts.add("AirUtilTX: %.2f%%".format(it)) }
-    return parts.joinToString("\n")
+    private fun LocalStats.formatToString(batteryLevel: Int? = null): String {
+        val parts = mutableListOf<String>()
+        batteryLevel?.let {
+            if (it > MAX_BATTERY_LEVEL) {
+                parts.add(BULLET + getString(Res.string.powered))
+            } else {
+                parts.add(BULLET + getString(Res.string.local_stats_battery, it))
+            }
+        }
+        parts.add(BULLET + getString(Res.string.local_stats_nodes, num_online_nodes, num_total_nodes))
+        parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(uptime_seconds)))
+        parts.add(BULLET + getString(Res.string.local_stats_utilization, channel_utilization, air_util_tx))
+
+        if (heap_free_bytes > 0 || heap_total_bytes > 0) {
+            parts.add(
+                BULLET +
+                    getString(Res.string.local_stats_heap) +
+                    ": " +
+                    getString(Res.string.local_stats_heap_value, heap_free_bytes, heap_total_bytes),
+            )
+        }
+
+        // Traffic Stats
+        if (num_packets_tx > 0 || num_packets_rx > 0) {
+            parts.add(BULLET + getString(Res.string.local_stats_traffic, num_packets_tx, num_packets_rx, num_rx_dupe))
+        }
+        if (num_tx_relay > 0) {
+            parts.add(BULLET + getString(Res.string.local_stats_relays, num_tx_relay, num_tx_relay_canceled))
+        }
+
+        // Diagnostic Fields
+        val diagnosticParts = mutableListOf<String>()
+        if (noise_floor != 0) diagnosticParts.add(getString(Res.string.local_stats_noise, noise_floor))
+        if (num_packets_rx_bad > 0) diagnosticParts.add(getString(Res.string.local_stats_bad, num_packets_rx_bad))
+        if (num_tx_dropped > 0) diagnosticParts.add(getString(Res.string.local_stats_dropped, num_tx_dropped))
+
+        if (diagnosticParts.isNotEmpty()) {
+            parts.add(
+                BULLET + getString(Res.string.local_stats_diagnostics_prefix, diagnosticParts.joinToString(" | ")),
+            )
+        }
+
+        return parts.joinToString("\n")
+    }
+
+    private fun DeviceMetrics.formatToString(): String {
+        val parts = mutableListOf<String>()
+        battery_level?.let { parts.add(BULLET + getString(Res.string.local_stats_battery, it)) }
+        uptime_seconds?.let { parts.add(BULLET + getString(Res.string.local_stats_uptime, formatUptime(it))) }
+        if (channel_utilization != null || air_util_tx != null) {
+            parts.add(
+                BULLET + getString(Res.string.local_stats_utilization, channel_utilization ?: 0f, air_util_tx ?: 0f),
+            )
+        }
+        return parts.joinToString("\n")
+    }
+
+    // endregion
 }

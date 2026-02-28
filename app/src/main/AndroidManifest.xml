@@ -44,8 +44,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- Permissions required for providing location (from phone GPS) to mesh -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:remove="android:maxSdkVersion" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" tools:remove="android:maxSdkVersion" />
 
     <!-- This permission is required for analytics - and soon the MQTT gateway -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -112,7 +112,8 @@
         android:hardwareAccelerated="true"
         android:theme="@style/SplashTheme"
         android:localeConfig="@xml/locales_config"
-        android:networkSecurityConfig="@xml/network_security_config">
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:enableOnBackInvokedCallback="true">
 
         <uses-library
             android:name="org.apache.http.legacy"
@@ -124,6 +125,29 @@
             android:value="false" />
         <meta-data
             android:name="firebase_analytics_collection_enabled"
+            android:value="false" />
+
+        <!-- Disable AdID collection for privacy -->
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+        <meta-data
+            android:name="google_analytics_default_allow_ad_personalization_signals"
+            android:value="false" />
+
+        <!-- Disable SSAID collection to reduce PII footprint -->
+        <meta-data
+            android:name="google_analytics_ssaid_collection_enabled"
+            android:value="false" />
+
+        <!-- Disable automatic screen reporting to reduce background noise -->
+        <meta-data
+            android:name="google_analytics_automatic_screen_reporting_enabled"
+            android:value="false" />
+
+        <!-- Set default analytics storage consent to denied for Advanced Consent Mode -->
+        <meta-data
+            android:name="google_analytics_default_allow_analytics_storage"
             android:value="false" />
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
@@ -172,29 +196,20 @@
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
-                <!-- The QR codes to share channel settings and contacts are shared as meshtastic URLS
+                <!--
+                  The QR codes to share channel settings and contacts are shared as meshtastic URLS.
+                  We also support NFC NDEF Discovery for the same URLs.
 
-                an approximate example:
-                https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
-                https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
+                  An approximate example:
+                  https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                  https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
                 -->
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="https" />
-                <data android:host="meshtastic.org" />
-                <data android:pathPrefix="/e/" />
-                <data android:pathPrefix="/E/" />
-                <data android:pathPrefix="/v/" />
-                <data android:pathPrefix="/V/" />
-            </intent-filter>
-
-            <!-- Support NFC NDEF Discovery for the same URLs -->
-            <intent-filter>
-                <action android:name="android.nfc.action.NDEF_DISCOVERED" />
-                <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="https" />
                 <data android:host="meshtastic.org" />
                 <data android:pathPrefix="/e/" />
@@ -240,6 +255,17 @@
         <receiver android:name="com.geeksville.mesh.service.ReplyReceiver"/>
         <receiver android:name="com.geeksville.mesh.service.MarkAsReadReceiver"/>
         <receiver android:name="com.geeksville.mesh.service.ReactionReceiver"/>
+
+        <receiver
+            android:name="com.geeksville.mesh.widget.LocalStatsWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/local_stats_widget_info" />
+        </receiver>
 
         <!-- allow for plugin discovery -->
         <activity

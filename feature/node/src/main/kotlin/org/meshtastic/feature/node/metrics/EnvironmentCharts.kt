@@ -33,15 +33,15 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.baro_pressure
-import org.meshtastic.core.strings.humidity
-import org.meshtastic.core.strings.iaq
-import org.meshtastic.core.strings.lux
-import org.meshtastic.core.strings.soil_moisture
-import org.meshtastic.core.strings.soil_temperature
-import org.meshtastic.core.strings.temperature
-import org.meshtastic.core.strings.uv_lux
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.baro_pressure
+import org.meshtastic.core.resources.humidity
+import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.lux
+import org.meshtastic.core.resources.soil_moisture
+import org.meshtastic.core.resources.soil_temperature
+import org.meshtastic.core.resources.temperature
+import org.meshtastic.core.resources.uv_lux
 import org.meshtastic.proto.Telemetry
 
 @Suppress("MagicNumber")
@@ -129,16 +129,41 @@ fun EnvironmentMetricsChart(
             }
         val colorToLabel = allLegendData.associate { it.color to stringResource(it.nameRes) }
 
-        LaunchedEffect(telemetries, graphData) {
+        val pressureData =
+            remember(telemetries) {
+                telemetries.filter {
+                    val v = Environment.BAROMETRIC_PRESSURE.getValue(it)
+                    it.time != 0 && v != null && !v.isNaN()
+                }
+            }
+
+        val otherMetrics =
+            remember(telemetries, shouldPlot) {
+                Environment.entries.filter { metric ->
+                    metric != Environment.BAROMETRIC_PRESSURE &&
+                        shouldPlot[metric.ordinal] &&
+                        telemetries.any {
+                            val v = metric.getValue(it)
+                            it.time != 0 && v != null && !v.isNaN()
+                        }
+                }
+            }
+
+        val otherMetricsData =
+            remember(telemetries, otherMetrics) {
+                otherMetrics.associateWith { metric ->
+                    telemetries.filter {
+                        val v = metric.getValue(it)
+                        it.time != 0 && v != null && !v.isNaN()
+                    }
+                }
+            }
+
+        LaunchedEffect(pressureData, otherMetricsData) {
             modelProducer.runTransaction {
                 /* Pressure on its own layer/axis */
-                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
                     lineSeries {
-                        val pressureData =
-                            telemetries.filter {
-                                val v = Environment.BAROMETRIC_PRESSURE.getValue(it)
-                                it.time != 0 && v != null && !v.isNaN()
-                            }
                         series(
                             x = pressureData.map { it.time },
                             y = pressureData.map { Environment.BAROMETRIC_PRESSURE.getValue(it)!! },
@@ -146,14 +171,10 @@ fun EnvironmentMetricsChart(
                     }
                 }
                 /* Everything else on the default axis */
-                Environment.entries.forEach { metric ->
-                    if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
+                otherMetrics.forEach { metric ->
+                    val metricData = otherMetricsData[metric] ?: emptyList()
+                    if (metricData.isNotEmpty()) {
                         lineSeries {
-                            val metricData =
-                                telemetries.filter {
-                                    val v = metric.getValue(it)
-                                    it.time != 0 && v != null && !v.isNaN()
-                                }
                             series(x = metricData.map { it.time }, y = metricData.map { metric.getValue(it)!! })
                         }
                     }
@@ -171,7 +192,7 @@ fun EnvironmentMetricsChart(
             )
 
         val layers = mutableListOf<LineCartesianLayer>()
-        if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+        if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
             layers.add(
                 rememberLineCartesianLayer(
                     lineProvider =
@@ -185,31 +206,27 @@ fun EnvironmentMetricsChart(
                 ),
             )
         }
-        Environment.entries.forEach { metric ->
-            if (metric != Environment.BAROMETRIC_PRESSURE && shouldPlot[metric.ordinal]) {
-                layers.add(
-                    rememberLineCartesianLayer(
-                        lineProvider =
-                        LineCartesianLayer.LineProvider.series(
-                            ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
-                        ),
-                        verticalAxisPosition = Axis.Position.Vertical.End,
+        otherMetrics.forEach { metric ->
+            layers.add(
+                rememberLineCartesianLayer(
+                    lineProvider =
+                    LineCartesianLayer.LineProvider.series(
+                        ChartStyling.createGradientLine(metric.color, ChartStyling.MEDIUM_POINT_SIZE_DP),
                     ),
-                )
-            }
+                    verticalAxisPosition = Axis.Position.Vertical.End,
+                ),
+            )
         }
 
         if (layers.isNotEmpty()) {
-            val otherMetricsPlotted =
-                Environment.entries.filter { it != Environment.BAROMETRIC_PRESSURE && shouldPlot[it.ordinal] }
-            val endAxisColor = if (otherMetricsPlotted.size == 1) otherMetricsPlotted.first().color else onSurfaceColor
+            val endAxisColor = if (otherMetrics.size == 1) otherMetrics.first().color else onSurfaceColor
 
             GenericMetricChart(
                 modelProducer = modelProducer,
                 modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
                 layers = layers,
                 startAxis =
-                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
+                if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
                         valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },

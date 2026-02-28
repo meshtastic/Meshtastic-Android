@@ -176,9 +176,12 @@ jobs:
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane internal
 
+      - name: List outputs
+        run: ls -R app/build/outputs/
+
       - name: Upload Google AAB artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: google-aab
           path: app/build/outputs/bundle/googleRelease/app-google-release.aab
@@ -186,19 +189,23 @@ jobs:
 
       - name: Upload Google APK artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: google-apk
-          path: app/build/outputs/apk/google/release/app-google-release.apk
+          path: app/build/outputs/apk/**/*.apk
           retention-days: 1
 
-      - name: Attest Google artifacts provenance
+      - name: Attest Google AAB provenance
         if: always()
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         with:
-          subject-path: |
-            app/build/outputs/bundle/googleRelease/app-google-release.aab
-            app/build/outputs/apk/google/release/app-google-release.apk
+          subject-path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+
+      - name: Attest Google APK provenance
+        if: always()
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: app/build/outputs/apk/**/*.apk
 
   release-fdroid:
     runs-on: ubuntu-latest
@@ -250,17 +257,22 @@ jobs:
           VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
         run: bundle exec fastlane fdroid_build
 
+      - name: List outputs
+        run: ls -R app/build/outputs/
+
       - name: Upload F-Droid APK artifact
-        uses: actions/upload-artifact@v6
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
           name: fdroid-apk
-          path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+          path: app/build/outputs/apk/**/*.apk
           retention-days: 1
 
       - name: Attest F-Droid APK provenance
-        uses: actions/attest-build-provenance@v3
+        if: always()
+        uses: actions/attest-build-provenance@v4
         with:
-          subject-path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+          subject-path: app/build/outputs/apk/**/*.apk
 
   github-release:
     runs-on: ubuntu-latest
@@ -273,7 +285,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           path: ./artifacts
 
@@ -294,7 +306,7 @@ jobs:
           token: ${{ secrets.INTERNAL_BUILDS_HOST_PAT }}
           tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
-          generate_release_notes: true
+          generate_release_notes: false
           files: ./artifacts/*/*
           draft: false
           prerelease: true

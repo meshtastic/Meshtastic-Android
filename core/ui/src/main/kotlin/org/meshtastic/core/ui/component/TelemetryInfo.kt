@@ -39,19 +39,19 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.baro_pressure
-import org.meshtastic.core.strings.env_metrics_log
-import org.meshtastic.core.strings.humidity
-import org.meshtastic.core.strings.iaq
-import org.meshtastic.core.strings.node_id
-import org.meshtastic.core.strings.pax
-import org.meshtastic.core.strings.pax_metrics_log
-import org.meshtastic.core.strings.role
-import org.meshtastic.core.strings.soil_moisture
-import org.meshtastic.core.strings.soil_temperature
-import org.meshtastic.core.strings.temperature
-import org.meshtastic.core.strings.uptime
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.baro_pressure
+import org.meshtastic.core.resources.env_metrics_log
+import org.meshtastic.core.resources.humidity
+import org.meshtastic.core.resources.iaq
+import org.meshtastic.core.resources.node_id
+import org.meshtastic.core.resources.pax
+import org.meshtastic.core.resources.pax_metrics_log
+import org.meshtastic.core.resources.role
+import org.meshtastic.core.resources.soil_moisture
+import org.meshtastic.core.resources.soil_temperature
+import org.meshtastic.core.resources.temperature
+import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.HardwareModel
@@ -64,6 +64,8 @@ import org.meshtastic.core.ui.icon.Pressure
 import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Soil
 import org.meshtastic.core.ui.icon.Temperature
+import org.meshtastic.core.ui.icon.role
+import org.meshtastic.proto.Config
 
 private const val SIZE_ICON = 14
 
@@ -225,6 +227,22 @@ fun HardwareInfo(
         icon = MeshtasticIcons.HardwareModel,
         contentDescription = "Hardware Model",
         text = hwModel,
+        style = MaterialTheme.typography.labelSmall,
+        contentColor = contentColor,
+    )
+}
+
+@Composable
+fun RoleInfo(
+    role: Config.DeviceConfig.Role,
+    modifier: Modifier = Modifier,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface,
+) {
+    IconInfo(
+        modifier = modifier,
+        icon = MeshtasticIcons.role(role),
+        contentDescription = stringResource(Res.string.role),
+        text = role.name,
         style = MaterialTheme.typography.labelSmall,
         contentColor = contentColor,
     )

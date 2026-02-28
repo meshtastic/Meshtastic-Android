@@ -28,6 +28,7 @@ class AndroidApplicationComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugin("compose-compiler").get().pluginId)
+            apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
             extensions.configure<CommonExtension> {
                 configureAndroidCompose(this)
             }

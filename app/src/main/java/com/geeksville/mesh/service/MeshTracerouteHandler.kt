@@ -17,22 +17,23 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.meshtastic.core.strings.getString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.traceroute_duration
+import org.meshtastic.core.resources.traceroute_route_back_to_us
+import org.meshtastic.core.resources.traceroute_route_towards_dest
+import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.TracerouteResponse
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.traceroute_duration
-import org.meshtastic.core.strings.traceroute_route_back_to_us
-import org.meshtastic.core.strings.traceroute_route_towards_dest
-import org.meshtastic.core.strings.unknown_username
 import org.meshtastic.proto.MeshPacket
 import java.util.Locale
 import javax.inject.Inject
@@ -83,8 +84,8 @@ constructor(
         val start = commandSender.tracerouteStartTimes.remove(requestId)
         val responseText =
             if (start != null) {
-                val elapsedMs = System.currentTimeMillis() - start
-                val seconds = elapsedMs / MILLISECONDS_IN_SECOND
+                val elapsedMs = nowMillis - start
+                val seconds = elapsedMs / MILLIS_PER_SECOND
                 Logger.i { "Traceroute $requestId complete in $seconds s" }
                 val durationText = getString(Res.string.traceroute_duration, "%.1f".format(Locale.US, seconds))
                 "$full\n\n$durationText"
@@ -108,6 +109,6 @@ constructor(
     }
 
     companion object {
-        private const val MILLISECONDS_IN_SECOND = 1000.0
+        private const val MILLIS_PER_SECOND = 1000.0
     }
 }

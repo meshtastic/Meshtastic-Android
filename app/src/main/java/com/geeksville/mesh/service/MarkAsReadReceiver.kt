@@ -24,6 +24,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.service.MeshServiceNotifications
 import javax.inject.Inject
@@ -48,7 +49,7 @@ class MarkAsReadReceiver : BroadcastReceiver() {
             val pendingResult = goAsync()
             scope.launch {
                 try {
-                    packetRepository.clearUnreadCount(contactKey, System.currentTimeMillis())
+                    packetRepository.clearUnreadCount(contactKey, nowMillis)
                     meshServiceNotifications.cancelMessageNotification(contactKey)
                 } finally {
                     pendingResult.finish()

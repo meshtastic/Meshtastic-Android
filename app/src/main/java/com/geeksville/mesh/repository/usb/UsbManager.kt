@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.usb
 
 import android.content.BroadcastReceiver
@@ -24,33 +23,32 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import androidx.core.app.PendingIntentCompat
-import com.geeksville.mesh.util.registerReceiverCompat
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import org.meshtastic.core.common.util.registerReceiverCompat
 
 private const val ACTION_USB_PERMISSION = "com.geeksville.mesh.USB_PERMISSION"
 
-internal fun UsbManager.requestPermission(
-    context: Context,
-    device: UsbDevice,
-): Flow<Boolean> = callbackFlow {
-    val receiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            if (ACTION_USB_PERMISSION == intent.action) {
-                val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
-                trySend(granted)
-                close()
+internal fun UsbManager.requestPermission(context: Context, device: UsbDevice): Flow<Boolean> = callbackFlow {
+    val receiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                if (ACTION_USB_PERMISSION == intent.action) {
+                    val granted = intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)
+                    trySend(granted)
+                    close()
+                }
             }
         }
-    }
-    val permissionIntent = PendingIntentCompat.getBroadcast(
-        context,
-        0,
-        Intent(ACTION_USB_PERMISSION).apply { `package` = context.packageName },
-        0,
-        true
-    )
+    val permissionIntent =
+        PendingIntentCompat.getBroadcast(
+            context,
+            0,
+            Intent(ACTION_USB_PERMISSION).apply { `package` = context.packageName },
+            0,
+            true,
+        )
     val filter = IntentFilter(ACTION_USB_PERMISSION)
     context.registerReceiverCompat(receiver, filter)
     requestPermission(device, permissionIntent)

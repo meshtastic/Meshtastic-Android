@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.model
 
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.node_sort_alpha
-import org.meshtastic.core.strings.node_sort_channel
-import org.meshtastic.core.strings.node_sort_distance
-import org.meshtastic.core.strings.node_sort_hops_away
-import org.meshtastic.core.strings.node_sort_last_heard
-import org.meshtastic.core.strings.node_sort_via_favorite
-import org.meshtastic.core.strings.node_sort_via_mqtt
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.node_sort_alpha
+import org.meshtastic.core.resources.node_sort_channel
+import org.meshtastic.core.resources.node_sort_distance
+import org.meshtastic.core.resources.node_sort_hops_away
+import org.meshtastic.core.resources.node_sort_last_heard
+import org.meshtastic.core.resources.node_sort_via_favorite
+import org.meshtastic.core.resources.node_sort_via_mqtt
 
 enum class NodeSortOption(val sqlValue: String, val stringRes: StringResource) {
     LAST_HEARD("last_heard", Res.string.node_sort_last_heard),

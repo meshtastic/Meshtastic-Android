@@ -17,27 +17,33 @@
 package org.meshtastic.feature.map.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.rounded.LocationDisabled
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.manage_map_layers
-import org.meshtastic.core.strings.map_filter
-import org.meshtastic.core.strings.map_tile_source
-import org.meshtastic.core.strings.orient_north
-import org.meshtastic.core.strings.toggle_my_position
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.manage_map_layers
+import org.meshtastic.core.resources.map_filter
+import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.orient_north
+import org.meshtastic.core.resources.refresh
+import org.meshtastic.core.resources.toggle_my_position
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.map.MapViewModel
 
@@ -56,12 +62,14 @@ fun MapControlsOverlay(
     onManageCustomTileProvidersClicked: () -> Unit, // New parameter
     isNodeMap: Boolean,
     // Location tracking parameters
-    hasLocationPermission: Boolean = false,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     bearing: Float = 0f,
     onCompassClick: () -> Unit = {},
     followPhoneBearing: Boolean,
+    showRefresh: Boolean = false,
+    isRefreshing: Boolean = false,
+    onRefresh: () -> Unit = {},
 ) {
     HorizontalFloatingToolbar(
         modifier = modifier,
@@ -116,19 +124,31 @@ fun MapControlsOverlay(
                 onClick = onManageLayersClicked,
             )
 
-            // Location tracking button
-            if (hasLocationPermission) {
-                MapButton(
-                    icon =
-                    if (isLocationTrackingEnabled) {
-                        Icons.Rounded.LocationDisabled
-                    } else {
-                        Icons.Outlined.MyLocation
-                    },
-                    contentDescription = stringResource(Res.string.toggle_my_position),
-                    onClick = onToggleLocationTracking,
-                )
+            if (showRefresh) {
+                if (isRefreshing) {
+                    Box(modifier = Modifier.padding(8.dp)) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                    }
+                } else {
+                    MapButton(
+                        icon = Icons.Filled.Refresh,
+                        contentDescription = stringResource(Res.string.refresh),
+                        onClick = onRefresh,
+                    )
+                }
             }
+
+            // Location tracking button
+            MapButton(
+                icon =
+                if (isLocationTrackingEnabled) {
+                    Icons.Rounded.LocationDisabled
+                } else {
+                    Icons.Outlined.MyLocation
+                },
+                contentDescription = stringResource(Res.string.toggle_my_position),
+                onClick = onToggleLocationTracking,
+            )
         },
     )
 }

@@ -25,6 +25,7 @@ import android.provider.Settings
 import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
@@ -53,9 +54,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.core.os.ConfigurationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -65,36 +68,39 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.acknowledgements
-import org.meshtastic.core.strings.analytics_okay
-import org.meshtastic.core.strings.app_settings
-import org.meshtastic.core.strings.app_version
-import org.meshtastic.core.strings.bottom_nav_settings
-import org.meshtastic.core.strings.choose_theme
-import org.meshtastic.core.strings.device_db_cache_limit
-import org.meshtastic.core.strings.device_db_cache_limit_summary
-import org.meshtastic.core.strings.dynamic
-import org.meshtastic.core.strings.export_configuration
-import org.meshtastic.core.strings.export_data_csv
-import org.meshtastic.core.strings.import_configuration
-import org.meshtastic.core.strings.intro_show
-import org.meshtastic.core.strings.location_disabled
-import org.meshtastic.core.strings.modules_already_unlocked
-import org.meshtastic.core.strings.modules_unlocked
-import org.meshtastic.core.strings.preferences_language
-import org.meshtastic.core.strings.provide_location_to_mesh
-import org.meshtastic.core.strings.remotely_administrating
-import org.meshtastic.core.strings.save_rangetest
-import org.meshtastic.core.strings.system_settings
-import org.meshtastic.core.strings.theme
-import org.meshtastic.core.strings.theme_dark
-import org.meshtastic.core.strings.theme_light
-import org.meshtastic.core.strings.theme_system
-import org.meshtastic.core.strings.use_homoglyph_characters_encoding
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.acknowledgements
+import org.meshtastic.core.resources.analytics_okay
+import org.meshtastic.core.resources.app_settings
+import org.meshtastic.core.resources.app_version
+import org.meshtastic.core.resources.bottom_nav_settings
+import org.meshtastic.core.resources.choose_theme
+import org.meshtastic.core.resources.device_db_cache_limit
+import org.meshtastic.core.resources.device_db_cache_limit_summary
+import org.meshtastic.core.resources.dynamic
+import org.meshtastic.core.resources.export_configuration
+import org.meshtastic.core.resources.export_data_csv
+import org.meshtastic.core.resources.import_configuration
+import org.meshtastic.core.resources.intro_show
+import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.modules_already_unlocked
+import org.meshtastic.core.resources.modules_unlocked
+import org.meshtastic.core.resources.preferences_language
+import org.meshtastic.core.resources.provide_location_to_mesh
+import org.meshtastic.core.resources.remotely_administrating
+import org.meshtastic.core.resources.save_rangetest
+import org.meshtastic.core.resources.system_settings
+import org.meshtastic.core.resources.theme
+import org.meshtastic.core.resources.theme_dark
+import org.meshtastic.core.resources.theme_light
+import org.meshtastic.core.resources.theme_system
+import org.meshtastic.core.resources.use_homoglyph_characters_encoding
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
@@ -112,7 +118,6 @@ import org.meshtastic.feature.settings.util.LanguageUtils
 import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
@@ -184,8 +189,8 @@ fun SettingsScreen(
                 } else {
                     deviceProfile = it
                     val nodeName = (it.short_name ?: "").ifBlank { "node" }
-                    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
-                    val dateStr = dateFormat.format(java.util.Date())
+                    val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+                    val dateStr = dateFormat.format(nowMillis.toInstant().toDate())
                     val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -311,11 +316,10 @@ fun SettingsScreen(
 
                 val homoglyphEncodingEnabled by
                     viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
-                SwitchListItem(
-                    text = stringResource(Res.string.use_homoglyph_characters_encoding),
-                    checked = homoglyphEncodingEnabled,
-                    leadingIcon = Icons.Default.Abc,
-                    onClick = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+
+                HomoglyphSetting(
+                    homoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                    onToggle = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                 )
 
                 val settingsLauncher =
@@ -366,7 +370,7 @@ fun SettingsScreen(
                     summary = stringResource(Res.string.device_db_cache_limit_summary),
                 )
 
-                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(nowMillis.toInstant().toDate())
                 val nodeName = ourNode?.user?.short_name ?: ""
 
                 val exportRangeTestLauncher =
@@ -532,4 +536,19 @@ private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit
             }
         },
     )
+}
+
+@VisibleForTesting
+@Composable
+fun HomoglyphSetting(homoglyphEncodingEnabled: Boolean, onToggle: () -> Unit) {
+    val currentLocale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
+    val supportedLanguages = listOf("ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn")
+    if (currentLocale?.language in supportedLanguages) {
+        SwitchListItem(
+            text = stringResource(Res.string.use_homoglyph_characters_encoding),
+            checked = homoglyphEncodingEnabled,
+            leadingIcon = Icons.Default.Abc,
+            onClick = onToggle,
+        )
+    }
 }

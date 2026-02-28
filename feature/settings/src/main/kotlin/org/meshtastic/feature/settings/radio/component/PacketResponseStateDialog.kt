@@ -33,10 +33,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.delivery_confirmed
-import org.meshtastic.core.strings.error
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.delivery_confirmed
+import org.meshtastic.core.resources.error
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.feature.settings.radio.ResponseState
 

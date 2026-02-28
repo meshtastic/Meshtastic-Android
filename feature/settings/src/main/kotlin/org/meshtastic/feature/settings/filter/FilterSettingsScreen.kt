@@ -48,18 +48,18 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.add
-import org.meshtastic.core.strings.delete
-import org.meshtastic.core.strings.filter_add_placeholder
-import org.meshtastic.core.strings.filter_enable
-import org.meshtastic.core.strings.filter_enable_summary
-import org.meshtastic.core.strings.filter_no_words
-import org.meshtastic.core.strings.filter_regex_pattern
-import org.meshtastic.core.strings.filter_settings
-import org.meshtastic.core.strings.filter_whole_word
-import org.meshtastic.core.strings.filter_words
-import org.meshtastic.core.strings.filter_words_summary
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.add
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.filter_add_placeholder
+import org.meshtastic.core.resources.filter_enable
+import org.meshtastic.core.resources.filter_enable_summary
+import org.meshtastic.core.resources.filter_no_words
+import org.meshtastic.core.resources.filter_regex_pattern
+import org.meshtastic.core.resources.filter_settings
+import org.meshtastic.core.resources.filter_whole_word
+import org.meshtastic.core.resources.filter_words
+import org.meshtastic.core.resources.filter_words_summary
 import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable

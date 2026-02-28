@@ -26,20 +26,21 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.firmware_update_connecting_attempt
+import org.meshtastic.core.resources.firmware_update_downloading_percent
+import org.meshtastic.core.resources.firmware_update_erasing
+import org.meshtastic.core.resources.firmware_update_hash_rejected
+import org.meshtastic.core.resources.firmware_update_loading
+import org.meshtastic.core.resources.firmware_update_ota_failed
+import org.meshtastic.core.resources.firmware_update_retrieval_failed
+import org.meshtastic.core.resources.firmware_update_starting_ota
+import org.meshtastic.core.resources.firmware_update_uploading
+import org.meshtastic.core.resources.firmware_update_waiting_reboot
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.firmware_update_connecting_attempt
-import org.meshtastic.core.strings.firmware_update_downloading_percent
-import org.meshtastic.core.strings.firmware_update_erasing
-import org.meshtastic.core.strings.firmware_update_hash_rejected
-import org.meshtastic.core.strings.firmware_update_loading
-import org.meshtastic.core.strings.firmware_update_ota_failed
-import org.meshtastic.core.strings.firmware_update_retrieval_failed
-import org.meshtastic.core.strings.firmware_update_starting_ota
-import org.meshtastic.core.strings.firmware_update_uploading
-import org.meshtastic.core.strings.firmware_update_waiting_reboot
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
@@ -302,13 +303,13 @@ constructor(
                 WifiOtaTransport.RECOMMENDED_CHUNK_SIZE
             }
 
-        val startTime = System.currentTimeMillis()
+        val startTime = nowMillis
         transport
             .streamFirmware(
                 data = firmwareData,
                 chunkSize = chunkSize,
                 onProgress = { progress ->
-                    val currentTime = System.currentTimeMillis()
+                    val currentTime = nowMillis
                     val elapsedSeconds = (currentTime - startTime) / MILLIS_PER_SECOND
                     val percent = (progress * PERCENT_MAX).toInt()
 

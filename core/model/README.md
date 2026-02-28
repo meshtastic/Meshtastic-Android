@@ -1,11 +1,37 @@
-# `:core:model`
+# `:core:model` (Meshtastic Domain Models)
+
+## Overview
+The `:core:model` module is a **Kotlin Multiplatform (KMP)** library containing the domain models and data classes used throughout the application and its API. These models are platform-agnostic and designed to be shared across Android, JVM, and future supported platforms.
+
+## Multiplatform Support
+Models in this module use the `CommonParcelable` and `CommonParcelize` abstractions from `:core:common`. This allows them to maintain Android `Parcelable` compatibility (via `@Parcelize`) while residing in `commonMain` and remaining accessible to non-Android targets.
+
+## Key Models
+
+- **`DataPacket`**: Represents a mesh packet (text, telemetry, etc.).
+- **`NodeInfo`**: Contains detailed information about a node (position, SNR, battery, etc.).
+- **`DeviceHardware`**: Represents supported Meshtastic hardware devices and their capabilities.
+- **`Channel`**: Represents a mesh channel configuration.
+
+## Usage
+This module is a core dependency of `core:api` and most feature modules.
+
+```kotlin
+// In commonMain
+implementation(projects.core.model)
+```
+
+## Structure
+- **`commonMain`**: Contains the majority of domain models and logic.
+- **`androidMain`**: Contains Android-specific utilities and implementations for `expect` declarations.
+- **`androidUnitTest`**: Contains unit tests that require Android-specific features (like `Parcel` testing via Robolectric).
 
 ## Module dependency graph
 
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:model[model]:::null
+  :core:model[model]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
@@ -19,22 +45,3 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 
 ```
 <!--endregion-->
-
-## Meshtastic Core Models
-
-This module contains the Parcelable data classes used by the Meshtastic Android app and its API. These models are designed to be shared between the service and client applications via AIDL.
-
-### Key Classes
-
-*   **`DataPacket`**: Represents a mesh packet (text, telemetry, etc.).
-*   **`MeshUser`**: Represents a user/node on the mesh.
-*   **`NodeInfo`**: Contains detailed information about a node (position, SNR, battery, etc.).
-*   **`Position`**: GPS location data.
-
-### Usage
-
-This module is typically used as a dependency of `core:api` but can be used independently if you need to work with Meshtastic data structures.
-
-```kotlin
-implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:v2.7.13")
-```

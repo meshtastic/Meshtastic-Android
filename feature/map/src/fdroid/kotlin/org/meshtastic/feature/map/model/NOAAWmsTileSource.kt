@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.map.model
 
 import android.content.res.Resources
-import android.util.Log
+import co.touchlab.kermit.Logger
 import org.osmdroid.api.IMapView
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
@@ -78,7 +77,7 @@ open class NOAAWmsTileSource(
     private var forceHttp = false
 
     init {
-        Log.i(IMapView.LOGTAG, "WMS support is BETA. Please report any issues")
+        Logger.withTag(IMapView.LOGTAG).i { "WMS support is BETA. Please report any issues" }
         layer = layername
         this.version = version
         this.srs = srs
@@ -165,7 +164,7 @@ open class NOAAWmsTileSource(
         sb.append(bbox[minY]).append(",")
         sb.append(bbox[maxX]).append(",")
         sb.append(bbox[maxY])
-        Log.i(IMapView.LOGTAG, sb.toString())
+        Logger.withTag(IMapView.LOGTAG).i { sb.toString() }
         return sb.toString()
     }
 

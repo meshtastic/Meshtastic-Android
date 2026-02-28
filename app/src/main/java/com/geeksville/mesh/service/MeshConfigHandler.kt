@@ -16,7 +16,6 @@
  */
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.concurrent.handledLaunch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.Channel
@@ -59,12 +59,16 @@ constructor(
 
     fun handleDeviceConfig(config: Config) {
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
-        serviceRepository.setStatusMessage("Device config received")
+        serviceRepository.setConnectionProgress("Device config received")
     }
 
     fun handleModuleConfig(config: ModuleConfig) {
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
-        serviceRepository.setStatusMessage("Module config received")
+        serviceRepository.setConnectionProgress("Module config received")
+
+        config.statusmessage?.let { sm ->
+            nodeManager.myNodeNum?.let { num -> nodeManager.updateNodeStatus(num, sm.node_status) }
+        }
     }
 
     fun handleChannel(ch: Channel) {
@@ -75,9 +79,9 @@ constructor(
         val mi = nodeManager.getMyNodeInfo()
         val index = ch.index ?: 0
         if (mi != null) {
-            serviceRepository.setStatusMessage("Channels (${index + 1} / ${mi.maxChannels})")
+            serviceRepository.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
         } else {
-            serviceRepository.setStatusMessage("Channels (${index + 1})")
+            serviceRepository.setConnectionProgress("Channels (${index + 1})")
         }
     }
 }

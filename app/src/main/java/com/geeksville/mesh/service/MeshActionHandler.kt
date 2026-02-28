@@ -16,8 +16,6 @@
  */
 package com.geeksville.mesh.service
 
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.util.ignoreException
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -25,6 +23,9 @@ import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ReactionEntity
@@ -68,6 +69,7 @@ constructor(
 
     companion object {
         private const val DEFAULT_REBOOT_DELAY = 5
+        private const val EMOJI_INDICATOR = 1
     }
 
     fun onServiceAction(action: ServiceAction) {
@@ -127,16 +129,15 @@ constructor(
         val channel = action.contactKey[0].digitToInt()
         val destId = action.contactKey.substring(1)
         val dataPacket =
-            org.meshtastic.core.model
-                .DataPacket(
-                    to = destId,
-                    dataType = PortNum.TEXT_MESSAGE_APP.value,
-                    bytes = action.emoji.encodeToByteArray().toByteString(),
-                    channel = channel,
-                    replyId = action.replyId,
-                    wantAck = true,
-                    emoji = action.emoji.codePointAt(0),
-                )
+            DataPacket(
+                to = destId,
+                dataType = PortNum.TEXT_MESSAGE_APP.value,
+                bytes = action.emoji.encodeToByteArray().toByteString(),
+                channel = channel,
+                replyId = action.replyId,
+                wantAck = true,
+                emoji = EMOJI_INDICATOR,
+            )
                 .apply { from = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL }
         commandSender.sendData(dataPacket)
         rememberReaction(action, dataPacket.id, myNodeNum)
@@ -160,7 +161,7 @@ constructor(
                     replyId = action.replyId,
                     userId = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL,
                     emoji = action.emoji,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = nowMillis,
                     snr = 0f,
                     rssi = 0,
                     hopsAway = 0,
@@ -208,6 +209,7 @@ constructor(
     fun handleSetRemoteOwner(id: Int, destNum: Int, payload: ByteArray) {
         val u = User.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_owner = u) }
+        nodeManager.handleReceivedUser(destNum, u)
     }
 
     fun handleGetRemoteOwner(id: Int, destNum: Int) {
@@ -237,6 +239,7 @@ constructor(
     fun handleSetModuleConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = ModuleConfig.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_module_config = c) }
+        c.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
     }
 
     fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {

@@ -40,7 +40,7 @@ jobs:
 
       - name: Upload changelog artifact
         if: steps.last_prod_tag.outputs.tag != ''
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: main-push-changelog
           path: main-push-changelog.md

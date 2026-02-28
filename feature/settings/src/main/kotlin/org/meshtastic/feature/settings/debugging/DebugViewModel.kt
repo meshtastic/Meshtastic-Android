@@ -33,6 +33,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.nowInstant
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
@@ -41,9 +44,9 @@ import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.debug_clear
-import org.meshtastic.core.strings.debug_clear_logs_confirm
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.debug_clear
+import org.meshtastic.core.resources.debug_clear_logs_confirm
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.AdminMessage
@@ -60,7 +63,6 @@ import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
 import java.text.DateFormat
-import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -306,7 +308,7 @@ constructor(
             UiMeshLog(
                 uuid = log.uuid,
                 messageType = log.message_type,
-                formattedReceivedDate = TIME_FORMAT.format(log.received_date),
+                formattedReceivedDate = TIME_FORMAT.format(log.received_date.toInstant().toDate()),
                 logMessage = annotateMeshLogMessage(log),
                 decodedPayload = decodePayloadFromMeshLog(log),
             )
@@ -430,7 +432,7 @@ constructor(
             // decoded
             add("decoded")
             // today (locale-dependent short date format)
-            add(DateFormat.getDateInstance(DateFormat.SHORT).format(Date()))
+            add(DateFormat.getDateInstance(DateFormat.SHORT).format(nowInstant.toDate()))
             // Each app name
             addAll(PortNum.entries.map { it.name })
         }

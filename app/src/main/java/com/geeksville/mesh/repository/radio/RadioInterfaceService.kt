@@ -22,19 +22,11 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.android.BinaryLogFile
-import com.geeksville.mesh.android.BuildUtils
-import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.util.ignoreException
-import com.geeksville.mesh.util.toRemoteExceptions
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +35,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.common.core.simpleSharedFlow
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.ble.BleError
+import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.common.util.BinaryLogFile
+import org.meshtastic.core.common.util.BuildUtils
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.util.anonymize
@@ -81,10 +82,10 @@ constructor(
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    private val _receivedData = MutableSharedFlow<ByteArray>()
+    private val _receivedData = simpleSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
-    private val _connectionError = MutableSharedFlow<BleError>()
+    private val _connectionError = simpleSharedFlow<BleError>()
     val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
 
     // Thread-safe StateFlow for tracking device address changes
@@ -146,7 +147,7 @@ constructor(
 
     private var lastHeartbeatMillis = 0L
 
-    fun keepAlive(now: Long = System.currentTimeMillis()) {
+    fun keepAlive(now: Long = nowMillis) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             if (radioIf is SerialInterface) {
                 Logger.i { "Sending ToRadio heartbeat" }
@@ -370,12 +371,7 @@ constructor(
         serviceScope.handledLaunch { handleSendToRadio(a) }
     }
 
-    private val _meshActivity =
-        MutableSharedFlow<MeshActivity>(
-            replay = 0, // No replay needed for event-like emissions
-            extraBufferCapacity = 1, // Buffer one event to avoid loss on rapid emissions
-            onBufferOverflow = BufferOverflow.DROP_OLDEST, // Drop oldest if buffer overflows
-        )
+    private val _meshActivity = simpleSharedFlow<MeshActivity>()
     val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private fun emitSendActivity() {

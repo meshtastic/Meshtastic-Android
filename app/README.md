@@ -1,11 +1,53 @@
 # `:app`
 
+## Overview
+The `:app` module is the entry point for the Meshtastic Android application. It orchestrates the various feature modules, manages global state, and provides the main UI shell.
+
+## Key Components
+
+### 1. `MainActivity` & `Main.kt`
+The single Activity of the application. It hosts the `NavHost` and manages the root UI structure (Navigation Bar, Rail, etc.).
+
+### 2. `MeshService`
+The core background service that manages long-running communication with the mesh radio. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
+
+### 3. Hilt Application
+`MeshUtilApplication` is the Hilt entry point, providing the global dependency injection container.
+
+## Architecture
+The module primarily serves as a "glue" layer, connecting:
+- `core:*` modules for shared logic.
+- `feature:*` modules for specific user-facing screens.
+
 ## Module dependency graph
 
 <!--region graph-->
 ```mermaid
 graph TB
-  :app[app]:::null
+  :app[app]:::android-application
+  :app -.-> :core:analytics
+  :app -.-> :core:ble
+  :app -.-> :core:common
+  :app -.-> :core:data
+  :app -.-> :core:database
+  :app -.-> :core:datastore
+  :app -.-> :core:di
+  :app -.-> :core:model
+  :app -.-> :core:navigation
+  :app -.-> :core:network
+  :app -.-> :core:nfc
+  :app -.-> :core:prefs
+  :app -.-> :core:proto
+  :app -.-> :core:service
+  :app -.-> :core:resources
+  :app -.-> :core:ui
+  :app -.-> :core:barcode
+  :app -.-> :feature:intro
+  :app -.-> :feature:messaging
+  :app -.-> :feature:map
+  :app -.-> :feature:node
+  :app -.-> :feature:settings
+  :app -.-> :feature:firmware
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

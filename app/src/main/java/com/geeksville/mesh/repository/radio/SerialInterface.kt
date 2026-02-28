@@ -22,6 +22,7 @@ import com.geeksville.mesh.repository.usb.SerialConnectionListener
 import com.geeksville.mesh.repository.usb.UsbRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import org.meshtastic.core.common.util.nowMillis
 import java.util.concurrent.atomic.AtomicReference
 
 /** An interface that assumes we are talking to a meshtastic device via USB serial */
@@ -49,7 +50,7 @@ constructor(
         if (device == null) {
             Logger.e { "[$address] Serial device not found at address" }
         } else {
-            val connectStart = System.currentTimeMillis()
+            val connectStart = nowMillis
             Logger.i { "[$address] Opening serial device: $device" }
 
             var packetsReceived = 0
@@ -57,7 +58,7 @@ constructor(
             var connectionStartTime = 0L
 
             val onConnect: () -> Unit = {
-                connectionStartTime = System.currentTimeMillis()
+                connectionStartTime = nowMillis
                 val connectionTime = connectionStartTime - connectStart
                 Logger.i { "[$address] Serial device connected in ${connectionTime}ms" }
                 super.connect()
@@ -90,12 +91,13 @@ constructor(
                         override fun onDisconnected(thrown: Exception?) {
                             val uptime =
                                 if (connectionStartTime > 0) {
-                                    System.currentTimeMillis() - connectionStartTime
+                                    nowMillis - connectionStartTime
                                 } else {
                                     0
                                 }
                             thrown?.let { e ->
-                                Logger.e(e) { "[$address] Serial error after ${uptime}ms: ${e.message}" }
+                                // USB errors are common when unplugging; log as warning to avoid Crashlytics noise
+                                Logger.w(e) { "[$address] Serial error after ${uptime}ms: ${e.message}" }
                             }
                             Logger.w {
                                 "[$address] Serial device disconnected - " +

@@ -17,12 +17,10 @@
 package com.geeksville.mesh.service
 
 import dagger.Lazy
-import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
-import io.mockk.slot
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,13 +35,11 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
-import org.meshtastic.proto.Routing
 import org.meshtastic.proto.StoreForwardPlusPlus
 
 class MeshDataHandlerTest {
@@ -156,59 +152,5 @@ class MeshDataHandlerTest {
                 myNodeNum = 123,
             )
         }
-    }
-
-    @Test
-    fun `handleAckNak triggers RetryEvent when MAX_RETRANSMIT and conditions met`() = runTest {
-        val requestId = 555
-        val originalPacket =
-            org.meshtastic.core.database.entity.Packet(
-                uuid = 1L,
-                myNodeNum = 123,
-                packetId = requestId,
-                port_num = PortNum.TEXT_MESSAGE_APP.value,
-                contact_key = "contact",
-                received_time = System.currentTimeMillis(),
-                read = true,
-                data =
-                DataPacket(
-                    to = "recipient",
-                    bytes = "Important Message".encodeToByteArray().toByteString(),
-                    dataType = PortNum.TEXT_MESSAGE_APP.value,
-                    channel = 0,
-                    id = requestId,
-                    from = "!0000007b", // ID_LOCAL or my ID
-                    retryCount = 0,
-                ),
-            )
-
-        coEvery { packetRepository.getPacketById(requestId) } returns originalPacket
-        coEvery { packetRepository.getReactionByPacketId(requestId) } returns null
-        coEvery { serviceRepository.requestRetry(any(), any()) } returns true
-        every { commandSender.generatePacketId() } returns 888
-
-        val routingPayload = Routing(error_reason = Routing.Error.MAX_RETRANSMIT)
-        val payload = Routing.ADAPTER.encode(routingPayload).toByteString()
-
-        val meshPacket =
-            MeshPacket(
-                from = 123,
-                decoded = Data(portnum = PortNum.ROUTING_APP, payload = payload, request_id = requestId),
-                id = 2002,
-            )
-
-        every { dataMapper.toNodeID(any()) } returns "!0000007b"
-
-        meshDataHandler.handleReceivedData(meshPacket, 123)
-
-        val retryEventSlot = slot<RetryEvent.MessageRetry>()
-        coVerify { serviceRepository.requestRetry(capture(retryEventSlot), any()) }
-
-        assert(retryEventSlot.captured.packetId == requestId)
-        assert(retryEventSlot.captured.attemptNumber == 1)
-
-        // Verify update and resend
-        coVerify { packetRepository.update(any()) }
-        coVerify { commandSender.sendData(any()) }
     }
 }

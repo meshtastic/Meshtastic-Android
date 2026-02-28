@@ -20,7 +20,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
+import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.proto.Data
@@ -113,6 +113,7 @@ constructor(
         runCatching {
             packetHandler.sendToRadio(
                 MeshPacket(
+                    from = myNodeNum,
                     to = myNodeNum,
                     decoded = Data(portnum = PortNum.STORE_FORWARD_APP, payload = request.encode().toByteString()),
                     priority = MeshPacket.Priority.BACKGROUND,

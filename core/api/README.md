@@ -1,104 +1,66 @@
-# Meshtastic Android API
+# `:core:api` (Meshtastic Android API)
 
-This module contains the stable AIDL interface and dependencies required to integrate with the Meshtastic Android app.
+## Overview
+The `:core:api` module contains the stable AIDL interface and dependencies required for third-party applications to integrate with the Meshtastic Android app.
 
 ## Integration
 
-[![](https://jitpack.io/v/meshtastic/Meshtastic-Android.svg)](https://jitpack.io/#meshtastic/Meshtastic-Android)
-
 To communicate with the Meshtastic Android service from your own application, we recommend using **JitPack**.
 
-Add the JitPack repository to your root `build.gradle.kts` (or `settings.gradle.kts`):
-
-```kotlin
-dependencyResolutionManagement {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-    }
-}
-```
-
-Add the dependencies to your module's `build.gradle.kts`:
+### Dependencies
+Add the following to your `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    // Replace 'v2.7.13' with the specific version you need
-    val meshtasticVersion = "v2.7.13" 
-
     // The core AIDL interface and Intent constants
-    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-api:$meshtasticVersion")
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-api:v2.x.x")
     
-    // Data models (DataPacket, MeshUser, NodeInfo, etc.)
-    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:$meshtasticVersion")
+    // Data models (DataPacket, MeshUser, NodeInfo, etc.) - Kotlin Multiplatform
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-model:v2.x.x")
     
-    // Protobuf definitions (PortNum, Telemetry, etc.)
-    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-proto:$meshtasticVersion")
+    // Protobuf definitions (PortNum, Telemetry, etc.) - Kotlin Multiplatform
+    implementation("com.github.meshtastic.Meshtastic-Android:meshtastic-android-proto:v2.x.x")
 }
 ```
+*(Replace `v2.x.x` with the latest stable version).*
 
 ## Usage
 
 ### 1. Bind to the Service
-
-Use the `IMeshService` interface to bind to the Meshtastic service. It is recommended to query the package manager to find the correct service component, as the package name may vary between build flavors (e.g., Play Store vs. F-Droid).
+Use the `IMeshService` interface to bind to the Meshtastic service.
 
 ```kotlin
 val intent = Intent("com.geeksville.mesh.Service")
-val resolveInfo = packageManager.queryIntentServices(intent, 0)
-
-if (resolveInfo.isNotEmpty()) {
-    val serviceInfo = resolveInfo[0].serviceInfo
-    intent.setClassName(serviceInfo.packageName, serviceInfo.name)
-    bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
-}
+// ... query package manager and bind
 ```
 
 ### 2. Interact with the API
-
-Once bound, cast the `IBinder` to `IMeshService`:
-
-```kotlin
-override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
-    val meshService = IMeshService.Stub.asInterface(service)
-    
-    // Example: Send a broadcast text message
-    val packet = DataPacket(
-        to = DataPacket.ID_BROADCAST,
-        bytes = "Hello Meshtastic!".encodeToByteArray().toByteString(),
-        dataType = PortNum.TEXT_MESSAGE_APP.value,
-        id = meshService.packetId,
-        wantAck = true
-    )
-    meshService.send(packet)
-}
-```
+Once bound, cast the `IBinder` to `IMeshService`.
 
 ### 3. Register a BroadcastReceiver
+Use `MeshtasticIntent` constants for actions. Remember to use `RECEIVER_EXPORTED` on Android 13+.
 
-To receive packets and status updates, register a `BroadcastReceiver`. Use `MeshtasticIntent` constants for the actions.
+## Key Components
+- **`IMeshService.aidl`**: The primary AIDL interface.
+- **`MeshtasticIntent.kt`**: Defines Intent actions for received messages and status changes.
 
-**Important:** On Android 13+ (API 33), you **must** use `RECEIVER_EXPORTED` since you are receiving broadcasts from a different application.
+## Module dependency graph
 
-```kotlin
-// Using constants from org.meshtastic.core.api.MeshtasticIntent
-val intentFilter = IntentFilter().apply {
-    addAction(MeshtasticIntent.ACTION_RECEIVED_TEXT_MESSAGE_APP)
-    addAction(MeshtasticIntent.ACTION_NODE_CHANGE)
-    addAction(MeshtasticIntent.ACTION_CONNECTION_CHANGED)
-    addAction(MeshtasticIntent.ACTION_MESH_DISCONNECTED)
-}
+<!--region graph-->
+```mermaid
+graph TB
+  :core:api[api]:::android-library
+  :core:api --> :core:model
 
-if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    registerReceiver(meshtasticReceiver, intentFilter, Context.RECEIVER_EXPORTED)
-} else {
-    registerReceiver(meshtasticReceiver, intentFilter)
-}
+classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
+classDef android-test fill:#A0C4FF,stroke:#000,stroke-width:2px,color:#000;
+classDef jvm-library fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000;
+classDef kmp-library fill:#FFC1CC,stroke:#000,stroke-width:2px,color:#000;
+classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
+
 ```
-
-## Modules
-
-*   **`core:api`**: Contains `IMeshService.aidl` and `MeshtasticIntent`.
-*   **`core:model`**: Contains Parcelable data classes like `DataPacket`, `MeshUser`, `NodeInfo`.
-*   **`core:proto`**: Contains the generated Protobuf code (Wire).
+<!--endregion-->

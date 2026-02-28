@@ -40,7 +40,6 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -61,22 +60,24 @@ import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.delete
-import org.meshtastic.core.strings.info
-import org.meshtastic.core.strings.rssi
-import org.meshtastic.core.strings.snr
+import org.meshtastic.core.common.util.toDate
+import org.meshtastic.core.common.util.toInstant
+import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.info
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.snr
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import java.text.DateFormat
-import java.util.Date
+import kotlin.time.Duration.Companion.days
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     val TIME_MINUTE_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
     val TIME_SECONDS_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
-    val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
@@ -100,19 +101,22 @@ object CommonCharts {
 
     /** A dynamic [CartesianValueFormatter] that adjusts the time format based on the visible X range. */
     val dynamicTimeFormatter = CartesianValueFormatter { context, value, _ ->
-        val date = Date((value * MS_PER_SEC.toDouble()).toLong())
+        val date = (value * MS_PER_SEC.toDouble()).toLong().toInstant().toDate()
         val xLength = context.ranges.xLength
         val zoom = if (context is CartesianDrawingContext) context.zoom else 1f
         val visibleSpan = xLength / zoom
 
-        val formatter =
-            when {
-                visibleSpan <= 3600 -> TIME_SECONDS_FORMAT // < 1 hour visible
-                visibleSpan <= 86400 * 2 -> TIME_MINUTE_FORMAT // < 2 days visible
-                visibleSpan <= 86400 * 14 -> DATE_TIME_MINUTE_FORMAT // < 2 weeks visible
-                else -> DATE_FORMAT
+        when {
+            visibleSpan <= TimeConstants.ONE_HOUR.inWholeSeconds -> TIME_SECONDS_FORMAT.format(date) // < 1 hour visible
+            visibleSpan <= 2.days.inWholeSeconds -> TIME_MINUTE_FORMAT.format(date) // < 2 days visible
+            visibleSpan <= 14.days.inWholeSeconds -> {
+                // < 2 weeks visible: separate date and time with a newline
+                val dateStr = DATE_FORMAT.format(date)
+                val timeStr = TIME_MINUTE_FORMAT.format(date)
+                "$dateStr\n$timeStr"
             }
-        formatter.format(date)
+            else -> DATE_FORMAT.format(date)
+        }
     }
 }
 
@@ -235,7 +239,6 @@ fun DeleteItem(onClick: () -> Unit) {
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MetricLogItem(icon: ImageVector, text: String, contentDescription: String, modifier: Modifier = Modifier) {
     Card(
@@ -261,7 +264,8 @@ fun MetricLogItem(icon: ImageVector, text: String, contentDescription: String, m
             }
             Text(
                 text = text,
-                style = MaterialTheme.typography.titleMediumEmphasized,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }

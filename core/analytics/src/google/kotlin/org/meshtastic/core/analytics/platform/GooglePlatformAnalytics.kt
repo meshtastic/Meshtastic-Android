@@ -30,7 +30,6 @@ import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
 import com.datadog.android.compose.ExperimentalTrackingApi
 import com.datadog.android.compose.NavigationViewTrackingEffect
-import com.datadog.android.compose.enableComposeActionTracking
 import com.datadog.android.core.configuration.Configuration
 import com.datadog.android.log.Logger
 import com.datadog.android.log.Logs
@@ -40,17 +39,14 @@ import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumConfiguration
 import com.datadog.android.rum.tracking.AcceptAllNavDestinations
-import com.datadog.android.sessionreplay.ImagePrivacy
-import com.datadog.android.sessionreplay.SessionReplay
-import com.datadog.android.sessionreplay.SessionReplayConfiguration
-import com.datadog.android.sessionreplay.TextAndInputPrivacy
-import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
 import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics.ConsentStatus
+import com.google.firebase.analytics.FirebaseAnalytics.ConsentType
 import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
@@ -69,15 +65,21 @@ import co.touchlab.kermit.Logger as KermitLogger
 /**
  * Google Play Services specific implementation of [PlatformAnalytics]. This helper initializes and manages Firebase and
  * Datadog services, and subscribes to analytics preference changes to update consent accordingly.
+ *
+ * This implementation delays initialization of SDKs until user consent is granted to reduce tracking "noise" and
+ * respect privacy-focused environments.
  */
 class GooglePlatformAnalytics
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    analyticsPrefs: AnalyticsPrefs,
+    private val analyticsPrefs: AnalyticsPrefs,
 ) : PlatformAnalytics {
 
     private val sampleRate = 100f.takeIf { BuildConfig.DEBUG } ?: 10f // For Datadog remote sample rate
+
+    private var datadogLogger: Logger? = null
+    private var isFirebaseInitialized = false
 
     private val isInTestLab: Boolean
         get() {
@@ -88,22 +90,16 @@ constructor(
     companion object {
         private const val TAG = "GooglePlatformAnalytics"
         private const val SERVICE_NAME = "org.meshtastic"
+
+        private const val KEY_PRIORITY = "priority"
+        private const val KEY_TAG = "tag"
+        private const val KEY_MESSAGE = "message"
     }
 
     init {
-        initDatadog(context as Application, analyticsPrefs)
-        initCrashlytics(context, analyticsPrefs)
-
-        val datadogLogger =
-            Logger.Builder()
-                .setService(SERVICE_NAME)
-                .setNetworkInfoEnabled(true)
-                .setRemoteSampleRate(sampleRate)
-                .setBundleWithTraceEnabled(true)
-                .setBundleWithRumEnabled(true)
-                .build()
+        // Setup Kermit log writers immediately, they will handle delayed SDK initialization gracefully.
         val writers = buildList {
-            add(DatadogLogWriter(datadogLogger))
+            add(DatadogLogWriter())
             add(CrashlyticsLogWriter())
             if (BuildConfig.DEBUG) {
                 add(co.touchlab.kermit.LogcatWriter())
@@ -122,7 +118,31 @@ constructor(
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
 
-    private fun initDatadog(application: Application, analyticsPrefs: AnalyticsPrefs) {
+    /**
+     * Ensures that Datadog and Firebase SDKs are initialized if allowed. This is called lazily when consent is granted.
+     */
+    private fun ensureInitialized() {
+        if (!analyticsPrefs.analyticsAllowed || isInTestLab) return
+
+        if (!Datadog.isInitialized()) {
+            initDatadog(context as Application)
+            datadogLogger =
+                Logger.Builder()
+                    .setService(SERVICE_NAME)
+                    .setNetworkInfoEnabled(false) // Disable to avoid collecting Local IP/SSID
+                    .setRemoteSampleRate(sampleRate)
+                    .setBundleWithTraceEnabled(true)
+                    .setBundleWithRumEnabled(true)
+                    .build()
+        }
+
+        if (!isFirebaseInitialized) {
+            initCrashlytics(context as Application)
+            isFirebaseInitialized = true
+        }
+    }
+
+    private fun initDatadog(application: Application) {
         val configuration =
             Configuration.Builder(
                 clientToken = BuildConfig.datadogClientToken,
@@ -135,42 +155,45 @@ constructor(
                 .build()
         // Initialize with PENDING, consent will be updated via updateAnalyticsConsent
         Datadog.initialize(application, configuration, TrackingConsent.PENDING)
-        Datadog.setUserInfo(analyticsPrefs.installId)
         Datadog.setVerbosity(if (BuildConfig.DEBUG) android.util.Log.DEBUG else android.util.Log.WARN)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
                 .trackAnonymousUser(true)
-                .trackBackgroundEvents(true)
-                .trackFrustrations(true)
+                .trackBackgroundEvents(false) // Disable background noise
+                .trackFrustrations(false) // Disable click-tracking based frustration detection
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                .trackUserInteractions()
                 .setSessionSampleRate(sampleRate)
-                .enableComposeActionTracking()
                 .build()
         Rum.enable(rumConfiguration)
 
         val logsConfig = LogsConfiguration.Builder().build()
         Logs.enable(logsConfig)
 
-        val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(true).build()
+        val traceConfig = TraceConfiguration.Builder().setNetworkInfoEnabled(false).build()
         Trace.enable(traceConfig)
 
         GlobalOpenTelemetry.set(DatadogOpenTelemetry(serviceName = SERVICE_NAME))
 
-        val sessionReplayConfig =
-            SessionReplayConfiguration.Builder(sampleRate = sampleRate)
-                .setTextAndInputPrivacy(TextAndInputPrivacy.MASK_ALL)
-                .setImagePrivacy(ImagePrivacy.MASK_ALL)
-                .addExtensionSupport(ComposeExtensionSupport())
-                .build()
-        SessionReplay.enable(sessionReplayConfig)
+        // Session Replay disabled to reduce PII collection
     }
 
-    private fun initCrashlytics(application: Application, analyticsPrefs: AnalyticsPrefs) {
+    private fun initCrashlytics(application: Application) {
         Firebase.initialize(application)
-        Firebase.crashlytics.setUserId(analyticsPrefs.installId)
+
+        // Deny all ad-related consent types by default to minimize tracking noise
+        Firebase.analytics.setConsent(
+            mapOf(
+                ConsentType.AD_STORAGE to ConsentStatus.DENIED,
+                ConsentType.AD_USER_DATA to ConsentStatus.DENIED,
+                ConsentType.AD_PERSONALIZATION to ConsentStatus.DENIED,
+                ConsentType.ANALYTICS_STORAGE to ConsentStatus.DENIED,
+            ),
+        )
+
+        // Explicitly disable analytics collection until we confirm user consent
+        Firebase.analytics.setAnalyticsCollectionEnabled(false)
     }
 
     /**
@@ -179,18 +202,39 @@ constructor(
      * @param allowed True if analytics are allowed, false otherwise.
      */
     fun updateAnalyticsConsent(allowed: Boolean) {
-        if (!isPlatformServicesAvailable || isInTestLab) {
-            KermitLogger.i { "Analytics not available or in test lab, consent update skipped." }
-            return
-        }
-        KermitLogger.i { if (allowed) "Analytics enabled" else "Analytics disabled" }
-
-        Datadog.setTrackingConsent(if (allowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
-        Firebase.crashlytics.isCrashlyticsCollectionEnabled = allowed
-        Firebase.analytics.setAnalyticsCollectionEnabled(allowed)
+        if (isInTestLab) return
 
         if (allowed) {
-            Firebase.crashlytics.sendUnsentReports()
+            ensureInitialized()
+        }
+
+        KermitLogger.i { if (allowed) "Analytics enabled" else "Analytics disabled" }
+
+        if (Datadog.isInitialized()) {
+            Datadog.setTrackingConsent(if (allowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
+        }
+
+        if (isFirebaseInitialized) {
+            Firebase.crashlytics.isCrashlyticsCollectionEnabled = allowed
+            Firebase.analytics.setAnalyticsCollectionEnabled(allowed)
+
+            if (allowed) {
+                Firebase.crashlytics.sendUnsentReports()
+                // Ensure ad-related PII collection remains disabled even if analytics is allowed
+                Firebase.analytics.setUserProperty("allow_personalized_ads", "false")
+            }
+
+            // Manage Analytics Storage consent for Advanced Consent Mode
+            val consentStatus = if (allowed) ConsentStatus.GRANTED else ConsentStatus.DENIED
+            Firebase.analytics.setConsent(
+                mapOf(
+                    ConsentType.ANALYTICS_STORAGE to consentStatus,
+                    // Keep ad-related types explicitly denied
+                    ConsentType.AD_STORAGE to ConsentStatus.DENIED,
+                    ConsentType.AD_USER_DATA to ConsentStatus.DENIED,
+                    ConsentType.AD_PERSONALIZATION to ConsentStatus.DENIED,
+                ),
+            )
         }
     }
 
@@ -218,20 +262,12 @@ constructor(
                 it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
             }
 
-    private val isDatadogAvailable: Boolean
-        get() = Datadog.isInitialized()
-
     override val isPlatformServicesAvailable: Boolean
-        get() = isGooglePlayAvailable && isDatadogAvailable
+        get() = isGooglePlayAvailable
 
-    private class CrashlyticsLogWriter : LogWriter() {
-        companion object {
-            private const val KEY_PRIORITY = "priority"
-            private const val KEY_TAG = "tag"
-            private const val KEY_MESSAGE = "message"
-        }
-
+    private inner class CrashlyticsLogWriter : LogWriter() {
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+            if (!isFirebaseInitialized) return
             if (!Firebase.crashlytics.isCrashlyticsCollectionEnabled) return
 
             // Add the log to the Crashlytics log buffer so it appears in reports
@@ -256,8 +292,9 @@ constructor(
         }
     }
 
-    private class DatadogLogWriter(private val datadogLogger: Logger) : LogWriter() {
+    private inner class DatadogLogWriter : LogWriter() {
         override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+            val logger = datadogLogger ?: return
             val datadogPriority =
                 when (severity) {
                     Severity.Verbose -> android.util.Log.VERBOSE
@@ -267,7 +304,7 @@ constructor(
                     Severity.Error -> android.util.Log.ERROR
                     Severity.Assert -> android.util.Log.ASSERT
                 }
-            datadogLogger.log(datadogPriority, message, throwable, mapOf("tag" to tag))
+            logger.log(datadogPriority, message, throwable, mapOf("tag" to tag))
         }
     }
 
@@ -278,6 +315,7 @@ constructor(
     }
 
     override fun track(event: String, vararg properties: DataPair) {
+        if (!isFirebaseInitialized) return
         val bundle = Bundle()
         properties.forEach {
             when (it.value) {

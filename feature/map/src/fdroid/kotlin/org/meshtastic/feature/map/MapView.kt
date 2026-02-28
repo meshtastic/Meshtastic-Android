@@ -18,7 +18,6 @@ package org.meshtastic.feature.map
 
 import android.Manifest
 import android.graphics.Paint
-import android.text.format.DateUtils
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -48,7 +48,6 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -67,6 +66,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -82,44 +82,51 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
-import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.gpsDisabled
-import org.meshtastic.core.common.hasGps
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.calculating
-import org.meshtastic.core.strings.cancel
-import org.meshtastic.core.strings.clear
-import org.meshtastic.core.strings.close
-import org.meshtastic.core.strings.delete_for_everyone
-import org.meshtastic.core.strings.delete_for_me
-import org.meshtastic.core.strings.expires
-import org.meshtastic.core.strings.location_disabled
-import org.meshtastic.core.strings.map_cache_info
-import org.meshtastic.core.strings.map_cache_manager
-import org.meshtastic.core.strings.map_cache_size
-import org.meshtastic.core.strings.map_cache_tiles
-import org.meshtastic.core.strings.map_clear_tiles
-import org.meshtastic.core.strings.map_download_complete
-import org.meshtastic.core.strings.map_download_errors
-import org.meshtastic.core.strings.map_download_region
-import org.meshtastic.core.strings.map_filter
-import org.meshtastic.core.strings.map_node_popup_details
-import org.meshtastic.core.strings.map_offline_manager
-import org.meshtastic.core.strings.map_purge_fail
-import org.meshtastic.core.strings.map_purge_success
-import org.meshtastic.core.strings.map_style_selection
-import org.meshtastic.core.strings.map_subDescription
-import org.meshtastic.core.strings.map_tile_source
-import org.meshtastic.core.strings.only_favorites
-import org.meshtastic.core.strings.show_precision_circle
-import org.meshtastic.core.strings.show_waypoints
-import org.meshtastic.core.strings.toggle_my_position
-import org.meshtastic.core.strings.waypoint_delete
-import org.meshtastic.core.strings.you
+import org.meshtastic.core.model.util.toString
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.calculating
+import org.meshtastic.core.resources.cancel
+import org.meshtastic.core.resources.clear
+import org.meshtastic.core.resources.close
+import org.meshtastic.core.resources.delete_for_everyone
+import org.meshtastic.core.resources.delete_for_me
+import org.meshtastic.core.resources.expires
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.heading
+import org.meshtastic.core.resources.latitude
+import org.meshtastic.core.resources.location_disabled
+import org.meshtastic.core.resources.longitude
+import org.meshtastic.core.resources.map_cache_info
+import org.meshtastic.core.resources.map_cache_manager
+import org.meshtastic.core.resources.map_cache_size
+import org.meshtastic.core.resources.map_cache_tiles
+import org.meshtastic.core.resources.map_clear_tiles
+import org.meshtastic.core.resources.map_download_complete
+import org.meshtastic.core.resources.map_download_errors
+import org.meshtastic.core.resources.map_download_region
+import org.meshtastic.core.resources.map_filter
+import org.meshtastic.core.resources.map_node_popup_details
+import org.meshtastic.core.resources.map_offline_manager
+import org.meshtastic.core.resources.map_purge_fail
+import org.meshtastic.core.resources.map_purge_success
+import org.meshtastic.core.resources.map_style_selection
+import org.meshtastic.core.resources.map_subDescription
+import org.meshtastic.core.resources.map_tile_source
+import org.meshtastic.core.resources.only_favorites
+import org.meshtastic.core.resources.position
+import org.meshtastic.core.resources.show_precision_circle
+import org.meshtastic.core.resources.show_waypoints
+import org.meshtastic.core.resources.toggle_my_position
+import org.meshtastic.core.resources.waypoint_delete
+import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BasicListItem
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.TracerouteColors
@@ -133,6 +140,7 @@ import org.meshtastic.feature.map.component.MapButton
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
 import org.meshtastic.feature.map.model.TracerouteOverlay
+import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
@@ -165,12 +173,26 @@ import kotlin.math.sin
 private fun MapView.updateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
+    trackMarkers: List<Marker>,
+    trackPolylines: List<Polyline>,
     nodeClusterer: RadiusMarkerClusterer,
 ) {
-    Logger.d { "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints" }
-    overlays.removeAll { it is MarkerWithLabel }
-    // overlays.addAll(nodeMarkers + waypointMarkers)
+    Logger.d {
+        "Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints ${trackMarkers.size} tracks"
+    }
+
+    val trackOverlayIds = (trackMarkers + trackPolylines).toSet()
+
+    overlays.removeAll { overlay ->
+        overlay is MarkerWithLabel ||
+            (overlay is Marker && overlay !in nodeClusterer.items && overlay !in trackOverlayIds) ||
+            (overlay is Polyline && overlay !in trackOverlayIds)
+    }
+
     overlays.addAll(waypointMarkers)
+    overlays.addAll(trackPolylines)
+    overlays.addAll(trackMarkers)
+
     nodeClusterer.items.clear()
     nodeClusterer.items.addAll(nodeMarkers)
     nodeClusterer.invalidate()
@@ -212,6 +234,8 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
+    focusedNodeNum: Int? = null,
+    nodeTracks: List<Position>? = null,
     tracerouteOverlay: TracerouteOverlay? = null,
     tracerouteNodePositions: Map<Int, Position> = emptyMap(),
     onTracerouteMappableCountChanged: (shown: Int, total: Int) -> Unit = { _, _ -> },
@@ -242,8 +266,6 @@ fun MapView(
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-
-    val hasGps = remember { context.hasGps() }
 
     // Accompanist permissions state for location
     val locationPermissionsState =
@@ -280,18 +302,18 @@ fun MapView(
             scope.launch { context.showToast(Res.string.location_disabled) }
             return
         }
+
         Logger.d { "user clicked MyLocationNewOverlay ${myLocationOverlay == null}" }
         if (myLocationOverlay == null) {
             myLocationOverlay =
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_location_dot_24)
-                        ?.let {
-                            setPersonIcon(it)
-                            setPersonAnchor(0.5f, 0.5f)
-                        }
-                    getBitmapFromVectorDrawable(context, org.meshtastic.core.ui.R.drawable.ic_map_navigation_24)?.let {
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot)?.let {
+                        setPersonIcon(it)
+                        setPersonAnchor(0.5f, 0.5f)
+                    }
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -387,9 +409,7 @@ fun MapView(
     val traceroutePolylines = remember { mutableStateListOf<Polyline>() }
     var hasCenteredTraceroute by remember(tracerouteOverlay) { mutableStateOf(false) }
 
-    val markerIcon = remember {
-        AppCompatResources.getDrawable(context, org.meshtastic.core.ui.R.drawable.ic_baseline_location_on_24)
-    }
+    val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_location_on) }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
@@ -413,7 +433,7 @@ fun MapView(
                 id = u.id
                 title = u.long_name
                 snippet =
-                    com.meshtastic.core.strings.getString(
+                    getString(
                         Res.string.map_node_popup_details,
                         node.gpsString(),
                         formatAgo(node.lastHeard),
@@ -421,12 +441,7 @@ fun MapView(
                         if (node.batteryStr != "") node.batteryStr else "?",
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription =
-                        com.meshtastic.core.strings.getString(
-                            Res.string.map_subDescription,
-                            ourNode.bearing(node).toString(),
-                            dist,
-                        )
+                    subDescription = getString(Res.string.map_subDescription, ourNode.bearing(node).toString(), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -447,16 +462,16 @@ fun MapView(
 
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
-        builder.setTitle(com.meshtastic.core.strings.getString(Res.string.waypoint_delete))
-        builder.setNeutralButton(com.meshtastic.core.strings.getString(Res.string.cancel)) { _, _ ->
+        builder.setTitle(getString(Res.string.waypoint_delete))
+        builder.setNeutralButton(getString(Res.string.cancel)) { _, _ ->
             Logger.d { "User canceled marker delete dialog" }
         }
-        builder.setNegativeButton(com.meshtastic.core.strings.getString(Res.string.delete_for_me)) { _, _ ->
+        builder.setNegativeButton(getString(Res.string.delete_for_me)) { _, _ ->
             Logger.d { "User deleted waypoint ${waypoint.id} for me" }
             mapViewModel.deleteWaypoint(waypoint.id)
         }
         if ((waypoint.locked_to ?: 0) in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
-            builder.setPositiveButton(com.meshtastic.core.strings.getString(Res.string.delete_for_everyone)) { _, _ ->
+            builder.setPositiveButton(getString(Res.string.delete_for_everyone)) { _, _ ->
                 Logger.d { "User deleted waypoint ${waypoint.id} for everyone" }
                 mapViewModel.sendWaypoint(waypoint.copy(expire = 1))
                 mapViewModel.deleteWaypoint(waypoint.id)
@@ -491,7 +506,7 @@ fun MapView(
     }
 
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL || (myId != null && id == myId)) {
-        com.meshtastic.core.strings.getString(Res.string.you)
+        getString(Res.string.you)
     } else {
         mapViewModel.getUser(id).long_name
     }
@@ -502,36 +517,21 @@ fun MapView(
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if ((pt.locked_to ?: 0) != 0) "\uD83D\uDD12" else ""
-            val time =
-                DateUtils.formatDateTime(
-                    context,
-                    waypoint.received_time,
-                    DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-                )
+            val time = DateFormatter.formatDateTime(waypoint.received_time)
             val label = (pt.name ?: "") + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if ((pt.icon ?: 0) == 0) 128205 else pt.icon!!))
-            val now = System.currentTimeMillis()
+            val now = nowMillis
             val expireTimeMillis = (pt.expire ?: 0) * 1000L
             val expireTimeStr =
                 when {
                     (pt.expire ?: 0) == 0 || pt.expire == Int.MAX_VALUE -> "Never"
                     expireTimeMillis <= now -> "Expired"
-                    else ->
-                        DateUtils.getRelativeTimeSpanString(
-                            expireTimeMillis,
-                            now,
-                            DateUtils.MINUTE_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_RELATIVE,
-                        )
-                            .toString()
+                    else -> DateFormatter.formatRelativeTime(expireTimeMillis)
                 }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet =
-                    "[$time] ${pt.description}  " +
-                    com.meshtastic.core.strings.getString(Res.string.expires) +
-                    ": $expireTimeStr"
+                snippet = "[$time] ${pt.description}  " + getString(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 if (selectedWaypointId == pt.id) {
                     showInfoWindow()
@@ -642,7 +642,7 @@ fun MapView(
         val tileCount: Int =
             CacheManager(this)
                 .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
-        cacheEstimate = com.meshtastic.core.strings.getString(Res.string.map_cache_tiles, tileCount)
+        cacheEstimate = getString(Res.string.map_cache_tiles, tileCount)
     }
 
     val boxOverlayListener =
@@ -690,6 +690,51 @@ fun MapView(
         }
     }
 
+    fun MapView.onTracksChanged(nodeTracks: List<Position>?, focusedNodeNum: Int?): Pair<List<Marker>, List<Polyline>> {
+        if (nodeTracks == null || focusedNodeNum == null) return emptyList<Marker>() to emptyList<Polyline>()
+
+        val lastHeardTrackFilter = mapFilterState.lastHeardTrackFilter
+        val timeFilteredPositions =
+            nodeTracks.filter {
+                lastHeardTrackFilter == LastHeardFilter.Any || it.time > nowSeconds - lastHeardTrackFilter.seconds
+            }
+        val sortedPositions = timeFilteredPositions.sortedBy { it.time }
+
+        val focusedNode = nodes.find { it.num == focusedNodeNum } ?: return emptyList<Marker>() to emptyList<Polyline>()
+        val color = focusedNode.colors.second
+
+        val trackPolylines = mutableListOf<Polyline>()
+        if (sortedPositions.size > 1) {
+            val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
+            segments.forEachIndexed { index, segmentPoints ->
+                val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
+                val polyline =
+                    Polyline().apply {
+                        setPoints(
+                            segmentPoints.map { GeoPoint((it.latitude_i ?: 0) * 1e-7, (it.longitude_i ?: 0) * 1e-7) },
+                        )
+                        outlinePaint.color = Color(color).copy(alpha = alpha).toArgb()
+                        outlinePaint.strokeWidth = 8f
+                    }
+                trackPolylines.add(polyline)
+            }
+        }
+
+        val trackMarkers =
+            sortedPositions.mapIndexedNotNull { index, position ->
+                if (index == sortedPositions.lastIndex) return@mapIndexedNotNull null
+
+                Marker(this).apply {
+                    this.position = GeoPoint((position.latitude_i ?: 0) * 1e-7, (position.longitude_i ?: 0) * 1e-7)
+                    icon = AppCompatResources.getDrawable(context, R.drawable.ic_map_location_dot)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    title = getString(Res.string.position)
+                    snippet = formatAgo(position.time)
+                }
+            }
+        return trackMarkers to trackPolylines
+    }
+
     Scaffold(
         floatingActionButton = {
             DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
@@ -706,10 +751,13 @@ fun MapView(
                 modifier = Modifier.fillMaxSize(),
                 update = { mapView ->
                     mapView.updateTracerouteOverlay(tracerouteForwardOffsetPoints, tracerouteReturnOffsetPoints)
+                    val (trackMarkers, trackPolylines) = mapView.onTracksChanged(nodeTracks, focusedNodeNum)
                     with(mapView) {
                         updateMarkers(
                             onNodesChanged(nodesForMarkers),
                             onWaypointChanged(waypoints.values, selectedWaypointId),
+                            trackMarkers,
+                            trackPolylines,
                             nodeClusterer,
                         )
                     }
@@ -728,6 +776,7 @@ fun MapView(
                     modifier = Modifier.align(Alignment.BottomCenter),
                 )
             } else {
+                @Suppress("MagicNumber")
                 Column(
                     modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -741,7 +790,7 @@ fun MapView(
                         MapButton(
                             onClick = { mapFilterExpanded = true },
                             icon = Icons.Outlined.Tune,
-                            contentDescription = Res.string.map_filter,
+                            contentDescription = stringResource(Res.string.map_filter),
                         )
                         DropdownMenu(
                             expanded = mapFilterExpanded,
@@ -814,6 +863,7 @@ fun MapView(
                                             text = stringResource(Res.string.show_precision_circle),
                                             modifier = Modifier.weight(1f),
                                         )
+                                        @Suppress("MagicNumber")
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
                                             onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
@@ -825,22 +875,20 @@ fun MapView(
                             )
                         }
                     }
-                    if (hasGps) {
-                        MapButton(
-                            icon =
-                            if (myLocationOverlay == null) {
-                                Icons.Outlined.MyLocation
-                            } else {
-                                Icons.Rounded.LocationDisabled
-                            },
-                            contentDescription = stringResource(Res.string.toggle_my_position),
-                        ) {
-                            if (locationPermissionsState.allPermissionsGranted) {
-                                map.toggleMyLocation()
-                            } else {
-                                triggerLocationToggleAfterPermission = true
-                                locationPermissionsState.launchMultiplePermissionRequest()
-                            }
+                    MapButton(
+                        icon =
+                        if (myLocationOverlay == null) {
+                            Icons.Outlined.MyLocation
+                        } else {
+                            Icons.Rounded.LocationDisabled
+                        },
+                        contentDescription = stringResource(Res.string.toggle_my_position),
+                    ) {
+                        if (locationPermissionsState.allPermissionsGranted) {
+                            map.toggleMyLocation()
+                        } else {
+                            triggerLocationToggleAfterPermission = true
+                            locationPermissionsState.launchMultiplePermissionRequest()
                         }
                     }
                 }
@@ -986,7 +1034,6 @@ private fun CacheInfoDialog(mapView: MapView, onDismiss: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PurgeTileSourceDialog(onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
@@ -1085,7 +1132,8 @@ private const val TRACEROUTE_SINGLE_POINT_ZOOM = 12.0
 private const val TRACEROUTE_ZOOM_OUT_LEVELS = 0.5
 private const val WAYPOINT_ZOOM = 15.0
 
-private fun Double.toRad(): Double = Math.toRadians(this)
+@Suppress("MagicNumber")
+private fun Double.toRad(): Double = this * Math.PI / 180.0
 
 private fun bearingRad(from: GeoPoint, to: GeoPoint): Double {
     val lat1 = from.latitude.toRad()
@@ -1126,6 +1174,8 @@ private fun offsetPolyline(
 
     return points.mapIndexed { index, point ->
         val heading = headings[index.coerceIn(0, headings.lastIndex)]
+
+        @Suppress("MagicNumber")
         val perpendicularHeading = heading + (Math.PI / 2 * sideMultiplier)
         point.offsetPoint(perpendicularHeading, abs(offsetMeters))
     }

@@ -16,6 +16,7 @@
  */
 package com.geeksville.mesh.service
 
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -26,6 +27,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
+import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -87,5 +89,34 @@ class MeshMessageProcessorTest {
         processor.handleReceivedMeshPacket(packet, 999)
 
         verify(exactly = 1) { dataHandler.handleReceivedData(match { it.id == 456 }, any(), any(), any()) }
+    }
+
+    @Test
+    fun `packets from local node are logged with NODE_NUM_LOCAL`() = runTest(testDispatcher) {
+        val myNodeNum = 1234
+        val packet = MeshPacket(from = myNodeNum, id = 789, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+
+        isNodeDbReady.value = true
+        testScheduler.runCurrent()
+
+        processor.handleReceivedMeshPacket(packet, myNodeNum)
+        testScheduler.runCurrent() // wait for log insert job
+
+        coVerify { meshLogRepository.insert(match { log -> log.fromNum == MeshLog.NODE_NUM_LOCAL }) }
+    }
+
+    @Test
+    fun `packets from remote nodes are logged with their node number`() = runTest(testDispatcher) {
+        val myNodeNum = 1234
+        val remoteNodeNum = 5678
+        val packet = MeshPacket(from = remoteNodeNum, id = 789, decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP))
+
+        isNodeDbReady.value = true
+        testScheduler.runCurrent()
+
+        processor.handleReceivedMeshPacket(packet, myNodeNum)
+        testScheduler.runCurrent()
+
+        coVerify { meshLogRepository.insert(match { log -> log.fromNum == remoteNodeNum }) }
     }
 }

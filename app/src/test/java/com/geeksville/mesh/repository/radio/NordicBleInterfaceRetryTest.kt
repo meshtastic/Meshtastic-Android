@@ -22,8 +22,8 @@ import io.mockk.clearMocks
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.mock.mock
@@ -38,18 +38,19 @@ import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
 import org.junit.Before
 import org.junit.Test
-import java.util.UUID
+import org.meshtastic.core.ble.BleError
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
+import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class NordicBleInterfaceRetryTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val address = "00:11:22:33:44:55"
-
-    private fun UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Before
     fun setup() {
@@ -106,10 +107,10 @@ class NordicBleInterfaceRetryTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             toRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = TORADIO_CHARACTERISTIC,
                                     properties =
                                     setOf(
                                         CharacteristicProperty.WRITE,
@@ -118,17 +119,17 @@ class NordicBleInterfaceRetryTest {
                                     permission = Permission.WRITE,
                                 )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = FROMNUM_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = FROMRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = LOGRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -138,7 +139,7 @@ class NordicBleInterfaceRetryTest {
             }
 
         centralManager.simulatePeripherals(listOf(peripheralSpec))
-        delay(100.milliseconds)
+        advanceUntilIdle()
 
         val nordicInterface =
             NordicBleInterface(
@@ -149,7 +150,7 @@ class NordicBleInterfaceRetryTest {
             )
 
         // Wait for connection and stable state
-        delay(2000.milliseconds)
+        advanceUntilIdle()
         verify(timeout = 5000) { service.onConnect() }
 
         // Clear initial discovery errors if any (sometimes mock emits empty list initially)
@@ -159,8 +160,8 @@ class NordicBleInterfaceRetryTest {
         val dataToSend = byteArrayOf(0x01, 0x02, 0x03)
         nordicInterface.handleSendToRadio(dataToSend)
 
-        // Give it time to process retries (500ms delay per retry in code)
-        delay(1500.milliseconds)
+        // Give it time to process retries
+        advanceUntilIdle()
 
         assert(writeAttempts == 2) { "Should have attempted write twice, but was $writeAttempts" }
         assert(writtenValue != null) { "Value should have been eventually written" }
@@ -211,10 +212,10 @@ class NordicBleInterfaceRetryTest {
                     isBonded = true,
                     eventHandler = eventHandler,
                     cachedServices = {
-                        Service(uuid = BleConstants.BTM_SERVICE_UUID.toKotlinUuid()) {
+                        Service(uuid = SERVICE_UUID) {
                             toRadioHandle =
                                 Characteristic(
-                                    uuid = BleConstants.BTM_TORADIO_CHARACTER.toKotlinUuid(),
+                                    uuid = TORADIO_CHARACTERISTIC,
                                     properties =
                                     setOf(
                                         CharacteristicProperty.WRITE,
@@ -223,17 +224,17 @@ class NordicBleInterfaceRetryTest {
                                     permission = Permission.WRITE,
                                 )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMNUM_CHARACTER.toKotlinUuid(),
+                                uuid = FROMNUM_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_FROMRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = FROMRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.READ),
                                 permission = Permission.READ,
                             )
                             Characteristic(
-                                uuid = BleConstants.BTM_LOGRADIO_CHARACTER.toKotlinUuid(),
+                                uuid = LOGRADIO_CHARACTERISTIC,
                                 properties = setOf(CharacteristicProperty.NOTIFY),
                                 permission = Permission.READ,
                             )
@@ -243,7 +244,7 @@ class NordicBleInterfaceRetryTest {
             }
 
         centralManager.simulatePeripherals(listOf(peripheralSpec))
-        delay(100.milliseconds)
+        advanceUntilIdle()
 
         val nordicInterface =
             NordicBleInterface(
@@ -254,7 +255,7 @@ class NordicBleInterfaceRetryTest {
             )
 
         // Wait for connection
-        delay(2000.milliseconds)
+        advanceUntilIdle()
         verify(timeout = 5000) { service.onConnect() }
 
         // Clear initial discovery errors
@@ -263,8 +264,8 @@ class NordicBleInterfaceRetryTest {
         // Trigger write which will fail repeatedly
         nordicInterface.handleSendToRadio(byteArrayOf(0x01))
 
-        // Wait for all 3 attempts + delays (500ms * 2)
-        delay(2500.milliseconds)
+        // Wait for all attempts
+        advanceUntilIdle()
 
         assert(writeAttempts == 3) {
             "Should have attempted write 3 times (initial + 2 retries), but was $writeAttempts"

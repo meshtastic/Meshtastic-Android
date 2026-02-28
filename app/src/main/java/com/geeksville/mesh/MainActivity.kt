@@ -26,17 +26,18 @@ import android.nfc.NdefMessage
 import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Bundle
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalView
+import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,11 +47,12 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.MainScreen
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import org.meshtastic.core.datastore.UiPreferencesDataSource
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import no.nordicsemi.kotlin.ble.environment.android.compose.LocalEnvironmentOwner
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.channel_invalid
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.showToast
@@ -58,57 +60,74 @@ import org.meshtastic.feature.intro.AppIntroductionScreen
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     private val model: UIViewModel by viewModels()
 
-    // This is aware of the Activity lifecycle and handles binding to the mesh service.
+    /**
+     * Activity-lifecycle-aware client that binds to the mesh service. Note: This is used implicitly as it registers
+     * itself as a LifecycleObserver in its init block.
+     */
     @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
-    @Inject internal lateinit var uiPreferencesDataSource: UiPreferencesDataSource
+    @Inject internal lateinit var androidEnvironment: AndroidEnvironment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
-        enableEdgeToEdge(
-            // Disable three-button navbar scrim on pre-Q devices
-            navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Disable three-button navbar scrim
-            window.setNavigationBarContrastEnforced(false)
-        }
 
         super.onCreate(savedInstanceState)
 
+        enableEdgeToEdge()
+
+        // Explicitly set the cutout mode to ALWAYS for Android 15+ to satisfy Play Console recommendations.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+            window.attributes.layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+        }
+
+        // Ensure the navigation bar remains seamless on modern Android versions
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+
         setContent {
-            val theme by model.theme.collectAsState()
+            val theme by model.theme.collectAsStateWithLifecycle()
             val dynamic = theme == MODE_DYNAMIC
             val dark =
                 when (theme) {
                     AppCompatDelegate.MODE_NIGHT_YES -> true
                     AppCompatDelegate.MODE_NIGHT_NO -> false
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
                     else -> isSystemInDarkTheme()
                 }
 
-            AppTheme(dynamicColor = dynamic, darkTheme = dark) {
-                val view = LocalView.current
-                if (!view.isInEditMode) {
-                    SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
-                }
+            // Update system bar style when theme changes
+            androidx.compose.runtime.SideEffect {
+                enableEdgeToEdge(
+                    statusBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+                    navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+                )
+            }
 
-                val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
-                if (appIntroCompleted) {
-                    MainScreen(uIViewModel = model)
-                } else {
-                    AppIntroductionScreen(onDone = { model.onAppIntroCompleted() })
+            @Suppress("SpreadOperator")
+            CompositionLocalProvider(*(LocalEnvironmentOwner provides androidEnvironment)) {
+                AppTheme(dynamicColor = dynamic, darkTheme = dark) {
+                    val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
+
+                    // Signal to the system that the initial UI is "fully drawn"
+                    // once we've decided whether to show the intro or the main screen.
+                    ReportDrawnWhen { true }
+
+                    if (appIntroCompleted) {
+                        MainScreen(uIViewModel = model)
+                    } else {
+                        AppIntroductionScreen(onDone = { model.onAppIntroCompleted() })
+                    }
                 }
             }
         }
-        handleIntent(intent)
-    }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
+        // Listen for new intents (e.g. deep links, NFC) without overriding onNewIntent
+        addOnNewIntentListener { intent -> handleIntent(intent) }
+
         handleIntent(intent)
     }
 
@@ -123,7 +142,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             NfcAdapter.ACTION_NDEF_DISCOVERED -> {
-                val rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES)
+                val rawMessages =
+                    IntentCompat.getParcelableArrayExtra(
+                        intent,
+                        NfcAdapter.EXTRA_NDEF_MESSAGES,
+                        NdefMessage::class.java,
+                    )
                 if (rawMessages != null) {
                     for (rawMsg in rawMessages) {
                         val msg = rawMsg as NdefMessage
@@ -156,6 +180,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
+        if (uri.toString().startsWith(DEEP_LINK_BASE_URI)) {
+            model.handleNavigationDeepLink(uri)
+            return
+        }
+
         uri.dispatchMeshtasticUri(
             onChannel = { model.setRequestChannelSet(it) },
             onContact = { model.setSharedContactRequested(it) },

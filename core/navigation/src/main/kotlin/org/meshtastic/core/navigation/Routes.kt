@@ -145,6 +145,10 @@ object SettingsRoutes {
 
     @Serializable data object StatusMessage : Route
 
+    @Serializable data object TrafficManagement : Route
+
+    @Serializable data object TAK : Route
+
     // endregion
 
     // region advanced config routes

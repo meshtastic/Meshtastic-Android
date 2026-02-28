@@ -25,6 +25,7 @@ import androidx.room.Update
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import okio.ByteString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.PacketEntity
@@ -347,7 +348,7 @@ interface PacketDao {
                     } else if (until == 0L) { // unmute
                         0L
                     } else {
-                        System.currentTimeMillis() + until
+                        nowMillis + until
                     }
 
                 getContactSettings(contact)?.copy(muteUntil = absoluteMuteUntil)

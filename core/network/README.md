@@ -1,11 +1,25 @@
 # `:core:network`
 
+## Overview
+The `:core:network` module handles all internet-based communication, including fetching firmware metadata, device hardware definitions, and map tiles (in the `fdroid` flavor).
+
+## Key Components
+
+### 1. `Ktor` Client
+The module uses **Ktor** as its primary HTTP client for high-performance, asynchronous networking.
+
+### 2. Remote Data Sources
+- **`FirmwareReleaseRemoteDataSource`**: Fetches the latest firmware versions from GitHub or Meshtastic's metadata servers.
+- **`DeviceHardwareRemoteDataSource`**: Fetches definitions for supported Meshtastic hardware devices.
+
 ## Module dependency graph
 
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:network[network]:::null
+  :core:network[network]:::android-library
+  :core:network -.-> :core:di
+  :core:network -.-> :core:model
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

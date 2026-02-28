@@ -64,14 +64,14 @@ import org.meshtastic.core.database.model.getStringResFrom
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.getShortDateTime
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.delivery_confirmed
-import org.meshtastic.core.strings.error
-import org.meshtastic.core.strings.message_delivery_status
-import org.meshtastic.core.strings.message_status_enroute
-import org.meshtastic.core.strings.message_status_queued
-import org.meshtastic.core.strings.react
-import org.meshtastic.core.strings.you
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.delivery_confirmed
+import org.meshtastic.core.resources.error
+import org.meshtastic.core.resources.message_delivery_status
+import org.meshtastic.core.resources.message_status_enroute
+import org.meshtastic.core.resources.message_status_queued
+import org.meshtastic.core.resources.react
+import org.meshtastic.core.resources.you
 import org.meshtastic.core.ui.component.BottomSheetDialog
 import org.meshtastic.core.ui.component.Rssi
 import org.meshtastic.core.ui.component.Snr
@@ -232,8 +232,6 @@ internal fun ReactionDialog(
             onDismiss = { showStatusDialog = null },
             relayNodeName = relayNodeName,
             relays = reaction.relays,
-            retryCount = reaction.retryCount,
-            maxRetries = 2,
         )
     }
 

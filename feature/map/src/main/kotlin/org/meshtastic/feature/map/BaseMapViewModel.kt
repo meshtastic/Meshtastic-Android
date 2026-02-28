@@ -28,37 +28,38 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.any
+import org.meshtastic.core.resources.eight_hours
+import org.meshtastic.core.resources.one_day
+import org.meshtastic.core.resources.one_hour
+import org.meshtastic.core.resources.two_days
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.any
-import org.meshtastic.core.strings.eight_hours
-import org.meshtastic.core.strings.one_day
-import org.meshtastic.core.strings.one_hour
-import org.meshtastic.core.strings.two_days
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
-import java.util.concurrent.TimeUnit
 
 @Suppress("MagicNumber")
 sealed class LastHeardFilter(val seconds: Long, val label: StringResource) {
     data object Any : LastHeardFilter(0L, Res.string.any)
 
-    data object OneHour : LastHeardFilter(TimeUnit.HOURS.toSeconds(1), Res.string.one_hour)
+    data object OneHour : LastHeardFilter(TimeConstants.ONE_HOUR.inWholeSeconds, Res.string.one_hour)
 
-    data object EightHours : LastHeardFilter(TimeUnit.HOURS.toSeconds(8), Res.string.eight_hours)
+    data object EightHours : LastHeardFilter(TimeConstants.EIGHT_HOURS.inWholeSeconds, Res.string.eight_hours)
 
-    data object OneDay : LastHeardFilter(TimeUnit.DAYS.toSeconds(1), Res.string.one_day)
+    data object OneDay : LastHeardFilter(TimeConstants.ONE_DAY.inWholeSeconds, Res.string.one_day)
 
-    data object TwoDays : LastHeardFilter(TimeUnit.DAYS.toSeconds(2), Res.string.two_days)
+    data object TwoDays : LastHeardFilter(TimeConstants.TWO_DAYS.inWholeSeconds, Res.string.two_days)
 
     companion object {
         fun fromSeconds(seconds: Long): LastHeardFilter = entries.find { it.seconds == seconds } ?: Any
@@ -88,6 +89,11 @@ abstract class BaseMapViewModel(
             .map { nodes -> nodes.filterNot { node -> node.isIgnored } }
             .stateInWhileSubscribed(initialValue = emptyList())
 
+    val nodesWithPosition: StateFlow<List<Node>> =
+        nodes
+            .map { nodes -> nodes.filter { node -> node.validPosition != null } }
+            .stateInWhileSubscribed(initialValue = emptyList())
+
     val waypoints: StateFlow<Map<Int, Packet>> =
         packetRepository
             .getWaypoints()
@@ -96,7 +102,7 @@ abstract class BaseMapViewModel(
                     .associateBy { packet -> packet.data.waypoint!!.id }
                     .filterValues {
                         val expire = it.data.waypoint!!.expire ?: 0
-                        expire == 0 || expire > System.currentTimeMillis() / 1000
+                        expire == 0 || expire.toLong() > nowSeconds
                     }
             }
             .stateInWhileSubscribed(initialValue = emptyMap())

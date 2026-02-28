@@ -35,22 +35,18 @@ import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-@OptIn(ExperimentalCoroutinesApi::class, ExperimentalUuidApi::class)
+private val serviceUuid = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+private val otaCharacteristicUuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
+private val txCharacteristicUuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportErrorTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val address = "00:11:22:33:44:55"
-
-    private val serviceUuid = UUID.fromString("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-    private val otaCharacteristicUuid = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130005")
-    private val txCharacteristicUuid = UUID.fromString("62ec0272-3ec5-11eb-b378-0242ac130003")
-
-    private fun UUID.toKotlinUuid(): Uuid = Uuid.parse(this.toString())
 
     @Test
     fun `startOta fails when device rejects hash`() = runTest(testDispatcher) {
@@ -86,16 +82,16 @@ class BleOtaTransportErrorTest {
                     CompleteLocalName("ESP32-OTA")
                 }
                 connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
-                    Service(uuid = serviceUuid.toKotlinUuid()) {
+                    Service(uuid = serviceUuid) {
                         Characteristic(
-                            uuid = otaCharacteristicUuid.toKotlinUuid(),
+                            uuid = otaCharacteristicUuid,
                             properties =
                             CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
                             permission = Permission.WRITE,
                         )
                         txCharHandle =
                             Characteristic(
-                                uuid = txCharacteristicUuid.toKotlinUuid(),
+                                uuid = txCharacteristicUuid,
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )
@@ -106,13 +102,15 @@ class BleOtaTransportErrorTest {
         centralManager.simulatePeripherals(listOf(otaPeripheral))
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        transport.connect().getOrThrow()
+        try {
+            transport.connect().getOrThrow()
 
-        val result = transport.startOta(1024, "badhash") {}
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is OtaProtocolException.HashRejected)
-
-        transport.close()
+            val result = transport.startOta(1024, "badhash") {}
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull() is OtaProtocolException.HashRejected)
+        } finally {
+            transport.close()
+        }
     }
 
     @Test
@@ -146,16 +144,16 @@ class BleOtaTransportErrorTest {
                     CompleteLocalName("ESP32-OTA")
                 }
                 connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
-                    Service(uuid = serviceUuid.toKotlinUuid()) {
+                    Service(uuid = serviceUuid) {
                         Characteristic(
-                            uuid = otaCharacteristicUuid.toKotlinUuid(),
+                            uuid = otaCharacteristicUuid,
                             properties =
                             CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
                             permission = Permission.WRITE,
                         )
                         txCharHandle =
                             Characteristic(
-                                uuid = txCharacteristicUuid.toKotlinUuid(),
+                                uuid = txCharacteristicUuid,
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )
@@ -166,25 +164,27 @@ class BleOtaTransportErrorTest {
         centralManager.simulatePeripherals(listOf(otaPeripheral))
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        transport.connect().getOrThrow()
-        transport.startOta(1024, "hash") {}.getOrThrow()
+        try {
+            transport.connect().getOrThrow()
+            transport.startOta(1024, "hash") {}.getOrThrow()
 
-        // Find the connected peripheral and disconnect it
-        // We use isBonded=true to ensure it shows up in getBondedPeripherals()
-        val peripheral = centralManager.getBondedPeripherals().first { it.address == address }
-        peripheral.disconnect()
+            // Find the connected peripheral and disconnect it
+            // We use isBonded=true to ensure it shows up in getBondedPeripherals()
+            val peripheral = centralManager.getBondedPeripherals().first { it.address == address }
+            peripheral.disconnect()
 
-        // Wait for state propagation
-        delay(100.milliseconds)
+            // Wait for state propagation
+            delay(100.milliseconds)
 
-        val data = ByteArray(1024) { it.toByte() }
-        val result = transport.streamFirmware(data, 512) {}
+            val data = ByteArray(1024) { it.toByte() }
+            val result = transport.streamFirmware(data, 512) {}
 
-        assertTrue("Should fail due to connection loss", result.isFailure)
-        assertTrue(result.exceptionOrNull() is OtaProtocolException.TransferFailed)
-        assertTrue(result.exceptionOrNull()?.message?.contains("Connection lost") == true)
-
-        transport.close()
+            assertTrue("Should fail due to connection loss", result.isFailure)
+            assertTrue(result.exceptionOrNull() is OtaProtocolException.TransferFailed)
+            assertTrue(result.exceptionOrNull()?.message?.contains("Connection lost") == true)
+        } finally {
+            transport.close()
+        }
     }
 
     @Test
@@ -225,16 +225,16 @@ class BleOtaTransportErrorTest {
                     CompleteLocalName("ESP32-OTA")
                 }
                 connectable(name = "ESP32-OTA", eventHandler = eventHandler, isBonded = true) {
-                    Service(uuid = serviceUuid.toKotlinUuid()) {
+                    Service(uuid = serviceUuid) {
                         Characteristic(
-                            uuid = otaCharacteristicUuid.toKotlinUuid(),
+                            uuid = otaCharacteristicUuid,
                             properties =
                             CharacteristicProperty.WRITE and CharacteristicProperty.WRITE_WITHOUT_RESPONSE,
                             permission = Permission.WRITE,
                         )
                         txCharHandle =
                             Characteristic(
-                                uuid = txCharacteristicUuid.toKotlinUuid(),
+                                uuid = txCharacteristicUuid,
                                 property = CharacteristicProperty.NOTIFY,
                                 permission = Permission.READ,
                             )
@@ -245,21 +245,27 @@ class BleOtaTransportErrorTest {
         centralManager.simulatePeripherals(listOf(otaPeripheral))
         val transport = BleOtaTransport(centralManager, address, testDispatcher)
 
-        transport.connect().getOrThrow()
-        transport.startOta(1024, "hash") {}.getOrThrow()
+        try {
+            transport.connect().getOrThrow()
+            transport.startOta(1024, "hash") {}.getOrThrow()
 
-        // Setup final response to be a Hash Mismatch error after chunks are sent
-        backgroundScope.launch {
-            delay(1000.milliseconds)
-            otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+            // Setup final response to be a Hash Mismatch error after chunks are sent
+            backgroundScope.launch {
+                delay(1000.milliseconds)
+                otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+            }
+
+            val data = ByteArray(1024) { it.toByte() }
+            val result = transport.streamFirmware(data, 512) {}
+
+            val exception = result.exceptionOrNull()
+            assertTrue("Expected failure, but succeeded", result.isFailure)
+            assertTrue(
+                "Expected OtaProtocolException.VerificationFailed but got $exception",
+                exception is OtaProtocolException.VerificationFailed,
+            )
+        } finally {
+            transport.close()
         }
-
-        val data = ByteArray(1024) { it.toByte() }
-        val result = transport.streamFirmware(data, 512) {}
-
-        assertTrue("Should fail due to hash mismatch, but got ${result.exceptionOrNull()}", result.isFailure)
-        assertTrue(result.exceptionOrNull() is OtaProtocolException.VerificationFailed)
-
-        transport.close()
     }
 }

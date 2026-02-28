@@ -40,6 +40,9 @@ internal fun Project.configureAndroidCompose(
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
         "debugImplementation"(libs.library("androidx-compose-ui-tooling"))
 
+        "implementation"(libs.library("compose-multiplatform-runtime"))
+        "implementation"(libs.library("compose-multiplatform-resources"))
+
         // Add Espresso explicitly to avoid version mismatch issues on newer Android versions
         "androidTestImplementation"(libs.library("androidx-test-espresso-core"))
     }

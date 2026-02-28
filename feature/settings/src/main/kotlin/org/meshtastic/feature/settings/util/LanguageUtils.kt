@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.feature.settings.util
 
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,12 +23,12 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.core.os.LocaleListCompat
 import co.touchlab.kermit.Logger
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.fr_HT
-import org.meshtastic.core.strings.preferences_system_default
-import org.meshtastic.core.strings.pt_BR
-import org.meshtastic.core.strings.zh_CN
-import org.meshtastic.core.strings.zh_TW
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.fr_HT
+import org.meshtastic.core.resources.preferences_system_default
+import org.meshtastic.core.resources.pt_BR
+import org.meshtastic.core.resources.zh_CN
+import org.meshtastic.core.resources.zh_TW
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
@@ -37,6 +36,10 @@ object LanguageUtils {
 
     const val SYSTEM_DEFAULT = "zz"
 
+    /**
+     * Sets the application locale using AppCompatDelegate. Note: This is the modern standard for per-app language
+     * support, providing a backport for API levels below 33.
+     */
     fun setAppLocale(languageTag: String) {
         AppCompatDelegate.setApplicationLocales(
             if (languageTag == SYSTEM_DEFAULT) {

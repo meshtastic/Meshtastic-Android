@@ -18,10 +18,10 @@ package com.geeksville.mesh.repository.usb
 
 import android.hardware.usb.UsbManager
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.util.ignoreException
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialPort
 import com.hoho.android.usbserial.util.SerialInputOutputManager
+import org.meshtastic.core.common.util.ignoreException
 import java.nio.BufferOverflowException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -41,29 +41,30 @@ internal class SerialConnectionImpl(
     @Suppress("TooGenericExceptionCaught")
     override fun sendBytes(bytes: ByteArray) {
         ioRef.get()?.let {
-            Logger.d { "writing ${bytes.size} byte(s }" }
+            Logger.d { "writing ${bytes.size} byte(s)" }
             try {
                 it.writeAsync(bytes)
             } catch (e: BufferOverflowException) {
-                Logger.e(e) { "Buffer overflow while writing to serial port" }
+                Logger.w(e) { "Buffer overflow while writing to serial port" }
             } catch (e: Exception) {
-                Logger.e(e) { "Failed to write to serial port" }
+                // USB disconnections often cause IOExceptions here; log as warning to avoid Crashlytics noise
+                Logger.w(e) { "Failed to write to serial port (likely disconnected)" }
             }
         }
     }
 
     override fun close(waitForStopped: Boolean) {
-        ignoreException {
-            if (closed.compareAndSet(false, true)) {
-                ioRef.get()?.stop()
+        if (closed.compareAndSet(false, true)) {
+            ignoreException(silent = true) { ioRef.get()?.stop() }
+            ignoreException(silent = true) {
                 port.close() // This will cause the reader thread to exit
             }
+        }
 
-            // Allow a short amount of time for the manager to quit (so the port can be cleanly closed)
-            if (waitForStopped) {
-                Logger.d { "Waiting for USB manager to stop..." }
-                closedLatch.await(1, TimeUnit.SECONDS)
-            }
+        // Allow a short amount of time for the manager to quit (so the port can be cleanly closed)
+        if (waitForStopped) {
+            Logger.d { "Waiting for USB manager to stop..." }
+            ignoreException(silent = true) { closedLatch.await(1, TimeUnit.SECONDS) }
         }
     }
 
@@ -98,11 +99,9 @@ internal class SerialConnectionImpl(
 
                     override fun onRunError(e: Exception?) {
                         closed.set(true)
-                        ignoreException {
-                            port.dtr = false
-                            port.rts = false
-                            port.close()
-                        }
+                        // Connection is already failing, don't try to set DTR/RTS as it will just throw more
+                        // IOExceptions
+                        ignoreException(silent = true) { port.close() }
                         closedLatch.countDown()
                         listener.onDisconnected(e)
                     }

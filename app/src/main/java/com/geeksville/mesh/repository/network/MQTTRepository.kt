@@ -17,7 +17,6 @@
 package com.geeksville.mesh.repository.network
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.util.ignoreException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -31,6 +30,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.subscribeList
@@ -70,10 +70,12 @@ constructor(
     fun disconnect() {
         Logger.i { "MQTT Disconnected" }
         mqttClient?.apply {
-            ignoreException { disconnect() }
-            close(true)
-            mqttClient = null
+            if (isConnected) {
+                ignoreException { disconnect() }
+            }
+            ignoreException { close(true) }
         }
+        mqttClient = null
     }
 
     val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
@@ -166,7 +168,11 @@ constructor(
             val token = mqttClient?.publish(topic, data, DEFAULT_QOS, retained)
             Logger.i { "MQTT Publish messageId: ${token?.messageId}" }
         } catch (ex: Exception) {
-            Logger.e { "MQTT Publish error: ${ex.message}" }
+            if (ex.message?.contains("Client is disconnected") == true) {
+                Logger.w { "MQTT Publish skipped: Client is disconnected" }
+            } else {
+                Logger.e(ex) { "MQTT Publish error: ${ex.message}" }
+            }
         }
     }
 }

@@ -23,17 +23,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.are_you_sure
+import org.meshtastic.core.resources.clean_node_database_confirmation
+import org.meshtastic.core.resources.clean_now
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.are_you_sure
-import org.meshtastic.core.strings.clean_node_database_confirmation
-import org.meshtastic.core.strings.clean_now
 import org.meshtastic.core.ui.util.AlertManager
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.milliseconds
 
 private const val MIN_DAYS_THRESHOLD = 7f
 
@@ -80,7 +80,7 @@ constructor(
     fun getNodesToDelete() {
         viewModelScope.launch {
             val onlyUnknownEnabled = _onlyUnknownNodes.value
-            val currentTimeSeconds = System.currentTimeMillis().milliseconds.inWholeSeconds
+            val currentTimeSeconds = nowSeconds
             val sevenDaysAgoSeconds = currentTimeSeconds - 7.days.inWholeSeconds
             val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
 

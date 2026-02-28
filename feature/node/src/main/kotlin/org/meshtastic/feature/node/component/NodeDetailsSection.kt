@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+@file:Suppress("TooManyFunctions")
+
 package org.meshtastic.feature.node.component
 
 import android.content.ClipData
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,31 +51,34 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.copy
-import org.meshtastic.core.strings.details
-import org.meshtastic.core.strings.encryption_error
-import org.meshtastic.core.strings.encryption_error_text
-import org.meshtastic.core.strings.error
-import org.meshtastic.core.strings.hops_away
-import org.meshtastic.core.strings.node_id
-import org.meshtastic.core.strings.node_number
-import org.meshtastic.core.strings.node_sort_last_heard
-import org.meshtastic.core.strings.public_key
-import org.meshtastic.core.strings.role
-import org.meshtastic.core.strings.rssi
-import org.meshtastic.core.strings.short_name
-import org.meshtastic.core.strings.snr
-import org.meshtastic.core.strings.supported
-import org.meshtastic.core.strings.uptime
-import org.meshtastic.core.strings.user_id
-import org.meshtastic.core.strings.via_mqtt
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.copy
+import org.meshtastic.core.resources.details
+import org.meshtastic.core.resources.encryption_error
+import org.meshtastic.core.resources.encryption_error_text
+import org.meshtastic.core.resources.error
+import org.meshtastic.core.resources.hops_away
+import org.meshtastic.core.resources.node_id
+import org.meshtastic.core.resources.node_number
+import org.meshtastic.core.resources.node_sort_last_heard
+import org.meshtastic.core.resources.public_key
+import org.meshtastic.core.resources.role
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.short_name
+import org.meshtastic.core.resources.snr
+import org.meshtastic.core.resources.status_message
+import org.meshtastic.core.resources.supported
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.user_id
+import org.meshtastic.core.resources.via_mqtt
+import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.icon.ArrowCircleUp
 import org.meshtastic.core.ui.icon.ChannelUtilization
 import org.meshtastic.core.ui.icon.Cloud
@@ -82,8 +88,9 @@ import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
-import org.meshtastic.core.ui.icon.Role
 import org.meshtastic.core.ui.icon.Verified
+import org.meshtastic.core.ui.icon.role
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
@@ -135,13 +142,17 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 private fun MainNodeDetails(node: Node) {
     Column {
         NameAndRoleRow(node)
+        node.nodeStatus?.let { status ->
+            SectionDivider()
+            StatusMessageRow(status)
+        }
         SectionDivider()
         NodeIdentificationRow(node)
         SectionDivider()
         HearsAndHopsRow(node)
         SectionDivider()
         UserAndUptimeRow(node)
-        if (node.hopsAway == 0) {
+        if (node.hopsAway == 0 && !node.viaMqtt) {
             SectionDivider()
             SignalRow(node)
         }
@@ -169,10 +180,20 @@ private fun NameAndRoleRow(node: Node) {
         InfoItem(
             label = stringResource(Res.string.role),
             value = node.user.role?.name ?: "",
-            icon = MeshtasticIcons.Role,
+            icon = MeshtasticIcons.role(node.user.role),
             modifier = Modifier.weight(1f),
         )
     }
+}
+
+@Composable
+private fun StatusMessageRow(status: String) {
+    InfoItem(
+        label = stringResource(Res.string.status_message),
+        value = status,
+        icon = Icons.AutoMirrored.Rounded.Notes,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 @Composable
@@ -350,5 +371,14 @@ private fun PublicKeyItem(publicKeyBytes: ByteArray) {
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
             color = if (isMismatch) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun NodeDetailsSectionPreview() {
+    AppTheme {
+        val node = NodePreviewParameterProvider().values.last().copy(nodeStatus = "Going to the farm.. to grow wheat.")
+        NodeDetailsSection(node = node)
     }
 }

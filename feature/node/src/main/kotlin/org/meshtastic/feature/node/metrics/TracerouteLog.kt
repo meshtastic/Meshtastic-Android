@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -40,29 +39,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.meshtastic.core.strings.getString
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.routing_error_no_response
-import org.meshtastic.core.strings.traceroute
-import org.meshtastic.core.strings.traceroute_diff
-import org.meshtastic.core.strings.traceroute_direct
-import org.meshtastic.core.strings.traceroute_duration
-import org.meshtastic.core.strings.traceroute_hops
-import org.meshtastic.core.strings.traceroute_log
-import org.meshtastic.core.strings.traceroute_route_back_to_us
-import org.meshtastic.core.strings.traceroute_route_towards_dest
-import org.meshtastic.core.strings.traceroute_time_and_text
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.routing_error_no_response
+import org.meshtastic.core.resources.traceroute
+import org.meshtastic.core.resources.traceroute_diff
+import org.meshtastic.core.resources.traceroute_direct
+import org.meshtastic.core.resources.traceroute_duration
+import org.meshtastic.core.resources.traceroute_hops
+import org.meshtastic.core.resources.traceroute_log
+import org.meshtastic.core.resources.traceroute_route_back_to_us
+import org.meshtastic.core.resources.traceroute_route_towards_dest
+import org.meshtastic.core.resources.traceroute_time_and_text
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Group
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -97,7 +96,7 @@ fun TracerouteLogScreen(
             when (effect) {
                 is NodeRequestEffect.ShowFeedback -> {
                     @Suppress("SpreadOperator")
-                    snackbarHostState.showSnackbar(getString(effect.resource, *effect.args.toTypedArray()))
+                    snackbarHostState.showSnackbar(effect.text.resolve())
                 }
             }
         }
@@ -106,7 +105,6 @@ fun TracerouteLogScreen(
     fun getUsername(nodeNum: Int): String =
         with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
 
-    val context = LocalContext.current
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow
     val statusOrange = MaterialTheme.colorScheme.StatusOrange
@@ -141,6 +139,8 @@ fun TracerouteLogScreen(
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) {
             items(state.tracerouteRequests, key = { it.uuid }) { log ->
+                val headerTowardsStr = stringResource(Res.string.traceroute_route_towards_dest)
+                val headerBackStr = stringResource(Res.string.traceroute_route_back_to_us)
                 val result =
                     remember(state.tracerouteRequests, log.fromRadio.packet?.id) {
                         state.tracerouteResults.find {
@@ -149,12 +149,7 @@ fun TracerouteLogScreen(
                     }
                 val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
 
-                val time =
-                    DateUtils.formatDateTime(
-                        context,
-                        log.received_date,
-                        DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-                    )
+                val time = DateFormatter.formatDateTime(log.received_date)
                 val (text, icon) = route.getTextAndIcon()
                 var expanded by remember { mutableStateOf(false) }
 
@@ -168,7 +163,7 @@ fun TracerouteLogScreen(
                                     res.fromRadio.packet?.getTracerouteResponse(
                                         ::getUsername,
                                         headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                        headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                        headerBack = headerBackStr,
                                     ),
                                     statusGreen = statusGreen,
                                     statusYellow = statusYellow,
@@ -185,7 +180,7 @@ fun TracerouteLogScreen(
                                 ?.getTracerouteResponse(
                                     ::getUsername,
                                     headerTowards = stringResource(Res.string.traceroute_route_towards_dest),
-                                    headerBack = stringResource(Res.string.traceroute_route_back_to_us),
+                                    headerBack = headerBackStr,
                                 )
                                 ?.let { AnnotatedString(it) }
                         }
@@ -213,8 +208,8 @@ fun TracerouteLogScreen(
                                         ?.packet
                                         ?.getTracerouteResponse(
                                             ::getUsername,
-                                            headerTowards = getString(Res.string.traceroute_route_towards_dest),
-                                            headerBack = getString(Res.string.traceroute_route_back_to_us),
+                                            headerTowards = headerTowardsStr,
+                                            headerBack = headerBackStr,
                                         )
                                         ?.let {
                                             annotateTraceroute(
@@ -276,12 +271,7 @@ private fun RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVector> = when {
 @PreviewLightDark
 @Composable
 private fun TracerouteItemPreview() {
-    val time =
-        DateUtils.formatDateTime(
-            LocalContext.current,
-            System.currentTimeMillis(),
-            DateUtils.FORMAT_SHOW_DATE or DateUtils.FORMAT_SHOW_TIME or DateUtils.FORMAT_ABBREV_ALL,
-        )
+    val time = DateFormatter.formatDateTime(nowMillis)
     AppTheme {
         MetricLogItem(
             icon = MeshtasticIcons.Group,

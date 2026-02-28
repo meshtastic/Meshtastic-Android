@@ -105,40 +105,38 @@ import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getChannel
-import org.meshtastic.core.service.RetryEvent
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.alert_bell_text
-import org.meshtastic.core.strings.cancel_reply
-import org.meshtastic.core.strings.clear_selection
-import org.meshtastic.core.strings.copy
-import org.meshtastic.core.strings.delete
-import org.meshtastic.core.strings.delete_messages
-import org.meshtastic.core.strings.delete_messages_title
-import org.meshtastic.core.strings.filter_disable_for_contact
-import org.meshtastic.core.strings.filter_enable_for_contact
-import org.meshtastic.core.strings.filter_hide_count
-import org.meshtastic.core.strings.filter_show_count
-import org.meshtastic.core.strings.message_input_label
-import org.meshtastic.core.strings.navigate_back
-import org.meshtastic.core.strings.overflow_menu
-import org.meshtastic.core.strings.quick_chat
-import org.meshtastic.core.strings.quick_chat_hide
-import org.meshtastic.core.strings.quick_chat_show
-import org.meshtastic.core.strings.reply
-import org.meshtastic.core.strings.replying_to
-import org.meshtastic.core.strings.scroll_to_bottom
-import org.meshtastic.core.strings.select_all
-import org.meshtastic.core.strings.send
-import org.meshtastic.core.strings.type_a_message
-import org.meshtastic.core.strings.unknown
-import org.meshtastic.core.strings.unknown_channel
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.alert_bell_text
+import org.meshtastic.core.resources.cancel_reply
+import org.meshtastic.core.resources.clear_selection
+import org.meshtastic.core.resources.copy
+import org.meshtastic.core.resources.delete
+import org.meshtastic.core.resources.delete_messages
+import org.meshtastic.core.resources.delete_messages_title
+import org.meshtastic.core.resources.filter_disable_for_contact
+import org.meshtastic.core.resources.filter_enable_for_contact
+import org.meshtastic.core.resources.filter_hide_count
+import org.meshtastic.core.resources.filter_show_count
+import org.meshtastic.core.resources.message_input_label
+import org.meshtastic.core.resources.navigate_back
+import org.meshtastic.core.resources.overflow_menu
+import org.meshtastic.core.resources.quick_chat
+import org.meshtastic.core.resources.quick_chat_hide
+import org.meshtastic.core.resources.quick_chat_show
+import org.meshtastic.core.resources.reply
+import org.meshtastic.core.resources.replying_to
+import org.meshtastic.core.resources.scroll_to_bottom
+import org.meshtastic.core.resources.select_all
+import org.meshtastic.core.resources.send
+import org.meshtastic.core.resources.type_a_message
+import org.meshtastic.core.resources.unknown
+import org.meshtastic.core.resources.unknown_channel
 import org.meshtastic.core.ui.component.MeshtasticTextDialog
 import org.meshtastic.core.ui.component.NodeKeyStatusIcon
 import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.messaging.component.RetryConfirmationDialog
 import org.meshtastic.proto.ChannelSet
 import java.nio.charset.StandardCharsets
 
@@ -185,27 +183,9 @@ fun MessageScreen(
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
     val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
-    val filteredCount by viewModel.getFilteredCount(contactKey).collectAsStateWithLifecycle(initialValue = 0)
+    val filteredCount by viewModel.filteredCount.collectAsStateWithLifecycle()
     val showFiltered by viewModel.showFiltered.collectAsStateWithLifecycle()
     val filteringDisabled = contactSettings[contactKey]?.filteringDisabled ?: false
-
-    // Retry dialog state
-    var currentRetryEvent by remember { mutableStateOf<RetryEvent?>(null) }
-
-    // Observe retry events from the service
-    // Key on contactKey to restart collection when navigating between conversations
-    LaunchedEffect(contactKey) {
-        android.util.Log.d("MessageScreen", "Starting retry event collection for contact: $contactKey")
-        viewModel.retryEvents.collect { event ->
-            if (event != null) {
-                android.util.Log.d("MessageScreen", "Received retry event: ${event.packetId}")
-                currentRetryEvent = event
-            } else {
-                android.util.Log.d("MessageScreen", "Retry event cleared")
-                currentRetryEvent = null
-            }
-        }
-    }
 
     // Prevent the message TextField from stealing focus when the screen opens
     LaunchedEffect(contactKey) { focusManager.clearFocus() }
@@ -240,9 +220,8 @@ fun MessageScreen(
     val listState = rememberLazyListState()
 
     // Track unread messages using lightweight metadata queries
-    val hasUnreadMessages by viewModel.hasUnreadMessages(contactKey).collectAsStateWithLifecycle(initialValue = false)
-    val firstUnreadMessageUuid by
-        viewModel.getFirstUnreadMessageUuid(contactKey).collectAsStateWithLifecycle(initialValue = null)
+    val hasUnreadMessages by viewModel.hasUnreadMessages.collectAsStateWithLifecycle()
+    val firstUnreadMessageUuid by viewModel.firstUnreadMessageUuid.collectAsStateWithLifecycle()
 
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
 
@@ -323,28 +302,12 @@ fun MessageScreen(
 
     sharedContact?.let { contact -> SharedContactDialog(contact = contact, onDismiss = { sharedContact = null }) }
 
-    // Show retry confirmation dialog
-    currentRetryEvent?.let { event ->
-        RetryConfirmationDialog(
-            retryEvent = event,
-            countdownSeconds = 5,
-            onConfirm = {
-                // User clicked "Retry Now" - proceed immediately
-                viewModel.respondToRetry(event.packetId, shouldRetry = true)
-                currentRetryEvent = null
-            },
-            onCancel = {
-                // User clicked "Cancel Retry" - stop retrying
-                viewModel.respondToRetry(event.packetId, shouldRetry = false)
-                currentRetryEvent = null
-            },
-            onTimeout = {
-                // Countdown reached 0 - auto-retry
-                viewModel.respondToRetry(event.packetId, shouldRetry = true)
-                currentRetryEvent = null
-            },
-        )
-    }
+    val originalMessage by
+        remember(replyingToPacketId, pagedMessages.itemCount) {
+            derivedStateOf {
+                replyingToPacketId?.let { id -> pagedMessages.itemSnapshotList.firstOrNull { it?.packetId == id } }
+            }
+        }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -400,82 +363,74 @@ fun MessageScreen(
                 )
             }
         },
-    ) { paddingValues ->
-        Column(Modifier.fillMaxSize().padding(paddingValues).focusable()) {
-            Box(modifier = Modifier.weight(1f)) {
-                MessageListPaged(
-                    modifier = Modifier.fillMaxSize(),
-                    listState = listState,
-                    state =
-                    MessageListPagedState(
-                        nodes = nodes,
-                        ourNode = ourNode,
-                        messages = pagedMessages,
-                        selectedIds = selectedMessageIds,
-                        contactKey = contactKey,
-                        firstUnreadMessageUuid = firstUnreadMessageUuid,
-                        hasUnreadMessages = hasUnreadMessages,
-                        filteredCount = filteredCount,
-                        showFiltered = showFiltered,
-                        filteringDisabled = filteringDisabled,
-                    ),
-                    handlers =
-                    MessageListHandlers(
-                        onUnreadChanged = { messageUuid, timestamp ->
-                            onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+        bottomBar = {
+            Column {
+                AnimatedVisibility(visible = showQuickChat) {
+                    QuickChatRow(
+                        enabled = connectionState.isConnected(),
+                        actions = quickChatActions,
+                        onClick = { action ->
+                            handleQuickChatAction(
+                                action = action,
+                                messageInputState = messageInputState,
+                                onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
+                            )
                         },
-                        onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
-                        onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
-                        onDeleteMessages = { viewModel.deleteMessages(it) },
-                        onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
-                        onReply = { message -> replyingToPacketId = message?.packetId },
-                    ),
-                    quickEmojis = viewModel.frequentEmojis,
-                )
-                // Show FAB if we can scroll towards the newest messages (index 0).
-                if (listState.canScrollBackward) {
-                    ScrollToBottomFab(coroutineScope, listState)
+                    )
                 }
-            }
-            AnimatedVisibility(visible = showQuickChat) {
-                QuickChatRow(
-                    enabled = connectionState.isConnected(),
-                    actions = quickChatActions,
-                    onClick = { action ->
-                        handleQuickChatAction(
-                            action = action,
-                            messageInputState = messageInputState,
-                            onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
-                        )
+                ReplySnippet(
+                    originalMessage = originalMessage,
+                    onClearReply = { replyingToPacketId = null },
+                    ourNode = ourNode,
+                )
+                MessageInput(
+                    isEnabled = connectionState.isConnected(),
+                    isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                    textFieldState = messageInputState,
+                    onSendMessage = {
+                        val messageText = messageInputState.text.toString().trim { it.isWhitespace() }
+                        if (messageText.isNotEmpty()) {
+                            onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
+                        }
                     },
                 )
             }
-            val originalMessage by
-                remember(replyingToPacketId, pagedMessages.itemCount) {
-                    derivedStateOf {
-                        replyingToPacketId?.let { id ->
-                            (0 until pagedMessages.itemCount).firstNotNullOfOrNull { index ->
-                                pagedMessages[index]?.takeIf { it.packetId == id }
-                            }
-                        }
-                    }
-                }
-            ReplySnippet(
-                originalMessage = originalMessage,
-                onClearReply = { replyingToPacketId = null },
-                ourNode = ourNode,
+        },
+    ) { paddingValues ->
+        Box(Modifier.fillMaxSize().padding(paddingValues).focusable()) {
+            MessageListPaged(
+                modifier = Modifier.fillMaxSize(),
+                listState = listState,
+                state =
+                MessageListPagedState(
+                    nodes = nodes,
+                    ourNode = ourNode,
+                    messages = pagedMessages,
+                    selectedIds = selectedMessageIds,
+                    contactKey = contactKey,
+                    firstUnreadMessageUuid = firstUnreadMessageUuid,
+                    hasUnreadMessages = hasUnreadMessages,
+                    filteredCount = filteredCount,
+                    showFiltered = showFiltered,
+                    filteringDisabled = filteringDisabled,
+                ),
+                handlers =
+                MessageListHandlers(
+                    onUnreadChanged = { messageUuid, timestamp ->
+                        onEvent(MessageScreenEvent.ClearUnreadCount(messageUuid, timestamp))
+                    },
+                    onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
+                    onClickChip = { onEvent(MessageScreenEvent.NodeDetails(it)) },
+                    onDeleteMessages = { viewModel.deleteMessages(it) },
+                    onSendMessage = { text, key -> viewModel.sendMessage(text, key) },
+                    onReply = { message -> replyingToPacketId = message?.packetId },
+                ),
+                quickEmojis = viewModel.frequentEmojis,
             )
-            MessageInput(
-                isEnabled = connectionState.isConnected(),
-                isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
-                textFieldState = messageInputState,
-                onSendMessage = {
-                    val messageText = messageInputState.text.toString().trim()
-                    if (messageText.isNotEmpty()) {
-                        onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
-                    }
-                },
-            )
+            // Show FAB if we can scroll towards the newest messages (index 0).
+            if (listState.canScrollBackward) {
+                ScrollToBottomFab(coroutineScope, listState)
+            }
         }
     }
 }
@@ -906,7 +861,7 @@ private fun QuickChatRow(
             // Memoize if content is static
             QuickChatAction(
                 name = "🔔",
-                message = "🔔 $alertActionMessage  ", // Bell character added to message
+                message = "🔔 $alertActionMessage \u0007", // Bell character added to message
                 mode = QuickChatAction.Mode.Append,
                 position = -1, // Assuming -1 means it's a special prepended action
             )

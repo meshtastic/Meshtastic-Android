@@ -34,8 +34,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -57,15 +58,16 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.rssi
-import org.meshtastic.core.strings.rssi_definition
-import org.meshtastic.core.strings.signal_quality
-import org.meshtastic.core.strings.snr
-import org.meshtastic.core.strings.snr_definition
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.rssi
+import org.meshtastic.core.resources.rssi_definition
+import org.meshtastic.core.resources.signal_quality
+import org.meshtastic.core.resources.snr
+import org.meshtastic.core.resources.snr_definition
 import org.meshtastic.core.ui.component.LoraSignalIndicator
 import org.meshtastic.core.ui.theme.GraphColors.Blue
 import org.meshtastic.core.ui.theme.GraphColors.Green
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.MeshPacket
@@ -85,20 +87,44 @@ private val LEGEND_DATA =
 @Composable
 fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val data = state.signalMetrics
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
+    val data = state.signalMetrics.filter { (it.rx_time ?: 0).toLong() >= timeFrame.timeThreshold() }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(effect.text.resolve())
+                }
+            }
+        }
+    }
 
     BaseMetricScreen(
-        viewModel = viewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.LOCAL_STATS,
         titleRes = Res.string.signal_quality,
+        nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { (it.rx_time ?: 0).toDouble() },
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) },
         infoData =
         listOf(
             InfoDialogData(Res.string.snr, Res.string.snr_definition, SignalMetric.SNR.color),
             InfoDialogData(Res.string.rssi, Res.string.rssi_definition, SignalMetric.RSSI.color),
         ),
+        controlPart = {
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
+                onTimeFrameSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             SignalMetricsChart(
                 modifier = modifier,
@@ -108,8 +134,8 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 onPointSelected = onPointSelected,
             )
         },
-        listPart = { modifier, selectedX, onCardClick ->
-            LazyColumn(modifier = modifier.fillMaxSize()) {
+        listPart = { modifier, selectedX, lazyListState, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(data) { _, meshPacket ->
                     SignalMetricsCard(
                         meshPacket = meshPacket,
@@ -122,7 +148,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
@@ -135,23 +161,23 @@ private fun SignalMetricsChart(
         if (meshPackets.isEmpty()) return@Column
 
         val modelProducer = remember { CartesianChartModelProducer() }
+        val rssiColor = SignalMetric.RSSI.color
+        val snrColor = SignalMetric.SNR.color
 
-        LaunchedEffect(meshPackets) {
+        val rssiData = remember(meshPackets) { meshPackets.filter { (it.rx_rssi ?: 0) != 0 } }
+        val snrData = remember(meshPackets) { meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) } }
+
+        LaunchedEffect(rssiData, snrData) {
             modelProducer.runTransaction {
-                /* Use separate lineSeries calls to associate them with different vertical axes */
-                lineSeries {
-                    val rssiData = meshPackets.filter { (it.rx_rssi ?: 0) != 0 }
-                    series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 })
+                if (rssiData.isNotEmpty()) {
+                    /* Use separate lineSeries calls to associate them with different vertical axes */
+                    lineSeries { series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 }) }
                 }
-                lineSeries {
-                    val snrData = meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) }
-                    series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f })
+                if (snrData.isNotEmpty()) {
+                    lineSeries { series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f }) }
                 }
             }
         }
-
-        val rssiColor = SignalMetric.RSSI.color
-        val snrColor = SignalMetric.SNR.color
 
         val marker =
             ChartStyling.rememberMarker(
@@ -165,54 +191,75 @@ private fun SignalMetricsChart(
                 },
             )
 
-        GenericMetricChart(
-            modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
-            layers =
-            listOf(
+        val rssiLayer =
+            if (rssiData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createPointOnlyLine(rssiColor, ChartStyling.LARGE_POINT_SIZE_DP),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
-                ),
+                )
+            } else {
+                null
+            }
+
+        val snrLayer =
+            if (snrData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
                         ChartStyling.createPointOnlyLine(snrColor, ChartStyling.LARGE_POINT_SIZE_DP),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
+                )
+            } else {
+                null
+            }
+
+        val layers = remember(rssiLayer, snrLayer) { listOfNotNull(rssiLayer, snrLayer) }
+
+        if (layers.isNotEmpty()) {
+            GenericMetricChart(
+                modelProducer = modelProducer,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                layers = layers,
+                startAxis =
+                if (rssiData.isNotEmpty()) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(color = rssiColor),
+                        valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                if (snrData.isNotEmpty()) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = snrColor),
+                        valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    label = ChartStyling.rememberAxisLabel(),
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
+                    labelRotationDegrees = 45f,
                 ),
-            ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = rssiColor),
-                valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = snrColor),
-                valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 50),
-                labelRotationDegrees = 45f,
-            ),
-            marker = marker,
-            selectedX = selectedX,
-            onPointSelected = onPointSelected,
-            vicoScrollState = vicoScrollState,
-        )
+                marker = marker,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+                vicoScrollState = vicoScrollState,
+            )
+        }
 
         Legend(legendData = LEGEND_DATA, modifier = Modifier.padding(top = 0.dp))
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
     val time = (meshPacket.rx_time ?: 0).toLong() * MS_PER_SEC
@@ -239,7 +286,8 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                             Row(horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text(
                                     text = DATE_TIME_FORMAT.format(time),
-                                    style = MaterialTheme.typography.titleMediumEmphasized,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
                                 )
                             }
 

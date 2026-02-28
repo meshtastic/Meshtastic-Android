@@ -1,4 +1,4 @@
-Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+ 
 
 For more information about the Meshtastic project, please visit our website: <a href="https://www.meshtastic.org">meshtastic.org</a>. The firmware that runs on the radio devices is a separate open-source project, which you can find here: <a href="https://github.com/meshtastic/Meshtastic-device">https://github.com/meshtastic/Meshtastic-device</a>.
 

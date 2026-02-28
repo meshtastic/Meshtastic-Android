@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.network.di
 
 import android.content.Context
@@ -31,6 +30,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.meshtastic.core.network.BuildConfig
 import javax.inject.Singleton
@@ -49,7 +53,7 @@ class NetworkModule {
         return ImageLoader.Builder(context = application)
             .components {
                 add(OkHttpNetworkFetcherFactory(callFactory = { sharedOkHttp }))
-                add(SvgDecoder.Factory())
+                add(SvgDecoder.Factory(scaleToDensity = true))
             }
             .memoryCache {
                 MemoryCache.Builder().maxSizePercent(context = application, percent = MEMORY_CACHE_PERCENT).build()
@@ -58,5 +62,20 @@ class NetworkModule {
             .logger(logger = if (BuildConfig.DEBUG) DebugLogger(minLevel = Logger.Level.Verbose) else null)
             .crossfade(enable = true)
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(okHttpClient: OkHttpClient): HttpClient = HttpClient(engineFactory = OkHttp) {
+        engine { preconfigured = okHttpClient }
+
+        install(plugin = ContentNegotiation) {
+            json(
+                Json {
+                    isLenient = true
+                    ignoreUnknownKeys = true
+                },
+            )
+        }
     }
 }

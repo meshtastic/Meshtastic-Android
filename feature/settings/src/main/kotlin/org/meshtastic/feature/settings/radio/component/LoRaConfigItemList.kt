@@ -31,30 +31,30 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ChannelOption
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.advanced
-import org.meshtastic.core.strings.bandwidth
-import org.meshtastic.core.strings.coding_rate
-import org.meshtastic.core.strings.config_lora_frequency_slot_summary
-import org.meshtastic.core.strings.config_lora_hop_limit_summary
-import org.meshtastic.core.strings.config_lora_modem_preset_summary
-import org.meshtastic.core.strings.config_lora_region_summary
-import org.meshtastic.core.strings.frequency_slot
-import org.meshtastic.core.strings.hop_limit
-import org.meshtastic.core.strings.ignore_mqtt
-import org.meshtastic.core.strings.lora
-import org.meshtastic.core.strings.modem_preset
-import org.meshtastic.core.strings.ok_to_mqtt
-import org.meshtastic.core.strings.options
-import org.meshtastic.core.strings.override_duty_cycle
-import org.meshtastic.core.strings.override_frequency_mhz
-import org.meshtastic.core.strings.pa_fan_disabled
-import org.meshtastic.core.strings.region_frequency_plan
-import org.meshtastic.core.strings.spread_factor
-import org.meshtastic.core.strings.sx126x_rx_boosted_gain
-import org.meshtastic.core.strings.tx_enabled
-import org.meshtastic.core.strings.tx_power_dbm
-import org.meshtastic.core.strings.use_modem_preset
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.advanced
+import org.meshtastic.core.resources.bandwidth
+import org.meshtastic.core.resources.coding_rate
+import org.meshtastic.core.resources.config_lora_frequency_slot_summary
+import org.meshtastic.core.resources.config_lora_hop_limit_summary
+import org.meshtastic.core.resources.config_lora_modem_preset_summary
+import org.meshtastic.core.resources.config_lora_region_summary
+import org.meshtastic.core.resources.frequency_slot
+import org.meshtastic.core.resources.hop_limit
+import org.meshtastic.core.resources.ignore_mqtt
+import org.meshtastic.core.resources.lora
+import org.meshtastic.core.resources.modem_preset
+import org.meshtastic.core.resources.ok_to_mqtt
+import org.meshtastic.core.resources.options
+import org.meshtastic.core.resources.override_duty_cycle
+import org.meshtastic.core.resources.override_frequency_mhz
+import org.meshtastic.core.resources.pa_fan_disabled
+import org.meshtastic.core.resources.region_frequency_plan
+import org.meshtastic.core.resources.spread_factor
+import org.meshtastic.core.resources.sx126x_rx_boosted_gain
+import org.meshtastic.core.resources.tx_enabled
+import org.meshtastic.core.resources.tx_power_dbm
+import org.meshtastic.core.resources.use_modem_preset
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.EditTextPreference
 import org.meshtastic.core.ui.component.SignedIntegerEditTextPreference
@@ -181,8 +181,8 @@ fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.hop_limit),
                     summary = stringResource(Res.string.config_lora_hop_limit_summary),
                     items = hopLimitItems,
-                    selectedItem = formState.value.hop_limit.toLong(),
-                    onItemSelected = { formState.value = formState.value.copy(hop_limit = it.toInt()) },
+                    selectedItem = formState.value.hop_limit,
+                    onItemSelected = { formState.value = formState.value.copy(hop_limit = it) },
                     enabled = state.connected,
                 )
                 HorizontalDivider()

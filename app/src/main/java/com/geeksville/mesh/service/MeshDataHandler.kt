@@ -18,10 +18,9 @@ package com.geeksville.mesh.service
 
 import android.util.Log
 import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.InterfaceId
-import com.meshtastic.core.strings.getString
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +30,9 @@ import kotlinx.coroutines.flow.first
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.Packet
@@ -41,15 +43,15 @@ import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.critical_alert
+import org.meshtastic.core.resources.error_duty_cycle
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.unknown_username
+import org.meshtastic.core.resources.waypoint_received
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.RetryEvent
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.filter.MessageFilterService
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.critical_alert
-import org.meshtastic.core.strings.error_duty_cycle
-import org.meshtastic.core.strings.unknown_username
-import org.meshtastic.core.strings.waypoint_received
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
@@ -326,7 +328,7 @@ constructor(
         val payload = packet.decoded?.payload ?: return
         val u = Waypoint.ADAPTER.decode(payload)
         if (u.locked_to != 0 && u.locked_to != packet.from) return
-        val currentSecond = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt()
+        val currentSecond = nowSeconds.toInt()
         rememberDataPacket(dataPacket, myNodeNum, updateNotification = u.expire > currentSecond)
     }
 
@@ -336,6 +338,14 @@ constructor(
         u.session_passkey.let { commandSender.setSessionPasskey(it) }
 
         val fromNum = packet.from
+        u.get_module_config_response?.let { config ->
+            if (fromNum == myNodeNum) {
+                configHandler.handleModuleConfig(config)
+            } else {
+                config.statusmessage?.node_status?.let { nodeManager.updateNodeStatus(fromNum, it) }
+            }
+        }
+
         if (fromNum == myNodeNum) {
             u.get_config_response?.let { configHandler.handleDeviceConfig(it) }
             u.get_channel_response?.let { configHandler.handleChannel(it) }
@@ -436,7 +446,7 @@ constructor(
             isRemote -> shouldDisplay = true
         }
         if (shouldDisplay) {
-            val now = System.currentTimeMillis() / MILLISECONDS_IN_SECOND
+            val now = nowSeconds
             if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0L
             if ((now - batteryPercentCooldowns[fromNum]!!) >= BATTERY_PERCENT_COOLDOWN_SECONDS || forceDisplay) {
                 batteryPercentCooldowns[fromNum] = now
@@ -450,11 +460,11 @@ constructor(
         val payload = packet.decoded?.payload ?: return
         val r = Routing.ADAPTER.decodeOrNull(payload, Logger) ?: return
         if (r.error_reason == Routing.Error.DUTY_CYCLE_LIMIT) {
-            serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle))
+            serviceRepository.setErrorMessage(getString(Res.string.error_duty_cycle), Severity.Warn)
         }
         handleAckNak(
             packet.decoded?.request_id ?: 0,
-            dataMapper.toNodeID(packet.from),
+            nodeManager.toNodeID(packet.from),
             r.error_reason?.value ?: 0,
             dataPacket.relayNode,
         )
@@ -468,122 +478,11 @@ constructor(
             val p = packetRepository.get().getPacketById(requestId)
             val reaction = packetRepository.get().getReactionByPacketId(requestId)
 
-            val isMaxRetransmit = routingError == Routing.Error.MAX_RETRANSMIT.value
-            val shouldRetry =
-                isMaxRetransmit &&
-                    p != null &&
-                    p.port_num == PortNum.TEXT_MESSAGE_APP.value &&
-                    (p.data.from == DataPacket.ID_LOCAL || p.data.from == nodeManager.getMyId()) &&
-                    p.data.retryCount < MAX_RETRY_ATTEMPTS
-
-            val shouldRetryReaction =
-                isMaxRetransmit &&
-                    reaction != null &&
-                    (reaction.userId == DataPacket.ID_LOCAL || reaction.userId == nodeManager.getMyId()) &&
-                    reaction.retryCount < MAX_RETRY_ATTEMPTS &&
-                    reaction.to != null
             @Suppress("MaxLineLength")
             Logger.d {
-                val retryInfo =
-                    "packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} retry=${p?.data?.retryCount ?: reaction?.retryCount}"
                 val statusInfo = "status=${p?.data?.status ?: reaction?.status}"
                 "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
-                    "maxRetransmit=$isMaxRetransmit shouldRetry=$shouldRetry reaction=$shouldRetryReaction $retryInfo $statusInfo"
-            }
-
-            if (shouldRetry) {
-                val newRetryCount = p.data.retryCount + 1
-
-                // Emit retry event to UI and wait for user response
-                val retryEvent =
-                    RetryEvent.MessageRetry(
-                        packetId = requestId,
-                        text = p.data.text ?: "",
-                        attemptNumber = newRetryCount,
-                        maxAttempts = MAX_RETRY_ATTEMPTS + 1, // +1 for initial attempt
-                    )
-
-                Logger.w { "[ackNak] requesting retry for req=$requestId retry=$newRetryCount" }
-                Log.d("MeshDataHandler", "[ackNak] Emitting retry event for req=$requestId retry=$newRetryCount")
-
-                val shouldProceed = serviceRepository.requestRetry(retryEvent, RETRY_DELAY_MS)
-                Log.d("MeshDataHandler", "[ackNak] Retry response for req=$requestId: shouldProceed=$shouldProceed")
-
-                if (shouldProceed) {
-                    val newId = commandSender.generatePacketId()
-                    val updatedData =
-                        p.data.copy(
-                            id = newId,
-                            status = MessageStatus.QUEUED,
-                            retryCount = newRetryCount,
-                            relayNode = null,
-                        )
-                    val updatedPacket =
-                        p.copy(packetId = newId, data = updatedData, routingError = Routing.Error.NONE.value)
-                    packetRepository.get().update(updatedPacket)
-
-                    Logger.w { "[ackNak] retrying req=$requestId newId=$newId retry=$newRetryCount" }
-                    commandSender.sendData(updatedData)
-                } else {
-                    // User cancelled retry - mark as ERROR
-                    Logger.w { "[ackNak] retry cancelled by user for req=$requestId" }
-                    p.data.status = MessageStatus.ERROR
-                    packetRepository.get().update(p)
-                }
-                return@handledLaunch
-            }
-
-            if (shouldRetryReaction) {
-                val newRetryCount = reaction.retryCount + 1
-
-                // Emit retry event to UI and wait for user response
-                val retryEvent =
-                    RetryEvent.ReactionRetry(
-                        packetId = requestId,
-                        emoji = reaction.emoji,
-                        attemptNumber = newRetryCount,
-                        maxAttempts = MAX_RETRY_ATTEMPTS + 1, // +1 for initial attempt
-                    )
-
-                Logger.w { "[ackNak] requesting retry for reaction req=$requestId retry=$newRetryCount" }
-
-                val shouldProceed = serviceRepository.requestRetry(retryEvent, RETRY_DELAY_MS)
-
-                if (shouldProceed) {
-                    val newId = commandSender.generatePacketId()
-
-                    val reactionPacket =
-                        DataPacket(
-                            to = reaction.to,
-                            channel = reaction.channel,
-                            bytes = reaction.emoji.encodeToByteArray().toByteString(),
-                            dataType = PortNum.TEXT_MESSAGE_APP.value,
-                            replyId = reaction.replyId,
-                            wantAck = true,
-                            emoji = reaction.emoji.codePointAt(0),
-                            id = newId,
-                            retryCount = newRetryCount,
-                        )
-
-                    val updatedReaction =
-                        reaction.copy(
-                            packetId = newId,
-                            status = MessageStatus.QUEUED,
-                            retryCount = newRetryCount,
-                            relayNode = null,
-                            routingError = Routing.Error.NONE.value,
-                        )
-                    packetRepository.get().updateReaction(updatedReaction)
-
-                    Logger.w { "[ackNak] retrying reaction req=$requestId newId=$newId retry=$newRetryCount" }
-                    commandSender.sendData(reactionPacket)
-                } else {
-                    // User cancelled retry - mark as ERROR
-                    Logger.w { "[ackNak] retry cancelled by user for reaction req=$requestId" }
-                    val errorReaction = reaction.copy(status = MessageStatus.ERROR, routingError = routingError)
-                    packetRepository.get().updateReaction(errorReaction)
-                }
-                return@handledLaunch
+                    "packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} $statusInfo"
             }
 
             val m =
@@ -702,7 +601,7 @@ constructor(
                         packetId = dataPacket.id,
                         port_num = dataPacket.dataType,
                         contact_key = contactKey,
-                        received_time = System.currentTimeMillis(),
+                        received_time = nowMillis,
                         read = fromLocal || isFiltered,
                         data = dataPacket,
                         snr = dataPacket.snr,
@@ -796,8 +695,8 @@ constructor(
     private fun rememberReaction(packet: MeshPacket) = scope.handledLaunch {
         val decoded = packet.decoded ?: return@handledLaunch
         val emoji = decoded.payload.toByteArray().decodeToString()
-        val fromId = dataMapper.toNodeID(packet.from)
-        val toId = dataMapper.toNodeID(packet.to)
+        val fromId = nodeManager.toNodeID(packet.from)
+        val toId = nodeManager.toNodeID(packet.to)
 
         val reaction =
             ReactionEntity(
@@ -805,7 +704,7 @@ constructor(
                 replyId = decoded.reply_id,
                 userId = fromId,
                 emoji = emoji,
-                timestamp = System.currentTimeMillis(),
+                timestamp = nowMillis,
                 snr = packet.rx_snr,
                 rssi = packet.rx_rssi,
                 hopsAway =
@@ -893,9 +792,6 @@ constructor(
     }
 
     companion object {
-        private const val MAX_RETRY_ATTEMPTS = 2
-        private const val RETRY_DELAY_MS = 5_000L
-        private const val MILLISECONDS_IN_SECOND = 1000L
         private const val HOPS_AWAY_UNAVAILABLE = -1
 
         private const val BATTERY_PERCENT_UNSUPPORTED = 0.0

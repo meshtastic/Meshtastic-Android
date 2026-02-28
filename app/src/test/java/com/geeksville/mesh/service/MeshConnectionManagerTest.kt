@@ -16,6 +16,9 @@
  */
 package com.geeksville.mesh.service
 
+import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.updateAll
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.coEvery
 import io.mockk.every
@@ -36,17 +39,20 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.ToRadio
 
 class MeshConnectionManagerTest {
 
+    private val context: Context = mockk(relaxed = true)
     private val radioInterfaceService: RadioInterfaceService = mockk(relaxed = true)
     private val connectionStateHolder = ConnectionStateHandler()
     private val serviceBroadcasts: MeshServiceBroadcasts = mockk(relaxed = true)
@@ -72,16 +78,21 @@ class MeshConnectionManagerTest {
     @Before
     fun setUp() {
         mockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
+        mockkStatic("androidx.glance.appwidget.GlanceAppWidgetKt")
         coEvery { org.jetbrains.compose.resources.getString(any()) } returns "Mocked String"
         coEvery { org.jetbrains.compose.resources.getString(any(), *anyVararg()) } returns "Mocked String"
+        coEvery { any<GlanceAppWidget>().updateAll(any()) } returns Unit
 
         every { radioInterfaceService.connectionState } returns radioConnectionState
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeEntity?>(null)
+        every { nodeRepository.ourNodeInfo } returns MutableStateFlow<Node?>(null)
+        every { nodeRepository.localStats } returns MutableStateFlow(LocalStats())
 
         manager =
             MeshConnectionManager(
+                context,
                 radioInterfaceService,
                 connectionStateHolder,
                 serviceBroadcasts,
@@ -102,6 +113,7 @@ class MeshConnectionManagerTest {
     @After
     fun tearDown() {
         unmockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
+        unmockkStatic("androidx.glance.appwidget.GlanceAppWidgetKt")
     }
 
     @Test

@@ -81,24 +81,30 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.format
+import kotlinx.datetime.format.char
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.debug_clear
-import org.meshtastic.core.strings.debug_decoded_payload
-import org.meshtastic.core.strings.debug_default_search
-import org.meshtastic.core.strings.debug_export_failed
-import org.meshtastic.core.strings.debug_export_success
-import org.meshtastic.core.strings.debug_filters
-import org.meshtastic.core.strings.debug_logs_export
-import org.meshtastic.core.strings.debug_panel
-import org.meshtastic.core.strings.debug_store_logs_summary
-import org.meshtastic.core.strings.debug_store_logs_title
-import org.meshtastic.core.strings.log_retention_days
-import org.meshtastic.core.strings.log_retention_days_quantity
-import org.meshtastic.core.strings.log_retention_days_summary
-import org.meshtastic.core.strings.log_retention_hours
-import org.meshtastic.core.strings.log_retention_never
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.debug_clear
+import org.meshtastic.core.resources.debug_decoded_payload
+import org.meshtastic.core.resources.debug_default_search
+import org.meshtastic.core.resources.debug_export_failed
+import org.meshtastic.core.resources.debug_export_success
+import org.meshtastic.core.resources.debug_filters
+import org.meshtastic.core.resources.debug_logs_export
+import org.meshtastic.core.resources.debug_panel
+import org.meshtastic.core.resources.debug_store_logs_summary
+import org.meshtastic.core.resources.debug_store_logs_title
+import org.meshtastic.core.resources.log_retention_days
+import org.meshtastic.core.resources.log_retention_days_quantity
+import org.meshtastic.core.resources.log_retention_days_summary
+import org.meshtastic.core.resources.log_retention_hours
+import org.meshtastic.core.resources.log_retention_never
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.MainAppBar
@@ -110,9 +116,7 @@ import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -199,7 +203,18 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel = hiltViewMo
                         filterMode = filterMode,
                         onFilterModeChange = { filterMode = it },
                         onExportLogs = {
-                            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                            val format =
+                                LocalDateTime.Format {
+                                    year()
+                                    monthNumber()
+                                    day()
+                                    char('_')
+                                    hour()
+                                    minute()
+                                    second()
+                                }
+                            val timestamp =
+                                fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"
                             exportLogsLauncher.launch(fileName)
                         },

@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.ui.component
 
-import android.util.Base64
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,19 +54,19 @@ import okio.ByteString
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.config_security_public_key
-import org.meshtastic.core.strings.encryption_error
-import org.meshtastic.core.strings.encryption_error_text
-import org.meshtastic.core.strings.encryption_pkc
-import org.meshtastic.core.strings.encryption_pkc_text
-import org.meshtastic.core.strings.encryption_psk
-import org.meshtastic.core.strings.encryption_psk_text
-import org.meshtastic.core.strings.error
-import org.meshtastic.core.strings.security_icon_help_dismiss
-import org.meshtastic.core.strings.security_icon_help_show_all
-import org.meshtastic.core.strings.security_icon_help_show_less
-import org.meshtastic.core.strings.show_all_key_title
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.config_security_public_key
+import org.meshtastic.core.resources.encryption_error
+import org.meshtastic.core.resources.encryption_error_text
+import org.meshtastic.core.resources.encryption_pkc
+import org.meshtastic.core.resources.encryption_pkc_text
+import org.meshtastic.core.resources.encryption_psk
+import org.meshtastic.core.resources.encryption_psk_text
+import org.meshtastic.core.resources.error
+import org.meshtastic.core.resources.security_icon_help_dismiss
+import org.meshtastic.core.resources.security_icon_help_show_all
+import org.meshtastic.core.resources.security_icon_help_show_less
+import org.meshtastic.core.resources.show_all_key_title
 import org.meshtastic.core.ui.icon.KeyOff
 import org.meshtastic.core.ui.icon.Lock
 import org.meshtastic.core.ui.icon.LockOpen
@@ -198,7 +197,7 @@ private fun KeyStatusDialog(title: StringResource, text: StringResource, key: By
                             if (isMismatch) {
                                 stringResource(Res.string.error)
                             } else {
-                                Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                                key.base64()
                             }
                         Text(
                             text = stringResource(Res.string.config_security_public_key) + ":",

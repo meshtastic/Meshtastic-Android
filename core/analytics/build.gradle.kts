@@ -36,8 +36,6 @@ dependencies {
     googleApi(libs.dd.sdk.android.compose)
     googleApi(libs.dd.sdk.android.logs)
     googleApi(libs.dd.sdk.android.rum)
-    googleApi(libs.dd.sdk.android.session.replay)
-    googleApi(libs.dd.sdk.android.session.replay.compose)
     googleApi(libs.dd.sdk.android.timber)
     googleApi(libs.dd.sdk.android.trace)
     googleApi(libs.dd.sdk.android.trace.otel)

@@ -26,6 +26,7 @@ plugins {
 configure<LibraryExtension> { namespace = "org.meshtastic.core.ui" }
 
 dependencies {
+    implementation(projects.core.common)
     implementation(projects.core.barcode)
     implementation(projects.core.nfc)
     implementation(projects.core.data)
@@ -34,7 +35,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
 
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.compose)
@@ -46,6 +47,7 @@ dependencies {
     implementation(libs.guava)
     implementation(libs.zxing.core)
     implementation(libs.kermit)
+    implementation(libs.nordic.common.core)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

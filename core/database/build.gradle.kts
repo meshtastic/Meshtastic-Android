@@ -32,10 +32,11 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    implementation(projects.core.common)
     implementation(projects.core.di)
     implementation(projects.core.model)
     implementation(projects.core.proto)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
 
     implementation(libs.androidx.room.paging)
     implementation(libs.kotlinx.serialization.json)

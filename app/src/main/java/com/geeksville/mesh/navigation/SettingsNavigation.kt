@@ -61,7 +61,9 @@ import org.meshtastic.feature.settings.radio.component.SecurityConfigScreen
 import org.meshtastic.feature.settings.radio.component.SerialConfigScreen
 import org.meshtastic.feature.settings.radio.component.StatusMessageConfigScreen
 import org.meshtastic.feature.settings.radio.component.StoreForwardConfigScreen
+import org.meshtastic.feature.settings.radio.component.TAKConfigScreen
 import org.meshtastic.feature.settings.radio.component.TelemetryConfigScreen
+import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigScreen
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
@@ -167,6 +169,11 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
 
                     ModuleRoute.STATUS_MESSAGE ->
                         StatusMessageConfigScreen(viewModel, onBack = navController::popBackStack)
+
+                    ModuleRoute.TRAFFIC_MANAGEMENT ->
+                        TrafficManagementConfigScreen(viewModel, onBack = navController::popBackStack)
+
+                    ModuleRoute.TAK -> TAKConfigScreen(viewModel, onBack = navController::popBackStack)
                 }
             }
         }

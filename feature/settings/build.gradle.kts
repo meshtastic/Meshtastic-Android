@@ -23,7 +23,10 @@ plugins {
     alias(libs.plugins.meshtastic.hilt)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.feature.settings" }
+configure<LibraryExtension> {
+    namespace = "org.meshtastic.feature.settings"
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+}
 
 dependencies {
     implementation(projects.core.common)
@@ -36,7 +39,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
     implementation(projects.core.ui)
     implementation(projects.core.barcode)
 
@@ -50,6 +53,13 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.collections.immutable)
     implementation(libs.kermit)
+    implementation(libs.nordic.common.core)
+    implementation(libs.nordic.common.permissions.ble)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.ext.junit)
 
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.test.ext.junit)

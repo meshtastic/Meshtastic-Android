@@ -15,14 +15,32 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.library) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.kotlin.parcelize)
+}
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    android { androidResources.enable = false }
+    android {
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
 
     sourceSets {
-        androidMain.dependencies { implementation(libs.androidx.core.ktx) }
-        commonTest.dependencies { implementation(kotlin("test")) }
+        commonMain.dependencies {
+            implementation(libs.javax.inject)
+            implementation(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.datetime)
+            implementation(libs.kermit)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+            api(libs.nordic.common.core)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }

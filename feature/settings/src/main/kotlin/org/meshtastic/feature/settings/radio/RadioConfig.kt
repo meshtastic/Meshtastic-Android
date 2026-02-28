@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material.icons.rounded.Download
@@ -54,24 +52,24 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.administration
-import org.meshtastic.core.strings.advanced_title
-import org.meshtastic.core.strings.backup_restore
-import org.meshtastic.core.strings.clean_node_database_title
-import org.meshtastic.core.strings.debug_panel
-import org.meshtastic.core.strings.device_configuration
-import org.meshtastic.core.strings.export_configuration
-import org.meshtastic.core.strings.factory_reset
-import org.meshtastic.core.strings.firmware_update_title
-import org.meshtastic.core.strings.import_configuration
-import org.meshtastic.core.strings.message_device_managed
-import org.meshtastic.core.strings.module_settings
-import org.meshtastic.core.strings.nodedb_reset
-import org.meshtastic.core.strings.preserve_favorites
-import org.meshtastic.core.strings.radio_configuration
-import org.meshtastic.core.strings.reboot
-import org.meshtastic.core.strings.shutdown
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.administration
+import org.meshtastic.core.resources.advanced_title
+import org.meshtastic.core.resources.backup_restore
+import org.meshtastic.core.resources.clean_node_database_title
+import org.meshtastic.core.resources.debug_panel
+import org.meshtastic.core.resources.device_configuration
+import org.meshtastic.core.resources.export_configuration
+import org.meshtastic.core.resources.factory_reset
+import org.meshtastic.core.resources.firmware_update_title
+import org.meshtastic.core.resources.import_configuration
+import org.meshtastic.core.resources.message_device_managed
+import org.meshtastic.core.resources.module_settings
+import org.meshtastic.core.resources.nodedb_reset
+import org.meshtastic.core.resources.preserve_favorites
+import org.meshtastic.core.resources.radio_configuration
+import org.meshtastic.core.resources.reboot
+import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.core.ui.theme.AppTheme
@@ -97,13 +95,15 @@ fun RadioConfigItemList(
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
-    var modules by remember { mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata)) }
+    var modules by remember {
+        mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata, state.radioConfig.device?.role))
+    }
 
-    LaunchedEffect(excludedModulesUnlocked) {
+    LaunchedEffect(excludedModulesUnlocked, state.metadata, state.radioConfig.device?.role) {
         if (excludedModulesUnlocked) {
             modules = ModuleRoute.entries
         } else {
-            modules = ModuleRoute.filterExcludedFrom(state.metadata)
+            modules = ModuleRoute.filterExcludedFrom(state.metadata, state.radioConfig.device?.role)
         }
     }
 

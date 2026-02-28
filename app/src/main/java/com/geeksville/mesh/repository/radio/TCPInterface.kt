@@ -17,13 +17,14 @@
 package com.geeksville.mesh.repository.radio
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.util.Exceptions
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.common.util.Exceptions
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
@@ -83,7 +84,8 @@ constructor(
         try {
             stream.write(p)
         } catch (ex: IOException) {
-            Logger.e(ex) { "[$address] TCP write error: ${ex.message}" }
+            // TCP write errors are common when the connection is lost; log as warning to avoid Crashlytics noise
+            Logger.w(ex) { "[$address] TCP write error: ${ex.message}" }
             onDeviceDisconnect(false)
         }
     }
@@ -94,7 +96,8 @@ constructor(
         try {
             stream.flush()
         } catch (ex: IOException) {
-            Logger.e(ex) { "[$address] TCP flush error: ${ex.message}" }
+            // TCP flush errors are common when the connection is lost; log as warning to avoid Crashlytics noise
+            Logger.w(ex) { "[$address] TCP flush error: ${ex.message}" }
             onDeviceDisconnect(false)
         }
     }
@@ -104,7 +107,7 @@ constructor(
         if (s != null) {
             val uptime =
                 if (connectionStartTime > 0) {
-                    System.currentTimeMillis() - connectionStartTime
+                    nowMillis - connectionStartTime
                 } else {
                     0
                 }
@@ -130,7 +133,7 @@ constructor(
                 } catch (ex: IOException) {
                     val uptime =
                         if (connectionStartTime > 0) {
-                            System.currentTimeMillis() - connectionStartTime
+                            nowMillis - connectionStartTime
                         } else {
                             0
                         }
@@ -140,7 +143,7 @@ constructor(
                 } catch (ex: Throwable) {
                     val uptime =
                         if (connectionStartTime > 0) {
-                            System.currentTimeMillis() - connectionStartTime
+                            nowMillis - connectionStartTime
                         } else {
                             0
                         }
@@ -175,7 +178,7 @@ constructor(
 
     // Create a socket to make the connection with the server
     private suspend fun startConnect() = withContext(dispatchers.io) {
-        val attemptStart = System.currentTimeMillis()
+        val attemptStart = nowMillis
         Logger.i { "[$address] TCP connection attempt starting..." }
 
         val parts = address.split(":", limit = 2)
@@ -190,8 +193,8 @@ constructor(
             socket.soTimeout = SOCKET_TIMEOUT
             this@TCPInterface.socket = socket
 
-            val connectTime = System.currentTimeMillis() - attemptStart
-            connectionStartTime = System.currentTimeMillis()
+            val connectTime = nowMillis - attemptStart
+            connectionStartTime = nowMillis
             Logger.i {
                 "[$address] TCP socket connected in ${connectTime}ms - " +
                     "Local: ${socket.localSocketAddress}, Remote: ${socket.remoteSocketAddress}"

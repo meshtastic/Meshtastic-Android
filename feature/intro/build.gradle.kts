@@ -20,14 +20,18 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.flavors)
     alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.feature.intro" }
+configure<LibraryExtension> {
+    namespace = "org.meshtastic.feature.intro"
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+}
 
 dependencies {
-    implementation(projects.core.strings)
-    googleImplementation(projects.core.ui)
+    implementation(projects.core.resources)
+    implementation(projects.core.ui)
 
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.compose.material.iconsExtended)
@@ -35,4 +39,12 @@ dependencies {
     implementation(libs.androidx.compose.ui.text)
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 }

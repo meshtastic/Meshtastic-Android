@@ -34,9 +34,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.squareup.wire.Message
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.discard_changes
-import org.meshtastic.core.strings.save_changes
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.discard_changes
+import org.meshtastic.core.resources.save_changes
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.feature.settings.radio.ResponseState

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.timezone
 
+import kotlinx.datetime.TimeZone
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.time.ZoneId
-import java.time.ZoneOffset
+import org.meshtastic.core.model.util.toPosixString
 
 class ZoneIdExtensionsTest {
 
@@ -51,21 +50,6 @@ class ZoneIdExtensionsTest {
                 "Pacific/Auckland" to "NZST-12NZDT,M9.5.0,M4.1.0/3",
             )
 
-        zoneMap.forEach { (tz, expected) -> assertEquals(expected, ZoneId.of(tz).toPosixString()) }
-    }
-
-    @Test
-    fun `test formatAbbreviation`() {
-        assertEquals("PST", formatAbbreviation("PST"))
-        assertEquals("<GMT-8>", formatAbbreviation("GMT-8"))
-    }
-
-    @Test
-    fun `test formatPosixOffset`() {
-        assertEquals("8", formatPosixOffset(ZoneOffset.ofHours(-8)))
-        assertEquals("-1", formatPosixOffset(ZoneOffset.ofHours(1)))
-        assertEquals("-5:30", formatPosixOffset(ZoneOffset.ofHoursMinutes(5, 30)))
-        assertEquals("0", formatPosixOffset(ZoneOffset.ofHours(0)))
-        assertEquals("-0:30", formatPosixOffset(ZoneOffset.ofTotalSeconds(30 * 60)))
+        zoneMap.forEach { (tz, expected) -> assertEquals(expected, TimeZone.of(tz).toPosixString()) }
     }
 }

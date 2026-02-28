@@ -35,8 +35,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +48,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -62,23 +63,25 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.air_util_definition
-import org.meshtastic.core.strings.air_utilization
-import org.meshtastic.core.strings.battery
-import org.meshtastic.core.strings.ch_util_definition
-import org.meshtastic.core.strings.channel_utilization
-import org.meshtastic.core.strings.device_metrics_log
-import org.meshtastic.core.strings.uptime
-import org.meshtastic.core.strings.voltage
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.air_util_definition
+import org.meshtastic.core.resources.air_utilization
+import org.meshtastic.core.resources.battery
+import org.meshtastic.core.resources.ch_util_definition
+import org.meshtastic.core.resources.channel_utilization
+import org.meshtastic.core.resources.device_metrics_log
+import org.meshtastic.core.resources.uptime
+import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.GraphColors.Cyan
 import org.meshtastic.core.ui.theme.GraphColors.Gold
 import org.meshtastic.core.ui.theme.GraphColors.Green
 import org.meshtastic.core.ui.theme.GraphColors.Purple
+import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.DATE_TIME_FORMAT
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.Telemetry
@@ -122,12 +125,26 @@ private val LEGEND_DATA =
 @Composable
 fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val data = state.deviceMetrics
+    val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
+    val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
+    val data = state.deviceMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
     val hasVoltage = remember(data) { data.any { it.device_metrics?.voltage != null } }
     val hasChUtil = remember(data) { data.any { it.device_metrics?.channel_utilization != null } }
     val hasAirUtil = remember(data) { data.any { it.device_metrics?.air_util_tx != null } }
+
+    LaunchedEffect(Unit) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is NodeRequestEffect.ShowFeedback -> {
+                    @Suppress("SpreadOperator")
+                    snackbarHostState.showSnackbar(effect.text.resolve())
+                }
+            }
+        }
+    }
 
     val filteredLegendData =
         remember(hasBattery, hasVoltage, hasChUtil, hasAirUtil) {
@@ -167,13 +184,23 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
         }
 
     BaseMetricScreen(
-        viewModel = viewModel,
         onNavigateUp = onNavigateUp,
         telemetryType = TelemetryType.DEVICE,
         titleRes = Res.string.device_metrics_log,
+        nodeName = state.node?.user?.long_name ?: "",
         data = data,
         timeProvider = { (it.time ?: 0).toDouble() },
         infoData = infoItems,
+        snackbarHostState = snackbarHostState,
+        onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.DEVICE) },
+        controlPart = {
+            TimeFrameSelector(
+                selectedTimeFrame = timeFrame,
+                availableTimeFrames = availableTimeFrames,
+                onTimeFrameSelected = viewModel::setTimeFrame,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        },
         chartPart = { modifier, selectedX, vicoScrollState, onPointSelected ->
             DeviceMetricsChart(
                 modifier = modifier,
@@ -184,8 +211,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
                 onPointSelected = onPointSelected,
             )
         },
-        listPart = { modifier, selectedX, onCardClick ->
-            LazyColumn(modifier = modifier.fillMaxSize()) {
+        listPart = { modifier, selectedX, lazyListState, onCardClick ->
+            LazyColumn(modifier = modifier.fillMaxSize(), state = lazyListState) {
                 itemsIndexed(data) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,
@@ -198,7 +225,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel(), onNavigat
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
@@ -230,59 +257,82 @@ private fun DeviceMetricsChart(
                 },
             )
 
-        LaunchedEffect(telemetries) {
+        val batteryData = remember(telemetries) { telemetries.filter { it.device_metrics?.battery_level != null } }
+        val chUtilData = remember(telemetries) { telemetries.filter { it.device_metrics?.channel_utilization != null } }
+        val airUtilData = remember(telemetries) { telemetries.filter { it.device_metrics?.air_util_tx != null } }
+        val voltageData = remember(telemetries) { telemetries.filter { it.device_metrics?.voltage != null } }
+
+        val batteryStyle =
+            if (batteryData.isNotEmpty()) {
+                ChartStyling.createBoldLine(batteryColor, ChartStyling.MEDIUM_POINT_SIZE_DP)
+            } else {
+                null
+            }
+        val chUtilStyle =
+            if (chUtilData.isNotEmpty()) {
+                ChartStyling.createPointOnlyLine(chUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+            } else {
+                null
+            }
+        val airUtilStyle =
+            if (airUtilData.isNotEmpty()) {
+                ChartStyling.createPointOnlyLine(airUtilColor, ChartStyling.LARGE_POINT_SIZE_DP)
+            } else {
+                null
+            }
+
+        val leftLayerSeriesStyles =
+            remember(batteryStyle, chUtilStyle, airUtilStyle) { listOfNotNull(batteryStyle, chUtilStyle, airUtilStyle) }
+
+        LaunchedEffect(batteryData, chUtilData, airUtilData, voltageData, leftLayerSeriesStyles) {
             modelProducer.runTransaction {
                 /* Series for Left Axis (0-100%) */
-                lineSeries {
-                    series(
-                        x = telemetries.map { it.time ?: 0 },
-                        y = telemetries.map { it.device_metrics?.battery_level ?: 0 },
-                    )
-                    val chUtilData = telemetries.filter { it.device_metrics?.channel_utilization != null }
-                    series(
-                        x = chUtilData.map { it.time ?: 0 },
-                        y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
-                    )
-                    val airUtilData = telemetries.filter { it.device_metrics?.air_util_tx != null }
-                    series(
-                        x = airUtilData.map { it.time ?: 0 },
-                        y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
-                    )
+                if (leftLayerSeriesStyles.isNotEmpty()) {
+                    lineSeries {
+                        if (batteryData.isNotEmpty()) {
+                            series(
+                                x = batteryData.map { it.time ?: 0 },
+                                y = batteryData.map { (it.device_metrics?.battery_level ?: 0).toFloat() },
+                            )
+                        }
+                        if (chUtilData.isNotEmpty()) {
+                            series(
+                                x = chUtilData.map { it.time ?: 0 },
+                                y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
+                            )
+                        }
+                        if (airUtilData.isNotEmpty()) {
+                            series(
+                                x = airUtilData.map { it.time ?: 0 },
+                                y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
+                            )
+                        }
+                    }
                 }
                 /* Series for Right Axis (Voltage) */
-                lineSeries {
-                    val voltageData = telemetries.filter { it.device_metrics?.voltage != null }
-                    series(
-                        x = voltageData.map { it.time ?: 0 },
-                        y = voltageData.map { it.device_metrics?.voltage ?: 0f },
-                    )
+                if (voltageData.isNotEmpty()) {
+                    lineSeries {
+                        series(
+                            x = voltageData.map { it.time ?: 0 },
+                            y = voltageData.map { it.device_metrics?.voltage ?: 0f },
+                        )
+                    }
                 }
             }
         }
 
-        GenericMetricChart(
-            modelProducer = modelProducer,
-            modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
-            layers =
-            listOf(
+        val leftLayer =
+            if (leftLayerSeriesStyles.isNotEmpty()) {
                 rememberLineCartesianLayer(
-                    lineProvider =
-                    LineCartesianLayer.LineProvider.series(
-                        ChartStyling.createBoldLine(
-                            lineColor = batteryColor,
-                            pointSize = ChartStyling.MEDIUM_POINT_SIZE_DP,
-                        ),
-                        ChartStyling.createPointOnlyLine(
-                            pointColor = chUtilColor,
-                            pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
-                        ),
-                        ChartStyling.createPointOnlyLine(
-                            pointColor = airUtilColor,
-                            pointSize = ChartStyling.LARGE_POINT_SIZE_DP,
-                        ),
-                    ),
+                    lineProvider = LineCartesianLayer.LineProvider.series(leftLayerSeriesStyles),
                     verticalAxisPosition = Axis.Position.Vertical.Start,
-                ),
+                )
+            } else {
+                null
+            }
+
+        val rightLayer =
+            if (voltageData.isNotEmpty()) {
                 rememberLineCartesianLayer(
                     lineProvider =
                     LineCartesianLayer.LineProvider.series(
@@ -292,30 +342,49 @@ private fun DeviceMetricsChart(
                         ),
                     ),
                     verticalAxisPosition = Axis.Position.Vertical.End,
+                )
+            } else {
+                null
+            }
+
+        val layers = remember(leftLayer, rightLayer) { listOfNotNull(leftLayer, rightLayer) }
+
+        if (layers.isNotEmpty()) {
+            GenericMetricChart(
+                modelProducer = modelProducer,
+                modifier = Modifier.weight(1f).padding(horizontal = 8.dp).padding(bottom = 0.dp),
+                layers = layers,
+                startAxis =
+                if (leftLayer != null) {
+                    VerticalAxis.rememberStart(
+                        label = ChartStyling.rememberAxisLabel(color = batteryColor),
+                        valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
+                    )
+                } else {
+                    null
+                },
+                endAxis =
+                if (rightLayer != null) {
+                    VerticalAxis.rememberEnd(
+                        label = ChartStyling.rememberAxisLabel(color = voltageColor),
+                        valueFormatter = { _, value, _ -> "%.1f V".format(value) },
+                    )
+                } else {
+                    null
+                },
+                bottomAxis =
+                HorizontalAxis.rememberBottom(
+                    label = ChartStyling.rememberAxisLabel(),
+                    valueFormatter = CommonCharts.dynamicTimeFormatter,
+                    itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
+                    labelRotationDegrees = 45f,
                 ),
-            ),
-            startAxis =
-            VerticalAxis.rememberStart(
-                label = ChartStyling.rememberAxisLabel(color = batteryColor),
-                valueFormatter = { _, value, _ -> "%.0f%%".format(value) },
-            ),
-            endAxis =
-            VerticalAxis.rememberEnd(
-                label = ChartStyling.rememberAxisLabel(color = voltageColor),
-                valueFormatter = { _, value, _ -> "%.1f V".format(value) },
-            ),
-            bottomAxis =
-            HorizontalAxis.rememberBottom(
-                label = ChartStyling.rememberAxisLabel(),
-                valueFormatter = CommonCharts.dynamicTimeFormatter,
-                itemPlacer = ChartStyling.rememberItemPlacer(spacing = 20),
-                labelRotationDegrees = 45f,
-            ),
-            marker = marker,
-            selectedX = selectedX,
-            onPointSelected = onPointSelected,
-            vicoScrollState = vicoScrollState,
-        )
+                marker = marker,
+                selectedX = selectedX,
+                onPointSelected = onPointSelected,
+                vicoScrollState = vicoScrollState,
+            )
+        }
 
         Legend(legendData = legendData, modifier = Modifier.padding(top = 0.dp))
     }
@@ -325,7 +394,7 @@ private fun DeviceMetricsChart(
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsChartPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
+    val now = nowSeconds.toInt()
     val telemetries =
         List(20) { i ->
             Telemetry(
@@ -352,7 +421,6 @@ private fun DeviceMetricsChartPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
@@ -378,7 +446,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
                             text = DATE_TIME_FORMAT.format(time),
-                            style = MaterialTheme.typography.titleMediumEmphasized,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                         )
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -441,7 +510,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsCardPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
+    val now = nowSeconds.toInt()
     val telemetry =
         Telemetry(
             time = now,
@@ -461,7 +530,7 @@ private fun DeviceMetricsCardPreview() {
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsScreenPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
+    val now = nowSeconds.toInt()
     val telemetries =
         List(24) { i ->
             Telemetry(

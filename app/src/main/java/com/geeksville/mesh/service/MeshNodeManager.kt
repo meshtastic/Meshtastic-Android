@@ -18,13 +18,14 @@ package com.geeksville.mesh.service
 
 import androidx.annotation.VisibleForTesting
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okio.ByteString
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.NodeEntity
@@ -32,6 +33,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
@@ -53,7 +55,7 @@ constructor(
     private val nodeRepository: NodeRepository?,
     private val serviceBroadcasts: MeshServiceBroadcasts?,
     private val serviceNotifications: MeshServiceNotifications?,
-) {
+) : NodeIdLookup {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
@@ -186,12 +188,7 @@ constructor(
         }
     }
 
-    fun handleReceivedPosition(
-        fromNum: Int,
-        myNodeNum: Int,
-        p: ProtoPosition,
-        defaultTime: Long = System.currentTimeMillis(),
-    ) {
+    fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long = nowMillis) {
         if (myNodeNum == fromNum && (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0) {
             Logger.d { "Ignoring nop position update for the local node" }
         } else {
@@ -214,7 +211,11 @@ constructor(
     }
 
     fun handleReceivedNodeStatus(fromNum: Int, s: StatusMessage) {
-        updateNodeInfo(fromNum) { it.nodeStatus = s.status }
+        updateNodeStatus(fromNum, s.status)
+    }
+
+    fun updateNodeStatus(nodeNum: Int, status: String?) {
+        updateNodeInfo(nodeNum) { it.nodeStatus = status?.takeIf { s -> s.isNotEmpty() } }
     }
 
     fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true) {
@@ -260,9 +261,9 @@ constructor(
         return hasExistingUser && isDefaultName && isDefaultHwModel
     }
 
-    fun toNodeID(n: Int): String = if (n == DataPacket.NODENUM_BROADCAST) {
+    override fun toNodeID(nodeNum: Int): String = if (nodeNum == DataPacket.NODENUM_BROADCAST) {
         DataPacket.ID_BROADCAST
     } else {
-        nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
+        nodeDBbyNodeNum[nodeNum]?.user?.id ?: DataPacket.nodeNumToDefaultId(nodeNum)
     }
 }

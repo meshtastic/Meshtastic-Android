@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,30 +40,31 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.util.encodeToString
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.admin_key
-import org.meshtastic.core.strings.admin_keys
-import org.meshtastic.core.strings.administration
-import org.meshtastic.core.strings.config_security_admin_key
-import org.meshtastic.core.strings.config_security_debug_log_api_enabled
-import org.meshtastic.core.strings.config_security_is_managed
-import org.meshtastic.core.strings.config_security_private_key
-import org.meshtastic.core.strings.config_security_public_key
-import org.meshtastic.core.strings.config_security_serial_enabled
-import org.meshtastic.core.strings.debug_log_api_enabled
-import org.meshtastic.core.strings.direct_message_key
-import org.meshtastic.core.strings.export_keys
-import org.meshtastic.core.strings.export_keys_confirmation
-import org.meshtastic.core.strings.legacy_admin_channel
-import org.meshtastic.core.strings.logs
-import org.meshtastic.core.strings.managed_mode
-import org.meshtastic.core.strings.private_key
-import org.meshtastic.core.strings.public_key
-import org.meshtastic.core.strings.regenerate_keys_confirmation
-import org.meshtastic.core.strings.regenerate_private_key
-import org.meshtastic.core.strings.security
-import org.meshtastic.core.strings.serial_console
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.admin_key
+import org.meshtastic.core.resources.admin_keys
+import org.meshtastic.core.resources.administration
+import org.meshtastic.core.resources.config_security_admin_key
+import org.meshtastic.core.resources.config_security_debug_log_api_enabled
+import org.meshtastic.core.resources.config_security_is_managed
+import org.meshtastic.core.resources.config_security_private_key
+import org.meshtastic.core.resources.config_security_public_key
+import org.meshtastic.core.resources.config_security_serial_enabled
+import org.meshtastic.core.resources.debug_log_api_enabled
+import org.meshtastic.core.resources.direct_message_key
+import org.meshtastic.core.resources.export_keys
+import org.meshtastic.core.resources.export_keys_confirmation
+import org.meshtastic.core.resources.legacy_admin_channel
+import org.meshtastic.core.resources.logs
+import org.meshtastic.core.resources.managed_mode
+import org.meshtastic.core.resources.private_key
+import org.meshtastic.core.resources.public_key
+import org.meshtastic.core.resources.regenerate_keys_confirmation
+import org.meshtastic.core.resources.regenerate_private_key
+import org.meshtastic.core.resources.security
+import org.meshtastic.core.resources.serial_console
 import org.meshtastic.core.ui.component.CopyIconButton
 import org.meshtastic.core.ui.component.EditBase64Preference
 import org.meshtastic.core.ui.component.EditListPreference
@@ -75,8 +75,8 @@ import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 import java.security.SecureRandom
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
+@Suppress("LongMethod")
 fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val node by viewModel.destNode.collectAsStateWithLifecycle()
@@ -122,10 +122,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/*"
-                        putExtra(
-                            Intent.EXTRA_TITLE,
-                            "${node?.user?.short_name}_keys_${System.currentTimeMillis()}.json",
-                        )
+                        putExtra(Intent.EXTRA_TITLE, "${node?.user?.short_name}_keys_$nowMillis.json")
                     }
                 exportConfigLauncher.launch(intent)
             },

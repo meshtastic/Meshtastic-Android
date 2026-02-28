@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
@@ -120,6 +121,6 @@ class DeviceHardwareRepositoryTest {
         requiresDfu = false,
         supportLevel = 0,
         tags = emptyList(),
-        lastUpdated = System.currentTimeMillis(),
+        lastUpdated = nowMillis,
     )
 }

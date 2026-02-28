@@ -23,6 +23,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import okio.ByteString
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
@@ -57,8 +58,8 @@ data class PacketEntity(
             viaMqtt = data.viaMqtt,
             relayNode = data.relayNode,
             relays = data.relays,
-            retryCount = data.retryCount,
             filtered = filtered,
+            transportMechanism = data.transportMechanism,
         )
     }
 }
@@ -126,7 +127,7 @@ data class ContactSettings(
     @ColumnInfo(name = "filtering_disabled", defaultValue = "0") val filteringDisabled: Boolean = false,
 ) {
     val isMuted
-        get() = System.currentTimeMillis() <= muteUntil
+        get() = nowMillis <= muteUntil
 }
 
 data class Reaction(
@@ -140,7 +141,6 @@ data class Reaction(
     val packetId: Int = 0,
     val status: MessageStatus = MessageStatus.UNKNOWN,
     val routingError: Int = 0,
-    val retryCount: Int = 0,
     val relays: Int = 0,
     val relayNode: Int? = null,
     val to: String? = null,
@@ -166,7 +166,6 @@ data class ReactionEntity(
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "status", defaultValue = "0") val status: MessageStatus = MessageStatus.UNKNOWN,
     @ColumnInfo(name = "routing_error", defaultValue = "0") val routingError: Int = 0,
-    @ColumnInfo(name = "retry_count", defaultValue = "0") val retryCount: Int = 0,
     @ColumnInfo(name = "relays", defaultValue = "0") val relays: Int = 0,
     @ColumnInfo(name = "relay_node") val relayNode: Int? = null,
     @ColumnInfo(name = "to") val to: String? = null,
@@ -187,7 +186,6 @@ private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?)
         packetId = packetId,
         status = status,
         routingError = routingError,
-        retryCount = retryCount,
         relays = relays,
         relayNode = relayNode,
         to = to,

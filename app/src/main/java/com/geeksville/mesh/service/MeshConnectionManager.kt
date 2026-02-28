@@ -17,44 +17,57 @@
 package com.geeksville.mesh.service
 
 import android.app.Notification
+import android.content.Context
+import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.meshtastic.core.strings.getString
+import com.geeksville.mesh.widget.LocalStatsWidget
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.connected
+import org.meshtastic.core.resources.connecting
+import org.meshtastic.core.resources.device_sleeping
+import org.meshtastic.core.resources.disconnected
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.strings.Res
-import org.meshtastic.core.strings.connected_count
-import org.meshtastic.core.strings.connecting
-import org.meshtastic.core.strings.device_sleeping
-import org.meshtastic.core.strings.disconnected
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.DurationUnit
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
 class MeshConnectionManager
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionStateHolder: ConnectionStateHandler,
     private val serviceBroadcasts: MeshServiceBroadcasts,
@@ -73,11 +86,26 @@ constructor(
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
+    private var handshakeTimeout: Job? = null
     private var connectTimeMsec = 0L
 
+    @OptIn(FlowPreview::class)
     fun start(scope: CoroutineScope) {
         this.scope = scope
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
+
+        // Ensure notification title and content stay in sync with state changes
+        connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+
+        // Kickstart the widget composition. The widget internally uses collectAsState()
+        // and its own sampled StateFlow to drive updates automatically without excessive IPC and recreation.
+        scope.launch {
+            try {
+                LocalStatsWidget().updateAll(context)
+            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
+            }
+        }
 
         nodeRepository.myNodeInfo
             .onEach { myNodeEntity ->
@@ -118,11 +146,21 @@ constructor(
     }
 
     private fun onConnectionChanged(c: ConnectionState) {
-        if (connectionStateHolder.connectionState.value == c && c !is ConnectionState.Connected) return
-        Logger.d { "onConnectionChanged: ${connectionStateHolder.connectionState.value} -> $c" }
+        val current = connectionStateHolder.connectionState.value
+        if (current == c) return
+
+        // If the transport reports 'Connected', but we are already in the middle of a handshake (Connecting)
+        if (c is ConnectionState.Connected && current is ConnectionState.Connecting) {
+            Logger.d { "Ignoring redundant transport connection signal while handshake is in progress" }
+            return
+        }
+
+        Logger.i { "onConnectionChanged: $current -> $c" }
 
         sleepTimeout?.cancel()
         sleepTimeout = null
+        handshakeTimeout?.cancel()
+        handshakeTimeout = null
 
         when (c) {
             is ConnectionState.Connecting -> connectionStateHolder.setState(ConnectionState.Connecting)
@@ -130,19 +168,33 @@ constructor(
             is ConnectionState.DeviceSleep -> handleDeviceSleep()
             is ConnectionState.Disconnected -> handleDisconnected()
         }
-        updateStatusNotification()
     }
 
     private fun handleConnected() {
         // The service state remains 'Connecting' until config is fully loaded
-        if (connectionStateHolder.connectionState.value == ConnectionState.Disconnected) {
+        if (connectionStateHolder.connectionState.value != ConnectionState.Connected) {
             connectionStateHolder.setState(ConnectionState.Connecting)
         }
         serviceBroadcasts.broadcastConnection()
-        Logger.d { "Starting connect" }
-        connectTimeMsec = System.currentTimeMillis()
-        scope.handledLaunch { nodeRepository.clearMyNodeInfo() }
+        Logger.i { "Starting mesh handshake (Stage 1)" }
+        connectTimeMsec = nowMillis
         startConfigOnly()
+
+        // Guard against handshake stalls
+        handshakeTimeout =
+            scope.handledLaunch {
+                delay(HANDSHAKE_TIMEOUT)
+                if (connectionStateHolder.connectionState.value is ConnectionState.Connecting) {
+                    Logger.w { "Handshake stall detected! Retrying Stage 1." }
+                    startConfigOnly()
+                    // Recursive timeout for one more try
+                    delay(HANDSHAKE_TIMEOUT)
+                    if (connectionStateHolder.connectionState.value is ConnectionState.Connecting) {
+                        Logger.e { "Handshake still stalled after retry. Resetting connection." }
+                        onConnectionChanged(ConnectionState.Disconnected)
+                    }
+                }
+            }
     }
 
     private fun handleDeviceSleep() {
@@ -152,12 +204,12 @@ constructor(
         mqttManager.stop()
 
         if (connectTimeMsec != 0L) {
-            val now = System.currentTimeMillis()
+            val now = nowMillis
             val duration = now - connectTimeMsec
             connectTimeMsec = 0L
             analytics.track(
                 EVENT_CONNECTED_SECONDS,
-                DataPair(EVENT_CONNECTED_SECONDS, duration / MILLISECONDS_IN_SECOND),
+                DataPair(EVENT_CONNECTED_SECONDS, duration.milliseconds.toDouble(DurationUnit.SECONDS)),
             )
         }
 
@@ -207,12 +259,13 @@ constructor(
 
         val myNodeNum = nodeManager.myNodeNum ?: 0
         // Set time
-        commandSender.sendAdmin(myNodeNum) {
-            AdminMessage(set_time_only = (System.currentTimeMillis() / MILLISECONDS_IN_SECOND).toInt())
-        }
+        commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
     }
 
     fun onNodeDbReady() {
+        handshakeTimeout?.cancel()
+        handshakeTimeout = null
+
         // Start MQTT if enabled
         scope.handledLaunch {
             val moduleConfig = radioConfigRepository.moduleConfigFlow.first()
@@ -234,7 +287,9 @@ constructor(
             }
         }
 
-        updateStatusNotification()
+        // Request immediate LocalStats and DeviceMetrics update on connection with proper request IDs
+        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)
+        commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.DEVICE.ordinal)
     }
 
     private fun reportConnection() {
@@ -249,6 +304,7 @@ constructor(
     }
 
     fun updateTelemetry(telemetry: Telemetry) {
+        telemetry.local_stats?.let { nodeRepository.updateLocalStats(it) }
         updateStatusNotification(telemetry)
     }
 
@@ -256,8 +312,7 @@ constructor(
         val summary =
             when (connectionStateHolder.connectionState.value) {
                 is ConnectionState.Connected ->
-                    getString(Res.string.connected_count)
-                        .format(nodeManager.nodeDBbyNodeNum.values.count { it.isOnline })
+                    getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
                 is ConnectionState.Disconnected -> getString(Res.string.disconnected)
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
                 is ConnectionState.Connecting -> getString(Res.string.connecting)
@@ -268,8 +323,8 @@ constructor(
     companion object {
         private const val CONFIG_ONLY_NONCE = 69420
         private const val NODE_INFO_NONCE = 69421
-        private const val MILLISECONDS_IN_SECOND = 1000.0
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
+        private val HANDSHAKE_TIMEOUT = 10.seconds
 
         private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
         private const val EVENT_MESH_DISCONNECT = "mesh_disconnect"

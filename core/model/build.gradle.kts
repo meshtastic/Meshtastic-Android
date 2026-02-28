@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     `maven-publish`
@@ -25,46 +24,57 @@ plugins {
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
-configure<LibraryExtension> {
-    namespace = "org.meshtastic.core.model"
-    buildFeatures {
-        buildConfig = true
-        aidl = true
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+        withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
     }
 
-    defaultConfig {
-        // Lowering minSdk to 21 for better compatibility with ATAK and other plugins
-        minSdk = 21
-    }
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.core.proto)
+            api(projects.core.common)
 
-    testOptions { unitTests { isIncludeAndroidResources = true } }
-
-    publishing { singleVariant("release") { withSourcesJar() } }
-}
-
-afterEvaluate {
-    publishing {
-        publications {
-            create<MavenPublication>("release") {
-                from(components["release"])
-                artifactId = "meshtastic-android-model"
+            api(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.datetime)
+            implementation(libs.kermit)
+            api(libs.okio)
+        }
+        androidMain.dependencies {
+            api(libs.androidx.annotation)
+            api(libs.androidx.core.ktx)
+            implementation(libs.zxing.core)
+        }
+        commonTest.dependencies { implementation(kotlin("test")) }
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.mockk)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(kotlin("test"))
+            }
+        }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.test.runner)
             }
         }
     }
 }
 
-dependencies {
-    api(projects.core.proto)
-
-    api(libs.androidx.annotation)
-    api(libs.kotlinx.serialization.json)
-    implementation(libs.kermit)
-    implementation(libs.zxing.core)
-
-    testImplementation(libs.androidx.core.ktx)
-    testImplementation(libs.junit)
-    testImplementation(libs.robolectric)
-
-    androidTestImplementation(libs.androidx.test.ext.junit)
-    androidTestImplementation(libs.androidx.test.runner)
+// Modern KMP publication uses the project name as the artifactId by default.
+// We rename the publications to include the 'core-' prefix for consistency.
+publishing {
+    publications.withType<MavenPublication>().configureEach {
+        val baseId = artifactId
+        if (baseId == "model") {
+            artifactId = "meshtastic-android-model"
+        } else if (baseId.startsWith("model-")) {
+            artifactId = baseId.replace("model-", "meshtastic-android-model-")
+        }
+    }
 }

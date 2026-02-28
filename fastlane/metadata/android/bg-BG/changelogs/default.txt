@@ -1,1 +1,1 @@
-For detailed release notes, please visit: https://github.com/meshtastic/Meshtastic-Android/releases/
+За подробни бележки за изданието, моля, посетете: https://github.com/meshtastic/Meshtastic-Android/releases/

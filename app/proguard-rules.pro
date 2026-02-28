@@ -43,3 +43,8 @@
 
 # R8 optimization for Kotlin null checks (AGP 9.0+)
 -processkotlinnullchecks remove
+
+# Nordic BLE
+-dontwarn no.nordicsemi.kotlin.ble.environment.android.mock.**
+-keep class no.nordicsemi.kotlin.ble.environment.android.mock.** { *; }
+-keep class no.nordicsemi.kotlin.ble.environment.android.compose.** { *; }

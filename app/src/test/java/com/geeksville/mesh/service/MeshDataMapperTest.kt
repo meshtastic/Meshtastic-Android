@@ -24,7 +24,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -42,6 +41,7 @@ class MeshDataMapperTest {
 
     @Test
     fun `toNodeID resolves broadcast correctly`() {
+        every { nodeManager.toNodeID(DataPacket.NODENUM_BROADCAST) } returns DataPacket.ID_BROADCAST
         assertEquals(DataPacket.ID_BROADCAST, mapper.toNodeID(DataPacket.NODENUM_BROADCAST))
     }
 
@@ -49,9 +49,7 @@ class MeshDataMapperTest {
     fun `toNodeID resolves known node correctly`() {
         val nodeNum = 1234
         val nodeId = "!1234abcd"
-        val nodeEntity = mockk<NodeEntity>()
-        every { nodeEntity.user.id } returns nodeId
-        every { nodeManager.nodeDBbyNodeNum[nodeNum] } returns nodeEntity
+        every { nodeManager.toNodeID(nodeNum) } returns nodeId
 
         assertEquals(nodeId, mapper.toNodeID(nodeNum))
     }
@@ -59,9 +57,10 @@ class MeshDataMapperTest {
     @Test
     fun `toNodeID resolves unknown node to default ID`() {
         val nodeNum = 1234
-        every { nodeManager.nodeDBbyNodeNum[nodeNum] } returns null
+        val nodeId = DataPacket.nodeNumToDefaultId(nodeNum)
+        every { nodeManager.toNodeID(nodeNum) } returns nodeId
 
-        assertEquals(DataPacket.nodeNumToDefaultId(nodeNum), mapper.toNodeID(nodeNum))
+        assertEquals(nodeId, mapper.toNodeID(nodeNum))
     }
 
     @Test
@@ -74,9 +73,8 @@ class MeshDataMapperTest {
     fun `toDataPacket maps basic fields correctly`() {
         val nodeNum = 1234
         val nodeId = "!1234abcd"
-        val nodeEntity = mockk<NodeEntity>()
-        every { nodeEntity.user.id } returns nodeId
-        every { nodeManager.nodeDBbyNodeNum[any()] } returns nodeEntity
+        every { nodeManager.toNodeID(nodeNum) } returns nodeId
+        every { nodeManager.toNodeID(DataPacket.NODENUM_BROADCAST) } returns DataPacket.ID_BROADCAST
 
         val proto =
             MeshPacket(
@@ -113,7 +111,7 @@ class MeshDataMapperTest {
     fun `toDataPacket maps PKC channel correctly for encrypted packets`() {
         val proto = MeshPacket(pki_encrypted = true, channel = 1, decoded = Data())
 
-        every { nodeManager.nodeDBbyNodeNum[any()] } returns null
+        every { nodeManager.toNodeID(any()) } returns "any"
 
         val result = mapper.toDataPacket(proto)
         assertEquals(DataPacket.PKC_CHANNEL_INDEX, result!!.channel)

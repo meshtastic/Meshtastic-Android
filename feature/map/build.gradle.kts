@@ -35,7 +35,7 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.proto)
     implementation(projects.core.service)
-    implementation(projects.core.strings)
+    implementation(projects.core.resources)
     implementation(projects.core.ui)
 
     implementation(libs.accompanist.permissions)
@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.common)
+    implementation(libs.androidx.savedstate.compose)
     implementation(libs.androidx.savedstate.ktx)
     implementation(libs.material)
     implementation(libs.kermit)
@@ -61,4 +62,10 @@ dependencies {
     googleImplementation(libs.maps.compose)
     googleImplementation(libs.maps.compose.utils)
     googleImplementation(libs.maps.compose.widgets)
+
+    testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.androidx.test.core)
 }
