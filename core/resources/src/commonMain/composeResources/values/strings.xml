@@ -338,6 +338,7 @@
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Delivery confirmed</string>
+    <string name="delivery_confirmed_reboot_warning">Your device may disconnect and reboot while settings are applied.</string>
     <string name="error">Error</string>
     <string name="ignore">Ignore</string>
     <string name="remove_ignored">Remove from ignored</string>

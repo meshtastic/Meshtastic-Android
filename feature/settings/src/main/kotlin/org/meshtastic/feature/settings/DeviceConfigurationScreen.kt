@@ -52,7 +52,8 @@ fun DeviceConfigurationScreen(
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.device_configuration),
-                subtitle = if (state.isLocal) {
+                subtitle =
+                if (state.isLocal) {
                     destNode?.user?.long_name
                 } else {
                     val remoteName = destNode?.user?.long_name ?: ""
@@ -68,10 +69,7 @@ fun DeviceConfigurationScreen(
         },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(16.dp),
+            modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
@@ -79,7 +77,7 @@ fun DeviceConfigurationScreen(
                     ListItem(
                         text = stringResource(it.title),
                         leadingIcon = it.icon,
-                        enabled = state.connected && !state.responseState.isWaiting()
+                        enabled = state.connected && !state.responseState.isWaiting(),
                     ) {
                         onNavigate(it.route)
                     }

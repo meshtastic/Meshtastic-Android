@@ -102,9 +102,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
             DeviceConfigurationScreen(
                 viewModel = hiltViewModel(parentEntry),
                 onBack = navController::popBackStack,
-                onNavigate = { route ->
-                    navController.navigate(route)
-                }
+                onNavigate = { route -> navController.navigate(route) },
             )
         }
 
@@ -117,19 +115,14 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                 viewModel = hiltViewModel(parentEntry),
                 excludedModulesUnlocked = excludedModulesUnlocked,
                 onBack = navController::popBackStack,
-                onNavigate = { route ->
-                    navController.navigate(route)
-                }
+                onNavigate = { route -> navController.navigate(route) },
             )
         }
 
         composable<SettingsRoutes.Administration> { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            AdministrationScreen(
-                viewModel = hiltViewModel(parentEntry),
-                onBack = navController::popBackStack,
-            )
+            AdministrationScreen(viewModel = hiltViewModel(parentEntry), onBack = navController::popBackStack)
         }
 
         composable<SettingsRoutes.CleanNodeDb>(
@@ -148,9 +141,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                 route = entry.route::class,
                 parentGraphRoute = SettingsRoutes.SettingsGraph::class,
             ) { viewModel ->
-                LaunchedEffect(Unit) {
-                    viewModel.setResponseStateLoading(entry)
-                }
+                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(entry) }
                 when (entry) {
                     ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = navController::popBackStack)
 
@@ -180,9 +171,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                 route = entry.route::class,
                 parentGraphRoute = SettingsRoutes.SettingsGraph::class,
             ) { viewModel ->
-                LaunchedEffect(Unit) {
-                    viewModel.setResponseStateLoading(entry)
-                }
+                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(entry) }
                 when (entry) {
                     ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = navController::popBackStack)
 

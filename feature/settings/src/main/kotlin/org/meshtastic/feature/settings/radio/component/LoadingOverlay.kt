@@ -44,34 +44,26 @@ import org.meshtastic.feature.settings.radio.ResponseState
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun LoadingOverlay(
-    state: ResponseState<*>,
-    modifier: Modifier = Modifier,
-) {
-    AnimatedVisibility(
-        visible = state is ResponseState.Loading,
-        enter = fadeIn(),
-        exit = fadeOut(),
-    ) {
+fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
+    AnimatedVisibility(visible = state is ResponseState.Loading, enter = fadeIn(), exit = fadeOut()) {
         Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
-                .clickable(enabled = false) {},
+            modifier =
+            modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)).clickable(
+                enabled = false,
+            ) {},
             contentAlignment = Alignment.Center,
         ) {
             Column(
-                modifier = Modifier
-                    .padding(32.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.padding(32.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 if (state is ResponseState.Loading) {
-                    val progress by animateFloatAsState(
-                        targetValue = state.completed.toFloat() / state.total.toFloat(),
-                        label = "loading_progress",
-                    )
+                    val progress by
+                        animateFloatAsState(
+                            targetValue = state.completed.toFloat() / state.total.toFloat(),
+                            label = "loading_progress",
+                        )
 
                     Box(contentAlignment = Alignment.Center) {
                         CircularWavyProgressIndicator(

@@ -225,10 +225,7 @@ fun SettingsScreen(
         },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(16.dp),
+            modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             RadioConfigItemList(
@@ -238,11 +235,12 @@ fun SettingsScreen(
                 isOtaCapable = isOtaCapable,
                 onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },
                 onRouteClick = { route ->
-                    val navRoute = when (route) {
-                        is ConfigRoute -> route.route
-                        is ModuleRoute -> route.route
-                        else -> null
-                    }
+                    val navRoute =
+                        when (route) {
+                            is ConfigRoute -> route.route
+                            is ModuleRoute -> route.route
+                            else -> null
+                        }
                     navRoute?.let { onNavigate(it) }
                 },
                 onImport = {

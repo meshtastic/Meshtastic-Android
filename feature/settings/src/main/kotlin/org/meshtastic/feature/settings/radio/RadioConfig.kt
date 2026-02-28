@@ -150,9 +150,7 @@ fun RadioConfigItemList(
             }
         }
 
-        ExpressiveSection(
-            title = stringResource(Res.string.administration),
-        ) {
+        ExpressiveSection(title = stringResource(Res.string.administration)) {
             ListItem(
                 text = stringResource(Res.string.administration),
                 leadingIcon = Icons.Rounded.AdminPanelSettings,
@@ -216,9 +214,7 @@ fun ExpressiveSection(
         )
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-            ),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
             content = content,
         )
     }

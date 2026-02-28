@@ -50,19 +50,21 @@ fun ModuleConfigurationScreen(
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
 
-    val modules = remember(state.metadata, excludedModulesUnlocked) {
-        if (excludedModulesUnlocked) {
-            ModuleRoute.entries
-        } else {
-            ModuleRoute.filterExcludedFrom(state.metadata, state.userConfig.role)
+    val modules =
+        remember(state.metadata, excludedModulesUnlocked) {
+            if (excludedModulesUnlocked) {
+                ModuleRoute.entries
+            } else {
+                ModuleRoute.filterExcludedFrom(state.metadata, state.userConfig.role)
+            }
         }
-    }
 
     Scaffold(
         topBar = {
             MainAppBar(
                 title = stringResource(Res.string.module_settings),
-                subtitle = if (state.isLocal) {
+                subtitle =
+                if (state.isLocal) {
                     destNode?.user?.long_name
                 } else {
                     val remoteName = destNode?.user?.long_name ?: ""
@@ -78,10 +80,7 @@ fun ModuleConfigurationScreen(
         },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues)
-                .padding(16.dp),
+            modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             ExpressiveSection(title = stringResource(Res.string.module_settings)) {
@@ -89,7 +88,7 @@ fun ModuleConfigurationScreen(
                     ListItem(
                         text = stringResource(it.title),
                         leadingIcon = it.icon,
-                        enabled = state.connected && !state.responseState.isWaiting()
+                        enabled = state.connected && !state.responseState.isWaiting(),
                     ) {
                         onNavigate(it.route)
                     }

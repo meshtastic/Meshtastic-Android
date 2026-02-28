@@ -56,10 +56,7 @@ import org.meshtastic.feature.settings.radio.component.ShutdownConfirmationDialo
 import org.meshtastic.feature.settings.radio.component.WarningDialog
 
 @Composable
-fun AdministrationScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
-    onBack: () -> Unit,
-) {
+fun AdministrationScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val enabled = state.connected && !state.responseState.isWaiting()
@@ -69,7 +66,8 @@ fun AdministrationScreen(
             topBar = {
                 MainAppBar(
                     title = stringResource(Res.string.administration),
-                    subtitle = if (state.isLocal) {
+                    subtitle =
+                    if (state.isLocal) {
                         destNode?.user?.long_name
                     } else {
                         val remoteName = destNode?.user?.long_name ?: ""
@@ -85,10 +83,7 @@ fun AdministrationScreen(
             },
         ) { paddingValues ->
             Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(paddingValues)
-                    .padding(16.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 ExpressiveSection(
@@ -104,9 +99,7 @@ fun AdministrationScreen(
                                     node = destNode,
                                     onDismiss = { showDialog = false },
                                     isShutdown = route == AdminRoute.SHUTDOWN,
-                                    onConfirm = {
-                                        viewModel.setResponseStateLoading(route)
-                                    },
+                                    onConfirm = { viewModel.setResponseStateLoading(route) },
                                 )
                             } else {
                                 WarningDialog(
@@ -114,7 +107,8 @@ fun AdministrationScreen(
                                     text = {
                                         if (route == AdminRoute.NODEDB_RESET) {
                                             Row(
-                                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                                modifier =
+                                                Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                                                     .fillMaxWidth(),
                                                 verticalAlignment = Alignment.CenterVertically,
                                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -130,9 +124,7 @@ fun AdministrationScreen(
                                         }
                                     },
                                     onDismiss = { showDialog = false },
-                                    onConfirm = {
-                                        viewModel.setResponseStateLoading(route)
-                                    },
+                                    onConfirm = { viewModel.setResponseStateLoading(route) },
                                 )
                             }
                         }
