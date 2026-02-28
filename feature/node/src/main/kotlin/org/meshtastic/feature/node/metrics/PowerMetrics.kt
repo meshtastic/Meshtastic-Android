@@ -64,6 +64,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.model.util.UnitConversions.milliToBase
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
@@ -277,7 +278,7 @@ private fun PowerMetricsChart(
                 if (currentData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = currentColor),
-                        valueFormatter = { _, value, _ -> "%.0f mA".format(value) },
+                        valueFormatter = { _, value, _ -> "%.0f A".format(value.toFloat().milliToBase) },
                     )
                 } else {
                     null
@@ -383,7 +384,7 @@ private fun PowerChannelColumn(titleRes: StringResource, voltage: Float, current
             MetricIndicator(PowerMetric.CURRENT.color)
             Spacer(Modifier.width(4.dp))
             Text(
-                text = "%.1fmA".format(current),
+                text = "%.1fA".format(current.milliToBase),
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
             )

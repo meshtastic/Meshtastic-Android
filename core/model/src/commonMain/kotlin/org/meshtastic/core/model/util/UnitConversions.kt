@@ -59,5 +59,6 @@ object UnitConversions {
      * - 100 millimeters to 0.1 meters
      */
     @Suppress("MagicNumber")
-    fun convertToBaseUnit(number: Float): Float = number / 1000f
+    val Float.milliToBase: Float
+        get() = this / 1000f
 }

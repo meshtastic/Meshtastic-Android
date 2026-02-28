@@ -54,6 +54,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
+import org.meshtastic.core.model.util.UnitConversions.milliToBase
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
@@ -362,7 +363,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.current ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = "%.1fmA".format(env.current ?: 0f),
+                value = "%.1fA".format(env.current?.milliToBase ?: 0f),
                 label = stringResource(Res.string.current),
                 contentColor = contentColor,
             )

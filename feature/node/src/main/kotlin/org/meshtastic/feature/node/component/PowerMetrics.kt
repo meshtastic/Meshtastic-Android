@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.util.UnitConversions.milliToBase
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
@@ -48,15 +49,33 @@ internal fun PowerMetrics(node: Node) {
                 with(node.powerMetrics) {
                     if ((ch1_voltage ?: 0f) != 0f) {
                         add(VectorMetricInfo(Res.string.channel_1, "%.2fV".format(ch1_voltage), Icons.Rounded.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_1, "%.1fmA".format(ch1_current), Icons.Rounded.Power))
+                        add(
+                            VectorMetricInfo(
+                                Res.string.channel_1,
+                                "%.1fA".format(ch1_current?.milliToBase),
+                                Icons.Rounded.Power,
+                            ),
+                        )
                     }
                     if ((ch2_voltage ?: 0f) != 0f) {
                         add(VectorMetricInfo(Res.string.channel_2, "%.2fV".format(ch2_voltage), Icons.Rounded.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_2, "%.1fmA".format(ch2_current), Icons.Rounded.Power))
+                        add(
+                            VectorMetricInfo(
+                                Res.string.channel_2,
+                                "%.1fA".format(ch2_current?.milliToBase),
+                                Icons.Rounded.Power,
+                            ),
+                        )
                     }
                     if ((ch3_voltage ?: 0f) != 0f) {
                         add(VectorMetricInfo(Res.string.channel_3, "%.2fV".format(ch3_voltage), Icons.Rounded.Bolt))
-                        add(VectorMetricInfo(Res.string.channel_3, "%.1fmA".format(ch3_current), Icons.Rounded.Power))
+                        add(
+                            VectorMetricInfo(
+                                Res.string.channel_3,
+                                "%.1fA".format(ch3_current?.milliToBase),
+                                Icons.Rounded.Power,
+                            ),
+                        )
                     }
                 }
             }

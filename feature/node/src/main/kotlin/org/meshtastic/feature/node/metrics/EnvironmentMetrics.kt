@@ -51,7 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.TelemetryType
-import org.meshtastic.core.model.util.UnitConversions.convertToBaseUnit
+import org.meshtastic.core.model.util.UnitConversions.milliToBase
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.current
 import org.meshtastic.core.resources.env_metrics_log
@@ -298,7 +298,7 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                 )
             }
             if (hasCurrent) {
-                val currentValue = convertToBaseUnit(envMetrics.current!!)
+                val currentValue = envMetrics.current!!.milliToBase
                 Text(
                     text = "%s %.2f mA".format(stringResource(Res.string.current), currentValue),
                     color = MaterialTheme.colorScheme.onSurface,
