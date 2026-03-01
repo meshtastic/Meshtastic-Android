@@ -31,10 +31,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.toRemoteExceptions
@@ -250,7 +248,7 @@ class MeshService : Service() {
             override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
             override fun getConfig(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.localConfigFlow.first().encode() }
+                commandSender.getCachedLocalConfig().encode()
             }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
@@ -310,7 +308,7 @@ class MeshService : Service() {
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.channelSetFlow.first().encode() }
+                commandSender.getCachedChannelSet().encode()
             }
 
             override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()

@@ -98,7 +98,7 @@ class ServiceRepository @Inject constructor() {
         }
     }
 
-    private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
+    private val _meshPacketFlow = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 64)
     val meshPacketFlow: SharedFlow<MeshPacket>
         get() = _meshPacketFlow
 

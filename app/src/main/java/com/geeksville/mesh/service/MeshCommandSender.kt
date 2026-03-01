@@ -94,6 +94,9 @@ constructor(
         radioConfigRepository?.channelSetFlow?.onEach { channelSet.value = it }?.launchIn(scope)
     }
 
+    fun getCachedLocalConfig(): LocalConfig = localConfig.value
+    fun getCachedChannelSet(): ChannelSet = channelSet.value
+
     @VisibleForTesting internal constructor() : this(null, null, null, null)
 
     fun getCurrentPacketId(): Long = currentPacketId.get()
