@@ -198,7 +198,7 @@
             <intent-filter android:autoVerify="true">
                 <!--
                   The QR codes to share channel settings and contacts are shared as meshtastic URLS.
-                  We also support NFC NDEF Discovery for the same URLs.
+                  We also support NFC NDEF Discovery for the same URLS.
 
                   An approximate example:
                   https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
@@ -252,9 +252,9 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
-        <receiver android:name="com.geeksville.mesh.service.ReplyReceiver"/>
-        <receiver android:name="com.geeksville.mesh.service.MarkAsReadReceiver"/>
-        <receiver android:name="com.geeksville.mesh.service.ReactionReceiver"/>
+        <receiver android:name="com.geeksville.mesh.service.ReplyReceiver" android:exported="false" />
+        <receiver android:name="com.geeksville.mesh.service.MarkAsReadReceiver" android:exported="false" />
+        <receiver android:name="com.geeksville.mesh.service.ReactionReceiver" android:exported="false" />
 
         <receiver
             android:name="com.geeksville.mesh.widget.LocalStatsWidgetReceiver"
@@ -276,6 +276,17 @@
                 <action android:name="com.atakmap.app.component" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
 
     </application>
 
