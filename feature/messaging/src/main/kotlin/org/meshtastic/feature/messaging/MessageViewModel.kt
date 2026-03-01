@@ -39,6 +39,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.domain.usecase.SendMessageUseCase
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
@@ -47,7 +48,6 @@ import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.feature.messaging.domain.usecase.SendMessageUseCase
 import org.meshtastic.proto.ChannelSet
 import javax.inject.Inject
 

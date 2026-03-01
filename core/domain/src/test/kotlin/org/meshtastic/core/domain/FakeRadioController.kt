@@ -1,4 +1,4 @@
-package org.meshtastic.feature.messaging.domain
+package org.meshtastic.core.domain
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
