@@ -37,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
@@ -46,7 +47,6 @@ import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.unmessageable
 import org.meshtastic.core.resources.unmonitored_or_infrastructure
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.icon.CloudDone
 import org.meshtastic.core.ui.icon.CloudOffTwoTone
 import org.meshtastic.core.ui.icon.CloudSync

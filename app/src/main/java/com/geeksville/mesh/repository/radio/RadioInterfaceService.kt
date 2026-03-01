@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -47,9 +48,9 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
@@ -127,6 +128,7 @@ constructor(
                         stopInterface()
                     }
                 }
+                .catch { Logger.e(it) { "bluetoothRepository.state flow crashed!" } }
                 .launchIn(processLifecycle.coroutineScope)
 
             networkRepository.networkAvailable
@@ -137,6 +139,7 @@ constructor(
                         stopInterface()
                     }
                 }
+                .catch { Logger.e(it) { "networkRepository.networkAvailable flow crashed!" } }
                 .launchIn(processLifecycle.coroutineScope)
         }
     }

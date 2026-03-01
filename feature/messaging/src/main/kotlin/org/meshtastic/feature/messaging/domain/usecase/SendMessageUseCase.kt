@@ -21,12 +21,10 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
-import org.meshtastic.core.service.ServiceAction
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.messaging.HomoglyphCharacterStringTransformer
 import org.meshtastic.proto.Config
-import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 
 @Suppress("TooGenericExceptionCaught")
@@ -34,7 +32,7 @@ class SendMessageUseCase
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
 ) {
 
@@ -77,7 +75,7 @@ constructor(
         val packet = DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply { from = fromId }
 
         try {
-            serviceRepository.meshService?.send(packet)
+            radioController.sendMessage(packet)
         } catch (ex: Exception) {
             Logger.e(ex) { "Failed to send data packet" }
         }
@@ -85,7 +83,7 @@ constructor(
 
     private suspend fun favoriteNode(node: Node) {
         try {
-            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
+            radioController.favoriteNode(node.num)
         } catch (ex: Exception) {
             Logger.e(ex) { "Favorite node error" }
         }
@@ -93,9 +91,7 @@ constructor(
 
     private suspend fun sendSharedContact(node: Node) {
         try {
-            val contact =
-                SharedContact(node_num = node.num, user = node.user, manually_verified = node.manuallyVerified)
-            serviceRepository.onServiceAction(ServiceAction.SendContact(contact = contact))
+            radioController.sendSharedContact(node.num)
         } catch (ex: Exception) {
             Logger.e(ex) { "Send shared contact error" }
         }

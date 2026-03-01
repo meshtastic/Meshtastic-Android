@@ -16,7 +16,10 @@
  */
 import com.android.build.api.dsl.LibraryExtension
 
-plugins { alias(libs.plugins.meshtastic.android.library) }
+plugins { 
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
+}
 
 configure<LibraryExtension> {
     buildFeatures { aidl = true }
@@ -28,6 +31,7 @@ configure<LibraryExtension> {
 dependencies {
     api(projects.core.api)
     implementation(projects.core.common)
+    implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.model)
     implementation(projects.core.prefs)
@@ -39,4 +43,5 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
 }

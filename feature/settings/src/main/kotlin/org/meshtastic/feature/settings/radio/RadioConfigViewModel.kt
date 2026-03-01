@@ -53,6 +53,7 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
@@ -61,7 +62,6 @@ import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.getChannelList

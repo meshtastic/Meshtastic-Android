@@ -44,6 +44,7 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
@@ -71,7 +72,6 @@ import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_updating
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.unknown
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import java.io.File
 import javax.inject.Inject

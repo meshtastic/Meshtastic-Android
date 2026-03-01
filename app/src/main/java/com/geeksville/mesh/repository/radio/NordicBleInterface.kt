@@ -208,6 +208,10 @@ constructor(
                             onDisconnected(state)
                         }
                     }
+                    .catch { e ->
+                        Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
+                        service.onDisconnect(BleError.from(e))
+                    }
                     .launchIn(connectionScope)
 
                 val p = retryBleOperation(tag = address) { findPeripheral() }

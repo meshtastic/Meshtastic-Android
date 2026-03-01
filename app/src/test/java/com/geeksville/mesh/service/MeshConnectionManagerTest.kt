@@ -40,8 +40,8 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
