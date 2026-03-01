@@ -14,13 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging.domain.usecase
+package org.meshtastic.core.domain.usecase
 
-import android.content.Context
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.Operation
-import androidx.work.WorkManager
 import io.mockk.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -33,11 +28,11 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.domain.FakeRadioController
+import org.meshtastic.core.domain.MessageQueue
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
-import org.meshtastic.feature.messaging.domain.FakeRadioController
-import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 
@@ -45,31 +40,26 @@ class SendMessageUseCaseTest {
 
     private lateinit var nodeRepository: NodeRepository
     private lateinit var packetRepository: PacketRepository
-    private lateinit var context: Context
-    private lateinit var workManager: WorkManager
     private lateinit var radioController: FakeRadioController
     private lateinit var homoglyphEncodingPrefs: HomoglyphPrefs
+    private lateinit var messageQueue: MessageQueue
     private lateinit var useCase: SendMessageUseCase
 
     @Before
     fun setUp() {
         nodeRepository = mockk(relaxed = true)
         packetRepository = mockk(relaxed = true)
-        context = mockk(relaxed = true)
-        workManager = mockk(relaxed = true)
         radioController = FakeRadioController()
         homoglyphEncodingPrefs = mockk(relaxed = true)
-
-        every { workManager.enqueueUniqueWork(any<String>(), any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) } returns mockkClass(Operation::class)
+        messageQueue = mockk(relaxed = true)
 
         useCase =
             SendMessageUseCase(
-                context = context,
                 nodeRepository = nodeRepository,
                 packetRepository = packetRepository,
                 radioController = radioController,
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
-                workManager = workManager,
+                messageQueue = messageQueue,
             )
 
         mockkConstructor(Capabilities::class)
@@ -96,7 +86,7 @@ class SendMessageUseCaseTest {
         assertEquals(0, radioController.sentSharedContacts.size)
         
         coVerify { packetRepository.insert(any<Packet>()) }
-        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        coVerify { messageQueue.enqueue(any()) }
     }
 
     @Test
@@ -126,7 +116,7 @@ class SendMessageUseCaseTest {
         assertEquals(12345, radioController.favoritedNodes[0])
         
         coVerify { packetRepository.insert(any<Packet>()) }
-        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        coVerify { messageQueue.enqueue(any()) }
     }
 
     @Test
@@ -155,7 +145,7 @@ class SendMessageUseCaseTest {
         assertEquals(67890, radioController.sentSharedContacts[0])
         
         coVerify { packetRepository.insert(any<Packet>()) }
-        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        coVerify { messageQueue.enqueue(any()) }
     }
 
     @Test
@@ -174,6 +164,6 @@ class SendMessageUseCaseTest {
         val packetSlot = slot<Packet>()
         coVerify { packetRepository.insert(capture(packetSlot)) }
         assertTrue(packetSlot.captured.data?.text?.contains("Apple") == true)
-        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        coVerify { messageQueue.enqueue(any()) }
     }
 }

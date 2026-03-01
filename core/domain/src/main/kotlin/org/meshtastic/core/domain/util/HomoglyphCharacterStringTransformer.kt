@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging
+package org.meshtastic.core.domain.util
 
 /**
  * This util class allows you to optimize the binary size of the transmitted text message strings. It replaces certain
@@ -24,7 +24,7 @@ package org.meshtastic.feature.messaging
  * reduces the binary size of the transmitted message. The average transmitted message volume can then fit around
  * ~140-145 characters instead of ~115-120
  */
-internal object HomoglyphCharacterStringTransformer {
+object HomoglyphCharacterStringTransformer {
 
     /**
      * Unicode characters from the basic cyrillic block (U+0400-U+04FF), each of which occupies 2 bytes
