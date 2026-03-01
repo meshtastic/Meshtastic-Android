@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import okio.ByteString
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.PortNum
 
 class MeshCommandSenderQueueTest {

@@ -41,6 +41,7 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.resources.Res
@@ -50,7 +51,6 @@ import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config

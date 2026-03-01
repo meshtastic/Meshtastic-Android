@@ -24,7 +24,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf

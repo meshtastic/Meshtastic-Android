@@ -21,11 +21,11 @@ import android.content.Intent
 import android.os.Parcelable
 import co.touchlab.kermit.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.toPIIString
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.ServiceRepository
 import java.util.Locale
 import javax.inject.Inject

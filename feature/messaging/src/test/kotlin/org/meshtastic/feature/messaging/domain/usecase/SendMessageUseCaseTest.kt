@@ -16,12 +16,13 @@
  */
 package org.meshtastic.feature.messaging.domain.usecase
 
-import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkConstructor
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.NodeRepository
@@ -29,28 +30,27 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
-import org.meshtastic.core.service.ServiceAction
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.feature.messaging.domain.FakeRadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 
 class SendMessageUseCaseTest {
 
     private lateinit var nodeRepository: NodeRepository
-    private lateinit var serviceRepository: ServiceRepository
+    private lateinit var radioController: FakeRadioController
     private lateinit var homoglyphEncodingPrefs: HomoglyphPrefs
     private lateinit var useCase: SendMessageUseCase
 
     @Before
     fun setUp() {
         nodeRepository = mockk(relaxed = true)
-        serviceRepository = mockk(relaxed = true)
+        radioController = FakeRadioController()
         homoglyphEncodingPrefs = mockk(relaxed = true)
 
         useCase =
             SendMessageUseCase(
                 nodeRepository = nodeRepository,
-                serviceRepository = serviceRepository,
+                radioController = radioController,
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
             )
 
@@ -69,8 +69,9 @@ class SendMessageUseCaseTest {
         useCase("Hello broadcast", "0${DataPacket.ID_BROADCAST}", null)
 
         // Assert
-        coVerify(exactly = 0) { serviceRepository.onServiceAction(any()) }
-        coVerify(exactly = 1) { serviceRepository.meshService?.send(any()) }
+        assertEquals(0, radioController.favoritedNodes.size)
+        assertEquals(0, radioController.sentSharedContacts.size)
+        assertEquals(1, radioController.sentPackets.size)
     }
 
     @Test
@@ -86,18 +87,19 @@ class SendMessageUseCaseTest {
 
         val destNode = mockk<Node>(relaxed = true)
         every { destNode.isFavorite } returns false
+        every { destNode.num } returns 12345
         every { nodeRepository.getNode("!dest") } returns destNode
 
         every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns false
-
         every { anyConstructed<Capabilities>().canSendVerifiedContacts } returns false
 
         // Act
         useCase("Direct message", "!dest", null)
 
         // Assert
-        coVerify(exactly = 1) { serviceRepository.onServiceAction(match { it is ServiceAction.Favorite }) }
-        coVerify(exactly = 1) { serviceRepository.meshService?.send(any()) }
+        assertEquals(1, radioController.favoritedNodes.size)
+        assertEquals(12345, radioController.favoritedNodes[0])
+        assertEquals(1, radioController.sentPackets.size)
     }
 
     @Test
@@ -112,18 +114,19 @@ class SendMessageUseCaseTest {
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(ourNode)
 
         val destNode = mockk<Node>(relaxed = true)
+        every { destNode.num } returns 67890
         every { nodeRepository.getNode("!dest") } returns destNode
 
         every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns false
-
         every { anyConstructed<Capabilities>().canSendVerifiedContacts } returns true
 
         // Act
         useCase("Direct message", "!dest", null)
 
         // Assert
-        coVerify(exactly = 1) { serviceRepository.onServiceAction(match { it is ServiceAction.SendContact }) }
-        coVerify(exactly = 1) { serviceRepository.meshService?.send(any()) }
+        assertEquals(1, radioController.sentSharedContacts.size)
+        assertEquals(67890, radioController.sentSharedContacts[0])
+        assertEquals(1, radioController.sentPackets.size)
     }
 
     @Test
@@ -133,14 +136,15 @@ class SendMessageUseCaseTest {
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(ourNode)
         every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns true
 
-        // Let's use a cyrillic character 'A' (U+0410) that will be mapped to Latin 'A'
-        val originalText = "\u0410pple"
+        val originalText = "\u0410pple" // Cyrillic A
 
         // Act
         useCase(originalText, "0${DataPacket.ID_BROADCAST}", null)
 
         // Assert
-        // We verify that send was called with the transformed text (Latin 'A'pple)
-        coVerify(exactly = 1) { serviceRepository.meshService?.send(match { it.text?.contains("Apple") == true }) }
+        assertEquals(1, radioController.sentPackets.size)
+        assertTrue(radioController.sentPackets[0] is DataPacket)
+        val dataPacket = radioController.sentPackets[0] as DataPacket
+        assertTrue(dataPacket.text?.contains("Apple") == true)
     }
 }
