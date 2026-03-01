@@ -19,6 +19,10 @@ package com.geeksville.mesh.service
 import android.app.Notification
 import android.content.Context
 import androidx.glance.appwidget.updateAll
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.widget.LocalStatsWidget
@@ -40,6 +44,7 @@ import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.TelemetryType
@@ -52,6 +57,7 @@ import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
 import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
@@ -82,6 +88,8 @@ constructor(
     private val commandSender: MeshCommandSender,
     private val nodeManager: MeshNodeManager,
     private val analytics: PlatformAnalytics,
+    private val packetRepository: PacketRepository,
+    private val workManager: WorkManager,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
@@ -255,7 +263,24 @@ constructor(
     }
 
     fun onRadioConfigLoaded() {
-        commandSender.processQueuedPackets()
+        scope.handledLaunch {
+            val queuedPackets = packetRepository.getQueuedPackets() ?: emptyList()
+            queuedPackets.forEach { packet ->
+                try {
+                    val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
+                        .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packet.id))
+                        .build()
+
+                    workManager.enqueueUniqueWork(
+                        "${SendMessageWorker.WORK_NAME_PREFIX}${packet.id}",
+                        ExistingWorkPolicy.REPLACE,
+                        workRequest
+                    )
+                } catch (e: Exception) {
+                    Logger.e(e) { "Failed to enqueue queued packet worker" }
+                }
+            }
+        }
 
         val myNodeNum = nodeManager.myNodeNum ?: 0
         // Set time

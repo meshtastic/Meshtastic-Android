@@ -40,4 +40,6 @@ plugins {
 
 configure<LibraryExtension> { namespace = "org.meshtastic.core.di" }
 
-dependencies {}
+dependencies {
+    implementation(libs.androidx.work.runtime.ktx)
+}

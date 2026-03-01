@@ -16,27 +16,37 @@
  */
 package org.meshtastic.feature.messaging.domain.usecase
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkConstructor
+import android.content.Context
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.Operation
+import androidx.work.WorkManager
+import io.mockk.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.feature.messaging.domain.FakeRadioController
+import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 
 class SendMessageUseCaseTest {
 
     private lateinit var nodeRepository: NodeRepository
+    private lateinit var packetRepository: PacketRepository
+    private lateinit var context: Context
+    private lateinit var workManager: WorkManager
     private lateinit var radioController: FakeRadioController
     private lateinit var homoglyphEncodingPrefs: HomoglyphPrefs
     private lateinit var useCase: SendMessageUseCase
@@ -44,17 +54,30 @@ class SendMessageUseCaseTest {
     @Before
     fun setUp() {
         nodeRepository = mockk(relaxed = true)
+        packetRepository = mockk(relaxed = true)
+        context = mockk(relaxed = true)
+        workManager = mockk(relaxed = true)
         radioController = FakeRadioController()
         homoglyphEncodingPrefs = mockk(relaxed = true)
 
+        every { workManager.enqueueUniqueWork(any<String>(), any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) } returns mockkClass(Operation::class)
+
         useCase =
             SendMessageUseCase(
+                context = context,
                 nodeRepository = nodeRepository,
+                packetRepository = packetRepository,
                 radioController = radioController,
                 homoglyphEncodingPrefs = homoglyphEncodingPrefs,
+                workManager = workManager,
             )
 
         mockkConstructor(Capabilities::class)
+    }
+
+    @After
+    fun tearDown() {
+        unmockkAll()
     }
 
     @Test
@@ -71,7 +94,9 @@ class SendMessageUseCaseTest {
         // Assert
         assertEquals(0, radioController.favoritedNodes.size)
         assertEquals(0, radioController.sentSharedContacts.size)
-        assertEquals(1, radioController.sentPackets.size)
+        
+        coVerify { packetRepository.insert(any<Packet>()) }
+        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
     }
 
     @Test
@@ -99,7 +124,9 @@ class SendMessageUseCaseTest {
         // Assert
         assertEquals(1, radioController.favoritedNodes.size)
         assertEquals(12345, radioController.favoritedNodes[0])
-        assertEquals(1, radioController.sentPackets.size)
+        
+        coVerify { packetRepository.insert(any<Packet>()) }
+        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
     }
 
     @Test
@@ -126,7 +153,9 @@ class SendMessageUseCaseTest {
         // Assert
         assertEquals(1, radioController.sentSharedContacts.size)
         assertEquals(67890, radioController.sentSharedContacts[0])
-        assertEquals(1, radioController.sentPackets.size)
+        
+        coVerify { packetRepository.insert(any<Packet>()) }
+        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
     }
 
     @Test
@@ -142,9 +171,9 @@ class SendMessageUseCaseTest {
         useCase(originalText, "0${DataPacket.ID_BROADCAST}", null)
 
         // Assert
-        assertEquals(1, radioController.sentPackets.size)
-        assertTrue(radioController.sentPackets[0] is DataPacket)
-        val dataPacket = radioController.sentPackets[0] as DataPacket
-        assertTrue(dataPacket.text?.contains("Apple") == true)
+        val packetSlot = slot<Packet>()
+        coVerify { packetRepository.insert(capture(packetSlot)) }
+        assertTrue(packetSlot.captured.data?.text?.contains("Apple") == true)
+        verify { workManager.enqueueUniqueWork(match { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
     }
 }
