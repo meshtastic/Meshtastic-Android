@@ -6,6 +6,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
@@ -18,6 +22,17 @@ class SendMessageWorker @AssistedInject constructor(
     private val packetRepository: PacketRepository,
     private val radioController: RadioController
 ) : CoroutineWorker(context, params) {
+
+    // Fallback constructor for cases where HiltWorkerFactory is not used
+    constructor(
+        appContext: Context,
+        workerParams: WorkerParameters,
+    ) : this(
+        appContext,
+        workerParams,
+        entryPoint(appContext).packetRepository(),
+        entryPoint(appContext).radioController(),
+    )
 
     override suspend fun doWork(): Result {
         val packetId = inputData.getInt(KEY_PACKET_ID, 0)
@@ -46,5 +61,15 @@ class SendMessageWorker @AssistedInject constructor(
     companion object {
         const val KEY_PACKET_ID = "packet_id"
         const val WORK_NAME_PREFIX = "send_message_"
+
+        private fun entryPoint(context: Context): WorkerEntryPoint =
+            EntryPointAccessors.fromApplication(context.applicationContext, WorkerEntryPoint::class.java)
+    }
+
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface WorkerEntryPoint {
+        fun packetRepository(): PacketRepository
+        fun radioController(): RadioController
     }
 }
