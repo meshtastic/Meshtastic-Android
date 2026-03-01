@@ -60,7 +60,7 @@ constructor(
     private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
 
     private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
-    private val maxEarlyPacketBuffer = 128
+    private val maxEarlyPacketBuffer = 10240
 
     fun clearEarlyPackets() {
         synchronized(earlyReceivedPackets) { earlyReceivedPackets.clear() }

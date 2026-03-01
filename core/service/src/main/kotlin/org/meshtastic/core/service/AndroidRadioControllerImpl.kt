@@ -5,6 +5,7 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.SharedContact
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -18,9 +19,16 @@ class AndroidRadioControllerImpl @Inject constructor(
     override val connectionState: StateFlow<ConnectionState>
         get() = serviceRepository.connectionState
 
+    override val clientNotification: StateFlow<ClientNotification?>
+        get() = serviceRepository.clientNotification
+
     override suspend fun sendMessage(packet: DataPacket) {
         // Bridging to the existing flow via IMeshService
         serviceRepository.meshService?.send(packet)
+    }
+
+    override fun clearClientNotification() {
+        serviceRepository.clearClientNotification()
     }
 
     override suspend fun favoriteNode(nodeNum: Int) {

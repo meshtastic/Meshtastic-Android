@@ -16,24 +16,40 @@
  */
 package org.meshtastic.feature.messaging.domain.usecase
 
+import android.content.Context
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.workDataOf
 import co.touchlab.kermit.Logger
+import dagger.hilt.android.qualifiers.ApplicationContext
+import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
+import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.feature.messaging.HomoglyphCharacterStringTransformer
+import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.Config
 import javax.inject.Inject
+import kotlin.math.abs
+import kotlin.random.Random
 
 @Suppress("TooGenericExceptionCaught")
 class SendMessageUseCase
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
     private val nodeRepository: NodeRepository,
+    private val packetRepository: PacketRepository,
     private val radioController: RadioController,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
+    private val workManager: WorkManager,
 ) {
 
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
@@ -72,12 +88,45 @@ constructor(
                 text
             }
 
-        val packet = DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply { from = fromId }
+        val packetId = abs(Random.nextInt())
+        
+        val packet = DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply { 
+            from = fromId
+            id = packetId
+            status = MessageStatus.QUEUED
+        }
+
+        val packetToSave = Packet(
+            uuid = 0L,
+            myNodeNum = ourNode?.num ?: 0,
+            packetId = packetId,
+            port_num = packet.dataType,
+            contact_key = contactKey,
+            received_time = nowMillis,
+            read = true, 
+            data = packet,
+            snr = packet.snr,
+            rssi = packet.rssi,
+            hopsAway = packet.hopsAway,
+            filtered = false,
+        )
 
         try {
-            radioController.sendMessage(packet)
+            // Write to the DB to immediately reflect the queued state on the UI
+            packetRepository.insert(packetToSave)
+
+            // Enqueue the durable WorkManager worker
+            val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
+                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .build()
+
+            workManager.enqueueUniqueWork(
+                "${SendMessageWorker.WORK_NAME_PREFIX}${packetId}", 
+                ExistingWorkPolicy.REPLACE, 
+                workRequest
+            )
         } catch (ex: Exception) {
-            Logger.e(ex) { "Failed to send data packet" }
+            Logger.e(ex) { "Failed to enqueue WorkManager packet" }
         }
     }
 
