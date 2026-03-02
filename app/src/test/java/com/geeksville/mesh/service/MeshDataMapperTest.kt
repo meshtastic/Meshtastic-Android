@@ -25,6 +25,7 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum

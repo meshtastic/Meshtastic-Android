@@ -41,7 +41,7 @@ class DeviceHardwareRepositoryTest {
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
     private val repository =
-        DeviceHardwareRepository(
+        DeviceHardwareRepositoryImpl(
             remoteDataSource,
             localDataSource,
             jsonDataSource,

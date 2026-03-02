@@ -47,6 +47,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
@@ -87,7 +88,7 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val locationManager: MeshLocationManager,
     private val mqttManager: MeshMqttManager,
-    private val historyManager: MeshHistoryManager,
+    private val historyManager: HistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val commandSender: CommandSender,
     private val nodeManager: NodeManager,

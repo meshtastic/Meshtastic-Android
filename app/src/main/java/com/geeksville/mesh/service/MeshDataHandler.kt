@@ -42,6 +42,7 @@ import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
@@ -90,7 +91,7 @@ constructor(
     private val configHandler: MeshConfigHandler,
     private val configFlowManager: MeshConfigFlowManager,
     private val commandSender: CommandSender,
-    private val historyManager: MeshHistoryManager,
+    private val historyManager: HistoryManager,
     private val meshPrefs: MeshPrefs,
     private val connectionManager: MeshConnectionManager,
     private val tracerouteHandler: MeshTracerouteHandler,

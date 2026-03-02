@@ -364,7 +364,7 @@ constructor(
         }
     }
 
-    private fun resolveNodeNum(toId: String): Int = when (toId) {
+    fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
         else -> {
             val numericNum =

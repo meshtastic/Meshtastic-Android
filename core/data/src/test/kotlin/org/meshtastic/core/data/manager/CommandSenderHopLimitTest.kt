@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import io.mockk.every
 import io.mockk.mockk
@@ -29,18 +29,21 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.User
 
 class CommandSenderHopLimitTest {
 
     private val packetHandler: PacketHandler = mockk(relaxed = true)
-    private val nodeManager = NodeManagerImpl()
-    private val connectionStateHolder: ConnectionStateHandler = mockk(relaxed = true)
+    private val nodeManager: NodeManager = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
 
     private val localConfigFlow = MutableStateFlow(LocalConfig())
@@ -51,13 +54,14 @@ class CommandSenderHopLimitTest {
 
     @Before
     fun setUp() {
-        val connectedFlow = MutableStateFlow(ConnectionState.Connected)
-        every { connectionStateHolder.connectionState } returns connectedFlow
+        val myNum = 123
+        val myNode = Node(num = myNum, user = User(id = "!id", long_name = "long", short_name = "shrt"))
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
+        every { nodeManager.myNodeNum } returns myNum
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(myNum to myNode)
 
-        commandSender = CommandSenderImpl(packetHandler, nodeManager, connectionStateHolder, radioConfigRepository)
+        commandSender = CommandSenderImpl(packetHandler, nodeManager, radioConfigRepository)
         commandSender.start(testScope)
-        nodeManager.myNodeNum = 123
     }
 
     @Test
@@ -111,7 +115,10 @@ class CommandSenderHopLimitTest {
         localConfigFlow.value = LocalConfig(lora = Config.LoRaConfig(hop_limit = 6))
 
         // Mock node manager interactions
-        nodeManager.nodeDBbyNodeNum.remove(destNum)
+        // Note: we need to keep myNode in the map for requestUserInfo to not return early
+        val myNum = 123
+        val myNode = Node(num = myNum, user = User(id = "!id", long_name = "long", short_name = "shrt"))
+        every { nodeManager.nodeDBbyNodeNum } returns mapOf(myNum to myNode)
 
         commandSender.requestUserInfo(destNum)
 

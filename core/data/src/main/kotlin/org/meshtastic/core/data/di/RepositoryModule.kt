@@ -22,6 +22,7 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.data.manager.CommandSenderImpl
+import org.meshtastic.core.data.manager.HistoryManagerImpl
 import org.meshtastic.core.data.manager.NodeManagerImpl
 import org.meshtastic.core.data.repository.DeviceHardwareRepositoryImpl
 import org.meshtastic.core.data.repository.NodeRepositoryImpl
@@ -29,6 +30,7 @@ import org.meshtastic.core.data.repository.PacketRepositoryImpl
 import org.meshtastic.core.data.repository.RadioConfigRepositoryImpl
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -74,4 +76,10 @@ abstract class RepositoryModule {
     abstract fun bindCommandSender(
         commandSenderImpl: CommandSenderImpl
     ): CommandSender
+
+    @Binds
+    @Singleton
+    abstract fun bindHistoryManager(
+        historyManagerImpl: HistoryManagerImpl
+    ): HistoryManager
 }

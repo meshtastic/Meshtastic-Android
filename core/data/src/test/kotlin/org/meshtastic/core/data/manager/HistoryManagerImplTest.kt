@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.meshtastic.proto.StoreAndForward
 
-class StoreForwardHistoryRequestTest {
+class HistoryManagerImplTest {
 
     @Test
     fun `buildStoreForwardHistoryRequest copies positive parameters`() {
-        val request =
-            MeshHistoryManager.buildStoreForwardHistoryRequest(
-                lastRequest = 42,
-                historyReturnWindow = 15,
-                historyReturnMax = 25,
-            )
+        val request = HistoryManagerImpl.buildStoreForwardHistoryRequest(
+            lastRequest = 42,
+            historyReturnWindow = 15,
+            historyReturnMax = 25,
+        )
 
         assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
         assertEquals(42, request.history?.last_request)
@@ -39,12 +38,11 @@ class StoreForwardHistoryRequestTest {
 
     @Test
     fun `buildStoreForwardHistoryRequest clamps non-positive parameters`() {
-        val request =
-            MeshHistoryManager.buildStoreForwardHistoryRequest(
-                lastRequest = 0,
-                historyReturnWindow = -1,
-                historyReturnMax = 0,
-            )
+        val request = HistoryManagerImpl.buildStoreForwardHistoryRequest(
+            lastRequest = 0,
+            historyReturnWindow = -1,
+            historyReturnMax = 0,
+        )
 
         assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
         assertEquals(0, request.history?.last_request)
@@ -54,7 +52,7 @@ class StoreForwardHistoryRequestTest {
 
     @Test
     fun `resolveHistoryRequestParameters uses config values when positive`() {
-        val (window, max) = MeshHistoryManager.resolveHistoryRequestParameters(window = 30, max = 10)
+        val (window, max) = HistoryManagerImpl.resolveHistoryRequestParameters(window = 30, max = 10)
 
         assertEquals(30, window)
         assertEquals(10, max)
@@ -62,7 +60,7 @@ class StoreForwardHistoryRequestTest {
 
     @Test
     fun `resolveHistoryRequestParameters falls back to defaults when non-positive`() {
-        val (window, max) = MeshHistoryManager.resolveHistoryRequestParameters(window = 0, max = -5)
+        val (window, max) = HistoryManagerImpl.resolveHistoryRequestParameters(window = 0, max = -5)
 
         assertEquals(1440, window)
         assertEquals(100, max)

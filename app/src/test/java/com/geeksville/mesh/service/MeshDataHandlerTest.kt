@@ -32,7 +32,10 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
@@ -56,7 +59,7 @@ class MeshDataHandlerTest {
     private val configHandler: MeshConfigHandler = mockk(relaxed = true)
     private val configFlowManager: MeshConfigFlowManager = mockk(relaxed = true)
     private val commandSender: CommandSender = mockk(relaxed = true)
-    private val historyManager: MeshHistoryManager = mockk(relaxed = true)
+    private val historyManager: HistoryManager = mockk(relaxed = true)
     private val meshPrefs: MeshPrefs = mockk(relaxed = true)
     private val connectionManager: MeshConnectionManager = mockk(relaxed = true)
     private val tracerouteHandler: MeshTracerouteHandler = mockk(relaxed = true)
