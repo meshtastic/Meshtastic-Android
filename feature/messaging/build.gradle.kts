@@ -26,6 +26,7 @@ configure<LibraryExtension> { namespace = "org.meshtastic.feature.messaging" }
 
 dependencies {
     implementation(projects.core.analytics)
+    implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.domain)

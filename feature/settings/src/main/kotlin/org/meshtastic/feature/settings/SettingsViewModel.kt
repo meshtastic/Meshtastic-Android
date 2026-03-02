@@ -25,35 +25,29 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
+import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
 import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.core.prefs.radio.RadioPrefs
-import org.meshtastic.core.prefs.radio.isBle
-import org.meshtastic.core.prefs.radio.isSerial
-import org.meshtastic.core.prefs.radio.isTcp
 import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 import java.io.BufferedWriter
@@ -68,13 +62,11 @@ class SettingsViewModel
 constructor(
     private val app: android.app.Application,
     radioConfigRepository: RadioConfigRepository,
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
     private val uiPrefs: UiPrefs,
     private val buildConfigProvider: BuildConfigProvider,
     private val databaseManager: DatabaseManager,
-    private val deviceHardwareRepository: DeviceHardwareRepository,
-    private val radioPrefs: RadioPrefs,
     private val meshLogPrefs: MeshLogPrefs,
     private val setThemeUseCase: SetThemeUseCase,
     private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
@@ -83,6 +75,7 @@ constructor(
     private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
     private val meshLocationUseCase: MeshLocationUseCase,
     private val exportDataUseCase: ExportDataUseCase,
+    private val isOtaCapableUseCase: IsOtaCapableUseCase,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
@@ -92,7 +85,7 @@ constructor(
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
-        serviceRepository.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
+        radioController.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
 
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
@@ -124,27 +117,7 @@ constructor(
         get() = buildConfigProvider.versionName
 
     val isOtaCapable: StateFlow<Boolean> =
-        combine(ourNodeInfo, serviceRepository.connectionState) { node, connectionState -> Pair(node, connectionState) }
-            .flatMapLatest { (node, connectionState) ->
-                if (node == null || !connectionState.isConnected()) {
-                    flowOf(false)
-                } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
-                    val hwModel = node.user.hw_model.value
-                    val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                    // Support both Nordic DFU (requiresDfu) and ESP32 Unified OTA (supportsUnifiedOta)
-                    // val capabilities = Capabilities(node.metadata?.firmware_version)
-
-                    // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
-                    // TODO: Re-enable when supportsUnifiedOta is added to DeviceHardware
-                    val isEsp32OtaSupported = false
-                    // hw?.supportsUnifiedOta == true && capabilities.supportsEsp32Ota && !radioPrefs.isSerial()
-
-                    flow { emit(hw?.requiresDfu == true || isEsp32OtaSupported) }
-                } else {
-                    flowOf(false)
-                }
-            }
-            .stateInWhileSubscribed(initialValue = false)
+        isOtaCapableUseCase().stateInWhileSubscribed(initialValue = false)
 
     // Device DB cache limit (bounded by DatabaseConstants)
     val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
