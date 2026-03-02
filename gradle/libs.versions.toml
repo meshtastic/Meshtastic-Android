@@ -26,7 +26,7 @@ ktlint = "1.7.1"
 kover = "0.9.7"
 mockk = "1.14.9"
 testRetry = "1.6.4"
-turbine = "1.1.0"
+turbine = "1.2.1"
 
 # Compose Multiplatform
 compose-multiplatform = "1.11.0-alpha03"
