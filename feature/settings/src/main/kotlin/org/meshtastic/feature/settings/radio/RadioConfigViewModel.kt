@@ -21,7 +21,6 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
-import android.os.RemoteException
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
@@ -55,10 +54,10 @@ import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
+import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
-import org.meshtastic.core.domain.usecase.settings.UpdateRadioConfigUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -68,7 +67,6 @@ import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
-import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -129,13 +127,10 @@ constructor(
     private val exportProfileUseCase: ExportProfileUseCase,
     private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase,
     private val installProfileUseCase: InstallProfileUseCase,
-    private val updateRadioConfigUseCase: UpdateRadioConfigUseCase,
+    private val radioConfigUseCase: RadioConfigUseCase,
     private val adminActionsUseCase: AdminActionsUseCase,
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
 ) : ViewModel() {
-    private val meshService: IMeshService?
-        get() = serviceRepository.meshService
-
     var analyticsAllowedFlow = analyticsPrefs.getAnalyticsAllowedChangesFlow()
 
     fun toggleAnalyticsAllowed() {
@@ -247,53 +242,29 @@ constructor(
         Logger.d { "RadioConfigViewModel cleared" }
     }
 
-    private fun request(destNum: Int, requestAction: suspend (IMeshService, Int, Int) -> Unit, errorMessage: String) =
-        viewModelScope.launch {
-            meshService?.let { service ->
-                val packetId = service.getPacketId()
-                try {
-                    requestAction(service, packetId, destNum)
-                    requestIds.update { it.apply { add(packetId) } }
-                    _radioConfigState.update { state ->
-                        if (state.responseState is ResponseState.Loading) {
-                            val total = maxOf(requestIds.value.size, state.responseState.total)
-                            state.copy(responseState = state.responseState.copy(total = total))
-                        } else {
-                            state.copy(
-                                route = "", // setter (response is PortNum.ROUTING_APP)
-                                responseState = ResponseState.Loading(),
-                            )
-                        }
-                    }
-                } catch (ex: RemoteException) {
-                    Logger.e { "$errorMessage: ${ex.message}" }
-                }
-            }
-        }
-
     fun setOwner(user: User) {
         val destNum = destNode.value?.num ?: return
         viewModelScope.launch {
             _radioConfigState.update { it.copy(userConfig = user) }
-            val packetId = updateRadioConfigUseCase.setOwner(destNum, user)
+            val packetId = radioConfigUseCase.setOwner(destNum, user)
             registerRequestId(packetId)
         }
     }
 
-    private fun getOwner(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getRemoteOwner(packetId, dest) },
-        "Request getOwner error",
-    )
+    private fun getOwner(destNum: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getOwner(destNum)
+            registerRequestId(packetId)
+        }
+    }
 
     fun updateChannels(new: List<ChannelSettings>, old: List<ChannelSettings>) {
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { channel ->
-            request(
-                destNum,
-                { service, packetId, dest -> service.setRemoteChannel(packetId, dest, channel.encode()) },
-                "Request setRemoteChannel error",
-            )
+            viewModelScope.launch {
+                val packetId = radioConfigUseCase.setRemoteChannel(destNum, channel)
+                registerRequestId(packetId)
+            }
         }
 
         if (destNum == myNodeNum) {
@@ -305,11 +276,12 @@ constructor(
         _radioConfigState.update { it.copy(channelList = new) }
     }
 
-    private fun getChannel(destNum: Int, index: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getRemoteChannel(packetId, dest, index) },
-        "Request getChannel error",
-    )
+    private fun getChannel(destNum: Int, index: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getChannel(destNum, index)
+            registerRequestId(packetId)
+        }
+    }
 
     fun setConfig(config: Config) {
         val destNum = destNode.value?.num ?: return
@@ -329,16 +301,17 @@ constructor(
                     ),
                 )
             }
-            val packetId = updateRadioConfigUseCase.setConfig(destNum, config)
+            val packetId = radioConfigUseCase.setConfig(destNum, config)
             registerRequestId(packetId)
         }
     }
 
-    private fun getConfig(destNum: Int, configType: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getRemoteConfig(packetId, dest, configType) },
-        "Request getConfig error",
-    )
+    private fun getConfig(destNum: Int, configType: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getConfig(destNum, configType)
+            registerRequestId(packetId)
+        }
+    }
 
     fun setModuleConfig(config: ModuleConfig) {
         val destNum = destNode.value?.num ?: return
@@ -367,50 +340,54 @@ constructor(
                     ),
                 )
             }
-            val packetId = updateRadioConfigUseCase.setModuleConfig(destNum, config)
+            val packetId = radioConfigUseCase.setModuleConfig(destNum, config)
             registerRequestId(packetId)
         }
     }
 
-    private fun getModuleConfig(destNum: Int, configType: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getModuleConfig(packetId, dest, configType) },
-        "Request getModuleConfig error",
-    )
+    private fun getModuleConfig(destNum: Int, configType: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getModuleConfig(destNum, configType)
+            registerRequestId(packetId)
+        }
+    }
 
     fun setRingtone(ringtone: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
         viewModelScope.launch {
-            updateRadioConfigUseCase.setRingtone(destNum, ringtone)
+            radioConfigUseCase.setRingtone(destNum, ringtone)
         }
     }
 
-    private fun getRingtone(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getRingtone(packetId, dest) },
-        "Request getRingtone error",
-    )
+    private fun getRingtone(destNum: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getRingtone(destNum)
+            registerRequestId(packetId)
+        }
+    }
 
     fun setCannedMessages(messages: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
         viewModelScope.launch {
-            updateRadioConfigUseCase.setCannedMessages(destNum, messages)
+            radioConfigUseCase.setCannedMessages(destNum, messages)
         }
     }
 
-    private fun getCannedMessages(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getCannedMessages(packetId, dest) },
-        "Request getCannedMessages error",
-    )
+    private fun getCannedMessages(destNum: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getCannedMessages(destNum)
+            registerRequestId(packetId)
+        }
+    }
 
-    private fun getDeviceConnectionStatus(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.getDeviceConnectionStatus(packetId, dest) },
-        "Request getDeviceConnectionStatus error",
-    )
+    private fun getDeviceConnectionStatus(destNum: Int) {
+        viewModelScope.launch {
+            val packetId = radioConfigUseCase.getDeviceConnectionStatus(destNum)
+            registerRequestId(packetId)
+        }
+    }
 
     private fun requestShutdown(destNum: Int) {
         viewModelScope.launch {
@@ -428,33 +405,17 @@ constructor(
 
     private fun requestFactoryReset(destNum: Int) {
         viewModelScope.launch {
-            val packetId = adminActionsUseCase.factoryReset(destNum)
+            val isLocal = (destNum == myNodeNum)
+            val packetId = adminActionsUseCase.factoryReset(destNum, isLocal)
             registerRequestId(packetId)
-
-            if (destNum == myNodeNum) {
-                // Clear the service's in-memory node cache first so screens refresh immediately.
-                val existingNodeNums = nodeRepository.getNodeEntityDBbyNumFlow().firstOrNull()?.keys?.toList().orEmpty()
-                meshService?.let { service ->
-                    existingNodeNums.forEach { service.removeByNodenum(service.getPacketId(), it) }
-                }
-                nodeRepository.clearNodeDB()
-            }
         }
     }
 
     private fun requestNodedbReset(destNum: Int, preserveFavorites: Boolean) {
         viewModelScope.launch {
-            val packetId = adminActionsUseCase.nodedbReset(destNum, preserveFavorites)
+            val isLocal = (destNum == myNodeNum)
+            val packetId = adminActionsUseCase.nodedbReset(destNum, preserveFavorites, isLocal)
             registerRequestId(packetId)
-
-            if (destNum == myNodeNum) {
-                // Clear the service's in-memory node cache as well so UI updates immediately.
-                val existingNodeNums = nodeRepository.getNodeEntityDBbyNumFlow().firstOrNull()?.keys?.toList().orEmpty()
-                meshService?.let { service ->
-                    existingNodeNums.forEach { service.removeByNodenum(service.getPacketId(), it) }
-                }
-                nodeRepository.clearNodeDB(preserveFavorites)
-            }
         }
     }
 
@@ -483,14 +444,14 @@ constructor(
     fun setFixedPosition(position: Position) {
         val destNum = destNode.value?.num ?: return
         viewModelScope.launch {
-            updateRadioConfigUseCase.setFixedPosition(destNum, position)
+            radioConfigUseCase.setFixedPosition(destNum, position)
         }
     }
 
     fun removeFixedPosition() {
         val destNum = destNode.value?.num ?: return
         viewModelScope.launch {
-            updateRadioConfigUseCase.removeFixedPosition(destNum)
+            radioConfigUseCase.removeFixedPosition(destNum)
         }
     }
 

@@ -35,8 +35,8 @@ import org.meshtastic.core.resources.device_configuration
 import org.meshtastic.core.resources.remotely_administrating
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.radio.ExpressiveSection
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 @Composable

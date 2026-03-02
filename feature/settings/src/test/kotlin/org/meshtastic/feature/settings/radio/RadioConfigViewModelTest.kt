@@ -46,10 +46,10 @@ import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
+import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
-import org.meshtastic.core.domain.usecase.settings.UpdateRadioConfigUseCase
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
@@ -81,7 +81,7 @@ class RadioConfigViewModelTest {
     private lateinit var exportProfileUseCase: ExportProfileUseCase
     private lateinit var exportSecurityConfigUseCase: ExportSecurityConfigUseCase
     private lateinit var installProfileUseCase: InstallProfileUseCase
-    private lateinit var updateRadioConfigUseCase: UpdateRadioConfigUseCase
+    private lateinit var radioConfigUseCase: RadioConfigUseCase
     private lateinit var adminActionsUseCase: AdminActionsUseCase
     private lateinit var processRadioResponseUseCase: ProcessRadioResponseUseCase
 
@@ -105,7 +105,7 @@ class RadioConfigViewModelTest {
         exportProfileUseCase = mockk(relaxed = true)
         exportSecurityConfigUseCase = mockk(relaxed = true)
         installProfileUseCase = mockk(relaxed = true)
-        updateRadioConfigUseCase = mockk(relaxed = true)
+        radioConfigUseCase = mockk(relaxed = true)
         adminActionsUseCase = mockk(relaxed = true)
         processRadioResponseUseCase = mockk(relaxed = true)
 
@@ -143,7 +143,7 @@ class RadioConfigViewModelTest {
         exportProfileUseCase = exportProfileUseCase,
         exportSecurityConfigUseCase = exportSecurityConfigUseCase,
         installProfileUseCase = installProfileUseCase,
-        updateRadioConfigUseCase = updateRadioConfigUseCase,
+        radioConfigUseCase = radioConfigUseCase,
         adminActionsUseCase = adminActionsUseCase,
         processRadioResponseUseCase = processRadioResponseUseCase,
     )
@@ -157,7 +157,7 @@ class RadioConfigViewModelTest {
         advanceUntilIdle()
 
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
-        coEvery { updateRadioConfigUseCase.setConfig(any(), any()) } returns 42
+        coEvery { radioConfigUseCase.setConfig(any(), any()) } returns 42
 
         // Act
         viewModel.setConfig(config)
@@ -167,7 +167,7 @@ class RadioConfigViewModelTest {
         val state = viewModel.radioConfigState.value
         assertEquals(Config.DeviceConfig.Role.ROUTER, state.radioConfig.device?.role)
         assertTrue(state.responseState is ResponseState.Loading)
-        coVerify { updateRadioConfigUseCase.setConfig(123, config) }
+        coVerify { radioConfigUseCase.setConfig(123, config) }
     }
 
     @Test

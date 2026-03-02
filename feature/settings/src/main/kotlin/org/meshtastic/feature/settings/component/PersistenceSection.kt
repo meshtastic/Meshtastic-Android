@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.tooling.preview.Preview
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
@@ -37,10 +38,13 @@ import org.meshtastic.core.resources.export_data_csv
 import org.meshtastic.core.resources.save_rangetest
 import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.feature.settings.radio.ExpressiveSection
+import org.meshtastic.core.ui.theme.AppTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+/**
+ * Section for settings related to data persistence and exports.
+ */
 @Composable
 fun PersistenceSection(
     cacheLimit: Int,
@@ -106,5 +110,18 @@ fun PersistenceSection(
                 }
             exportDataLauncher.launch(intent)
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PersistenceSectionPreview() {
+    AppTheme {
+        PersistenceSection(
+            cacheLimit = 100,
+            onSetCacheLimit = {},
+            nodeShortName = "TEST",
+            onExportData = {},
+        )
     }
 }

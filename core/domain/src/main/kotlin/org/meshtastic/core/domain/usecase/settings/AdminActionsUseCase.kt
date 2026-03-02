@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.RadioController
 import javax.inject.Inject
 
@@ -24,9 +25,12 @@ import javax.inject.Inject
  */
 class AdminActionsUseCase @Inject constructor(
     private val radioController: RadioController,
+    private val nodeRepository: NodeRepository,
 ) {
     /**
      * Reboots the radio.
+     * @param destNum The node number to reboot.
+     * @return The packet ID of the request.
      */
     suspend fun reboot(destNum: Int): Int {
         val packetId = radioController.getPacketId()
@@ -36,6 +40,8 @@ class AdminActionsUseCase @Inject constructor(
 
     /**
      * Shuts down the radio.
+     * @param destNum The node number to shut down.
+     * @return The packet ID of the request.
      */
     suspend fun shutdown(destNum: Int): Int {
         val packetId = radioController.getPacketId()
@@ -45,19 +51,38 @@ class AdminActionsUseCase @Inject constructor(
 
     /**
      * Factory resets the radio.
+     * @param destNum The node number to reset.
+     * @param isLocal Whether the reset is being performed on the locally connected node.
+     * @return The packet ID of the request.
      */
-    suspend fun factoryReset(destNum: Int): Int {
+    suspend fun factoryReset(destNum: Int, isLocal: Boolean): Int {
         val packetId = radioController.getPacketId()
         radioController.factoryReset(destNum, packetId)
+
+        if (isLocal) {
+            // If it's the local node, we should also clear the phone's node database as it will be out of sync.
+            nodeRepository.clearNodeDB()
+        }
+
         return packetId
     }
 
     /**
      * Resets the NodeDB on the radio.
+     * @param destNum The node number to reset.
+     * @param preserveFavorites Whether to keep favorite nodes in the database.
+     * @param isLocal Whether the reset is being performed on the locally connected node.
+     * @return The packet ID of the request.
      */
-    suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean): Int {
+    suspend fun nodedbReset(destNum: Int, preserveFavorites: Boolean, isLocal: Boolean): Int {
         val packetId = radioController.getPacketId()
         radioController.nodedbReset(destNum, packetId, preserveFavorites)
+
+        if (isLocal) {
+            // If it's the local node, we should also clear the phone's node database.
+            nodeRepository.clearNodeDB(preserveFavorites)
+        }
+
         return packetId
     }
 }
