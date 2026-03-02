@@ -19,6 +19,7 @@ package org.meshtastic.feature.messaging
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 
 class HomoglyphCharacterTransformTest {
 
