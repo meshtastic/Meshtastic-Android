@@ -54,6 +54,7 @@ devtools-ksp = "2.3.6"
 markdownRenderer = "0.39.2"
 okio = "3.16.4"
 osmdroid-android = "6.1.20"
+screenshot = "0.0.1-alpha13"
 spotless = "8.2.1"
 wire = "6.0.0-alpha02"
 vico = "3.0.2"
@@ -180,6 +181,7 @@ androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core",
 junit = { module = "junit:junit", version = "4.13.2" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.16.1" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # Other
@@ -282,6 +284,7 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room", version.ref = "room" }
+screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
 dependency-guard = { id = "com.dropbox.dependency-guard", version.ref = "dependency-guard" }
