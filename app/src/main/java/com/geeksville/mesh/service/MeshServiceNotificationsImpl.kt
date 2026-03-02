@@ -309,7 +309,7 @@ constructor(
             if (myNodeNum != null) {
                 // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
                 // and we only do this once if the cache is empty.
-                val nodes = runBlocking { repo.getNodeDBbyNum().first() }
+                val nodes = runBlocking { repo.getNodeEntityDBbyNumFlow().first() }
                 nodes[myNodeNum]?.let { entity ->
                     if (cachedDeviceMetrics == null) {
                         cachedDeviceMetrics = entity.deviceTelemetry.device_metrics

@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.ui.connections.ScannerViewModel
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.no_usb_devices
-import org.meshtastic.core.service.ConnectionState
 
 @Composable
 fun UsbDevices(

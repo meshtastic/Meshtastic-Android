@@ -16,101 +16,54 @@
  */
 package org.meshtastic.feature.settings
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
-import android.os.Build
-import android.provider.Settings
-import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Abc
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.rounded.AppSettingsAlt
-import androidx.compose.material.icons.rounded.FormatPaint
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.rounded.Language
-import androidx.compose.material.icons.rounded.LocationOn
-import androidx.compose.material.icons.rounded.Memory
-import androidx.compose.material.icons.rounded.Output
-import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
-import androidx.core.os.ConfigurationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
-import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.acknowledgements
-import org.meshtastic.core.resources.analytics_okay
-import org.meshtastic.core.resources.app_settings
-import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.choose_theme
-import org.meshtastic.core.resources.device_db_cache_limit
-import org.meshtastic.core.resources.device_db_cache_limit_summary
 import org.meshtastic.core.resources.dynamic
 import org.meshtastic.core.resources.export_configuration
-import org.meshtastic.core.resources.export_data_csv
 import org.meshtastic.core.resources.import_configuration
-import org.meshtastic.core.resources.intro_show
-import org.meshtastic.core.resources.location_disabled
-import org.meshtastic.core.resources.modules_already_unlocked
-import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.resources.preferences_language
-import org.meshtastic.core.resources.provide_location_to_mesh
 import org.meshtastic.core.resources.remotely_administrating
-import org.meshtastic.core.resources.save_rangetest
-import org.meshtastic.core.resources.system_settings
-import org.meshtastic.core.resources.theme
 import org.meshtastic.core.resources.theme_dark
 import org.meshtastic.core.resources.theme_light
 import org.meshtastic.core.resources.theme_system
-import org.meshtastic.core.resources.use_homoglyph_characters_encoding
-import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticDialog
-import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
-import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.settings.component.AppInfoSection
+import org.meshtastic.feature.settings.component.AppearanceSection
+import org.meshtastic.feature.settings.component.PersistenceSection
+import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
-import org.meshtastic.feature.settings.radio.ExpressiveSection
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.EditDeviceProfileDialog
@@ -119,7 +72,6 @@ import org.meshtastic.feature.settings.util.LanguageUtils.languageMap
 import org.meshtastic.proto.DeviceProfile
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -259,226 +211,37 @@ fun SettingsScreen(
                 onNavigate = onNavigate,
             )
 
-            val context = LocalContext.current
+            PrivacySection(
+                analyticsAvailable = state.analyticsAvailable,
+                analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false).value,
+                onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
+                provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                onToggleLocation = { settingsViewModel.setProvideLocation(it) },
+                homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
+                onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                startProvideLocation = { settingsViewModel.startProvidingLocation() },
+                stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+            )
 
-            ExpressiveSection(title = stringResource(Res.string.app_settings)) {
-                if (state.analyticsAvailable) {
-                    val allowed by viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false)
-                    SwitchListItem(
-                        text = stringResource(Res.string.analytics_okay),
-                        checked = allowed,
-                        leadingIcon = Icons.Default.BugReport,
-                        onClick = { viewModel.toggleAnalyticsAllowed() },
-                    )
-                }
+            AppearanceSection(
+                onShowLanguagePicker = { showLanguagePickerDialog = true },
+                onShowThemePicker = { showThemePickerDialog = true },
+            )
 
-                val locationPermissionsState =
-                    rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
-                val isGpsDisabled = context.gpsDisabled()
-                val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
+            PersistenceSection(
+                cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
+                onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
+                nodeShortName = ourNode?.user?.short_name ?: "",
+                onExportData = { settingsViewModel.saveDataCsv(it) },
+            )
 
-                LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
-                    if (provideLocation) {
-                        if (locationPermissionsState.allPermissionsGranted) {
-                            if (!isGpsDisabled) {
-                                settingsViewModel.meshService?.startProvideLocation()
-                            } else {
-                                context.showToast(Res.string.location_disabled)
-                            }
-                        } else {
-                            // Request permissions if not granted and user wants to provide location
-                            locationPermissionsState.launchMultiplePermissionRequest()
-                        }
-                    } else {
-                        settingsViewModel.meshService?.stopProvideLocation()
-                    }
-                }
-
-                SwitchListItem(
-                    text = stringResource(Res.string.provide_location_to_mesh),
-                    leadingIcon = Icons.Rounded.LocationOn,
-                    enabled = !isGpsDisabled,
-                    checked = provideLocation,
-                    onClick = { settingsViewModel.setProvideLocation(!provideLocation) },
-                )
-
-                val homoglyphEncodingEnabled by
-                    viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false)
-
-                HomoglyphSetting(
-                    homoglyphEncodingEnabled = homoglyphEncodingEnabled,
-                    onToggle = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                )
-
-                val settingsLauncher =
-                    rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
-
-                // On Android 12 and below, system app settings for language are not available. Use the in-app language
-                // picker for these devices.
-                val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
-                ListItem(
-                    text = stringResource(Res.string.preferences_language),
-                    leadingIcon = Icons.Rounded.Language,
-                    trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                ) {
-                    if (useInAppLangPicker) {
-                        showLanguagePickerDialog = true
-                    } else {
-                        val intent = Intent(ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
-                        if (intent.resolveActivity(context.packageManager) != null) {
-                            settingsLauncher.launch(intent)
-                        } else {
-                            // Fall back to the in-app picker
-                            showLanguagePickerDialog = true
-                        }
-                    }
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.theme),
-                    leadingIcon = Icons.Rounded.FormatPaint,
-                    trailingIcon = null,
-                ) {
-                    showThemePickerDialog = true
-                }
-
-                // Node DB cache limit (App setting)
-                val cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value
-                val cacheItems = remember {
-                    (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
-                        it.toLong() to it.toString()
-                    }
-                }
-                DropDownPreference(
-                    title = stringResource(Res.string.device_db_cache_limit),
-                    enabled = true,
-                    items = cacheItems,
-                    selectedItem = cacheLimit.toLong(),
-                    onItemSelected = { selected -> settingsViewModel.setDbCacheLimit(selected.toInt()) },
-                    summary = stringResource(Res.string.device_db_cache_limit_summary),
-                )
-
-                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(nowMillis.toInstant().toDate())
-                val nodeName = ourNode?.user?.short_name ?: ""
-
-                val exportRangeTestLauncher =
-                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                        if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
-                        }
-                    }
-                ListItem(
-                    text = stringResource(Res.string.save_rangetest),
-                    leadingIcon = Icons.Rounded.Output,
-                    trailingIcon = null,
-                ) {
-                    val intent =
-                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                            type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_${nodeName}_$timestamp.csv")
-                        }
-                    exportRangeTestLauncher.launch(intent)
-                }
-
-                val exportDataLauncher =
-                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                        if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
-                        }
-                    }
-                ListItem(
-                    text = stringResource(Res.string.export_data_csv),
-                    leadingIcon = Icons.Rounded.Output,
-                    trailingIcon = null,
-                ) {
-                    val intent =
-                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                            type = "application/csv"
-                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_${nodeName}_$timestamp.csv")
-                        }
-                    exportDataLauncher.launch(intent)
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.intro_show),
-                    leadingIcon = Icons.Rounded.WavingHand,
-                    trailingIcon = null,
-                ) {
-                    settingsViewModel.showAppIntro()
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.system_settings),
-                    leadingIcon = Icons.Rounded.AppSettingsAlt,
-                    trailingIcon = null,
-                ) {
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    intent.data = Uri.fromParts("package", context.packageName, null)
-                    settingsLauncher.launch(intent)
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.acknowledgements),
-                    leadingIcon = Icons.Rounded.Info,
-                    trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                ) {
-                    onNavigate(SettingsRoutes.About)
-                }
-
-                AppVersionButton(
-                    excludedModulesUnlocked = excludedModulesUnlocked,
-                    appVersionName = settingsViewModel.appVersionName,
-                ) {
-                    settingsViewModel.unlockExcludedModules()
-                }
-            }
-        }
-    }
-}
-
-private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.
-private const val UNLOCKED_CLICK_COUNT = 3 // Number of clicks before we toast that modules are already unlocked.
-private const val UNLOCK_TIMEOUT_SECONDS = 1 // Timeout in seconds to reset the click counter.
-
-/** A button to display the app version. Clicking it 5 times will unlock the excluded modules. */
-@Composable
-private fun AppVersionButton(
-    excludedModulesUnlocked: Boolean,
-    appVersionName: String,
-    onUnlockExcludedModules: () -> Unit,
-) {
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    var clickCount by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(clickCount) {
-        if (clickCount in 1..<UNLOCK_CLICK_COUNT) {
-            delay(UNLOCK_TIMEOUT_SECONDS.seconds)
-            clickCount = 0
-        }
-    }
-
-    ListItem(
-        text = stringResource(Res.string.app_version),
-        leadingIcon = Icons.Rounded.Memory,
-        supportingText = appVersionName,
-        trailingIcon = null,
-    ) {
-        clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
-
-        when {
-            clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
-                clickCount = 0
-                scope.launch { context.showToast(Res.string.modules_already_unlocked) }
-            }
-
-            clickCount == UNLOCK_CLICK_COUNT -> {
-                clickCount = 0
-                onUnlockExcludedModules()
-                scope.launch { context.showToast(Res.string.modules_unlocked) }
-            }
+            AppInfoSection(
+                appVersionName = settingsViewModel.appVersionName,
+                excludedModulesUnlocked = excludedModulesUnlocked,
+                onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
+                onShowAppIntro = { settingsViewModel.showAppIntro() },
+                onNavigateToAbout = { onNavigate(SettingsRoutes.About) },
+            )
         }
     }
 }
@@ -524,19 +287,4 @@ private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit
             }
         },
     )
-}
-
-@VisibleForTesting
-@Composable
-fun HomoglyphSetting(homoglyphEncodingEnabled: Boolean, onToggle: () -> Unit) {
-    val currentLocale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
-    val supportedLanguages = listOf("ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn")
-    if (currentLocale?.language in supportedLanguages) {
-        SwitchListItem(
-            text = stringResource(Res.string.use_homoglyph_characters_encoding),
-            checked = homoglyphEncodingEnabled,
-            leadingIcon = Icons.Default.Abc,
-            onClick = onToggle,
-        )
-    }
 }

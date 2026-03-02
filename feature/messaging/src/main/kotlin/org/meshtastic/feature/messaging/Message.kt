@@ -100,6 +100,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node

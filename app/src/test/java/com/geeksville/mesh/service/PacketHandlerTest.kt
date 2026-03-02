@@ -30,7 +30,7 @@ import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
-import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum

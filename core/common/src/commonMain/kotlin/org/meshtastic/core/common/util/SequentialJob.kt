@@ -25,8 +25,9 @@ import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 /**
- * A helper class that manages a single [Job]. When a new job is launched, the previous one is cancelled. This is useful
- * for ensuring that only one operation of a certain type is running at a time.
+ * A helper class that manages a single [Job]. When a new job is launched, any previous job is cancelled. This is useful
+ * for ensuring that only the latest operation of a certain type is running at a time (e.g. for search or settings
+ * updates).
  */
 class SequentialJob @Inject constructor() {
     private val job = AtomicReference<Job?>()

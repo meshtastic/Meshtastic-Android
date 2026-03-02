@@ -56,7 +56,7 @@ import javax.inject.Singleton
 /** Repository for managing node-related data, including hardware info, node database, and identity. */
 @Singleton
 @Suppress("TooManyFunctions")
-class NodeRepository
+open class NodeRepository
 @Inject
 constructor(
     @ProcessLifecycle private val processLifecycle: Lifecycle,
@@ -66,7 +66,7 @@ constructor(
     private val localStatsDataSource: LocalStatsDataSource,
 ) {
     /** Hardware info about our local device (can be null if not connected). */
-    val myNodeInfo: StateFlow<MyNodeEntity?> =
+    open val myNodeInfo: StateFlow<MyNodeEntity?> =
         nodeInfoReadDataSource
             .myNodeInfoFlow()
             .flowOn(dispatchers.io)
@@ -75,7 +75,7 @@ constructor(
     private val _ourNodeInfo = MutableStateFlow<Node?>(null)
 
     /** Information about the locally connected node, as seen from the mesh. */
-    val ourNodeInfo: StateFlow<Node?>
+    open val ourNodeInfo: StateFlow<Node?>
         get() = _ourNodeInfo
 
     private val _myId = MutableStateFlow<String?>(null)
@@ -131,7 +131,7 @@ constructor(
         .map { info -> if (nodeNum == info?.myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum }
         .distinctUntilChanged()
 
-    fun getNodeDBbyNum() =
+    fun getNodeEntityDBbyNumFlow() =
         nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     /** Returns the [Node] associated with a given [userId]. Falls back to a generic node if not found. */

@@ -19,6 +19,9 @@ package com.geeksville.mesh.service
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.updateAll
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.coEvery
 import io.mockk.every
@@ -37,12 +40,15 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -67,6 +73,8 @@ class MeshConnectionManagerTest {
     private val commandSender: MeshCommandSender = mockk(relaxed = true)
     private val nodeManager: MeshNodeManager = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
+    private val packetRepository: PacketRepository = mockk(relaxed = true)
+    private val workManager: WorkManager = mockk(relaxed = true)
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val localConfigFlow = MutableStateFlow(LocalConfig())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig())
@@ -107,6 +115,8 @@ class MeshConnectionManagerTest {
                 commandSender,
                 nodeManager,
                 analytics,
+                packetRepository,
+                workManager,
             )
     }
 
@@ -194,10 +204,23 @@ class MeshConnectionManagerTest {
     }
 
     @Test
-    fun `onRadioConfigLoaded processes queued packets and sets time`() = runTest(testDispatcher) {
-        manager.onRadioConfigLoaded()
+    fun `onRadioConfigLoaded enqueues queued packets and sets time`() = runTest(testDispatcher) {
+        manager.start(backgroundScope)
+        val packetId = 456
+        val dataPacket = mockk<DataPacket>(relaxed = true)
+        every { dataPacket.id } returns packetId
+        coEvery { packetRepository.getQueuedPackets() } returns listOf(dataPacket)
 
-        verify { commandSender.processQueuedPackets() }
+        manager.onRadioConfigLoaded()
+        advanceUntilIdle()
+
+        verify {
+            workManager.enqueueUniqueWork(
+                match<String> { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) },
+                any<ExistingWorkPolicy>(),
+                any<OneTimeWorkRequest>(),
+            )
+        }
         verify { commandSender.sendAdmin(any(), initFn = any()) }
     }
 

@@ -37,9 +37,9 @@ import no.nordicsemi.android.common.scanner.view.ScannerView
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_available_devices
-import org.meshtastic.core.service.ConnectionState
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth

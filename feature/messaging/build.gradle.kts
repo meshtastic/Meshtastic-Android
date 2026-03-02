@@ -26,8 +26,10 @@ configure<LibraryExtension> { namespace = "org.meshtastic.feature.messaging" }
 
 dependencies {
     implementation(projects.core.analytics)
+    implementation(projects.core.common)
     implementation(projects.core.data)
     implementation(projects.core.database)
+    implementation(projects.core.domain)
     implementation(projects.core.model)
     implementation(projects.core.navigation)
     implementation(projects.core.prefs)
@@ -50,6 +52,9 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.paging.compose)
     implementation(libs.kermit)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -59,4 +64,8 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.robolectric)
 }

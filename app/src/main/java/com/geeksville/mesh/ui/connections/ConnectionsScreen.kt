@@ -59,6 +59,7 @@ import com.geeksville.mesh.ui.connections.components.UsbDevices
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.resources.Res
@@ -71,7 +72,6 @@ import org.meshtastic.core.resources.must_set_region
 import org.meshtastic.core.resources.no_device_selected
 import org.meshtastic.core.resources.not_connected
 import org.meshtastic.core.resources.set_your_region
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.TitledCard

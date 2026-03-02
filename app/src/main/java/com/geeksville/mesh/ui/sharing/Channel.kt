@@ -71,6 +71,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.model.util.qrCode
 import org.meshtastic.core.navigation.Route
@@ -88,7 +89,6 @@ import org.meshtastic.core.resources.replace
 import org.meshtastic.core.resources.reset
 import org.meshtastic.core.resources.reset_to_defaults
 import org.meshtastic.core.resources.share_channels_qr
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.MainAppBar

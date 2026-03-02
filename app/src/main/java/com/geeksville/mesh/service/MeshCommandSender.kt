@@ -30,12 +30,12 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.isWithinSizeLimit
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
@@ -47,7 +47,6 @@ import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
@@ -68,7 +67,6 @@ constructor(
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val currentPacketId = AtomicLong(java.util.Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = AtomicReference(ByteString.EMPTY)
-    private val offlineSentPackets = CopyOnWriteArrayList<DataPacket>()
     val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
     val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
 
@@ -76,17 +74,6 @@ constructor(
     private val channelSet = MutableStateFlow(ChannelSet())
 
     @Volatile var lastNeighborInfo: NeighborInfo? = null
-
-    private val rememberDataType =
-        setOf(
-            PortNum.TEXT_MESSAGE_APP.value,
-            PortNum.ALERT_APP.value,
-            PortNum.WAYPOINT_APP.value,
-            PortNum.ATAK_PLUGIN.value,
-            PortNum.ATAK_FORWARDER.value,
-            PortNum.DETECTION_SENSOR_APP.value,
-            PortNum.PRIVATE_APP.value,
-        )
 
     fun start(scope: CoroutineScope) {
         this.scope = scope
@@ -154,14 +141,9 @@ constructor(
         }
 
         if (connectionStateHolder?.connectionState?.value == ConnectionState.Connected) {
-            try {
-                sendNow(p)
-            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
-                Logger.e(ex) { "Error sending message, so enqueueing" }
-                enqueueForSending(p)
-            }
+            sendNow(p)
         } else {
-            enqueueForSending(p)
+            error("Radio is not connected")
         }
     }
 
@@ -183,25 +165,6 @@ constructor(
             )
         p.time = nowMillis
         packetHandler?.sendToRadio(meshPacket)
-    }
-
-    private fun enqueueForSending(p: DataPacket) {
-        if (p.dataType in rememberDataType) {
-            offlineSentPackets.add(p)
-        }
-    }
-
-    fun processQueuedPackets() {
-        val sentPackets = mutableListOf<DataPacket>()
-        offlineSentPackets.forEach { p ->
-            try {
-                sendNow(p)
-                sentPackets.add(p)
-            } catch (@Suppress("TooGenericExceptionCaught") ex: Exception) {
-                Logger.e(ex) { "Error sending queued message:" }
-            }
-        }
-        offlineSentPackets.removeAll(sentPackets)
     }
 
     fun sendAdmin(

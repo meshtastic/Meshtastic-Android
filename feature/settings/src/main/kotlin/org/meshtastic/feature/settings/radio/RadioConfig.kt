@@ -18,8 +18,6 @@ package org.meshtastic.feature.settings.radio
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -35,16 +33,11 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Upload
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
@@ -72,10 +65,9 @@ import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigItemList(
     state: RadioConfigState,
@@ -89,130 +81,135 @@ fun RadioConfigItemList(
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-            ConfigRoute.radioConfigRoutes.forEach {
-                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
-            }
-        }
-
-        ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-            ListItem(
-                text = stringResource(Res.string.device_configuration),
-                leadingIcon = Icons.Rounded.AppSettingsAlt,
-                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                enabled = enabled,
-            ) {
-                onNavigate(SettingsRoutes.DeviceConfiguration)
-            }
-        }
-
-        ExpressiveSection(title = stringResource(Res.string.module_settings)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-            ListItem(
-                text = stringResource(Res.string.module_settings),
-                leadingIcon = Icons.Rounded.Settings,
-                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                enabled = enabled,
-            ) {
-                onNavigate(SettingsRoutes.ModuleConfiguration)
-            }
-        }
+        RadioConfigSection(isManaged, enabled, onRouteClick)
+        DeviceConfigSection(isManaged, enabled, onNavigate)
+        ModuleSettingsSection(isManaged, enabled, onNavigate)
 
         if (state.isLocal) {
-            ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
-                if (isManaged) {
-                    ManagedMessage()
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.import_configuration),
-                    leadingIcon = Icons.Rounded.Download,
-                    enabled = enabled,
-                    onClick = onImport,
-                )
-                ListItem(
-                    text = stringResource(Res.string.export_configuration),
-                    leadingIcon = Icons.Rounded.Upload,
-                    enabled = enabled,
-                    onClick = onExport,
-                )
-            }
+            BackupRestoreSection(isManaged, enabled, onImport, onExport)
         }
 
-        ExpressiveSection(title = stringResource(Res.string.administration)) {
-            ListItem(
-                text = stringResource(Res.string.administration),
-                leadingIcon = Icons.Rounded.AdminPanelSettings,
-                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                leadingIconTint = MaterialTheme.colorScheme.error,
-                textColor = MaterialTheme.colorScheme.error,
-                trailingIconTint = MaterialTheme.colorScheme.error,
-                enabled = enabled,
-            ) {
-                onNavigate(SettingsRoutes.Administration)
-            }
-        }
+        AdministrationSection(enabled, onNavigate)
 
         if (state.isLocal) {
-            ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
-                if (isManaged) {
-                    ManagedMessage()
-                }
-
-                if (isOtaCapable) {
-                    ListItem(
-                        text = stringResource(Res.string.firmware_update_title),
-                        leadingIcon = Icons.Rounded.SystemUpdate,
-                        enabled = enabled,
-                        onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
-                    )
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.clean_node_database_title),
-                    leadingIcon = Icons.Rounded.CleaningServices,
-                    enabled = enabled,
-                    onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
-                )
-
-                ListItem(
-                    text = stringResource(Res.string.debug_panel),
-                    leadingIcon = Icons.Rounded.BugReport,
-                    enabled = enabled,
-                    onClick = { onNavigate(SettingsRoutes.DebugPanel) },
-                )
-            }
+            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
         }
     }
 }
 
 @Composable
-fun ExpressiveSection(
-    title: String,
-    modifier: Modifier = Modifier,
-    titleColor: Color = MaterialTheme.colorScheme.primary,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = title,
-            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = titleColor,
+private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+        ConfigRoute.radioConfigRoutes.forEach {
+            ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
+        }
+    }
+}
+
+@Composable
+private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+        ListItem(
+            text = stringResource(Res.string.device_configuration),
+            leadingIcon = Icons.Rounded.AppSettingsAlt,
+            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            enabled = enabled,
+        ) {
+            onNavigate(SettingsRoutes.DeviceConfiguration)
+        }
+    }
+}
+
+@Composable
+private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.module_settings)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+        ListItem(
+            text = stringResource(Res.string.module_settings),
+            leadingIcon = Icons.Rounded.Settings,
+            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            enabled = enabled,
+        ) {
+            onNavigate(SettingsRoutes.ModuleConfiguration)
+        }
+    }
+}
+
+@Composable
+private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport: () -> Unit, onExport: () -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+
+        ListItem(
+            text = stringResource(Res.string.import_configuration),
+            leadingIcon = Icons.Rounded.Download,
+            enabled = enabled,
+            onClick = onImport,
         )
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-            content = content,
+        ListItem(
+            text = stringResource(Res.string.export_configuration),
+            leadingIcon = Icons.Rounded.Upload,
+            enabled = enabled,
+            onClick = onExport,
+        )
+    }
+}
+
+@Composable
+private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.administration)) {
+        ListItem(
+            text = stringResource(Res.string.administration),
+            leadingIcon = Icons.Rounded.AdminPanelSettings,
+            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIconTint = MaterialTheme.colorScheme.error,
+            textColor = MaterialTheme.colorScheme.error,
+            trailingIconTint = MaterialTheme.colorScheme.error,
+            enabled = enabled,
+        ) {
+            onNavigate(SettingsRoutes.Administration)
+        }
+    }
+}
+
+@Composable
+private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+
+        if (isOtaCapable) {
+            ListItem(
+                text = stringResource(Res.string.firmware_update_title),
+                leadingIcon = Icons.Rounded.SystemUpdate,
+                enabled = enabled,
+                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+            )
+        }
+
+        ListItem(
+            text = stringResource(Res.string.clean_node_database_title),
+            leadingIcon = Icons.Rounded.CleaningServices,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+        )
+
+        ListItem(
+            text = stringResource(Res.string.debug_panel),
+            leadingIcon = Icons.Rounded.BugReport,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoutes.DebugPanel) },
         )
     }
 }

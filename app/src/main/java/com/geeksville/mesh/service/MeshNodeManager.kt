@@ -78,7 +78,7 @@ constructor(
 
     fun loadCachedNodeDB() {
         scope.handledLaunch {
-            val nodes = nodeRepository?.getNodeDBbyNum()?.first() ?: emptyMap()
+            val nodes = nodeRepository?.getNodeEntityDBbyNumFlow()?.first() ?: emptyMap()
             nodeDBbyNodeNum.putAll(nodes)
             nodes.values.forEach { nodeDBbyID[it.user.id] = it }
             myNodeNum = nodeRepository?.myNodeInfo?.value?.myNodeNum

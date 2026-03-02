@@ -96,6 +96,7 @@ import no.nordicsemi.android.common.permissions.notification.RequestNotification
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
@@ -123,7 +124,6 @@ import org.meshtastic.core.resources.should_update
 import org.meshtastic.core.resources.should_update_firmware
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations

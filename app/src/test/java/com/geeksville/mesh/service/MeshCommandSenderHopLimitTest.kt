@@ -30,8 +30,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket

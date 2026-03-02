@@ -32,11 +32,11 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
