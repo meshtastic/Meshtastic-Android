@@ -181,6 +181,12 @@ constructor(
             .onEach { lc -> if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(radioConfig = lc) } }
             .launchIn(viewModelScope)
 
+        radioConfigRepository.channelSetFlow
+            .onEach { cs ->
+                if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(channelList = cs.settings) }
+            }
+            .launchIn(viewModelScope)
+
         radioConfigRepository.moduleConfigFlow
             .onEach { lmc ->
                 if (radioConfigState.value.isLocal) _radioConfigState.update { it.copy(moduleConfig = lmc) }
@@ -608,16 +614,7 @@ constructor(
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNode.value?.num ?: return
 
-        _radioConfigState.update {
-            RadioConfigState(
-                isLocal = it.isLocal,
-                connected = it.connected,
-                route = route.name,
-                metadata = it.metadata,
-                nodeDbResetPreserveFavorites = it.nodeDbResetPreserveFavorites,
-                responseState = ResponseState.Loading(),
-            )
-        }
+        _radioConfigState.update { it.copy(route = route.name, responseState = ResponseState.Loading()) }
 
         when (route) {
             ConfigRoute.USER -> getOwner(destNum)
@@ -862,6 +859,14 @@ constructor(
                 sendAdminRequest(destNum)
             }
             requestIds.update { it.apply { remove(data.request_id) } }
+
+            if (requestIds.value.isEmpty()) {
+                if (route.isNotEmpty() && !AdminRoute.entries.any { it.name == route }) {
+                    clearPacketResponse()
+                } else if (route.isEmpty()) {
+                    setResponseStateSuccess()
+                }
+            }
         }
     }
 }

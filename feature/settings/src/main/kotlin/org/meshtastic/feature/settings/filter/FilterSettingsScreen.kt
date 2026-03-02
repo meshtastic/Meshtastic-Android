@@ -37,7 +37,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
@@ -64,8 +64,8 @@ import org.meshtastic.core.ui.component.MainAppBar
 
 @Composable
 fun FilterSettingsScreen(viewModel: FilterSettingsViewModel = hiltViewModel(), onBack: () -> Unit) {
-    val filterEnabled by viewModel.filterEnabled.collectAsState()
-    val filterWords by viewModel.filterWords.collectAsState()
+    val filterEnabled by viewModel.filterEnabled.collectAsStateWithLifecycle()
+    val filterWords by viewModel.filterWords.collectAsStateWithLifecycle()
     var newWord by remember { mutableStateOf("") }
 
     Scaffold(

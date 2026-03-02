@@ -19,6 +19,7 @@ package org.meshtastic.core.ble
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
@@ -30,6 +31,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
@@ -72,7 +74,7 @@ class BleConnection(
      *
      * @param p The peripheral to connect to.
      */
-    suspend fun connect(p: Peripheral) {
+    suspend fun connect(p: Peripheral) = withContext(NonCancellable) {
         stateJob?.cancel()
         peripheral = p
 
@@ -156,7 +158,7 @@ class BleConnection(
     }
 
     /** Disconnects from the current peripheral. */
-    suspend fun disconnect() {
+    suspend fun disconnect() = withContext(NonCancellable) {
         stateJob?.cancel()
         stateJob = null
         peripheral?.disconnect()

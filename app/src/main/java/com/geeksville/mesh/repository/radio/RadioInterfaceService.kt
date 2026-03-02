@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +36,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.core.simpleSharedFlow
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BluetoothRepository
@@ -82,10 +82,10 @@ constructor(
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
-    private val _receivedData = simpleSharedFlow<ByteArray>()
+    private val _receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
-    private val _connectionError = simpleSharedFlow<BleError>()
+    private val _connectionError = MutableSharedFlow<BleError>(extraBufferCapacity = 64)
     val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
 
     // Thread-safe StateFlow for tracking device address changes
@@ -371,7 +371,7 @@ constructor(
         serviceScope.handledLaunch { handleSendToRadio(a) }
     }
 
-    private val _meshActivity = simpleSharedFlow<MeshActivity>()
+    private val _meshActivity = MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64)
     val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private fun emitSendActivity() {

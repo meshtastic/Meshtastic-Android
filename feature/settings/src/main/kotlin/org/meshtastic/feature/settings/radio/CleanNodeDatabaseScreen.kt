@@ -33,12 +33,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.resources.Res
@@ -56,9 +56,9 @@ import org.meshtastic.core.ui.component.NodeChip
  */
 @Composable
 fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewModel()) {
-    val olderThanDays by viewModel.olderThanDays.collectAsState()
-    val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsState()
-    val nodesToDelete by viewModel.nodesToDelete.collectAsState()
+    val olderThanDays by viewModel.olderThanDays.collectAsStateWithLifecycle()
+    val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsStateWithLifecycle()
+    val nodesToDelete by viewModel.nodesToDelete.collectAsStateWithLifecycle()
 
     LaunchedEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
 

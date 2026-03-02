@@ -33,33 +33,43 @@ constructor(
     private val dispatchers: CoroutineDispatchers,
 ) : NodeInfoWriteDataSource {
 
-    override suspend fun upsert(node: NodeEntity) =
+    override suspend fun upsert(node: NodeEntity) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().upsert(node) } }
+    }
 
-    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) =
+    override suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().installConfig(mi, nodes) } }
+    }
 
-    override suspend fun clearNodeDB(preserveFavorites: Boolean) =
+    override suspend fun clearNodeDB(preserveFavorites: Boolean) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearNodeInfo(preserveFavorites) } }
+    }
 
-    override suspend fun clearMyNodeInfo() =
+    override suspend fun clearMyNodeInfo() {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().clearMyNodeInfo() } }
+    }
 
-    override suspend fun deleteNode(num: Int) =
+    override suspend fun deleteNode(num: Int) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNode(num) } }
+    }
 
-    override suspend fun deleteNodes(nodeNums: List<Int>) =
+    override suspend fun deleteNodes(nodeNums: List<Int>) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteNodes(nodeNums) } }
+    }
 
-    override suspend fun deleteMetadata(num: Int) =
+    override suspend fun deleteMetadata(num: Int) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().deleteMetadata(num) } }
+    }
 
-    override suspend fun upsert(metadata: MetadataEntity) =
+    override suspend fun upsert(metadata: MetadataEntity) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().upsert(metadata) } }
+    }
 
-    override suspend fun setNodeNotes(num: Int, notes: String) =
+    override suspend fun setNodeNotes(num: Int, notes: String) {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().setNodeNotes(num, notes) } }
+    }
 
-    override suspend fun backfillDenormalizedNames() =
+    override suspend fun backfillDenormalizedNames() {
         withContext(dispatchers.io) { dbManager.withDb { it.nodeInfoDao().backfillDenormalizedNames() } }
+    }
 }

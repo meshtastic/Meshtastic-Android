@@ -23,6 +23,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +45,7 @@ import javax.inject.Singleton
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
 @Suppress("TooManyFunctions")
+@OptIn(ExperimentalCoroutinesApi::class)
 class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -114,8 +116,15 @@ class DatabaseManager @Inject constructor(private val app: Application, private 
         Logger.i { "Switched active DB to ${anonymizeDbName(dbName)} for address ${anonymizeAddress(address)}" }
     }
 
+    private val limitedIo = dispatchers.io.limitedParallelism(4)
+
     /** Execute [block] with the current DB instance. */
-    inline fun <T> withDb(block: (MeshtasticDatabase) -> T): T = block(currentDb.value)
+    suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
+        val active = _currentDb.value?.openHelper?.databaseName ?: return@withContext null
+        markLastUsed(active)
+        val db = _currentDb.value ?: return@withContext null // Use the cached current DB
+        block(db)
+    }
 
     /** Returns true if a database exists for the given device address. */
     fun hasDatabaseFor(address: String?): Boolean {
