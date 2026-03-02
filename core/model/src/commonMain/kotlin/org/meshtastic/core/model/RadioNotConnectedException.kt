@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,5 @@
  */
 package org.meshtastic.core.model
 
-/**
- * Exception thrown when an operation is attempted while not connected to a mesh radio.
- */
+/** Exception thrown when an operation is attempted while not connected to a mesh radio. */
 open class RadioNotConnectedException(message: String = "Not connected to radio") : Exception(message)

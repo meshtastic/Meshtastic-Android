@@ -53,9 +53,7 @@ sealed class NodeRequestEffect {
 }
 
 @Singleton
-class NodeRequestActions @Inject constructor(
-    private val radioController: RadioController,
-) {
+class NodeRequestActions @Inject constructor(private val radioController: RadioController) {
 
     private val _effects = MutableSharedFlow<NodeRequestEffect>()
     val effects: SharedFlow<NodeRequestEffect> = _effects.asSharedFlow()

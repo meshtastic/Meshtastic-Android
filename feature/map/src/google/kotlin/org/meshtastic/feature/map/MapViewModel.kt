@@ -644,7 +644,8 @@ constructor(
         (currentTileProvider as? MBTilesProvider)?.close()
     }
 
-    override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
+    override fun getUser(userId: String?) =
+        nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
 }
 
 enum class LayerType {

@@ -61,8 +61,10 @@ abstract class BaseMapViewModel(
 
     val myId = nodeRepository.myId
 
-    val isConnected = radioController.connectionState.map { it is org.meshtastic.core.model.ConnectionState.Connected }
-        .stateInWhileSubscribed(initialValue = false)
+    val isConnected =
+        radioController.connectionState
+            .map { it is org.meshtastic.core.model.ConnectionState.Connected }
+            .stateInWhileSubscribed(initialValue = false)
 
     val nodes: StateFlow<List<Node>> =
         nodeRepository
@@ -133,8 +135,7 @@ abstract class BaseMapViewModel(
 
     abstract fun getUser(userId: String?): org.meshtastic.proto.User
 
-    fun getNodeOrFallback(nodeNum: Int): Node =
-        nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
+    fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
@@ -148,9 +149,7 @@ abstract class BaseMapViewModel(
     }
 
     private fun sendDataPacket(p: DataPacket) {
-        viewModelScope.launch(Dispatchers.IO) {
-            radioController.sendMessage(p)
-        }
+        viewModelScope.launch(Dispatchers.IO) { radioController.sendMessage(p) }
     }
 
     fun generatePacketId(): Int = radioController.getPacketId()

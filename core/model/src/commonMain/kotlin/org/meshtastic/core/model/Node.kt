@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,6 +138,7 @@ data class Node(
 
     fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
+    @Suppress("CyclomaticComplexMethod")
     private fun EnvironmentMetrics.getDisplayStrings(isFahrenheit: Boolean): List<String> {
         val temp =
             if ((temperature ?: 0f) != 0f) {

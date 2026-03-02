@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@ import org.meshtastic.proto.FromRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers.
- */
+/** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
 @Singleton
-class FromRadioPacketHandlerImpl @Inject constructor(
+class FromRadioPacketHandlerImpl
+@Inject
+constructor(
     private val serviceRepository: ServiceRepository,
     private val router: Lazy<MeshRouter>,
     private val mqttManager: MqttManager,

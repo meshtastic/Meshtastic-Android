@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,10 +73,10 @@ constructor(
 
     override var lastNeighborInfo: NeighborInfo? = null
 
-    // We'll need a way to track connection state in shared code, 
+    // We'll need a way to track connection state in shared code,
     // maybe via ServiceRepository or similar.
     // For now I'll assume it's injected or available.
-    
+
     override fun start(scope: CoroutineScope) {
         this.scope = scope
         radioConfigRepository.localConfigFlow.onEach { localConfig.value = it }.launchIn(scope)
@@ -137,7 +137,7 @@ constructor(
             p.status = MessageStatus.ERROR
             // throw RemoteException("Message too long: $actualSize bytes (max ${Constants.DATA_PAYLOAD_LEN.value})")
             // RemoteException is Android specific. For KMP we might want a custom exception.
-            throw IllegalStateException("Message too long: $actualSize bytes")
+            error("Message too long: $actualSize bytes")
         } else {
             p.status = MessageStatus.QUEUED
         }
@@ -166,12 +166,7 @@ constructor(
         packetHandler.sendToRadio(meshPacket)
     }
 
-    override fun sendAdmin(
-        destNum: Int,
-        requestId: Int,
-        wantResponse: Boolean,
-        initFn: () -> AdminMessage,
-    ) {
+    override fun sendAdmin(destNum: Int, requestId: Int, wantResponse: Boolean, initFn: () -> AdminMessage) {
         val adminMsg = initFn().copy(session_passkey = sessionPasskey.get())
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)

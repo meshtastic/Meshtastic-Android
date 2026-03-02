@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,12 @@ class HistoryManagerImplTest {
 
     @Test
     fun `buildStoreForwardHistoryRequest copies positive parameters`() {
-        val request = HistoryManagerImpl.buildStoreForwardHistoryRequest(
-            lastRequest = 42,
-            historyReturnWindow = 15,
-            historyReturnMax = 25,
-        )
+        val request =
+            HistoryManagerImpl.buildStoreForwardHistoryRequest(
+                lastRequest = 42,
+                historyReturnWindow = 15,
+                historyReturnMax = 25,
+            )
 
         assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
         assertEquals(42, request.history?.last_request)
@@ -38,11 +39,12 @@ class HistoryManagerImplTest {
 
     @Test
     fun `buildStoreForwardHistoryRequest clamps non-positive parameters`() {
-        val request = HistoryManagerImpl.buildStoreForwardHistoryRequest(
-            lastRequest = 0,
-            historyReturnWindow = -1,
-            historyReturnMax = 0,
-        )
+        val request =
+            HistoryManagerImpl.buildStoreForwardHistoryRequest(
+                lastRequest = 0,
+                historyReturnWindow = -1,
+                historyReturnMax = 0,
+            )
 
         assertEquals(StoreAndForward.RequestResponse.CLIENT_HISTORY, request.rr)
         assertEquals(0, request.history?.last_request)

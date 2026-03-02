@@ -202,9 +202,10 @@ constructor(
     override fun setDeviceAddress(address: String) {
         serviceRepository.meshService?.setDeviceAddress(address)
         // Ensure service is running/restarted to handle the new address
-        val intent = android.content.Intent().apply {
-            setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
-        }
+        val intent =
+            android.content.Intent().apply {
+                setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
+            }
         context.startForegroundService(intent)
     }
 }

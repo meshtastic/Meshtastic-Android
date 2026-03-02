@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,7 @@
  */
 package org.meshtastic.core.repository
 
-/**
- * Interface for managing background workers for mesh-related tasks.
- */
+/** Interface for managing background workers for mesh-related tasks. */
 interface MeshWorkerManager {
     /** Enqueues a worker to send a specific packet. */
     fun enqueueSendMessage(packetId: Int)

@@ -16,8 +16,6 @@
  */
 package com.geeksville.mesh.ui.connections
 
-import android.app.Application
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -51,7 +49,6 @@ import javax.inject.Inject
 class ScannerViewModel
 @Inject
 constructor(
-    private val application: Application,
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val bluetoothRepository: BluetoothRepository,
@@ -60,9 +57,6 @@ constructor(
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
 ) : ViewModel() {
-    private val context: Context
-        get() = application.applicationContext
-
     val showMockInterface: StateFlow<Boolean> = MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
 
     private val _errorText = MutableStateFlow<String?>(null)

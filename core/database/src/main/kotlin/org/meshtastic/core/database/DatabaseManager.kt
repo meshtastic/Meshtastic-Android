@@ -47,7 +47,12 @@ import org.meshtastic.core.repository.DatabaseManager as SharedDatabaseManager
 @Singleton
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
-open class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) : SharedDatabaseManager {
+open class DatabaseManager
+@Inject
+constructor(
+    private val app: Application,
+    private val dispatchers: CoroutineDispatchers,
+) : SharedDatabaseManager {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 

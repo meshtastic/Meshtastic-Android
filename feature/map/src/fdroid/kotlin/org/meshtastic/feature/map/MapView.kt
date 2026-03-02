@@ -87,8 +87,8 @@ import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating

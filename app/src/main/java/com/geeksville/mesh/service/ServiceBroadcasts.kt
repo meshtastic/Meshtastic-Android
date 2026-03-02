@@ -68,40 +68,42 @@ constructor(
 
     private fun Node.toLegacy(): NodeInfo = NodeInfo(
         num = num,
-        user = org.meshtastic.core.model.MeshUser(
+        user =
+        org.meshtastic.core.model.MeshUser(
             id = user.id,
             longName = user.long_name,
             shortName = user.short_name,
             hwModel = user.hw_model,
-            role = user.role.value
+            role = user.role.value,
         ),
-        position = org.meshtastic.core.model.Position(
-            latitude = latitude,
-            longitude = longitude,
-            altitude = position.altitude ?: 0,
-            time = position.time,
-            satellitesInView = position.sats_in_view ?: 0,
-            groundSpeed = position.ground_speed ?: 0,
-            groundTrack = position.ground_track ?: 0,
-            precisionBits = position.precision_bits ?: 0
-        ).takeIf { latitude != 0.0 || longitude != 0.0 },
+        position =
+        org.meshtastic.core.model
+            .Position(
+                latitude = latitude,
+                longitude = longitude,
+                altitude = position.altitude ?: 0,
+                time = position.time,
+                satellitesInView = position.sats_in_view ?: 0,
+                groundSpeed = position.ground_speed ?: 0,
+                groundTrack = position.ground_track ?: 0,
+                precisionBits = position.precision_bits ?: 0,
+            )
+            .takeIf { latitude != 0.0 || longitude != 0.0 },
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
-        deviceMetrics = org.meshtastic.core.model.DeviceMetrics(
+        deviceMetrics =
+        org.meshtastic.core.model.DeviceMetrics(
             batteryLevel = deviceMetrics.battery_level ?: 0,
             voltage = deviceMetrics.voltage ?: 0f,
             channelUtilization = deviceMetrics.channel_utilization ?: 0f,
             airUtilTx = deviceMetrics.air_util_tx ?: 0f,
-            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0
+            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0,
         ),
         channel = channel,
-        environmentMetrics = org.meshtastic.core.model.EnvironmentMetrics.fromTelemetryProto(
-            environmentMetrics,
-            0 
-        ),
+        environmentMetrics = org.meshtastic.core.model.EnvironmentMetrics.fromTelemetryProto(environmentMetrics, 0),
         hopsAway = hopsAway,
-        nodeStatus = nodeStatus
+        nodeStatus = nodeStatus,
     )
 
     fun broadcastMessageStatus(p: DataPacket) = broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)

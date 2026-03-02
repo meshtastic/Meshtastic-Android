@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,7 @@ import kotlinx.coroutines.Job
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 
-/**
- * Interface for handling incoming mesh data packets and routing them to the appropriate handlers.
- */
+/** Interface for handling incoming mesh data packets and routing them to the appropriate handlers. */
 interface MeshDataHandler {
     /** Starts the handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)
@@ -36,12 +34,7 @@ interface MeshDataHandler {
      * @param logUuid Optional UUID for logging purposes.
      * @param logInsertJob Optional job that tracks the insertion of the packet into the log.
      */
-    fun handleReceivedData(
-        packet: MeshPacket,
-        myNodeNum: Int,
-        logUuid: String? = null,
-        logInsertJob: Job? = null
-    )
+    fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null)
 
     /**
      * Persists a data packet in the history and triggers notifications if necessary.
@@ -50,9 +43,5 @@ interface MeshDataHandler {
      * @param myNodeNum The local node number.
      * @param updateNotification Whether to trigger a notification for this packet.
      */
-    fun rememberDataPacket(
-        dataPacket: DataPacket,
-        myNodeNum: Int,
-        updateNotification: Boolean = true
-    )
+    fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true)
 }

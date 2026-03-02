@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.network.repository
 
 import android.annotation.SuppressLint
@@ -24,6 +23,8 @@ import javax.net.ssl.X509TrustManager
 @SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager")
 class TrustAllX509TrustManager : X509TrustManager {
     override fun checkClientTrusted(chain: Array<X509Certificate>?, authType: String?) {}
+
     override fun checkServerTrusted(chain: Array<X509Certificate>?, authType: String?) {}
+
     override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
 }

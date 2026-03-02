@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,25 +30,24 @@ import org.meshtastic.proto.User
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
-/**
- * Interface for managing the in-memory node database and processing received node information.
- */
+/** Interface for managing the in-memory node database and processing received node information. */
+@Suppress("TooManyFunctions")
 interface NodeManager : NodeIdLookup {
     /** Reactive map of all nodes by their number. */
     val nodeDBbyNodeNum: Map<Int, Node>
-    
+
     /** Reactive map of all nodes by their ID string. */
     val nodeDBbyID: Map<String, Node>
 
     /** Whether the node database is ready. */
     val isNodeDbReady: StateFlow<Boolean>
-    
+
     /** Sets whether the node database is ready. */
     fun setNodeDbReady(ready: Boolean)
 
     /** Whether node database writes are allowed. */
     val allowNodeDbWrites: StateFlow<Boolean>
-    
+
     /** Sets whether node database writes are allowed. */
     fun setAllowNodeDbWrites(allowed: Boolean)
 
@@ -99,7 +98,7 @@ interface NodeManager : NodeIdLookup {
 
     /** Installs node information from a ProtoNodeInfo object. */
     fun installNodeInfo(info: ProtoNodeInfo, withBroadcast: Boolean = true)
-    
+
     /** Inserts hardware metadata for a node. */
     fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
 }

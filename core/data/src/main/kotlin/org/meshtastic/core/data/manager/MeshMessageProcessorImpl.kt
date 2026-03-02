@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,12 +47,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.uuid.Uuid
 
-/**
- * Implementation of [MeshMessageProcessor] that handles raw radio messages and prepares mesh packets for routing.
- */
+/** Implementation of [MeshMessageProcessor] that handles raw radio messages and prepares mesh packets for routing. */
 @Suppress("TooManyFunctions")
 @Singleton
-class MeshMessageProcessorImpl @Inject constructor(
+class MeshMessageProcessorImpl
+@Inject
+constructor(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
@@ -173,6 +173,7 @@ class MeshMessageProcessorImpl @Inject constructor(
         packets.forEach { processReceivedMeshPacket(it, myNodeNum) }
     }
 
+    @Suppress("LongMethod")
     private fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val decoded = packet.decoded ?: return
         val log =
@@ -194,11 +195,13 @@ class MeshMessageProcessorImpl @Inject constructor(
         myNodeNum?.let { myNum ->
             val from = packet.from
             val isOtherNode = myNum != from
-            nodeManager.updateNode(myNum, withBroadcast = isOtherNode) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+            nodeManager.updateNode(myNum, withBroadcast = isOtherNode) { node: Node ->
+                node.copy(lastHeard = nowSeconds.toInt())
+            }
             nodeManager.updateNode(from, withBroadcast = false, channel = packet.channel) { node: Node ->
                 val viaMqtt = packet.via_mqtt == true
                 val isDirect = packet.hop_start == packet.hop_limit
-                
+
                 var snr = node.snr
                 var rssi = node.rssi
                 if (isDirect && packet.isLora() && !viaMqtt) {
@@ -218,14 +221,14 @@ class MeshMessageProcessorImpl @Inject constructor(
                     } else {
                         packet.hop_start - packet.hop_limit
                     }
-                
+
                 node.copy(
                     lastHeard = packet.rx_time,
                     viaMqtt = viaMqtt,
                     lastTransport = packet.transport_mechanism.value,
                     snr = snr,
                     rssi = rssi,
-                    hopsAway = hopsAway
+                    hopsAway = hopsAway,
                 )
             }
 

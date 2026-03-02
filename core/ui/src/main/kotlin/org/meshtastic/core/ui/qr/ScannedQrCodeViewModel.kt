@@ -54,15 +54,11 @@ constructor(
     }
 
     private fun setChannel(channel: Channel) {
-        viewModelScope.launch {
-            radioController.setLocalChannel(channel)
-        }
+        viewModelScope.launch { radioController.setLocalChannel(channel) }
     }
 
     // Set the radio config (also updates our saved copy in preferences)
     private fun setConfig(config: Config) {
-        viewModelScope.launch {
-            radioController.setLocalConfig(config)
-        }
+        viewModelScope.launch { radioController.setLocalConfig(config) }
     }
 }

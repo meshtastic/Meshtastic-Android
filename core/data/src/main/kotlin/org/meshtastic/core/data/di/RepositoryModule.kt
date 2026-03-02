@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.di
 
 import dagger.Binds
@@ -65,129 +64,84 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TracerouteHandler
 import javax.inject.Singleton
 
+@Suppress("TooManyFunctions")
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
 
-    @Binds
-    @Singleton
-    abstract fun bindNodeRepository(
-        nodeRepositoryImpl: NodeRepositoryImpl
-    ): NodeRepository
+    @Binds @Singleton
+    abstract fun bindNodeRepository(nodeRepositoryImpl: NodeRepositoryImpl): NodeRepository
 
     @Binds
     @Singleton
-    abstract fun bindRadioConfigRepository(
-        radioConfigRepositoryImpl: RadioConfigRepositoryImpl
-    ): RadioConfigRepository
+    abstract fun bindRadioConfigRepository(radioConfigRepositoryImpl: RadioConfigRepositoryImpl): RadioConfigRepository
 
     @Binds
     @Singleton
     abstract fun bindDeviceHardwareRepository(
-        deviceHardwareRepositoryImpl: DeviceHardwareRepositoryImpl
+        deviceHardwareRepositoryImpl: DeviceHardwareRepositoryImpl,
     ): DeviceHardwareRepository
 
-    @Binds
-    @Singleton
-    abstract fun bindPacketRepository(
-        packetRepositoryImpl: PacketRepositoryImpl
-    ): PacketRepository
+    @Binds @Singleton
+    abstract fun bindPacketRepository(packetRepositoryImpl: PacketRepositoryImpl): PacketRepository
+
+    @Binds @Singleton
+    abstract fun bindNodeManager(nodeManagerImpl: NodeManagerImpl): NodeManager
+
+    @Binds @Singleton
+    abstract fun bindCommandSender(commandSenderImpl: CommandSenderImpl): CommandSender
+
+    @Binds @Singleton
+    abstract fun bindHistoryManager(historyManagerImpl: HistoryManagerImpl): HistoryManager
 
     @Binds
     @Singleton
-    abstract fun bindNodeManager(
-        nodeManagerImpl: NodeManagerImpl
-    ): NodeManager
+    abstract fun bindTracerouteHandler(tracerouteHandlerImpl: TracerouteHandlerImpl): TracerouteHandler
 
     @Binds
     @Singleton
-    abstract fun bindCommandSender(
-        commandSenderImpl: CommandSenderImpl
-    ): CommandSender
+    abstract fun bindNeighborInfoHandler(neighborInfoHandlerImpl: NeighborInfoHandlerImpl): NeighborInfoHandler
+
+    @Binds @Singleton
+    abstract fun bindMqttManager(mqttManagerImpl: MqttManagerImpl): MqttManager
+
+    @Binds @Singleton
+    abstract fun bindPacketHandler(packetHandlerImpl: PacketHandlerImpl): PacketHandler
 
     @Binds
     @Singleton
-    abstract fun bindHistoryManager(
-        historyManagerImpl: HistoryManagerImpl
-    ): HistoryManager
+    abstract fun bindMeshConnectionManager(meshConnectionManagerImpl: MeshConnectionManagerImpl): MeshConnectionManager
+
+    @Binds @Singleton
+    abstract fun bindMeshDataHandler(meshDataHandlerImpl: MeshDataHandlerImpl): MeshDataHandler
 
     @Binds
     @Singleton
-    abstract fun bindTracerouteHandler(
-        tracerouteHandlerImpl: TracerouteHandlerImpl
-    ): TracerouteHandler
+    abstract fun bindMeshActionHandler(meshActionHandlerImpl: MeshActionHandlerImpl): MeshActionHandler
 
     @Binds
     @Singleton
-    abstract fun bindNeighborInfoHandler(
-        neighborInfoHandlerImpl: NeighborInfoHandlerImpl
-    ): NeighborInfoHandler
+    abstract fun bindMeshMessageProcessor(meshMessageProcessorImpl: MeshMessageProcessorImpl): MeshMessageProcessor
 
-    @Binds
-    @Singleton
-    abstract fun bindMqttManager(
-        mqttManagerImpl: MqttManagerImpl
-    ): MqttManager
-
-    @Binds
-    @Singleton
-    abstract fun bindPacketHandler(
-        packetHandlerImpl: PacketHandlerImpl
-    ): PacketHandler
-
-    @Binds
-    @Singleton
-    abstract fun bindMeshConnectionManager(
-        meshConnectionManagerImpl: MeshConnectionManagerImpl
-    ): MeshConnectionManager
-
-    @Binds
-    @Singleton
-    abstract fun bindMeshDataHandler(
-        meshDataHandlerImpl: MeshDataHandlerImpl
-    ): MeshDataHandler
-
-    @Binds
-    @Singleton
-    abstract fun bindMeshActionHandler(
-        meshActionHandlerImpl: MeshActionHandlerImpl
-    ): MeshActionHandler
-
-    @Binds
-    @Singleton
-    abstract fun bindMeshMessageProcessor(
-        meshMessageProcessorImpl: MeshMessageProcessorImpl
-    ): MeshMessageProcessor
-
-    @Binds
-    @Singleton
-    abstract fun bindMeshRouter(
-        meshRouterImpl: MeshRouterImpl
-    ): MeshRouter
+    @Binds @Singleton
+    abstract fun bindMeshRouter(meshRouterImpl: MeshRouterImpl): MeshRouter
 
     @Binds
     @Singleton
     abstract fun bindFromRadioPacketHandler(
-        fromRadioPacketHandlerImpl: FromRadioPacketHandlerImpl
+        fromRadioPacketHandlerImpl: FromRadioPacketHandlerImpl,
     ): FromRadioPacketHandler
 
     @Binds
     @Singleton
-    abstract fun bindMeshConfigHandler(
-        meshConfigHandlerImpl: MeshConfigHandlerImpl
-    ): MeshConfigHandler
+    abstract fun bindMeshConfigHandler(meshConfigHandlerImpl: MeshConfigHandlerImpl): MeshConfigHandler
 
     @Binds
     @Singleton
-    abstract fun bindMeshConfigFlowManager(
-        meshConfigFlowManagerImpl: MeshConfigFlowManagerImpl
-    ): MeshConfigFlowManager
+    abstract fun bindMeshConfigFlowManager(meshConfigFlowManagerImpl: MeshConfigFlowManagerImpl): MeshConfigFlowManager
 
-    @Binds
-    @Singleton
-    abstract fun bindMessageFilter(
-        messageFilterImpl: MessageFilterImpl
-    ): MessageFilter
+    @Binds @Singleton
+    abstract fun bindMessageFilter(messageFilterImpl: MessageFilterImpl): MessageFilter
 
     companion object {
         @Provides

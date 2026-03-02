@@ -68,7 +68,7 @@ import javax.inject.Singleton
  * Note - this class intentionally dumb. It doesn't understand protobuf framing etc... It is designed to be simple so it
  * can be stubbed out with a simulated version as needed.
  */
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
 class AndroidRadioInterfaceService
 @Inject
@@ -234,6 +234,7 @@ constructor(
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
+    @Suppress("TooGenericExceptionCaught")
     override fun handleFromRadio(bytes: ByteArray) {
         if (logReceives) {
             try {
@@ -366,7 +367,9 @@ constructor(
             true
         }
 
-    override fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions { setBondedDeviceAddress(deviceAddr) }
+    override fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions {
+        setBondedDeviceAddress(deviceAddr)
+    }
 
     /**
      * If the service is not currently connected to the radio, try to connect now. At boot the radio interface service

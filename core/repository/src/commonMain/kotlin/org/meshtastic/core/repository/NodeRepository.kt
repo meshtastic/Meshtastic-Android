@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,8 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
-/**
- * Repository interface for managing node-related data.
- * This interface is shared across platforms via KMP.
- */
+/** Repository interface for managing node-related data. This interface is shared across platforms via KMP. */
+@Suppress("TooManyFunctions")
 interface NodeRepository {
     /** Hardware info about our local device. */
     val myNodeInfo: StateFlow<MyNodeInfo?>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,9 @@ import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
 @Singleton
-class PacketHandlerImpl @Inject constructor(
+class PacketHandlerImpl
+@Inject
+constructor(
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
@@ -138,6 +140,7 @@ class PacketHandlerImpl @Inject constructor(
                 Logger.d { "packet queueJob started" }
                 while (serviceRepository.connectionState.value == ConnectionState.Connected) {
                     val packet = queuedPackets.poll() ?: break
+                    @Suppress("TooGenericExceptionCaught", "SwallowedException")
                     try {
                         val response = sendPacket(packet)
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
@@ -173,6 +176,7 @@ class PacketHandlerImpl @Inject constructor(
         dataPacket
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun sendPacket(packet: MeshPacket): CompletableDeferred<Boolean> {
         val deferred = CompletableDeferred<Boolean>()
         queueResponse[packet.id] = deferred

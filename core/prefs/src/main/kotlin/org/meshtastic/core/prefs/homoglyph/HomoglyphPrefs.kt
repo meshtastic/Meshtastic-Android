@@ -24,7 +24,6 @@ import org.meshtastic.core.prefs.PrefDelegate
 import org.meshtastic.core.prefs.di.HomoglyphEncodingSharedPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
-
 import org.meshtastic.core.repository.HomoglyphPrefs as SharedHomoglyphPrefs
 
 interface HomoglyphPrefs : SharedHomoglyphPrefs {

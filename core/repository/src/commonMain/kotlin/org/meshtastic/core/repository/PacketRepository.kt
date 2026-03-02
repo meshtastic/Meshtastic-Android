@@ -26,11 +26,12 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.proto.ChannelSettings
 
+@Suppress("TooManyFunctions")
 interface PacketRepository {
     fun getWaypoints(): Flow<List<DataPacket>>
-    
+
     fun getContacts(): Flow<Map<String, DataPacket>>
-    
+
     fun getContactsPaged(): Flow<PagingData<DataPacket>>
 
     suspend fun getMessageCount(contact: String): Int
@@ -65,10 +66,7 @@ interface PacketRepository {
         getNode: suspend (String?) -> Node,
     ): Flow<List<Message>>
 
-    fun getMessagesFromPaged(
-        contact: String, 
-        getNode: suspend (String?) -> Node
-    ): Flow<PagingData<Message>>
+    fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>>
 
     fun getMessagesFromPaged(
         contactKey: String,
@@ -103,12 +101,19 @@ interface PacketRepository {
     suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>)
 
     suspend fun updateFilteredBySender(senderId: String, filtered: Boolean)
-    
+
     suspend fun getPacketByPacketId(packetId: Int): DataPacket?
 
     suspend fun getPacketById(id: Int): DataPacket?
 
-    suspend fun insert(packet: DataPacket, myNodeNum: Int, contactKey: String, receivedTime: Long, read: Boolean = true, filtered: Boolean = false)
+    suspend fun insert(
+        packet: DataPacket,
+        myNodeNum: Int,
+        contactKey: String,
+        receivedTime: Long,
+        read: Boolean = true,
+        filtered: Boolean = false,
+    )
 
     suspend fun update(packet: DataPacket)
 
@@ -132,9 +137,5 @@ interface PacketRepository {
         myNodeNum: Int?,
     )
 
-    suspend fun updateSFPPStatusByHash(
-        hash: ByteArray,
-        status: MessageStatus,
-        rxTime: Long,
-    )
+    suspend fun updateSFPPStatusByHash(hash: ByteArray, status: MessageStatus, rxTime: Long)
 }

@@ -57,8 +57,9 @@ constructor(
         val full =
             packet.getFullTracerouteResponse(
                 getUser = { num ->
-                    nodeManager.nodeDBbyNodeNum[num]?.let { node: Node -> "${node.user.long_name} (${node.user.short_name})" }
-                        ?: "Unknown" // We don't have strings in core:data yet, but we can fix this later
+                    nodeManager.nodeDBbyNodeNum[num]?.let { node: Node ->
+                        "${node.user.long_name} (${node.user.short_name})"
+                    } ?: "Unknown" // We don't have strings in core:data yet, but we can fix this later
                 },
                 headerTowards = "Route towards destination:",
                 headerBack = "Route back to us:",

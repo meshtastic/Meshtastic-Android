@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,7 @@ package org.meshtastic.core.repository
 
 import org.meshtastic.proto.ModuleConfig
 
-/**
- * Interface for managing store-and-forward history replay requests.
- */
+/** Interface for managing store-and-forward history replay requests. */
 interface HistoryManager {
     /**
      * Requests a history replay from the radio.

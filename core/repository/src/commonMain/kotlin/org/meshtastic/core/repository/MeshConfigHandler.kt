@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,7 @@ import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 
-/**
- * Interface for handling device and module configuration updates.
- */
+/** Interface for handling device and module configuration updates. */
 interface MeshConfigHandler {
     /** Starts the handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 
-/**
- * Interface for broadcasting service-level events to the application.
- */
+/** Interface for broadcasting service-level events to the application. */
 interface ServiceBroadcasts {
     /** Subscribes a receiver to mesh broadcasts. */
     fun subscribeReceiver(receiverName: String, packageName: String)

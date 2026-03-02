@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,18 +26,17 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidMeshWorkerManager @Inject constructor(
-    private val workManager: WorkManager
-) : MeshWorkerManager {
+class AndroidMeshWorkerManager @Inject constructor(private val workManager: WorkManager) : MeshWorkerManager {
     override fun enqueueSendMessage(packetId: Int) {
-        val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
-            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
-            .build()
+        val workRequest =
+            OneTimeWorkRequestBuilder<SendMessageWorker>()
+                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .build()
 
         workManager.enqueueUniqueWork(
             "${SendMessageWorker.WORK_NAME_PREFIX}$packetId",
             ExistingWorkPolicy.REPLACE,
-            workRequest
+            workRequest,
         )
     }
 }

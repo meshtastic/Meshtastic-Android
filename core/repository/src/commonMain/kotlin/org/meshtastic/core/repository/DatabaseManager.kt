@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,7 @@ package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
 
-/**
- * Interface for managing database instances and cache limits.
- */
+/** Interface for managing database instances and cache limits. */
 interface DatabaseManager {
     /** Reactive stream of the current database cache limit. */
     val cacheLimit: StateFlow<Int>

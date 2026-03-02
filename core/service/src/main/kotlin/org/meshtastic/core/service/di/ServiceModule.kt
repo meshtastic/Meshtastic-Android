@@ -30,11 +30,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 abstract class ServiceModule {
 
-    @Binds
-    @Singleton
+    @Binds @Singleton
     abstract fun bindRadioController(impl: AndroidRadioControllerImpl): RadioController
 
-    @Binds
-    @Singleton
+    @Binds @Singleton
     abstract fun bindServiceRepository(impl: AndroidServiceRepository): ServiceRepository
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,7 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 
-/**
- * Interface for managing the configuration flow, including local node info and metadata.
- */
+/** Interface for managing the configuration flow, including local node info and metadata. */
 interface MeshConfigFlowManager {
     /** Starts the manager with the given coroutine scope. */
     fun start(scope: CoroutineScope)

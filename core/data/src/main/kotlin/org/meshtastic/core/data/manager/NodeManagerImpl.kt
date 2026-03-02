@@ -142,11 +142,7 @@ constructor(
                 hw_model = HardwareModel.UNSET,
             )
 
-        Node(
-            num = n,
-            user = defaultUser,
-            channel = channel,
-        )
+        Node(num = n, user = defaultUser, channel = channel)
     }
 
     override fun updateNode(nodeNum: Int, withBroadcast: Boolean, channel: Int, transform: (Node) -> Node) {
@@ -158,7 +154,7 @@ constructor(
         }
 
         if (next.user.id.isNotEmpty() && isNodeDbReady.value) {
-            // scope.handledLaunch { nodeRepository.upsert(next) } 
+            // scope.handledLaunch { nodeRepository.upsert(next) }
             // TODO: Add upsert to repository interface
         }
 
@@ -172,13 +168,14 @@ constructor(
             val newNode = (node.isUnknownUser && p.hw_model != HardwareModel.UNSET)
             val shouldPreserve = shouldPreserveExistingUser(node.user, p)
 
-            val next = if (shouldPreserve) {
-                node.copy(channel = channel, manuallyVerified = manuallyVerified)
-            } else {
-                val keyMatch = !node.hasPKC || node.user.public_key == p.public_key
-                val newUser = if (keyMatch) p else p.copy(public_key = ByteString.EMPTY)
-                node.copy(user = newUser, channel = channel, manuallyVerified = manuallyVerified)
-            }
+            val next =
+                if (shouldPreserve) {
+                    node.copy(channel = channel, manuallyVerified = manuallyVerified)
+                } else {
+                    val keyMatch = !node.hasPKC || node.user.public_key == p.public_key
+                    val newUser = if (keyMatch) p else p.copy(public_key = ByteString.EMPTY)
+                    node.copy(user = newUser, channel = channel, manuallyVerified = manuallyVerified)
+                }
             if (newNode && !shouldPreserve) {
                 serviceNotifications.showNewNodeSeenNotification(next)
             }
@@ -191,7 +188,7 @@ constructor(
             Logger.d { "Ignoring nop position update for the local node" }
         } else {
             updateNode(fromNum) { node ->
-                node.copy(position = p.copy(time = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt())) 
+                node.copy(position = p.copy(time = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()))
             }
         }
     }
@@ -238,16 +235,17 @@ constructor(
             if (position != null) {
                 next = next.copy(position = position)
             }
-            next = next.copy(
-                lastHeard = info.last_heard,
-                deviceMetrics = info.device_metrics ?: next.deviceMetrics,
-                channel = info.channel,
-                viaMqtt = info.via_mqtt,
-                hopsAway = info.hops_away ?: -1,
-                isFavorite = info.is_favorite,
-                isIgnored = info.is_ignored,
-                isMuted = info.is_muted
-            )
+            next =
+                next.copy(
+                    lastHeard = info.last_heard,
+                    deviceMetrics = info.device_metrics ?: next.deviceMetrics,
+                    channel = info.channel,
+                    viaMqtt = info.via_mqtt,
+                    hopsAway = info.hops_away ?: -1,
+                    isFavorite = info.is_favorite,
+                    isIgnored = info.is_ignored,
+                    isMuted = info.is_muted,
+                )
             next
         }
     }
@@ -271,14 +269,16 @@ constructor(
 
     private fun Node.toNodeInfo(): NodeInfo = NodeInfo(
         num = num,
-        user = MeshUser(
+        user =
+        MeshUser(
             id = user.id,
             longName = user.long_name,
             shortName = user.short_name,
             hwModel = user.hw_model,
-            role = user.role.value
+            role = user.role.value,
         ),
-        position = Position(
+        position =
+        Position(
             latitude = latitude,
             longitude = longitude,
             altitude = position.altitude ?: 0,
@@ -286,24 +286,23 @@ constructor(
             satellitesInView = position.sats_in_view ?: 0,
             groundSpeed = position.ground_speed ?: 0,
             groundTrack = position.ground_track ?: 0,
-            precisionBits = position.precision_bits ?: 0
-        ).takeIf { latitude != 0.0 || longitude != 0.0 },
+            precisionBits = position.precision_bits ?: 0,
+        )
+            .takeIf { latitude != 0.0 || longitude != 0.0 },
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
-        deviceMetrics = DeviceMetrics(
+        deviceMetrics =
+        DeviceMetrics(
             batteryLevel = deviceMetrics.battery_level ?: 0,
             voltage = deviceMetrics.voltage ?: 0f,
             channelUtilization = deviceMetrics.channel_utilization ?: 0f,
             airUtilTx = deviceMetrics.air_util_tx ?: 0f,
-            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0
+            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0,
         ),
         channel = channel,
-        environmentMetrics = EnvironmentMetrics.fromTelemetryProto(
-            environmentMetrics,
-            0
-        ),
+        environmentMetrics = EnvironmentMetrics.fromTelemetryProto(environmentMetrics, 0),
         hopsAway = hopsAway,
-        nodeStatus = nodeStatus
+        nodeStatus = nodeStatus,
     )
 }

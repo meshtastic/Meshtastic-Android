@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class HistoryManagerImpl @Inject constructor(
+class HistoryManagerImpl
+@Inject
+constructor(
     private val meshPrefs: MeshPrefs,
     private val packetHandler: PacketHandler,
 ) : HistoryManager {
@@ -46,11 +48,12 @@ class HistoryManagerImpl @Inject constructor(
             historyReturnWindow: Int,
             historyReturnMax: Int,
         ): StoreAndForward {
-            val history = StoreAndForward.History(
-                last_request = lastRequest.coerceAtLeast(0),
-                window = historyReturnWindow.coerceAtLeast(0),
-                history_messages = historyReturnMax.coerceAtLeast(0),
-            )
+            val history =
+                StoreAndForward.History(
+                    last_request = lastRequest.coerceAtLeast(0),
+                    window = historyReturnWindow.coerceAtLeast(0),
+                    history_messages = historyReturnMax.coerceAtLeast(0),
+                )
             return StoreAndForward(rr = StoreAndForward.RequestResponse.CLIENT_HISTORY, history = history)
         }
 
@@ -84,16 +87,17 @@ class HistoryManagerImpl @Inject constructor(
         }
 
         val lastRequest = meshPrefs.getStoreForwardLastRequest(address)
-        val (window, max) = resolveHistoryRequestParameters(
-            storeForwardConfig?.history_return_window ?: 0,
-            storeForwardConfig?.history_return_max ?: 0,
-        )
+        val (window, max) =
+            resolveHistoryRequestParameters(
+                storeForwardConfig?.history_return_window ?: 0,
+                storeForwardConfig?.history_return_max ?: 0,
+            )
 
         val request = buildStoreForwardHistoryRequest(lastRequest, window, max)
 
         historyLog(
             "requestHistory trigger=$trigger transport=$transport addr=$address " +
-                "lastRequest=$lastRequest window=$window max=$max"
+                "lastRequest=$lastRequest window=$window max=$max",
         )
 
         runCatching {
@@ -117,7 +121,7 @@ class HistoryManagerImpl @Inject constructor(
             meshPrefs.setStoreForwardLastRequest(address, lastRequest)
             historyLog(
                 "historyMarker updated source=$source transport=$transport " +
-                    "addr=$address from=$current to=$lastRequest"
+                    "addr=$address from=$current to=$lastRequest",
             )
         }
     }

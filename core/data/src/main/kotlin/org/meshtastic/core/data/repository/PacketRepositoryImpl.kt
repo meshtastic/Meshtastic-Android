@@ -51,13 +51,13 @@ constructor(
     private val dispatchers: CoroutineDispatchers,
 ) : SharedPacketRepository {
 
-    override fun getWaypoints(): Flow<List<DataPacket>> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getAllWaypointsFlow() }
-            .map { list -> list.map { it.data } }
+    override fun getWaypoints(): Flow<List<DataPacket>> = dbManager.currentDb
+        .flatMapLatest { db -> db.packetDao().getAllWaypointsFlow() }
+        .map { list -> list.map { it.data } }
 
-    override fun getContacts(): Flow<Map<String, DataPacket>> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactKeys() }
-            .map { map -> map.mapValues { it.value.data } }
+    override fun getContacts(): Flow<Map<String, DataPacket>> = dbManager.currentDb
+        .flatMapLatest { db -> db.packetDao().getContactKeys() }
+        .map { map -> map.mapValues { it.value.data } }
 
     override fun getContactsPaged(): Flow<PagingData<DataPacket>> = Pager(
         config =
@@ -162,26 +162,27 @@ constructor(
         }
     }
 
-    override fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> = Pager(
-        config =
-        PagingConfig(
-            pageSize = MESSAGES_PAGE_SIZE,
-            enablePlaceholders = false,
-            initialLoadSize = MESSAGES_PAGE_SIZE,
-        ),
-        pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
-    )
-        .flow
-        .map { pagingData ->
-            pagingData.map { packet ->
-                val message = packet.toMessage(getNode)
-                message.replyId
-                    .takeIf { it != null && it != 0 }
-                    ?.let { getPacketByPacketIdInternal(it) }
-                    ?.let { originalPacket -> originalPacket.toMessage(getNode) }
-                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+    override fun getMessagesFromPaged(contact: String, getNode: suspend (String?) -> Node): Flow<PagingData<Message>> =
+        Pager(
+            config =
+            PagingConfig(
+                pageSize = MESSAGES_PAGE_SIZE,
+                enablePlaceholders = false,
+                initialLoadSize = MESSAGES_PAGE_SIZE,
+            ),
+            pagingSourceFactory = { dbManager.currentDb.value.packetDao().getMessagesFromPaged(contact) },
+        )
+            .flow
+            .map { pagingData ->
+                pagingData.map { packet ->
+                    val message = packet.toMessage(getNode)
+                    message.replyId
+                        .takeIf { it != null && it != 0 }
+                        ?.let { getPacketByPacketIdInternal(it) }
+                        ?.let { originalPacket -> originalPacket.toMessage(getNode) }
+                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+                }
             }
-        }
 
     override fun getMessagesFromPaged(
         contactKey: String,
@@ -216,14 +217,12 @@ constructor(
     override suspend fun updateMessageId(d: DataPacket, id: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageId(d, id) }
 
-    private suspend fun getPacketByIdInternal(requestId: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketById(requestId) }
-
     override suspend fun getPacketById(id: Int): DataPacket? =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketById(id)?.data }
 
-    override suspend fun getPacketByPacketId(packetId: Int): DataPacket? =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId)?.packet?.data }
+    override suspend fun getPacketByPacketId(packetId: Int): DataPacket? = withContext(dispatchers.io) {
+        dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId)?.packet?.data
+    }
 
     private suspend fun getPacketByPacketIdInternal(packetId: Int) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getPacketByPacketId(packetId) }
@@ -256,28 +255,22 @@ constructor(
 
     override suspend fun update(packet: DataPacket): Unit = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        dao.findPacketsWithId(packet.id).find { it.data == packet }?.let { 
-            dao.update(it.copy(data = packet))
-        }
+        dao.findPacketsWithId(packet.id).find { it.data == packet }?.let { dao.update(it.copy(data = packet)) }
     }
 
-    override suspend fun insertReaction(reaction: Reaction, myNodeNum: Int) = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().insert(reaction.toEntity(myNodeNum))
-    }
+    override suspend fun insertReaction(reaction: Reaction, myNodeNum: Int) =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().insert(reaction.toEntity(myNodeNum)) }
 
     override suspend fun updateReaction(reaction: Reaction) = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        dao.findReactionsWithId(reaction.packetId).find { it.userId == reaction.user.id && it.emoji == reaction.emoji }?.let {
-            dao.update(reaction.toEntity(it.myNodeNum))
-        } ?: Unit
+        dao.findReactionsWithId(reaction.packetId)
+            .find { it.userId == reaction.user.id && it.emoji == reaction.emoji }
+            ?.let { dao.update(reaction.toEntity(it.myNodeNum)) } ?: Unit
     }
 
     override suspend fun getReactionByPacketId(packetId: Int): Reaction? = withContext(dispatchers.io) {
         dbManager.currentDb.value.packetDao().getReactionByPacketId(packetId)?.toReaction { null }
     }
-
-    private suspend fun getReactionByPacketIdInternal(packetId: Int) =
-        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getReactionByPacketId(packetId) }
 
     override suspend fun findPacketsWithId(packetId: Int): List<DataPacket> = withContext(dispatchers.io) {
         dbManager.currentDb.value.packetDao().findPacketsWithId(packetId).map { it.data }
@@ -362,32 +355,29 @@ constructor(
         }
     }
 
-    override suspend fun updateSFPPStatusByHash(
-        hash: ByteArray,
-        status: MessageStatus,
-        rxTime: Long,
-    ): Unit = withContext(dispatchers.io) {
-        val dao = dbManager.currentDb.value.packetDao()
-        val hashByteString = hash.toByteString()
-        dao.findPacketBySfppHash(hashByteString)?.let { packet ->
-            // If it's already confirmed, don't downgrade it
-            if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                return@let
+    override suspend fun updateSFPPStatusByHash(hash: ByteArray, status: MessageStatus, rxTime: Long): Unit =
+        withContext(dispatchers.io) {
+            val dao = dbManager.currentDb.value.packetDao()
+            val hashByteString = hash.toByteString()
+            dao.findPacketBySfppHash(hashByteString)?.let { packet ->
+                // If it's already confirmed, don't downgrade it
+                if (packet.data.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
+                    return@let
+                }
+                val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
+                val updatedData = packet.data.copy(status = status, sfppHash = hashByteString, time = newTime)
+                dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
             }
-            val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else packet.received_time
-            val updatedData = packet.data.copy(status = status, sfppHash = hashByteString, time = newTime)
-            dao.update(packet.copy(data = updatedData, sfpp_hash = hashByteString, received_time = newTime))
-        }
 
-        dao.findReactionBySfppHash(hashByteString)?.let { reaction ->
-            if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
-                return@let
+            dao.findReactionBySfppHash(hashByteString)?.let { reaction ->
+                if (reaction.status == MessageStatus.SFPP_CONFIRMED && status == MessageStatus.SFPP_ROUTING) {
+                    return@let
+                }
+                val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
+                val updatedReaction = reaction.copy(status = status, sfpp_hash = hashByteString, timestamp = newTime)
+                dao.update(updatedReaction)
             }
-            val newTime = if (rxTime > 0) rxTime * MILLISECONDS_IN_SECOND else reaction.timestamp
-            val updatedReaction = reaction.copy(status = status, sfpp_hash = hashByteString, timestamp = newTime)
-            dao.update(updatedReaction)
         }
-    }
 
     override suspend fun deleteMessages(uuidList: List<Long>) = withContext(dispatchers.io) {
         for (chunk in uuidList.chunked(DELETE_CHUNK_SIZE)) {
@@ -408,9 +398,9 @@ constructor(
     suspend fun update(packet: RoomPacket) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().update(packet) }
 
-    override fun getContactSettings(): Flow<Map<String, ContactSettings>> =
-        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getContactSettings() }
-            .map { map -> map.mapValues { it.value.toShared() } }
+    override fun getContactSettings(): Flow<Map<String, ContactSettings>> = dbManager.currentDb
+        .flatMapLatest { db -> db.packetDao().getContactSettings() }
+        .map { map -> map.mapValues { it.value.toShared() } }
 
     override suspend fun getContactSettings(contact: String): ContactSettings = withContext(dispatchers.io) {
         dbManager.currentDb.value.packetDao().getContactSettings(contact)?.toShared() ?: ContactSettings(contact)
@@ -431,11 +421,13 @@ constructor(
     override suspend fun getFilteredCount(contactKey: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getFilteredCount(contactKey) }
 
-    override suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) = withContext(dispatchers.io) {
-        dbManager.currentDb.value.packetDao().setContactFilteringDisabled(contactKey, disabled)
-    }
+    override suspend fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) =
+        withContext(dispatchers.io) {
+            dbManager.currentDb.value.packetDao().setContactFilteringDisabled(contactKey, disabled)
+        }
 
-    override suspend fun clearPacketDB() = withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
+    override suspend fun clearPacketDB() =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().deleteAll() }
 
     override suspend fun migrateChannelsByPSK(oldSettings: List<ChannelSettings>, newSettings: List<ChannelSettings>) =
         withContext(dispatchers.io) {
@@ -456,7 +448,7 @@ constructor(
         lastReadMessageUuid = lastReadMessageUuid,
         lastReadMessageTimestamp = lastReadMessageTimestamp,
         filteringDisabled = filteringDisabled,
-        isMuted = isMuted
+        isMuted = isMuted,
     )
 
     private fun Reaction.toEntity(myNodeNum: Int) = RoomReaction(
@@ -475,7 +467,7 @@ constructor(
         relayNode = relayNode,
         to = to,
         channel = channel,
-        sfpp_hash = sfppHash
+        sfpp_hash = sfppHash,
     )
 
     companion object {

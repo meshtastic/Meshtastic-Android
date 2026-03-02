@@ -316,8 +316,7 @@ constructor(
                     }
                     if (cachedLocalStats == null) {
                         // Fallback to DB stats if repository hasn't received any fresh ones yet
-                        cachedLocalStats =
-                            repo.localStats.value.takeIf { it.uptime_seconds != 0 }
+                        cachedLocalStats = repo.localStats.value.takeIf { it.uptime_seconds != 0 }
                     }
                 }
             }

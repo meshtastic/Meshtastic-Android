@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,8 @@ import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.service.ServiceAction
 
-/**
- * Interface for handling UI-triggered actions and administrative commands for the mesh.
- */
+/** Interface for handling UI-triggered actions and administrative commands for the mesh. */
+@Suppress("TooManyFunctions")
 interface MeshActionHandler {
     /** Starts the handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)

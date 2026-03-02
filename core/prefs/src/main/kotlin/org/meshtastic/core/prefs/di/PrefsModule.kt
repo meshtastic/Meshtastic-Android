@@ -109,7 +109,10 @@ interface PrefsModule {
 
     @Binds fun bindHomoglyphEncodingPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): HomoglyphPrefs
 
-    @Binds fun bindSharedHomoglyphPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): org.meshtastic.core.repository.HomoglyphPrefs
+    @Binds
+    fun bindSharedHomoglyphPrefs(
+        homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl,
+    ): org.meshtastic.core.repository.HomoglyphPrefs
 
     @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
 

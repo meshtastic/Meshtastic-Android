@@ -85,9 +85,7 @@ constructor(
     }
 
     fun ignoreNode(scope: CoroutineScope, node: Node) {
-        scope.launch(Dispatchers.IO) {
-            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
-        }
+        scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Ignore(node)) }
     }
 
     fun requestMuteNode(scope: CoroutineScope, node: Node) {
@@ -103,9 +101,7 @@ constructor(
     }
 
     fun muteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(Dispatchers.IO) {
-            serviceRepository.onServiceAction(ServiceAction.Mute(node))
-        }
+        scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Mute(node)) }
     }
 
     fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
@@ -124,9 +120,7 @@ constructor(
     }
 
     fun favoriteNode(scope: CoroutineScope, node: Node) {
-        scope.launch(Dispatchers.IO) {
-            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
-        }
+        scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Favorite(node)) }
     }
 
     fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {

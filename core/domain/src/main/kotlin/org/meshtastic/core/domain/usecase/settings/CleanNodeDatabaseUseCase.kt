@@ -43,10 +43,9 @@ constructor(
                 nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
             }
 
-        return nodesToConsider
-            .filterNot { node ->
-                (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) || node.isIgnored || node.isFavorite
-            }
+        return nodesToConsider.filterNot { node ->
+            (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) || node.isIgnored || node.isFavorite
+        }
     }
 
     /** Performs the cleanup of specified nodes. */

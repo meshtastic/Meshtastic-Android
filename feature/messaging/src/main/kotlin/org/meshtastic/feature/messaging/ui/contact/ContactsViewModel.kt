@@ -90,7 +90,8 @@ constructor(
                 val contactKey = entry.key
                 val packetData = entry.value
                 // Determine if this is my message (originated on this device)
-                val fromLocal = (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
+                val fromLocal =
+                    (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
                 val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
 
                 // grab usernames from NodeInfo
@@ -139,10 +140,13 @@ constructor(
 
                 packetRepository.getContactsPaged().map { pagingData ->
                     pagingData.map { packetData: DataPacket ->
-                        val contactKey = "${packetData.channel}${packetData.to}" // This might be wrong, need to check how contactKey is derived in PagingSource
+                        val contactKey =
+                            "${packetData.channel}${packetData.to}" // This might be wrong, need to check how contactKey
+                        // is derived in PagingSource
 
                         // Determine if this is my message (originated on this device)
-                        val fromLocal = (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
+                        val fromLocal =
+                            (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
                         val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
 
                         // grab usernames from NodeInfo
@@ -158,7 +162,8 @@ constructor(
                                 user.long_name
                             }
 
-                        val contactKeyComputed = if (toBroadcast) "${packetData.channel}${DataPacket.ID_BROADCAST}" else contactKey
+                        val contactKeyComputed =
+                            if (toBroadcast) "${packetData.channel}${DataPacket.ID_BROADCAST}" else contactKey
 
                         Contact(
                             contactKey = contactKeyComputed,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 
-/**
- * Interface for the low-level radio interface that handles raw byte communication.
- */
+/** Interface for the low-level radio interface that handles raw byte communication. */
 interface RadioInterfaceService {
     /** Reactive connection state of the radio. */
     val connectionState: StateFlow<ConnectionState>

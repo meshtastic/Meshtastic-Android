@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database.di
 
 import android.app.Application
@@ -47,26 +46,20 @@ abstract class DatabaseModule {
         @Singleton
         fun provideDatabase(app: Application): MeshtasticDatabase = MeshtasticDatabase.getDatabase(app)
 
-        @Provides
-        fun provideNodeInfoDao(database: MeshtasticDatabase): NodeInfoDao = database.nodeInfoDao()
+        @Provides fun provideNodeInfoDao(database: MeshtasticDatabase): NodeInfoDao = database.nodeInfoDao()
+
+        @Provides fun providePacketDao(database: MeshtasticDatabase): PacketDao = database.packetDao()
+
+        @Provides fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao = database.meshLogDao()
 
         @Provides
-        fun providePacketDao(database: MeshtasticDatabase): PacketDao = database.packetDao()
+        fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao = database.quickChatActionDao()
 
         @Provides
-        fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao = database.meshLogDao()
+        fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao = database.deviceHardwareDao()
 
         @Provides
-        fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao =
-            database.quickChatActionDao()
-
-        @Provides
-        fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao =
-            database.deviceHardwareDao()
-
-        @Provides
-        fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao =
-            database.firmwareReleaseDao()
+        fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao = database.firmwareReleaseDao()
 
         @Provides
         fun provideTracerouteNodePositionDao(database: MeshtasticDatabase): TracerouteNodePositionDao =

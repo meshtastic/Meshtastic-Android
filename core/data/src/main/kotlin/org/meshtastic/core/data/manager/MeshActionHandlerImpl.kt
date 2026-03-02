@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,9 @@ import javax.inject.Singleton
 
 @Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
 @Singleton
-class MeshActionHandlerImpl @Inject constructor(
+class MeshActionHandlerImpl
+@Inject
+constructor(
     private val nodeManager: NodeManager,
     private val commandSender: CommandSender,
     private val packetRepository: Lazy<PacketRepository>,

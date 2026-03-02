@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.meshtastic.feature.messaging.domain.worker
 
 import android.content.Context
@@ -51,16 +67,20 @@ class SendMessageWorkerTest {
         coEvery { radioController.sendMessage(any()) } just Runs
         coEvery { packetRepository.updateMessageStatus(any(), any()) } just Runs
 
-        val worker = TestListenableWorkerBuilder<SendMessageWorker>(context)
-            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
-            .setWorkerFactory(object : androidx.work.WorkerFactory() {
-                override fun createWorker(
-                    appContext: Context,
-                    workerClassName: String,
-                    workerParameters: WorkerParameters
-                ): ListenableWorker? = SendMessageWorker(appContext, workerParameters, packetRepository, radioController)
-            })
-            .build()
+        val worker =
+            TestListenableWorkerBuilder<SendMessageWorker>(context)
+                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .setWorkerFactory(
+                    object : androidx.work.WorkerFactory() {
+                        override fun createWorker(
+                            appContext: Context,
+                            workerClassName: String,
+                            workerParameters: WorkerParameters,
+                        ): ListenableWorker? =
+                            SendMessageWorker(appContext, workerParameters, packetRepository, radioController)
+                    },
+                )
+                .build()
 
         // Act
         val result = worker.doWork()
@@ -79,16 +99,20 @@ class SendMessageWorkerTest {
         coEvery { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
         every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
-        val worker = TestListenableWorkerBuilder<SendMessageWorker>(context)
-            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
-            .setWorkerFactory(object : androidx.work.WorkerFactory() {
-                override fun createWorker(
-                    appContext: Context,
-                    workerClassName: String,
-                    workerParameters: WorkerParameters
-                ): ListenableWorker? = SendMessageWorker(appContext, workerParameters, packetRepository, radioController)
-            })
-            .build()
+        val worker =
+            TestListenableWorkerBuilder<SendMessageWorker>(context)
+                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .setWorkerFactory(
+                    object : androidx.work.WorkerFactory() {
+                        override fun createWorker(
+                            appContext: Context,
+                            workerClassName: String,
+                            workerParameters: WorkerParameters,
+                        ): ListenableWorker? =
+                            SendMessageWorker(appContext, workerParameters, packetRepository, radioController)
+                    },
+                )
+                .build()
 
         // Act
         val result = worker.doWork()
@@ -104,16 +128,20 @@ class SendMessageWorkerTest {
         val packetId = 999
         coEvery { packetRepository.getPacketByPacketId(packetId) } returns null
 
-        val worker = TestListenableWorkerBuilder<SendMessageWorker>(context)
-            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
-            .setWorkerFactory(object : androidx.work.WorkerFactory() {
-                override fun createWorker(
-                    appContext: Context,
-                    workerClassName: String,
-                    workerParameters: WorkerParameters
-                ): ListenableWorker? = SendMessageWorker(appContext, workerParameters, packetRepository, radioController)
-            })
-            .build()
+        val worker =
+            TestListenableWorkerBuilder<SendMessageWorker>(context)
+                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .setWorkerFactory(
+                    object : androidx.work.WorkerFactory() {
+                        override fun createWorker(
+                            appContext: Context,
+                            workerClassName: String,
+                            workerParameters: WorkerParameters,
+                        ): ListenableWorker? =
+                            SendMessageWorker(appContext, workerParameters, packetRepository, radioController)
+                    },
+                )
+                .build()
 
         // Act
         val result = worker.doWork()

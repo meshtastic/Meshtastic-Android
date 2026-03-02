@@ -15,22 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-}
+plugins { alias(libs.plugins.meshtastic.kmp.library) }
 
 kotlin {
     @Suppress("UnstableApiUsage")
-    android {
-        androidResources.enable = false
-    }
+    android { androidResources.enable = false }
 
     sourceSets {
         commonMain.dependencies {
             api(projects.core.model)
             api(projects.core.proto)
             implementation(projects.core.common)
-            
+
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
             implementation(libs.androidx.paging.common)

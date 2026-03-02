@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,7 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MeshPacket
 
-/**
- * Interface for handling neighbor info responses from the mesh.
- */
+/** Interface for handling neighbor info responses from the mesh. */
 interface NeighborInfoHandler {
     /** Starts the neighbor info handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)

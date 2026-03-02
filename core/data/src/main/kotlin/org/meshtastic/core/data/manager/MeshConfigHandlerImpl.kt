@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MeshConfigHandlerImpl @Inject constructor(
+class MeshConfigHandlerImpl
+@Inject
+constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,

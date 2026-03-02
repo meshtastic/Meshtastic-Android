@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,7 @@
  */
 package org.meshtastic.core.repository
 
-/**
- * Interface for triggering updates to application widgets.
- */
+/** Interface for triggering updates to application widgets. */
 interface AppWidgetUpdater {
     /** Triggers an update for all app widgets. */
     suspend fun updateAll()

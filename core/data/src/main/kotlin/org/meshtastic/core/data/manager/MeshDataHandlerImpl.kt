@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,6 @@ import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
-import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -81,7 +80,9 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass", "CyclomaticComplexMethod")
 @Singleton
-class MeshDataHandlerImpl @Inject constructor(
+class MeshDataHandlerImpl
+@Inject
+constructor(
     private val nodeManager: NodeManager,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
@@ -94,7 +95,6 @@ class MeshDataHandlerImpl @Inject constructor(
     private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val commandSender: CommandSender,
     private val historyManager: HistoryManager,
-    private val meshPrefs: MeshPrefs,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
@@ -228,7 +228,7 @@ class MeshDataHandlerImpl @Inject constructor(
         handleReceivedStoreAndForward(dataPacket, u, myNodeNum)
     }
 
-    @Suppress("LongMethod")
+    @Suppress("LongMethod", "ReturnCount")
     private fun handleStoreForwardPlusPlus(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
         val sfpp =
@@ -409,7 +409,7 @@ class MeshDataHandlerImpl @Inject constructor(
             val metrics = t.device_metrics
             val environment = t.environment_metrics
             val power = t.power_metrics
-            
+
             var nextNode = node
             when {
                 metrics != null -> {
@@ -438,6 +438,7 @@ class MeshDataHandlerImpl @Inject constructor(
         }
     }
 
+    @Suppress("ReturnCount")
     private fun shouldBatteryNotificationShow(fromNum: Int, t: Telemetry, myNodeNum: Int): Boolean {
         val isRemote = (fromNum != myNodeNum)
         var shouldDisplay = false
@@ -502,11 +503,8 @@ class MeshDataHandlerImpl @Inject constructor(
                     else -> MessageStatus.ERROR
                 }
             if (p != null && p.status != MessageStatus.RECEIVED) {
-                val updatedPacket = p.copy(
-                    status = m,
-                    relays = if (isAck) p.relays + 1 else p.relays,
-                    relayNode = relayNode
-                )
+                val updatedPacket =
+                    p.copy(status = m, relays = if (isAck) p.relays + 1 else p.relays, relayNode = relayNode)
                 packetRepository.get().update(updatedPacket)
             }
 
@@ -596,7 +594,14 @@ class MeshDataHandlerImpl @Inject constructor(
                 // Check if message should be filtered
                 val isFiltered = shouldFilterMessage(dataPacket, contactKey)
 
-                insert(dataPacket, myNodeNum, contactKey, nowMillis, read = fromLocal || isFiltered, filtered = isFiltered)
+                insert(
+                    dataPacket,
+                    myNodeNum,
+                    contactKey,
+                    nowMillis,
+                    read = fromLocal || isFiltered,
+                    filtered = isFiltered,
+                )
                 if (!isFiltered) {
                     handlePacketNotification(dataPacket, contactKey, updateNotification)
                 }
@@ -684,7 +689,7 @@ class MeshDataHandlerImpl @Inject constructor(
 
         val fromNode = nodeManager.nodeDBbyNodeNum[packet.from] ?: Node(num = packet.from)
         val toNode = nodeManager.nodeDBbyNodeNum[packet.to] ?: Node(num = packet.to)
-        
+
         val reaction =
             Reaction(
                 replyId = decoded.reply_id,
@@ -720,7 +725,8 @@ class MeshDataHandlerImpl @Inject constructor(
         // Find the original packet to get the contactKey
         packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
-            val contactKey = "${originalPacket.channel}${if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from}"
+            val targetId = if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
+            val contactKey = "${originalPacket.channel}$targetId"
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
             val isSilent = conversationMuted || nodeMuted

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,7 @@ import java.util.regex.PatternSyntaxException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of [MessageFilter] that uses regex and plain text matching.
- */
+/** Implementation of [MessageFilter] that uses regex and plain text matching. */
 @Singleton
 class MessageFilterImpl @Inject constructor(private val filterPrefs: FilterPrefs) : MessageFilter {
     private var compiledPatterns: List<Regex> = emptyList()

@@ -119,9 +119,7 @@ constructor(
         }
 
         // Keep ourNodeInfo and myId correctly updated based on current connection and node DB
-        combine(nodeDBbyNum, nodeInfoReadDataSource.myNodeInfoFlow()) { db, info ->
-            info?.myNodeNum?.let { db[it] }
-        }
+        combine(nodeDBbyNum, nodeInfoReadDataSource.myNodeInfoFlow()) { db, info -> info?.myNodeNum?.let { db[it] } }
             .onEach { node ->
                 _ourNodeInfo.value = node
                 _myId.value = node?.user?.id
@@ -133,7 +131,8 @@ constructor(
      * Returns the node number used for log queries. Maps [nodeNum] to [MeshLog.NODE_NUM_LOCAL] (0) if it is the locally
      * connected node.
      */
-    override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = nodeInfoReadDataSource.myNodeInfoFlow()
+    override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = nodeInfoReadDataSource
+        .myNodeInfoFlow()
         .map { info -> if (nodeNum == info?.myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum }
         .distinctUntilChanged()
 
@@ -189,8 +188,9 @@ constructor(
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node) }
 
     /** Installs initial configuration data (local info and remote nodes) into the database. */
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) =
-        withContext(dispatchers.io) { nodeInfoWriteDataSource.installConfig(mi.toEntity(), nodes.map { it.toEntity() }) }
+    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) = withContext(dispatchers.io) {
+        nodeInfoWriteDataSource.installConfig(mi.toEntity(), nodes.map { it.toEntity() })
+    }
 
     /** Deletes all nodes from the database, optionally preserving favorites. */
     override suspend fun clearNodeDB(preserveFavorites: Boolean) =
@@ -212,14 +212,10 @@ constructor(
     }
 
     override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
-        withContext(dispatchers.io) {
-            nodeInfoReadDataSource.getNodesOlderThan(lastHeard).map { it.toModel() }
-        }
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getNodesOlderThan(lastHeard).map { it.toModel() } }
 
     override suspend fun getUnknownNodes(): List<Node> =
-        withContext(dispatchers.io) {
-            nodeInfoReadDataSource.getUnknownNodes().map { it.toModel() }
-        }
+        withContext(dispatchers.io) { nodeInfoReadDataSource.getUnknownNodes().map { it.toModel() } }
 
     /** Persists hardware metadata for a node. */
     override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =
@@ -256,7 +252,7 @@ constructor(
         maxChannels = maxChannels,
         hasWifi = hasWifi,
         deviceId = deviceId,
-        pioEnv = pioEnv
+        pioEnv = pioEnv,
     )
 
     private fun Node.toEntity() = NodeEntity(
@@ -280,6 +276,6 @@ constructor(
         notes = notes,
         manuallyVerified = manuallyVerified,
         nodeStatus = nodeStatus,
-        lastTransport = lastTransport
+        lastTransport = lastTransport,
     )
 }

@@ -116,8 +116,7 @@ constructor(
     val appVersionName
         get() = buildConfigProvider.versionName
 
-    val isOtaCapable: StateFlow<Boolean> =
-        isOtaCapableUseCase().stateInWhileSubscribed(initialValue = false)
+    val isOtaCapable: StateFlow<Boolean> = isOtaCapableUseCase().stateInWhileSubscribed(initialValue = false)
 
     // Device DB cache limit (bounded by DatabaseConstants)
     val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
@@ -173,9 +172,7 @@ constructor(
     fun saveDataCsv(uri: Uri, filterPortnum: Int? = null) {
         viewModelScope.launch(Dispatchers.Main) {
             val myNodeNum = myNodeNum ?: return@launch
-            writeToUri(uri) { writer ->
-                exportDataUseCase(writer, myNodeNum, filterPortnum)
-            }
+            writeToUri(uri) { writer -> exportDataUseCase(writer, myNodeNum, filterPortnum) }
         }
     }
 

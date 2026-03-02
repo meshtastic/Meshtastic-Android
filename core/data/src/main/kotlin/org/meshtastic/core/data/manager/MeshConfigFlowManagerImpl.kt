@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,11 @@ import javax.inject.Singleton
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
-class MeshConfigFlowManagerImpl @Inject constructor(
+class MeshConfigFlowManagerImpl
+@Inject
+constructor(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val nodeRepository: NodeRepository,

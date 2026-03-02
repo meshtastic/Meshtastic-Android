@@ -64,7 +64,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -464,7 +463,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerVie
 private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     val myFirmwareVersion = myNodeInfo?.firmwareVersion
 
@@ -499,9 +497,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                     viewModel.showAlert(
                         titleRes = Res.string.app_too_old,
                         messageRes = Res.string.must_update,
-                        onConfirm = {
-                            viewModel.setDeviceAddress("n")
-                        },
+                        onConfirm = { viewModel.setDeviceAddress("n") },
                     )
                 } else {
                     myFirmwareVersion
@@ -525,9 +521,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 viewModel.showAlert(
                                     title = title,
                                     html = message,
-                                    onConfirm = {
-                                        viewModel.setDeviceAddress("n")
-                                    },
+                                    onConfirm = { viewModel.setDeviceAddress("n") },
                                 )
                             } else if (curVer < MeshService.minDeviceVersion) {
                                 Logger.w {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,27 +29,40 @@ import org.meshtastic.core.repository.TracerouteHandler
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Implementation of [MeshRouter] that orchestrates specialized mesh packet handlers.
- */
+/** Implementation of [MeshRouter] that orchestrates specialized mesh packet handlers. */
 @Suppress("LongParameterList")
 @Singleton
-class MeshRouterImpl @Inject constructor(
-    private val _dataHandler: Lazy<MeshDataHandler>,
-    private val _configHandler: Lazy<MeshConfigHandler>,
-    private val _tracerouteHandler: Lazy<TracerouteHandler>,
-    private val _neighborInfoHandler: Lazy<NeighborInfoHandler>,
-    private val _configFlowManager: Lazy<MeshConfigFlowManager>,
-    private val _mqttManager: Lazy<MqttManager>,
-    private val _actionHandler: Lazy<MeshActionHandler>,
+class MeshRouterImpl
+@Inject
+constructor(
+    private val dataHandlerLazy: Lazy<MeshDataHandler>,
+    private val configHandlerLazy: Lazy<MeshConfigHandler>,
+    private val tracerouteHandlerLazy: Lazy<TracerouteHandler>,
+    private val neighborInfoHandlerLazy: Lazy<NeighborInfoHandler>,
+    private val configFlowManagerLazy: Lazy<MeshConfigFlowManager>,
+    private val mqttManagerLazy: Lazy<MqttManager>,
+    private val actionHandlerLazy: Lazy<MeshActionHandler>,
 ) : MeshRouter {
-    override val dataHandler: MeshDataHandler get() = _dataHandler.get()
-    override val configHandler: MeshConfigHandler get() = _configHandler.get()
-    override val tracerouteHandler: TracerouteHandler get() = _tracerouteHandler.get()
-    override val neighborInfoHandler: NeighborInfoHandler get() = _neighborInfoHandler.get()
-    override val configFlowManager: MeshConfigFlowManager get() = _configFlowManager.get()
-    override val mqttManager: MqttManager get() = _mqttManager.get()
-    override val actionHandler: MeshActionHandler get() = _actionHandler.get()
+    override val dataHandler: MeshDataHandler
+        get() = dataHandlerLazy.get()
+
+    override val configHandler: MeshConfigHandler
+        get() = configHandlerLazy.get()
+
+    override val tracerouteHandler: TracerouteHandler
+        get() = tracerouteHandlerLazy.get()
+
+    override val neighborInfoHandler: NeighborInfoHandler
+        get() = neighborInfoHandlerLazy.get()
+
+    override val configFlowManager: MeshConfigFlowManager
+        get() = configFlowManagerLazy.get()
+
+    override val mqttManager: MqttManager
+        get() = mqttManagerLazy.get()
+
+    override val actionHandler: MeshActionHandler
+        get() = actionHandlerLazy.get()
 
     override fun start(scope: CoroutineScope) {
         dataHandler.start(scope)

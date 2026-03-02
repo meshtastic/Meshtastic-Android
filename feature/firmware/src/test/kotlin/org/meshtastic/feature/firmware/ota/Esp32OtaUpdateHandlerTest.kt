@@ -49,7 +49,8 @@ class Esp32OtaUpdateHandlerTest {
     private val context: Context = mockk()
     private val contentResolver: ContentResolver = mockk()
 
-    private val handler = Esp32OtaUpdateHandler(firmwareRetriever, radioController, nodeRepository, centralManager, context)
+    private val handler =
+        Esp32OtaUpdateHandler(firmwareRetriever, radioController, nodeRepository, centralManager, context)
 
     @Before
     fun setUp() {

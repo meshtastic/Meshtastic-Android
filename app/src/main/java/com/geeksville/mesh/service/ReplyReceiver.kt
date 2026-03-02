@@ -50,9 +50,7 @@ class ReplyReceiver : BroadcastReceiver() {
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
         val p = DataPacket(dest, channel ?: 0, str)
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            radioController.sendMessage(p)
-        }
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch { radioController.sendMessage(p) }
     }
 
     override fun onReceive(context: android.content.Context, intent: android.content.Intent) {

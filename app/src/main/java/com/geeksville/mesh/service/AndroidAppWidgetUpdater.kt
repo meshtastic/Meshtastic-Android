@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidAppWidgetUpdater @Inject constructor(
-    @ApplicationContext private val context: Context
-) : AppWidgetUpdater {
+class AndroidAppWidgetUpdater @Inject constructor(@ApplicationContext private val context: Context) : AppWidgetUpdater {
     override suspend fun updateAll() {
         // Kickstart the widget composition.
         // The widget internally uses collectAsState() and its own sampled StateFlow
         // to drive updates automatically without excessive IPC and recreation.
+        @Suppress("TooGenericExceptionCaught")
         try {
             LocalStatsWidget().updateAll(context)
         } catch (e: Exception) {

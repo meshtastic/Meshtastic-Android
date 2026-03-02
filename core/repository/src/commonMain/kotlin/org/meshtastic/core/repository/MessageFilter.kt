@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,7 @@
  */
 package org.meshtastic.core.repository
 
-/**
- * Interface for filtering messages based on user-configured filter words.
- */
+/** Interface for filtering messages based on user-configured filter words. */
 interface MessageFilter {
     /**
      * Determines if a message should be filtered.
@@ -29,8 +27,6 @@ interface MessageFilter {
      */
     fun shouldFilter(message: String, isFilteringDisabled: Boolean = false): Boolean
 
-    /**
-     * Rebuilds the internal filter patterns. Should be called after filter words are updated.
-     */
+    /** Rebuilds the internal filter patterns. Should be called after filter words are updated. */
     fun rebuildPatterns()
 }
