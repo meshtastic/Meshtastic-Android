@@ -12,11 +12,14 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  Of not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.ui
 
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
@@ -29,8 +32,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.android.tools.screenshot.PreviewTest
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Channel
+import org.meshtastic.core.ui.component.AutoLinkText
 import org.meshtastic.core.ui.component.BatteryInfoPreviewParameterProvider
 import org.meshtastic.core.ui.component.ChannelInfo
+import org.meshtastic.core.ui.component.ChannelSelection
 import org.meshtastic.core.ui.component.DistanceInfo
 import org.meshtastic.core.ui.component.ElevationInfo
 import org.meshtastic.core.ui.component.HopsInfo
@@ -40,13 +46,18 @@ import org.meshtastic.core.ui.component.IndoorAirQuality
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
 import org.meshtastic.core.ui.component.NodeChip
+import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.component.SatelliteCountInfo
+import org.meshtastic.core.ui.component.SecurityIcon
+import org.meshtastic.core.ui.component.SecurityState
 import org.meshtastic.core.ui.component.SignalInfo
 import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.Config
+import org.meshtastic.proto.MeshPacket
 
 class ComponentScreenshotTest {
 
@@ -168,6 +179,71 @@ class ComponentScreenshotTest {
     fun IndoorAirQualityPillTest() {
         AppTheme {
             IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Pill)
+        }
+    }
+
+    @PreviewTest
+    @Preview(showBackground = true)
+    @Composable
+    fun AutoLinkTextTest() {
+        AppTheme {
+            AutoLinkText("Check out https://meshtastic.org for more info!")
+        }
+    }
+
+    @PreviewTest
+    @Preview(showBackground = true)
+    @Composable
+    fun SecurityIconTest() {
+        AppTheme {
+            Column {
+                SecurityState.entries.forEach { state ->
+                    SecurityIcon(securityState = state)
+                }
+            }
+        }
+    }
+
+    @PreviewTest
+    @Preview(showBackground = true)
+    @Composable
+    fun TransportIconTest() {
+        AppTheme {
+            Column {
+                TransportIcon(transport = MeshPacket.TransportMechanism.TRANSPORT_INTERNAL.value, viaMqtt = false)
+                TransportIcon(transport = MeshPacket.TransportMechanism.TRANSPORT_MQTT.value, viaMqtt = true)
+                TransportIcon(transport = MeshPacket.TransportMechanism.TRANSPORT_MULTICAST_UDP.value, viaMqtt = false)
+            }
+        }
+    }
+
+    @PreviewTest
+    @Preview(showBackground = true)
+    @Composable
+    fun ChannelSelectionTest() {
+        AppTheme {
+            ChannelSelection(
+                index = 0,
+                title = "LongFast",
+                enabled = true,
+                isSelected = true,
+                onSelected = {},
+                channel = Channel.default
+            )
+        }
+    }
+
+    @PreviewTest
+    @Preview(showBackground = true)
+    @Composable
+    fun QrDialogTest() {
+        AppTheme {
+            QrDialog(
+                title = "Share Contact",
+                uri = Uri.parse("https://meshtastic.org/u/dummy"),
+                qrCode = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888),
+                onDismiss = {}
+            )
         }
     }
 }

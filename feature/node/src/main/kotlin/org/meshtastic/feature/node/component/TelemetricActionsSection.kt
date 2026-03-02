@@ -55,6 +55,9 @@ import org.meshtastic.core.resources.request_air_quality_metrics
 import org.meshtastic.core.resources.request_telemetry
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.core.resources.userinfo
+import org.meshtastic.core.ui.component.COOL_DOWN_TIME_MS
+import org.meshtastic.core.ui.component.CooldownOutlinedIconButton
+import org.meshtastic.core.ui.component.REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS
 import org.meshtastic.core.ui.icon.AirQuality
 import org.meshtastic.core.ui.icon.LineAxis
 import org.meshtastic.core.ui.icon.MeshtasticIcons

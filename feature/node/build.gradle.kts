@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.library.flavors)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.screenshot)
 }
 
 configure<LibraryExtension> {
@@ -29,6 +30,8 @@ configure<LibraryExtension> {
     defaultConfig { manifestPlaceholders["MAPS_API_KEY"] = "DEBUG_KEY" }
 
     testOptions { unitTests { isIncludeAndroidResources = true } }
+
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
 
 dependencies {
@@ -70,4 +73,10 @@ dependencies {
     testImplementation(libs.androidx.test.ext.junit)
     testImplementation(libs.robolectric)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
+    screenshotTestImplementation(libs.compose.multiplatform.runtime)
+    screenshotTestImplementation(libs.compose.multiplatform.resources)
+    screenshotTestImplementation(projects.core.resources)
 }

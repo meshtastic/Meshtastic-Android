@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import android.content.ClipData
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -120,6 +120,6 @@ fun InfoCard(
 }
 
 @Composable
-internal fun DrawableInfoCard(iconRes: DrawableResource, text: String, value: String, rotateIcon: Float = 0f) {
+fun DrawableInfoCard(iconRes: DrawableResource, text: String, value: String, rotateIcon: Float = 0f) {
     InfoCard(iconRes = iconRes, text = text, value = value, rotateIcon = rotateIcon)
 }

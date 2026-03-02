@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
@@ -49,7 +49,7 @@ import org.meshtastic.core.resources.reply
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 
 @Composable
-internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
+fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
     var showEmojiPickerDialog by remember { mutableStateOf(false) }
     if (showEmojiPickerDialog) {
         EmojiPickerDialog(
@@ -66,7 +66,7 @@ internal fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
 }
 
 @Composable
-private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
+fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
     onClick = onClick,
     content = {
         Icon(imageVector = Icons.AutoMirrored.Filled.Reply, contentDescription = stringResource(Res.string.reply))
@@ -74,7 +74,7 @@ private fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
 )
 
 @Composable
-internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
+fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
     AnimatedVisibility(visible = fromLocal) {
         IconButton(onClick = onStatusClick) {
             Crossfade(targetState = status, label = "MessageStatusIcon") { currentStatus ->
@@ -98,7 +98,7 @@ internal fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: Message
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-internal fun MessageActions(
+fun MessageActions(
     modifier: Modifier = Modifier,
     isLocal: Boolean = false,
     status: MessageStatus?,

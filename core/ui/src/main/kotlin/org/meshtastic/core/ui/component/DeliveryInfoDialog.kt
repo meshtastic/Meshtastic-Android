@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,15 +33,13 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
 import org.meshtastic.core.resources.relays
 import org.meshtastic.core.resources.resend
-import org.meshtastic.core.ui.component.MeshtasticDialog
 
-@Suppress("UnusedParameter")
 @Composable
 fun DeliveryInfo(
     title: StringResource,
     resendOption: Boolean,
     text: StringResource? = null,
-    relayNodeName: String? = null,
+    @Suppress("UNUSED_PARAMETER") relayNodeName: String? = null,
     relays: Int = 0,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},

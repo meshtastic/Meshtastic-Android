@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
@@ -72,14 +72,10 @@ import org.meshtastic.core.resources.message_status_enroute
 import org.meshtastic.core.resources.message_status_queued
 import org.meshtastic.core.resources.react
 import org.meshtastic.core.resources.you
-import org.meshtastic.core.ui.component.BottomSheetDialog
-import org.meshtastic.core.ui.component.Rssi
-import org.meshtastic.core.ui.component.Snr
 import org.meshtastic.core.ui.emoji.EmojiPickerDialog
 import org.meshtastic.core.ui.icon.Hops
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.feature.messaging.DeliveryInfo
 import org.meshtastic.proto.User
 
 @Composable
@@ -137,7 +133,7 @@ private fun ReactionItem(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun ReactionRow(
+fun ReactionRow(
     modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
     myId: String? = null,
@@ -193,7 +189,7 @@ private fun AddReactionButton(modifier: Modifier = Modifier, onSendReaction: (St
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-internal fun ReactionDialog(
+fun ReactionDialog(
     reactions: List<Reaction>,
     onDismiss: () -> Unit = {},
     myId: String? = null,
@@ -334,7 +330,7 @@ private fun ReactionItemPreview() {
 
 @Preview
 @Composable
-private fun ReactionRowPreview() {
+fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
             reactions =

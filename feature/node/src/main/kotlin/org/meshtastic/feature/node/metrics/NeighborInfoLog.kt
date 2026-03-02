@@ -55,7 +55,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.annotateNeighborInfo
-import org.meshtastic.feature.node.component.CooldownIconButton
+import org.meshtastic.core.ui.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 
 @OptIn(ExperimentalFoundationApi::class)

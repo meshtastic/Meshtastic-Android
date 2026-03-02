@@ -73,7 +73,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.feature.map.model.TracerouteOverlay
-import org.meshtastic.feature.node.component.CooldownIconButton
+import org.meshtastic.core.ui.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.feature.node.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.proto.RouteDiscovery

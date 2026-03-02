@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging.component
+package org.meshtastic.core.ui.component
 
 import android.content.ClipData
 import androidx.compose.foundation.background
@@ -71,11 +71,6 @@ import org.meshtastic.core.resources.filter_message_label
 import org.meshtastic.core.resources.message_delivery_status
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.sample_message
-import org.meshtastic.core.ui.component.AutoLinkText
-import org.meshtastic.core.ui.component.NodeChip
-import org.meshtastic.core.ui.component.Rssi
-import org.meshtastic.core.ui.component.Snr
-import org.meshtastic.core.ui.component.TransportIcon
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.emoji.EmojiPicker
 import org.meshtastic.core.ui.icon.Acknowledged
@@ -92,7 +87,7 @@ import org.meshtastic.core.ui.theme.MessageItemColors
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-internal fun MessageItem(
+fun MessageItem(
     modifier: Modifier = Modifier,
     node: Node,
     ourNode: Node,
@@ -449,7 +444,7 @@ private fun OriginalMessageSnippet(
 
 @PreviewLightDark
 @Composable
-private fun MessageItemPreview() {
+fun MessageItemPreview() {
     val sent =
         Message(
             text = stringResource(Res.string.sample_message),

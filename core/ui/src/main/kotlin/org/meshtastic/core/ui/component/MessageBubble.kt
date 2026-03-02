@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.messaging.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
  * @param hasSamePrev Whether the previous message in the list is from the same sender.
  * @param hasSameNext Whether the next message in the list is from the same sender.
  */
-internal fun getMessageBubbleShape(
+fun getMessageBubbleShape(
     cornerRadius: Dp,
     isSender: Boolean,
     hasSamePrev: Boolean = false,

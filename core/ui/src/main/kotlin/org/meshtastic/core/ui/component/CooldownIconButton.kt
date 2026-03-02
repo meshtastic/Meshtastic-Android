@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -36,8 +36,8 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.theme.AppTheme
 
-internal const val COOL_DOWN_TIME_MS = 30000L
-internal const val REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS = 180000L // 3 minutes
+const val COOL_DOWN_TIME_MS = 30000L
+const val REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS = 180000L // 3 minutes
 
 @Composable
 fun CooldownIconButton(

@@ -88,7 +88,7 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.node.component.NodeFilterTextField
-import org.meshtastic.feature.node.component.NodeItem
+import org.meshtastic.core.ui.component.NodeItem
 import org.meshtastic.proto.SharedContact
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

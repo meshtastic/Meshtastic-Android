@@ -16,7 +16,7 @@
  */
 @file:Suppress("MagicNumber")
 
-package org.meshtastic.feature.node.component
+package org.meshtastic.core.ui.component
 
 import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
@@ -64,6 +64,7 @@ import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.voltage
+import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.AirQualityInfo
 import org.meshtastic.core.ui.component.ChannelInfo
 import org.meshtastic.core.ui.component.DistanceInfo
@@ -117,7 +118,7 @@ fun NodeItem(
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val originalLongName = (thatNode.user.long_name ?: "").ifEmpty { stringResource(Res.string.unknown_username) }
+    val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
 
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system =
@@ -318,7 +319,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     val env = node.environmentMetrics
     val pax = node.paxcounter
 
-    if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0) {
+    if (pax.ble != 0 || pax.wifi != 0) {
         items.add { PaxcountInfo(pax = "B:${pax.ble ?: 0} W:${pax.wifi ?: 0}", contentColor = contentColor) }
     }
     if ((env.temperature ?: 0f) != 0f) {
