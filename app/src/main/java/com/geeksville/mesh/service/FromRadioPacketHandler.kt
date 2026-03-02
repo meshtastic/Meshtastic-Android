@@ -18,8 +18,9 @@ package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,7 +35,7 @@ class FromRadioPacketHandler
 constructor(
     private val serviceRepository: ServiceRepository,
     private val router: MeshRouter,
-    private val mqttManager: MeshMqttManager,
+    private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val serviceNotifications: MeshServiceNotifications,
 ) {

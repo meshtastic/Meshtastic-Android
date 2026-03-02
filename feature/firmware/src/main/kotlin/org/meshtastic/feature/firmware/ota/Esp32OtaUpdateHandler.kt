@@ -21,14 +21,18 @@ import android.net.Uri
 import co.touchlab.kermit.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_connecting_attempt
 import org.meshtastic.core.resources.firmware_update_downloading_percent
@@ -40,7 +44,6 @@ import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_starting_ota
 import org.meshtastic.core.resources.firmware_update_uploading
 import org.meshtastic.core.resources.firmware_update_waiting_reboot
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateHandler
 import org.meshtastic.feature.firmware.FirmwareUpdateState
@@ -68,7 +71,8 @@ class Esp32OtaUpdateHandler
 @Inject
 constructor(
     private val firmwareRetriever: FirmwareRetriever,
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
+    private val nodeRepository: NodeRepository,
     private val centralManager: CentralManager,
     @ApplicationContext private val context: Context,
 ) : FirmwareUpdateHandler {
@@ -201,13 +205,11 @@ constructor(
     }
 
     private fun triggerRebootOta(mode: Int, hash: ByteArray?) {
-        val service = serviceRepository.meshService ?: return
-        try {
-            val myInfo = service.getMyNodeInfo() ?: return
-            Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
-            service.requestRebootOta(service.getPacketId(), myInfo.myNodeNum, mode, hash)
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.e(e) { "ESP32 OTA: Failed to trigger reboot OTA" }
+        val myInfo = nodeRepository.myNodeInfo.value ?: return
+        val myNodeNum = myInfo.myNodeNum
+        Logger.i { "ESP32 OTA: Triggering reboot OTA mode $mode with hash" }
+        CoroutineScope(Dispatchers.IO).launch {
+            radioController.requestRebootOta(radioController.getPacketId(), myNodeNum, mode, hash)
         }
     }
 
@@ -216,12 +218,8 @@ constructor(
      * interface) cleanly disconnects without reconnection attempts.
      */
     private fun disconnectMeshService() {
-        try {
-            Logger.i { "ESP32 OTA: Disconnecting mesh service for OTA" }
-            serviceRepository.meshService?.setDeviceAddress("n")
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.w(e) { "ESP32 OTA: Error disconnecting mesh service" }
-        }
+        Logger.i { "ESP32 OTA: Disconnecting mesh service for OTA" }
+        radioController.setDeviceAddress("n")
     }
 
     private suspend fun obtainFirmwareFile(

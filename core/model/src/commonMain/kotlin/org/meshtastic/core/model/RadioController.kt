@@ -33,6 +33,11 @@ interface RadioController {
 
     suspend fun sendSharedContact(nodeNum: Int)
 
+    // Local radio configuration
+    suspend fun setLocalConfig(config: org.meshtastic.proto.Config)
+
+    suspend fun setLocalChannel(channel: org.meshtastic.proto.Channel)
+
     // Radio configuration
     suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int)
 
@@ -66,6 +71,10 @@ interface RadioController {
     // Admin operations
     suspend fun reboot(destNum: Int, packetId: Int)
 
+    suspend fun rebootToDfu(nodeNum: Int)
+
+    suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?)
+
     suspend fun shutdown(destNum: Int, packetId: Int)
 
     suspend fun factoryReset(destNum: Int, packetId: Int)
@@ -73,6 +82,16 @@ interface RadioController {
     suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean)
 
     suspend fun removeByNodenum(packetId: Int, nodeNum: Int)
+
+    suspend fun requestPosition(destNum: Int, currentPosition: Position)
+
+    suspend fun requestUserInfo(destNum: Int)
+
+    suspend fun requestTraceroute(requestId: Int, destNum: Int)
+
+    suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int)
+
+    suspend fun requestNeighborInfo(requestId: Int, destNum: Int)
 
     // Batch editing
     suspend fun beginEditSettings(destNum: Int)
@@ -87,4 +106,7 @@ interface RadioController {
 
     /** Stops providing the phone's location to the mesh. */
     fun stopProvideLocation()
+
+    /** Changes the device address we are talking to. */
+    fun setDeviceAddress(address: String)
 }

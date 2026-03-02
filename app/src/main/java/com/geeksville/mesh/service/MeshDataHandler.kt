@@ -37,6 +37,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
@@ -44,18 +45,20 @@ import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
@@ -94,8 +97,8 @@ constructor(
     private val historyManager: HistoryManager,
     private val meshPrefs: MeshPrefs,
     private val connectionManager: MeshConnectionManager,
-    private val tracerouteHandler: MeshTracerouteHandler,
-    private val neighborInfoHandler: MeshNeighborInfoHandler,
+    private val tracerouteHandler: TracerouteHandler,
+    private val neighborInfoHandler: NeighborInfoHandler,
     private val radioConfigRepository: RadioConfigRepository,
     private val messageFilterService: MessageFilterService,
 ) {

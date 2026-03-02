@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.repository.network
+package org.meshtastic.core.network.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.channels.awaitClose

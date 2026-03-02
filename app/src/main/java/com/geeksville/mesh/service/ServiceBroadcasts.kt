@@ -27,7 +27,7 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.toPIIString
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton

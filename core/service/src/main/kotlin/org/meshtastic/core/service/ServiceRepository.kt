@@ -19,33 +19,25 @@ package org.meshtastic.core.service
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.service.ServiceAction
+import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class TracerouteResponse(
-    val message: String,
-    val destinationNodeNum: Int,
-    val requestId: Int,
-    val forwardRoute: List<Int> = emptyList(),
-    val returnRoute: List<Int> = emptyList(),
-    val logUuid: String? = null,
-) {
-    val hasOverlay: Boolean
-        get() = forwardRoute.isNotEmpty() || returnRoute.isNotEmpty()
-}
-
 /** Repository class for managing the [IMeshService] instance and connection state */
 @Suppress("TooManyFunctions")
 @Singleton
-open class ServiceRepository @Inject constructor() {
+open class AndroidServiceRepository @Inject constructor() : ServiceRepository {
     var meshService: IMeshService? = null
         private set
 
@@ -55,86 +47,86 @@ open class ServiceRepository @Inject constructor() {
 
     // Connection state to our radio device
     private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
-    open val connectionState: StateFlow<ConnectionState>
+    override val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
 
-    fun setConnectionState(connectionState: ConnectionState) {
+    override fun setConnectionState(connectionState: ConnectionState) {
         _connectionState.value = connectionState
     }
 
     private val _clientNotification = MutableStateFlow<ClientNotification?>(null)
-    val clientNotification: StateFlow<ClientNotification?>
+    override val clientNotification: StateFlow<ClientNotification?>
         get() = _clientNotification
 
-    fun setClientNotification(notification: ClientNotification?) {
+    override fun setClientNotification(notification: ClientNotification?) {
         notification?.message?.let { Logger.w { it } }
 
         _clientNotification.value = notification
     }
 
-    fun clearClientNotification() {
+    override fun clearClientNotification() {
         _clientNotification.value = null
     }
 
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?>
+    override val errorMessage: StateFlow<String?>
         get() = _errorMessage
 
-    fun setErrorMessage(text: String, severity: Severity = Severity.Error) {
+    override fun setErrorMessage(text: String, severity: Severity) {
         Logger.log(severity, "ServiceRepository", null, text)
         _errorMessage.value = text
     }
 
-    fun clearErrorMessage() {
+    override fun clearErrorMessage() {
         _errorMessage.value = null
     }
 
     private val _connectionProgress = MutableStateFlow<String?>(null)
-    val connectionProgress: StateFlow<String?>
+    override val connectionProgress: StateFlow<String?>
         get() = _connectionProgress
 
-    fun setConnectionProgress(text: String) {
+    override fun setConnectionProgress(text: String) {
         if (connectionState.value != ConnectionState.Connected) {
             _connectionProgress.value = text
         }
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>(extraBufferCapacity = 64)
-    val meshPacketFlow: SharedFlow<MeshPacket>
+    override val meshPacketFlow: SharedFlow<MeshPacket>
         get() = _meshPacketFlow
 
-    suspend fun emitMeshPacket(packet: MeshPacket) {
+    override suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)
     }
 
     private val _tracerouteResponse = MutableStateFlow<TracerouteResponse?>(null)
-    val tracerouteResponse: StateFlow<TracerouteResponse?>
+    override val tracerouteResponse: StateFlow<TracerouteResponse?>
         get() = _tracerouteResponse
 
-    fun setTracerouteResponse(value: TracerouteResponse?) {
+    override fun setTracerouteResponse(value: TracerouteResponse?) {
         _tracerouteResponse.value = value
     }
 
-    fun clearTracerouteResponse() {
+    override fun clearTracerouteResponse() {
         setTracerouteResponse(null)
     }
 
     private val _neighborInfoResponse = MutableStateFlow<String?>(null)
-    val neighborInfoResponse: StateFlow<String?>
+    override val neighborInfoResponse: StateFlow<String?>
         get() = _neighborInfoResponse
 
-    fun setNeighborInfoResponse(value: String?) {
+    override fun setNeighborInfoResponse(value: String?) {
         _neighborInfoResponse.value = value
     }
 
-    fun clearNeighborInfoResponse() {
+    override fun clearNeighborInfoResponse() {
         setNeighborInfoResponse(null)
     }
 
     private val _serviceAction = Channel<ServiceAction>()
-    val serviceAction = _serviceAction.receiveAsFlow()
+    override val serviceAction: Flow<ServiceAction> = _serviceAction.receiveAsFlow()
 
-    suspend fun onServiceAction(action: ServiceAction) {
+    override suspend fun onServiceAction(action: ServiceAction) {
         _serviceAction.send(action)
     }
 }

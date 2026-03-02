@@ -48,8 +48,10 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
+import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
@@ -57,9 +59,8 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
+import org.meshtastic.core.service.AndroidServiceRepository
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.core.ui.util.ComposableContent
@@ -75,7 +76,8 @@ class UIViewModel
 @Inject
 constructor(
     private val nodeDB: NodeRepository,
-    private val serviceRepository: ServiceRepository,
+    private val serviceRepository: AndroidServiceRepository,
+    private val radioController: RadioController,
     radioInterfaceService: RadioInterfaceService,
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
@@ -160,6 +162,10 @@ constructor(
 
     val meshService: IMeshService?
         get() = serviceRepository.meshService
+
+    fun setDeviceAddress(address: String) {
+        radioController.setDeviceAddress(address)
+    }
 
     val unreadMessageCount =
         packetRepository.getUnreadCountTotal().map { it.coerceAtLeast(0) }.stateInWhileSubscribed(initialValue = 0)

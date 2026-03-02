@@ -500,8 +500,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                         titleRes = Res.string.app_too_old,
                         messageRes = Res.string.must_update,
                         onConfirm = {
-                            val service = viewModel.meshService ?: return@showAlert
-                            MeshService.changeDeviceAddress(context, service, "n")
+                            viewModel.setDeviceAddress("n")
                         },
                     )
                 } else {
@@ -527,8 +526,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                     title = title,
                                     html = message,
                                     onConfirm = {
-                                        val service = viewModel.meshService ?: return@showAlert
-                                        MeshService.changeDeviceAddress(context, service, "n")
+                                        viewModel.setDeviceAddress("n")
                                     },
                                 )
                             } else if (curVer < MeshService.minDeviceVersion) {

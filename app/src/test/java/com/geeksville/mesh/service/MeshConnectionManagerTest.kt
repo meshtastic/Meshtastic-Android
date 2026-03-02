@@ -48,6 +48,7 @@ import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -71,7 +72,7 @@ class MeshConnectionManagerTest {
     private val packetHandler: PacketHandler = mockk(relaxed = true)
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
     private val locationManager: MeshLocationManager = mockk(relaxed = true)
-    private val mqttManager: MeshMqttManager = mockk(relaxed = true)
+    private val mqttManager: MqttManager = mockk(relaxed = true)
     private val historyManager: HistoryManager = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
     private val commandSender: CommandSender = mockk(relaxed = true)

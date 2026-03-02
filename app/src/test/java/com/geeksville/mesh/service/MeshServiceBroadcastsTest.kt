@@ -25,7 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config

@@ -18,7 +18,6 @@ package com.geeksville.mesh.ui.connections
 
 import android.app.Application
 import android.content.Context
-import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -27,7 +26,6 @@ import com.geeksville.mesh.domain.usecase.GetDiscoveredDevicesUseCase
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
-import com.geeksville.mesh.service.MeshService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -42,8 +40,9 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import javax.inject.Inject
 
@@ -54,6 +53,7 @@ class ScannerViewModel
 constructor(
     private val application: Application,
     private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
     private val bluetoothRepository: BluetoothRepository,
     private val usbRepository: UsbRepository,
     private val radioInterfaceService: RadioInterfaceService,
@@ -117,11 +117,8 @@ constructor(
     }
 
     private fun changeDeviceAddress(address: String) {
-        try {
-            serviceRepository.meshService?.let { service -> MeshService.changeDeviceAddress(context, service, address) }
-        } catch (ex: RemoteException) {
-            Logger.e(ex) { "changeDeviceSelection failed, probably it is shutting down" }
-        }
+        Logger.i { "Attempting to change device address to ${address.anonymize()}" }
+        radioController.setDeviceAddress(address)
     }
 
     /** Initiates the bonding process and connects to the device upon success. */

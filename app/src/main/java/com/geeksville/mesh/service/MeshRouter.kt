@@ -17,6 +17,9 @@
 package com.geeksville.mesh.service
 
 import kotlinx.coroutines.CoroutineScope
+import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.NeighborInfoHandler
+import org.meshtastic.core.repository.TracerouteHandler
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,10 +34,10 @@ class MeshRouter
 constructor(
     val dataHandler: MeshDataHandler,
     val configHandler: MeshConfigHandler,
-    val tracerouteHandler: MeshTracerouteHandler,
-    val neighborInfoHandler: MeshNeighborInfoHandler,
+    val tracerouteHandler: TracerouteHandler,
+    val neighborInfoHandler: NeighborInfoHandler,
     val configFlowManager: MeshConfigFlowManager,
-    val mqttManager: MeshMqttManager,
+    val mqttManager: MqttManager,
     val actionHandler: MeshActionHandler,
 ) {
     fun start(scope: CoroutineScope) {

@@ -34,7 +34,7 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.MeshPacket

@@ -29,10 +29,13 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    api(projects.core.repository)
     implementation(projects.core.di)
     implementation(projects.core.model)
+    implementation(projects.core.proto)
 
-    implementation(libs.coil.network.core)
+    implementation(libs.org.eclipse.paho.client.mqttv3)
+    implementation(libs.okio)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
     implementation(libs.kotlinx.serialization.json)
@@ -40,6 +43,7 @@ dependencies {
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.okhttp3.logging.interceptor)
+    implementation(libs.kermit)
 
     googleImplementation(libs.dd.sdk.android.okhttp)
 }

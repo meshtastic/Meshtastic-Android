@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.repository
 
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.repository.NodeManager
+import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.proto.MeshPacket
-import javax.inject.Inject
-import javax.inject.Singleton
-import org.meshtastic.core.model.util.MeshDataMapper as CommonMeshDataMapper
 
-@Singleton
-class MeshDataMapper @Inject constructor(private val nodeManager: NodeManager) {
-    private val commonMapper = CommonMeshDataMapper(nodeManager)
+/**
+ * Interface for handling neighbor info responses from the mesh.
+ */
+interface NeighborInfoHandler {
+    /** Starts the neighbor info handler with the given coroutine scope. */
+    fun start(scope: CoroutineScope)
 
-    fun toNodeID(n: Int): String = nodeManager.toNodeID(n)
-
-    fun toDataPacket(packet: MeshPacket): DataPacket? = commonMapper.toDataPacket(packet)
+    /**
+     * Processes a neighbor info packet.
+     *
+     * @param packet The received mesh packet.
+     */
+    fun handleNeighborInfo(packet: MeshPacket)
 }

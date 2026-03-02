@@ -33,7 +33,8 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.firmware.FirmwareRetriever
 import org.meshtastic.feature.firmware.FirmwareUpdateState
 import java.io.IOException
@@ -42,12 +43,13 @@ import java.io.IOException
 class Esp32OtaUpdateHandlerTest {
 
     private val firmwareRetriever: FirmwareRetriever = mockk()
-    private val serviceRepository: ServiceRepository = mockk()
+    private val radioController: RadioController = mockk()
+    private val nodeRepository: NodeRepository = mockk()
     private val centralManager: CentralManager = mockk()
     private val context: Context = mockk()
     private val contentResolver: ContentResolver = mockk()
 
-    private val handler = Esp32OtaUpdateHandler(firmwareRetriever, serviceRepository, centralManager, context)
+    private val handler = Esp32OtaUpdateHandler(firmwareRetriever, radioController, nodeRepository, centralManager, context)
 
     @Before
     fun setUp() {

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.network
+package org.meshtastic.core.network.repository
 
 import android.annotation.SuppressLint
 import java.security.cert.X509Certificate
