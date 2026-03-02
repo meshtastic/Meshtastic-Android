@@ -34,10 +34,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.UiText
-import org.meshtastic.core.service.ServiceAction
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsState

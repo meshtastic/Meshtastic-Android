@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig

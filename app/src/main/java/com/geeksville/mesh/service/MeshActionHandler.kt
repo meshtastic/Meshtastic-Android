@@ -32,13 +32,13 @@ import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.Reaction
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config

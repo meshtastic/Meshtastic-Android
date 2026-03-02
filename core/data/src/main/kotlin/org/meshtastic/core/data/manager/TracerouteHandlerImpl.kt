@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -26,24 +26,19 @@ import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
+import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.traceroute_duration
-import org.meshtastic.core.resources.traceroute_route_back_to_us
-import org.meshtastic.core.resources.traceroute_route_towards_dest
-import org.meshtastic.core.resources.unknown_username
-import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.service.TracerouteResponse
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.MeshPacket
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MeshTracerouteHandler
+class TracerouteHandlerImpl
 @Inject
 constructor(
     private val nodeManager: NodeManager,
@@ -51,22 +46,22 @@ constructor(
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
     private val commandSender: CommandSender,
-) {
+) : TracerouteHandler {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
     }
 
-    fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: kotlinx.coroutines.Job?) {
+    override fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: kotlinx.coroutines.Job?) {
         val full =
             packet.getFullTracerouteResponse(
                 getUser = { num ->
                     nodeManager.nodeDBbyNodeNum[num]?.let { node: Node -> "${node.user.long_name} (${node.user.short_name})" }
-                        ?: getString(Res.string.unknown_username)
+                        ?: "Unknown" // We don't have strings in core:data yet, but we can fix this later
                 },
-                headerTowards = getString(Res.string.traceroute_route_towards_dest),
-                headerBack = getString(Res.string.traceroute_route_back_to_us),
+                headerTowards = "Route towards destination:",
+                headerBack = "Route back to us:",
             ) ?: return
 
         val requestId = packet.decoded?.request_id ?: 0
@@ -90,7 +85,7 @@ constructor(
                 val elapsedMs = nowMillis - start
                 val seconds = elapsedMs / MILLIS_PER_SECOND
                 Logger.i { "Traceroute $requestId complete in $seconds s" }
-                val durationText = getString(Res.string.traceroute_duration, "%.1f".format(Locale.US, seconds))
+                val durationText = "Duration: %.1f s".format(Locale.US, seconds)
                 "$full\n\n$durationText"
             } else {
                 full

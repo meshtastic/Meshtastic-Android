@@ -26,7 +26,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject

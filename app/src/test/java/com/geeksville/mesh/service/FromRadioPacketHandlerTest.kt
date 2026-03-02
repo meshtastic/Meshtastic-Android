@@ -21,7 +21,8 @@ import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -33,7 +34,7 @@ import org.meshtastic.proto.QueueStatus
 class FromRadioPacketHandlerTest {
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val router: MeshRouter = mockk(relaxed = true)
-    private val mqttManager: MeshMqttManager = mockk(relaxed = true)
+    private val mqttManager: MqttManager = mockk(relaxed = true)
     private val packetHandler: PacketHandler = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
 

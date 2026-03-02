@@ -24,8 +24,9 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.proto.User
 
@@ -34,6 +35,7 @@ class NodeManagementActionsTest {
 
     private val nodeRepository = mockk<NodeRepository>(relaxed = true)
     private val serviceRepository = mockk<ServiceRepository>(relaxed = true)
+    private val radioController = mockk<RadioController>(relaxed = true)
     private val alertManager = mockk<AlertManager>(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -42,6 +44,7 @@ class NodeManagementActionsTest {
         NodeManagementActions(
             nodeRepository = nodeRepository,
             serviceRepository = serviceRepository,
+            radioController = radioController,
             alertManager = alertManager,
         )
 

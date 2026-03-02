@@ -16,10 +16,13 @@
  */
 package org.meshtastic.core.service
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.ClientNotification
 import javax.inject.Inject
@@ -30,7 +33,8 @@ import javax.inject.Singleton
 class AndroidRadioControllerImpl
 @Inject
 constructor(
-    private val serviceRepository: ServiceRepository,
+    @ApplicationContext private val context: Context,
+    private val serviceRepository: AndroidServiceRepository,
     private val nodeRepository: NodeRepository,
 ) : RadioController {
 
@@ -63,6 +67,14 @@ constructor(
                 manually_verified = nodeDef.manuallyVerified,
             )
         serviceRepository.onServiceAction(ServiceAction.SendContact(contact))
+    }
+
+    override suspend fun setLocalConfig(config: org.meshtastic.proto.Config) {
+        serviceRepository.meshService?.setConfig(config.encode())
+    }
+
+    override suspend fun setLocalChannel(channel: org.meshtastic.proto.Channel) {
+        serviceRepository.meshService?.setChannel(channel.encode())
     }
 
     override suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int) {
@@ -125,6 +137,14 @@ constructor(
         serviceRepository.meshService?.requestReboot(packetId, destNum)
     }
 
+    override suspend fun rebootToDfu(nodeNum: Int) {
+        serviceRepository.meshService?.rebootToDfu(nodeNum)
+    }
+
+    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+        serviceRepository.meshService?.requestRebootOta(requestId, destNum, mode, hash)
+    }
+
     override suspend fun shutdown(destNum: Int, packetId: Int) {
         serviceRepository.meshService?.requestShutdown(packetId, destNum)
     }
@@ -139,6 +159,26 @@ constructor(
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
         serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+    }
+
+    override suspend fun requestPosition(destNum: Int, currentPosition: org.meshtastic.core.model.Position) {
+        serviceRepository.meshService?.requestPosition(destNum, currentPosition)
+    }
+
+    override suspend fun requestUserInfo(destNum: Int) {
+        serviceRepository.meshService?.requestUserInfo(destNum)
+    }
+
+    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {
+        serviceRepository.meshService?.requestTraceroute(requestId, destNum)
+    }
+
+    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
+        serviceRepository.meshService?.requestTelemetry(requestId, destNum, typeValue)
+    }
+
+    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {
+        serviceRepository.meshService?.requestNeighborInfo(requestId, destNum)
     }
 
     override suspend fun beginEditSettings(destNum: Int) {
@@ -157,5 +197,14 @@ constructor(
 
     override fun stopProvideLocation() {
         serviceRepository.meshService?.stopProvideLocation()
+    }
+
+    override fun setDeviceAddress(address: String) {
+        serviceRepository.meshService?.setDeviceAddress(address)
+        // Ensure service is running/restarted to handle the new address
+        val intent = android.content.Intent().apply {
+            setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
+        }
+        context.startForegroundService(intent)
     }
 }

@@ -31,14 +31,17 @@ import org.junit.Test
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -62,8 +65,8 @@ class MeshDataHandlerTest {
     private val historyManager: HistoryManager = mockk(relaxed = true)
     private val meshPrefs: MeshPrefs = mockk(relaxed = true)
     private val connectionManager: MeshConnectionManager = mockk(relaxed = true)
-    private val tracerouteHandler: MeshTracerouteHandler = mockk(relaxed = true)
-    private val neighborInfoHandler: MeshNeighborInfoHandler = mockk(relaxed = true)
+    private val tracerouteHandler: TracerouteHandler = mockk(relaxed = true)
+    private val neighborInfoHandler: NeighborInfoHandler = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
     private val messageFilterService: MessageFilterService = mockk(relaxed = true)
 

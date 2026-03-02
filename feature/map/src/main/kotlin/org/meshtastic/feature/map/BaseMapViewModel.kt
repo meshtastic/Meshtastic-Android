@@ -16,10 +16,8 @@
  */
 package org.meshtastic.feature.map
 
-import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,7 +29,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.TimeConstants
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -41,46 +39,30 @@ import org.meshtastic.core.resources.eight_hours
 import org.meshtastic.core.resources.one_day
 import org.meshtastic.core.resources.one_hour
 import org.meshtastic.core.resources.two_days
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
-import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
-
-@Suppress("MagicNumber")
-sealed class LastHeardFilter(val seconds: Long, val label: StringResource) {
-    data object Any : LastHeardFilter(0L, Res.string.any)
-
-    data object OneHour : LastHeardFilter(TimeConstants.ONE_HOUR.inWholeSeconds, Res.string.one_hour)
-
-    data object EightHours : LastHeardFilter(TimeConstants.EIGHT_HOURS.inWholeSeconds, Res.string.eight_hours)
-
-    data object OneDay : LastHeardFilter(TimeConstants.ONE_DAY.inWholeSeconds, Res.string.one_day)
-
-    data object TwoDays : LastHeardFilter(TimeConstants.TWO_DAYS.inWholeSeconds, Res.string.two_days)
-
-    companion object {
-        fun fromSeconds(seconds: Long): LastHeardFilter = entries.find { it.seconds == seconds } ?: Any
-
-        val entries = listOf(Any, OneHour, EightHours, OneDay, TwoDays)
-    }
-}
 
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
-    private val nodeRepository: NodeRepository,
+    protected open val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
 ) : ViewModel() {
 
     val myNodeInfo = nodeRepository.myNodeInfo
+
+    val ourNodeInfo = nodeRepository.ourNodeInfo
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
 
     val myId = nodeRepository.myId
+
+    val isConnected = radioController.connectionState.map { it is org.meshtastic.core.model.ConnectionState.Connected }
+        .stateInWhileSubscribed(initialValue = false)
 
     val nodes: StateFlow<List<Node>> =
         nodeRepository
@@ -107,64 +89,52 @@ abstract class BaseMapViewModel(
             .stateInWhileSubscribed(initialValue = emptyMap())
 
     private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites)
-
-    private val showWaypointsOnMap = MutableStateFlow(mapPrefs.showWaypointsOnMap)
-
-    private val showPrecisionCircleOnMap = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
-
-    private val lastHeardFilter = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter))
-
-    private val lastHeardTrackFilter = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter))
-
-    fun setLastHeardFilter(filter: LastHeardFilter) {
-        mapPrefs.lastHeardFilter = filter.seconds
-        lastHeardFilter.value = filter
-    }
-
-    fun setLastHeardTrackFilter(filter: LastHeardFilter) {
-        mapPrefs.lastHeardTrackFilter = filter.seconds
-        lastHeardTrackFilter.value = filter
-    }
-
-    val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
-
-    fun getNodeByNum(nodeNum: Int): Node? = nodeRepository.nodeDBbyNum.value[nodeNum]
-
-    open fun getUser(userId: String?): User = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
-
-    fun getUser(nodeNum: Int): User = nodeRepository.getUser(nodeNum)
-
-    fun getNodeOrFallback(nodeNum: Int): Node = getNodeByNum(nodeNum) ?: Node(num = nodeNum, user = getUser(nodeNum))
-
-    val isConnected =
-        serviceRepository.connectionState.map { it.isConnected() }.stateInWhileSubscribed(initialValue = false)
+    val showOnlyFavoritesOnMap = showOnlyFavorites
 
     fun toggleOnlyFavorites() {
-        val current = showOnlyFavorites.value
-        mapPrefs.showOnlyFavorites = !current
-        showOnlyFavorites.value = !current
+        val newValue = !showOnlyFavorites.value
+        showOnlyFavorites.value = newValue
+        mapPrefs.showOnlyFavorites = newValue
     }
+
+    private val showWaypoints = MutableStateFlow(mapPrefs.showWaypointsOnMap)
+    val showWaypointsOnMap = showWaypoints
 
     fun toggleShowWaypointsOnMap() {
-        val current = showWaypointsOnMap.value
-        mapPrefs.showWaypointsOnMap = !current
-        showWaypointsOnMap.value = !current
+        val newValue = !showWaypoints.value
+        showWaypoints.value = newValue
+        mapPrefs.showWaypointsOnMap = newValue
     }
+
+    private val showPrecisionCircle = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
+    val showPrecisionCircleOnMap = showPrecisionCircle
 
     fun toggleShowPrecisionCircleOnMap() {
-        val current = showPrecisionCircleOnMap.value
-        mapPrefs.showPrecisionCircleOnMap = !current
-        showPrecisionCircleOnMap.value = !current
+        val newValue = !showPrecisionCircle.value
+        showPrecisionCircle.value = newValue
+        mapPrefs.showPrecisionCircleOnMap = newValue
     }
 
-    fun generatePacketId(): Int? {
-        return try {
-            serviceRepository.meshService?.packetId
-        } catch (ex: RemoteException) {
-            Logger.e { "RemoteException: ${ex.message}" }
-            return null
-        }
+    private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter))
+    val lastHeardFilter = lastHeardFilterValue
+
+    fun setLastHeardFilter(filter: LastHeardFilter) {
+        lastHeardFilterValue.value = filter
+        mapPrefs.lastHeardFilter = filter.seconds
     }
+
+    private val lastHeardTrackFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter))
+    val lastHeardTrackFilter = lastHeardTrackFilterValue
+
+    fun setLastHeardTrackFilter(filter: LastHeardFilter) {
+        lastHeardTrackFilterValue.value = filter
+        mapPrefs.lastHeardTrackFilter = filter.seconds
+    }
+
+    abstract fun getUser(userId: String?): org.meshtastic.proto.User
+
+    fun getNodeOrFallback(nodeNum: Int): Node =
+        nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
@@ -178,12 +148,12 @@ abstract class BaseMapViewModel(
     }
 
     private fun sendDataPacket(p: DataPacket) {
-        try {
-            serviceRepository.meshService?.send(p)
-        } catch (ex: RemoteException) {
-            Logger.e { "Send DataPacket error: ${ex.message}" }
+        viewModelScope.launch(Dispatchers.IO) {
+            radioController.sendMessage(p)
         }
     }
+
+    fun generatePacketId(): Int = radioController.getPacketId()
 
     data class MapFilterState(
         val onlyFavorites: Boolean,
@@ -257,4 +227,17 @@ fun BaseMapViewModel.tracerouteNodeSelection(
         nodesForMarkers = nodesForMarkers,
         nodeLookup = nodesForLookup.associateBy { it.num },
     )
+}
+
+enum class LastHeardFilter(val label: StringResource, val seconds: Long) {
+    Any(Res.string.any, 0L),
+    OneHour(Res.string.one_hour, 3600L),
+    EightHours(Res.string.eight_hours, 28800L),
+    OneDay(Res.string.one_day, 86400L),
+    TwoDays(Res.string.two_days, 172800L),
+    ;
+
+    companion object {
+        fun fromSeconds(seconds: Long): LastHeardFilter = entries.find { it.seconds == seconds } ?: Any
+    }
 }

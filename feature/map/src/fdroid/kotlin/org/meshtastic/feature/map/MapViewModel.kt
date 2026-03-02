@@ -23,13 +23,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.navigation.MapRoutes
+import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.core.prefs.map.MapPrefs
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
@@ -41,12 +41,12 @@ class MapViewModel
 constructor(
     mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
-    private val nodeRepository: NodeRepository,
-    serviceRepository: ServiceRepository,
+    override val nodeRepository: NodeRepository,
+    radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
     buildConfigProvider: BuildConfigProvider,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.toRoute<MapRoutes.Map>().waypointId)
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
