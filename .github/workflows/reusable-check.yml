@@ -12,6 +12,9 @@ on:
       run_instrumented_tests:
         type: boolean
         default: true
+      run_screenshot_tests:
+        type: boolean
+        default: true
       flavors:
         type: string
         default: '["google"]'
@@ -107,6 +110,15 @@ jobs:
             elif [ "$FLAVOR" = "fdroid" ]; then
               TASKS="$TASKS assembleFdroidDebug "
               [ "${{ inputs.run_unit_tests }}" = "true" ] && TASKS="$TASKS testFdroidDebugUnitTest "
+            fi
+          fi
+          
+          # Screenshot Test Tasks
+          if [ "${{ inputs.run_screenshot_tests }}" = "true" ] && [ "$IS_FIRST_API" = "true" ]; then
+            if [ "$FLAVOR" = "google" ]; then
+              TASKS="$TASKS validateGoogleDebugScreenshotTest "
+            elif [ "$FLAVOR" = "fdroid" ]; then
+              TASKS="$TASKS validateFdroidDebugScreenshotTest "
             fi
           fi
           

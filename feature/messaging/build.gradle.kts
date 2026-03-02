@@ -20,9 +20,15 @@ plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.screenshot)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.feature.messaging" }
+configure<LibraryExtension> {
+    namespace = "org.meshtastic.feature.messaging"
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
+
+    testOptions { unitTests { isIncludeAndroidResources = true } }
+}
 
 dependencies {
     implementation(projects.core.analytics)
@@ -68,4 +74,10 @@ dependencies {
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.robolectric)
+
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
+    screenshotTestImplementation(libs.compose.multiplatform.runtime)
+    screenshotTestImplementation(libs.compose.multiplatform.resources)
+    screenshotTestImplementation(projects.core.resources)
 }

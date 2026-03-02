@@ -68,8 +68,9 @@ import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.new_messages_below
-import org.meshtastic.feature.messaging.component.MessageItem
-import org.meshtastic.feature.messaging.component.ReactionDialog
+import org.meshtastic.core.ui.component.DeliveryInfo
+import org.meshtastic.core.ui.component.MessageItem
+import org.meshtastic.core.ui.component.ReactionDialog
 
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,

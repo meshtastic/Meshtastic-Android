@@ -31,6 +31,7 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_1
 import org.meshtastic.core.resources.channel_2
 import org.meshtastic.core.resources.channel_3
+import org.meshtastic.core.ui.component.InfoCard
 import org.meshtastic.feature.node.model.VectorMetricInfo
 
 /**

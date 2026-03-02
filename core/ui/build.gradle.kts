@@ -21,9 +21,13 @@ plugins {
     alias(libs.plugins.meshtastic.android.library.compose)
     alias(libs.plugins.meshtastic.android.library.flavors)
     alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.screenshot)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.ui" }
+configure<LibraryExtension> {
+    namespace = "org.meshtastic.core.ui"
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
+}
 
 dependencies {
     implementation(projects.core.common)
@@ -55,4 +59,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.runner)
 
     testImplementation(libs.junit)
+
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
 }

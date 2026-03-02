@@ -61,6 +61,8 @@ import org.meshtastic.core.resources.uv_lux
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.resources.weight
 import org.meshtastic.core.resources.wind
+import org.meshtastic.core.ui.component.DrawableInfoCard
+import org.meshtastic.core.ui.component.InfoCard
 import org.meshtastic.feature.node.model.DrawableMetricInfo
 import org.meshtastic.feature.node.model.VectorMetricInfo
 import org.meshtastic.proto.Config
