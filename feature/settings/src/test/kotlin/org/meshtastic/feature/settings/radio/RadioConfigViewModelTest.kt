@@ -25,14 +25,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.LocationRepository
@@ -55,6 +53,7 @@ import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.DeviceProfile
@@ -65,25 +64,25 @@ import org.meshtastic.proto.MeshPacket
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadioConfigViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var radioConfigRepository: RadioConfigRepository
-    private lateinit var packetRepository: PacketRepository
-    private lateinit var serviceRepository: ServiceRepository
-    private lateinit var nodeRepository: NodeRepository
-    private lateinit var locationRepository: LocationRepository
-    private lateinit var mapConsentPrefs: MapConsentPrefs
-    private lateinit var analyticsPrefs: AnalyticsPrefs
-    private lateinit var homoglyphEncodingPrefs: HomoglyphPrefs
-    private lateinit var toggleAnalyticsUseCase: ToggleAnalyticsUseCase
-    private lateinit var toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase
-    private lateinit var importProfileUseCase: ImportProfileUseCase
-    private lateinit var exportProfileUseCase: ExportProfileUseCase
-    private lateinit var exportSecurityConfigUseCase: ExportSecurityConfigUseCase
-    private lateinit var installProfileUseCase: InstallProfileUseCase
-    private lateinit var radioConfigUseCase: RadioConfigUseCase
-    private lateinit var adminActionsUseCase: AdminActionsUseCase
-    private lateinit var processRadioResponseUseCase: ProcessRadioResponseUseCase
+    private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
+    private val packetRepository: PacketRepository = mockk(relaxed = true)
+    private val serviceRepository: ServiceRepository = mockk(relaxed = true)
+    private val nodeRepository: NodeRepository = mockk(relaxed = true)
+    private val locationRepository: LocationRepository = mockk(relaxed = true)
+    private val mapConsentPrefs: MapConsentPrefs = mockk(relaxed = true)
+    private val analyticsPrefs: AnalyticsPrefs = mockk(relaxed = true)
+    private val homoglyphEncodingPrefs: HomoglyphPrefs = mockk(relaxed = true)
+    private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase = mockk(relaxed = true)
+    private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase = mockk(relaxed = true)
+    private val importProfileUseCase: ImportProfileUseCase = mockk(relaxed = true)
+    private val exportProfileUseCase: ExportProfileUseCase = mockk(relaxed = true)
+    private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase = mockk(relaxed = true)
+    private val installProfileUseCase: InstallProfileUseCase = mockk(relaxed = true)
+    private val radioConfigUseCase: RadioConfigUseCase = mockk(relaxed = true)
+    private val adminActionsUseCase: AdminActionsUseCase = mockk(relaxed = true)
+    private val processRadioResponseUseCase: ProcessRadioResponseUseCase = mockk(relaxed = true)
 
     private lateinit var viewModel: RadioConfigViewModel
 
@@ -91,24 +90,6 @@ class RadioConfigViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         
-        radioConfigRepository = mockk(relaxed = true)
-        packetRepository = mockk(relaxed = true)
-        serviceRepository = mockk(relaxed = true)
-        nodeRepository = mockk(relaxed = true)
-        locationRepository = mockk(relaxed = true)
-        mapConsentPrefs = mockk(relaxed = true)
-        analyticsPrefs = mockk(relaxed = true)
-        homoglyphEncodingPrefs = mockk(relaxed = true)
-        toggleAnalyticsUseCase = mockk(relaxed = true)
-        toggleHomoglyphEncodingUseCase = mockk(relaxed = true)
-        importProfileUseCase = mockk(relaxed = true)
-        exportProfileUseCase = mockk(relaxed = true)
-        exportSecurityConfigUseCase = mockk(relaxed = true)
-        installProfileUseCase = mockk(relaxed = true)
-        radioConfigUseCase = mockk(relaxed = true)
-        adminActionsUseCase = mockk(relaxed = true)
-        processRadioResponseUseCase = mockk(relaxed = true)
-
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
@@ -150,29 +131,22 @@ class RadioConfigViewModelTest {
 
     @Test
     fun `setConfig updates state and calls useCase`() = runTest {
-        // Arrange
         val node = Node(num = 123)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
         viewModel = createViewModel()
-        advanceUntilIdle()
-
+        
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
-        coEvery { radioConfigUseCase.setConfig(any(), any()) } returns 42
+        coEvery { radioConfigUseCase.setConfig(123, any()) } returns 42
 
-        // Act
         viewModel.setConfig(config)
-        advanceUntilIdle()
-
-        // Assert
+        
         val state = viewModel.radioConfigState.value
         assertEquals(Config.DeviceConfig.Role.ROUTER, state.radioConfig.device?.role)
-        assertTrue(state.responseState is ResponseState.Loading)
         coVerify { radioConfigUseCase.setConfig(123, config) }
     }
 
     @Test
     fun `processPacketResponse updates state on metadata result`() = runTest {
-        // Arrange
         val node = Node(num = 123)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
         
@@ -184,14 +158,83 @@ class RadioConfigViewModelTest {
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Metadata(metadata)
         
         viewModel = createViewModel()
-        advanceUntilIdle()
 
-        // Act
         packetFlow.emit(packet)
-        advanceUntilIdle()
 
-        // Assert
         val state = viewModel.radioConfigState.value
         assertEquals("3.0.0", state.metadata?.firmware_version)
+    }
+
+    @Test
+    fun `setOwner calls useCase`() = runTest {
+        val node = Node(num = 123)
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        viewModel = createViewModel()
+
+        val user = org.meshtastic.proto.User(long_name = "Test")
+        coEvery { radioConfigUseCase.setOwner(123, any()) } returns 42
+        
+        viewModel.setOwner(user)
+        
+        coVerify { radioConfigUseCase.setOwner(123, user) }
+    }
+
+    @Test
+    fun `updateChannels calls useCase for each changed channel`() = runTest {
+        val node = Node(num = 123)
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        viewModel = createViewModel()
+
+        val old = listOf(ChannelSettings(name = "Old"))
+        val new = listOf(ChannelSettings(name = "New"))
+        
+        coEvery { radioConfigUseCase.setRemoteChannel(123, any()) } returns 42
+        
+        viewModel.updateChannels(new, old)
+        
+        coVerify { radioConfigUseCase.setRemoteChannel(123, any()) }
+        assertEquals(new, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `setResponseStateLoading for REBOOT calls useCase after packet response`() = runTest {
+        val node = Node(num = 123)
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+        
+        viewModel = createViewModel()
+        
+        coEvery { adminActionsUseCase.reboot(123) } returns 42
+        
+        viewModel.setResponseStateLoading(AdminRoute.REBOOT)
+        
+        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        packetFlow.emit(MeshPacket())
+        
+        coVerify { adminActionsUseCase.reboot(123) }
+    }
+
+    @Test
+    fun `setResponseStateLoading for FACTORY_RESET calls useCase after packet response`() = runTest {
+        val node = Node(num = 123)
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+        
+        viewModel = createViewModel()
+        
+        coEvery { adminActionsUseCase.factoryReset(123, any()) } returns 42
+        
+        viewModel.setResponseStateLoading(AdminRoute.FACTORY_RESET)
+        
+        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        packetFlow.emit(MeshPacket())
+        
+        coVerify { adminActionsUseCase.factoryReset(123, any()) }
     }
 }

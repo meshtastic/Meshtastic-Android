@@ -397,8 +397,11 @@ constructor(
     }
 
     private fun requestReboot(destNum: Int) {
+        println("RadioConfigViewModel: requestReboot for $destNum")
         viewModelScope.launch {
+            println("RadioConfigViewModel: launching reboot for $destNum")
             val packetId = adminActionsUseCase.reboot(destNum)
+            println("RadioConfigViewModel: reboot packetId: $packetId")
             registerRequestId(packetId)
         }
     }

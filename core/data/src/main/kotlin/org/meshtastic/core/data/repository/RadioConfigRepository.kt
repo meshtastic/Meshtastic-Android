@@ -36,7 +36,7 @@ import javax.inject.Inject
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
-class RadioConfigRepository
+open class RadioConfigRepository
 @Inject
 constructor(
     private val nodeDB: NodeRepository,
@@ -68,7 +68,7 @@ constructor(
     suspend fun updateChannelSettings(channel: Channel) = channelSetDataSource.updateChannelSettings(channel)
 
     /** Flow representing the [LocalConfig] data store. */
-    val localConfigFlow: Flow<LocalConfig> = localConfigDataSource.localConfigFlow
+    open val localConfigFlow: Flow<LocalConfig> = localConfigDataSource.localConfigFlow
 
     /** Clears the [LocalConfig] data in the data store. */
     suspend fun clearLocalConfig() {

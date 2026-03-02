@@ -26,7 +26,7 @@ import javax.inject.Inject
 /**
  * Use case for interacting with radio configuration components.
  */
-class RadioConfigUseCase @Inject constructor(
+open class RadioConfigUseCase @Inject constructor(
     private val radioController: RadioController,
 ) {
     /**

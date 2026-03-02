@@ -45,7 +45,7 @@ data class TracerouteResponse(
 /** Repository class for managing the [IMeshService] instance and connection state */
 @Suppress("TooManyFunctions")
 @Singleton
-class ServiceRepository @Inject constructor() {
+open class ServiceRepository @Inject constructor() {
     var meshService: IMeshService? = null
         private set
 
@@ -55,7 +55,7 @@ class ServiceRepository @Inject constructor() {
 
     // Connection state to our radio device
     private val _connectionState: MutableStateFlow<ConnectionState> = MutableStateFlow(ConnectionState.Disconnected)
-    val connectionState: StateFlow<ConnectionState>
+    open val connectionState: StateFlow<ConnectionState>
         get() = _connectionState
 
     fun setConnectionState(connectionState: ConnectionState) {

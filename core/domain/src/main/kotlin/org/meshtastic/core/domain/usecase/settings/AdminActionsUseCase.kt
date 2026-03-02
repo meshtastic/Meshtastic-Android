@@ -23,7 +23,7 @@ import javax.inject.Inject
 /**
  * Use case for performing administrative actions on the radio.
  */
-class AdminActionsUseCase @Inject constructor(
+open class AdminActionsUseCase @Inject constructor(
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
 ) {
