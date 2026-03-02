@@ -41,6 +41,7 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
+import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
 import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
@@ -52,7 +53,6 @@ import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.radio.isTcp
 import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
@@ -81,6 +81,7 @@ constructor(
     private val setProvideLocationUseCase: SetProvideLocationUseCase,
     private val setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase,
     private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
+    private val meshLocationUseCase: MeshLocationUseCase,
     private val exportDataUseCase: ExportDataUseCase,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
@@ -96,9 +97,6 @@ constructor(
     val localConfig: StateFlow<LocalConfig> =
         radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
-    val meshService: IMeshService?
-        get() = serviceRepository.meshService
-
     val provideLocation: StateFlow<Boolean> =
         myNodeInfo
             .flatMapLatest { myNodeEntity ->
@@ -110,6 +108,14 @@ constructor(
                 }
             }
             .stateInWhileSubscribed(initialValue = false)
+
+    fun startProvidingLocation() {
+        meshLocationUseCase.startProvidingLocation()
+    }
+
+    fun stopProvidingLocation() {
+        meshLocationUseCase.stopProvidingLocation()
+    }
 
     private val _excludedModulesUnlocked = MutableStateFlow(false)
     val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()

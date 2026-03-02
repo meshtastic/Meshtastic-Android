@@ -27,6 +27,7 @@ import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
@@ -34,8 +35,11 @@ import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.preferences_language
 import org.meshtastic.core.resources.theme
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.feature.settings.radio.ExpressiveSection
+import org.meshtastic.core.ui.theme.AppTheme
 
+/**
+ * Section for app appearance settings like language and theme.
+ */
 @Composable
 fun AppearanceSection(
     onShowLanguagePicker: () -> Unit,
@@ -75,5 +79,16 @@ fun AppearanceSection(
         ) {
             onShowThemePicker()
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AppearanceSectionPreview() {
+    AppTheme {
+        AppearanceSection(
+            onShowLanguagePicker = {},
+            onShowThemePicker = {},
+        )
     }
 }

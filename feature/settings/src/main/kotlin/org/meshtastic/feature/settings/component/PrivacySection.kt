@@ -23,6 +23,7 @@ import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import org.jetbrains.compose.resources.stringResource
@@ -33,9 +34,12 @@ import org.meshtastic.core.resources.app_settings
 import org.meshtastic.core.resources.location_disabled
 import org.meshtastic.core.resources.provide_location_to_mesh
 import org.meshtastic.core.ui.component.SwitchListItem
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
-import org.meshtastic.feature.settings.radio.ExpressiveSection
 
+/**
+ * Section managing privacy settings like analytics and location sharing.
+ */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PrivacySection(
@@ -91,6 +95,24 @@ fun PrivacySection(
         HomoglyphSetting(
             homoglyphEncodingEnabled = homoglyphEnabled,
             onToggle = onToggleHomoglyph,
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PrivacySectionPreview() {
+    AppTheme {
+        PrivacySection(
+            analyticsAvailable = true,
+            analyticsEnabled = true,
+            onToggleAnalytics = {},
+            provideLocation = true,
+            onToggleLocation = {},
+            homoglyphEnabled = false,
+            onToggleHomoglyph = {},
+            startProvideLocation = {},
+            stopProvideLocation = {},
         )
     }
 }

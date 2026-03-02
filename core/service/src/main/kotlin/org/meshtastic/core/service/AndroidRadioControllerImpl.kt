@@ -57,6 +57,10 @@ class AndroidRadioControllerImpl @Inject constructor(
         serviceRepository.meshService?.setModuleConfig(packetId, destNum, config.encode())
     }
 
+    override suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel, packetId: Int) {
+        serviceRepository.meshService?.setRemoteChannel(packetId, destNum, channel.encode())
+    }
+
     override suspend fun setFixedPosition(destNum: Int, position: org.meshtastic.core.model.Position) {
         serviceRepository.meshService?.setFixedPosition(destNum, position)
     }
@@ -67,6 +71,34 @@ class AndroidRadioControllerImpl @Inject constructor(
 
     override suspend fun setCannedMessages(destNum: Int, messages: String) {
         serviceRepository.meshService?.setCannedMessages(destNum, messages)
+    }
+
+    override suspend fun getOwner(destNum: Int, packetId: Int) {
+        serviceRepository.meshService?.getRemoteOwner(packetId, destNum)
+    }
+
+    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {
+        serviceRepository.meshService?.getRemoteConfig(packetId, destNum, configType)
+    }
+
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {
+        serviceRepository.meshService?.getModuleConfig(packetId, destNum, moduleConfigType)
+    }
+
+    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {
+        serviceRepository.meshService?.getRemoteChannel(packetId, destNum, index)
+    }
+
+    override suspend fun getRingtone(destNum: Int, packetId: Int) {
+        serviceRepository.meshService?.getRingtone(packetId, destNum)
+    }
+
+    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {
+        serviceRepository.meshService?.getCannedMessages(packetId, destNum)
+    }
+
+    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {
+        serviceRepository.meshService?.getDeviceConnectionStatus(packetId, destNum)
     }
 
     override suspend fun reboot(destNum: Int, packetId: Int) {
@@ -99,5 +131,13 @@ class AndroidRadioControllerImpl @Inject constructor(
 
     override fun getPacketId(): Int {
         return serviceRepository.meshService?.getPacketId() ?: 0
+    }
+
+    override fun startProvideLocation() {
+        serviceRepository.meshService?.startProvideLocation()
+    }
+
+    override fun stopProvideLocation() {
+        serviceRepository.meshService?.stopProvideLocation()
     }
 }

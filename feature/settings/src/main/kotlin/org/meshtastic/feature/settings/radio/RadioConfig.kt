@@ -18,8 +18,6 @@ package org.meshtastic.feature.settings.radio
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
@@ -35,16 +33,11 @@ import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Upload
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
@@ -72,10 +65,9 @@ import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
+import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigItemList(
     state: RadioConfigState,
@@ -191,29 +183,6 @@ fun RadioConfigItemList(
                 )
             }
         }
-    }
-}
-
-@Composable
-fun ExpressiveSection(
-    title: String,
-    modifier: Modifier = Modifier,
-    titleColor: Color = MaterialTheme.colorScheme.primary,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = title,
-            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = titleColor,
-        )
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
-            content = content,
-        )
     }
 }
 

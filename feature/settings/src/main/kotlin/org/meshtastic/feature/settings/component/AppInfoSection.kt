@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -47,10 +48,13 @@ import org.meshtastic.core.resources.modules_already_unlocked
 import org.meshtastic.core.resources.modules_unlocked
 import org.meshtastic.core.resources.system_settings
 import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
-import org.meshtastic.feature.settings.radio.ExpressiveSection
 import kotlin.time.Duration.Companion.seconds
 
+/**
+ * Section displaying application information and related actions.
+ */
 @Composable
 fun AppInfoSection(
     appVersionName: String,
@@ -139,5 +143,19 @@ private fun AppVersionButton(
                 scope.launch { context.showToast(Res.string.modules_unlocked) }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AppInfoSectionPreview() {
+    AppTheme {
+        AppInfoSection(
+            appVersionName = "2.5.0",
+            excludedModulesUnlocked = false,
+            onUnlockExcludedModules = {},
+            onShowAppIntro = {},
+            onNavigateToAbout = {},
+        )
     }
 }

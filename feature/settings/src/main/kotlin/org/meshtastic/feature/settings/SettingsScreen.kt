@@ -219,8 +219,8 @@ fun SettingsScreen(
                 onToggleLocation = { settingsViewModel.setProvideLocation(it) },
                 homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
                 onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                startProvideLocation = { settingsViewModel.meshService?.startProvideLocation() },
-                stopProvideLocation = { settingsViewModel.meshService?.stopProvideLocation() },
+                startProvideLocation = { settingsViewModel.startProvidingLocation() },
+                stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
             )
 
             AppearanceSection(

@@ -40,9 +40,18 @@ class FakeRadioController : RadioController {
     override suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int) {}
     override suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int) {}
     override suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int) {}
+    override suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel, packetId: Int) {}
     override suspend fun setFixedPosition(destNum: Int, position: org.meshtastic.core.model.Position) {}
     override suspend fun setRingtone(destNum: Int, ringtone: String) {}
     override suspend fun setCannedMessages(destNum: Int, messages: String) {}
+
+    override suspend fun getOwner(destNum: Int, packetId: Int) {}
+    override suspend fun getConfig(destNum: Int, configType: Int, packetId: Int) {}
+    override suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int, packetId: Int) {}
+    override suspend fun getChannel(destNum: Int, index: Int, packetId: Int) {}
+    override suspend fun getRingtone(destNum: Int, packetId: Int) {}
+    override suspend fun getCannedMessages(destNum: Int, packetId: Int) {}
+    override suspend fun getDeviceConnectionStatus(destNum: Int, packetId: Int) {}
 
     override suspend fun reboot(destNum: Int, packetId: Int) {}
     override suspend fun shutdown(destNum: Int, packetId: Int) {}
@@ -54,6 +63,9 @@ class FakeRadioController : RadioController {
     override suspend fun commitEditSettings(destNum: Int) {}
 
     override fun getPacketId(): Int = 1
+
+    override fun startProvideLocation() {}
+    override fun stopProvideLocation() {}
 
     // --- Helper methods for testing ---
     
