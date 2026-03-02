@@ -29,6 +29,7 @@ graph TB
   :feature:settings -.-> :core:data
   :feature:settings -.-> :core:database
   :feature:settings -.-> :core:datastore
+  :feature:settings -.-> :core:domain
   :feature:settings -.-> :core:model
   :feature:settings -.-> :core:navigation
   :feature:settings -.-> :core:nfc
