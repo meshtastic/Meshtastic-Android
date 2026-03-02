@@ -22,7 +22,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
 import android.os.RemoteException
-import android.util.Base64
 import androidx.annotation.RequiresPermission
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
@@ -44,8 +43,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
-import org.json.JSONObject
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
@@ -53,6 +50,10 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
+import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
+import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
@@ -123,6 +124,10 @@ constructor(
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase,
     private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase,
+    private val importProfileUseCase: ImportProfileUseCase,
+    private val exportProfileUseCase: ExportProfileUseCase,
+    private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase,
+    private val installProfileUseCase: InstallProfileUseCase,
 ) : ViewModel() {
     private val meshService: IMeshService?
         get() = serviceRepository.meshService
@@ -499,10 +504,10 @@ constructor(
 
     fun importProfile(uri: Uri, onResult: (DeviceProfile) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            app.contentResolver.openInputStream(uri).use { inputStream ->
-                val bytes = inputStream?.readBytes() ?: ByteArray(0)
-                val protobuf = DeviceProfile.ADAPTER.decode(bytes)
-                onResult(protobuf)
+            app.contentResolver.openInputStream(uri)?.use { inputStream ->
+                importProfileUseCase(inputStream)
+                    .onSuccess(onResult)
+                    .onFailure { throw it }
             }
         } catch (ex: Exception) {
             Logger.e { "Import DeviceProfile error: ${ex.message}" }
@@ -510,103 +515,46 @@ constructor(
         }
     }
 
-    fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch { writeToUri(uri, profile) }
-
-    private suspend fun writeToUri(uri: Uri, message: com.squareup.wire.Message<*, *>) = withContext(Dispatchers.IO) {
-        try {
-            app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
-                    outputStream.write(message.encode())
+    fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            try {
+                app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                    FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                        exportProfileUseCase(outputStream, profile)
+                            .onSuccess { setResponseStateSuccess() }
+                            .onFailure { throw it }
+                    }
                 }
+            } catch (ex: Exception) {
+                Logger.e { "Can't write file error: ${ex.message}" }
+                sendError(ex.customMessage)
             }
-            setResponseStateSuccess()
-        } catch (ex: Exception) {
-            Logger.e { "Can't write file error: ${ex.message}" }
-            sendError(ex.customMessage)
         }
     }
 
     fun exportSecurityConfig(uri: Uri, securityConfig: Config.SecurityConfig) =
-        viewModelScope.launch { writeSecurityKeysJsonToUri(uri, securityConfig) }
-
-    private val indentSpaces = 4
-
-    private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: Config.SecurityConfig) =
-        withContext(Dispatchers.IO) {
-            try {
-                val publicKeyBytes = securityConfig.public_key.toByteArray()
-                val privateKeyBytes = securityConfig.private_key.toByteArray()
-
-                // Convert byte arrays to Base64 strings for human readability in JSON
-                val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
-                val privateKeyBase64 = Base64.encodeToString(privateKeyBytes, Base64.NO_WRAP)
-
-                // Create a JSON object
-                val jsonObject =
-                    JSONObject().apply {
-                        put("timestamp", nowMillis)
-                        put("public_key", publicKeyBase64)
-                        put("private_key", privateKeyBase64)
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                try {
+                    app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                        FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                            exportSecurityConfigUseCase(outputStream, securityConfig)
+                                .onSuccess { setResponseStateSuccess() }
+                                .onFailure { throw it }
+                        }
                     }
-
-                // Convert JSON object to a string
-                val jsonString = jsonObject.toString(indentSpaces)
-
-                app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                    FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
-                        outputStream.write(jsonString.toByteArray(Charsets.UTF_8))
-                    }
+                } catch (ex: Exception) {
+                    val errorMessage = "Can't write security keys JSON error: ${ex.message}"
+                    Logger.e { errorMessage }
+                    sendError(ex.customMessage)
                 }
-                setResponseStateSuccess()
-            } catch (ex: Exception) {
-                val errorMessage = "Can't write security keys JSON error: ${ex.message}"
-                Logger.e { errorMessage }
-                sendError(ex.customMessage)
             }
         }
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNode.value?.num ?: return
-        with(protobuf) {
-            meshService?.beginEditSettings(destNum)
-            if (long_name != null || short_name != null) {
-                destNode.value?.user?.let {
-                    val user = it.copy(long_name = long_name ?: it.long_name, short_name = short_name ?: it.short_name)
-                    setOwner(user)
-                }
-            }
-            config?.let { lc ->
-                lc.device?.let { setConfig(Config(device = it)) }
-                lc.position?.let { setConfig(Config(position = it)) }
-                lc.power?.let { setConfig(Config(power = it)) }
-                lc.network?.let { setConfig(Config(network = it)) }
-                lc.display?.let { setConfig(Config(display = it)) }
-                lc.lora?.let { setConfig(Config(lora = it)) }
-                lc.bluetooth?.let { setConfig(Config(bluetooth = it)) }
-                lc.security?.let { setConfig(Config(security = it)) }
-            }
-            if (fixed_position != null) {
-                setFixedPosition(Position(fixed_position!!))
-            }
-            module_config?.let { lmc ->
-                lmc.mqtt?.let { setModuleConfig(ModuleConfig(mqtt = it)) }
-                lmc.serial?.let { setModuleConfig(ModuleConfig(serial = it)) }
-                lmc.external_notification?.let { setModuleConfig(ModuleConfig(external_notification = it)) }
-                lmc.store_forward?.let { setModuleConfig(ModuleConfig(store_forward = it)) }
-                lmc.range_test?.let { setModuleConfig(ModuleConfig(range_test = it)) }
-                lmc.telemetry?.let { setModuleConfig(ModuleConfig(telemetry = it)) }
-                lmc.canned_message?.let { setModuleConfig(ModuleConfig(canned_message = it)) }
-                lmc.audio?.let { setModuleConfig(ModuleConfig(audio = it)) }
-                lmc.remote_hardware?.let { setModuleConfig(ModuleConfig(remote_hardware = it)) }
-                lmc.neighbor_info?.let { setModuleConfig(ModuleConfig(neighbor_info = it)) }
-                lmc.ambient_lighting?.let { setModuleConfig(ModuleConfig(ambient_lighting = it)) }
-                lmc.detection_sensor?.let { setModuleConfig(ModuleConfig(detection_sensor = it)) }
-                lmc.paxcounter?.let { setModuleConfig(ModuleConfig(paxcounter = it)) }
-                lmc.statusmessage?.let { setModuleConfig(ModuleConfig(statusmessage = it)) }
-                lmc.traffic_management?.let { setModuleConfig(ModuleConfig(traffic_management = it)) }
-                lmc.tak?.let { setModuleConfig(ModuleConfig(tak = it)) }
-            }
-            meshService?.commitEditSettings(destNum)
+        viewModelScope.launch {
+            installProfileUseCase(destNum, protobuf, destNode.value?.user)
         }
     }
 
