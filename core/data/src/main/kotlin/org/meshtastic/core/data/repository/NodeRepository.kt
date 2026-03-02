@@ -131,7 +131,7 @@ constructor(
         .map { info -> if (nodeNum == info?.myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum }
         .distinctUntilChanged()
 
-    fun getNodeDBbyNum() =
+    fun getNodeEntityDBbyNumFlow() =
         nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     /** Returns the [Node] associated with a given [userId]. Falls back to a generic node if not found. */

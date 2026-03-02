@@ -61,6 +61,14 @@ class AndroidRadioControllerImpl @Inject constructor(
         serviceRepository.meshService?.setFixedPosition(destNum, position)
     }
 
+    override suspend fun setRingtone(destNum: Int, ringtone: String) {
+        serviceRepository.meshService?.setRingtone(destNum, ringtone)
+    }
+
+    override suspend fun setCannedMessages(destNum: Int, messages: String) {
+        serviceRepository.meshService?.setCannedMessages(destNum, messages)
+    }
+
     override suspend fun reboot(destNum: Int, packetId: Int) {
         serviceRepository.meshService?.requestReboot(packetId, destNum)
     }
@@ -75,6 +83,10 @@ class AndroidRadioControllerImpl @Inject constructor(
 
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {
         serviceRepository.meshService?.requestNodedbReset(packetId, destNum, preserveFavorites)
+    }
+
+    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {
+        serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
     }
 
     override suspend fun beginEditSettings(destNum: Int) {

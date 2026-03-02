@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clean_node_database_description
 import org.meshtastic.core.resources.clean_node_database_title
@@ -150,7 +150,7 @@ private fun UnknownNodesFilter(onlyUnknownNodes: Boolean, onCheckedChanged: (Boo
  * @param nodesToDelete The list of nodes to be deleted.
  */
 @Composable
-private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
+private fun NodesDeletionPreview(nodesToDelete: List<Node>) {
     Text(
         stringResource(Res.string.nodes_queued_for_deletion, nodesToDelete.size),
         modifier = Modifier.padding(bottom = 16.dp),
@@ -161,7 +161,7 @@ private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
         verticalArrangement = Arrangement.Center,
     ) {
         nodesToDelete.forEach { node ->
-            NodeChip(node = node.toModel(), modifier = Modifier.padding(end = 8.dp, bottom = 8.dp))
+            NodeChip(node = node, modifier = Modifier.padding(end = 8.dp, bottom = 8.dp))
         }
     }
 }
