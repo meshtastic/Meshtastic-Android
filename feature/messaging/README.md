@@ -27,8 +27,10 @@ A security-focused utility that detects and transforms homoglyphs (visually simi
 graph TB
   :feature:messaging[messaging]:::android-feature
   :feature:messaging -.-> :core:analytics
+  :feature:messaging -.-> :core:common
   :feature:messaging -.-> :core:data
   :feature:messaging -.-> :core:database
+  :feature:messaging -.-> :core:domain
   :feature:messaging -.-> :core:model
   :feature:messaging -.-> :core:navigation
   :feature:messaging -.-> :core:prefs
