@@ -19,12 +19,15 @@ interface RadioController {
     suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int)
     suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int)
     suspend fun setFixedPosition(destNum: Int, position: Position)
+    suspend fun setRingtone(destNum: Int, ringtone: String)
+    suspend fun setCannedMessages(destNum: Int, messages: String)
 
     // Admin operations
     suspend fun reboot(destNum: Int, packetId: Int)
     suspend fun shutdown(destNum: Int, packetId: Int)
     suspend fun factoryReset(destNum: Int, packetId: Int)
     suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean)
+    suspend fun removeByNodenum(packetId: Int, nodeNum: Int)
 
     // Batch editing
     suspend fun beginEditSettings(destNum: Int)

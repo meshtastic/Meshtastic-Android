@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
@@ -53,5 +54,33 @@ class UpdateRadioConfigUseCase @Inject constructor(
         val packetId = radioController.getPacketId()
         radioController.setModuleConfig(destNum, config, packetId)
         return packetId
+    }
+
+    /**
+     * Updates the fixed position on the radio.
+     */
+    suspend fun setFixedPosition(destNum: Int, position: Position) {
+        radioController.setFixedPosition(destNum, position)
+    }
+
+    /**
+     * Removes the fixed position on the radio.
+     */
+    suspend fun removeFixedPosition(destNum: Int) {
+        radioController.setFixedPosition(destNum, Position(0.0, 0.0, 0))
+    }
+
+    /**
+     * Sets the ringtone on the radio.
+     */
+    suspend fun setRingtone(destNum: Int, ringtone: String) {
+        radioController.setRingtone(destNum, ringtone)
+    }
+
+    /**
+     * Sets the canned messages on the radio.
+     */
+    suspend fun setCannedMessages(destNum: Int, messages: String) {
+        radioController.setCannedMessages(destNum, messages)
     }
 }

@@ -41,11 +41,14 @@ class FakeRadioController : RadioController {
     override suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int) {}
     override suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int) {}
     override suspend fun setFixedPosition(destNum: Int, position: org.meshtastic.core.model.Position) {}
+    override suspend fun setRingtone(destNum: Int, ringtone: String) {}
+    override suspend fun setCannedMessages(destNum: Int, messages: String) {}
 
     override suspend fun reboot(destNum: Int, packetId: Int) {}
     override suspend fun shutdown(destNum: Int, packetId: Int) {}
     override suspend fun factoryReset(destNum: Int, packetId: Int) {}
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
+    override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
 
     override suspend fun beginEditSettings(destNum: Int) {}
     override suspend fun commitEditSettings(destNum: Int) {}

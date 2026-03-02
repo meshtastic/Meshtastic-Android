@@ -49,6 +49,7 @@ import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
@@ -129,6 +130,7 @@ constructor(
     private val exportSecurityConfigUseCase: ExportSecurityConfigUseCase,
     private val installProfileUseCase: InstallProfileUseCase,
     private val updateRadioConfigUseCase: UpdateRadioConfigUseCase,
+    private val adminActionsUseCase: AdminActionsUseCase,
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
 ) : ViewModel() {
     private val meshService: IMeshService?
@@ -379,10 +381,8 @@ constructor(
     fun setRingtone(ringtone: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        try {
-            meshService?.setRingtone(destNum, ringtone)
-        } catch (ex: RemoteException) {
-            Logger.e { "Set ringtone error: ${ex.message}" }
+        viewModelScope.launch {
+            updateRadioConfigUseCase.setRingtone(destNum, ringtone)
         }
     }
 
@@ -395,10 +395,8 @@ constructor(
     fun setCannedMessages(messages: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        try {
-            meshService?.setCannedMessages(destNum, messages)
-        } catch (ex: RemoteException) {
-            Logger.e { "Set canned messages error: ${ex.message}" }
+        viewModelScope.launch {
+            updateRadioConfigUseCase.setCannedMessages(destNum, messages)
         }
     }
 
@@ -414,25 +412,28 @@ constructor(
         "Request getDeviceConnectionStatus error",
     )
 
-    private fun requestShutdown(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.requestShutdown(packetId, dest) },
-        "Request shutdown error",
-    )
+    private fun requestShutdown(destNum: Int) {
+        viewModelScope.launch {
+            val packetId = adminActionsUseCase.shutdown(destNum)
+            registerRequestId(packetId)
+        }
+    }
 
-    private fun requestReboot(destNum: Int) =
-        request(destNum, { service, packetId, dest -> service.requestReboot(packetId, dest) }, "Request reboot error")
+    private fun requestReboot(destNum: Int) {
+        viewModelScope.launch {
+            val packetId = adminActionsUseCase.reboot(destNum)
+            registerRequestId(packetId)
+        }
+    }
 
     private fun requestFactoryReset(destNum: Int) {
-        request(
-            destNum,
-            { service, packetId, dest -> service.requestFactoryReset(packetId, dest) },
-            "Request factory reset error",
-        )
-        if (destNum == myNodeNum) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            val packetId = adminActionsUseCase.factoryReset(destNum)
+            registerRequestId(packetId)
+
+            if (destNum == myNodeNum) {
                 // Clear the service's in-memory node cache first so screens refresh immediately.
-                val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
+                val existingNodeNums = nodeRepository.getNodeEntityDBbyNumFlow().firstOrNull()?.keys?.toList().orEmpty()
                 meshService?.let { service ->
                     existingNodeNums.forEach { service.removeByNodenum(service.getPacketId(), it) }
                 }
@@ -442,15 +443,13 @@ constructor(
     }
 
     private fun requestNodedbReset(destNum: Int, preserveFavorites: Boolean) {
-        request(
-            destNum,
-            { service, packetId, dest -> service.requestNodedbReset(packetId, dest, preserveFavorites) },
-            "Request NodeDB reset error",
-        )
-        if (destNum == myNodeNum) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            val packetId = adminActionsUseCase.nodedbReset(destNum, preserveFavorites)
+            registerRequestId(packetId)
+
+            if (destNum == myNodeNum) {
                 // Clear the service's in-memory node cache as well so UI updates immediately.
-                val existingNodeNums = nodeRepository.getNodeDBbyNum().firstOrNull()?.keys?.toList().orEmpty()
+                val existingNodeNums = nodeRepository.getNodeEntityDBbyNumFlow().firstOrNull()?.keys?.toList().orEmpty()
                 meshService?.let { service ->
                     existingNodeNums.forEach { service.removeByNodenum(service.getPacketId(), it) }
                 }
@@ -483,14 +482,17 @@ constructor(
 
     fun setFixedPosition(position: Position) {
         val destNum = destNode.value?.num ?: return
-        try {
-            meshService?.setFixedPosition(destNum, position)
-        } catch (ex: RemoteException) {
-            Logger.e { "Set fixed position error: ${ex.message}" }
+        viewModelScope.launch {
+            updateRadioConfigUseCase.setFixedPosition(destNum, position)
         }
     }
 
-    fun removeFixedPosition() = setFixedPosition(Position(0.0, 0.0, 0))
+    fun removeFixedPosition() {
+        val destNum = destNode.value?.num ?: return
+        viewModelScope.launch {
+            updateRadioConfigUseCase.removeFixedPosition(destNum)
+        }
+    }
 
     fun importProfile(uri: Uri, onResult: (DeviceProfile) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {

@@ -34,6 +34,7 @@ import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
+import org.meshtastic.proto.User
 import org.robolectric.RobolectricTestRunner
 import java.io.BufferedWriter
 import java.io.StringWriter
@@ -57,12 +58,15 @@ class ExportDataUseCaseTest {
         // Arrange
         val myNodeNum = 123
         val senderNodeNum = 456
-        val senderNode = mockk<Node>(relaxed = true)
-        every { senderNode.user.long_name } returns "Sender Name"
-        every { senderNode.num } returns senderNodeNum
+        val senderNode = Node(
+            num = senderNodeNum,
+            user = User(long_name = "Sender Name")
+        )
         
         val nodes = mapOf(senderNodeNum to senderNode)
-        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(nodes)
+        val stateFlow = MutableStateFlow(nodes)
+        every { nodeRepository.nodeDBbyNum } returns stateFlow
+        every { nodeRepository.getNodeEntityDBbyNumFlow() } returns flowOf(emptyMap())
 
         val meshPacket = MeshPacket(
             from = senderNodeNum,
