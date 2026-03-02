@@ -928,4 +928,7 @@
     <string name="all_time">Összes</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Piros</string>
+    <string name="tak_team_blue">Kék</string>
+    <string name="tak_team_green">Zöld</string>
 </resources>

@@ -1154,4 +1154,8 @@
     <string name="refresh">刷新</string>
     <string name="updated">更新</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">红</string>
+    <string name="tak_team_blue">蓝</string>
+    <string name="tak_team_green">绿</string>
+    <string name="traffic_management_enabled">开启模块</string>
 </resources>

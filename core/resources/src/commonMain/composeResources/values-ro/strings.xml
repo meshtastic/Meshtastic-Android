@@ -640,4 +640,7 @@
     <string name="all_time">Toate</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Roșu</string>
+    <string name="tak_team_blue">Albastru</string>
+    <string name="tak_team_green">Verde</string>
 </resources>

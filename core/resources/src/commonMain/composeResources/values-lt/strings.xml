@@ -248,4 +248,5 @@
     <!-- Compass -->
     <!-- Message Filter -->
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Raudona</string>
 </resources>

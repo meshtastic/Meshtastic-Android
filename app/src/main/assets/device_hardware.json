@@ -1349,47 +1349,5 @@
     "images": [
       "tbeam-1w.svg"
     ]
-  },
-  {
-    "hwModel": 123,
-    "hwModelSlug": "T5_S3_EPAPER_PRO",
-    "platformioTarget": "t5-s3-epaper-pro",
-    "architecture": "esp32-s3",
-    "activelySupported": true,
-    "supportLevel": 1,
-    "displayName": "LilyGo T5 S3 ePaper Pro",
-    "tags": [
-      "LilyGo"
-    ],
-    "hasMui": true,
-    "partitionScheme": "8MB"
-  },
-  {
-    "hwModel": 124,
-    "hwModelSlug": "TBEAM_BPF",
-    "platformioTarget": "tbeam-bpf",
-    "architecture": "esp32-s3",
-    "activelySupported": true,
-    "supportLevel": 1,
-    "displayName": "LilyGo T-Beam BPF",
-    "tags": [
-      "LilyGo"
-    ],
-    "hasMui": false,
-    "partitionScheme": "8MB"
-  },
-  {
-    "hwModel": 125,
-    "hwModelSlug": "MINI_EPAPER_S3",
-    "platformioTarget": "mini-epaper-s3",
-    "architecture": "esp32-s3",
-    "activelySupported": true,
-    "supportLevel": 1,
-    "displayName": "LilyGo T-Mini E-paper S3 Kit",
-    "tags": [
-      "LilyGo"
-    ],
-    "hasMui": true,
-    "partitionScheme": "8MB"
   }
 ]

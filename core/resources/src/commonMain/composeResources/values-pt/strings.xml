@@ -555,4 +555,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Configuração</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Vermelho</string>
+    <string name="tak_team_blue">Azul</string>
+    <string name="tak_team_green">Verde</string>
 </resources>
