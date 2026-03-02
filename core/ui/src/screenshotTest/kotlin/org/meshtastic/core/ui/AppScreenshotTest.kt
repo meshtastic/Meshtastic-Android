@@ -24,8 +24,8 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.ui.component.AdaptiveTwoPane
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.preview.previewNode
-import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.proto.ChannelSet
 
 class AppScreenshotTest {
@@ -43,7 +43,7 @@ class AppScreenshotTest {
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onClickChip = {}
+                onClickChip = {},
             )
         }
     }
@@ -54,14 +54,10 @@ class AppScreenshotTest {
     fun ScannedQrCodeDialogTest() {
         AppTheme {
             ScannedQrCodeDialog(
-                channels = ChannelSet(
-                    settings = listOf(Channel.default.settings),
-                    lora_config = Channel.default.loraConfig
-                ),
-                incoming = ChannelSet(
-                    settings = listOf(Channel.default.settings),
-                    lora_config = Channel.default.loraConfig
-                ),
+                channels =
+                ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
+                incoming =
+                ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
                 onDismiss = {},
                 onConfirm = {},
             )
@@ -72,23 +68,13 @@ class AppScreenshotTest {
     @Preview(showBackground = true, widthDp = 800)
     @Composable
     fun AdaptiveTwoPaneExpandedTest() {
-        AppTheme {
-            AdaptiveTwoPane(
-                first = { Text("Left Pane") },
-                second = { Text("Right Pane") }
-            )
-        }
+        AppTheme { AdaptiveTwoPane(first = { Text("Left Pane") }, second = { Text("Right Pane") }) }
     }
 
     @PreviewTest
     @Preview(showBackground = true, widthDp = 400)
     @Composable
     fun AdaptiveTwoPaneCompactTest() {
-        AppTheme {
-            AdaptiveTwoPane(
-                first = { Text("Top Pane") },
-                second = { Text("Bottom Pane") }
-            )
-        }
+        AppTheme { AdaptiveTwoPane(first = { Text("Top Pane") }, second = { Text("Bottom Pane") }) }
     }
 }

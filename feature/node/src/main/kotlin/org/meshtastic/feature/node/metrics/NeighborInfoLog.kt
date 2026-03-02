@@ -46,6 +46,7 @@ import org.meshtastic.core.model.getNeighborInfoResponse
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.neighbor_info
 import org.meshtastic.core.resources.routing_error_no_response
+import org.meshtastic.core.ui.component.CooldownIconButton
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Groups
 import org.meshtastic.core.ui.icon.MeshtasticIcons
@@ -55,7 +56,6 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.annotateNeighborInfo
-import org.meshtastic.core.ui.component.CooldownIconButton
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 
 @OptIn(ExperimentalFoundationApi::class)

@@ -19,11 +19,11 @@ package org.meshtastic.core.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.tools.screenshot.PreviewTest
-import org.meshtastic.core.ui.util.PreviewTextAlert
-import org.meshtastic.core.ui.util.PreviewIconAlert
-import org.meshtastic.core.ui.util.PreviewHtmlAlert
-import org.meshtastic.core.ui.util.PreviewMultipleChoiceAlert
 import org.meshtastic.core.ui.util.PreviewComposableAlert
+import org.meshtastic.core.ui.util.PreviewHtmlAlert
+import org.meshtastic.core.ui.util.PreviewIconAlert
+import org.meshtastic.core.ui.util.PreviewMultipleChoiceAlert
+import org.meshtastic.core.ui.util.PreviewTextAlert
 
 class AlertScreenshotTest {
 

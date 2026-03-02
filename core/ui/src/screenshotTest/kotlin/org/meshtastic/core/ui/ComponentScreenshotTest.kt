@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  Of not, see <https://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.ui
 
@@ -65,90 +65,70 @@ class ComponentScreenshotTest {
     @Preview(showBackground = true)
     @Composable
     fun BatteryInfoTest(@PreviewParameter(BatteryInfoPreviewParameterProvider::class) info: Pair<Int?, Float?>) {
-        AppTheme {
-            MaterialBatteryInfo(level = info.first, voltage = info.second)
-        }
+        AppTheme { MaterialBatteryInfo(level = info.first, voltage = info.second) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun SignalInfoTest(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
-        AppTheme {
-            SignalInfo(node = node)
-        }
+        AppTheme { SignalInfo(node = node) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun NodeChipTest(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
-        AppTheme {
-            NodeChip(node = node)
-        }
+        AppTheme { NodeChip(node = node) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun DistanceInfoTest() {
-        AppTheme {
-            DistanceInfo(distance = "12.3 km")
-        }
+        AppTheme { DistanceInfo(distance = "12.3 km") }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun ElevationInfoTest() {
-        AppTheme {
-            ElevationInfo(altitude = 1234, system = Config.DisplayConfig.DisplayUnits.METRIC, suffix = "m")
-        }
+        AppTheme { ElevationInfo(altitude = 1234, system = Config.DisplayConfig.DisplayUnits.METRIC, suffix = "m") }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun HopsInfoTest() {
-        AppTheme {
-            HopsInfo(hops = 3)
-        }
+        AppTheme { HopsInfo(hops = 3) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun SatelliteCountInfoTest() {
-        AppTheme {
-            SatelliteCountInfo(satCount = 8)
-        }
+        AppTheme { SatelliteCountInfo(satCount = 8) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun ChannelInfoTest() {
-        AppTheme {
-            ChannelInfo(channel = 1)
-        }
+        AppTheme { ChannelInfo(channel = 1) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun ListItemTest() {
-        AppTheme {
-            ListItem(text = "Example Item", leadingIcon = Icons.Rounded.Android) {}
-        }
+        AppTheme { ListItem(text = "Example Item", leadingIcon = Icons.Rounded.Android) {} }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun SwitchListItemTest() {
-        AppTheme {
-            SwitchListItem(checked = true, text = "Example Switch", onClick = {})
-        }
+        AppTheme { SwitchListItem(checked = true, text = "Example Switch", onClick = {}) }
     }
 
     @PreviewTest
@@ -156,11 +136,7 @@ class ComponentScreenshotTest {
     @Composable
     fun TitledCardTest() {
         AppTheme {
-            Surface {
-                TitledCard(title = "Example Title") {
-                    Box(modifier = Modifier.fillMaxWidth().height(50.dp))
-                }
-            }
+            Surface { TitledCard(title = "Example Title") { Box(modifier = Modifier.fillMaxWidth().height(50.dp)) } }
         }
     }
 
@@ -168,40 +144,28 @@ class ComponentScreenshotTest {
     @Preview(showBackground = true)
     @Composable
     fun IAQScaleTest() {
-        AppTheme {
-            IAQScale()
-        }
+        AppTheme { IAQScale() }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun IndoorAirQualityPillTest() {
-        AppTheme {
-            IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Pill)
-        }
+        AppTheme { IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Pill) }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun AutoLinkTextTest() {
-        AppTheme {
-            AutoLinkText("Check out https://meshtastic.org for more info!")
-        }
+        AppTheme { AutoLinkText("Check out https://meshtastic.org for more info!") }
     }
 
     @PreviewTest
     @Preview(showBackground = true)
     @Composable
     fun SecurityIconTest() {
-        AppTheme {
-            Column {
-                SecurityState.entries.forEach { state ->
-                    SecurityIcon(securityState = state)
-                }
-            }
-        }
+        AppTheme { Column { SecurityState.entries.forEach { state -> SecurityIcon(securityState = state) } } }
     }
 
     @PreviewTest
@@ -228,7 +192,7 @@ class ComponentScreenshotTest {
                 enabled = true,
                 isSelected = true,
                 onSelected = {},
-                channel = Channel.default
+                channel = Channel.default,
             )
         }
     }
@@ -242,7 +206,7 @@ class ComponentScreenshotTest {
                 title = "Share Contact",
                 uri = Uri.parse("https://meshtastic.org/u/dummy"),
                 qrCode = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888),
-                onDismiss = {}
+                onDismiss = {},
             )
         }
     }
