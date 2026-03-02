@@ -33,8 +33,10 @@ dependencies {
     implementation(projects.core.prefs)
     implementation(projects.core.data)
     implementation(projects.core.datastore)
+    implementation(projects.core.resources)
     
     implementation(libs.kermit)
+    implementation(libs.compose.multiplatform.resources)
     
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
