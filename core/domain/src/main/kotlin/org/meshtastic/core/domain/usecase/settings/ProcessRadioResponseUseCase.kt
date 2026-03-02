@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ sealed class RadioResponseResult {
     data class Ringtone(val ringtone: String) : RadioResponseResult()
     data class ConnectionStatus(val status: DeviceConnectionStatus) : RadioResponseResult()
     data class Error(val message: UiText) : RadioResponseResult()
-    object Success : RadioResponseResult()
+    data object Success : RadioResponseResult()
 }
 
 /**
