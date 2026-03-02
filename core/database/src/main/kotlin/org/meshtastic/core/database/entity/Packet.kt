@@ -24,12 +24,12 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import okio.ByteString
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.model.Message
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.getShortDateTime
-import org.meshtastic.proto.User
 
 data class PacketEntity(
     @Embedded val packet: Packet,
@@ -129,24 +129,6 @@ data class ContactSettings(
     val isMuted
         get() = nowMillis <= muteUntil
 }
-
-data class Reaction(
-    val replyId: Int,
-    val user: User,
-    val emoji: String,
-    val timestamp: Long,
-    val snr: Float,
-    val rssi: Int,
-    val hopsAway: Int,
-    val packetId: Int = 0,
-    val status: MessageStatus = MessageStatus.UNKNOWN,
-    val routingError: Int = 0,
-    val relays: Int = 0,
-    val relayNode: Int? = null,
-    val to: String? = null,
-    val channel: Int = 0,
-    val sfppHash: ByteString? = null,
-)
 
 @Suppress("ConstructorParameterNaming")
 @Entity(

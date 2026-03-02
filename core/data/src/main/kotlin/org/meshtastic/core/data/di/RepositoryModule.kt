@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
-}
+package org.meshtastic.core.data.di
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.prefs" }
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.data.repository.NodeRepositoryImpl
+import org.meshtastic.core.repository.NodeRepository
+import javax.inject.Singleton
 
-dependencies {
-    implementation(projects.core.repository)
-    googleImplementation(libs.maps.compose)
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class RepositoryModule {
 
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
+    @Binds
+    @Singleton
+    abstract fun bindNodeRepository(
+        nodeRepositoryImpl: NodeRepositoryImpl
+    ): NodeRepository
 }

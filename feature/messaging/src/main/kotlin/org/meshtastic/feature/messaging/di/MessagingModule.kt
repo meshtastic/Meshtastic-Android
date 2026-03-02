@@ -20,7 +20,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.meshtastic.core.domain.MessageQueue
+import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.feature.messaging.domain.worker.WorkManagerMessageQueue
 
 @Module

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
+package org.meshtastic.core.repository
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
-}
-
-configure<LibraryExtension> { namespace = "org.meshtastic.core.prefs" }
-
-dependencies {
-    implementation(projects.core.repository)
-    googleImplementation(libs.maps.compose)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
+interface HomoglyphPrefs {
+    val homoglyphEncodingEnabled: Boolean
 }

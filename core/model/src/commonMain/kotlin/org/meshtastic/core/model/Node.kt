@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.database.model
+package org.meshtastic.core.model
 
 import okio.ByteString
+import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.model.Capabilities
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.Config
@@ -34,7 +32,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.PowerMetrics
-import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 
 /**
@@ -88,7 +85,7 @@ data class Node(
         get() = (publicKey ?: user.public_key)?.size?.let { it > 0 } == true
 
     val mismatchKey
-        get() = (publicKey ?: user.public_key) == NodeEntity.ERROR_BYTE_STRING
+        get() = (publicKey ?: user.public_key) == ERROR_BYTE_STRING
 
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics()
@@ -188,34 +185,10 @@ data class Node(
     fun getTelemetryStrings(isFahrenheit: Boolean = false): List<String> =
         environmentMetrics.getDisplayStrings(isFahrenheit)
 
-    fun toEntity() = NodeEntity(
-        num = num,
-        user = user,
-        position = position,
-        latitude = latitude,
-        longitude = longitude,
-        snr = snr,
-        rssi = rssi,
-        lastHeard = lastHeard,
-        deviceTelemetry = Telemetry(device_metrics = deviceMetrics),
-        channel = channel,
-        viaMqtt = viaMqtt,
-        hopsAway = hopsAway,
-        isFavorite = isFavorite,
-        isIgnored = isIgnored,
-        isMuted = isMuted,
-        environmentTelemetry = Telemetry(environment_metrics = environmentMetrics),
-        powerTelemetry = Telemetry(power_metrics = powerMetrics),
-        paxcounter = paxcounter,
-        publicKey = publicKey ?: user.public_key,
-        notes = notes,
-        manuallyVerified = manuallyVerified,
-        nodeStatus = nodeStatus,
-        lastTransport = lastTransport,
-    )
-
     companion object {
         private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+
+        val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
 
         /** Creates a fallback [Node] when the node is not found in the database. */
         fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {

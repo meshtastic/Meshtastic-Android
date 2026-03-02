@@ -14,23 +14,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.domain.usecase
+package org.meshtastic.core.repository.usecase
 
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.database.entity.Packet
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.domain.MessageQueue
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
+import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.proto.Config
-import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -39,9 +37,7 @@ import kotlin.random.Random
  * delivery.
  */
 @Suppress("TooGenericExceptionCaught")
-class SendMessageUseCase
-@Inject
-constructor(
+class SendMessageUseCase(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
@@ -94,25 +90,14 @@ constructor(
                 status = MessageStatus.QUEUED
             }
 
-        val packetToSave =
-            Packet(
-                uuid = 0L,
-                myNodeNum = ourNode?.num ?: 0,
-                packetId = packetId,
-                port_num = packet.dataType,
-                contact_key = contactKey,
-                received_time = nowMillis,
-                read = true,
-                data = packet,
-                snr = packet.snr,
-                rssi = packet.rssi,
-                hopsAway = packet.hopsAway,
-                filtered = false,
-            )
-
         try {
             // Write to the DB to immediately reflect the queued state on the UI
-            packetRepository.insert(packetToSave)
+            packetRepository.savePacket(
+                myNodeNum = ourNode?.num ?: 0,
+                contactKey = contactKey,
+                packet = packet,
+                receivedTime = nowMillis,
+            )
 
             // Enqueue for durable transmission via the platform-specific queue
             messageQueue.enqueue(packetId)

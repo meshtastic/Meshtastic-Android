@@ -14,20 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.prefs" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        androidResources.enable = false
+    }
 
-dependencies {
-    implementation(projects.core.repository)
-    googleImplementation(libs.maps.compose)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.core.model)
+            api(projects.core.proto)
+            implementation(projects.core.common)
+            
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kermit)
+        }
+    }
 }

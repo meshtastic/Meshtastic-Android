@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import javax.inject.Inject
 
 /** Use case for performing administrative actions on the radio. */

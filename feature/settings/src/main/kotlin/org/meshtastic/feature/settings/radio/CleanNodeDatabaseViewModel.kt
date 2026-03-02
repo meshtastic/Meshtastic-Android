@@ -24,8 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.domain.usecase.settings.CleanNodeDatabaseUseCase
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.clean_node_database_confirmation

@@ -32,8 +32,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.service.ServiceAction

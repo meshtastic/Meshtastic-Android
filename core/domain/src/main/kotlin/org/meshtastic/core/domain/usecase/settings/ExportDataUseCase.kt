@@ -19,9 +19,9 @@ package org.meshtastic.core.domain.usecase.settings
 import android.icu.text.SimpleDateFormat
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.PortNum
 import java.io.BufferedWriter
 import java.util.Locale

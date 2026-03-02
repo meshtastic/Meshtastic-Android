@@ -36,11 +36,13 @@ kotlin {
         commonMain.dependencies {
             api(projects.core.proto)
             api(projects.core.common)
+            api(projects.core.resources)
 
             api(libs.kotlinx.serialization.json)
             api(libs.kotlinx.datetime)
             implementation(libs.kermit)
             api(libs.okio)
+            api(libs.compose.multiplatform.resources)
         }
         androidMain.dependencies {
             api(libs.androidx.annotation)

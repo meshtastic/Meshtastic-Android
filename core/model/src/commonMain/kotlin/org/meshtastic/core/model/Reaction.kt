@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.domain
+package org.meshtastic.core.model
 
-/**
- * Interface for enqueuing background work for transmitting messages. This allows the domain layer to trigger durable
- * transmission without depending on Android-specific WorkManager.
- */
-interface MessageQueue {
-    suspend fun enqueue(packetId: Int)
-}
+import okio.ByteString
+import org.meshtastic.proto.User
+
+data class Reaction(
+    val replyId: Int,
+    val user: User,
+    val emoji: String,
+    val timestamp: Long,
+    val snr: Float,
+    val rssi: Int,
+    val hopsAway: Int,
+    val packetId: Int = 0,
+    val status: MessageStatus = MessageStatus.UNKNOWN,
+    val routingError: Int = 0,
+    val relays: Int = 0,
+    val relayNode: Int? = null,
+    val to: String? = null,
+    val channel: Int = 0,
+    val sfppHash: ByteString? = null,
+)

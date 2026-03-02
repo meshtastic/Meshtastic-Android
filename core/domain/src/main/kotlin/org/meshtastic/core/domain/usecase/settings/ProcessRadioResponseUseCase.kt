@@ -17,7 +17,7 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.database.model.getStringResFrom
+import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel

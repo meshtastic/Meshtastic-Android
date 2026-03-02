@@ -17,10 +17,10 @@
 package org.meshtastic.core.service
 
 import kotlinx.coroutines.flow.StateFlow
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.ClientNotification
 import javax.inject.Inject
 import javax.inject.Singleton

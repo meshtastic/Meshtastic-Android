@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,21 +30,48 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.ContactSettings
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
-import org.meshtastic.core.database.model.Message
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
 import javax.inject.Inject
+import org.meshtastic.core.repository.PacketRepository as SharedPacketRepository
 
 class PacketRepository
 @Inject
 constructor(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
-) {
+) : SharedPacketRepository {
+    override suspend fun savePacket(
+        myNodeNum: Int,
+        contactKey: String,
+        packet: DataPacket,
+        receivedTime: Long,
+        read: Boolean,
+        filtered: Boolean,
+    ) {
+        val packetToSave =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                packetId = packet.id,
+                port_num = packet.dataType,
+                contact_key = contactKey,
+                received_time = receivedTime,
+                read = read,
+                data = packet,
+                snr = packet.snr,
+                rssi = packet.rssi,
+                hopsAway = packet.hopsAway,
+                filtered = filtered,
+            )
+        insert(packetToSave)
+    }
+
     fun getWaypoints(): Flow<List<Packet>> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getAllWaypointsFlow() }
 
@@ -96,7 +123,7 @@ constructor(
             dao.upsertContactSettings(listOf(updated))
         }
 
-    suspend fun getQueuedPackets(): List<DataPacket>? =
+    override suspend fun getQueuedPackets(): List<DataPacket>? =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getQueuedPackets() }
 
     suspend fun insert(packet: Packet) =
@@ -148,7 +175,7 @@ constructor(
             }
         }
 
-    suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) =
+    override suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().updateMessageStatus(d, m) }
 
     suspend fun updateMessageId(d: DataPacket, id: Int) =

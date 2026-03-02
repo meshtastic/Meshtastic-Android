@@ -29,15 +29,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.database.entity.Packet
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.domain.FakeRadioController
-import org.meshtastic.core.domain.MessageQueue
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 
@@ -90,7 +90,7 @@ class SendMessageUseCaseTest {
         assertEquals(0, radioController.favoritedNodes.size)
         assertEquals(0, radioController.sentSharedContacts.size)
 
-        coVerify { packetRepository.insert(any<Packet>()) }
+        coVerify { packetRepository.savePacket(any(), any(), any(), any()) }
         coVerify { messageQueue.enqueue(any()) }
     }
 
@@ -120,7 +120,7 @@ class SendMessageUseCaseTest {
         assertEquals(1, radioController.favoritedNodes.size)
         assertEquals(12345, radioController.favoritedNodes[0])
 
-        coVerify { packetRepository.insert(any<Packet>()) }
+        coVerify { packetRepository.savePacket(any(), any(), any(), any()) }
         coVerify { messageQueue.enqueue(any()) }
     }
 
@@ -149,7 +149,7 @@ class SendMessageUseCaseTest {
         assertEquals(1, radioController.sentSharedContacts.size)
         assertEquals(67890, radioController.sentSharedContacts[0])
 
-        coVerify { packetRepository.insert(any<Packet>()) }
+        coVerify { packetRepository.savePacket(any(), any(), any(), any()) }
         coVerify { messageQueue.enqueue(any()) }
     }
 
@@ -166,9 +166,9 @@ class SendMessageUseCaseTest {
         useCase(originalText, "0${DataPacket.ID_BROADCAST}", null)
 
         // Assert
-        val packetSlot = slot<Packet>()
-        coVerify { packetRepository.insert(capture(packetSlot)) }
-        assertTrue(packetSlot.captured.data?.text?.contains("Apple") == true)
+        val packetSlot = slot<DataPacket>()
+        coVerify { packetRepository.savePacket(any(), any(), capture(packetSlot), any()) }
+        assertTrue(packetSlot.captured.text?.contains("Apple") == true)
         coVerify { messageQueue.enqueue(any()) }
     }
 }

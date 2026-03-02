@@ -109,6 +109,8 @@ interface PrefsModule {
 
     @Binds fun bindHomoglyphEncodingPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): HomoglyphPrefs
 
+    @Binds fun bindSharedHomoglyphPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): org.meshtastic.core.repository.HomoglyphPrefs
+
     @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
 
     @Binds fun bindMapConsentPrefs(mapConsentPrefsImpl: MapConsentPrefsImpl): MapConsentPrefs

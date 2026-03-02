@@ -40,13 +40,15 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
@@ -56,7 +58,7 @@ import javax.inject.Singleton
 /** Repository for managing node-related data, including hardware info, node database, and identity. */
 @Singleton
 @Suppress("TooManyFunctions")
-open class NodeRepository
+class NodeRepositoryImpl
 @Inject
 constructor(
     @ProcessLifecycle private val processLifecycle: Lifecycle,
@@ -64,28 +66,29 @@ constructor(
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,
     private val localStatsDataSource: LocalStatsDataSource,
-) {
+) : NodeRepository {
     /** Hardware info about our local device (can be null if not connected). */
-    open val myNodeInfo: StateFlow<MyNodeEntity?> =
+    override val myNodeInfo: StateFlow<MyNodeInfo?> =
         nodeInfoReadDataSource
             .myNodeInfoFlow()
+            .map { it?.toMyNodeInfo() }
             .flowOn(dispatchers.io)
             .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
 
     private val _ourNodeInfo = MutableStateFlow<Node?>(null)
 
     /** Information about the locally connected node, as seen from the mesh. */
-    open val ourNodeInfo: StateFlow<Node?>
+    override val ourNodeInfo: StateFlow<Node?>
         get() = _ourNodeInfo
 
     private val _myId = MutableStateFlow<String?>(null)
 
     /** The unique userId (hex string) of our local node. */
-    val myId: StateFlow<String?>
+    override val myId: StateFlow<String?>
         get() = _myId
 
     /** The latest local stats telemetry received from the locally connected node. */
-    val localStats: StateFlow<LocalStats> =
+    override val localStats: StateFlow<LocalStats> =
         localStatsDataSource.localStatsFlow.stateIn(
             processLifecycle.coroutineScope,
             SharingStarted.Eagerly,
@@ -93,12 +96,12 @@ constructor(
         )
 
     /** Update the cached local stats telemetry. */
-    fun updateLocalStats(stats: LocalStats) {
+    override fun updateLocalStats(stats: LocalStats) {
         processLifecycle.coroutineScope.launch { localStatsDataSource.setLocalStats(stats) }
     }
 
     /** A reactive map from nodeNum to [Node] objects, representing the entire mesh. */
-    val nodeDBbyNum: StateFlow<Map<Int, Node>> =
+    override val nodeDBbyNum: StateFlow<Map<Int, Node>> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
             .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
@@ -115,7 +118,9 @@ constructor(
         }
 
         // Keep ourNodeInfo and myId correctly updated based on current connection and node DB
-        combine(nodeDBbyNum, myNodeInfo) { db, info -> info?.myNodeNum?.let { db[it] } }
+        combine(nodeDBbyNum, nodeInfoReadDataSource.myNodeInfoFlow()) { db, info ->
+            info?.myNodeNum?.let { db[it] }
+        }
             .onEach { node ->
                 _ourNodeInfo.value = node
                 _myId.value = node?.user?.id
@@ -127,7 +132,7 @@ constructor(
      * Returns the node number used for log queries. Maps [nodeNum] to [MeshLog.NODE_NUM_LOCAL] (0) if it is the locally
      * connected node.
      */
-    fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = myNodeInfo
+    override fun effectiveLogNodeId(nodeNum: Int): Flow<Int> = nodeInfoReadDataSource.myNodeInfoFlow()
         .map { info -> if (nodeNum == info?.myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum }
         .distinctUntilChanged()
 
@@ -135,14 +140,14 @@ constructor(
         nodeInfoReadDataSource.nodeDBbyNumFlow().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     /** Returns the [Node] associated with a given [userId]. Falls back to a generic node if not found. */
-    fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
+    override fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
         ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))
 
     /** Returns the [User] info for a given [nodeNum]. */
-    fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
+    override fun getUser(nodeNum: Int): User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
 
     /** Returns the [User] info for a given [userId]. Falls back to a generic user if not found. */
-    fun getUser(userId: String): User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
+    override fun getUser(userId: String): User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
         ?: User(
             id = userId,
             long_name =
@@ -161,13 +166,13 @@ constructor(
         )
 
     /** Returns a flow of nodes filtered and sorted according to the parameters. */
-    fun getNodes(
-        sort: NodeSortOption = NodeSortOption.LAST_HEARD,
-        filter: String = "",
-        includeUnknown: Boolean = true,
-        onlyOnline: Boolean = false,
-        onlyDirect: Boolean = false,
-    ) = nodeInfoReadDataSource
+    override fun getNodes(
+        sort: NodeSortOption,
+        filter: String,
+        includeUnknown: Boolean,
+        onlyOnline: Boolean,
+        onlyDirect: Boolean,
+    ): Flow<List<Node>> = nodeInfoReadDataSource
         .getNodesFlow(
             sort = sort.sqlValue,
             filter = filter,
@@ -187,36 +192,40 @@ constructor(
         withContext(dispatchers.io) { nodeInfoWriteDataSource.installConfig(mi, nodes) }
 
     /** Deletes all nodes from the database, optionally preserving favorites. */
-    suspend fun clearNodeDB(preserveFavorites: Boolean = false) =
+    override suspend fun clearNodeDB(preserveFavorites: Boolean) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.clearNodeDB(preserveFavorites) }
 
     /** Clears the local node's connection info. */
-    suspend fun clearMyNodeInfo() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearMyNodeInfo() }
+    override suspend fun clearMyNodeInfo() = withContext(dispatchers.io) { nodeInfoWriteDataSource.clearMyNodeInfo() }
 
     /** Deletes a node and its metadata by [num]. */
-    suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
+    override suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.deleteNode(num)
         nodeInfoWriteDataSource.deleteMetadata(num)
     }
 
     /** Deletes multiple nodes and their metadata. */
-    suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
+    override suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
         nodeInfoWriteDataSource.deleteNodes(nodeNums)
         nodeNums.forEach { nodeInfoWriteDataSource.deleteMetadata(it) }
     }
 
-    suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
-        withContext(dispatchers.io) { nodeInfoReadDataSource.getNodesOlderThan(lastHeard) }
+    override suspend fun getNodesOlderThan(lastHeard: Int): List<Node> =
+        withContext(dispatchers.io) {
+            nodeInfoReadDataSource.getNodesOlderThan(lastHeard).map { it.toModel() }
+        }
 
-    suspend fun getUnknownNodes(): List<NodeEntity> =
-        withContext(dispatchers.io) { nodeInfoReadDataSource.getUnknownNodes() }
+    override suspend fun getUnknownNodes(): List<Node> =
+        withContext(dispatchers.io) {
+            nodeInfoReadDataSource.getUnknownNodes().map { it.toModel() }
+        }
 
     /** Persists hardware metadata for a node. */
     suspend fun insertMetadata(metadata: MetadataEntity) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(metadata) }
 
     /** Flow emitting the count of nodes currently considered "online". */
-    val onlineNodeCount: Flow<Int> =
+    override val onlineNodeCount: Flow<Int> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
             .mapLatest { map -> map.values.count { it.node.lastHeard > onlineTimeThreshold() } }
@@ -224,7 +233,7 @@ constructor(
             .conflate()
 
     /** Flow emitting the total number of nodes in the database. */
-    val totalNodeCount: Flow<Int> =
+    override val totalNodeCount: Flow<Int> =
         nodeInfoReadDataSource
             .nodeDBbyNumFlow()
             .mapLatest { map -> map.values.count() }
@@ -232,6 +241,6 @@ constructor(
             .conflate()
 
     /** Updates the personal notes field for a node. */
-    suspend fun setNodeNotes(num: Int, notes: String) =
+    override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
 }
