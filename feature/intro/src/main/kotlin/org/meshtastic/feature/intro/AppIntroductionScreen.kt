@@ -36,7 +36,7 @@ import com.google.accompanist.permissions.rememberPermissionState
  */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun AppIntroductionScreen(onDone: () -> Unit, @Suppress("unused") viewModel: IntroViewModel = hiltViewModel()) {
+fun AppIntroductionScreen(onDone: () -> Unit, viewModel: IntroViewModel = hiltViewModel()) {
     val notificationPermissionState: PermissionState? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ class RadioConfigUseCaseTest {
     fun `setOwner calls radioController and returns packetId`() = runTest {
         val user = User(long_name = "New Name")
         val result = useCase.setOwner(123, user)
-        
+
         coVerify { radioController.setOwner(123, user, 42) }
         assertEquals(42, result)
     }
@@ -54,7 +54,7 @@ class RadioConfigUseCaseTest {
     @Test
     fun `getOwner calls radioController and returns packetId`() = runTest {
         val result = useCase.getOwner(123)
-        
+
         coVerify { radioController.getOwner(123, 42) }
         assertEquals(42, result)
     }
@@ -63,7 +63,7 @@ class RadioConfigUseCaseTest {
     fun `setConfig calls radioController and returns packetId`() = runTest {
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT))
         val result = useCase.setConfig(123, config)
-        
+
         coVerify { radioController.setConfig(123, config, 42) }
         assertEquals(42, result)
     }
@@ -71,7 +71,7 @@ class RadioConfigUseCaseTest {
     @Test
     fun `getConfig calls radioController and returns packetId`() = runTest {
         val result = useCase.getConfig(123, 1)
-        
+
         coVerify { radioController.getConfig(123, 1, 42) }
         assertEquals(42, result)
     }
@@ -80,7 +80,7 @@ class RadioConfigUseCaseTest {
     fun `setModuleConfig calls radioController and returns packetId`() = runTest {
         val config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
         val result = useCase.setModuleConfig(123, config)
-        
+
         coVerify { radioController.setModuleConfig(123, config, 42) }
         assertEquals(42, result)
     }
@@ -88,7 +88,7 @@ class RadioConfigUseCaseTest {
     @Test
     fun `getModuleConfig calls radioController and returns packetId`() = runTest {
         val result = useCase.getModuleConfig(123, 2)
-        
+
         coVerify { radioController.getModuleConfig(123, 2, 42) }
         assertEquals(42, result)
     }
@@ -96,7 +96,7 @@ class RadioConfigUseCaseTest {
     @Test
     fun `getChannel calls radioController and returns packetId`() = runTest {
         val result = useCase.getChannel(123, 0)
-        
+
         coVerify { radioController.getChannel(123, 0, 42) }
         assertEquals(42, result)
     }
@@ -105,7 +105,7 @@ class RadioConfigUseCaseTest {
     fun `setRemoteChannel calls radioController and returns packetId`() = runTest {
         val channel = Channel(index = 0)
         val result = useCase.setRemoteChannel(123, channel)
-        
+
         coVerify { radioController.setRemoteChannel(123, channel, 42) }
         assertEquals(42, result)
     }
@@ -114,14 +114,14 @@ class RadioConfigUseCaseTest {
     fun `setFixedPosition calls radioController`() = runTest {
         val pos = Position(1.0, 2.0, 3)
         useCase.setFixedPosition(123, pos)
-        
+
         coVerify { radioController.setFixedPosition(123, pos) }
     }
 
     @Test
     fun `removeFixedPosition calls radioController with zero position`() = runTest {
         useCase.removeFixedPosition(123)
-        
+
         coVerify { radioController.setFixedPosition(123, any()) }
     }
 

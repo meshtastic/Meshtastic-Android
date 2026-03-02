@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,8 @@ package org.meshtastic.core.domain.usecase.settings
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import javax.inject.Inject
 
-/**
- * Use case for setting the application theme.
- */
-class SetThemeUseCase @Inject constructor(
-    private val uiPreferencesDataSource: UiPreferencesDataSource
-) {
+/** Use case for setting the application theme. */
+class SetThemeUseCase @Inject constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
     operator fun invoke(themeMode: Int) {
         uiPreferencesDataSource.setTheme(themeMode)
     }

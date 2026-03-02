@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,16 +46,16 @@ class CleanNodeDatabaseUseCaseTest {
         // Arrange
         val currentTime = 1000000L
         val olderThanTimestamp = currentTime - 30.days.inWholeSeconds
-        
+
         val oldNode = NodeEntity(num = 1, lastHeard = (olderThanTimestamp - 1).toInt())
         val newNode = NodeEntity(num = 2, lastHeard = (currentTime - 1).toInt())
         val ignoredNode = NodeEntity(num = 3, lastHeard = (olderThanTimestamp - 1).toInt(), isIgnored = true)
-        
+
         coEvery { nodeRepository.getNodesOlderThan(any()) } returns listOf(oldNode, ignoredNode)
-        
+
         // Act
         val result = useCase.getNodesToClean(30f, false, currentTime)
-        
+
         // Assert
         assertEquals(1, result.size)
         assertEquals(1, result[0].num)
@@ -65,7 +65,7 @@ class CleanNodeDatabaseUseCaseTest {
     fun `cleanNodes calls repository and controller`() = runTest {
         // Act
         useCase.cleanNodes(listOf(1, 2))
-        
+
         // Assert
         coVerify { nodeRepository.deleteNodes(listOf(1, 2)) }
         // Note: we can't easily verify removeByNodenum on FakeRadioController without adding tracking

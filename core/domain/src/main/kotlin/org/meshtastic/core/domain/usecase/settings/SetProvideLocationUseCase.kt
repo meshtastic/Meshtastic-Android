@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,8 @@ package org.meshtastic.core.domain.usecase.settings
 import org.meshtastic.core.prefs.ui.UiPrefs
 import javax.inject.Inject
 
-/**
- * Use case for setting whether to provide the node location to the mesh.
- */
-class SetProvideLocationUseCase @Inject constructor(
-    private val uiPrefs: UiPrefs
-) {
+/** Use case for setting whether to provide the node location to the mesh. */
+class SetProvideLocationUseCase @Inject constructor(private val uiPrefs: UiPrefs) {
     operator fun invoke(myNodeNum: Int, provideLocation: Boolean) {
         uiPrefs.setShouldProvideNodeLocation(myNodeNum, provideLocation)
     }

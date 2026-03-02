@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,7 @@ import org.meshtastic.proto.DeviceProfile
 import java.io.OutputStream
 import javax.inject.Inject
 
-/**
- * Use case for exporting a device profile to an output stream.
- */
+/** Use case for exporting a device profile to an output stream. */
 class ExportProfileUseCase @Inject constructor() {
     /**
      * Exports the provided [DeviceProfile] to the given [OutputStream].

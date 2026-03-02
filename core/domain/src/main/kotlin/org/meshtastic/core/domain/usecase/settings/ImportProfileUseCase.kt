@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,7 @@ import org.meshtastic.proto.DeviceProfile
 import java.io.InputStream
 import javax.inject.Inject
 
-/**
- * Use case for importing a device profile from an input stream.
- */
+/** Use case for importing a device profile from an input stream. */
 class ImportProfileUseCase @Inject constructor() {
     /**
      * Imports a [DeviceProfile] from the provided [InputStream].

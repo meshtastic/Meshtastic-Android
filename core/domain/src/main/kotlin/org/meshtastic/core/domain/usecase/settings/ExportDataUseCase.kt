@@ -29,10 +29,10 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 import org.meshtastic.proto.Position as ProtoPosition
 
-/**
- * Use case for exporting persisted packet data to a CSV format.
- */
-class ExportDataUseCase @Inject constructor(
+/** Use case for exporting persisted packet data to a CSV format. */
+class ExportDataUseCase
+@Inject
+constructor(
     private val nodeRepository: NodeRepository,
     private val meshLogRepository: MeshLogRepository,
 ) {
@@ -43,12 +43,8 @@ class ExportDataUseCase @Inject constructor(
      * @param myNodeNum The node number of the current device.
      * @param filterPortnum If provided, only packets with this port number will be exported.
      */
-    @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
-    suspend operator fun invoke(
-        writer: BufferedWriter,
-        myNodeNum: Int,
-        filterPortnum: Int? = null
-    ) {
+    @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod", "detekt:NestedBlockDepth")
+    suspend operator fun invoke(writer: BufferedWriter, myNodeNum: Int, filterPortnum: Int? = null) {
         val nodes = nodeRepository.nodeDBbyNum.value
         val positionToPos: (ProtoPosition?) -> Position? = { meshPosition ->
             meshPosition?.let { Position(it) }?.takeIf { it.isValid() }
@@ -74,7 +70,8 @@ class ExportDataUseCase @Inject constructor(
                     }
                 }
 
-                if ((filterPortnum == null || (proto.decoded?.portnum?.value ?: 0) == filterPortnum) &&
+                if (
+                    (filterPortnum == null || (proto.decoded?.portnum?.value ?: 0) == filterPortnum) &&
                     proto.rx_snr != 0.0f
                 ) {
                     val rxDateTime = dateFormat.format(packet.received_date)
@@ -93,27 +90,26 @@ class ExportDataUseCase @Inject constructor(
                     val rxAlt = rxPos?.altitude ?: ""
                     val rxSnr = proto.rx_snr
 
-                    val dist = if (senderPos == null || rxPos == null) {
-                        ""
-                    } else {
-                        positionToMeter(
-                            Position(rxPosition!!),
-                            Position(senderPosition!!),
-                        ).roundToInt().toString()
-                    }
+                    val dist =
+                        if (senderPos == null || rxPos == null) {
+                            ""
+                        } else {
+                            positionToMeter(Position(rxPosition!!), Position(senderPosition!!)).roundToInt().toString()
+                        }
 
                     val hopLimit = proto.hop_limit
                     val decoded = proto.decoded
                     val encrypted = proto.encrypted
-                    val payload = when {
-                        (decoded?.portnum?.value ?: 0) !in
-                            setOf(PortNum.TEXT_MESSAGE_APP.value, PortNum.RANGE_TEST_APP.value) ->
-                            "<${decoded?.portnum}>"
+                    val payload =
+                        when {
+                            (decoded?.portnum?.value ?: 0) !in
+                                setOf(PortNum.TEXT_MESSAGE_APP.value, PortNum.RANGE_TEST_APP.value) ->
+                                "<${decoded?.portnum}>"
 
-                        decoded != null -> decoded.payload.utf8().replace("\"", "\"\"")
-                        encrypted != null -> "${encrypted.size} encrypted bytes"
-                        else -> ""
-                    }
+                            decoded != null -> decoded.payload.utf8().replace("\"", "\"\"")
+                            encrypted != null -> "${encrypted.size} encrypted bytes"
+                            else -> ""
+                        }
 
                     @Suppress("MaxLineLength")
                     writer.appendLine(

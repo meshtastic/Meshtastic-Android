@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,7 @@ import org.meshtastic.proto.Config
 import java.io.OutputStream
 import javax.inject.Inject
 
-/**
- * Use case for exporting security configuration to a JSON format.
- */
+/** Use case for exporting security configuration to a JSON format. */
 class ExportSecurityConfigUseCase @Inject constructor() {
     /**
      * Exports the provided [Config.SecurityConfig] as a JSON string to the given [OutputStream].
@@ -43,13 +41,18 @@ class ExportSecurityConfigUseCase @Inject constructor() {
         val privateKeyBase64 = Base64.encodeToString(privateKeyBytes, Base64.NO_WRAP)
 
         // Create a JSON object
-        val jsonObject = JSONObject().apply {
-            put("timestamp", nowMillis)
-            put("public_key", publicKeyBase64)
-            put("private_key", privateKeyBase64)
-        }
+        val jsonObject =
+            JSONObject().apply {
+                put("timestamp", nowMillis)
+                put("public_key", publicKeyBase64)
+                put("private_key", privateKeyBase64)
+            }
 
-        val jsonString = jsonObject.toString(4)
+        val jsonString = jsonObject.toString(JSON_INDENT_SPACES)
         outputStream.write(jsonString.toByteArray(Charsets.UTF_8))
+    }
+
+    private companion object {
+        private const val JSON_INDENT_SPACES = 4
     }
 }

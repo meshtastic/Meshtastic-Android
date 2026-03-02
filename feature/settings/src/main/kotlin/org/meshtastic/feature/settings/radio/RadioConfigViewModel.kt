@@ -313,6 +313,7 @@ constructor(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     fun setModuleConfig(config: ModuleConfig) {
         val destNum = destNode.value?.num ?: return
         viewModelScope.launch {

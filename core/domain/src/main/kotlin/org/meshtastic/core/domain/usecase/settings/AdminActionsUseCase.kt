@@ -20,15 +20,16 @@ import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.RadioController
 import javax.inject.Inject
 
-/**
- * Use case for performing administrative actions on the radio.
- */
-open class AdminActionsUseCase @Inject constructor(
+/** Use case for performing administrative actions on the radio. */
+open class AdminActionsUseCase
+@Inject
+constructor(
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
 ) {
     /**
      * Reboots the radio.
+     *
      * @param destNum The node number to reboot.
      * @return The packet ID of the request.
      */
@@ -40,6 +41,7 @@ open class AdminActionsUseCase @Inject constructor(
 
     /**
      * Shuts down the radio.
+     *
      * @param destNum The node number to shut down.
      * @return The packet ID of the request.
      */
@@ -51,6 +53,7 @@ open class AdminActionsUseCase @Inject constructor(
 
     /**
      * Factory resets the radio.
+     *
      * @param destNum The node number to reset.
      * @param isLocal Whether the reset is being performed on the locally connected node.
      * @return The packet ID of the request.
@@ -69,6 +72,7 @@ open class AdminActionsUseCase @Inject constructor(
 
     /**
      * Resets the NodeDB on the radio.
+     *
      * @param destNum The node number to reset.
      * @param preserveFavorites Whether to keep favorite nodes in the database.
      * @param isLocal Whether the reset is being performed on the locally connected node.

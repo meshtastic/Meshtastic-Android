@@ -23,14 +23,12 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 import javax.inject.Inject
 
-/**
- * Use case for interacting with radio configuration components.
- */
-open class RadioConfigUseCase @Inject constructor(
-    private val radioController: RadioController,
-) {
+/** Use case for interacting with radio configuration components. */
+@Suppress("TooManyFunctions")
+open class RadioConfigUseCase @Inject constructor(private val radioController: RadioController) {
     /**
      * Updates the owner information on the radio.
+     *
      * @param destNum The node number to update.
      * @param user The new user configuration.
      * @return The packet ID of the request.
@@ -43,6 +41,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Requests the owner information from the radio.
+     *
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
@@ -54,6 +53,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Updates a configuration section on the radio.
+     *
      * @param destNum The node number to update.
      * @param config The new configuration.
      * @return The packet ID of the request.
@@ -66,6 +66,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Requests a configuration section from the radio.
+     *
      * @param destNum The node number to query.
      * @param configType The type of configuration to request (from [org.meshtastic.proto.AdminMessage.ConfigType]).
      * @return The packet ID of the request.
@@ -78,6 +79,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Updates a module configuration section on the radio.
+     *
      * @param destNum The node number to update.
      * @param config The new module configuration.
      * @return The packet ID of the request.
@@ -90,6 +92,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Requests a module configuration section from the radio.
+     *
      * @param destNum The node number to query.
      * @param moduleConfigType The type of module configuration to request.
      * @return The packet ID of the request.
@@ -102,6 +105,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Requests a channel from the radio.
+     *
      * @param destNum The node number to query.
      * @param index The index of the channel to request.
      * @return The packet ID of the request.
@@ -114,6 +118,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Updates a channel on the radio.
+     *
      * @param destNum The node number to update.
      * @param channel The new channel configuration.
      * @return The packet ID of the request.
@@ -124,29 +129,24 @@ open class RadioConfigUseCase @Inject constructor(
         return packetId
     }
 
-    /**
-     * Updates the fixed position on the radio.
-     */
+    /** Updates the fixed position on the radio. */
     suspend fun setFixedPosition(destNum: Int, position: Position) {
         radioController.setFixedPosition(destNum, position)
     }
 
-    /**
-     * Removes the fixed position on the radio.
-     */
+    /** Removes the fixed position on the radio. */
     suspend fun removeFixedPosition(destNum: Int) {
         radioController.setFixedPosition(destNum, Position(0.0, 0.0, 0))
     }
 
-    /**
-     * Sets the ringtone on the radio.
-     */
+    /** Sets the ringtone on the radio. */
     suspend fun setRingtone(destNum: Int, ringtone: String) {
         radioController.setRingtone(destNum, ringtone)
     }
 
     /**
      * Requests the ringtone from the radio.
+     *
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
@@ -156,15 +156,14 @@ open class RadioConfigUseCase @Inject constructor(
         return packetId
     }
 
-    /**
-     * Sets the canned messages on the radio.
-     */
+    /** Sets the canned messages on the radio. */
     suspend fun setCannedMessages(destNum: Int, messages: String) {
         radioController.setCannedMessages(destNum, messages)
     }
 
     /**
      * Requests the canned messages from the radio.
+     *
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
@@ -176,6 +175,7 @@ open class RadioConfigUseCase @Inject constructor(
 
     /**
      * Requests the device connection status from the radio.
+     *
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */

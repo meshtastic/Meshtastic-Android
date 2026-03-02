@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,12 +20,8 @@ import org.meshtastic.core.database.DatabaseConstants
 import org.meshtastic.core.database.DatabaseManager
 import javax.inject.Inject
 
-/**
- * Use case for setting the database cache limit.
- */
-class SetDatabaseCacheLimitUseCase @Inject constructor(
-    private val databaseManager: DatabaseManager
-) {
+/** Use case for setting the database cache limit. */
+class SetDatabaseCacheLimitUseCase @Inject constructor(private val databaseManager: DatabaseManager) {
     operator fun invoke(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         databaseManager.setCacheLimit(clamped)

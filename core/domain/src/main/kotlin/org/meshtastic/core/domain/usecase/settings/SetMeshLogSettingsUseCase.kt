@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import javax.inject.Inject
 
-/**
- * Use case for managing mesh log settings.
- */
-class SetMeshLogSettingsUseCase @Inject constructor(
+/** Use case for managing mesh log settings. */
+class SetMeshLogSettingsUseCase
+@Inject
+constructor(
     private val meshLogRepository: MeshLogRepository,
     private val meshLogPrefs: MeshLogPrefs,
 ) {

@@ -58,30 +58,29 @@ class ExportDataUseCaseTest {
         // Arrange
         val myNodeNum = 123
         val senderNodeNum = 456
-        val senderNode = Node(
-            num = senderNodeNum,
-            user = User(long_name = "Sender Name")
-        )
-        
+        val senderNode = Node(num = senderNodeNum, user = User(long_name = "Sender Name"))
+
         val nodes = mapOf(senderNodeNum to senderNode)
         val stateFlow = MutableStateFlow(nodes)
         every { nodeRepository.nodeDBbyNum } returns stateFlow
         every { nodeRepository.getNodeEntityDBbyNumFlow() } returns flowOf(emptyMap())
 
-        val meshPacket = MeshPacket(
-            from = senderNodeNum,
-            rx_snr = 5.5f,
-            decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8())
-        )
-        val meshLog = MeshLog(
-            uuid = "uuid-1",
-            message_type = "Packet",
-            received_date = 1700000000000L,
-            raw_message = "",
-            fromNum = senderNodeNum,
-            portNum = PortNum.TEXT_MESSAGE_APP.value,
-            fromRadio = FromRadio(packet = meshPacket)
-        )
+        val meshPacket =
+            MeshPacket(
+                from = senderNodeNum,
+                rx_snr = 5.5f,
+                decoded = Data(portnum = PortNum.TEXT_MESSAGE_APP, payload = "Hello".encodeUtf8()),
+            )
+        val meshLog =
+            MeshLog(
+                uuid = "uuid-1",
+                message_type = "Packet",
+                received_date = 1700000000000L,
+                raw_message = "",
+                fromNum = senderNodeNum,
+                portNum = PortNum.TEXT_MESSAGE_APP.value,
+                fromRadio = FromRadio(packet = meshPacket),
+            )
         every { meshLogRepository.getAllLogsInReceiveOrder(any()) } returns flowOf(listOf(meshLog))
 
         val stringWriter = StringWriter()

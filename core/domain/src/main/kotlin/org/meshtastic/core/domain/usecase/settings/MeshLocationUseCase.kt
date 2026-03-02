@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,22 +19,14 @@ package org.meshtastic.core.domain.usecase.settings
 import org.meshtastic.core.model.RadioController
 import javax.inject.Inject
 
-/**
- * Use case for controlling location sharing with the mesh.
- */
-class MeshLocationUseCase @Inject constructor(
-    private val radioController: RadioController,
-) {
-    /**
-     * Starts providing the phone's location to the mesh.
-     */
+/** Use case for controlling location sharing with the mesh. */
+class MeshLocationUseCase @Inject constructor(private val radioController: RadioController) {
+    /** Starts providing the phone's location to the mesh. */
     fun startProvidingLocation() {
         radioController.startProvideLocation()
     }
 
-    /**
-     * Stops providing the phone's location to the mesh.
-     */
+    /** Stops providing the phone's location to the mesh. */
     fun stopProvidingLocation() {
         radioController.stopProvideLocation()
     }
