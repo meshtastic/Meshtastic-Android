@@ -29,7 +29,7 @@ import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum

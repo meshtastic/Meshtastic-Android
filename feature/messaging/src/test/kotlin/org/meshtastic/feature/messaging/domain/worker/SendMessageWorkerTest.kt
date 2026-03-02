@@ -14,12 +14,11 @@ import io.mockk.just
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
+import okio.ByteString.Companion.toByteString
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.database.entity.Packet
-import org.meshtastic.core.database.entity.PacketEntity
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -46,11 +45,8 @@ class SendMessageWorkerTest {
     fun `doWork returns success when packet is sent successfully`() = runTest {
         // Arrange
         val packetId = 12345
-        val dataPacket = DataPacket("dest", 0, "Hello")
-        val packet = mockk<Packet>(relaxed = true)
-        val packetEntity = PacketEntity(packet = packet)
-        every { packet.data } returns dataPacket
-        coEvery { packetRepository.getPacketByPacketId(packetId) } returns packetEntity
+        val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
+        coEvery { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
         every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Connected)
         coEvery { radioController.sendMessage(any()) } just Runs
         coEvery { packetRepository.updateMessageStatus(any(), any()) } just Runs
@@ -79,11 +75,8 @@ class SendMessageWorkerTest {
     fun `doWork returns retry when radio is disconnected`() = runTest {
         // Arrange
         val packetId = 12345
-        val dataPacket = DataPacket("dest", 0, "Hello")
-        val packet = mockk<Packet>(relaxed = true)
-        val packetEntity = PacketEntity(packet = packet)
-        every { packet.data } returns dataPacket
-        coEvery { packetRepository.getPacketByPacketId(packetId) } returns packetEntity
+        val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
+        coEvery { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
         every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         val worker = TestListenableWorkerBuilder<SendMessageWorker>(context)

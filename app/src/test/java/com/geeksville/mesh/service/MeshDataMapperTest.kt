@@ -25,7 +25,6 @@ import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -39,6 +38,30 @@ class MeshDataMapperTest {
     @Before
     fun setUp() {
         mapper = MeshDataMapper(nodeManager)
+    }
+
+    @Test
+    fun `toNodeID resolves broadcast correctly`() {
+        every { nodeManager.toNodeID(DataPacket.NODENUM_BROADCAST) } returns DataPacket.ID_BROADCAST
+        assertEquals(DataPacket.ID_BROADCAST, mapper.toNodeID(DataPacket.NODENUM_BROADCAST))
+    }
+
+    @Test
+    fun `toNodeID resolves known node correctly`() {
+        val nodeNum = 1234
+        val nodeId = "!1234abcd"
+        every { nodeManager.toNodeID(nodeNum) } returns nodeId
+
+        assertEquals(nodeId, mapper.toNodeID(nodeNum))
+    }
+
+    @Test
+    fun `toNodeID resolves unknown node to default ID`() {
+        val nodeNum = 1234
+        val nodeId = DataPacket.nodeNumToDefaultId(nodeNum)
+        every { nodeManager.toNodeID(nodeNum) } returns nodeId
+
+        assertEquals(nodeId, mapper.toNodeID(nodeNum))
     }
 
     @Test

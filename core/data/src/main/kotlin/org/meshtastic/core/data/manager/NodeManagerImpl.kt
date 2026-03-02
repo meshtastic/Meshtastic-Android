@@ -132,7 +132,7 @@ constructor(
         nodeDBbyNodeNum.remove(nodeNum)?.let { nodeDBbyID.remove(it.user.id) }
     }
 
-    private fun getOrCreateNode(n: Int, channel: Int = 0): Node = nodeDBbyNodeNum.getOrPut(n) {
+    fun getOrCreateNode(n: Int, channel: Int = 0): Node = nodeDBbyNodeNum.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
         val defaultUser =
             User(

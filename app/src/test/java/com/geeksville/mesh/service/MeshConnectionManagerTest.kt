@@ -16,6 +16,7 @@
  */
 package com.geeksville.mesh.service
 
+import android.app.Notification
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.updateAll
@@ -39,12 +40,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -68,7 +72,7 @@ class MeshConnectionManagerTest {
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
     private val locationManager: MeshLocationManager = mockk(relaxed = true)
     private val mqttManager: MeshMqttManager = mockk(relaxed = true)
-    private val historyManager: MeshHistoryManager = mockk(relaxed = true)
+    private val historyManager: HistoryManager = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
     private val commandSender: CommandSender = mockk(relaxed = true)
     private val nodeManager: NodeManager = mockk(relaxed = true)
@@ -94,9 +98,10 @@ class MeshConnectionManagerTest {
         every { radioInterfaceService.connectionState } returns radioConnectionState
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
         every { radioConfigRepository.moduleConfigFlow } returns moduleConfigFlow
-        every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeEntity?>(null)
+        every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeInfo?>(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow<Node?>(null)
         every { nodeRepository.localStats } returns MutableStateFlow(LocalStats())
+        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns mockk<Notification>(relaxed = true)
 
         manager =
             MeshConnectionManager(

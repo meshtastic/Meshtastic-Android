@@ -19,7 +19,7 @@ package com.geeksville.mesh.service
 import android.app.Notification
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.mockk
-import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
@@ -64,15 +64,15 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
 
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {}
 
-    override fun showNewNodeSeenNotification(node: NodeEntity) {}
+    override fun showNewNodeSeenNotification(node: Node) {}
 
-    override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {}
+    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {}
 
     override fun showClientNotification(clientNotification: ClientNotification) {}
 
     override fun cancelMessageNotification(contactKey: String) {}
 
-    override fun cancelLowBatteryNotification(node: NodeEntity) {}
+    override fun cancelLowBatteryNotification(node: Node) {}
 
     override fun clearClientNotification(notification: ClientNotification) {}
 }
