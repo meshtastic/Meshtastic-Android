@@ -16,21 +16,21 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.flow.StateFlow
-
 /**
- * Interface for managing database instances and cache limits.
+ * Interface for filtering messages based on user-configured filter words.
  */
-interface DatabaseManager {
-    /** Reactive stream of the current database cache limit. */
-    val cacheLimit: StateFlow<Int>
+interface MessageFilter {
+    /**
+     * Determines if a message should be filtered.
+     *
+     * @param message The message text to check.
+     * @param isFilteringDisabled Whether filtering is disabled for the current contact.
+     * @return true if the message should be filtered, false otherwise.
+     */
+    fun shouldFilter(message: String, isFilteringDisabled: Boolean = false): Boolean
 
-    /** Returns the current database cache limit. */
-    fun getCacheLimit(): Int
-
-    /** Sets the database cache limit. */
-    fun setCacheLimit(limit: Int)
-
-    /** Switches the active database to the one associated with the given [address]. */
-    suspend fun switchActiveDatabase(address: String?)
+    /**
+     * Rebuilds the internal filter patterns. Should be called after filter words are updated.
+     */
+    fun rebuildPatterns()
 }

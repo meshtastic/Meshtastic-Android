@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,34 +14,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.filter
+package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.repository.MessageFilter
 import java.util.regex.PatternSyntaxException
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Service for filtering messages based on user-configured filter words. Supports both plain text word matching and
- * regex patterns.
+ * Implementation of [MessageFilter] that uses regex and plain text matching.
  */
 @Singleton
-class MessageFilterService @Inject constructor(private val filterPrefs: FilterPrefs) {
+class MessageFilterImpl @Inject constructor(private val filterPrefs: FilterPrefs) : MessageFilter {
     private var compiledPatterns: List<Regex> = emptyList()
 
     init {
         rebuildPatterns()
     }
 
-    /**
-     * Determines if a message should be filtered based on the configured filter words.
-     *
-     * @param message The message text to check.
-     * @param isFilteringDisabled Whether filtering is disabled for this contact.
-     * @return true if the message should be filtered, false otherwise.
-     */
-    fun shouldFilter(message: String, isFilteringDisabled: Boolean = false): Boolean {
+    override fun shouldFilter(message: String, isFilteringDisabled: Boolean): Boolean {
         if (!filterPrefs.filterEnabled || compiledPatterns.isEmpty() || isFilteringDisabled) {
             return false
         }
@@ -49,11 +42,7 @@ class MessageFilterService @Inject constructor(private val filterPrefs: FilterPr
         return compiledPatterns.any { it.containsMatchIn(textToCheck) }
     }
 
-    /**
-     * Rebuilds the compiled regex patterns from the current filter words. Should be called whenever the filter words
-     * are updated.
-     */
-    fun rebuildPatterns() {
+    override fun rebuildPatterns() {
         compiledPatterns =
             filterPrefs.filterWords.mapNotNull { word ->
                 try {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import android.util.Log
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.BuildConfig
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +31,9 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
@@ -46,17 +47,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.uuid.Uuid
 
+/**
+ * Implementation of [MeshMessageProcessor] that handles raw radio messages and prepares mesh packets for routing.
+ */
 @Suppress("TooManyFunctions")
 @Singleton
-class MeshMessageProcessor
-@Inject
-constructor(
+class MeshMessageProcessorImpl @Inject constructor(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val router: MeshRouter,
     private val fromRadioDispatcher: FromRadioPacketHandler,
-) {
+) : MeshMessageProcessor {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val logUuidByPacketId = ConcurrentHashMap<Int, String>()
     private val logInsertJobByPacketId = ConcurrentHashMap<Int, Job>()
@@ -64,11 +66,11 @@ constructor(
     private val earlyReceivedPackets = ArrayDeque<MeshPacket>()
     private val maxEarlyPacketBuffer = 10240
 
-    fun clearEarlyPackets() {
+    override fun clearEarlyPackets() {
         synchronized(earlyReceivedPackets) { earlyReceivedPackets.clear() }
     }
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
         nodeManager.isNodeDbReady
             .onEach { ready ->
@@ -79,7 +81,7 @@ constructor(
             .launchIn(scope)
     }
 
-    fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?) {
+    override fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?) {
         runCatching { FromRadio.ADAPTER.decode(bytes) }
             .onSuccess { proto -> processFromRadio(proto, myNodeNum) }
             .onFailure { primaryException ->
@@ -136,7 +138,7 @@ constructor(
         )
     }
 
-    fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
+    override fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?) {
         val rxTime =
             if (packet.rx_time == 0) {
                 nowSeconds.toInt()
@@ -151,21 +153,9 @@ constructor(
             synchronized(earlyReceivedPackets) {
                 val queueSize = earlyReceivedPackets.size
                 if (queueSize >= maxEarlyPacketBuffer) {
-                    val dropped = earlyReceivedPackets.removeFirst()
-                    historyLog(Log.WARN) {
-                        val portLabel =
-                            dropped.decoded?.portnum?.name ?: dropped.decoded?.portnum?.value?.toString() ?: "unknown"
-                        "dropEarlyPacket bufferFull size=$queueSize id=${dropped.id} port=$portLabel"
-                    }
+                    earlyReceivedPackets.removeFirst()
                 }
                 earlyReceivedPackets.addLast(preparedPacket)
-                val portLabel =
-                    preparedPacket.decoded?.portnum?.name
-                        ?: preparedPacket.decoded?.portnum?.value?.toString()
-                        ?: "unknown"
-                historyLog {
-                    "queueEarlyPacket size=${earlyReceivedPackets.size} id=${preparedPacket.id} port=$portLabel"
-                }
             }
         }
     }
@@ -178,7 +168,7 @@ constructor(
                 earlyReceivedPackets.clear()
                 list
             }
-        historyLog { "replayEarlyPackets reason=$reason count=${packets.size}" }
+        Logger.d { "replayEarlyPackets reason=$reason count=${packets.size}" }
         val myNodeNum = nodeManager.myNodeNum
         packets.forEach { processReceivedMeshPacket(it, myNodeNum) }
     }
@@ -249,24 +239,6 @@ constructor(
     }
 
     private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.get().insert(log) }
-
-    private inline fun historyLog(
-        priority: Int = Log.INFO,
-        throwable: Throwable? = null,
-        crossinline message: () -> String,
-    ) {
-        if (!BuildConfig.DEBUG) return
-        val logger = Logger.withTag("HistoryReplay")
-        val msg = message()
-        when (priority) {
-            Log.VERBOSE -> logger.v(throwable) { msg }
-            Log.DEBUG -> logger.d(throwable) { msg }
-            Log.INFO -> logger.i(throwable) { msg }
-            Log.WARN -> logger.w(throwable) { msg }
-            Log.ERROR -> logger.e(throwable) { msg }
-            else -> logger.i(throwable) { msg }
-        }
-    }
 
     private fun ByteArray.toHexString(): String =
         this.joinToString(",") { byte -> String.format(Locale.US, "0x%02x", byte) }

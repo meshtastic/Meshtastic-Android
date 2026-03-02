@@ -19,7 +19,9 @@ package com.geeksville.mesh.service
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -35,19 +37,18 @@ import org.robolectric.annotation.Config
 class ServiceBroadcastsTest {
 
     private lateinit var context: Context
-    private val connectionStateHolder = ConnectionStateHandler()
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private lateinit var broadcasts: ServiceBroadcasts
 
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        broadcasts = ServiceBroadcasts(context, connectionStateHolder, serviceRepository)
+        broadcasts = ServiceBroadcasts(context, serviceRepository)
     }
 
     @Test
     fun `broadcastConnection sends uppercase state string for ATAK`() {
-        connectionStateHolder.setState(ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
 
         broadcasts.broadcastConnection()
 
@@ -58,7 +59,7 @@ class ServiceBroadcastsTest {
 
     @Test
     fun `broadcastConnection sends legacy connection intent`() {
-        connectionStateHolder.setState(ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
 
         broadcasts.broadcastConnection()
 

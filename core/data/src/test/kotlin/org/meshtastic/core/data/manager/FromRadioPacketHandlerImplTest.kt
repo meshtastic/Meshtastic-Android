@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
@@ -31,18 +34,18 @@ import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.QueueStatus
 
-class FromRadioPacketHandlerTest {
+class FromRadioPacketHandlerImplTest {
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val router: MeshRouter = mockk(relaxed = true)
     private val mqttManager: MqttManager = mockk(relaxed = true)
     private val packetHandler: PacketHandler = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
 
-    private lateinit var handler: FromRadioPacketHandler
+    private lateinit var handler: FromRadioPacketHandlerImpl
 
     @Before
     fun setup() {
-        handler = FromRadioPacketHandler(serviceRepository, router, mqttManager, packetHandler, serviceNotifications)
+        handler = FromRadioPacketHandlerImpl(serviceRepository, router, mqttManager, packetHandler, serviceNotifications)
     }
 
     @Test
@@ -70,10 +73,12 @@ class FromRadioPacketHandlerTest {
         val nodeInfo = NodeInfo(num = 1234)
         val proto = FromRadio(node_info = nodeInfo)
 
+        every { router.configFlowManager.newNodeCount } returns 1
+
         handler.handleFromRadio(proto)
 
         verify { router.configFlowManager.handleNodeInfo(nodeInfo) }
-        verify { serviceRepository.setConnectionProgress(any()) }
+        verify { serviceRepository.setConnectionProgress("Nodes (1)") }
     }
 
     @Test

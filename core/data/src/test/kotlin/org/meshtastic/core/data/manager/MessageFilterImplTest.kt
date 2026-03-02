@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service.filter
+package org.meshtastic.core.data.manager
 
 import io.mockk.every
 import io.mockk.mockk
@@ -24,9 +24,9 @@ import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.prefs.filter.FilterPrefs
 
-class MessageFilterServiceTest {
+class MessageFilterImplTest {
     private lateinit var filterPrefs: FilterPrefs
-    private lateinit var filterService: MessageFilterService
+    private lateinit var filterService: MessageFilterImpl
 
     @Before
     fun setup() {
@@ -34,7 +34,7 @@ class MessageFilterServiceTest {
             every { filterEnabled } returns true
             every { filterWords } returns setOf("spam", "bad")
         }
-        filterService = MessageFilterService(filterPrefs)
+        filterService = MessageFilterImpl(filterPrefs)
     }
 
     @Test

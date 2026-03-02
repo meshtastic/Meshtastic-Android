@@ -38,6 +38,7 @@ import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
@@ -60,7 +61,7 @@ constructor(
     private val serviceBroadcasts: ServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val connectionStateHolder: ConnectionStateHandler,
+    private val serviceRepository: ServiceRepository,
 ) : SharedPacketHandler {
 
     companion object {
@@ -140,13 +141,12 @@ constructor(
         queueResponse.remove(dataRequestId)?.complete(complete)
     }
 
-    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun startPacketQueue() {
         if (queueJob?.isActive == true) return
         queueJob =
             scope.handledLaunch {
                 Logger.d { "packet queueJob started" }
-                while (connectionStateHolder.connectionState.value == ConnectionState.Connected) {
+                while (serviceRepository.connectionState.value == ConnectionState.Connected) {
                     // take the first packet from the queue head
                     val packet = queuedPackets.poll() ?: break
                     try {
@@ -194,7 +194,7 @@ constructor(
         val deferred = CompletableDeferred<Boolean>()
         queueResponse[packet.id] = deferred
         try {
-            if (connectionStateHolder.connectionState.value != ConnectionState.Connected) {
+            if (serviceRepository.connectionState.value != ConnectionState.Connected) {
                 throw RadioNotConnectedException()
             }
             sendToRadio(ToRadio(packet = packet))

@@ -31,6 +31,7 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -43,7 +44,8 @@ class PacketHandlerTest {
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val radioInterfaceService: RadioInterfaceService = mockk(relaxed = true)
     private val meshLogRepository: MeshLogRepository = mockk(relaxed = true)
-    private val connectionStateHolder: ConnectionStateHandler = mockk(relaxed = true)
+    private val serviceRepository: ServiceRepository = mockk(relaxed = true)
+    private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -52,13 +54,16 @@ class PacketHandlerTest {
 
     @Before
     fun setUp() {
+        every { serviceRepository.connectionState } returns connectionStateFlow
+        every { serviceRepository.setConnectionState(any()) } answers { connectionStateFlow.value = firstArg() }
+
         handler =
             PacketHandler(
                 dagger.Lazy { packetRepository },
                 serviceBroadcasts,
                 radioInterfaceService,
                 dagger.Lazy { meshLogRepository },
-                connectionStateHolder,
+                serviceRepository,
             )
         handler.start(testScope)
     }
@@ -75,7 +80,7 @@ class PacketHandlerTest {
     @Test
     fun `sendToRadio with MeshPacket queues and sends when connected`() = runTest(testDispatcher) {
         val packet = MeshPacket(id = 456)
-        every { connectionStateHolder.connectionState } returns MutableStateFlow(ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()
@@ -86,7 +91,7 @@ class PacketHandlerTest {
     @Test
     fun `handleQueueStatus completes deferred`() = runTest(testDispatcher) {
         val packet = MeshPacket(id = 789)
-        every { connectionStateHolder.connectionState } returns MutableStateFlow(ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()

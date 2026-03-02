@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import dagger.Lazy
 import io.mockk.coVerify
@@ -35,14 +35,19 @@ import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.MeshConfigFlowManager
+import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TracerouteHandler
-import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -68,9 +73,9 @@ class MeshDataHandlerTest {
     private val tracerouteHandler: TracerouteHandler = mockk(relaxed = true)
     private val neighborInfoHandler: NeighborInfoHandler = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
-    private val messageFilterService: MessageFilterService = mockk(relaxed = true)
+    private val messageFilter: MessageFilter = mockk(relaxed = true)
 
-    private lateinit var meshDataHandler: MeshDataHandler
+    private lateinit var meshDataHandler: MeshDataHandlerImpl
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
@@ -82,7 +87,7 @@ class MeshDataHandlerTest {
         every { android.util.Log.e(any(), any()) } returns 0
 
         meshDataHandler =
-            MeshDataHandler(
+            MeshDataHandlerImpl(
                 nodeManager,
                 packetHandler,
                 serviceRepository,
@@ -100,7 +105,7 @@ class MeshDataHandlerTest {
                 tracerouteHandler,
                 neighborInfoHandler,
                 radioConfigRepository,
-                messageFilterService,
+                messageFilter,
             )
         // Use UnconfinedTestDispatcher for running coroutines synchronously in tests
         meshDataHandler.start(CoroutineScope(UnconfinedTestDispatcher()))

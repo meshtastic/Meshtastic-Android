@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.repository
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import org.meshtastic.core.model.ConnectionState
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.meshtastic.proto.FromRadio
 
-@Singleton
-class ConnectionStateHandler @Inject constructor() {
-    private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    val connectionState = _connectionState.asStateFlow()
-
-    fun setState(state: ConnectionState) {
-        _connectionState.value = state
-    }
+/**
+ * Interface for dispatching non-packet [FromRadio] variants to their respective handlers.
+ */
+interface FromRadioPacketHandler {
+    /** Processes a [FromRadio] message. */
+    fun handleFromRadio(proto: FromRadio)
 }

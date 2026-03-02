@@ -48,6 +48,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
@@ -56,6 +57,7 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
@@ -81,7 +83,7 @@ class MeshConnectionManager
 constructor(
     @ApplicationContext private val context: Context,
     private val radioInterfaceService: RadioInterfaceService,
-    private val connectionStateHolder: ConnectionStateHandler,
+    private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val serviceNotifications: MeshServiceNotifications,
     private val uiPrefs: UiPrefs,
@@ -96,7 +98,7 @@ constructor(
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
     private val workManager: WorkManager,
-) {
+) : MeshConnectionManager {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
@@ -104,12 +106,12 @@ constructor(
     private var connectTimeMsec = 0L
 
     @OptIn(FlowPreview::class)
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
         radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(scope)
 
         // Ensure notification title and content stay in sync with state changes
-        connectionStateHolder.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
+        serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
 
         // Kickstart the widget composition. The widget internally uses collectAsState()
         // and its own sampled StateFlow to drive updates automatically without excessive IPC and recreation.
@@ -160,7 +162,7 @@ constructor(
     }
 
     private fun onConnectionChanged(c: ConnectionState) {
-        val current = connectionStateHolder.connectionState.value
+        val current = serviceRepository.connectionState.value
         if (current == c) return
 
         // If the transport reports 'Connected', but we are already in the middle of a handshake (Connecting)
@@ -177,7 +179,7 @@ constructor(
         handshakeTimeout = null
 
         when (c) {
-            is ConnectionState.Connecting -> connectionStateHolder.setState(ConnectionState.Connecting)
+            is ConnectionState.Connecting -> serviceRepository.setConnectionState(ConnectionState.Connecting)
             is ConnectionState.Connected -> handleConnected()
             is ConnectionState.DeviceSleep -> handleDeviceSleep()
             is ConnectionState.Disconnected -> handleDisconnected()
@@ -186,8 +188,8 @@ constructor(
 
     private fun handleConnected() {
         // The service state remains 'Connecting' until config is fully loaded
-        if (connectionStateHolder.connectionState.value != ConnectionState.Connected) {
-            connectionStateHolder.setState(ConnectionState.Connecting)
+        if (serviceRepository.connectionState.value != ConnectionState.Connected) {
+            serviceRepository.setConnectionState(ConnectionState.Connecting)
         }
         serviceBroadcasts.broadcastConnection()
         Logger.i { "Starting mesh handshake (Stage 1)" }
@@ -198,12 +200,12 @@ constructor(
         handshakeTimeout =
             scope.handledLaunch {
                 delay(HANDSHAKE_TIMEOUT)
-                if (connectionStateHolder.connectionState.value is ConnectionState.Connecting) {
+                if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
                     Logger.w { "Handshake stall detected! Retrying Stage 1." }
                     startConfigOnly()
                     // Recursive timeout for one more try
                     delay(HANDSHAKE_TIMEOUT)
-                    if (connectionStateHolder.connectionState.value is ConnectionState.Connecting) {
+                    if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
                         Logger.e { "Handshake still stalled after retry. Resetting connection." }
                         onConnectionChanged(ConnectionState.Disconnected)
                     }
@@ -212,7 +214,7 @@ constructor(
     }
 
     private fun handleDeviceSleep() {
-        connectionStateHolder.setState(ConnectionState.DeviceSleep)
+        serviceRepository.setConnectionState(ConnectionState.DeviceSleep)
         packetHandler.stopPacketQueue()
         locationManager.stop()
         mqttManager.stop()
@@ -245,7 +247,7 @@ constructor(
     }
 
     private fun handleDisconnected() {
-        connectionStateHolder.setState(ConnectionState.Disconnected)
+        serviceRepository.setConnectionState(ConnectionState.Disconnected)
         packetHandler.stopPacketQueue()
         locationManager.stop()
         mqttManager.stop()
@@ -260,15 +262,15 @@ constructor(
         serviceBroadcasts.broadcastConnection()
     }
 
-    fun startConfigOnly() {
+    override fun startConfigOnly() {
         packetHandler.sendToRadio(ToRadio(want_config_id = CONFIG_ONLY_NONCE))
     }
 
-    fun startNodeInfoOnly() {
+    override fun startNodeInfoOnly() {
         packetHandler.sendToRadio(ToRadio(want_config_id = NODE_INFO_NONCE))
     }
 
-    fun onRadioConfigLoaded() {
+    override fun onRadioConfigLoaded() {
         scope.handledLaunch {
             val queuedPackets = packetRepository.getQueuedPackets() ?: emptyList()
             queuedPackets.forEach { packet ->
@@ -293,7 +295,7 @@ constructor(
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_time_only = nowSeconds.toInt()) }
     }
 
-    fun onNodeDbReady() {
+    override fun onNodeDbReady() {
         handshakeTimeout?.cancel()
         handshakeTimeout = null
 
@@ -334,14 +336,14 @@ constructor(
         )
     }
 
-    fun updateTelemetry(telemetry: Telemetry) {
-        telemetry.local_stats?.let { nodeRepository.updateLocalStats(it) }
-        updateStatusNotification(telemetry)
+    override fun updateTelemetry(t: Telemetry) {
+        t.local_stats?.let { nodeRepository.updateLocalStats(it) }
+        updateStatusNotification(t)
     }
 
-    fun updateStatusNotification(telemetry: Telemetry? = null): Notification {
+    override fun updateStatusNotification(telemetry: Telemetry?): Notification {
         val summary =
-            when (connectionStateHolder.connectionState.value) {
+            when (serviceRepository.connectionState.value) {
                 is ConnectionState.Connected ->
                     getString(Res.string.meshtastic_app_name) + ": " + getString(Res.string.connected)
                 is ConnectionState.Disconnected -> getString(Res.string.disconnected)

@@ -53,6 +53,8 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -65,7 +67,7 @@ class MeshConnectionManagerTest {
 
     private val context: Context = mockk(relaxed = true)
     private val radioInterfaceService: RadioInterfaceService = mockk(relaxed = true)
-    private val connectionStateHolder = ConnectionStateHandler()
+    private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
     private val uiPrefs: UiPrefs = mockk(relaxed = true)
@@ -81,6 +83,7 @@ class MeshConnectionManagerTest {
     private val packetRepository: PacketRepository = mockk(relaxed = true)
     private val workManager: WorkManager = mockk(relaxed = true)
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+    private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val localConfigFlow = MutableStateFlow(LocalConfig())
     private val moduleConfigFlow = MutableStateFlow(LocalModuleConfig())
 
@@ -102,13 +105,15 @@ class MeshConnectionManagerTest {
         every { nodeRepository.myNodeInfo } returns MutableStateFlow<MyNodeInfo?>(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow<Node?>(null)
         every { nodeRepository.localStats } returns MutableStateFlow(LocalStats())
+        every { serviceRepository.connectionState } returns connectionStateFlow
+        every { serviceRepository.setConnectionState(any()) } answers { connectionStateFlow.value = firstArg() }
         every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns mockk<Notification>(relaxed = true)
 
         manager =
             MeshConnectionManager(
                 context,
                 radioInterfaceService,
-                connectionStateHolder,
+                serviceRepository,
                 serviceBroadcasts,
                 serviceNotifications,
                 uiPrefs,
@@ -141,7 +146,7 @@ class MeshConnectionManagerTest {
         assertEquals(
             "State should be Connecting after radio Connected",
             ConnectionState.Connecting,
-            connectionStateHolder.connectionState.value,
+            serviceRepository.connectionState.value,
         )
         verify { serviceBroadcasts.broadcastConnection() }
         verify { packetHandler.sendToRadio(any<ToRadio>()) }
@@ -160,7 +165,7 @@ class MeshConnectionManagerTest {
         assertEquals(
             "State should be Disconnected after radio Disconnected",
             ConnectionState.Disconnected,
-            connectionStateHolder.connectionState.value,
+            serviceRepository.connectionState.value,
         )
         verify { packetHandler.stopPacketQueue() }
         verify { locationManager.stop() }
@@ -186,7 +191,7 @@ class MeshConnectionManagerTest {
         assertEquals(
             "State should be Disconnected when power saving is off",
             ConnectionState.Disconnected,
-            connectionStateHolder.connectionState.value,
+            serviceRepository.connectionState.value,
         )
     }
 
@@ -205,7 +210,7 @@ class MeshConnectionManagerTest {
         assertEquals(
             "State should stay in DeviceSleep when power saving is on",
             ConnectionState.DeviceSleep,
-            connectionStateHolder.connectionState.value,
+            serviceRepository.connectionState.value,
         )
     }
 

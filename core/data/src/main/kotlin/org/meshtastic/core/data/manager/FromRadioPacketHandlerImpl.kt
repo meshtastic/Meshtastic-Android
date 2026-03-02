@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import co.touchlab.kermit.Logger
+import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
@@ -26,21 +27,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Dispatches non-packet [FromRadio] variants to their respective handlers. This class is stateless and handles routing
- * for config, metadata, and specialized system messages.
+ * Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers.
  */
 @Singleton
-class FromRadioPacketHandler
-@Inject
-constructor(
+class FromRadioPacketHandlerImpl @Inject constructor(
     private val serviceRepository: ServiceRepository,
     private val router: MeshRouter,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val serviceNotifications: MeshServiceNotifications,
-) {
+) : FromRadioPacketHandler {
     @Suppress("CyclomaticComplexMethod")
-    fun handleFromRadio(proto: FromRadio) {
+    override fun handleFromRadio(proto: FromRadio) {
         val myInfo = proto.my_info
         val metadata = proto.metadata
         val nodeInfo = proto.node_info
@@ -68,19 +66,8 @@ constructor(
             clientNotification != null -> {
                 serviceRepository.setClientNotification(clientNotification)
                 serviceNotifications.showClientNotification(clientNotification)
-                packetHandler.removeResponse(clientNotification.reply_id ?: 0, complete = false)
+                packetHandler.removeResponse(0, complete = false)
             }
-            // Logging-only variants are handled by MeshMessageProcessor before dispatching here
-            proto.packet != null ||
-                proto.log_record != null ||
-                proto.rebooted != null ||
-                proto.xmodemPacket != null ||
-                proto.deviceuiConfig != null ||
-                proto.fileInfo != null -> {
-                /* No specialized routing needed here */
-            }
-
-            else -> Logger.d { "Dispatcher ignoring FromRadio variant" }
         }
     }
 }

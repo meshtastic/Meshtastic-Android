@@ -23,7 +23,15 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.data.manager.CommandSenderImpl
+import org.meshtastic.core.data.manager.FromRadioPacketHandlerImpl
 import org.meshtastic.core.data.manager.HistoryManagerImpl
+import org.meshtastic.core.data.manager.MeshActionHandlerImpl
+import org.meshtastic.core.data.manager.MeshConfigFlowManagerImpl
+import org.meshtastic.core.data.manager.MeshConfigHandlerImpl
+import org.meshtastic.core.data.manager.MeshDataHandlerImpl
+import org.meshtastic.core.data.manager.MeshMessageProcessorImpl
+import org.meshtastic.core.data.manager.MeshRouterImpl
+import org.meshtastic.core.data.manager.MessageFilterImpl
 import org.meshtastic.core.data.manager.MqttManagerImpl
 import org.meshtastic.core.data.manager.NeighborInfoHandlerImpl
 import org.meshtastic.core.data.manager.NodeManagerImpl
@@ -35,7 +43,15 @@ import org.meshtastic.core.data.repository.RadioConfigRepositoryImpl
 import org.meshtastic.core.model.util.MeshDataMapper
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.MeshActionHandler
+import org.meshtastic.core.repository.MeshConfigFlowManager
+import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshDataHandler
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
@@ -108,6 +124,54 @@ abstract class RepositoryModule {
     abstract fun bindMqttManager(
         mqttManagerImpl: MqttManagerImpl
     ): MqttManager
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshDataHandler(
+        meshDataHandlerImpl: MeshDataHandlerImpl
+    ): MeshDataHandler
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshActionHandler(
+        meshActionHandlerImpl: MeshActionHandlerImpl
+    ): MeshActionHandler
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshMessageProcessor(
+        meshMessageProcessorImpl: MeshMessageProcessorImpl
+    ): MeshMessageProcessor
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshRouter(
+        meshRouterImpl: MeshRouterImpl
+    ): MeshRouter
+
+    @Binds
+    @Singleton
+    abstract fun bindFromRadioPacketHandler(
+        fromRadioPacketHandlerImpl: FromRadioPacketHandlerImpl
+    ): FromRadioPacketHandler
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshConfigHandler(
+        meshConfigHandlerImpl: MeshConfigHandlerImpl
+    ): MeshConfigHandler
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshConfigFlowManager(
+        meshConfigFlowManagerImpl: MeshConfigFlowManagerImpl
+    ): MeshConfigFlowManager
+
+    @Binds
+    @Singleton
+    abstract fun bindMessageFilter(
+        messageFilterImpl: MessageFilterImpl
+    ): MessageFilter
 
     companion object {
         @Provides

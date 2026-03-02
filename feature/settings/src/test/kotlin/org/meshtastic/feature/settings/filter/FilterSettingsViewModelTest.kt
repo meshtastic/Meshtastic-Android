@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.prefs.filter.FilterPrefs
-import org.meshtastic.core.service.filter.MessageFilterService
+import org.meshtastic.core.repository.MessageFilter
 
 class FilterSettingsViewModelTest {
 
     private val filterPrefs: FilterPrefs = mockk(relaxed = true)
-    private val messageFilterService: MessageFilterService = mockk(relaxed = true)
+    private val messageFilter: MessageFilter = mockk(relaxed = true)
 
     private lateinit var viewModel: FilterSettingsViewModel
 
@@ -37,7 +37,10 @@ class FilterSettingsViewModelTest {
         every { filterPrefs.filterEnabled } returns true
         every { filterPrefs.filterWords } returns setOf("apple", "banana")
 
-        viewModel = FilterSettingsViewModel(filterPrefs = filterPrefs, messageFilterService = messageFilterService)
+        viewModel = FilterSettingsViewModel(
+            filterPrefs = filterPrefs,
+            messageFilter = messageFilter
+        )
     }
 
     @Test
@@ -50,18 +53,18 @@ class FilterSettingsViewModelTest {
     @Test
     fun `addFilterWord updates prefs and rebuilds patterns`() {
         viewModel.addFilterWord("cherry")
-
+        
         verify { filterPrefs.filterWords = any() }
-        verify { messageFilterService.rebuildPatterns() }
+        verify { messageFilter.rebuildPatterns() }
         assertEquals(listOf("apple", "banana", "cherry"), viewModel.filterWords.value)
     }
 
     @Test
     fun `removeFilterWord updates prefs and rebuilds patterns`() {
         viewModel.removeFilterWord("apple")
-
+        
         verify { filterPrefs.filterWords = any() }
-        verify { messageFilterService.rebuildPatterns() }
+        verify { messageFilter.rebuildPatterns() }
         assertEquals(listOf("banana"), viewModel.filterWords.value)
     }
 }

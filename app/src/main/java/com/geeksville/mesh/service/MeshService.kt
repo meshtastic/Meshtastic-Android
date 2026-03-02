@@ -43,13 +43,16 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.service.AndroidServiceRepository
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.proto.PortNum
 import javax.inject.Inject
@@ -60,9 +63,7 @@ class MeshService : Service() {
 
     @Inject lateinit var radioInterfaceService: RadioInterfaceService
 
-    @Inject lateinit var serviceRepository: AndroidServiceRepository
-
-    @Inject lateinit var connectionStateHolder: ConnectionStateHandler
+    @Inject lateinit var serviceRepository: ServiceRepository
 
     @Inject lateinit var packetHandler: PacketHandler
 
@@ -147,7 +148,7 @@ class MeshService : Service() {
         val a = radioInterfaceService.getDeviceAddress()
         val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
-        val notification = connectionManager.updateStatusNotification()
+        val notification = connectionManager.updateStatusNotification() as android.app.Notification
 
         val foregroundServiceType =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -315,7 +316,7 @@ class MeshService : Service() {
 
             override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()
 
-            override fun connectionState(): String = connectionStateHolder.connectionState.value.toString()
+            override fun connectionState(): String = serviceRepository.connectionState.value.toString()
 
             override fun startProvideLocation() {
                 locationManager.start(serviceScope) { commandSender.sendPosition(it) }

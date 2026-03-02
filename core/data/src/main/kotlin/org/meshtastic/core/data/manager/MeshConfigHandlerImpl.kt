@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -36,34 +37,31 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MeshConfigHandler
-@Inject
-constructor(
+class MeshConfigHandlerImpl @Inject constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
     private val nodeManager: NodeManager,
-) {
+) : MeshConfigHandler {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private val _localConfig = MutableStateFlow(LocalConfig())
-    val localConfig = _localConfig.asStateFlow()
+    override val localConfig = _localConfig.asStateFlow()
 
     private val _moduleConfig = MutableStateFlow(LocalModuleConfig())
-    val moduleConfig = _moduleConfig.asStateFlow()
+    override val moduleConfig = _moduleConfig.asStateFlow()
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
         radioConfigRepository.localConfigFlow.onEach { _localConfig.value = it }.launchIn(scope)
-
         radioConfigRepository.moduleConfigFlow.onEach { _moduleConfig.value = it }.launchIn(scope)
     }
 
-    fun handleDeviceConfig(config: Config) {
+    override fun handleDeviceConfig(config: Config) {
         scope.handledLaunch { radioConfigRepository.setLocalConfig(config) }
         serviceRepository.setConnectionProgress("Device config received")
     }
 
-    fun handleModuleConfig(config: ModuleConfig) {
+    override fun handleModuleConfig(config: ModuleConfig) {
         scope.handledLaunch { radioConfigRepository.setLocalModuleConfig(config) }
         serviceRepository.setConnectionProgress("Module config received")
 
@@ -72,13 +70,13 @@ constructor(
         }
     }
 
-    fun handleChannel(ch: Channel) {
+    override fun handleChannel(channel: Channel) {
         // We always want to save channel settings we receive from the radio
-        scope.handledLaunch { radioConfigRepository.updateChannelSettings(ch) }
+        scope.handledLaunch { radioConfigRepository.updateChannelSettings(channel) }
 
         // Update status message if we have node info, otherwise use a generic one
         val mi = nodeManager.getMyNodeInfo()
-        val index = ch.index ?: 0
+        val index = channel.index ?: 0
         if (mi != null) {
             serviceRepository.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
         } else {

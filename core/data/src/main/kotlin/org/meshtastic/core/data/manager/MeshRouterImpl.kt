@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import kotlinx.coroutines.CoroutineScope
+import org.meshtastic.core.repository.MeshActionHandler
+import org.meshtastic.core.repository.MeshConfigFlowManager
+import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshDataHandler
+import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.TracerouteHandler
@@ -24,23 +29,20 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Orchestrates the specialized packet handlers for the [MeshService]. This class serves as a central registry and
- * lifecycle manager for all routing sub-components.
+ * Implementation of [MeshRouter] that orchestrates specialized mesh packet handlers.
  */
 @Suppress("LongParameterList")
 @Singleton
-class MeshRouter
-@Inject
-constructor(
-    val dataHandler: MeshDataHandler,
-    val configHandler: MeshConfigHandler,
-    val tracerouteHandler: TracerouteHandler,
-    val neighborInfoHandler: NeighborInfoHandler,
-    val configFlowManager: MeshConfigFlowManager,
-    val mqttManager: MqttManager,
-    val actionHandler: MeshActionHandler,
-) {
-    fun start(scope: CoroutineScope) {
+class MeshRouterImpl @Inject constructor(
+    override val dataHandler: MeshDataHandler,
+    override val configHandler: MeshConfigHandler,
+    override val tracerouteHandler: TracerouteHandler,
+    override val neighborInfoHandler: NeighborInfoHandler,
+    override val configFlowManager: MeshConfigFlowManager,
+    override val mqttManager: MqttManager,
+    override val actionHandler: MeshActionHandler,
+) : MeshRouter {
+    override fun start(scope: CoroutineScope) {
         dataHandler.start(scope)
         configHandler.start(scope)
         tracerouteHandler.start(scope)

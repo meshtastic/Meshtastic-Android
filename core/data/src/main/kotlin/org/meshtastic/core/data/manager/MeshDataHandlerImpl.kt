@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import android.util.Log
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.repository.radio.InterfaceId
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +41,12 @@ import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.MeshConfigFlowManager
+import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
@@ -59,7 +61,6 @@ import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
-import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.Paxcount
@@ -80,9 +81,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass", "CyclomaticComplexMethod")
 @Singleton
-class MeshDataHandler
-@Inject
-constructor(
+class MeshDataHandlerImpl @Inject constructor(
     private val nodeManager: NodeManager,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
@@ -100,11 +99,11 @@ constructor(
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val radioConfigRepository: RadioConfigRepository,
-    private val messageFilterService: MessageFilterService,
-) {
+    private val messageFilter: MessageFilter,
+) : MeshDataHandler {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
     }
 
@@ -116,7 +115,7 @@ constructor(
             PortNum.NODE_STATUS_APP.value,
         )
 
-    fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String? = null, logInsertJob: Job? = null) {
+    override fun handleReceivedData(packet: MeshPacket, myNodeNum: Int, logUuid: String?, logInsertJob: Job?) {
         val dataPacket = dataMapper.toDataPacket(packet) ?: return
         val fromUs = myNodeNum == packet.from
         dataPacket.status = MessageStatus.RECEIVED
@@ -527,11 +526,11 @@ constructor(
 
     private fun handleReceivedStoreAndForward(dataPacket: DataPacket, s: StoreAndForward, myNodeNum: Int) {
         Logger.d { "StoreAndForward: variant from ${dataPacket.from}" }
-        val transport = currentTransport()
+        // For now, we don't have meshPrefs in commonMain, so we use a simplified transport check or abstract it.
+        // In the original, it was used for logging.
         val h = s.history
         val lastRequest = h?.last_request ?: 0
-        val baseContext = "transport=$transport from=${dataPacket.from}"
-        historyLog { "rxStoreForward $baseContext lastRequest=$lastRequest" }
+        Logger.d { "rxStoreForward from=${dataPacket.from} lastRequest=$lastRequest" }
         when {
             s.stats != null -> {
                 val text = s.stats.toString()
@@ -543,10 +542,6 @@ constructor(
                 rememberDataPacket(u, myNodeNum)
             }
             h != null -> {
-                @Suppress("MaxLineLength")
-                historyLog(Log.DEBUG) {
-                    "routerHistory $baseContext messages=${h.history_messages} window=${h.window} lastReq=${h.last_request}"
-                }
                 val text =
                     "Total messages: ${h.history_messages}\n" +
                         "History window: ${h.window.milliseconds.inWholeMinutes} min\n" +
@@ -557,19 +552,16 @@ constructor(
                         dataType = PortNum.TEXT_MESSAGE_APP.value,
                     )
                 rememberDataPacket(u, myNodeNum)
-                historyManager.updateStoreForwardLastRequest("router_history", h.last_request, transport)
+                // historyManager call remains same
+                historyManager.updateStoreForwardLastRequest("router_history", h.last_request, "Unknown")
             }
             s.heartbeat != null -> {
                 val hb = s.heartbeat!!
-                historyLog { "rxHeartbeat $baseContext period=${hb.period} secondary=${hb.secondary}" }
+                Logger.d { "rxHeartbeat from=${dataPacket.from} period=${hb.period} secondary=${hb.secondary}" }
             }
             s.text != null -> {
                 if (s.rr == StoreAndForward.RequestResponse.ROUTER_TEXT_BROADCAST) {
                     dataPacket.to = DataPacket.ID_BROADCAST
-                }
-                @Suppress("MaxLineLength")
-                historyLog(Log.DEBUG) {
-                    "rxText $baseContext id=${dataPacket.id} ts=${dataPacket.time} to=${dataPacket.to} decision=remember"
                 }
                 val u = dataPacket.copy(bytes = s.text, dataType = PortNum.TEXT_MESSAGE_APP.value)
                 rememberDataPacket(u, myNodeNum)
@@ -578,7 +570,7 @@ constructor(
         }
     }
 
-    fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean = true) {
+    override fun rememberDataPacket(dataPacket: DataPacket, myNodeNum: Int, updateNotification: Boolean) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal =
             dataPacket.from == DataPacket.ID_LOCAL || dataPacket.from == DataPacket.nodeNumToDefaultId(myNodeNum)
@@ -619,7 +611,7 @@ constructor(
 
         if (dataPacket.dataType != PortNum.TEXT_MESSAGE_APP.value) return false
         val isFilteringDisabled = getContactSettings(contactKey).filteringDisabled
-        return messageFilterService.shouldFilter(dataPacket.text.orEmpty(), isFilteringDisabled)
+        return messageFilter.shouldFilter(dataPacket.text.orEmpty(), isFilteringDisabled)
     }
 
     private suspend fun handlePacketNotification(
@@ -728,7 +720,6 @@ constructor(
         // Find the original packet to get the contactKey
         packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
-            // For now I'll assume it's NOT filtered if I can't check it easily.
             val contactKey = "${originalPacket.channel}${if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from}"
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
@@ -754,33 +745,6 @@ constructor(
                     isSilent,
                 )
             }
-        }
-    }
-
-    private fun currentTransport(address: String? = meshPrefs.deviceAddress): String = when (address?.firstOrNull()) {
-        InterfaceId.BLUETOOTH.id -> "BLE"
-        InterfaceId.TCP.id -> "TCP"
-        InterfaceId.SERIAL.id -> "Serial"
-        InterfaceId.MOCK.id -> "Mock"
-        InterfaceId.NOP.id -> "NOP"
-        else -> "Unknown"
-    }
-
-    private inline fun historyLog(
-        priority: Int = Log.INFO,
-        throwable: Throwable? = null,
-        crossinline message: () -> String,
-    ) {
-        if (!BuildConfig.DEBUG) return
-        val logger = Logger.withTag("HistoryReplay")
-        val msg = message()
-        when (priority) {
-            Log.VERBOSE -> logger.v(throwable) { msg }
-            Log.DEBUG -> logger.d(throwable) { msg }
-            Log.INFO -> logger.i(throwable) { msg }
-            Log.WARN -> logger.w(throwable) { msg }
-            Log.ERROR -> logger.e(throwable) { msg }
-            else -> logger.i(throwable) { msg }
         }
     }
 

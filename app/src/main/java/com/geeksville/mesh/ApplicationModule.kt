@@ -43,6 +43,8 @@ interface ApplicationModule {
 
     @Binds fun bindServiceBroadcasts(impl: ServiceBroadcasts): org.meshtastic.core.repository.ServiceBroadcasts
 
+    @Binds fun bindMeshConnectionManager(impl: com.geeksville.mesh.service.MeshConnectionManager): org.meshtastic.core.repository.MeshConnectionManager
+
     companion object {
         @Provides @ProcessLifecycle
         fun provideProcessLifecycleOwner(): LifecycleOwner = ProcessLifecycleOwner.get()

@@ -16,21 +16,22 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CoroutineScope
+import org.meshtastic.proto.MeshPacket
 
 /**
- * Interface for managing database instances and cache limits.
+ * Interface for processing incoming radio messages and mesh packets.
  */
-interface DatabaseManager {
-    /** Reactive stream of the current database cache limit. */
-    val cacheLimit: StateFlow<Int>
+interface MeshMessageProcessor {
+    /** Starts the processor with the given coroutine scope. */
+    fun start(scope: CoroutineScope)
 
-    /** Returns the current database cache limit. */
-    fun getCacheLimit(): Int
+    /** Handles a raw message received from the radio. */
+    fun handleFromRadio(bytes: ByteArray, myNodeNum: Int?)
 
-    /** Sets the database cache limit. */
-    fun setCacheLimit(limit: Int)
+    /** Handles a received mesh packet. */
+    fun handleReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?)
 
-    /** Switches the active database to the one associated with the given [address]. */
-    suspend fun switchActiveDatabase(address: String?)
+    /** Clears the buffer of early received packets. */
+    fun clearEarlyPackets()
 }

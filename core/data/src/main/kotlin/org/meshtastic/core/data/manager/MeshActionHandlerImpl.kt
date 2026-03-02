@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +26,6 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
@@ -35,6 +34,10 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.DatabaseManager
+import org.meshtastic.core.repository.MeshActionHandler
+import org.meshtastic.core.repository.MeshDataHandler
+import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
@@ -51,9 +54,7 @@ import javax.inject.Singleton
 
 @Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
 @Singleton
-class MeshActionHandler
-@Inject
-constructor(
+class MeshActionHandlerImpl @Inject constructor(
     private val nodeManager: NodeManager,
     private val commandSender: CommandSender,
     private val packetRepository: Lazy<PacketRepository>,
@@ -64,10 +65,10 @@ constructor(
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
-) {
+) : MeshActionHandler {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
     }
 
@@ -76,7 +77,7 @@ constructor(
         private const val EMOJI_INDICATOR = 1
     }
 
-    fun onServiceAction(action: ServiceAction) {
+    override fun onServiceAction(action: ServiceAction) {
         ignoreException {
             val myNodeNum = nodeManager.myNodeNum ?: return@ignoreException
             when (action) {
@@ -178,13 +179,13 @@ constructor(
         }
     }
 
-    fun handleSetOwner(u: MeshUser, myNodeNum: Int) {
+    override fun handleSetOwner(u: MeshUser, myNodeNum: Int) {
         val newUser = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_owner = newUser) }
         nodeManager.handleReceivedUser(myNodeNum, newUser)
     }
 
-    fun handleSend(p: DataPacket, myNodeNum: Int) {
+    override fun handleSend(p: DataPacket, myNodeNum: Int) {
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
         dataHandler.rememberDataPacket(p, myNodeNum, false)
@@ -192,7 +193,7 @@ constructor(
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }
 
-    fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {
+    override fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {
         if (destNum != myNodeNum) {
             val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
             val currentPosition =
@@ -205,32 +206,32 @@ constructor(
         }
     }
 
-    fun handleRemoveByNodenum(nodeNum: Int, requestId: Int, myNodeNum: Int) {
+    override fun handleRemoveByNodenum(nodeNum: Int, requestId: Int, myNodeNum: Int) {
         nodeManager.removeByNodenum(nodeNum)
         commandSender.sendAdmin(myNodeNum, requestId) { AdminMessage(remove_by_nodenum = nodeNum) }
     }
 
-    fun handleSetRemoteOwner(id: Int, destNum: Int, payload: ByteArray) {
+    override fun handleSetRemoteOwner(id: Int, destNum: Int, payload: ByteArray) {
         val u = User.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_owner = u) }
         nodeManager.handleReceivedUser(destNum, u)
     }
 
-    fun handleGetRemoteOwner(id: Int, destNum: Int) {
+    override fun handleGetRemoteOwner(id: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_owner_request = true) }
     }
 
-    fun handleSetConfig(payload: ByteArray, myNodeNum: Int) {
+    override fun handleSetConfig(payload: ByteArray, myNodeNum: Int) {
         val c = Config.ADAPTER.decode(payload)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_config = c) }
     }
 
-    fun handleSetRemoteConfig(id: Int, destNum: Int, payload: ByteArray) {
+    override fun handleSetRemoteConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = Config.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_config = c) }
     }
 
-    fun handleGetRemoteConfig(id: Int, destNum: Int, config: Int) {
+    override fun handleGetRemoteConfig(id: Int, destNum: Int, config: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) {
             if (config == AdminMessage.ConfigType.SESSIONKEY_CONFIG.value) {
                 AdminMessage(get_device_metadata_request = true)
@@ -240,104 +241,104 @@ constructor(
         }
     }
 
-    fun handleSetModuleConfig(id: Int, destNum: Int, payload: ByteArray) {
+    override fun handleSetModuleConfig(id: Int, destNum: Int, payload: ByteArray) {
         val c = ModuleConfig.ADAPTER.decode(payload)
         commandSender.sendAdmin(destNum, id) { AdminMessage(set_module_config = c) }
         c.statusmessage?.let { sm -> nodeManager.updateNodeStatus(destNum, sm.node_status) }
     }
 
-    fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
+    override fun handleGetModuleConfig(id: Int, destNum: Int, config: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) {
             AdminMessage(get_module_config_request = AdminMessage.ModuleConfigType.fromValue(config))
         }
     }
 
-    fun handleSetRingtone(destNum: Int, ringtone: String) {
+    override fun handleSetRingtone(destNum: Int, ringtone: String) {
         commandSender.sendAdmin(destNum) { AdminMessage(set_ringtone_message = ringtone) }
     }
 
-    fun handleGetRingtone(id: Int, destNum: Int) {
+    override fun handleGetRingtone(id: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_ringtone_request = true) }
     }
 
-    fun handleSetCannedMessages(destNum: Int, messages: String) {
+    override fun handleSetCannedMessages(destNum: Int, messages: String) {
         commandSender.sendAdmin(destNum) { AdminMessage(set_canned_message_module_messages = messages) }
     }
 
-    fun handleGetCannedMessages(id: Int, destNum: Int) {
+    override fun handleGetCannedMessages(id: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) {
             AdminMessage(get_canned_message_module_messages_request = true)
         }
     }
 
-    fun handleSetChannel(payload: ByteArray?, myNodeNum: Int) {
+    override fun handleSetChannel(payload: ByteArray?, myNodeNum: Int) {
         if (payload != null) {
             val c = Channel.ADAPTER.decode(payload)
             commandSender.sendAdmin(myNodeNum) { AdminMessage(set_channel = c) }
         }
     }
 
-    fun handleSetRemoteChannel(id: Int, destNum: Int, payload: ByteArray?) {
+    override fun handleSetRemoteChannel(id: Int, destNum: Int, payload: ByteArray?) {
         if (payload != null) {
             val c = Channel.ADAPTER.decode(payload)
             commandSender.sendAdmin(destNum, id) { AdminMessage(set_channel = c) }
         }
     }
 
-    fun handleGetRemoteChannel(id: Int, destNum: Int, index: Int) {
+    override fun handleGetRemoteChannel(id: Int, destNum: Int, index: Int) {
         commandSender.sendAdmin(destNum, id, wantResponse = true) { AdminMessage(get_channel_request = index + 1) }
     }
 
-    fun handleRequestNeighborInfo(requestId: Int, destNum: Int) {
+    override fun handleRequestNeighborInfo(requestId: Int, destNum: Int) {
         commandSender.requestNeighborInfo(requestId, destNum)
     }
 
-    fun handleBeginEditSettings(destNum: Int) {
+    override fun handleBeginEditSettings(destNum: Int) {
         commandSender.sendAdmin(destNum) { AdminMessage(begin_edit_settings = true) }
     }
 
-    fun handleCommitEditSettings(destNum: Int) {
+    override fun handleCommitEditSettings(destNum: Int) {
         commandSender.sendAdmin(destNum) { AdminMessage(commit_edit_settings = true) }
     }
 
-    fun handleRebootToDfu(destNum: Int) {
+    override fun handleRebootToDfu(destNum: Int) {
         commandSender.sendAdmin(destNum) { AdminMessage(enter_dfu_mode_request = true) }
     }
 
-    fun handleRequestTelemetry(requestId: Int, destNum: Int, type: Int) {
+    override fun handleRequestTelemetry(requestId: Int, destNum: Int, type: Int) {
         commandSender.requestTelemetry(requestId, destNum, type)
     }
 
-    fun handleRequestShutdown(requestId: Int, destNum: Int) {
+    override fun handleRequestShutdown(requestId: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(shutdown_seconds = DEFAULT_REBOOT_DELAY) }
     }
 
-    fun handleRequestReboot(requestId: Int, destNum: Int) {
+    override fun handleRequestReboot(requestId: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(reboot_seconds = DEFAULT_REBOOT_DELAY) }
     }
 
-    fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
+    override fun handleRequestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {
         val otaMode = OTAMode.fromValue(mode) ?: OTAMode.NO_REBOOT_OTA
         val otaEvent =
             AdminMessage.OTAEvent(reboot_ota_mode = otaMode, ota_hash = hash?.toByteString() ?: okio.ByteString.EMPTY)
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(ota_request = otaEvent) }
     }
 
-    fun handleRequestFactoryReset(requestId: Int, destNum: Int) {
+    override fun handleRequestFactoryReset(requestId: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(factory_reset_device = 1) }
     }
 
-    fun handleRequestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) {
+    override fun handleRequestNodedbReset(requestId: Int, destNum: Int, preserveFavorites: Boolean) {
         commandSender.sendAdmin(destNum, requestId) { AdminMessage(nodedb_reset = preserveFavorites) }
     }
 
-    fun handleGetDeviceConnectionStatus(requestId: Int, destNum: Int) {
+    override fun handleGetDeviceConnectionStatus(requestId: Int, destNum: Int) {
         commandSender.sendAdmin(destNum, requestId, wantResponse = true) {
             AdminMessage(get_device_connection_status_request = true)
         }
     }
 
-    fun handleUpdateLastAddress(deviceAddr: String?) {
+    override fun handleUpdateLastAddress(deviceAddr: String?) {
         val currentAddr = meshPrefs.deviceAddress
         if (deviceAddr != currentAddr) {
             meshPrefs.deviceAddress = deviceAddr

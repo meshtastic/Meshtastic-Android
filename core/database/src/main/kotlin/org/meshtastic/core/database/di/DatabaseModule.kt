@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,12 @@
 package org.meshtastic.core.database.di
 
 import android.app.Application
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
@@ -34,26 +36,40 @@ import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
 @Module
-class DatabaseModule {
-    @Provides @Singleton
-    fun provideDatabase(app: Application): MeshtasticDatabase = MeshtasticDatabase.getDatabase(app)
+abstract class DatabaseModule {
 
-    @Provides fun provideNodeInfoDao(database: MeshtasticDatabase): NodeInfoDao = database.nodeInfoDao()
+    @Binds
+    @Singleton
+    abstract fun bindDatabaseManager(impl: DatabaseManager): org.meshtastic.core.repository.DatabaseManager
 
-    @Provides fun providePacketDao(database: MeshtasticDatabase): PacketDao = database.packetDao()
+    companion object {
+        @Provides
+        @Singleton
+        fun provideDatabase(app: Application): MeshtasticDatabase = MeshtasticDatabase.getDatabase(app)
 
-    @Provides fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao = database.meshLogDao()
+        @Provides
+        fun provideNodeInfoDao(database: MeshtasticDatabase): NodeInfoDao = database.nodeInfoDao()
 
-    @Provides
-    fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao = database.quickChatActionDao()
+        @Provides
+        fun providePacketDao(database: MeshtasticDatabase): PacketDao = database.packetDao()
 
-    @Provides
-    fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao = database.deviceHardwareDao()
+        @Provides
+        fun provideMeshLogDao(database: MeshtasticDatabase): MeshLogDao = database.meshLogDao()
 
-    @Provides
-    fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao = database.firmwareReleaseDao()
+        @Provides
+        fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao =
+            database.quickChatActionDao()
 
-    @Provides
-    fun provideTracerouteNodePositionDao(database: MeshtasticDatabase): TracerouteNodePositionDao =
-        database.tracerouteNodePositionDao()
+        @Provides
+        fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao =
+            database.deviceHardwareDao()
+
+        @Provides
+        fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao =
+            database.firmwareReleaseDao()
+
+        @Provides
+        fun provideTracerouteNodePositionDao(database: MeshtasticDatabase): TracerouteNodePositionDao =
+            database.tracerouteNodePositionDao()
+    }
 }

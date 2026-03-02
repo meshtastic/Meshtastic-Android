@@ -84,7 +84,7 @@ open class DatabaseManager @Inject constructor(private val app: Application, pri
     }
 
     /** Switch active database to the one associated with [address]. Serialized via mutex. */
-    suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
+    override suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
         val dbName = buildDbName(address)
 
         // Remember the previously active DB name (any) so we can record its last-used time as well.

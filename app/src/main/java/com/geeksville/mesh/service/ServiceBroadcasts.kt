@@ -38,7 +38,6 @@ class ServiceBroadcasts
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    private val connectionStateHolder: ConnectionStateHandler,
     private val serviceRepository: ServiceRepository,
 ) : SharedServiceBroadcasts {
     // A mapping of receiver class name to package name - used for explicit broadcasts
@@ -124,13 +123,12 @@ constructor(
 
     /** Broadcast our current connection status */
     override fun broadcastConnection() {
-        val connectionState = connectionStateHolder.connectionState.value
+        val connectionState = serviceRepository.connectionState.value
         // ATAK expects a String: "CONNECTED" or "DISCONNECTED"
         // It uses equalsIgnoreCase, but we'll use uppercase to be specific.
         val stateStr = connectionState.toString().uppercase(Locale.ROOT)
 
         val intent = Intent(ACTION_MESH_CONNECTED).apply { putExtra(EXTRA_CONNECTED, stateStr) }
-        serviceRepository.setConnectionState(connectionState)
         explicitBroadcast(intent)
 
         if (connectionState == ConnectionState.Disconnected) {

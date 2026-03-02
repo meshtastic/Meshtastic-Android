@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -25,11 +25,14 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshConfigFlowManager
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Heartbeat
@@ -43,30 +46,28 @@ import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
 @Suppress("LongParameterList")
 @Singleton
-class MeshConfigFlowManager
-@Inject
-constructor(
+class MeshConfigFlowManagerImpl @Inject constructor(
     private val nodeManager: NodeManager,
     private val connectionManager: MeshConnectionManager,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val connectionStateHolder: ConnectionStateHandler,
+    private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val analytics: PlatformAnalytics,
     private val commandSender: CommandSender,
     private val packetHandler: PacketHandler,
-) {
+) : MeshConfigFlowManager {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val configOnlyNonce = 69420
     private val nodeInfoNonce = 69421
     private val wantConfigDelay = 100L
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
     }
 
     private val newNodes = mutableListOf<NodeInfo>()
-    val newNodeCount: Int
+    override val newNodeCount: Int
         get() = newNodes.size
 
     private var rawMyNodeInfo: ProtoMyNodeInfo? = null
@@ -74,7 +75,7 @@ constructor(
     private var newMyNodeInfo: SharedMyNodeInfo? = null
     private var myNodeInfo: SharedMyNodeInfo? = null
 
-    fun handleConfigComplete(configCompleteId: Int) {
+    override fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
             configOnlyNonce -> handleConfigOnlyComplete()
             nodeInfoNonce -> handleNodeInfoComplete()
@@ -134,7 +135,7 @@ constructor(
             }
             nodeManager.setNodeDbReady(true)
             nodeManager.setAllowNodeDbWrites(true)
-            connectionStateHolder.setState(ConnectionState.Connected)
+            serviceRepository.setConnectionState(ConnectionState.Connected)
             serviceBroadcasts.broadcastConnection()
             connectionManager.onNodeDbReady()
         }
@@ -144,7 +145,7 @@ constructor(
         analytics.setDeviceAttributes(mi.firmwareVersion ?: "unknown", mi.model ?: "unknown")
     }
 
-    fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
+    override fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
         Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
         rawMyNodeInfo = myInfo
         nodeManager.myNodeNum = myInfo.my_node_num
@@ -157,14 +158,18 @@ constructor(
         }
     }
 
-    fun handleLocalMetadata(metadata: DeviceMetadata) {
+    override fun handleLocalMetadata(metadata: DeviceMetadata) {
         Logger.i { "Local Metadata received: ${metadata.firmware_version}" }
         lastMetadata = metadata
         regenMyNodeInfo(metadata)
     }
 
-    fun handleNodeInfo(info: NodeInfo) {
+    override fun handleNodeInfo(info: NodeInfo) {
         newNodes.add(info)
+    }
+
+    override fun triggerWantConfig() {
+        connectionManager.startConfigOnly()
     }
 
     private fun regenMyNodeInfo(metadata: DeviceMetadata? = null) {
