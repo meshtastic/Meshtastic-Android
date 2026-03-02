@@ -143,7 +143,7 @@ constructor(
         if (connectionStateHolder?.connectionState?.value == ConnectionState.Connected) {
             sendNow(p)
         } else {
-            throw IllegalStateException("Radio is not connected")
+            error("Radio is not connected")
         }
     }
 

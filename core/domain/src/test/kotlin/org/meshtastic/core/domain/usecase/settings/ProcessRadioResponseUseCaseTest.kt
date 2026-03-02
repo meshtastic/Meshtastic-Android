@@ -80,5 +80,27 @@ class ProcessRadioResponseUseCaseTest {
         assertEquals("2.5.0", (result as RadioResponseResult.Metadata).metadata.firmware_version)
     }
 
+    @Test
+    fun `invoke with canned messages response returns canned messages result`() {
+        // Arrange
+        val adminMsg = AdminMessage(get_canned_message_module_messages_response = "Hello World")
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
+            )
+
+        // Act
+        val result = useCase(packet, 123, setOf(42))
+
+        // Assert
+        assertTrue(result is RadioResponseResult.CannedMessages)
+        assertEquals("Hello World", (result as RadioResponseResult.CannedMessages).messages)
+    }
+
     private fun ByteArray.toByteString() = okio.ByteString.of(*this)
 }

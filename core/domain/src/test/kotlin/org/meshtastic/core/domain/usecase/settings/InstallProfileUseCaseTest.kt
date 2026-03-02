@@ -82,4 +82,17 @@ class InstallProfileUseCaseTest {
         // Assert
         coVerify { radioController.setModuleConfig(789, match { it.mqtt == mqttConfig }, 1) }
     }
+
+    @Test
+    fun `invoke with module_config part 2 sets module config`() = runTest {
+        // Arrange
+        val neighborInfoConfig = ModuleConfig.NeighborInfoConfig(enabled = true)
+        val profile = DeviceProfile(module_config = LocalModuleConfig(neighbor_info = neighborInfoConfig))
+
+        // Act
+        useCase(789, profile, null)
+
+        // Assert
+        coVerify { radioController.setModuleConfig(789, match { it.neighbor_info == neighborInfoConfig }, 1) }
+    }
 }
