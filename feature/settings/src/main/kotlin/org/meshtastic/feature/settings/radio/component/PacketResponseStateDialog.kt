@@ -54,11 +54,7 @@ private const val AUTO_DISMISS_DELAY_MS = 1500L
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun <T> PacketResponseStateDialog(
-    state: ResponseState<T>,
-    onDismiss: () -> Unit = {},
-    onComplete: () -> Unit = {},
-) {
+fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit = {}, onComplete: () -> Unit = {}) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     LaunchedEffect(state) {
         if (state is ResponseState.Success) {
@@ -111,10 +107,7 @@ fun <T> PacketResponseStateDialog(
 @Composable
 private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit) {
     val progress by
-        animateFloatAsState(
-            targetValue = state.completed.toFloat() / state.total.toFloat(),
-            label = "progress",
-        )
+        animateFloatAsState(targetValue = state.completed.toFloat() / state.total.toFloat(), label = "progress")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "%.0f%%".format(progress * 100),
@@ -146,10 +139,7 @@ private fun SuccessContent() {
         modifier = Modifier.size(84.dp),
         tint = MaterialTheme.colorScheme.primary,
     )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(Res.string.delivery_confirmed),
             style = MaterialTheme.typography.headlineSmall,
@@ -172,10 +162,7 @@ private fun ErrorContent(state: ResponseState.Error) {
         modifier = Modifier.size(84.dp),
         tint = MaterialTheme.colorScheme.error,
     )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(Res.string.error),
             style = MaterialTheme.typography.headlineSmall,

@@ -247,9 +247,7 @@ class MeshService : Service() {
 
             override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
-            override fun getConfig(): ByteArray = toRemoteExceptions {
-                commandSender.getCachedLocalConfig().encode()
-            }
+            override fun getConfig(): ByteArray = toRemoteExceptions { commandSender.getCachedLocalConfig().encode() }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
                 router.actionHandler.handleSetConfig(payload, myNodeNum)

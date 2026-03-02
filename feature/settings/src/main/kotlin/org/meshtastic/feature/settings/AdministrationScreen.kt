@@ -92,12 +92,7 @@ fun AdministrationScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     title = stringResource(Res.string.administration),
                     titleColor = MaterialTheme.colorScheme.error,
                 ) {
-                    AdminRouteItems(
-                        viewModel = viewModel,
-                        enabled = enabled,
-                        state = state,
-                        destNode = destNode,
-                    )
+                    AdminRouteItems(viewModel = viewModel, enabled = enabled, state = state, destNode = destNode)
                 }
             }
         }
@@ -175,9 +170,7 @@ private fun AdminActionDialog(
             text = {
                 if (route == AdminRoute.NODEDB_RESET) {
                     Row(
-                        modifier =
-                        Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                            .fillMaxWidth(),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp).fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {

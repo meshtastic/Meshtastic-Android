@@ -95,6 +95,7 @@ constructor(
     }
 
     fun getCachedLocalConfig(): LocalConfig = localConfig.value
+
     fun getCachedChannelSet(): ChannelSet = channelSet.value
 
     @VisibleForTesting internal constructor() : this(null, null, null, null)

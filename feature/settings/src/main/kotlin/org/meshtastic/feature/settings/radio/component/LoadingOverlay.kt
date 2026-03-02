@@ -50,7 +50,8 @@ private const val PERCENTAGE_FACTOR = 100
 fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
     AnimatedVisibility(visible = state is ResponseState.Loading, enter = fadeIn(), exit = fadeOut()) {
         Box(
-            modifier = modifier
+            modifier =
+            modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = LOADING_OVERLAY_ALPHA))
                 .clickable(enabled = false) {},
