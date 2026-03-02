@@ -37,6 +37,21 @@ class FakeRadioController : RadioController {
         sentSharedContacts.add(nodeNum)
     }
 
+    override suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int) {}
+    override suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int) {}
+    override suspend fun setModuleConfig(destNum: Int, config: org.meshtastic.proto.ModuleConfig, packetId: Int) {}
+    override suspend fun setFixedPosition(destNum: Int, position: org.meshtastic.core.model.Position) {}
+
+    override suspend fun reboot(destNum: Int, packetId: Int) {}
+    override suspend fun shutdown(destNum: Int, packetId: Int) {}
+    override suspend fun factoryReset(destNum: Int, packetId: Int) {}
+    override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
+
+    override suspend fun beginEditSettings(destNum: Int) {}
+    override suspend fun commitEditSettings(destNum: Int) {}
+
+    override fun getPacketId(): Int = 1
+
     // --- Helper methods for testing ---
     
     fun setConnectionState(state: ConnectionState) {
