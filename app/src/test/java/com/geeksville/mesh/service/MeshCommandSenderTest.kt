@@ -24,15 +24,15 @@ import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.User
 
-class MeshCommandSenderTest {
+class CommandSenderTest {
 
-    private lateinit var commandSender: MeshCommandSender
-    private lateinit var nodeManager: MeshNodeManager
+    private lateinit var commandSender: CommandSender
+    private lateinit var nodeManager: NodeManager
 
     @Before
     fun setUp() {
-        nodeManager = MeshNodeManager()
-        commandSender = MeshCommandSender(null, nodeManager, null, null)
+        nodeManager = NodeManagerImpl()
+        commandSender = CommandSenderImpl(null, nodeManager, null, null)
     }
 
     @Test

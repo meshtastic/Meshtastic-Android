@@ -26,14 +26,18 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.DatabaseManager
-import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.prefs.mesh.MeshPrefs
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
@@ -50,10 +54,10 @@ import javax.inject.Singleton
 class MeshActionHandler
 @Inject
 constructor(
-    private val nodeManager: MeshNodeManager,
-    private val commandSender: MeshCommandSender,
+    private val nodeManager: NodeManager,
+    private val commandSender: CommandSender,
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val serviceBroadcasts: ServiceBroadcasts,
     private val dataHandler: MeshDataHandler,
     private val analytics: PlatformAnalytics,
     private val meshPrefs: MeshPrefs,
@@ -102,7 +106,7 @@ constructor(
                 AdminMessage(set_favorite_node = node.num)
             }
         }
-        nodeManager.updateNodeInfo(node.num) { it.isFavorite = !node.isFavorite }
+        nodeManager.updateNode(node.num) { it.copy(isFavorite = !node.isFavorite) }
     }
 
     private fun handleIgnore(action: ServiceAction.Ignore, myNodeNum: Int) {
@@ -115,14 +119,14 @@ constructor(
                 AdminMessage(remove_ignored_node = node.num)
             }
         }
-        nodeManager.updateNodeInfo(node.num) { it.isIgnored = newIgnoredStatus }
+        nodeManager.updateNode(node.num) { it.copy(isIgnored = newIgnoredStatus) }
         scope.handledLaunch { packetRepository.get().updateFilteredBySender(node.user.id, newIgnoredStatus) }
     }
 
     private fun handleMute(action: ServiceAction.Mute, myNodeNum: Int) {
         val node = action.node
         commandSender.sendAdmin(myNodeNum) { AdminMessage(toggle_muted_node = node.num) }
-        nodeManager.updateNodeInfo(node.num) { it.isMuted = !node.isMuted }
+        nodeManager.updateNode(node.num) { it.copy(isMuted = !node.isMuted) }
     }
 
     private fun handleReaction(action: ServiceAction.Reaction, myNodeNum: Int) {
@@ -155,11 +159,11 @@ constructor(
 
     private fun rememberReaction(action: ServiceAction.Reaction, packetId: Int, myNodeNum: Int) {
         scope.handledLaunch {
+            val user = nodeManager.nodeDBbyNodeNum[myNodeNum]?.user ?: User(id = nodeManager.getMyId())
             val reaction =
-                ReactionEntity(
-                    myNodeNum = myNodeNum,
+                Reaction(
                     replyId = action.replyId,
-                    userId = nodeManager.getMyId().takeIf { it.isNotEmpty() } ?: DataPacket.ID_LOCAL,
+                    user = user,
                     emoji = action.emoji,
                     timestamp = nowMillis,
                     snr = 0f,
@@ -170,11 +174,11 @@ constructor(
                     to = action.contactKey.substring(1),
                     channel = action.contactKey[0].digitToInt(),
                 )
-            packetRepository.get().insertReaction(reaction)
+            packetRepository.get().insertReaction(reaction, myNodeNum)
         }
     }
 
-    fun handleSetOwner(u: org.meshtastic.core.model.MeshUser, myNodeNum: Int) {
+    fun handleSetOwner(u: MeshUser, myNodeNum: Int) {
         val newUser = User(id = u.id, long_name = u.longName, short_name = u.shortName, is_licensed = u.isLicensed)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(set_owner = newUser) }
         nodeManager.handleReceivedUser(myNodeNum, newUser)
@@ -182,7 +186,7 @@ constructor(
 
     fun handleSend(p: DataPacket, myNodeNum: Int) {
         commandSender.sendData(p)
-        serviceBroadcasts.broadcastMessageStatus(p)
+        serviceBroadcasts.broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
         dataHandler.rememberDataPacket(p, myNodeNum, false)
         val bytes = p.bytes ?: okio.ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))

@@ -28,10 +28,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.onlineTimeThreshold
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.LocalStats
 import javax.inject.Inject

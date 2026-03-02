@@ -36,16 +36,20 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.toRemoteExceptions
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.PortNum
 import javax.inject.Inject
@@ -62,13 +66,13 @@ class MeshService : Service() {
 
     @Inject lateinit var packetHandler: PacketHandler
 
-    @Inject lateinit var serviceBroadcasts: MeshServiceBroadcasts
+    @Inject lateinit var serviceBroadcasts: ServiceBroadcasts
 
-    @Inject lateinit var nodeManager: MeshNodeManager
+    @Inject lateinit var nodeManager: NodeManager
 
     @Inject lateinit var messageProcessor: MeshMessageProcessor
 
-    @Inject lateinit var commandSender: MeshCommandSender
+    @Inject lateinit var commandSender: CommandSender
 
     @Inject lateinit var locationManager: MeshLocationManager
 

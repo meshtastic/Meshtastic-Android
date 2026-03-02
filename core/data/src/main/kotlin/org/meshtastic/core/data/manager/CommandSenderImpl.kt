@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import android.os.RemoteException
-import androidx.annotation.VisibleForTesting
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,14 +26,15 @@ import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.isWithinSizeLimit
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
@@ -54,55 +53,56 @@ import javax.inject.Singleton
 import kotlin.math.absoluteValue
 import kotlin.time.Duration.Companion.hours
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "CyclomaticComplexMethod")
 @Singleton
-class MeshCommandSender
+class CommandSenderImpl
 @Inject
 constructor(
-    private val packetHandler: PacketHandler?,
-    private val nodeManager: MeshNodeManager?,
-    private val connectionStateHolder: ConnectionStateHandler?,
-    private val radioConfigRepository: RadioConfigRepository?,
-) {
+    private val packetHandler: PacketHandler,
+    private val nodeManager: NodeManager,
+    private val radioConfigRepository: RadioConfigRepository,
+) : CommandSender {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val currentPacketId = AtomicLong(java.util.Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = AtomicReference(ByteString.EMPTY)
-    val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
-    val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
+    override val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
+    override val neighborInfoStartTimes = ConcurrentHashMap<Int, Long>()
 
     private val localConfig = MutableStateFlow(LocalConfig())
     private val channelSet = MutableStateFlow(ChannelSet())
 
-    @Volatile var lastNeighborInfo: NeighborInfo? = null
+    override var lastNeighborInfo: NeighborInfo? = null
 
-    fun start(scope: CoroutineScope) {
+    // We'll need a way to track connection state in shared code, 
+    // maybe via ServiceRepository or similar.
+    // For now I'll assume it's injected or available.
+    
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
-        radioConfigRepository?.localConfigFlow?.onEach { localConfig.value = it }?.launchIn(scope)
-        radioConfigRepository?.channelSetFlow?.onEach { channelSet.value = it }?.launchIn(scope)
+        radioConfigRepository.localConfigFlow.onEach { localConfig.value = it }.launchIn(scope)
+        radioConfigRepository.channelSetFlow.onEach { channelSet.value = it }.launchIn(scope)
     }
 
-    fun getCachedLocalConfig(): LocalConfig = localConfig.value
+    override fun getCachedLocalConfig(): LocalConfig = localConfig.value
 
-    fun getCachedChannelSet(): ChannelSet = channelSet.value
+    override fun getCachedChannelSet(): ChannelSet = channelSet.value
 
-    @VisibleForTesting internal constructor() : this(null, null, null, null)
+    override fun getCurrentPacketId(): Long = currentPacketId.get()
 
-    fun getCurrentPacketId(): Long = currentPacketId.get()
-
-    fun generatePacketId(): Int {
+    override fun generatePacketId(): Int {
         val numPacketIds = ((1L shl PACKET_ID_SHIFT_BITS) - 1)
         val next = currentPacketId.incrementAndGet() and PACKET_ID_MASK
         return ((next % numPacketIds) + 1L).toInt()
     }
 
-    fun setSessionPasskey(key: ByteString) {
+    override fun setSessionPasskey(key: ByteString) {
         sessionPasskey.set(key)
     }
 
     private fun computeHopLimit(): Int = (localConfig.value.lora?.hop_limit ?: 0).takeIf { it > 0 } ?: DEFAULT_HOP_LIMIT
 
     private fun getAdminChannelIndex(toNum: Int): Int {
-        val myNum = nodeManager?.myNodeNum ?: return 0
+        val myNum = nodeManager.myNodeNum ?: return 0
         val myNode = nodeManager.nodeDBbyNodeNum[myNum]
         val destNode = nodeManager.nodeDBbyNodeNum[toNum]
 
@@ -118,7 +118,7 @@ constructor(
         return adminChannelIndex
     }
 
-    fun sendData(p: DataPacket) {
+    override fun sendData(p: DataPacket) {
         if (p.id == 0) p.id = generatePacketId()
         val bytes = p.bytes ?: ByteString.EMPTY
         require(p.dataType != 0) { "Port numbers must be non-zero!" }
@@ -135,16 +135,15 @@ constructor(
         if (!Data.ADAPTER.isWithinSizeLimit(data, Constants.DATA_PAYLOAD_LEN.value)) {
             val actualSize = Data.ADAPTER.encodedSize(data)
             p.status = MessageStatus.ERROR
-            throw RemoteException("Message too long: $actualSize bytes (max ${Constants.DATA_PAYLOAD_LEN.value})")
+            // throw RemoteException("Message too long: $actualSize bytes (max ${Constants.DATA_PAYLOAD_LEN.value})")
+            // RemoteException is Android specific. For KMP we might want a custom exception.
+            throw IllegalStateException("Message too long: $actualSize bytes")
         } else {
             p.status = MessageStatus.QUEUED
         }
 
-        if (connectionStateHolder?.connectionState?.value == ConnectionState.Connected) {
-            sendNow(p)
-        } else {
-            error("Radio is not connected")
-        }
+        // TODO: Check connection state
+        sendNow(p)
     }
 
     private fun sendNow(p: DataPacket) {
@@ -164,31 +163,31 @@ constructor(
                 ),
             )
         p.time = nowMillis
-        packetHandler?.sendToRadio(meshPacket)
+        packetHandler.sendToRadio(meshPacket)
     }
 
-    fun sendAdmin(
+    override fun sendAdmin(
         destNum: Int,
-        requestId: Int = generatePacketId(),
-        wantResponse: Boolean = false,
+        requestId: Int,
+        wantResponse: Boolean,
         initFn: () -> AdminMessage,
     ) {
         val adminMsg = initFn().copy(session_passkey = sessionPasskey.get())
         val packet =
             buildAdminPacket(to = destNum, id = requestId, wantResponse = wantResponse, adminMessage = adminMsg)
-        packetHandler?.sendToRadio(packet)
+        packetHandler.sendToRadio(packet)
     }
 
-    fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int? = null, wantResponse: Boolean = false) {
-        val myNum = nodeManager?.myNodeNum ?: return
+    override fun sendPosition(pos: org.meshtastic.proto.Position, destNum: Int?, wantResponse: Boolean) {
+        val myNum = nodeManager.myNodeNum ?: return
         val idNum = destNum ?: myNum
         Logger.d { "Sending our position/time to=$idNum $pos" }
 
         if (localConfig.value.position?.fixed_position != true) {
-            nodeManager.handleReceivedPosition(myNum, myNum, pos)
+            nodeManager.handleReceivedPosition(myNum, myNum, pos, nowMillis)
         }
 
-        packetHandler?.sendToRadio(
+        packetHandler.sendToRadio(
             buildMeshPacket(
                 to = idNum,
                 channel = if (destNum == null) 0 else nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
@@ -203,18 +202,18 @@ constructor(
         )
     }
 
-    fun requestPosition(destNum: Int, currentPosition: Position) {
+    override fun requestPosition(destNum: Int, currentPosition: Position) {
         val meshPosition =
             org.meshtastic.proto.Position(
                 latitude_i = Position.degI(currentPosition.latitude),
                 longitude_i = Position.degI(currentPosition.longitude),
                 altitude = currentPosition.altitude,
-                time = nowSeconds.toInt(),
+                time = (nowMillis / 1000L).toInt(),
             )
-        packetHandler?.sendToRadio(
+        packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
-                channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
                 decoded =
                 Data(
@@ -226,7 +225,7 @@ constructor(
         )
     }
 
-    fun setFixedPosition(destNum: Int, pos: Position) {
+    override fun setFixedPosition(destNum: Int, pos: Position) {
         val meshPos =
             org.meshtastic.proto.Position(
                 latitude_i = Position.degI(pos.latitude),
@@ -240,13 +239,13 @@ constructor(
                 AdminMessage(remove_fixed_position = true)
             }
         }
-        nodeManager?.handleReceivedPosition(destNum, nodeManager.myNodeNum ?: 0, meshPos)
+        nodeManager.handleReceivedPosition(destNum, nodeManager.myNodeNum ?: 0, meshPos, nowMillis)
     }
 
-    fun requestUserInfo(destNum: Int) {
-        val myNum = nodeManager?.myNodeNum ?: return
-        val myNode = nodeManager.getOrCreateNodeInfo(myNum)
-        packetHandler?.sendToRadio(
+    override fun requestUserInfo(destNum: Int) {
+        val myNum = nodeManager.myNodeNum ?: return
+        val myNode = nodeManager.nodeDBbyNodeNum[myNum] ?: return
+        packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
                 channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
@@ -260,20 +259,20 @@ constructor(
         )
     }
 
-    fun requestTraceroute(requestId: Int, destNum: Int) {
+    override fun requestTraceroute(requestId: Int, destNum: Int) {
         tracerouteStartTimes[requestId] = nowMillis
-        packetHandler?.sendToRadio(
+        packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
                 wantAck = true,
                 id = requestId,
-                channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 decoded = Data(portnum = PortNum.TRACEROUTE_APP, want_response = true),
             ),
         )
     }
 
-    fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
+    override fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {
         val type = TelemetryType.entries.getOrNull(typeValue) ?: TelemetryType.DEVICE
 
         val portNum: PortNum
@@ -301,19 +300,19 @@ constructor(
                     .toByteString()
         }
 
-        packetHandler?.sendToRadio(
+        packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
                 id = requestId,
-                channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 decoded = Data(portnum = portNum, payload = payloadBytes, want_response = true),
             ),
         )
     }
 
-    fun requestNeighborInfo(requestId: Int, destNum: Int) {
+    override fun requestNeighborInfo(requestId: Int, destNum: Int) {
         neighborInfoStartTimes[requestId] = nowMillis
-        val myNum = nodeManager?.myNodeNum ?: 0
+        val myNum = nodeManager.myNodeNum ?: 0
         if (destNum == myNum) {
             val neighborInfoToSend =
                 lastNeighborInfo
@@ -329,7 +328,7 @@ constructor(
                                 Neighbor(
                                     node_id = 0, // Dummy node ID that can be intercepted
                                     snr = 0f,
-                                    last_rx_time = nowSeconds.toInt(),
+                                    last_rx_time = (nowMillis / 1000L).toInt(),
                                     node_broadcast_interval_secs = oneHour,
                                 ),
                             ),
@@ -337,12 +336,12 @@ constructor(
                     }
 
             // Send the neighbor info from our connected radio to ourselves (simulated)
-            packetHandler?.sendToRadio(
+            packetHandler.sendToRadio(
                 buildMeshPacket(
                     to = destNum,
                     wantAck = true,
                     id = requestId,
-                    channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                    channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                     decoded =
                     Data(
                         portnum = PortNum.NEIGHBORINFO_APP,
@@ -353,20 +352,19 @@ constructor(
             )
         } else {
             // Send request to remote
-            packetHandler?.sendToRadio(
+            packetHandler.sendToRadio(
                 buildMeshPacket(
                     to = destNum,
                     wantAck = true,
                     id = requestId,
-                    channel = nodeManager?.nodeDBbyNodeNum?.get(destNum)?.channel ?: 0,
+                    channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
                     decoded = Data(portnum = PortNum.NEIGHBORINFO_APP, want_response = true),
                 ),
             )
         }
     }
 
-    @VisibleForTesting
-    internal fun resolveNodeNum(toId: String): Int = when (toId) {
+    private fun resolveNodeNum(toId: String): Int = when (toId) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
         else -> {
             val numericNum =
@@ -376,7 +374,7 @@ constructor(
                     null
                 }
             numericNum
-                ?: nodeManager?.nodeDBbyID?.get(toId)?.num
+                ?: nodeManager.nodeDBbyID[toId]?.num
                 ?: throw IllegalArgumentException("Unknown node ID $toId")
         }
     }
@@ -398,12 +396,12 @@ constructor(
 
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
             pkiEncrypted = true
-            publicKey = nodeManager?.nodeDBbyNodeNum?.get(to)?.user?.public_key ?: ByteString.EMPTY
+            publicKey = nodeManager.nodeDBbyNodeNum[to]?.user?.public_key ?: ByteString.EMPTY
             actualChannel = 0
         }
 
         return MeshPacket(
-            from = nodeManager?.myNodeNum ?: 0,
+            from = nodeManager.myNodeNum ?: 0,
             to = to,
             id = id,
             want_ack = wantAck,

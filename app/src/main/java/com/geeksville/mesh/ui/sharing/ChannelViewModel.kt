@@ -27,8 +27,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.toChannelSet
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed

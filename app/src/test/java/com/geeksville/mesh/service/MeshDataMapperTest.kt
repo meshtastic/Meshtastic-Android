@@ -31,7 +31,7 @@ import org.meshtastic.proto.PortNum
 
 class MeshDataMapperTest {
 
-    private val nodeManager: MeshNodeManager = mockk()
+    private val nodeManager: NodeManager = mockk()
     private lateinit var mapper: MeshDataMapper
 
     @Before

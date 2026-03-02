@@ -45,19 +45,19 @@ import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.compromised_keys
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.ui.component.ScrollToTopEvent
@@ -172,7 +172,7 @@ constructor(
     }
 
     // hardware info about our local device (can be null)
-    val myNodeInfo: StateFlow<MyNodeEntity?>
+    val myNodeInfo: StateFlow<MyNodeInfo?>
         get() = nodeDB.myNodeInfo
 
     init {

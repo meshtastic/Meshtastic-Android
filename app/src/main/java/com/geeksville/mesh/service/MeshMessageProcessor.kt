@@ -31,7 +31,9 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
@@ -49,7 +51,7 @@ import kotlin.uuid.Uuid
 class MeshMessageProcessor
 @Inject
 constructor(
-    private val nodeManager: MeshNodeManager,
+    private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val router: MeshRouter,
@@ -202,22 +204,22 @@ constructor(
         myNodeNum?.let { myNum ->
             val from = packet.from
             val isOtherNode = myNum != from
-            nodeManager.updateNodeInfo(myNum, withBroadcast = isOtherNode) { it.lastHeard = nowSeconds.toInt() }
-            nodeManager.updateNodeInfo(from, withBroadcast = false, channel = packet.channel) {
-                it.lastHeard = packet.rx_time
-                it.viaMqtt = packet.via_mqtt == true
-                it.lastTransport = packet.transport_mechanism.value
-
+            nodeManager.updateNode(myNum, withBroadcast = isOtherNode) { node: Node -> node.copy(lastHeard = nowSeconds.toInt()) }
+            nodeManager.updateNode(from, withBroadcast = false, channel = packet.channel) { node: Node ->
+                val viaMqtt = packet.via_mqtt == true
                 val isDirect = packet.hop_start == packet.hop_limit
-                if (isDirect && packet.isLora() && !it.viaMqtt) {
-                    it.snr = packet.rx_snr
-                    it.rssi = packet.rx_rssi
+                
+                var snr = node.snr
+                var rssi = node.rssi
+                if (isDirect && packet.isLora() && !viaMqtt) {
+                    snr = packet.rx_snr
+                    rssi = packet.rx_rssi
                 }
 
-                it.hopsAway =
+                val hopsAway =
                     if (decoded.portnum == PortNum.RANGE_TEST_APP) {
                         0
-                    } else if (it.viaMqtt) {
+                    } else if (viaMqtt) {
                         -1
                     } else if (packet.hop_start == 0 && (decoded.bitfield ?: 0) == 0) {
                         -1
@@ -226,6 +228,15 @@ constructor(
                     } else {
                         packet.hop_start - packet.hop_limit
                     }
+                
+                node.copy(
+                    lastHeard = packet.rx_time,
+                    viaMqtt = viaMqtt,
+                    lastTransport = packet.transport_mechanism.value,
+                    snr = snr,
+                    rssi = rssi,
+                    hopsAway = hopsAway
+                )
             }
 
             try {

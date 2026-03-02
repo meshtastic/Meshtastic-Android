@@ -29,10 +29,10 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.toList
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.model.CustomTileSource

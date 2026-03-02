@@ -41,7 +41,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.GPSFormat
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res

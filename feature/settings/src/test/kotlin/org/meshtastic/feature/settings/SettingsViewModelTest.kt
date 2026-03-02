@@ -30,8 +30,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
@@ -44,6 +42,8 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class SettingsViewModelTest {

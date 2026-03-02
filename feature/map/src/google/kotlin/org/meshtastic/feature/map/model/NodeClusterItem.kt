@@ -18,7 +18,7 @@ package org.meshtastic.feature.map.model
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.clustering.ClusterItem
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 
 data class NodeClusterItem(
     val node: Node,

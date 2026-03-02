@@ -31,9 +31,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import org.meshtastic.core.common.util.ignoreException
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.util.subscribeList
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.MqttClientProxyMessage
 import java.net.URI
 import java.security.SecureRandom

@@ -59,7 +59,7 @@ constructor(
 
     // Expose the DB cache limit as a reactive stream so UI can observe changes.
     private val _cacheLimit = MutableStateFlow(getCacheLimit())
-    open val cacheLimit: StateFlow<Int> = _cacheLimit
+    override val cacheLimit: StateFlow<Int> = _cacheLimit
 
     // Keep cache-limit StateFlow in sync if some other component updates SharedPreferences.
     private val prefsListener =
@@ -189,11 +189,11 @@ constructor(
         }
     }
 
-    fun getCacheLimit(): Int = prefs
+    override fun getCacheLimit(): Int = prefs
         .getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
         .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
 
-    fun setCacheLimit(limit: Int) {
+    override fun setCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         if (clamped == getCacheLimit()) return
         prefs.edit().putInt(DatabaseConstants.CACHE_LIMIT_KEY, clamped).apply()

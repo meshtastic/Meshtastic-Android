@@ -21,7 +21,7 @@ import androidx.core.app.RemoteInput
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 
 /**

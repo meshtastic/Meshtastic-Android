@@ -17,13 +17,14 @@
 package com.geeksville.mesh.service
 
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.proto.MeshPacket
 import javax.inject.Inject
 import javax.inject.Singleton
 import org.meshtastic.core.model.util.MeshDataMapper as CommonMeshDataMapper
 
 @Singleton
-class MeshDataMapper @Inject constructor(private val nodeManager: MeshNodeManager) {
+class MeshDataMapper @Inject constructor(private val nodeManager: NodeManager) {
     private val commonMapper = CommonMeshDataMapper(nodeManager)
 
     fun toNodeID(n: Int): String = nodeManager.toNodeID(n)

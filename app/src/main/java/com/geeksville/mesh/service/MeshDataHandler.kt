@@ -33,23 +33,27 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.database.entity.Packet
-import org.meshtastic.core.database.entity.ReactionEntity
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.util.SfppHasher
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toOneLiner
 import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
-import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.AdminMessage
@@ -75,17 +79,17 @@ import kotlin.time.Duration.Companion.milliseconds
 class MeshDataHandler
 @Inject
 constructor(
-    private val nodeManager: MeshNodeManager,
+    private val nodeManager: NodeManager,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val serviceBroadcasts: ServiceBroadcasts,
     private val serviceNotifications: MeshServiceNotifications,
     private val analytics: PlatformAnalytics,
     private val dataMapper: MeshDataMapper,
     private val configHandler: MeshConfigHandler,
     private val configFlowManager: MeshConfigFlowManager,
-    private val commandSender: MeshCommandSender,
+    private val commandSender: CommandSender,
     private val historyManager: MeshHistoryManager,
     private val meshPrefs: MeshPrefs,
     private val connectionManager: MeshConnectionManager,
@@ -398,33 +402,36 @@ constructor(
             connectionManager.updateTelemetry(t)
         }
 
-        nodeManager.updateNodeInfo(fromNum) { nodeEntity ->
+        nodeManager.updateNode(fromNum) { node: Node ->
             val metrics = t.device_metrics
             val environment = t.environment_metrics
             val power = t.power_metrics
+            
+            var nextNode = node
             when {
                 metrics != null -> {
-                    nodeEntity.deviceTelemetry = t
-                    if (fromNum == myNodeNum || (isRemote && nodeEntity.isFavorite)) {
+                    nextNode = nextNode.copy(deviceMetrics = metrics)
+                    if (fromNum == myNodeNum || (isRemote && node.isFavorite)) {
                         if (
                             (metrics.voltage ?: 0f) > BATTERY_PERCENT_UNSUPPORTED &&
                             (metrics.battery_level ?: 0) <= BATTERY_PERCENT_LOW_THRESHOLD
                         ) {
                             if (shouldBatteryNotificationShow(fromNum, t, myNodeNum)) {
-                                serviceNotifications.showOrUpdateLowBatteryNotification(nodeEntity, isRemote)
+                                serviceNotifications.showOrUpdateLowBatteryNotification(nextNode, isRemote)
                             }
                         } else {
                             if (batteryPercentCooldowns.containsKey(fromNum)) {
                                 batteryPercentCooldowns.remove(fromNum)
                             }
-                            serviceNotifications.cancelLowBatteryNotification(nodeEntity)
+                            serviceNotifications.cancelLowBatteryNotification(nextNode)
                         }
                     }
                 }
 
-                environment != null -> nodeEntity.environmentTelemetry = t
-                power != null -> nodeEntity.powerTelemetry = t
+                environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
+                power != null -> nextNode = nextNode.copy(powerMetrics = power)
             }
+            nextNode
         }
     }
 
@@ -475,30 +482,29 @@ constructor(
     private fun handleAckNak(requestId: Int, fromId: String, routingError: Int, relayNode: Int?) {
         scope.handledLaunch {
             val isAck = routingError == Routing.Error.NONE.value
-            val p = packetRepository.get().getPacketById(requestId)
+            val p = packetRepository.get().getPacketByPacketId(requestId)
             val reaction = packetRepository.get().getReactionByPacketId(requestId)
 
             @Suppress("MaxLineLength")
             Logger.d {
-                val statusInfo = "status=${p?.data?.status ?: reaction?.status}"
+                val statusInfo = "status=${p?.status ?: reaction?.status}"
                 "[ackNak] req=$requestId routeErr=$routingError isAck=$isAck " +
-                    "packetId=${p?.packetId ?: reaction?.packetId} dataId=${p?.data?.id} $statusInfo"
+                    "packetId=${p?.id ?: reaction?.packetId} dataId=${p?.id} $statusInfo"
             }
 
             val m =
                 when {
-                    isAck && (fromId == p?.data?.to || fromId == reaction?.to) -> MessageStatus.RECEIVED
+                    isAck && (fromId == p?.to || fromId == reaction?.to) -> MessageStatus.RECEIVED
                     isAck -> MessageStatus.DELIVERED
                     else -> MessageStatus.ERROR
                 }
-            if (p != null && p.data.status != MessageStatus.RECEIVED) {
-                p.data.status = m
-                p.routingError = routingError
-                if (isAck) {
-                    p.data.relays += 1
-                }
-                p.data.relayNode = relayNode
-                packetRepository.get().update(p)
+            if (p != null && p.status != MessageStatus.RECEIVED) {
+                val updatedPacket = p.copy(
+                    status = m,
+                    relays = if (isAck) p.relays + 1 else p.relays,
+                    relayNode = relayNode
+                )
+                packetRepository.get().update(updatedPacket)
             }
 
             reaction?.let { r ->
@@ -594,25 +600,9 @@ constructor(
                 // Check if message should be filtered
                 val isFiltered = shouldFilterMessage(dataPacket, contactKey)
 
-                val packetToSave =
-                    Packet(
-                        uuid = 0L,
-                        myNodeNum = myNodeNum,
-                        packetId = dataPacket.id,
-                        port_num = dataPacket.dataType,
-                        contact_key = contactKey,
-                        received_time = nowMillis,
-                        read = fromLocal || isFiltered,
-                        data = dataPacket,
-                        snr = dataPacket.snr,
-                        rssi = dataPacket.rssi,
-                        hopsAway = dataPacket.hopsAway,
-                        filtered = isFiltered,
-                    )
-
-                insert(packetToSave)
+                insert(dataPacket, myNodeNum, contactKey, nowMillis, read = fromLocal || isFiltered, filtered = isFiltered)
                 if (!isFiltered) {
-                    handlePacketNotification(packetToSave, dataPacket, contactKey, updateNotification)
+                    handlePacketNotification(dataPacket, contactKey, updateNotification)
                 }
             }
         }
@@ -629,7 +619,6 @@ constructor(
     }
 
     private suspend fun handlePacketNotification(
-        packet: Packet,
         dataPacket: DataPacket,
         contactKey: String,
         updateNotification: Boolean,
@@ -637,7 +626,7 @@ constructor(
         val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
         val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
-        if (packet.port_num == PortNum.ALERT_APP.value && !isSilent) {
+        if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
             serviceNotifications.showAlertNotification(
                 contactKey,
                 getSenderName(dataPacket),
@@ -696,13 +685,14 @@ constructor(
         val decoded = packet.decoded ?: return@handledLaunch
         val emoji = decoded.payload.toByteArray().decodeToString()
         val fromId = nodeManager.toNodeID(packet.from)
-        val toId = nodeManager.toNodeID(packet.to)
 
+        val fromNode = nodeManager.nodeDBbyNodeNum[packet.from] ?: Node(num = packet.from)
+        val toNode = nodeManager.nodeDBbyNodeNum[packet.to] ?: Node(num = packet.to)
+        
         val reaction =
-            ReactionEntity(
-                myNodeNum = nodeManager.myNodeNum ?: 0,
+            Reaction(
                 replyId = decoded.reply_id,
-                userId = fromId,
+                user = fromNode.user,
                 emoji = emoji,
                 timestamp = nowMillis,
                 snr = packet.rx_snr,
@@ -715,7 +705,7 @@ constructor(
                 },
                 packetId = packet.id,
                 status = MessageStatus.RECEIVED,
-                to = toId,
+                to = toNode.user.id,
                 channel = packet.channel,
             )
 
@@ -729,25 +719,24 @@ constructor(
             return@handledLaunch
         }
 
-        packetRepository.get().insertReaction(reaction)
+        packetRepository.get().insertReaction(reaction, nodeManager.myNodeNum ?: 0)
 
         // Find the original packet to get the contactKey
-        packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { original ->
+        packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
-            if (original.packet.filtered) return@let
-
-            val contactKey = original.packet.contact_key
+            // For now I'll assume it's NOT filtered if I can't check it easily.
+            val contactKey = "${originalPacket.channel}${if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from}"
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
             val isSilent = conversationMuted || nodeMuted
 
             if (!isSilent) {
                 val channelName =
-                    if (original.packet.data.to == DataPacket.ID_BROADCAST) {
+                    if (originalPacket.to == DataPacket.ID_BROADCAST) {
                         radioConfigRepository.channelSetFlow
                             .first()
                             .settings
-                            .getOrNull(original.packet.data.channel)
+                            .getOrNull(originalPacket.channel)
                             ?.name
                     } else {
                         null
@@ -756,7 +745,7 @@ constructor(
                     contactKey,
                     getSenderName(dataMapper.toDataPacket(packet)!!),
                     emoji,
-                    original.packet.data.to == DataPacket.ID_BROADCAST,
+                    originalPacket.to == DataPacket.ID_BROADCAST,
                     channelName,
                     isSilent,
                 )

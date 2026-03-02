@@ -39,15 +39,15 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
@@ -61,7 +61,7 @@ class MeshConnectionManagerTest {
     private val context: Context = mockk(relaxed = true)
     private val radioInterfaceService: RadioInterfaceService = mockk(relaxed = true)
     private val connectionStateHolder = ConnectionStateHandler()
-    private val serviceBroadcasts: MeshServiceBroadcasts = mockk(relaxed = true)
+    private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
     private val uiPrefs: UiPrefs = mockk(relaxed = true)
     private val packetHandler: PacketHandler = mockk(relaxed = true)
@@ -70,8 +70,8 @@ class MeshConnectionManagerTest {
     private val mqttManager: MeshMqttManager = mockk(relaxed = true)
     private val historyManager: MeshHistoryManager = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
-    private val commandSender: MeshCommandSender = mockk(relaxed = true)
-    private val nodeManager: MeshNodeManager = mockk(relaxed = true)
+    private val commandSender: CommandSender = mockk(relaxed = true)
+    private val nodeManager: NodeManager = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val packetRepository: PacketRepository = mockk(relaxed = true)
     private val workManager: WorkManager = mockk(relaxed = true)

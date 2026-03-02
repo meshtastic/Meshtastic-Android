@@ -23,34 +23,37 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.database.entity.MetadataEntity
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Heartbeat
-import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.ToRadio
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
+import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
 @Suppress("LongParameterList")
 @Singleton
 class MeshConfigFlowManager
 @Inject
 constructor(
-    private val nodeManager: MeshNodeManager,
+    private val nodeManager: NodeManager,
     private val connectionManager: MeshConnectionManager,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val connectionStateHolder: ConnectionStateHandler,
-    private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val serviceBroadcasts: ServiceBroadcasts,
     private val analytics: PlatformAnalytics,
-    private val commandSender: MeshCommandSender,
+    private val commandSender: CommandSender,
     private val packetHandler: PacketHandler,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -66,10 +69,10 @@ constructor(
     val newNodeCount: Int
         get() = newNodes.size
 
-    private var rawMyNodeInfo: MyNodeInfo? = null
+    private var rawMyNodeInfo: ProtoMyNodeInfo? = null
     private var lastMetadata: DeviceMetadata? = null
-    private var newMyNodeInfo: MyNodeEntity? = null
-    private var myNodeInfo: MyNodeEntity? = null
+    private var newMyNodeInfo: SharedMyNodeInfo? = null
+    private var myNodeInfo: SharedMyNodeInfo? = null
 
     fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
@@ -129,19 +132,19 @@ constructor(
                 nodeRepository.installConfig(it, entities)
                 sendAnalytics(it)
             }
-            nodeManager.isNodeDbReady.value = true
-            nodeManager.allowNodeDbWrites.value = true
+            nodeManager.setNodeDbReady(true)
+            nodeManager.setAllowNodeDbWrites(true)
             connectionStateHolder.setState(ConnectionState.Connected)
             serviceBroadcasts.broadcastConnection()
             connectionManager.onNodeDbReady()
         }
     }
 
-    private fun sendAnalytics(mi: MyNodeEntity) {
+    private fun sendAnalytics(mi: SharedMyNodeInfo) {
         analytics.setDeviceAttributes(mi.firmwareVersion ?: "unknown", mi.model ?: "unknown")
     }
 
-    fun handleMyInfo(myInfo: MyNodeInfo) {
+    fun handleMyInfo(myInfo: ProtoMyNodeInfo) {
         Logger.i { "MyNodeInfo received: ${myInfo.my_node_num}" }
         rawMyNodeInfo = myInfo
         nodeManager.myNodeNum = myInfo.my_node_num
@@ -170,8 +173,9 @@ constructor(
             try {
                 val mi =
                     with(myInfo) {
-                        MyNodeEntity(
+                        SharedMyNodeInfo(
                             myNodeNum = my_node_num ?: 0,
+                            hasGPS = false,
                             model =
                             when (val hwModel = metadata?.hw_model) {
                                 null,
@@ -187,12 +191,14 @@ constructor(
                             minAppVersion = min_app_version,
                             maxChannels = 8,
                             hasWifi = metadata?.hasWifi == true,
+                            channelUtilization = 0f,
+                            airUtilTx = 0f,
                             deviceId = device_id.utf8(),
                             pioEnv = myInfo.pio_env.ifEmpty { null },
                         )
                     }
                 if (metadata != null && metadata != DeviceMetadata()) {
-                    scope.handledLaunch { nodeRepository.insertMetadata(MetadataEntity(mi.myNodeNum, metadata)) }
+                    scope.handledLaunch { nodeRepository.insertMetadata(mi.myNodeNum, metadata) }
                 }
                 newMyNodeInfo = mi
                 Logger.d { "newMyNodeInfo updated: nodeNum=${mi.myNodeNum} model=${mi.model} fw=${mi.firmwareVersion}" }

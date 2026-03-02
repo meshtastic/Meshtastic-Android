@@ -37,19 +37,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
-import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.radio.isTcp
+import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
@@ -462,7 +462,7 @@ constructor(
         return !isBatteryLow
     }
 
-    private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
+    private suspend fun getDeviceHardware(ourNode: MyNodeInfo): DeviceHardware? {
         val nodeInfo = nodeRepository.ourNodeInfo.value
         val hwModelInt = nodeInfo?.user?.hw_model?.value
         val target = ourNode.pioEnv

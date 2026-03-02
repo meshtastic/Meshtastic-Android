@@ -33,6 +33,7 @@ kotlin {
             
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
+            implementation(libs.androidx.paging.common)
         }
     }
 }

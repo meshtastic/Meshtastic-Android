@@ -87,8 +87,7 @@ import org.meshtastic.core.common.gpsDisabled
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.database.entity.Packet
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
@@ -344,7 +343,7 @@ fun MapView(
 
     LaunchedEffect(selectedWaypointId, waypoints) {
         if (selectedWaypointId != null && waypoints.containsKey(selectedWaypointId)) {
-            waypoints[selectedWaypointId]?.data?.waypoint?.let { pt ->
+            waypoints[selectedWaypointId]?.waypoint?.let { pt ->
                 val geoPoint = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 map.controller.setCenter(geoPoint)
                 map.controller.setZoom(WAYPOINT_ZOOM)
@@ -496,7 +495,7 @@ fun MapView(
     fun showMarkerLongPressDialog(id: Int) {
         performHapticFeedback()
         Logger.d { "marker long pressed id=$id" }
-        val waypoint = waypoints[id]?.data?.waypoint ?: return
+        val waypoint = waypoints[id]?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
         if ((waypoint.locked_to ?: 0) in setOf(0, mapViewModel.myNodeNum ?: 0) && isConnected) {
             showEditWaypointDialog = waypoint
@@ -512,13 +511,13 @@ fun MapView(
     }
 
     @Suppress("MagicNumber")
-    fun MapView.onWaypointChanged(waypoints: Collection<Packet>, selectedWaypointId: Int?): List<MarkerWithLabel> {
+    fun MapView.onWaypointChanged(waypoints: Collection<DataPacket>, selectedWaypointId: Int?): List<MarkerWithLabel> {
         return waypoints.mapNotNull { waypoint ->
-            val pt = waypoint.data.waypoint ?: return@mapNotNull null
+            val pt = waypoint.waypoint ?: return@mapNotNull null
             if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if ((pt.locked_to ?: 0) != 0) "\uD83D\uDD12" else ""
-            val time = DateFormatter.formatDateTime(waypoint.received_time)
-            val label = (pt.name ?: "") + " " + formatAgo((waypoint.received_time / 1000).toInt())
+            val time = DateFormatter.formatDateTime(waypoint.time)
+            val label = (pt.name ?: "") + " " + formatAgo((waypoint.time / 1000).toInt())
             val emoji = String(Character.toChars(if ((pt.icon ?: 0) == 0) 128205 else pt.icon!!))
             val now = nowMillis
             val expireTimeMillis = (pt.expire ?: 0) * 1000L
@@ -530,7 +529,7 @@ fun MapView(
                 }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
-                title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
+                title = "${pt.name} (${getUsername(waypoint.from)}$lock)"
                 snippet = "[$time] ${pt.description}  " + getString(Res.string.expires) + ": $expireTimeStr"
                 position = GeoPoint((pt.latitude_i ?: 0) * 1e-7, (pt.longitude_i ?: 0) * 1e-7)
                 if (selectedWaypointId == pt.id) {

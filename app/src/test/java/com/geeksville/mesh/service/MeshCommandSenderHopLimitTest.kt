@@ -29,17 +29,17 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.MeshPacket
 
-class MeshCommandSenderHopLimitTest {
+class CommandSenderHopLimitTest {
 
     private val packetHandler: PacketHandler = mockk(relaxed = true)
-    private val nodeManager = MeshNodeManager()
+    private val nodeManager = NodeManagerImpl()
     private val connectionStateHolder: ConnectionStateHandler = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
 
@@ -47,7 +47,7 @@ class MeshCommandSenderHopLimitTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = CoroutineScope(testDispatcher)
 
-    private lateinit var commandSender: MeshCommandSender
+    private lateinit var commandSender: CommandSender
 
     @Before
     fun setUp() {
@@ -55,7 +55,7 @@ class MeshCommandSenderHopLimitTest {
         every { connectionStateHolder.connectionState } returns connectedFlow
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
 
-        commandSender = MeshCommandSender(packetHandler, nodeManager, connectionStateHolder, radioConfigRepository)
+        commandSender = CommandSenderImpl(packetHandler, nodeManager, connectionStateHolder, radioConfigRepository)
         commandSender.start(testScope)
         nodeManager.myNodeNum = 123
     }

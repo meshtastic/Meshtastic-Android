@@ -22,10 +22,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.traceroute_duration
@@ -43,11 +46,11 @@ import javax.inject.Singleton
 class MeshTracerouteHandler
 @Inject
 constructor(
-    private val nodeManager: MeshNodeManager,
+    private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
-    private val commandSender: MeshCommandSender,
+    private val commandSender: CommandSender,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -59,7 +62,7 @@ constructor(
         val full =
             packet.getFullTracerouteResponse(
                 getUser = { num ->
-                    nodeManager.nodeDBbyNodeNum[num]?.let { "${it.longName} (${it.shortName})" }
+                    nodeManager.nodeDBbyNodeNum[num]?.let { node: Node -> "${node.user.long_name} (${node.user.short_name})" }
                         ?: getString(Res.string.unknown_username)
                 },
                 headerTowards = getString(Res.string.traceroute_route_towards_dest),

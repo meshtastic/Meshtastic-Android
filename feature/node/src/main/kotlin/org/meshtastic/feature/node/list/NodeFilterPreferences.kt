@@ -18,8 +18,8 @@
 package org.meshtastic.feature.node.list
 
 import kotlinx.coroutines.flow.map
-import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.model.NodeSortOption
 import javax.inject.Inject
 
 class NodeFilterPreferences @Inject constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {

@@ -28,9 +28,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
@@ -40,7 +40,7 @@ import org.meshtastic.proto.ToRadio
 class PacketHandlerTest {
 
     private val packetRepository: PacketRepository = mockk(relaxed = true)
-    private val serviceBroadcasts: MeshServiceBroadcasts = mockk(relaxed = true)
+    private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val radioInterfaceService: RadioInterfaceService = mockk(relaxed = true)
     private val meshLogRepository: MeshLogRepository = mockk(relaxed = true)
     private val connectionStateHolder: ConnectionStateHandler = mockk(relaxed = true)

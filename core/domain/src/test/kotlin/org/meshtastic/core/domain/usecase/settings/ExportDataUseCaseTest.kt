@@ -27,9 +27,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.MeshLog
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket

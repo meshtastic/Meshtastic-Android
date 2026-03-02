@@ -35,7 +35,7 @@ import org.meshtastic.proto.PortNum
 
 class MeshMessageProcessorTest {
 
-    private val nodeManager: MeshNodeManager = mockk(relaxed = true)
+    private val nodeManager: NodeManager = mockk(relaxed = true)
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val meshLogRepository: MeshLogRepository = mockk(relaxed = true)
     private val router: MeshRouter = mockk(relaxed = true)

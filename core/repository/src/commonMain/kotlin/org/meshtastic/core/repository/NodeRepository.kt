@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
 
@@ -92,4 +93,10 @@ interface NodeRepository {
 
     /** Updates the personal notes for a node. */
     suspend fun setNodeNotes(num: Int, notes: String)
+
+    /** Installs initial configuration data (local info and remote nodes) into the database. */
+    suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>)
+
+    /** Persists hardware metadata for a node. */
+    suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata)
 }

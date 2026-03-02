@@ -20,7 +20,7 @@ import android.app.Notification
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.mockk
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 

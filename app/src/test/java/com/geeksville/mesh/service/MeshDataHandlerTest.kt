@@ -29,12 +29,12 @@ import okio.ByteString.Companion.toByteString
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.prefs.mesh.MeshPrefs
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.service.filter.MessageFilterService
 import org.meshtastic.proto.Data
@@ -44,18 +44,18 @@ import org.meshtastic.proto.StoreForwardPlusPlus
 
 class MeshDataHandlerTest {
 
-    private val nodeManager: MeshNodeManager = mockk(relaxed = true)
+    private val nodeManager: NodeManager = mockk(relaxed = true)
     private val packetHandler: PacketHandler = mockk(relaxed = true)
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val packetRepository: PacketRepository = mockk(relaxed = true)
     private val packetRepositoryLazy: Lazy<PacketRepository> = mockk { every { get() } returns packetRepository }
-    private val serviceBroadcasts: MeshServiceBroadcasts = mockk(relaxed = true)
+    private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val dataMapper: MeshDataMapper = mockk(relaxed = true)
     private val configHandler: MeshConfigHandler = mockk(relaxed = true)
     private val configFlowManager: MeshConfigFlowManager = mockk(relaxed = true)
-    private val commandSender: MeshCommandSender = mockk(relaxed = true)
+    private val commandSender: CommandSender = mockk(relaxed = true)
     private val historyManager: MeshHistoryManager = mockk(relaxed = true)
     private val meshPrefs: MeshPrefs = mockk(relaxed = true)
     private val connectionManager: MeshConnectionManager = mockk(relaxed = true)

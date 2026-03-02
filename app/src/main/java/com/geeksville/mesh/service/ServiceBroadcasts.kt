@@ -24,57 +24,98 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.service.ServiceRepository
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.meshtastic.core.repository.ServiceBroadcasts as SharedServiceBroadcasts
 
 @Singleton
-class MeshServiceBroadcasts
+class ServiceBroadcasts
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
     private val connectionStateHolder: ConnectionStateHandler,
     private val serviceRepository: ServiceRepository,
-) {
+) : SharedServiceBroadcasts {
     // A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
 
-    fun subscribeReceiver(receiverName: String, packageName: String) {
+    override fun subscribeReceiver(receiverName: String, packageName: String) {
         clientPackages[receiverName] = packageName
     }
 
     /** Broadcast some received data Payload will be a DataPacket */
-    fun broadcastReceivedData(payload: DataPacket) {
-        val action = MeshService.actionReceived(payload.dataType)
-        explicitBroadcast(Intent(action).putExtra(EXTRA_PAYLOAD, payload))
+    override fun broadcastReceivedData(dataPacket: DataPacket) {
+        val action = MeshService.actionReceived(dataPacket.dataType)
+        explicitBroadcast(Intent(action).putExtra(EXTRA_PAYLOAD, dataPacket))
 
         // Also broadcast with the numeric port number for backwards compatibility with some apps
-        val numericAction = actionReceived(payload.dataType.toString())
+        val numericAction = actionReceived(dataPacket.dataType.toString())
         if (numericAction != action) {
-            explicitBroadcast(Intent(numericAction).putExtra(EXTRA_PAYLOAD, payload))
+            explicitBroadcast(Intent(numericAction).putExtra(EXTRA_PAYLOAD, dataPacket))
         }
     }
 
-    fun broadcastNodeChange(info: NodeInfo) {
-        Logger.d { "Broadcasting node change ${info.user?.toPIIString()}" }
-        val intent = Intent(ACTION_NODE_CHANGE).putExtra(EXTRA_NODEINFO, info)
+    override fun broadcastNodeChange(node: Node) {
+        Logger.d { "Broadcasting node change ${node.user.toPIIString()}" }
+        val legacy = node.toLegacy()
+        val intent = Intent(ACTION_NODE_CHANGE).putExtra(EXTRA_NODEINFO, legacy)
         explicitBroadcast(intent)
     }
 
-    fun broadcastMessageStatus(p: DataPacket) = broadcastMessageStatus(p.id, p.status)
+    private fun Node.toLegacy(): NodeInfo = NodeInfo(
+        num = num,
+        user = org.meshtastic.core.model.MeshUser(
+            id = user.id,
+            longName = user.long_name,
+            shortName = user.short_name,
+            hwModel = user.hw_model,
+            role = user.role.value
+        ),
+        position = org.meshtastic.core.model.Position(
+            latitude = latitude,
+            longitude = longitude,
+            altitude = position.altitude ?: 0,
+            time = position.time,
+            satellitesInView = position.sats_in_view ?: 0,
+            groundSpeed = position.ground_speed ?: 0,
+            groundTrack = position.ground_track ?: 0,
+            precisionBits = position.precision_bits ?: 0
+        ).takeIf { latitude != 0.0 || longitude != 0.0 },
+        snr = snr,
+        rssi = rssi,
+        lastHeard = lastHeard,
+        deviceMetrics = org.meshtastic.core.model.DeviceMetrics(
+            batteryLevel = deviceMetrics.battery_level ?: 0,
+            voltage = deviceMetrics.voltage ?: 0f,
+            channelUtilization = deviceMetrics.channel_utilization ?: 0f,
+            airUtilTx = deviceMetrics.air_util_tx ?: 0f,
+            uptimeSeconds = deviceMetrics.uptime_seconds ?: 0
+        ),
+        channel = channel,
+        environmentMetrics = org.meshtastic.core.model.EnvironmentMetrics.fromTelemetryProto(
+            environmentMetrics,
+            0 
+        ),
+        hopsAway = hopsAway,
+        nodeStatus = nodeStatus
+    )
 
-    fun broadcastMessageStatus(id: Int, status: MessageStatus?) {
-        if (id == 0) {
+    fun broadcastMessageStatus(p: DataPacket) = broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
+
+    override fun broadcastMessageStatus(packetId: Int, status: MessageStatus) {
+        if (packetId == 0) {
             Logger.d { "Ignoring anonymous packet status" }
         } else {
             // Do not log, contains PII possibly
             // MeshService.Logger.d { "Broadcasting message status $p" }
             val intent =
                 Intent(ACTION_MESSAGE_STATUS).apply {
-                    putExtra(EXTRA_PACKET_ID, id)
+                    putExtra(EXTRA_PACKET_ID, packetId)
                     putExtra(EXTRA_STATUS, status as Parcelable)
                 }
             explicitBroadcast(intent)
@@ -82,7 +123,7 @@ constructor(
     }
 
     /** Broadcast our current connection status */
-    fun broadcastConnection() {
+    override fun broadcastConnection() {
         val connectionState = connectionStateHolder.connectionState.value
         // ATAK expects a String: "CONNECTED" or "DISCONNECTED"
         // It uses equalsIgnoreCase, but we'll use uppercase to be specific.

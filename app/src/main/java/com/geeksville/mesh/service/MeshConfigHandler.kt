@@ -24,7 +24,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.Config
@@ -40,7 +41,7 @@ class MeshConfigHandler
 constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val nodeManager: MeshNodeManager,
+    private val nodeManager: NodeManager,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 

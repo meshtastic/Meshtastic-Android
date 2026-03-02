@@ -155,11 +155,11 @@ data class ReactionEntity(
     @ColumnInfo(name = "sfpp_hash") val sfpp_hash: ByteString? = null,
 )
 
-private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node): Reaction {
-    val node = getNode(userId)
+suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?) -> Node?): Reaction {
+    val user = getNode(userId)?.user ?: org.meshtastic.proto.User(id = userId)
     return Reaction(
         replyId = replyId,
-        user = node.user,
+        user = user,
         emoji = emoji,
         timestamp = timestamp,
         snr = snr,
@@ -176,5 +176,5 @@ private suspend fun ReactionEntity.toReaction(getNode: suspend (userId: String?)
     )
 }
 
-private suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node) =
+suspend fun List<ReactionEntity>.toReaction(getNode: suspend (userId: String?) -> Node?) =
     this.map { it.toReaction(getNode) }

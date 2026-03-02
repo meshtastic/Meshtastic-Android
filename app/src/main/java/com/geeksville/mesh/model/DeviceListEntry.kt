@@ -23,7 +23,7 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.anonymize
 
 /**

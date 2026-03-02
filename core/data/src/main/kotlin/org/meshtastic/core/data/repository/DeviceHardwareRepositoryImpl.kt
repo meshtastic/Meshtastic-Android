@@ -29,12 +29,13 @@ import org.meshtastic.core.model.BootloaderOtaQuirk
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
 // Annotating with Singleton to ensure a single instance manages the cache
 @Singleton
-class DeviceHardwareRepository
+class DeviceHardwareRepositoryImpl
 @Inject
 constructor(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
@@ -42,7 +43,7 @@ constructor(
     private val jsonDataSource: DeviceHardwareJsonDataSource,
     private val bootloaderOtaQuirksJsonDataSource: BootloaderOtaQuirksJsonDataSource,
     private val dispatchers: CoroutineDispatchers,
-) {
+) : DeviceHardwareRepository {
 
     /**
      * Retrieves device hardware information by its model ID and optional target string.
@@ -59,10 +60,10 @@ constructor(
      * @return A [Result] containing the [DeviceHardware] on success (or null if not found), or an exception on failure.
      */
     @Suppress("LongMethod", "detekt:CyclomaticComplexMethod")
-    suspend fun getDeviceHardwareByModel(
+    override suspend fun getDeviceHardwareByModel(
         hwModel: Int,
-        target: String? = null,
-        forceRefresh: Boolean = false,
+        target: String?,
+        forceRefresh: Boolean,
     ): Result<DeviceHardware?> = withContext(dispatchers.io) {
         Logger.d {
             "DeviceHardwareRepository: getDeviceHardwareByModel(hwModel=$hwModel," +

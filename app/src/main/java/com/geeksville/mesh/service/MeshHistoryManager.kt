@@ -23,6 +23,7 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig

@@ -43,12 +43,17 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
@@ -56,7 +61,6 @@ import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
-import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
@@ -76,7 +80,7 @@ constructor(
     @ApplicationContext private val context: Context,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionStateHolder: ConnectionStateHandler,
-    private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val serviceBroadcasts: ServiceBroadcasts,
     private val serviceNotifications: MeshServiceNotifications,
     private val uiPrefs: UiPrefs,
     private val packetHandler: PacketHandler,
@@ -85,8 +89,8 @@ constructor(
     private val mqttManager: MeshMqttManager,
     private val historyManager: MeshHistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
-    private val commandSender: MeshCommandSender,
-    private val nodeManager: MeshNodeManager,
+    private val commandSender: CommandSender,
+    private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
     private val workManager: WorkManager,
@@ -343,7 +347,7 @@ constructor(
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
                 is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
-        return serviceNotifications.updateServiceStateNotification(summary, telemetry = telemetry)
+        return serviceNotifications.updateServiceStateNotification(summary, telemetry = telemetry) as Notification
     }
 
     companion object {

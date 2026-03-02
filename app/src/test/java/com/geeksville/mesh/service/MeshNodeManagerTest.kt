@@ -23,24 +23,24 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 
-class MeshNodeManagerTest {
+class NodeManagerTest {
 
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
-    private val serviceBroadcasts: MeshServiceBroadcasts = mockk(relaxed = true)
+    private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
 
-    private lateinit var nodeManager: MeshNodeManager
+    private lateinit var nodeManager: NodeManager
 
     @Before
     fun setUp() {
-        nodeManager = MeshNodeManager(nodeRepository, serviceBroadcasts, serviceNotifications)
+        nodeManager = NodeManagerImpl(nodeRepository, serviceBroadcasts, serviceNotifications)
     }
 
     @Test
@@ -61,7 +61,7 @@ class MeshNodeManagerTest {
             User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
 
         // Setup existing node
-        nodeManager.updateNodeInfo(nodeNum) { it.user = existingUser }
+        nodeManager.updateNode(nodeNum) { it.user = existingUser }
 
         val incomingDefaultUser =
             User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
@@ -79,7 +79,7 @@ class MeshNodeManagerTest {
         val existingUser =
             User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
-        nodeManager.updateNodeInfo(nodeNum) { it.user = existingUser }
+        nodeManager.updateNode(nodeNum) { it.user = existingUser }
 
         val incomingDetailedUser =
             User(id = "!12345678", long_name = "Real User", short_name = "RU", hw_model = HardwareModel.TLORA_V1)
@@ -106,7 +106,7 @@ class MeshNodeManagerTest {
 
     @Test
     fun `clear resets internal state`() {
-        nodeManager.updateNodeInfo(1234) { it.longName = "Test" }
+        nodeManager.updateNode(1234) { it.longName = "Test" }
         nodeManager.clear()
 
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())

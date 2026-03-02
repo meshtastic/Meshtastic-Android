@@ -30,13 +30,14 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
@@ -48,6 +49,7 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
+import org.meshtastic.core.repository.PacketHandler as SharedPacketHandler
 
 @Suppress("TooManyFunctions")
 @Singleton
@@ -55,11 +57,11 @@ class PacketHandler
 @Inject
 constructor(
     private val packetRepository: Lazy<PacketRepository>,
-    private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val serviceBroadcasts: ServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val connectionStateHolder: ConnectionStateHandler,
-) {
+) : SharedPacketHandler {
 
     companion object {
         private val TIMEOUT = 5.seconds // Increased from 250ms to be more tolerant
@@ -71,7 +73,7 @@ constructor(
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
     private val queueResponse = ConcurrentHashMap<Int, CompletableDeferred<Boolean>>()
 
-    fun start(scope: CoroutineScope) {
+    override fun start(scope: CoroutineScope) {
         this.scope = scope
     }
 
@@ -79,7 +81,7 @@ constructor(
      * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
      * bound to the RadioInterfaceService
      */
-    fun sendToRadio(p: ToRadio) {
+    override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
         val b = p.encode()
 
@@ -106,12 +108,12 @@ constructor(
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw
      * NotConnectedException
      */
-    fun sendToRadio(packet: MeshPacket) {
+    override fun sendToRadio(packet: MeshPacket) {
         queuedPackets.add(packet)
         startPacketQueue()
     }
 
-    fun stopPacketQueue() {
+    override fun stopPacketQueue() {
         if (queueJob?.isActive == true) {
             Logger.i { "Stopping packet queueJob" }
             queueJob?.cancel()
@@ -122,7 +124,7 @@ constructor(
         }
     }
 
-    fun handleQueueStatus(queueStatus: QueueStatus) {
+    override fun handleQueueStatus(queueStatus: QueueStatus) {
         Logger.d { "[queueStatus] ${queueStatus.toOneLineString()}" }
         val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, mesh_packet_id) }
         if (success && isFull) return // Queue is full, wait for free != 0
@@ -134,7 +136,7 @@ constructor(
         }
     }
 
-    fun removeResponse(dataRequestId: Int, complete: Boolean) {
+    override fun removeResponse(dataRequestId: Int, complete: Boolean) {
         queueResponse.remove(dataRequestId)?.complete(complete)
     }
 
@@ -179,7 +181,7 @@ constructor(
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1.seconds) {
         var dataPacket: DataPacket? = null
         while (dataPacket == null) {
-            dataPacket = packetRepository.get().getPacketById(packetId)?.data
+            dataPacket = packetRepository.get().getPacketById(packetId)
             if (dataPacket == null) delay(100.milliseconds)
         }
         dataPacket

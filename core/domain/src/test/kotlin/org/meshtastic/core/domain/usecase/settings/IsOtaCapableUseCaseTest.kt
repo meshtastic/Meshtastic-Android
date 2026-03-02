@@ -26,12 +26,12 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.DeviceHardwareRepository
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.radio.RadioPrefs
+import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeRepository
 
 class IsOtaCapableUseCaseTest {
 

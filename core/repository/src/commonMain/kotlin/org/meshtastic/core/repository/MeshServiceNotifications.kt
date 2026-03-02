@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service
+package org.meshtastic.core.repository
 
-import android.app.Notification
-import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.model.Node
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
@@ -29,7 +28,7 @@ interface MeshServiceNotifications {
 
     fun initChannels()
 
-    fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification
+    fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Any
 
     suspend fun updateMessageNotification(
         contactKey: String,
@@ -59,15 +58,15 @@ interface MeshServiceNotifications {
 
     fun showAlertNotification(contactKey: String, name: String, alert: String)
 
-    fun showNewNodeSeenNotification(node: NodeEntity)
+    fun showNewNodeSeenNotification(node: Node)
 
-    fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean)
+    fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean)
 
     fun showClientNotification(clientNotification: ClientNotification)
 
     fun cancelMessageNotification(contactKey: String)
 
-    fun cancelLowBatteryNotification(node: NodeEntity)
+    fun cancelLowBatteryNotification(node: Node)
 
     fun clearClientNotification(notification: ClientNotification)
 }

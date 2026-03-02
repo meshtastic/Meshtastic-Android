@@ -28,15 +28,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.database.entity.ContactSettings
-import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.Contact
+import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.util.getChannel
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -59,7 +58,7 @@ constructor(
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
     // Combine node info and myId to reduce argument count in subsequent combines
-    private val identityFlow: Flow<Pair<MyNodeEntity?, String?>> =
+    private val identityFlow: Flow<Pair<MyNodeInfo?, String?>> =
         combine(nodeRepository.myNodeInfo, nodeRepository.myId) { info, id -> Pair(info, id) }
 
     /**
@@ -78,42 +77,41 @@ constructor(
                 settings,
             ->
             val (myNodeInfo, myId) = identity
-            val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
+            val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList<Contact>()
             // Add empty channel placeholders (always show Broadcast contacts, even when empty)
             val placeholder =
                 (0 until channelSet.settings.size).associate { ch ->
                     val contactKey = "$ch${DataPacket.ID_BROADCAST}"
                     val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-                    contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
+                    contactKey to data
                 }
 
-            (contacts + (placeholder - contacts.keys)).values.collectionsMap { packet ->
-                val data = packet.data
-                val contactKey = packet.contact_key
-
+            (contacts + (placeholder - contacts.keys)).entries.collectionsMap { entry ->
+                val contactKey = entry.key
+                val packetData = entry.value
                 // Determine if this is my message (originated on this device)
-                val fromLocal = (data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId))
-                val toBroadcast = data.to == DataPacket.ID_BROADCAST
+                val fromLocal = (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
+                val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
 
                 // grab usernames from NodeInfo
-                val userId = if (fromLocal) data.to else data.from
+                val userId = if (fromLocal) packetData.to else packetData.from
                 val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
                 val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
                 val shortName = user.short_name
                 val longName =
                     if (toBroadcast) {
-                        channelSet.getChannel(data.channel)?.name ?: "Channel ${data.channel}"
+                        channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
                     } else {
                         user.long_name
                     }
 
                 Contact(
                     contactKey = contactKey,
-                    shortName = if (toBroadcast) data.channel.toString() else shortName,
+                    shortName = if (toBroadcast) packetData.channel.toString() else shortName,
                     longName = longName,
-                    lastMessageTime = if (data.time != 0L) data.time else null,
-                    lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
+                    lastMessageTime = if (packetData.time != 0L) packetData.time else null,
+                    lastMessageText = if (fromLocal) packetData.text else "$shortName: ${packetData.text}",
                     unreadCount = packetRepository.getUnreadCount(contactKey),
                     messageCount = packetRepository.getMessageCount(contactKey),
                     isMuted = settings[contactKey]?.isMuted == true,
@@ -140,36 +138,37 @@ constructor(
                 val myId = params.myId
 
                 packetRepository.getContactsPaged().map { pagingData ->
-                    pagingData.map { packet ->
-                        val data = packet.data
-                        val contactKey = packet.contact_key
+                    pagingData.map { packetData: DataPacket ->
+                        val contactKey = "${packetData.channel}${packetData.to}" // This might be wrong, need to check how contactKey is derived in PagingSource
 
                         // Determine if this is my message (originated on this device)
-                        val fromLocal = (data.from == DataPacket.ID_LOCAL || (myId != null && data.from == myId))
-                        val toBroadcast = data.to == DataPacket.ID_BROADCAST
+                        val fromLocal = (packetData.from == DataPacket.ID_LOCAL || (myId != null && packetData.from == myId))
+                        val toBroadcast = packetData.to == DataPacket.ID_BROADCAST
 
                         // grab usernames from NodeInfo
-                        val userId = if (fromLocal) data.to else data.from
+                        val userId = if (fromLocal) packetData.to else packetData.from
                         val user = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
                         val node = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
                         val shortName = user.short_name
                         val longName =
                             if (toBroadcast) {
-                                channelSet.getChannel(data.channel)?.name ?: "Channel ${data.channel}"
+                                channelSet.getChannel(packetData.channel)?.name ?: "Channel ${packetData.channel}"
                             } else {
                                 user.long_name
                             }
 
+                        val contactKeyComputed = if (toBroadcast) "${packetData.channel}${DataPacket.ID_BROADCAST}" else contactKey
+
                         Contact(
-                            contactKey = contactKey,
-                            shortName = if (toBroadcast) data.channel.toString() else shortName,
+                            contactKey = contactKeyComputed,
+                            shortName = if (toBroadcast) packetData.channel.toString() else shortName,
                             longName = longName,
-                            lastMessageTime = if (data.time != 0L) data.time else null,
-                            lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                            unreadCount = packetRepository.getUnreadCount(contactKey),
-                            messageCount = packetRepository.getMessageCount(contactKey),
-                            isMuted = settings[contactKey]?.isMuted == true,
+                            lastMessageTime = if (packetData.time != 0L) packetData.time else null,
+                            lastMessageText = if (fromLocal) packetData.text else "$shortName: ${packetData.text}",
+                            unreadCount = packetRepository.getUnreadCount(contactKeyComputed),
+                            messageCount = packetRepository.getMessageCount(contactKeyComputed),
+                            isMuted = settings[contactKeyComputed]?.isMuted == true,
                             isUnmessageable = user.is_unmessagable ?: false,
                             nodeColors =
                             if (!toBroadcast) {

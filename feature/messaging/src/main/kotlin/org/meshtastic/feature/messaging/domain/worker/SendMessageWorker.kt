@@ -22,10 +22,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.PacketRepository
 
 @HiltWorker
 class SendMessageWorker
@@ -47,11 +47,9 @@ constructor(
             return Result.retry()
         }
 
-        val packetEntity =
+        val packetData =
             packetRepository.getPacketByPacketId(packetId)
                 ?: return Result.failure() // Packet no longer exists in DB? Do not retry.
-
-        val packetData = packetEntity.packet.data
 
         return try {
             radioController.sendMessage(packetData)

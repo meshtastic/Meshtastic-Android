@@ -22,6 +22,7 @@ import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
+import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -66,6 +67,9 @@ data class Node(
     val lastTransport: Int = 0,
 ) {
     val capabilities: Capabilities by lazy { Capabilities(metadata?.firmware_version) }
+
+    val isOnline: Boolean
+        get() = lastHeard > onlineTimeThreshold()
 
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
@@ -187,8 +191,29 @@ data class Node(
 
     companion object {
         private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+        private const val RELAY_NODE_SUFFIX_MASK = 0xFF
 
         val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
+
+        fun getRelayNode(relayNodeId: Int, nodes: List<Node>, ourNodeNum: Int?): Node? {
+            val relayNodeIdSuffix = relayNodeId and RELAY_NODE_SUFFIX_MASK
+
+            val candidateRelayNodes =
+                nodes.filter {
+                    it.num != ourNodeNum &&
+                        it.lastHeard != 0 &&
+                        (it.num and RELAY_NODE_SUFFIX_MASK) == relayNodeIdSuffix
+                }
+
+            val closestRelayNode =
+                if (candidateRelayNodes.size == 1) {
+                    candidateRelayNodes.first()
+                } else {
+                    candidateRelayNodes.minByOrNull { it.hopsAway }
+                }
+
+            return closestRelayNode
+        }
 
         /** Creates a fallback [Node] when the node is not found in the database. */
         fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {

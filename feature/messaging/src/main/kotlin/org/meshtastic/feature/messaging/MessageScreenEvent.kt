@@ -17,7 +17,7 @@
 
 package org.meshtastic.feature.messaging
 
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 
 /** Defines the various user interactions that can occur on the MessageScreen. */
 internal sealed interface MessageScreenEvent {

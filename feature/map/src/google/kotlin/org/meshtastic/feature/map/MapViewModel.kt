@@ -45,13 +45,13 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Config
@@ -344,7 +344,7 @@ constructor(
             viewModelScope.launch {
                 val wpMap = waypoints.first { it.containsKey(wpId) }
                 wpMap[wpId]?.let { packet ->
-                    val waypoint = packet.data.waypoint!!
+                    val waypoint = packet.waypoint!!
                     val latLng = LatLng((waypoint.latitude_i ?: 0) / 1e7, (waypoint.longitude_i ?: 0) / 1e7)
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
                 }

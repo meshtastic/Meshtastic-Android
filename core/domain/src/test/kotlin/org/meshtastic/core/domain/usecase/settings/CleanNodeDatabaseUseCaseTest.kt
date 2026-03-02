@@ -23,9 +23,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.domain.FakeRadioController
+import org.meshtastic.core.repository.NodeRepository
 import kotlin.time.Duration.Companion.days
 
 class CleanNodeDatabaseUseCaseTest {

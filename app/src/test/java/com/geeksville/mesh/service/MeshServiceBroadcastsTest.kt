@@ -32,17 +32,17 @@ import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [34])
-class MeshServiceBroadcastsTest {
+class ServiceBroadcastsTest {
 
     private lateinit var context: Context
     private val connectionStateHolder = ConnectionStateHandler()
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
-    private lateinit var broadcasts: MeshServiceBroadcasts
+    private lateinit var broadcasts: ServiceBroadcasts
 
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        broadcasts = MeshServiceBroadcasts(context, connectionStateHolder, serviceRepository)
+        broadcasts = ServiceBroadcasts(context, connectionStateHolder, serviceRepository)
     }
 
     @Test

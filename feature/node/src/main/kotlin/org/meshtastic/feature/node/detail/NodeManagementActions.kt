@@ -22,8 +22,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add

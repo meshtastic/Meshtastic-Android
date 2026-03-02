@@ -61,11 +61,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.entity.Packet
-import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
@@ -545,7 +544,7 @@ private fun MessageStatusDialog(
         remember(message.relayNode, nodes, ourNode) {
             derivedStateOf {
                 message.relayNode?.let { relayNodeId ->
-                    Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
+                    Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
                 }
             }
         }

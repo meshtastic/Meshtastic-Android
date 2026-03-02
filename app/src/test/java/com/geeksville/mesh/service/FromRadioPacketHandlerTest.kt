@@ -20,7 +20,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config

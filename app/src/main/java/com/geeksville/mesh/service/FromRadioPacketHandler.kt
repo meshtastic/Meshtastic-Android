@@ -17,7 +17,8 @@
 package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.FromRadio
 import javax.inject.Inject

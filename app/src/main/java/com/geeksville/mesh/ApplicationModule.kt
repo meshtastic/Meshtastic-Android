@@ -21,6 +21,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import com.geeksville.mesh.service.MeshServiceNotificationsImpl
+import com.geeksville.mesh.service.PacketHandler
+import com.geeksville.mesh.service.ServiceBroadcasts
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -28,7 +30,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.di.ProcessLifecycle
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -36,6 +38,10 @@ import javax.inject.Singleton
 interface ApplicationModule {
 
     @Binds fun bindMeshServiceNotifications(impl: MeshServiceNotificationsImpl): MeshServiceNotifications
+
+    @Binds fun bindPacketHandler(impl: PacketHandler): org.meshtastic.core.repository.PacketHandler
+
+    @Binds fun bindServiceBroadcasts(impl: ServiceBroadcasts): org.meshtastic.core.repository.ServiceBroadcasts
 
     companion object {
         @Provides @ProcessLifecycle
