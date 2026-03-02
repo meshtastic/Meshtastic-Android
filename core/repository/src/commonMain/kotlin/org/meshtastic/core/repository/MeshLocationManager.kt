@@ -14,16 +14,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.repository
 
-package com.geeksville.mesh.repository.radio
-
-import dagger.MapKey
-import org.meshtastic.core.model.InterfaceId
+import kotlinx.coroutines.CoroutineScope
+import org.meshtastic.proto.Position
 
 /**
- * Dagger `MapKey` implementation allowing for `InterfaceId` to be used as a map key.
+ * Interface for managing the local node's location updates and reporting.
  */
-@MapKey
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class InterfaceMapKey(val value: InterfaceId)
+interface MeshLocationManager {
+    /** Starts location updates and reports them via the given function. */
+    fun start(scope: CoroutineScope, sendPositionFn: (Position) -> Unit)
+
+    /** Stops location updates. */
+    fun stop()
+}

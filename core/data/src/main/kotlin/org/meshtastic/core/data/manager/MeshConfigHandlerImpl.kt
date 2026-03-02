@@ -76,7 +76,7 @@ class MeshConfigHandlerImpl @Inject constructor(
 
         // Update status message if we have node info, otherwise use a generic one
         val mi = nodeManager.getMyNodeInfo()
-        val index = channel.index ?: 0
+        val index = channel.index
         if (mi != null) {
             serviceRepository.setConnectionProgress("Channels (${index + 1} / ${mi.maxChannels})")
         } else {

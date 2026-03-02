@@ -25,7 +25,6 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -42,14 +41,17 @@ import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
@@ -95,7 +97,7 @@ class MeshService : Service() {
         fun actionReceived(portNum: Int): String {
             val portType = PortNum.fromValue(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
-            return com.geeksville.mesh.service.actionReceived(portStr)
+            return actionReceived(portStr)
         }
 
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)

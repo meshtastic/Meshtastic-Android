@@ -49,8 +49,11 @@ import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.prefs.radio.RadioPrefs
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
@@ -67,7 +70,7 @@ import javax.inject.Singleton
  */
 @Suppress("LongParameterList")
 @Singleton
-open class RadioInterfaceService
+class AndroidRadioInterfaceService
 @Inject
 constructor(
     private val context: Application,
@@ -78,20 +81,20 @@ constructor(
     private val radioPrefs: RadioPrefs,
     private val interfaceFactory: InterfaceFactory,
     private val analytics: PlatformAnalytics,
-) {
+) : RadioInterfaceService {
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
-    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
+    override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private val _receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
-    val receivedData: SharedFlow<ByteArray> = _receivedData
+    override val receivedData: SharedFlow<ByteArray> = _receivedData
 
     private val _connectionError = MutableSharedFlow<BleError>(extraBufferCapacity = 64)
     val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
 
     // Thread-safe StateFlow for tracking device address changes
     private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
-    val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
+    override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
     private val logSends = false
     private val logReceives = false
@@ -100,8 +103,11 @@ constructor(
 
     val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
 
+    override val serviceScope: CoroutineScope
+        get() = _serviceScope
+
     /** We recreate this scope each time we stop an interface */
-    var serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
+    private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
     private var radioIf: IRadioInterface = NopInterface("")
 
@@ -165,10 +171,10 @@ constructor(
     }
 
     /** Constructs a full radio address for the specific interface type. */
-    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
+    override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
         interfaceFactory.toInterfaceAddress(interfaceId, rest)
 
-    fun isMockInterface(): Boolean =
+    override fun isMockInterface(): Boolean =
         BuildConfig.DEBUG || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
 
     /**
@@ -185,7 +191,7 @@ constructor(
      * where a is either x for bluetooth or s for serial and t is an interface specific address (macaddr or a device
      * path)
      */
-    fun getDeviceAddress(): String? {
+    override fun getDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
         var address = radioPrefs.devAddr
 
@@ -228,10 +234,10 @@ constructor(
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
-    open fun handleFromRadio(p: ByteArray) {
+    override fun handleFromRadio(bytes: ByteArray) {
         if (logReceives) {
             try {
-                receivedPacketsLog.write(p)
+                receivedPacketsLog.write(bytes)
                 receivedPacketsLog.flush()
             } catch (t: Throwable) {
                 Logger.w(t) { "Failed to write receive log in handleFromRadio" }
@@ -239,29 +245,33 @@ constructor(
         }
 
         try {
-            processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
+            processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(bytes) }
             emitReceiveActivity()
         } catch (t: Throwable) {
             Logger.e(t) { "RadioInterfaceService.handleFromRadio failed while emitting data" }
         }
     }
 
-    fun onConnect() {
+    override fun onConnect() {
         if (_connectionState.value != ConnectionState.Connected) {
             broadcastConnectionChanged(ConnectionState.Connected)
         }
     }
 
-    fun onDisconnect(isPermanent: Boolean) {
+    override fun onDisconnect(isPermanent: Boolean) {
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {
             broadcastConnectionChanged(newTargetState)
         }
     }
 
-    fun onDisconnect(error: BleError) {
-        processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(error) }
-        onDisconnect(!error.shouldReconnect)
+    override fun onDisconnect(error: Any) {
+        if (error is BleError) {
+            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(error) }
+            onDisconnect(!error.shouldReconnect)
+        } else {
+            onDisconnect(isPermanent = true)
+        }
     }
 
     /** Start our configured interface (if it isn't already running) */
@@ -311,8 +321,8 @@ constructor(
         r.close()
 
         // cancel any old jobs and get ready for the new ones
-        serviceScope.cancel("stopping interface")
-        serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
+        _serviceScope.cancel("stopping interface")
+        _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
         if (logSends) {
             sentPacketsLog.close()
@@ -356,26 +366,26 @@ constructor(
             true
         }
 
-    fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions { setBondedDeviceAddress(deviceAddr) }
+    override fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions { setBondedDeviceAddress(deviceAddr) }
 
     /**
      * If the service is not currently connected to the radio, try to connect now. At boot the radio interface service
      * will not connect to a radio until this call is received.
      */
-    fun connect() = toRemoteExceptions {
+    override fun connect() = toRemoteExceptions {
         // We don't start actually talking to our device until MeshService binds to us - this prevents
         // broadcasting connection events before MeshService is ready to receive them
         startInterface()
         initStateListeners()
     }
 
-    fun sendToRadio(a: ByteArray) {
+    override fun sendToRadio(bytes: ByteArray) {
         // Do this in the IO thread because it might take a while (and we don't care about the result code)
-        serviceScope.handledLaunch { handleSendToRadio(a) }
+        _serviceScope.handledLaunch { handleSendToRadio(bytes) }
     }
 
     private val _meshActivity = MutableSharedFlow<MeshActivity>(extraBufferCapacity = 64)
-    val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
+    override val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
 
     private fun emitSendActivity() {
         // Use tryEmit for SharedFlow as it's non-blocking
@@ -391,10 +401,4 @@ constructor(
             Logger.d { "MeshActivity.Receive event was not emitted due to buffer overflow or no collectors" }
         }
     }
-}
-
-sealed class MeshActivity {
-    data object Send : MeshActivity()
-
-    data object Receive : MeshActivity()
 }

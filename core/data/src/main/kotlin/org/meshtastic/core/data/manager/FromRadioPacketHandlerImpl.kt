@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.manager
 
+import dagger.Lazy
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -32,7 +33,7 @@ import javax.inject.Singleton
 @Singleton
 class FromRadioPacketHandlerImpl @Inject constructor(
     private val serviceRepository: ServiceRepository,
-    private val router: MeshRouter,
+    private val router: Lazy<MeshRouter>,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
     private val serviceNotifications: MeshServiceNotifications,
@@ -51,18 +52,18 @@ class FromRadioPacketHandlerImpl @Inject constructor(
         val clientNotification = proto.clientNotification
 
         when {
-            myInfo != null -> router.configFlowManager.handleMyInfo(myInfo)
-            metadata != null -> router.configFlowManager.handleLocalMetadata(metadata)
+            myInfo != null -> router.get().configFlowManager.handleMyInfo(myInfo)
+            metadata != null -> router.get().configFlowManager.handleLocalMetadata(metadata)
             nodeInfo != null -> {
-                router.configFlowManager.handleNodeInfo(nodeInfo)
-                serviceRepository.setConnectionProgress("Nodes (${router.configFlowManager.newNodeCount})")
+                router.get().configFlowManager.handleNodeInfo(nodeInfo)
+                serviceRepository.setConnectionProgress("Nodes (${router.get().configFlowManager.newNodeCount})")
             }
-            configCompleteId != null -> router.configFlowManager.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> router.get().configFlowManager.handleConfigComplete(configCompleteId)
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
-            config != null -> router.configHandler.handleDeviceConfig(config)
-            moduleConfig != null -> router.configHandler.handleModuleConfig(moduleConfig)
-            channel != null -> router.configHandler.handleChannel(channel)
+            config != null -> router.get().configHandler.handleDeviceConfig(config)
+            moduleConfig != null -> router.get().configHandler.handleModuleConfig(moduleConfig)
+            channel != null -> router.get().configHandler.handleChannel(channel)
             clientNotification != null -> {
                 serviceRepository.setClientNotification(clientNotification)
                 serviceNotifications.showClientNotification(clientNotification)

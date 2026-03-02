@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.manager
 
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -34,14 +35,22 @@ import javax.inject.Singleton
 @Suppress("LongParameterList")
 @Singleton
 class MeshRouterImpl @Inject constructor(
-    override val dataHandler: MeshDataHandler,
-    override val configHandler: MeshConfigHandler,
-    override val tracerouteHandler: TracerouteHandler,
-    override val neighborInfoHandler: NeighborInfoHandler,
-    override val configFlowManager: MeshConfigFlowManager,
-    override val mqttManager: MqttManager,
-    override val actionHandler: MeshActionHandler,
+    private val _dataHandler: Lazy<MeshDataHandler>,
+    private val _configHandler: Lazy<MeshConfigHandler>,
+    private val _tracerouteHandler: Lazy<TracerouteHandler>,
+    private val _neighborInfoHandler: Lazy<NeighborInfoHandler>,
+    private val _configFlowManager: Lazy<MeshConfigFlowManager>,
+    private val _mqttManager: Lazy<MqttManager>,
+    private val _actionHandler: Lazy<MeshActionHandler>,
 ) : MeshRouter {
+    override val dataHandler: MeshDataHandler get() = _dataHandler.get()
+    override val configHandler: MeshConfigHandler get() = _configHandler.get()
+    override val tracerouteHandler: TracerouteHandler get() = _tracerouteHandler.get()
+    override val neighborInfoHandler: NeighborInfoHandler get() = _neighborInfoHandler.get()
+    override val configFlowManager: MeshConfigFlowManager get() = _configFlowManager.get()
+    override val mqttManager: MqttManager get() = _mqttManager.get()
+    override val actionHandler: MeshActionHandler get() = _actionHandler.get()
+
     override fun start(scope: CoroutineScope) {
         dataHandler.start(scope)
         configHandler.start(scope)

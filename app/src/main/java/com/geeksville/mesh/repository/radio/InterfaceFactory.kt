@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.repository.radio
 
+import org.meshtastic.core.model.InterfaceId
 import javax.inject.Inject
 import javax.inject.Provider
 

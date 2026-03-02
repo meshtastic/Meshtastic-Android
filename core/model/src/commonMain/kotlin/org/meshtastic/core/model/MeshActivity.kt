@@ -14,16 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.repository.radio
-
-import dagger.MapKey
-import org.meshtastic.core.model.InterfaceId
+package org.meshtastic.core.model
 
 /**
- * Dagger `MapKey` implementation allowing for `InterfaceId` to be used as a map key.
+ * Represents activity on the mesh network.
  */
-@MapKey
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class InterfaceMapKey(val value: InterfaceId)
+sealed class MeshActivity {
+    /** Data is being sent to the radio. */
+    data object Send : MeshActivity()
+
+    /** Data is being received from the radio. */
+    data object Receive : MeshActivity()
+}

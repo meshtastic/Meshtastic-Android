@@ -23,6 +23,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoMap
 import dagger.multibindings.Multibinds
+import org.meshtastic.core.model.InterfaceId
 
 @Suppress("unused") // Used by hilt
 @Module

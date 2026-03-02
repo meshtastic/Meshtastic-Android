@@ -17,10 +17,10 @@
 package com.geeksville.mesh.service
 
 import android.app.Notification
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.mockk
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 

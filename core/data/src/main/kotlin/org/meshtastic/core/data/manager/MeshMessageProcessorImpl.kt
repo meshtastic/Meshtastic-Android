@@ -56,7 +56,7 @@ class MeshMessageProcessorImpl @Inject constructor(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
-    private val router: MeshRouter,
+    private val router: Lazy<MeshRouter>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
 ) : MeshMessageProcessor {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -230,7 +230,7 @@ class MeshMessageProcessorImpl @Inject constructor(
             }
 
             try {
-                router.dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
+                router.get().dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
             } finally {
                 logUuidByPacketId.remove(packet.id)
                 logInsertJobByPacketId.remove(packet.id)

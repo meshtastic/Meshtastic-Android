@@ -17,6 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -48,7 +49,7 @@ import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 @Singleton
 class MeshConfigFlowManagerImpl @Inject constructor(
     private val nodeManager: NodeManager,
-    private val connectionManager: MeshConnectionManager,
+    private val connectionManager: Lazy<MeshConnectionManager>,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
@@ -98,7 +99,7 @@ class MeshConfigFlowManagerImpl @Inject constructor(
         } else {
             myNodeInfo = finalizedInfo
             Logger.i { "myNodeInfo committed successfully (nodeNum=${finalizedInfo.myNodeNum})" }
-            connectionManager.onRadioConfigLoaded()
+            connectionManager.get().onRadioConfigLoaded()
         }
 
         scope.handledLaunch {
@@ -106,7 +107,7 @@ class MeshConfigFlowManagerImpl @Inject constructor(
             sendHeartbeat()
             delay(wantConfigDelay)
             Logger.i { "Requesting NodeInfo (Stage 2)" }
-            connectionManager.startNodeInfoOnly()
+            connectionManager.get().startNodeInfoOnly()
         }
     }
 
@@ -137,7 +138,7 @@ class MeshConfigFlowManagerImpl @Inject constructor(
             nodeManager.setAllowNodeDbWrites(true)
             serviceRepository.setConnectionState(ConnectionState.Connected)
             serviceBroadcasts.broadcastConnection()
-            connectionManager.onNodeDbReady()
+            connectionManager.get().onNodeDbReady()
         }
     }
 
@@ -169,7 +170,7 @@ class MeshConfigFlowManagerImpl @Inject constructor(
     }
 
     override fun triggerWantConfig() {
-        connectionManager.startConfigOnly()
+        connectionManager.get().startConfigOnly()
     }
 
     private fun regenMyNodeInfo(metadata: DeviceMetadata? = null) {
@@ -179,7 +180,7 @@ class MeshConfigFlowManagerImpl @Inject constructor(
                 val mi =
                     with(myInfo) {
                         SharedMyNodeInfo(
-                            myNodeNum = my_node_num ?: 0,
+                            myNodeNum = my_node_num,
                             hasGPS = false,
                             model =
                             when (val hwModel = metadata?.hw_model) {

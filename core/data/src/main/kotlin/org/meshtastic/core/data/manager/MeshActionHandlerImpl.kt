@@ -59,7 +59,7 @@ class MeshActionHandlerImpl @Inject constructor(
     private val commandSender: CommandSender,
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: ServiceBroadcasts,
-    private val dataHandler: MeshDataHandler,
+    private val dataHandler: Lazy<MeshDataHandler>,
     private val analytics: PlatformAnalytics,
     private val meshPrefs: MeshPrefs,
     private val databaseManager: DatabaseManager,
@@ -152,7 +152,7 @@ class MeshActionHandlerImpl @Inject constructor(
         val verifiedContact = action.contact.copy(manually_verified = true)
         commandSender.sendAdmin(myNodeNum) { AdminMessage(add_contact = verifiedContact) }
         nodeManager.handleReceivedUser(
-            verifiedContact.node_num ?: 0,
+            verifiedContact.node_num,
             verifiedContact.user ?: User(),
             manuallyVerified = true,
         )
@@ -188,7 +188,7 @@ class MeshActionHandlerImpl @Inject constructor(
     override fun handleSend(p: DataPacket, myNodeNum: Int) {
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
-        dataHandler.rememberDataPacket(p, myNodeNum, false)
+        dataHandler.get().rememberDataPacket(p, myNodeNum, false)
         val bytes = p.bytes ?: okio.ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }

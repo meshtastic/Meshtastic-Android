@@ -20,8 +20,11 @@ package com.geeksville.mesh
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.geeksville.mesh.repository.radio.AndroidRadioInterfaceService
+import com.geeksville.mesh.service.AndroidAppWidgetUpdater
+import com.geeksville.mesh.service.AndroidMeshLocationManager
+import com.geeksville.mesh.service.AndroidMeshWorkerManager
 import com.geeksville.mesh.service.MeshServiceNotificationsImpl
-import com.geeksville.mesh.service.PacketHandler
 import com.geeksville.mesh.service.ServiceBroadcasts
 import dagger.Binds
 import dagger.Module
@@ -39,11 +42,15 @@ interface ApplicationModule {
 
     @Binds fun bindMeshServiceNotifications(impl: MeshServiceNotificationsImpl): MeshServiceNotifications
 
-    @Binds fun bindPacketHandler(impl: PacketHandler): org.meshtastic.core.repository.PacketHandler
+    @Binds fun bindMeshLocationManager(impl: AndroidMeshLocationManager): org.meshtastic.core.repository.MeshLocationManager
+
+    @Binds fun bindMeshWorkerManager(impl: AndroidMeshWorkerManager): org.meshtastic.core.repository.MeshWorkerManager
+
+    @Binds fun bindAppWidgetUpdater(impl: AndroidAppWidgetUpdater): org.meshtastic.core.repository.AppWidgetUpdater
+
+    @Binds fun bindRadioInterfaceService(impl: AndroidRadioInterfaceService): org.meshtastic.core.repository.RadioInterfaceService
 
     @Binds fun bindServiceBroadcasts(impl: ServiceBroadcasts): org.meshtastic.core.repository.ServiceBroadcasts
-
-    @Binds fun bindMeshConnectionManager(impl: com.geeksville.mesh.service.MeshConnectionManager): org.meshtastic.core.repository.MeshConnectionManager
 
     companion object {
         @Provides @ProcessLifecycle

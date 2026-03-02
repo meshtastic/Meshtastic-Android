@@ -29,23 +29,24 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.repository.MeshLocationManager
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import org.meshtastic.proto.Position as ProtoPosition
 
 @Singleton
-class MeshLocationManager
+class AndroidMeshLocationManager
 @Inject
 constructor(
     private val context: Application,
     private val locationRepository: LocationRepository,
-) {
+) : MeshLocationManager {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var locationFlow: Job? = null
 
     @SuppressLint("MissingPermission")
-    fun start(scope: CoroutineScope, sendPositionFn: (ProtoPosition) -> Unit) {
+    override fun start(scope: CoroutineScope, sendPositionFn: (ProtoPosition) -> Unit) {
         this.scope = scope
         if (locationFlow?.isActive == true) return
 
@@ -76,7 +77,7 @@ constructor(
         }
     }
 
-    fun stop() {
+    override fun stop() {
         if (locationFlow?.isActive == true) {
             Logger.i { "Stopping location requests" }
             locationFlow?.cancel()

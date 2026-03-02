@@ -90,12 +90,12 @@ class MeshDataHandlerImpl @Inject constructor(
     private val serviceNotifications: MeshServiceNotifications,
     private val analytics: PlatformAnalytics,
     private val dataMapper: MeshDataMapper,
-    private val configHandler: MeshConfigHandler,
-    private val configFlowManager: MeshConfigFlowManager,
+    private val configHandler: Lazy<MeshConfigHandler>,
+    private val configFlowManager: Lazy<MeshConfigFlowManager>,
     private val commandSender: CommandSender,
     private val historyManager: HistoryManager,
     private val meshPrefs: MeshPrefs,
-    private val connectionManager: MeshConnectionManager,
+    private val connectionManager: Lazy<MeshConnectionManager>,
     private val tracerouteHandler: TracerouteHandler,
     private val neighborInfoHandler: NeighborInfoHandler,
     private val radioConfigRepository: RadioConfigRepository,
@@ -347,20 +347,20 @@ class MeshDataHandlerImpl @Inject constructor(
         val fromNum = packet.from
         u.get_module_config_response?.let { config ->
             if (fromNum == myNodeNum) {
-                configHandler.handleModuleConfig(config)
+                configHandler.get().handleModuleConfig(config)
             } else {
                 config.statusmessage?.node_status?.let { nodeManager.updateNodeStatus(fromNum, it) }
             }
         }
 
         if (fromNum == myNodeNum) {
-            u.get_config_response?.let { configHandler.handleDeviceConfig(it) }
-            u.get_channel_response?.let { configHandler.handleChannel(it) }
+            u.get_config_response?.let { configHandler.get().handleDeviceConfig(it) }
+            u.get_channel_response?.let { configHandler.get().handleChannel(it) }
         }
 
         u.get_device_metadata_response?.let { metadata ->
             if (fromNum == myNodeNum) {
-                configFlowManager.handleLocalMetadata(metadata)
+                configFlowManager.get().handleLocalMetadata(metadata)
             } else {
                 nodeManager.insertMetadata(fromNum, metadata)
             }
@@ -402,7 +402,7 @@ class MeshDataHandlerImpl @Inject constructor(
         val fromNum = packet.from
         val isRemote = (fromNum != myNodeNum)
         if (!isRemote) {
-            connectionManager.updateTelemetry(t)
+            connectionManager.get().updateTelemetry(t)
         }
 
         nodeManager.updateNode(fromNum) { node: Node ->

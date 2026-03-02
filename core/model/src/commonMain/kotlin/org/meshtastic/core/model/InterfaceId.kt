@@ -14,16 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.repository.radio
-
-import dagger.MapKey
-import org.meshtastic.core.model.InterfaceId
+package org.meshtastic.core.model
 
 /**
- * Dagger `MapKey` implementation allowing for `InterfaceId` to be used as a map key.
+ * Address identifiers for all supported radio backend implementations.
  */
-@MapKey
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class InterfaceMapKey(val value: InterfaceId)
+enum class InterfaceId(val id: Char) {
+    BLUETOOTH('x'),
+    MOCK('m'),
+    NOP('n'),
+    SERIAL('s'),
+    TCP('t'),
+    ;
+
+    companion object {
+        fun forIdChar(id: Char): InterfaceId? {
+            return entries.firstOrNull { it.id == id }
+        }
+    }
+}

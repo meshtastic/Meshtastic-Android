@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import android.app.Notification
-import android.content.Context
-import androidx.glance.appwidget.updateAll
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.workDataOf
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.widget.LocalStatsWidget
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,16 +36,20 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
@@ -65,7 +59,6 @@ import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.meshtastic_app_name
-import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
@@ -78,10 +71,7 @@ import kotlin.time.DurationUnit
 
 @Suppress("LongParameterList", "TooManyFunctions")
 @Singleton
-class MeshConnectionManager
-@Inject
-constructor(
-    @ApplicationContext private val context: Context,
+class MeshConnectionManagerImpl @Inject constructor(
     private val radioInterfaceService: RadioInterfaceService,
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
@@ -97,7 +87,8 @@ constructor(
     private val nodeManager: NodeManager,
     private val analytics: PlatformAnalytics,
     private val packetRepository: PacketRepository,
-    private val workManager: WorkManager,
+    private val workerManager: MeshWorkerManager,
+    private val appWidgetUpdater: AppWidgetUpdater,
 ) : MeshConnectionManager {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
@@ -113,11 +104,9 @@ constructor(
         // Ensure notification title and content stay in sync with state changes
         serviceRepository.connectionState.onEach { updateStatusNotification() }.launchIn(scope)
 
-        // Kickstart the widget composition. The widget internally uses collectAsState()
-        // and its own sampled StateFlow to drive updates automatically without excessive IPC and recreation.
         scope.launch {
             try {
-                LocalStatsWidget().updateAll(context)
+                appWidgetUpdater.updateAll()
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                 Logger.e(e) { "Failed to kickstart LocalStatsWidget" }
             }
@@ -275,15 +264,7 @@ constructor(
             val queuedPackets = packetRepository.getQueuedPackets() ?: emptyList()
             queuedPackets.forEach { packet ->
                 try {
-                    val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
-                        .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packet.id))
-                        .build()
-
-                    workManager.enqueueUniqueWork(
-                        "${SendMessageWorker.WORK_NAME_PREFIX}${packet.id}",
-                        ExistingWorkPolicy.REPLACE,
-                        workRequest
-                    )
+                    workerManager.enqueueSendMessage(packet.id)
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Failed to enqueue queued packet worker" }
                 }
@@ -341,7 +322,7 @@ constructor(
         updateStatusNotification(t)
     }
 
-    override fun updateStatusNotification(telemetry: Telemetry?): Notification {
+    override fun updateStatusNotification(telemetry: Telemetry?): Any {
         val summary =
             when (serviceRepository.connectionState.value) {
                 is ConnectionState.Connected ->
@@ -350,7 +331,7 @@ constructor(
                 is ConnectionState.DeviceSleep -> getString(Res.string.device_sleeping)
                 is ConnectionState.Connecting -> getString(Res.string.connecting)
             }
-        return serviceNotifications.updateServiceStateNotification(summary, telemetry = telemetry) as Notification
+        return serviceNotifications.updateServiceStateNotification(summary, telemetry = telemetry)
     }
 
     companion object {

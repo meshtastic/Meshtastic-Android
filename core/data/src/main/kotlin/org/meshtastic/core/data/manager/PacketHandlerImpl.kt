@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -34,9 +33,12 @@ import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.model.util.toOneLineString
 import org.meshtastic.core.model.util.toPIIString
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
@@ -50,22 +52,19 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
-import org.meshtastic.core.repository.PacketHandler as SharedPacketHandler
 
 @Suppress("TooManyFunctions")
 @Singleton
-class PacketHandler
-@Inject
-constructor(
+class PacketHandlerImpl @Inject constructor(
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: Lazy<MeshLogRepository>,
     private val serviceRepository: ServiceRepository,
-) : SharedPacketHandler {
+) : PacketHandler {
 
     companion object {
-        private val TIMEOUT = 5.seconds // Increased from 250ms to be more tolerant
+        private val TIMEOUT = 5.seconds
     }
 
     private var queueJob: Job? = null
@@ -78,10 +77,6 @@ constructor(
         this.scope = scope
     }
 
-    /**
-     * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
-     * bound to the RadioInterfaceService
-     */
     override fun sendToRadio(p: ToRadio) {
         Logger.d { "Sending to radio ${p.toPIIString()}" }
         val b = p.encode()
@@ -97,7 +92,7 @@ constructor(
                     message_type = "Packet",
                     received_date = nowMillis,
                     raw_message = packet.toString(),
-                    fromNum = MeshLog.NODE_NUM_LOCAL, // Outgoing packets are always from the local node
+                    fromNum = MeshLog.NODE_NUM_LOCAL,
                     portNum = packet.decoded?.portnum?.value ?: 0,
                     fromRadio = FromRadio(packet = packet),
                 )
@@ -105,10 +100,6 @@ constructor(
         }
     }
 
-    /**
-     * Send a mesh packet to the radio, if the radio is not currently connected this function will throw
-     * NotConnectedException
-     */
     override fun sendToRadio(packet: MeshPacket) {
         queuedPackets.add(packet)
         startPacketQueue()
@@ -128,11 +119,10 @@ constructor(
     override fun handleQueueStatus(queueStatus: QueueStatus) {
         Logger.d { "[queueStatus] ${queueStatus.toOneLineString()}" }
         val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, mesh_packet_id) }
-        if (success && isFull) return // Queue is full, wait for free != 0
+        if (success && isFull) return
         if (requestId != 0) {
             queueResponse.remove(requestId)?.complete(success)
         } else {
-            // This is slightly suboptimal but matches legacy behavior for packets without IDs
             queueResponse.values.firstOrNull { !it.isCompleted }?.complete(success)
         }
     }
@@ -147,10 +137,8 @@ constructor(
             scope.handledLaunch {
                 Logger.d { "packet queueJob started" }
                 while (serviceRepository.connectionState.value == ConnectionState.Connected) {
-                    // take the first packet from the queue head
                     val packet = queuedPackets.poll() ?: break
                     try {
-                        // send packet to the radio and wait for response
                         val response = sendPacket(packet)
                         Logger.d { "queueJob packet id=${packet.id.toUInt()} waiting" }
                         val success = withTimeout(TIMEOUT) { response.await() }
@@ -166,7 +154,6 @@ constructor(
             }
     }
 
-    /** Change the status on a DataPacket and update watchers */
     private fun changeStatus(packetId: Int, m: MessageStatus) = scope.handledLaunch {
         if (packetId != 0) {
             getDataPacketById(packetId)?.let { p ->
@@ -177,7 +164,6 @@ constructor(
         }
     }
 
-    @Suppress("MagicNumber")
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1.seconds) {
         var dataPacket: DataPacket? = null
         while (dataPacket == null) {
@@ -187,10 +173,7 @@ constructor(
         dataPacket
     }
 
-    @Suppress("TooGenericExceptionCaught")
     private fun sendPacket(packet: MeshPacket): CompletableDeferred<Boolean> {
-        // send the packet to the radio and return a CompletableDeferred that will be completed with
-        // the result
         val deferred = CompletableDeferred<Boolean>()
         queueResponse[packet.id] = deferred
         try {
@@ -199,7 +182,6 @@ constructor(
             }
             sendToRadio(ToRadio(packet = packet))
         } catch (ex: RadioNotConnectedException) {
-            // Expected when radio is not connected, log as warning to avoid Crashlytics noise
             Logger.w(ex) { "sendToRadio skipped: Not connected to radio" }
             deferred.complete(false)
         } catch (ex: Exception) {
@@ -211,8 +193,6 @@ constructor(
 
     private fun insertMeshLog(packetToSave: MeshLog) {
         scope.handledLaunch {
-            // Do not log, because might contain PII
-
             Logger.d {
                 "insert: ${packetToSave.message_type} = " +
                     "${packetToSave.raw_message.toOneLineString()} from=${packetToSave.fromNum}"

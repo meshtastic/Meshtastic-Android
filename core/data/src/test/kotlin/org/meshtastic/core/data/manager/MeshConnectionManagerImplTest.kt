@@ -14,16 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import android.app.Notification
-import android.content.Context
-import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.updateAll
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequest
-import androidx.work.WorkManager
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -45,17 +37,22 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
+import org.meshtastic.core.resources.getString
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
@@ -63,9 +60,8 @@ import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.ToRadio
 
-class MeshConnectionManagerTest {
+class MeshConnectionManagerImplTest {
 
-    private val context: Context = mockk(relaxed = true)
     private val radioInterfaceService: RadioInterfaceService = mockk(relaxed = true)
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
@@ -81,7 +77,9 @@ class MeshConnectionManagerTest {
     private val nodeManager: NodeManager = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val packetRepository: PacketRepository = mockk(relaxed = true)
-    private val workManager: WorkManager = mockk(relaxed = true)
+    private val workerManager: MeshWorkerManager = mockk(relaxed = true)
+    private val appWidgetUpdater: AppWidgetUpdater = mockk(relaxed = true)
+
     private val radioConnectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val localConfigFlow = MutableStateFlow(LocalConfig())
@@ -89,15 +87,13 @@ class MeshConnectionManagerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private lateinit var manager: MeshConnectionManager
+    private lateinit var manager: MeshConnectionManagerImpl
 
     @Before
     fun setUp() {
-        mockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
-        mockkStatic("androidx.glance.appwidget.GlanceAppWidgetKt")
-        coEvery { org.jetbrains.compose.resources.getString(any()) } returns "Mocked String"
-        coEvery { org.jetbrains.compose.resources.getString(any(), *anyVararg()) } returns "Mocked String"
-        coEvery { any<GlanceAppWidget>().updateAll(any()) } returns Unit
+        mockkStatic("org.meshtastic.core.resources.ContextExtKt")
+        every { getString(any()) } returns "Mocked String"
+        every { getString(any(), *anyVararg()) } returns "Mocked String"
 
         every { radioInterfaceService.connectionState } returns radioConnectionState
         every { radioConfigRepository.localConfigFlow } returns localConfigFlow
@@ -107,11 +103,9 @@ class MeshConnectionManagerTest {
         every { nodeRepository.localStats } returns MutableStateFlow(LocalStats())
         every { serviceRepository.connectionState } returns connectionStateFlow
         every { serviceRepository.setConnectionState(any()) } answers { connectionStateFlow.value = firstArg() }
-        every { serviceNotifications.updateServiceStateNotification(any(), any()) } returns mockk<Notification>(relaxed = true)
 
         manager =
-            MeshConnectionManager(
-                context,
+            MeshConnectionManagerImpl(
                 radioInterfaceService,
                 serviceRepository,
                 serviceBroadcasts,
@@ -127,14 +121,14 @@ class MeshConnectionManagerTest {
                 nodeManager,
                 analytics,
                 packetRepository,
-                workManager,
+                workerManager,
+                appWidgetUpdater,
             )
     }
 
     @After
     fun tearDown() {
-        unmockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
-        unmockkStatic("androidx.glance.appwidget.GlanceAppWidgetKt")
+        unmockkStatic("org.meshtastic.core.resources.ContextExtKt")
     }
 
     @Test
@@ -225,7 +219,7 @@ class MeshConnectionManagerTest {
         manager.onRadioConfigLoaded()
         advanceUntilIdle()
 
-        verify { workManager.enqueueUniqueWork(match<String> { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        verify { workerManager.enqueueSendMessage(packetId) }
         verify { commandSender.sendAdmin(any(), initFn = any()) }
     }
 

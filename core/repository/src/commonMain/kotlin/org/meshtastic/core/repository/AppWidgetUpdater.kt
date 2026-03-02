@@ -14,16 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.repository.radio
-
-import dagger.MapKey
-import org.meshtastic.core.model.InterfaceId
+package org.meshtastic.core.repository
 
 /**
- * Dagger `MapKey` implementation allowing for `InterfaceId` to be used as a map key.
+ * Interface for triggering updates to application widgets.
  */
-@MapKey
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_SETTER, AnnotationTarget.PROPERTY_GETTER)
-@Retention(AnnotationRetention.RUNTIME)
-annotation class InterfaceMapKey(val value: InterfaceId)
+interface AppWidgetUpdater {
+    /** Triggers an update for all app widgets. */
+    suspend fun updateAll()
+}

@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.geeksville.mesh.service
+package org.meshtastic.core.data.manager
 
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -31,6 +30,8 @@ import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -38,7 +39,7 @@ import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 
-class PacketHandlerTest {
+class PacketHandlerImplTest {
 
     private val packetRepository: PacketRepository = mockk(relaxed = true)
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
@@ -50,7 +51,7 @@ class PacketHandlerTest {
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
-    private lateinit var handler: PacketHandler
+    private lateinit var handler: PacketHandlerImpl
 
     @Before
     fun setUp() {
@@ -58,11 +59,11 @@ class PacketHandlerTest {
         every { serviceRepository.setConnectionState(any()) } answers { connectionStateFlow.value = firstArg() }
 
         handler =
-            PacketHandler(
-                dagger.Lazy { packetRepository },
+            PacketHandlerImpl(
+                { packetRepository },
                 serviceBroadcasts,
                 radioInterfaceService,
-                dagger.Lazy { meshLogRepository },
+                { meshLogRepository },
                 serviceRepository,
             )
         handler.start(testScope)
@@ -80,7 +81,7 @@ class PacketHandlerTest {
     @Test
     fun `sendToRadio with MeshPacket queues and sends when connected`() = runTest(testDispatcher) {
         val packet = MeshPacket(id = 456)
-        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
+        connectionStateFlow.value = ConnectionState.Connected
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()
@@ -91,7 +92,7 @@ class PacketHandlerTest {
     @Test
     fun `handleQueueStatus completes deferred`() = runTest(testDispatcher) {
         val packet = MeshPacket(id = 789)
-        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Connected)
+        connectionStateFlow.value = ConnectionState.Connected
 
         handler.sendToRadio(packet)
         testScheduler.runCurrent()

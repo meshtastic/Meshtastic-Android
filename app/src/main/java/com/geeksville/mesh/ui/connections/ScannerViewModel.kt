@@ -24,7 +24,6 @@ import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
 import com.geeksville.mesh.domain.usecase.GetDiscoveredDevicesUseCase
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +41,7 @@ import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import javax.inject.Inject

@@ -28,6 +28,7 @@ import org.meshtastic.core.data.manager.HistoryManagerImpl
 import org.meshtastic.core.data.manager.MeshActionHandlerImpl
 import org.meshtastic.core.data.manager.MeshConfigFlowManagerImpl
 import org.meshtastic.core.data.manager.MeshConfigHandlerImpl
+import org.meshtastic.core.data.manager.MeshConnectionManagerImpl
 import org.meshtastic.core.data.manager.MeshDataHandlerImpl
 import org.meshtastic.core.data.manager.MeshMessageProcessorImpl
 import org.meshtastic.core.data.manager.MeshRouterImpl
@@ -35,6 +36,7 @@ import org.meshtastic.core.data.manager.MessageFilterImpl
 import org.meshtastic.core.data.manager.MqttManagerImpl
 import org.meshtastic.core.data.manager.NeighborInfoHandlerImpl
 import org.meshtastic.core.data.manager.NodeManagerImpl
+import org.meshtastic.core.data.manager.PacketHandlerImpl
 import org.meshtastic.core.data.manager.TracerouteHandlerImpl
 import org.meshtastic.core.data.repository.DeviceHardwareRepositoryImpl
 import org.meshtastic.core.data.repository.NodeRepositoryImpl
@@ -48,6 +50,7 @@ import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
+import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
@@ -56,6 +59,7 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.TracerouteHandler
@@ -124,6 +128,18 @@ abstract class RepositoryModule {
     abstract fun bindMqttManager(
         mqttManagerImpl: MqttManagerImpl
     ): MqttManager
+
+    @Binds
+    @Singleton
+    abstract fun bindPacketHandler(
+        packetHandlerImpl: PacketHandlerImpl
+    ): PacketHandler
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshConnectionManager(
+        meshConnectionManagerImpl: MeshConnectionManagerImpl
+    ): MeshConnectionManager
 
     @Binds
     @Singleton

@@ -14,23 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-package com.geeksville.mesh.repository.radio
+package org.meshtastic.core.repository
 
 /**
- * Address identifiers for all supported radio backend implementations.
+ * Interface for managing background workers for mesh-related tasks.
  */
-enum class InterfaceId(val id: Char) {
-    BLUETOOTH('x'),
-    MOCK('m'),
-    NOP('n'),
-    SERIAL('s'),
-    TCP('t'),
-    ;
-
-    companion object {
-        fun forIdChar(id: Char): InterfaceId? {
-            return entries.firstOrNull { it.id == id }
-        }
-    }
+interface MeshWorkerManager {
+    /** Enqueues a worker to send a specific packet. */
+    fun enqueueSendMessage(packetId: Int)
 }

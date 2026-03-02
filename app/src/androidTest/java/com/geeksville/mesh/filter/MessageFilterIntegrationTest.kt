@@ -26,7 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.prefs.filter.FilterPrefs
-import org.meshtastic.core.service.filter.MessageFilterService
+import org.meshtastic.core.repository.MessageFilter
 import javax.inject.Inject
 
 @HiltAndroidTest
@@ -37,7 +37,7 @@ class MessageFilterIntegrationTest {
 
     @Inject lateinit var filterPrefs: FilterPrefs
 
-    @Inject lateinit var filterService: MessageFilterService
+    @Inject lateinit var filterService: MessageFilter
 
     @Before
     fun setup() {
