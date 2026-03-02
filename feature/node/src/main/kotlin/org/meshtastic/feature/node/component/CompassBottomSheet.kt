@@ -70,6 +70,7 @@ import org.meshtastic.core.resources.compass_uncertainty_unknown
 import org.meshtastic.core.resources.elevation_suffix
 import org.meshtastic.core.resources.exchange_position
 import org.meshtastic.core.resources.last_position_update
+import org.meshtastic.core.ui.component.ElevationInfo
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassWarning
