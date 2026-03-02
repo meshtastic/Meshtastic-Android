@@ -53,6 +53,8 @@ import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.database.model.getStringResFrom
+import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
+import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -119,6 +121,8 @@ constructor(
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
+    private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase,
+    private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase,
 ) : ViewModel() {
     private val meshService: IMeshService?
         get() = serviceRepository.meshService
@@ -126,13 +130,13 @@ constructor(
     var analyticsAllowedFlow = analyticsPrefs.getAnalyticsAllowedChangesFlow()
 
     fun toggleAnalyticsAllowed() {
-        analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
+        toggleAnalyticsUseCase()
     }
 
     val homoglyphEncodingEnabledFlow = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
 
     fun toggleHomoglyphCharactersEncodingEnabled() {
-        homoglyphEncodingPrefs.homoglyphEncodingEnabled = !homoglyphEncodingPrefs.homoglyphEncodingEnabled
+        toggleHomoglyphEncodingUseCase()
     }
 
     private val destNum =
