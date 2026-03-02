@@ -276,7 +276,7 @@ constructor(
                         ExistingWorkPolicy.REPLACE,
                         workRequest
                     )
-                } catch (e: Exception) {
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Failed to enqueue queued packet worker" }
                 }
             }
