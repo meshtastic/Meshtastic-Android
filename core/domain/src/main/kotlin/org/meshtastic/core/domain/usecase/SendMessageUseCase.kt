@@ -17,13 +17,13 @@
 package org.meshtastic.core.domain.usecase
 
 import co.touchlab.kermit.Logger
+import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.data.repository.PacketRepository
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.domain.MessageQueue
-import org.meshtastic.core.domain.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
