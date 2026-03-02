@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,9 +52,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * Section displaying application information and related actions.
- */
+/** Section displaying application information and related actions. */
 @Composable
 fun AppInfoSection(
     appVersionName: String,
@@ -97,7 +95,7 @@ fun AppInfoSection(
         AppVersionButton(
             excludedModulesUnlocked = excludedModulesUnlocked,
             appVersionName = appVersionName,
-            onUnlockExcludedModules = onUnlockExcludedModules
+            onUnlockExcludedModules = onUnlockExcludedModules,
         )
     }
 }

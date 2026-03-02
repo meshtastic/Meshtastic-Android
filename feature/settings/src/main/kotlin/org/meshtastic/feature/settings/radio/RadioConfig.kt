@@ -183,12 +183,7 @@ private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit)
 }
 
 @Composable
-private fun AdvancedSection(
-    isManaged: Boolean,
-    isOtaCapable: Boolean,
-    enabled: Boolean,
-    onNavigate: (Route) -> Unit
-) {
+private fun AdvancedSection(isManaged: Boolean, isOtaCapable: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
     ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
         if (isManaged) {
             ManagedMessage()

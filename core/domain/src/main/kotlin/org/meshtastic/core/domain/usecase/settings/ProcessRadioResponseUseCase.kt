@@ -98,33 +98,30 @@ class ProcessRadioResponseUseCase @Inject constructor() {
         return processAdminMessage(parsed)
     }
 
-    private fun processAdminMessage(parsed: AdminMessage): RadioResponseResult {
-        return when {
-            parsed.get_device_metadata_response != null ->
-                RadioResponseResult.Metadata(parsed.get_device_metadata_response!!)
+    private fun processAdminMessage(parsed: AdminMessage): RadioResponseResult = when {
+        parsed.get_device_metadata_response != null ->
+            RadioResponseResult.Metadata(parsed.get_device_metadata_response!!)
 
-            parsed.get_channel_response != null ->
-                RadioResponseResult.ChannelResponse(parsed.get_channel_response!!)
+        parsed.get_channel_response != null -> RadioResponseResult.ChannelResponse(parsed.get_channel_response!!)
 
-            parsed.get_owner_response != null -> RadioResponseResult.Owner(parsed.get_owner_response!!)
+        parsed.get_owner_response != null -> RadioResponseResult.Owner(parsed.get_owner_response!!)
 
-            parsed.get_config_response != null -> RadioResponseResult.ConfigResponse(parsed.get_config_response!!)
+        parsed.get_config_response != null -> RadioResponseResult.ConfigResponse(parsed.get_config_response!!)
 
-            parsed.get_module_config_response != null ->
-                RadioResponseResult.ModuleConfigResponse(parsed.get_module_config_response!!)
+        parsed.get_module_config_response != null ->
+            RadioResponseResult.ModuleConfigResponse(parsed.get_module_config_response!!)
 
-            parsed.get_canned_message_module_messages_response != null ->
-                RadioResponseResult.CannedMessages(parsed.get_canned_message_module_messages_response!!)
+        parsed.get_canned_message_module_messages_response != null ->
+            RadioResponseResult.CannedMessages(parsed.get_canned_message_module_messages_response!!)
 
-            parsed.get_ringtone_response != null -> RadioResponseResult.Ringtone(parsed.get_ringtone_response!!)
+        parsed.get_ringtone_response != null -> RadioResponseResult.Ringtone(parsed.get_ringtone_response!!)
 
-            parsed.get_device_connection_status_response != null ->
-                RadioResponseResult.ConnectionStatus(parsed.get_device_connection_status_response!!)
+        parsed.get_device_connection_status_response != null ->
+            RadioResponseResult.ConnectionStatus(parsed.get_device_connection_status_response!!)
 
-            else -> {
-                Logger.d { "No custom processing needed for $parsed" }
-                RadioResponseResult.Success
-            }
+        else -> {
+            Logger.d { "No custom processing needed for $parsed" }
+            RadioResponseResult.Success
         }
     }
 }

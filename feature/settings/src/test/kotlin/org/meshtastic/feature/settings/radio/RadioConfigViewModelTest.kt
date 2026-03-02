@@ -89,14 +89,15 @@ class RadioConfigViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
-        every { serviceRepository.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        every { serviceRepository.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
 
         viewModel = createViewModel()
@@ -134,12 +135,12 @@ class RadioConfigViewModelTest {
         val node = Node(num = 123)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
         viewModel = createViewModel()
-        
+
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
         coEvery { radioConfigUseCase.setConfig(123, any()) } returns 42
 
         viewModel.setConfig(config)
-        
+
         val state = viewModel.radioConfigState.value
         assertEquals(Config.DeviceConfig.Role.ROUTER, state.radioConfig.device?.role)
         coVerify { radioConfigUseCase.setConfig(123, config) }
@@ -149,14 +150,14 @@ class RadioConfigViewModelTest {
     fun `processPacketResponse updates state on metadata result`() = runTest {
         val node = Node(num = 123)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
-        
+
         val packet = MeshPacket()
         val metadata = DeviceMetadata(firmware_version = "3.0.0")
         val packetFlow = MutableSharedFlow<MeshPacket>()
-        
+
         every { serviceRepository.meshPacketFlow } returns packetFlow
         every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Metadata(metadata)
-        
+
         viewModel = createViewModel()
 
         packetFlow.emit(packet)
@@ -173,9 +174,9 @@ class RadioConfigViewModelTest {
 
         val user = org.meshtastic.proto.User(long_name = "Test")
         coEvery { radioConfigUseCase.setOwner(123, any()) } returns 42
-        
+
         viewModel.setOwner(user)
-        
+
         coVerify { radioConfigUseCase.setOwner(123, user) }
     }
 
@@ -187,11 +188,11 @@ class RadioConfigViewModelTest {
 
         val old = listOf(ChannelSettings(name = "Old"))
         val new = listOf(ChannelSettings(name = "New"))
-        
+
         coEvery { radioConfigUseCase.setRemoteChannel(123, any()) } returns 42
-        
+
         viewModel.updateChannels(new, old)
-        
+
         coVerify { radioConfigUseCase.setRemoteChannel(123, any()) }
         assertEquals(new, viewModel.radioConfigState.value.channelList)
     }
@@ -200,20 +201,20 @@ class RadioConfigViewModelTest {
     fun `setResponseStateLoading for REBOOT calls useCase after packet response`() = runTest {
         val node = Node(num = 123)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
-        
+
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
-        
+
         viewModel = createViewModel()
-        
+
         coEvery { adminActionsUseCase.reboot(123) } returns 42
-        
+
         viewModel.setResponseStateLoading(AdminRoute.REBOOT)
-        
+
         // Emit a packet to trigger processPacketResponse -> sendAdminRequest
         packetFlow.emit(MeshPacket())
-        
+
         coVerify { adminActionsUseCase.reboot(123) }
     }
 
@@ -221,20 +222,20 @@ class RadioConfigViewModelTest {
     fun `setResponseStateLoading for FACTORY_RESET calls useCase after packet response`() = runTest {
         val node = Node(num = 123)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
-        
+
         val packetFlow = MutableSharedFlow<MeshPacket>()
         every { serviceRepository.meshPacketFlow } returns packetFlow
         every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
-        
+
         viewModel = createViewModel()
-        
+
         coEvery { adminActionsUseCase.factoryReset(123, any()) } returns 42
-        
+
         viewModel.setResponseStateLoading(AdminRoute.FACTORY_RESET)
-        
+
         // Emit a packet to trigger processPacketResponse -> sendAdminRequest
         packetFlow.emit(MeshPacket())
-        
+
         coVerify { adminActionsUseCase.factoryReset(123, any()) }
     }
 }

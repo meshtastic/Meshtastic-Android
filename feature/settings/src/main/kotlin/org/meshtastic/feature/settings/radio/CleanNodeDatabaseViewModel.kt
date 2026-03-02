@@ -66,16 +66,15 @@ constructor(
         }
     }
 
-    /**
-     * Updates the list of nodes to be deleted based on the current filter criteria.
-     */
+    /** Updates the list of nodes to be deleted based on the current filter criteria. */
     fun getNodesToDelete() {
         viewModelScope.launch {
-            _nodesToDelete.value = cleanNodeDatabaseUseCase.getNodesToClean(
-                olderThanDays = _olderThanDays.value,
-                onlyUnknownNodes = _onlyUnknownNodes.value,
-                currentTimeSeconds = nowSeconds
-            )
+            _nodesToDelete.value =
+                cleanNodeDatabaseUseCase.getNodesToClean(
+                    olderThanDays = _olderThanDays.value,
+                    onlyUnknownNodes = _onlyUnknownNodes.value,
+                    currentTimeSeconds = nowSeconds,
+                )
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ import org.meshtastic.core.ui.util.AlertManager
 class DebugViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    
+
     private val meshLogRepository: MeshLogRepository = mockk(relaxed = true)
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
     private val meshLogPrefs: MeshLogPrefs = mockk(relaxed = true)
@@ -52,19 +52,20 @@ class DebugViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         every { meshLogRepository.getAllLogs() } returns flowOf(emptyList())
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { meshLogPrefs.retentionDays } returns 7
         every { meshLogPrefs.loggingEnabled } returns true
 
-        viewModel = DebugViewModel(
-            meshLogRepository = meshLogRepository,
-            nodeRepository = nodeRepository,
-            meshLogPrefs = meshLogPrefs,
-            alertManager = alertManager,
-        )
+        viewModel =
+            DebugViewModel(
+                meshLogRepository = meshLogRepository,
+                nodeRepository = nodeRepository,
+                meshLogPrefs = meshLogPrefs,
+                alertManager = alertManager,
+            )
     }
 
     @After
@@ -75,7 +76,7 @@ class DebugViewModelTest {
     @Test
     fun `setRetentionDays updates prefs and deletes old logs`() = runTest {
         viewModel.setRetentionDays(14)
-        
+
         verify { meshLogPrefs.retentionDays = 14 }
         coVerify { meshLogRepository.deleteLogsOlderThan(14) }
         assertEquals(14, viewModel.retentionDays.value)
@@ -84,7 +85,7 @@ class DebugViewModelTest {
     @Test
     fun `setLoggingEnabled false deletes all logs`() = runTest {
         viewModel.setLoggingEnabled(false)
-        
+
         verify { meshLogPrefs.loggingEnabled = false }
         coVerify { meshLogRepository.deleteAll() }
         assertEquals(false, viewModel.loggingEnabled.value)
@@ -92,13 +93,14 @@ class DebugViewModelTest {
 
     @Test
     fun `search filters results correctly`() = runTest {
-        val logs = listOf(
-            DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Message Apple"),
-            DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Message Banana")
-        )
-        
+        val logs =
+            listOf(
+                DebugViewModel.UiMeshLog("1", "TypeA", "Date1", "Message Apple"),
+                DebugViewModel.UiMeshLog("2", "TypeB", "Date2", "Message Banana"),
+            )
+
         viewModel.searchManager.updateMatches("Apple", logs)
-        
+
         val state = viewModel.searchState.value
         assertEquals(true, state.hasMatches)
         assertEquals(1, state.allMatches.size)

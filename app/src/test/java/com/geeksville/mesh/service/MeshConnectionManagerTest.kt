@@ -214,7 +214,13 @@ class MeshConnectionManagerTest {
         manager.onRadioConfigLoaded()
         advanceUntilIdle()
 
-        verify { workManager.enqueueUniqueWork(match<String> { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) }, any<ExistingWorkPolicy>(), any<OneTimeWorkRequest>()) }
+        verify {
+            workManager.enqueueUniqueWork(
+                match<String> { it.startsWith(SendMessageWorker.WORK_NAME_PREFIX) },
+                any<ExistingWorkPolicy>(),
+                any<OneTimeWorkRequest>(),
+            )
+        }
         verify { commandSender.sendAdmin(any(), initFn = any()) }
     }
 

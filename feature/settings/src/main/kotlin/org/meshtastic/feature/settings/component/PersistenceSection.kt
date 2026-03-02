@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,9 +42,7 @@ import org.meshtastic.core.ui.theme.AppTheme
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-/**
- * Section for settings related to data persistence and exports.
- */
+/** Section for settings related to data persistence and exports. */
 @Composable
 fun PersistenceSection(
     cacheLimit: Int,
@@ -70,9 +68,7 @@ fun PersistenceSection(
 
     ExpressiveSection(title = stringResource(Res.string.app_settings)) {
         val cacheItems = remember {
-            (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map {
-                it.toLong() to it.toString()
-            }
+            (DatabaseConstants.MIN_CACHE_LIMIT..DatabaseConstants.MAX_CACHE_LIMIT).map { it.toLong() to it.toString() }
         }
         DropDownPreference(
             title = stringResource(Res.string.device_db_cache_limit),
@@ -116,12 +112,5 @@ fun PersistenceSection(
 @Preview(showBackground = true)
 @Composable
 private fun PersistenceSectionPreview() {
-    AppTheme {
-        PersistenceSection(
-            cacheLimit = 100,
-            onSetCacheLimit = {},
-            nodeShortName = "TEST",
-            onExportData = {},
-        )
-    }
+    AppTheme { PersistenceSection(cacheLimit = 100, onSetCacheLimit = {}, nodeShortName = "TEST", onExportData = {}) }
 }

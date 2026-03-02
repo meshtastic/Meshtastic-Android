@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,7 @@ import org.meshtastic.core.ui.component.SwitchListItem
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.showToast
 
-/**
- * Section managing privacy settings like analytics and location sharing.
- */
+/** Section managing privacy settings like analytics and location sharing. */
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun PrivacySection(
@@ -92,10 +90,7 @@ fun PrivacySection(
             onClick = { onToggleLocation(!provideLocation) },
         )
 
-        HomoglyphSetting(
-            homoglyphEncodingEnabled = homoglyphEnabled,
-            onToggle = onToggleHomoglyph,
-        )
+        HomoglyphSetting(homoglyphEncodingEnabled = homoglyphEnabled, onToggle = onToggleHomoglyph)
     }
 }
 

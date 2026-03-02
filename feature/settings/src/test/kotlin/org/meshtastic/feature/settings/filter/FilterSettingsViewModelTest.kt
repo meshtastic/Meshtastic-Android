@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,10 +37,7 @@ class FilterSettingsViewModelTest {
         every { filterPrefs.filterEnabled } returns true
         every { filterPrefs.filterWords } returns setOf("apple", "banana")
 
-        viewModel = FilterSettingsViewModel(
-            filterPrefs = filterPrefs,
-            messageFilterService = messageFilterService
-        )
+        viewModel = FilterSettingsViewModel(filterPrefs = filterPrefs, messageFilterService = messageFilterService)
     }
 
     @Test
@@ -53,7 +50,7 @@ class FilterSettingsViewModelTest {
     @Test
     fun `addFilterWord updates prefs and rebuilds patterns`() {
         viewModel.addFilterWord("cherry")
-        
+
         verify { filterPrefs.filterWords = any() }
         verify { messageFilterService.rebuildPatterns() }
         assertEquals(listOf("apple", "banana", "cherry"), viewModel.filterWords.value)
@@ -62,7 +59,7 @@ class FilterSettingsViewModelTest {
     @Test
     fun `removeFilterWord updates prefs and rebuilds patterns`() {
         viewModel.removeFilterWord("apple")
-        
+
         verify { filterPrefs.filterWords = any() }
         verify { messageFilterService.rebuildPatterns() }
         assertEquals(listOf("banana"), viewModel.filterWords.value)

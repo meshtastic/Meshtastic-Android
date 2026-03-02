@@ -46,7 +46,12 @@ import javax.inject.Singleton
 @Singleton
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
-open class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
+open class DatabaseManager
+@Inject
+constructor(
+    private val app: Application,
+    private val dispatchers: CoroutineDispatchers,
+) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 

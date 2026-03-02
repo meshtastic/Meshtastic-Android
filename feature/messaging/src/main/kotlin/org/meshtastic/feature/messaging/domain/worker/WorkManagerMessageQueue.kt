@@ -24,24 +24,20 @@ import org.meshtastic.core.domain.MessageQueue
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Android implementation of [MessageQueue] that uses [WorkManager] 
- * for reliable background transmission.
- */
+/** Android implementation of [MessageQueue] that uses [WorkManager] for reliable background transmission. */
 @Singleton
-class WorkManagerMessageQueue @Inject constructor(
-    private val workManager: WorkManager
-) : MessageQueue {
+class WorkManagerMessageQueue @Inject constructor(private val workManager: WorkManager) : MessageQueue {
 
     override suspend fun enqueue(packetId: Int) {
-        val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
-            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
-            .build()
+        val workRequest =
+            OneTimeWorkRequestBuilder<SendMessageWorker>()
+                .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packetId))
+                .build()
 
         workManager.enqueueUniqueWork(
-            "${SendMessageWorker.WORK_NAME_PREFIX}${packetId}", 
-            ExistingWorkPolicy.REPLACE, 
-            workRequest
+            "${SendMessageWorker.WORK_NAME_PREFIX}$packetId",
+            ExistingWorkPolicy.REPLACE,
+            workRequest,
         )
     }
 }

@@ -27,6 +27,5 @@ import org.meshtastic.feature.messaging.domain.worker.WorkManagerMessageQueue
 @InstallIn(SingletonComponent::class)
 abstract class MessagingModule {
 
-    @Binds
-    abstract fun bindMessageQueue(impl: WorkManagerMessageQueue): MessageQueue
+    @Binds abstract fun bindMessageQueue(impl: WorkManagerMessageQueue): MessageQueue
 }

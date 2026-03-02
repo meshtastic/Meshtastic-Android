@@ -49,7 +49,7 @@ import org.meshtastic.core.prefs.ui.UiPrefs
 class SettingsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    
+
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
     private val radioController: RadioController = mockk(relaxed = true)
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
@@ -57,7 +57,7 @@ class SettingsViewModelTest {
     private val buildConfigProvider: BuildConfigProvider = mockk(relaxed = true)
     private val databaseManager: DatabaseManager = mockk(relaxed = true)
     private val meshLogPrefs: MeshLogPrefs = mockk(relaxed = true)
-    
+
     private val setThemeUseCase: SetThemeUseCase = mockk(relaxed = true)
     private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase = mockk(relaxed = true)
     private val setProvideLocationUseCase: SetProvideLocationUseCase = mockk(relaxed = true)
@@ -72,33 +72,35 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         // Return real StateFlows to avoid ClassCastException
         every { databaseManager.cacheLimit } returns MutableStateFlow(100)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
-        every { radioController.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
         every { isOtaCapableUseCase() } returns flowOf(false)
 
-        viewModel = SettingsViewModel(
-            app = mockk(),
-            radioConfigRepository = radioConfigRepository,
-            radioController = radioController,
-            nodeRepository = nodeRepository,
-            uiPrefs = uiPrefs,
-            buildConfigProvider = buildConfigProvider,
-            databaseManager = databaseManager,
-            meshLogPrefs = meshLogPrefs,
-            setThemeUseCase = setThemeUseCase,
-            setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
-            setProvideLocationUseCase = setProvideLocationUseCase,
-            setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
-            setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
-            meshLocationUseCase = meshLocationUseCase,
-            exportDataUseCase = exportDataUseCase,
-            isOtaCapableUseCase = isOtaCapableUseCase,
-        )
+        viewModel =
+            SettingsViewModel(
+                app = mockk(),
+                radioConfigRepository = radioConfigRepository,
+                radioController = radioController,
+                nodeRepository = nodeRepository,
+                uiPrefs = uiPrefs,
+                buildConfigProvider = buildConfigProvider,
+                databaseManager = databaseManager,
+                meshLogPrefs = meshLogPrefs,
+                setThemeUseCase = setThemeUseCase,
+                setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
+                setProvideLocationUseCase = setProvideLocationUseCase,
+                setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
+                setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
+                meshLocationUseCase = meshLocationUseCase,
+                exportDataUseCase = exportDataUseCase,
+                isOtaCapableUseCase = isOtaCapableUseCase,
+            )
     }
 
     @After

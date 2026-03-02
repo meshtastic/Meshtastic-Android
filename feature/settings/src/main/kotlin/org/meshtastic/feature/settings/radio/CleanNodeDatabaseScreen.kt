@@ -160,8 +160,6 @@ private fun NodesDeletionPreview(nodesToDelete: List<Node>) {
         horizontalArrangement = Arrangement.Center,
         verticalArrangement = Arrangement.Center,
     ) {
-        nodesToDelete.forEach { node ->
-            NodeChip(node = node, modifier = Modifier.padding(end = 8.dp, bottom = 8.dp))
-        }
+        nodesToDelete.forEach { node -> NodeChip(node = node, modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)) }
     }
 }

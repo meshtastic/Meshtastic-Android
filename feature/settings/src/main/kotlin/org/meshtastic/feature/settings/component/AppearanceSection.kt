@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,14 +37,9 @@ import org.meshtastic.core.resources.theme
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.AppTheme
 
-/**
- * Section for app appearance settings like language and theme.
- */
+/** Section for app appearance settings like language and theme. */
 @Composable
-fun AppearanceSection(
-    onShowLanguagePicker: () -> Unit,
-    onShowThemePicker: () -> Unit,
-) {
+fun AppearanceSection(onShowLanguagePicker: () -> Unit, onShowThemePicker: () -> Unit) {
     val context = LocalContext.current
     val settingsLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
@@ -85,10 +80,5 @@ fun AppearanceSection(
 @Preview(showBackground = true)
 @Composable
 private fun AppearanceSectionPreview() {
-    AppTheme {
-        AppearanceSection(
-            onShowLanguagePicker = {},
-            onShowThemePicker = {},
-        )
-    }
+    AppTheme { AppearanceSection(onShowLanguagePicker = {}, onShowThemePicker = {}) }
 }

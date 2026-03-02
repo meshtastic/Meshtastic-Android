@@ -267,14 +267,15 @@ constructor(
             val queuedPackets = packetRepository.getQueuedPackets() ?: emptyList()
             queuedPackets.forEach { packet ->
                 try {
-                    val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
-                        .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packet.id))
-                        .build()
+                    val workRequest =
+                        OneTimeWorkRequestBuilder<SendMessageWorker>()
+                            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packet.id))
+                            .build()
 
                     workManager.enqueueUniqueWork(
                         "${SendMessageWorker.WORK_NAME_PREFIX}${packet.id}",
                         ExistingWorkPolicy.REPLACE,
-                        workRequest
+                        workRequest,
                     )
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Failed to enqueue queued packet worker" }

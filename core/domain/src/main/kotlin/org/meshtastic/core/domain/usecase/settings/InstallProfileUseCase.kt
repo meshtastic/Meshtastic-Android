@@ -49,10 +49,11 @@ class InstallProfileUseCase @Inject constructor(private val radioController: Rad
     private suspend fun installOwner(destNum: Int, profile: DeviceProfile, currentUser: User?) {
         if (profile.long_name != null || profile.short_name != null) {
             currentUser?.let {
-                val user = it.copy(
-                    long_name = profile.long_name ?: it.long_name,
-                    short_name = profile.short_name ?: it.short_name
-                )
+                val user =
+                    it.copy(
+                        long_name = profile.long_name ?: it.long_name,
+                        short_name = profile.short_name ?: it.short_name,
+                    )
                 radioController.setOwner(destNum, user, radioController.getPacketId())
             }
         }
@@ -60,24 +61,14 @@ class InstallProfileUseCase @Inject constructor(private val radioController: Rad
 
     private suspend fun installConfig(destNum: Int, config: LocalConfig?) {
         config?.let { lc ->
-            lc.device?.let {
-                radioController.setConfig(destNum, Config(device = it), radioController.getPacketId())
-            }
+            lc.device?.let { radioController.setConfig(destNum, Config(device = it), radioController.getPacketId()) }
             lc.position?.let {
                 radioController.setConfig(destNum, Config(position = it), radioController.getPacketId())
             }
-            lc.power?.let {
-                radioController.setConfig(destNum, Config(power = it), radioController.getPacketId())
-            }
-            lc.network?.let {
-                radioController.setConfig(destNum, Config(network = it), radioController.getPacketId())
-            }
-            lc.display?.let {
-                radioController.setConfig(destNum, Config(display = it), radioController.getPacketId())
-            }
-            lc.lora?.let {
-                radioController.setConfig(destNum, Config(lora = it), radioController.getPacketId())
-            }
+            lc.power?.let { radioController.setConfig(destNum, Config(power = it), radioController.getPacketId()) }
+            lc.network?.let { radioController.setConfig(destNum, Config(network = it), radioController.getPacketId()) }
+            lc.display?.let { radioController.setConfig(destNum, Config(display = it), radioController.getPacketId()) }
+            lc.lora?.let { radioController.setConfig(destNum, Config(lora = it), radioController.getPacketId()) }
             lc.bluetooth?.let {
                 radioController.setConfig(destNum, Config(bluetooth = it), radioController.getPacketId())
             }
@@ -115,32 +106,16 @@ class InstallProfileUseCase @Inject constructor(private val radioController: Rad
             )
         }
         lmc.store_forward?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(store_forward = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(store_forward = it), radioController.getPacketId())
         }
         lmc.range_test?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(range_test = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(range_test = it), radioController.getPacketId())
         }
         lmc.telemetry?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(telemetry = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(telemetry = it), radioController.getPacketId())
         }
         lmc.canned_message?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(canned_message = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(canned_message = it), radioController.getPacketId())
         }
         lmc.audio?.let {
             radioController.setModuleConfig(destNum, ModuleConfig(audio = it), radioController.getPacketId())
@@ -149,46 +124,22 @@ class InstallProfileUseCase @Inject constructor(private val radioController: Rad
 
     private suspend fun installModuleConfigPart2(destNum: Int, lmc: LocalModuleConfig) {
         lmc.remote_hardware?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(remote_hardware = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(remote_hardware = it), radioController.getPacketId())
         }
         lmc.neighbor_info?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(neighbor_info = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(neighbor_info = it), radioController.getPacketId())
         }
         lmc.ambient_lighting?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(ambient_lighting = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(ambient_lighting = it), radioController.getPacketId())
         }
         lmc.detection_sensor?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(detection_sensor = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(detection_sensor = it), radioController.getPacketId())
         }
         lmc.paxcounter?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(paxcounter = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(paxcounter = it), radioController.getPacketId())
         }
         lmc.statusmessage?.let {
-            radioController.setModuleConfig(
-                destNum,
-                ModuleConfig(statusmessage = it),
-                radioController.getPacketId(),
-            )
+            radioController.setModuleConfig(destNum, ModuleConfig(statusmessage = it), radioController.getPacketId())
         }
         lmc.traffic_management?.let {
             radioController.setModuleConfig(
@@ -197,8 +148,6 @@ class InstallProfileUseCase @Inject constructor(private val radioController: Rad
                 radioController.getPacketId(),
             )
         }
-        lmc.tak?.let {
-            radioController.setModuleConfig(destNum, ModuleConfig(tak = it), radioController.getPacketId())
-        }
+        lmc.tak?.let { radioController.setModuleConfig(destNum, ModuleConfig(tak = it), radioController.getPacketId()) }
     }
 }

@@ -356,9 +356,7 @@ constructor(
     fun setRingtone(ringtone: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(ringtone = ringtone) }
-        viewModelScope.launch {
-            radioConfigUseCase.setRingtone(destNum, ringtone)
-        }
+        viewModelScope.launch { radioConfigUseCase.setRingtone(destNum, ringtone) }
     }
 
     private fun getRingtone(destNum: Int) {
@@ -371,9 +369,7 @@ constructor(
     fun setCannedMessages(messages: String) {
         val destNum = destNode.value?.num ?: return
         _radioConfigState.update { it.copy(cannedMessageMessages = messages) }
-        viewModelScope.launch {
-            radioConfigUseCase.setCannedMessages(destNum, messages)
-        }
+        viewModelScope.launch { radioConfigUseCase.setCannedMessages(destNum, messages) }
     }
 
     private fun getCannedMessages(destNum: Int) {
@@ -444,24 +440,18 @@ constructor(
 
     fun setFixedPosition(position: Position) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch {
-            radioConfigUseCase.setFixedPosition(destNum, position)
-        }
+        viewModelScope.launch { radioConfigUseCase.setFixedPosition(destNum, position) }
     }
 
     fun removeFixedPosition() {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch {
-            radioConfigUseCase.removeFixedPosition(destNum)
-        }
+        viewModelScope.launch { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
     fun importProfile(uri: Uri, onResult: (DeviceProfile) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
             app.contentResolver.openInputStream(uri)?.use { inputStream ->
-                importProfileUseCase(inputStream)
-                    .onSuccess(onResult)
-                    .onFailure { throw it }
+                importProfileUseCase(inputStream).onSuccess(onResult).onFailure { throw it }
             }
         } catch (ex: Exception) {
             Logger.e { "Import DeviceProfile error: ${ex.message}" }
@@ -486,30 +476,27 @@ constructor(
         }
     }
 
-    fun exportSecurityConfig(uri: Uri, securityConfig: Config.SecurityConfig) =
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                try {
-                    app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                        FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
-                            exportSecurityConfigUseCase(outputStream, securityConfig)
-                                .onSuccess { setResponseStateSuccess() }
-                                .onFailure { throw it }
-                        }
+    fun exportSecurityConfig(uri: Uri, securityConfig: Config.SecurityConfig) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            try {
+                app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                    FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                        exportSecurityConfigUseCase(outputStream, securityConfig)
+                            .onSuccess { setResponseStateSuccess() }
+                            .onFailure { throw it }
                     }
-                } catch (ex: Exception) {
-                    val errorMessage = "Can't write security keys JSON error: ${ex.message}"
-                    Logger.e { errorMessage }
-                    sendError(ex.customMessage)
                 }
+            } catch (ex: Exception) {
+                val errorMessage = "Can't write security keys JSON error: ${ex.message}"
+                Logger.e { errorMessage }
+                sendError(ex.customMessage)
             }
         }
+    }
 
     fun installProfile(protobuf: DeviceProfile) {
         val destNum = destNode.value?.num ?: return
-        viewModelScope.launch {
-            installProfileUseCase(destNum, protobuf, destNode.value?.user)
-        }
+        viewModelScope.launch { installProfileUseCase(destNum, protobuf, destNode.value?.user) }
     }
 
     fun clearPacketResponse() {
