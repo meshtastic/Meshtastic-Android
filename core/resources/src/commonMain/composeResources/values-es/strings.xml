@@ -911,4 +911,7 @@ Estos datos de ubicación pueden ser utilizados para fines como aparecer en un m
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Configuración</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Rojo</string>
+    <string name="tak_team_blue">Azul</string>
+    <string name="tak_team_green">Verde</string>
 </resources>

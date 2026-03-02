@@ -706,4 +706,7 @@
     <!-- Message Filter -->
     <string name="bluetooth_permission">Bluetooth</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Vermelho</string>
+    <string name="tak_team_blue">Azul</string>
+    <string name="tak_team_green">Verde</string>
 </resources>

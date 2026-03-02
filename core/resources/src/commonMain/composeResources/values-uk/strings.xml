@@ -795,4 +795,7 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Налаштування</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Червоний</string>
+    <string name="tak_team_blue">Синій</string>
+    <string name="tak_team_green">Зелений</string>
 </resources>

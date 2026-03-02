@@ -865,4 +865,8 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Червен</string>
+    <string name="tak_team_blue">Син</string>
+    <string name="tak_team_green">Зелен</string>
+    <string name="traffic_management_enabled">Модулът е активиран</string>
 </resources>

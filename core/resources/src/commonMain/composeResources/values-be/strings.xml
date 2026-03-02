@@ -245,4 +245,7 @@
     <string name="all_time">Усе</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Чырвоны</string>
+    <string name="tak_team_blue">Сіні</string>
+    <string name="tak_team_green">Зялёны</string>
 </resources>
