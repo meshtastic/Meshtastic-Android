@@ -63,7 +63,6 @@ class ExportDataUseCaseTest {
         val nodes = mapOf(senderNodeNum to senderNode)
         val stateFlow = MutableStateFlow(nodes)
         every { nodeRepository.nodeDBbyNum } returns stateFlow
-        every { nodeRepository.getNodeEntityDBbyNumFlow() } returns flowOf(emptyMap())
 
         val meshPacket =
             MeshPacket(

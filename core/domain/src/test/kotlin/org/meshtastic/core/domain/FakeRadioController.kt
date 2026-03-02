@@ -53,6 +53,10 @@ class FakeRadioController : RadioController {
         sentSharedContacts.add(nodeNum)
     }
 
+    override suspend fun setLocalConfig(config: org.meshtastic.proto.Config) {}
+
+    override suspend fun setLocalChannel(channel: org.meshtastic.proto.Channel) {}
+
     override suspend fun setOwner(destNum: Int, user: org.meshtastic.proto.User, packetId: Int) {}
 
     override suspend fun setConfig(destNum: Int, config: org.meshtastic.proto.Config, packetId: Int) {}
@@ -83,6 +87,10 @@ class FakeRadioController : RadioController {
 
     override suspend fun reboot(destNum: Int, packetId: Int) {}
 
+    override suspend fun rebootToDfu(nodeNum: Int) {}
+
+    override suspend fun requestRebootOta(requestId: Int, destNum: Int, mode: Int, hash: ByteArray?) {}
+
     override suspend fun shutdown(destNum: Int, packetId: Int) {}
 
     override suspend fun factoryReset(destNum: Int, packetId: Int) {}
@@ -90,6 +98,16 @@ class FakeRadioController : RadioController {
     override suspend fun nodedbReset(destNum: Int, packetId: Int, preserveFavorites: Boolean) {}
 
     override suspend fun removeByNodenum(packetId: Int, nodeNum: Int) {}
+
+    override suspend fun requestPosition(destNum: Int, currentPosition: org.meshtastic.core.model.Position) {}
+
+    override suspend fun requestUserInfo(destNum: Int) {}
+
+    override suspend fun requestTraceroute(requestId: Int, destNum: Int) {}
+
+    override suspend fun requestTelemetry(requestId: Int, destNum: Int, typeValue: Int) {}
+
+    override suspend fun requestNeighborInfo(requestId: Int, destNum: Int) {}
 
     override suspend fun beginEditSettings(destNum: Int) {}
 
@@ -100,6 +118,8 @@ class FakeRadioController : RadioController {
     override fun startProvideLocation() {}
 
     override fun stopProvideLocation() {}
+
+    override fun setDeviceAddress(address: String) {}
 
     // --- Helper methods for testing ---
 

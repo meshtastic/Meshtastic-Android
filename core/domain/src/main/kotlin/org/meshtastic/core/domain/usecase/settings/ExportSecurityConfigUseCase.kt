@@ -24,7 +24,7 @@ import java.io.OutputStream
 import javax.inject.Inject
 
 /** Use case for exporting security configuration to a JSON format. */
-class ExportSecurityConfigUseCase @Inject constructor() {
+open class ExportSecurityConfigUseCase @Inject constructor() {
     /**
      * Exports the provided [Config.SecurityConfig] as a JSON string to the given [OutputStream].
      *

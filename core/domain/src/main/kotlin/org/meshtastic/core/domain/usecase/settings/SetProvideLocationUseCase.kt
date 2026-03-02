@@ -20,7 +20,7 @@ import org.meshtastic.core.prefs.ui.UiPrefs
 import javax.inject.Inject
 
 /** Use case for setting whether to provide the node location to the mesh. */
-class SetProvideLocationUseCase @Inject constructor(private val uiPrefs: UiPrefs) {
+open class SetProvideLocationUseCase @Inject constructor(private val uiPrefs: UiPrefs) {
     operator fun invoke(myNodeNum: Int, provideLocation: Boolean) {
         uiPrefs.setShouldProvideNodeLocation(myNodeNum, provideLocation)
     }

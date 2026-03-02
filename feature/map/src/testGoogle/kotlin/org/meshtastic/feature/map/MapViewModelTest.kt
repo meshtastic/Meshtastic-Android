@@ -42,12 +42,12 @@ import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.service.ServiceRepository
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,7 +60,7 @@ class MapViewModelTest {
     private val nodeRepository = mockk<NodeRepository>(relaxed = true)
     private val packetRepository = mockk<PacketRepository>(relaxed = true)
     private val radioConfigRepository = mockk<RadioConfigRepository>(relaxed = true)
-    private val serviceRepository = mockk<ServiceRepository>(relaxed = true)
+    private val radioController = mockk<RadioController>(relaxed = true)
     private val customTileProviderRepository = mockk<CustomTileProviderRepository>(relaxed = true)
     private val uiPreferencesDataSource = mockk<UiPreferencesDataSource>(relaxed = true)
     private val savedStateHandle = SavedStateHandle(mapOf("waypointId" to null))
@@ -81,7 +81,7 @@ class MapViewModelTest {
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
         every { nodeRepository.getNodes() } returns flowOf(emptyList())
         every { packetRepository.getWaypoints() } returns flowOf(emptyList())
-        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
+        every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         viewModel =
             MapViewModel(
@@ -91,7 +91,7 @@ class MapViewModelTest {
                 nodeRepository,
                 packetRepository,
                 radioConfigRepository,
-                serviceRepository,
+                radioController,
                 customTileProviderRepository,
                 uiPreferencesDataSource,
                 savedStateHandle,

@@ -23,7 +23,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 
 /** Use case for cleaning up nodes from the database. */
-class CleanNodeDatabaseUseCase
+open class CleanNodeDatabaseUseCase
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,

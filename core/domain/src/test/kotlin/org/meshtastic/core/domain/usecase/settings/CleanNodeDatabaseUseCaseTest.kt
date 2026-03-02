@@ -23,8 +23,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.domain.FakeRadioController
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
 import kotlin.time.Duration.Companion.days
 
@@ -47,9 +47,9 @@ class CleanNodeDatabaseUseCaseTest {
         val currentTime = 1000000L
         val olderThanTimestamp = currentTime - 30.days.inWholeSeconds
 
-        val oldNode = NodeEntity(num = 1, lastHeard = (olderThanTimestamp - 1).toInt())
-        val newNode = NodeEntity(num = 2, lastHeard = (currentTime - 1).toInt())
-        val ignoredNode = NodeEntity(num = 3, lastHeard = (olderThanTimestamp - 1).toInt(), isIgnored = true)
+        val oldNode = Node(num = 1, lastHeard = (olderThanTimestamp - 1).toInt())
+        val newNode = Node(num = 2, lastHeard = (currentTime - 1).toInt())
+        val ignoredNode = Node(num = 3, lastHeard = (olderThanTimestamp - 1).toInt(), isIgnored = true)
 
         coEvery { nodeRepository.getNodesOlderThan(any()) } returns listOf(oldNode, ignoredNode)
 

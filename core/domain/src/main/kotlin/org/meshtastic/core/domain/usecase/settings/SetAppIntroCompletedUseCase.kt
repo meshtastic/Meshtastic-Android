@@ -20,7 +20,11 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import javax.inject.Inject
 
 /** Use case for setting whether the application intro has been completed. */
-class SetAppIntroCompletedUseCase @Inject constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
+open class SetAppIntroCompletedUseCase
+@Inject
+constructor(
+    private val uiPreferencesDataSource: UiPreferencesDataSource,
+) {
     operator fun invoke(completed: Boolean) {
         uiPreferencesDataSource.setAppIntroCompleted(completed)
     }

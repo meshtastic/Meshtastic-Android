@@ -21,7 +21,7 @@ import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import javax.inject.Inject
 
 /** Use case for managing mesh log settings. */
-class SetMeshLogSettingsUseCase
+open class SetMeshLogSettingsUseCase
 @Inject
 constructor(
     private val meshLogRepository: MeshLogRepository,

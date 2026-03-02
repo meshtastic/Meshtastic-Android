@@ -54,7 +54,7 @@ sealed class RadioResponseResult {
 }
 
 /** Use case for processing incoming [MeshPacket]s that are responses to admin requests. */
-class ProcessRadioResponseUseCase @Inject constructor() {
+open class ProcessRadioResponseUseCase @Inject constructor() {
     /**
      * Decodes and processes the provided [packet].
      *

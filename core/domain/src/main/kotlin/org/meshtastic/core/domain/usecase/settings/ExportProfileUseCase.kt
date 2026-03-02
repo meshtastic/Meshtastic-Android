@@ -21,7 +21,7 @@ import java.io.OutputStream
 import javax.inject.Inject
 
 /** Use case for exporting a device profile to an output stream. */
-class ExportProfileUseCase @Inject constructor() {
+open class ExportProfileUseCase @Inject constructor() {
     /**
      * Exports the provided [DeviceProfile] to the given [OutputStream].
      *

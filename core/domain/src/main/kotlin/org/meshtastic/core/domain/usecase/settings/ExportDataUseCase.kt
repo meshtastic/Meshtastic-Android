@@ -30,7 +30,7 @@ import kotlin.math.roundToInt
 import org.meshtastic.proto.Position as ProtoPosition
 
 /** Use case for exporting persisted packet data to a CSV format. */
-class ExportDataUseCase
+open class ExportDataUseCase
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,

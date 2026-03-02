@@ -32,7 +32,7 @@ import org.meshtastic.core.repository.NodeRepository
 import javax.inject.Inject
 
 /** Use case to determine if the currently connected device is capable of over-the-air (OTA) updates. */
-class IsOtaCapableUseCase
+open class IsOtaCapableUseCase
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,
