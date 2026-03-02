@@ -46,7 +46,7 @@ import javax.inject.Singleton
 @Singleton
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
-class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
+open class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
@@ -54,7 +54,7 @@ class DatabaseManager @Inject constructor(private val app: Application, private 
 
     // Expose the DB cache limit as a reactive stream so UI can observe changes.
     private val _cacheLimit = MutableStateFlow(getCacheLimit())
-    val cacheLimit: StateFlow<Int> = _cacheLimit
+    open val cacheLimit: StateFlow<Int> = _cacheLimit
 
     // Keep cache-limit StateFlow in sync if some other component updates SharedPreferences.
     private val prefsListener =

@@ -23,47 +23,50 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.ModuleConfig
-import org.meshtastic.proto.User
 
-class UpdateRadioConfigUseCaseTest {
+class AdminActionsUseCaseTest {
 
     private lateinit var radioController: RadioController
-    private lateinit var useCase: UpdateRadioConfigUseCase
+    private lateinit var nodeRepository: NodeRepository
+    private lateinit var useCase: AdminActionsUseCase
 
     @Before
     fun setUp() {
         radioController = mockk(relaxed = true)
-        useCase = UpdateRadioConfigUseCase(radioController)
+        nodeRepository = mockk(relaxed = true)
+        useCase = AdminActionsUseCase(radioController, nodeRepository)
         every { radioController.getPacketId() } returns 42
     }
 
     @Test
-    fun `setOwner calls radioController and returns packetId`() = runTest {
-        val user = User(long_name = "New Name")
-        val result = useCase.setOwner(123, user)
-        
-        coVerify { radioController.setOwner(123, user, 42) }
+    fun `reboot calls radioController and returns packetId`() = runTest {
+        val result = useCase.reboot(123)
+        coVerify { radioController.reboot(123, 42) }
         assertEquals(42, result)
     }
 
     @Test
-    fun `setConfig calls radioController and returns packetId`() = runTest {
-        val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.CLIENT))
-        val result = useCase.setConfig(123, config)
-        
-        coVerify { radioController.setConfig(123, config, 42) }
+    fun `shutdown calls radioController and returns packetId`() = runTest {
+        val result = useCase.shutdown(123)
+        coVerify { radioController.shutdown(123, 42) }
         assertEquals(42, result)
     }
 
     @Test
-    fun `setModuleConfig calls radioController and returns packetId`() = runTest {
-        val config = ModuleConfig(mqtt = ModuleConfig.MQTTConfig(enabled = true))
-        val result = useCase.setModuleConfig(123, config)
-        
-        coVerify { radioController.setModuleConfig(123, config, 42) }
+    fun `factoryReset calls radioController and clears DB if local`() = runTest {
+        val result = useCase.factoryReset(123, isLocal = true)
+        coVerify { radioController.factoryReset(123, 42) }
+        coVerify { nodeRepository.clearNodeDB() }
+        assertEquals(42, result)
+    }
+
+    @Test
+    fun `nodedbReset calls radioController and clears DB if local`() = runTest {
+        val result = useCase.nodedbReset(123, preserveFavorites = true, isLocal = true)
+        coVerify { radioController.nodedbReset(123, 42, true) }
+        coVerify { nodeRepository.clearNodeDB(true) }
         assertEquals(42, result)
     }
 }
