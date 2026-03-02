@@ -78,6 +78,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Implementation of [MeshDataHandler] that decodes and routes incoming mesh data packets.
+ *
+ * This class handles the complexity of:
+ * 1. Mapping raw [MeshPacket] objects to domain-friendly [DataPacket] objects.
+ * 2. Routing packets to specialized handlers (e.g., Traceroute, NeighborInfo, SFPP).
+ * 3. Managing message history and persistence.
+ * 4. Triggering notifications for various packet types (Text, Waypoints, Battery).
+ * 5. Tracking received telemetry for node updates.
+ */
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass", "CyclomaticComplexMethod")
 @Singleton
 class MeshDataHandlerImpl

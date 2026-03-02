@@ -184,8 +184,9 @@ constructor(
         .flowOn(dispatchers.io)
         .conflate()
 
-    /** Upserts a [NodeEntity] to the database. */
-    suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node) }
+    /** Upserts a [Node] to the database. */
+    override suspend fun upsert(node: Node) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node.toEntity()) }
 
     /** Installs initial configuration data (local info and remote nodes) into the database. */
     override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) = withContext(dispatchers.io) {

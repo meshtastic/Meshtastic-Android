@@ -29,12 +29,19 @@ import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.proto.Config
-import kotlin.math.abs
 import kotlin.random.Random
 
 /**
- * Use case for sending a message. This component handles message transformation, persistence, and enqueuing for durable
- * delivery.
+ * Use case for sending a message over the mesh network.
+ *
+ * This component orchestrates the process of:
+ * 1. Resolving the destination and sender information.
+ * 2. Handling implicit actions for direct messages (e.g., sharing contacts, favoriting).
+ * 3. Applying message transformations (e.g., homoglyph encoding).
+ * 4. Persisting the outgoing message in the local history.
+ * 5. Enqueuing the message for durable delivery via the platform's message queue.
+ *
+ * This implementation is platform-agnostic and relies on injected repositories and controllers.
  */
 @Suppress("TooGenericExceptionCaught")
 class SendMessageUseCase(
@@ -45,6 +52,13 @@ class SendMessageUseCase(
     private val messageQueue: MessageQueue,
 ) {
 
+    /**
+     * Executes the send message workflow.
+     *
+     * @param text The plain text message to send.
+     * @param contactKey The identifier of the target contact or channel (e.g., "0!ffffffff" for broadcast).
+     * @param replyId Optional ID of a message being replied to.
+     */
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
     suspend operator fun invoke(
         text: String,
@@ -81,7 +95,7 @@ class SendMessageUseCase(
                 text
             }
 
-        val packetId = abs(Random.nextInt())
+        val packetId = Random.nextInt(1, Int.MAX_VALUE)
 
         val packet =
             DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply {

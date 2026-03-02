@@ -55,7 +55,7 @@ constructor(
             packetRepository.updateMessageStatus(packetData, MessageStatus.ENROUTE)
             Result.success()
         } catch (e: Exception) {
-            packetRepository.updateMessageStatus(packetData, MessageStatus.ERROR)
+            packetRepository.updateMessageStatus(packetData, MessageStatus.QUEUED)
             Result.retry()
         }
     }

@@ -48,6 +48,16 @@ import javax.inject.Singleton
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
+/**
+ * Implementation of [NodeManager] that maintains an in-memory database of the mesh.
+ *
+ * This component acts as the "brain" for node-related data during a connection session.
+ * It manages:
+ * 1. In-memory maps for fast node lookup by number or ID.
+ * 2. Synchronization of node data between the radio and the persistent database.
+ * 3. Processing of incoming node-related packets (User, Position, Telemetry).
+ * 4. Broadcasting changes to the rest of the application.
+ */
 @Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
 @Singleton
 class NodeManagerImpl
@@ -154,8 +164,7 @@ constructor(
         }
 
         if (next.user.id.isNotEmpty() && isNodeDbReady.value) {
-            // scope.handledLaunch { nodeRepository.upsert(next) }
-            // TODO: Add upsert to repository interface
+            scope.handledLaunch { nodeRepository.upsert(next) }
         }
 
         if (withBroadcast) {

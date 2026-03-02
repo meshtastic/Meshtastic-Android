@@ -26,66 +26,123 @@ import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
 
-/** Interface for managing service state, connection status, and mesh events. */
+/**
+ * Interface for managing background service state, connection status, and mesh events.
+ *
+ * This repository acts as the primary data bridge between the long-running mesh service
+ * and the UI/Feature layers. It maintains reactive flows for connection status,
+ * error messages, and incoming mesh traffic.
+ */
 @Suppress("TooManyFunctions")
 interface ServiceRepository {
-    /** Reactive connection state. */
+    /** Reactive flow of the current connection state. */
     val connectionState: StateFlow<ConnectionState>
 
-    /** Sets the connection state. */
+    /**
+     * Updates the current connection state.
+     *
+     * @param connectionState The new [ConnectionState].
+     */
     fun setConnectionState(connectionState: ConnectionState)
 
-    /** Reactive client notification. */
+    /**
+     * Reactive flow of high-level client notifications.
+     *
+     * These represent events from the mesh client that may require UI feedback.
+     */
     val clientNotification: StateFlow<ClientNotification?>
 
-    /** Sets the current client notification. */
+    /**
+     * Sets the current client notification.
+     *
+     * @param notification The [ClientNotification] to display or act upon.
+     */
     fun setClientNotification(notification: ClientNotification?)
 
     /** Clears the current client notification. */
     fun clearClientNotification()
 
-    /** Reactive error message. */
+    /**
+     * Reactive flow of human-readable error messages.
+     *
+     * These are typically shown as snackbars or dialogs in the UI.
+     */
     val errorMessage: StateFlow<String?>
 
-    /** Sets an error message to be displayed. */
+    /**
+     * Sets an error message to be displayed.
+     *
+     * @param text The error message text.
+     * @param severity The [Severity] level of the error.
+     */
     fun setErrorMessage(text: String, severity: Severity = Severity.Error)
 
     /** Clears the current error message. */
     fun clearErrorMessage()
 
-    /** Reactive connection progress message. */
+    /**
+     * Reactive flow of connection progress messages.
+     *
+     * Used during the handshake and config loading phase to provide status updates to the user.
+     */
     val connectionProgress: StateFlow<String?>
 
-    /** Sets the connection progress message. */
+    /**
+     * Sets the connection progress message.
+     *
+     * @param text The progress description (e.g., "Downloading Node DB...").
+     */
     fun setConnectionProgress(text: String)
 
-    /** Flow of all mesh packets. */
+    /**
+     * Flow of all raw [MeshPacket] objects received from the mesh.
+     *
+     * Subscribing to this flow allows components to react to any incoming traffic.
+     */
     val meshPacketFlow: SharedFlow<MeshPacket>
 
-    /** Emits a mesh packet into the flow. */
+    /**
+     * Emits a mesh packet into the flow.
+     *
+     * Called by the packet processor when new data arrives from the radio.
+     *
+     * @param packet The received [MeshPacket].
+     */
     suspend fun emitMeshPacket(packet: MeshPacket)
 
-    /** Reactive traceroute response. */
+    /** Reactive flow of the most recent traceroute result. */
     val tracerouteResponse: StateFlow<TracerouteResponse?>
 
-    /** Sets the traceroute response. */
+    /**
+     * Sets the traceroute response.
+     *
+     * @param value The [TracerouteResponse] result.
+     */
     fun setTracerouteResponse(value: TracerouteResponse?)
 
-    /** Clears the traceroute response. */
+    /** Clears the current traceroute response. */
     fun clearTracerouteResponse()
 
-    /** Reactive neighbor info response. */
+    /** Reactive flow of the most recent neighbor info response (formatted string). */
     val neighborInfoResponse: StateFlow<String?>
 
-    /** Sets the neighbor info response. */
+    /**
+     * Sets the neighbor info response.
+     *
+     * @param value The human-readable neighbor info string.
+     */
     fun setNeighborInfoResponse(value: String?)
 
-    /** Clears the neighbor info response. */
+    /** Clears the current neighbor info response. */
     fun clearNeighborInfoResponse()
 
-    /** Flow of service actions requested by the UI. */
+    /** Flow of service actions requested by the UI (e.g., "Favorite Node", "Mute Node"). */
     val serviceAction: Flow<ServiceAction>
 
-    /** Dispatches a service action. */
+    /**
+     * Dispatches a service action to be handled by the background service.
+     *
+     * @param action The [ServiceAction] to perform.
+     */
     suspend fun onServiceAction(action: ServiceAction)
 }

@@ -32,7 +32,6 @@ import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.util.MeshDataMapper
-import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshConfigFlowManager
@@ -65,11 +64,13 @@ class MeshDataHandlerTest {
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val dataMapper: MeshDataMapper = mockk(relaxed = true)
     private val configHandler: MeshConfigHandler = mockk(relaxed = true)
+    private val configHandlerLazy: Lazy<MeshConfigHandler> = mockk { every { get() } returns configHandler }
     private val configFlowManager: MeshConfigFlowManager = mockk(relaxed = true)
+    private val configFlowManagerLazy: Lazy<MeshConfigFlowManager> = mockk { every { get() } returns configFlowManager }
     private val commandSender: CommandSender = mockk(relaxed = true)
     private val historyManager: HistoryManager = mockk(relaxed = true)
-    private val meshPrefs: MeshPrefs = mockk(relaxed = true)
     private val connectionManager: MeshConnectionManager = mockk(relaxed = true)
+    private val connectionManagerLazy: Lazy<MeshConnectionManager> = mockk { every { get() } returns connectionManager }
     private val tracerouteHandler: TracerouteHandler = mockk(relaxed = true)
     private val neighborInfoHandler: NeighborInfoHandler = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
@@ -96,12 +97,11 @@ class MeshDataHandlerTest {
                 serviceNotifications,
                 analytics,
                 dataMapper,
-                { configHandler },
-                { configFlowManager },
+                configHandlerLazy,
+                configFlowManagerLazy,
                 commandSender,
                 historyManager,
-                meshPrefs,
-                { connectionManager },
+                connectionManagerLazy,
                 tracerouteHandler,
                 neighborInfoHandler,
                 radioConfigRepository,

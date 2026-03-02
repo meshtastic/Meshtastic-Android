@@ -20,7 +20,13 @@ import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.NodeRepository
 import javax.inject.Inject
 
-/** Use case for performing administrative actions on the radio. */
+/**
+ * Use case for performing administrative and destructive actions on mesh nodes.
+ *
+ * This component provides methods for rebooting, shutting down, or resetting nodes
+ * within the mesh. It also handles local database synchronization when these actions
+ * are performed on the locally connected device.
+ */
 open class AdminActionsUseCase
 @Inject
 constructor(

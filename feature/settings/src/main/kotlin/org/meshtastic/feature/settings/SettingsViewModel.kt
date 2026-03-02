@@ -170,7 +170,7 @@ constructor(
      */
     @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
     fun saveDataCsv(uri: Uri, filterPortnum: Int? = null) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch {
             val myNodeNum = myNodeNum ?: return@launch
             writeToUri(uri) { writer -> exportDataUseCase(writer, myNodeNum, filterPortnum) }
         }
