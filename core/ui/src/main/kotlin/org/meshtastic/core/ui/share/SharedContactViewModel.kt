@@ -22,9 +22,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.SharedContact
 import javax.inject.Inject

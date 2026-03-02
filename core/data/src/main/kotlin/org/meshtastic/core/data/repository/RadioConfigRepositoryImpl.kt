@@ -23,7 +23,6 @@ import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
 import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
@@ -38,25 +37,25 @@ import javax.inject.Inject
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
-open class RadioConfigRepositoryImpl
+open class RadioConfigRepository
 @Inject
 constructor(
     private val nodeDB: NodeRepository,
     private val channelSetDataSource: ChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,
     private val moduleConfigDataSource: ModuleConfigDataSource,
-) : RadioConfigRepository {
+) {
 
     /** Flow representing the [ChannelSet] data store. */
-    override val channelSetFlow: Flow<ChannelSet> = channelSetDataSource.channelSetFlow
+    val channelSetFlow: Flow<ChannelSet> = channelSetDataSource.channelSetFlow
 
     /** Clears the [ChannelSet] data in the data store. */
-    override suspend fun clearChannelSet() {
+    suspend fun clearChannelSet() {
         channelSetDataSource.clearChannelSet()
     }
 
     /** Replaces the [ChannelSettings] list with a new [settingsList]. */
-    override suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
+    suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
         channelSetDataSource.replaceAllSettings(settingsList)
     }
 
@@ -67,13 +66,13 @@ constructor(
      * @param channel The [Channel] provided.
      * @return the index of the admin channel after the update (if not found, returns 0).
      */
-    override suspend fun updateChannelSettings(channel: Channel) = channelSetDataSource.updateChannelSettings(channel)
+    suspend fun updateChannelSettings(channel: Channel) = channelSetDataSource.updateChannelSettings(channel)
 
     /** Flow representing the [LocalConfig] data store. */
-    override val localConfigFlow: Flow<LocalConfig> = localConfigDataSource.localConfigFlow
+    open val localConfigFlow: Flow<LocalConfig> = localConfigDataSource.localConfigFlow
 
     /** Clears the [LocalConfig] data in the data store. */
-    override suspend fun clearLocalConfig() {
+    suspend fun clearLocalConfig() {
         localConfigDataSource.clearLocalConfig()
     }
 
@@ -82,16 +81,16 @@ constructor(
      *
      * @param config The [Config] to be set.
      */
-    override suspend fun setLocalConfig(config: Config) {
+    suspend fun setLocalConfig(config: Config) {
         localConfigDataSource.setLocalConfig(config)
         config.lora?.let { channelSetDataSource.setLoraConfig(it) }
     }
 
     /** Flow representing the [LocalModuleConfig] data store. */
-    override val moduleConfigFlow: Flow<LocalModuleConfig> = moduleConfigDataSource.moduleConfigFlow
+    val moduleConfigFlow: Flow<LocalModuleConfig> = moduleConfigDataSource.moduleConfigFlow
 
     /** Clears the [LocalModuleConfig] data in the data store. */
-    override suspend fun clearLocalModuleConfig() {
+    suspend fun clearLocalModuleConfig() {
         moduleConfigDataSource.clearLocalModuleConfig()
     }
 
@@ -100,12 +99,12 @@ constructor(
      *
      * @param config The [ModuleConfig] to be set.
      */
-    override suspend fun setLocalModuleConfig(config: ModuleConfig) {
+    suspend fun setLocalModuleConfig(config: ModuleConfig) {
         moduleConfigDataSource.setLocalModuleConfig(config)
     }
 
     /** Flow representing the combined [DeviceProfile] protobuf. */
-    override val deviceProfileFlow: Flow<DeviceProfile> =
+    val deviceProfileFlow: Flow<DeviceProfile> =
         combine(nodeDB.ourNodeInfo, channelSetFlow, localConfigFlow, moduleConfigFlow) {
                 node,
                 channels,

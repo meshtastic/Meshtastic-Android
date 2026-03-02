@@ -49,7 +49,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
@@ -189,8 +188,8 @@ constructor(
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(node) }
 
     /** Installs initial configuration data (local info and remote nodes) into the database. */
-    override suspend fun installConfig(mi: MyNodeInfo, nodes: List<Node>) =
-        withContext(dispatchers.io) { nodeInfoWriteDataSource.installConfig(mi.toEntity(), nodes.map { it.toEntity() }) }
+    suspend fun installConfig(mi: MyNodeEntity, nodes: List<NodeEntity>) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.installConfig(mi, nodes) }
 
     /** Deletes all nodes from the database, optionally preserving favorites. */
     override suspend fun clearNodeDB(preserveFavorites: Boolean) =
@@ -222,8 +221,8 @@ constructor(
         }
 
     /** Persists hardware metadata for a node. */
-    override suspend fun insertMetadata(nodeNum: Int, metadata: DeviceMetadata) =
-        withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(MetadataEntity(nodeNum, metadata)) }
+    suspend fun insertMetadata(metadata: MetadataEntity) =
+        withContext(dispatchers.io) { nodeInfoWriteDataSource.upsert(metadata) }
 
     /** Flow emitting the count of nodes currently considered "online". */
     override val onlineNodeCount: Flow<Int> =
@@ -241,45 +240,7 @@ constructor(
             .flowOn(dispatchers.io)
             .conflate()
 
+    /** Updates the personal notes field for a node. */
     override suspend fun setNodeNotes(num: Int, notes: String) =
         withContext(dispatchers.io) { nodeInfoWriteDataSource.setNodeNotes(num, notes) }
-
-    private fun MyNodeInfo.toEntity() = MyNodeEntity(
-        myNodeNum = myNodeNum,
-        model = model,
-        firmwareVersion = firmwareVersion,
-        couldUpdate = couldUpdate,
-        shouldUpdate = shouldUpdate,
-        currentPacketId = currentPacketId,
-        messageTimeoutMsec = messageTimeoutMsec,
-        minAppVersion = minAppVersion,
-        maxChannels = maxChannels,
-        hasWifi = hasWifi,
-        deviceId = deviceId,
-        pioEnv = pioEnv
-    )
-
-    private fun Node.toEntity() = NodeEntity(
-        num = num,
-        user = user,
-        position = position,
-        snr = snr,
-        rssi = rssi,
-        lastHeard = lastHeard,
-        deviceTelemetry = org.meshtastic.proto.Telemetry(device_metrics = deviceMetrics),
-        channel = channel,
-        viaMqtt = viaMqtt,
-        hopsAway = hopsAway,
-        isFavorite = isFavorite,
-        isIgnored = isIgnored,
-        isMuted = isMuted,
-        environmentTelemetry = org.meshtastic.proto.Telemetry(environment_metrics = environmentMetrics),
-        powerTelemetry = org.meshtastic.proto.Telemetry(power_metrics = powerMetrics),
-        paxcounter = paxcounter,
-        publicKey = publicKey,
-        notes = notes,
-        manuallyVerified = manuallyVerified,
-        nodeStatus = nodeStatus,
-        lastTransport = lastTransport
-    )
 }

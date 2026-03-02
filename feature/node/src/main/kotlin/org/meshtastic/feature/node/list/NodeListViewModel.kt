@@ -17,9 +17,11 @@
 package org.meshtastic.feature.node.list
 
 import android.net.Uri
+import android.os.RemoteException
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,13 +30,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.node.detail.NodeManagementActions
 import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
@@ -52,7 +53,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
     val nodeManagementActions: NodeManagementActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
@@ -154,7 +154,11 @@ constructor(
         radioConfigRepository.replaceAllSettings(channelSet.settings)
         val newLoraConfig = channelSet.lora_config
         if (newLoraConfig != null) {
-            radioController.setLocalConfig(Config(lora = newLoraConfig))
+            try {
+                serviceRepository.meshService?.setConfig(Config(lora = newLoraConfig).encode())
+            } catch (ex: RemoteException) {
+                Logger.e(ex) { "Set config error" }
+            }
         }
     }
 

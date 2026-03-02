@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddReaction
@@ -57,10 +56,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.database.entity.Reaction
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.model.util.getShortDateTime
 import org.meshtastic.core.resources.Res
@@ -147,9 +147,7 @@ internal fun ReactionRow(
 
     AnimatedVisibility(emojiGroups.isNotEmpty(), modifier = modifier) {
         LazyRow(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-            items(emojiGroups.entries.toList()) { entry ->
-                val emoji = entry.key
-                val reactions = entry.value
+            items(emojiGroups.entries.toList()) { (emoji, reactions) ->
                 val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
                 ReactionItem(
                     emoji = emoji,
@@ -219,7 +217,7 @@ internal fun ReactionDialog(
 
         val relayNodeName =
             reaction.relayNode?.let { relayNodeId ->
-                Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
+                Packet.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
             }
 
         DeliveryInfo(
@@ -237,9 +235,7 @@ internal fun ReactionDialog(
     }
 
     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        items(groupedEmojis.entries.toList()) { entry ->
-            val emoji = entry.key
-            val reactions = entry.value
+        items(groupedEmojis.entries.toList()) { (emoji, reactions) ->
             val localReaction = reactions.find { it.user.id == DataPacket.ID_LOCAL || it.user.id == myId }
             val isSending =
                 localReaction?.status == MessageStatus.QUEUED || localReaction?.status == MessageStatus.ENROUTE

@@ -32,7 +32,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.data.repository.NodeRepository
+import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -41,13 +44,10 @@ import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
-import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 import java.io.BufferedWriter
@@ -77,7 +77,7 @@ constructor(
     private val exportDataUseCase: ExportDataUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
 ) : ViewModel() {
-    val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
@@ -116,7 +116,8 @@ constructor(
     val appVersionName
         get() = buildConfigProvider.versionName
 
-    val isOtaCapable: StateFlow<Boolean> = isOtaCapableUseCase().stateInWhileSubscribed(initialValue = false)
+    val isOtaCapable: StateFlow<Boolean> =
+        isOtaCapableUseCase().stateInWhileSubscribed(initialValue = false)
 
     // Device DB cache limit (bounded by DatabaseConstants)
     val dbCacheLimit: StateFlow<Int> = databaseManager.cacheLimit
@@ -172,7 +173,9 @@ constructor(
     fun saveDataCsv(uri: Uri, filterPortnum: Int? = null) {
         viewModelScope.launch(Dispatchers.Main) {
             val myNodeNum = myNodeNum ?: return@launch
-            writeToUri(uri) { writer -> exportDataUseCase(writer, myNodeNum, filterPortnum) }
+            writeToUri(uri) { writer ->
+                exportDataUseCase(writer, myNodeNum, filterPortnum)
+            }
         }
     }
 

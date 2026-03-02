@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
@@ -27,7 +28,6 @@ import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.radio.isTcp
-import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import javax.inject.Inject
 
