@@ -17,8 +17,8 @@
 package org.meshtastic.core.domain
 
 /**
- * Interface for enqueuing background work for transmitting messages.
- * This allows the domain layer to trigger durable transmission without depending on Android-specific WorkManager.
+ * Interface for enqueuing background work for transmitting messages. This allows the domain layer to trigger durable
+ * transmission without depending on Android-specific WorkManager.
  */
 interface MessageQueue {
     suspend fun enqueue(packetId: Int)

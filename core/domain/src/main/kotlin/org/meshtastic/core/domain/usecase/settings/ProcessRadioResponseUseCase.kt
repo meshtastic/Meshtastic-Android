@@ -21,6 +21,7 @@ import org.meshtastic.core.database.model.getStringResFrom
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Channel
+import org.meshtastic.proto.Data
 import org.meshtastic.proto.DeviceConnectionStatus
 import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.MeshPacket
@@ -29,25 +30,30 @@ import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
 import javax.inject.Inject
 
-/**
- * Sealed class representing the result of processing a radio response packet.
- */
+/** Sealed class representing the result of processing a radio response packet. */
 sealed class RadioResponseResult {
     data class Metadata(val metadata: DeviceMetadata) : RadioResponseResult()
+
     data class ChannelResponse(val channel: Channel) : RadioResponseResult()
+
     data class Owner(val user: User) : RadioResponseResult()
+
     data class ConfigResponse(val config: org.meshtastic.proto.Config) : RadioResponseResult()
+
     data class ModuleConfigResponse(val config: org.meshtastic.proto.ModuleConfig) : RadioResponseResult()
+
     data class CannedMessages(val messages: String) : RadioResponseResult()
+
     data class Ringtone(val ringtone: String) : RadioResponseResult()
+
     data class ConnectionStatus(val status: DeviceConnectionStatus) : RadioResponseResult()
+
     data class Error(val message: UiText) : RadioResponseResult()
+
     data object Success : RadioResponseResult()
 }
 
-/**
- * Use case for processing incoming [MeshPacket]s that are responses to admin requests.
- */
+/** Use case for processing incoming [MeshPacket]s that are responses to admin requests. */
 class ProcessRadioResponseUseCase @Inject constructor() {
     /**
      * Decodes and processes the provided [packet].
@@ -58,61 +64,67 @@ class ProcessRadioResponseUseCase @Inject constructor() {
      * @return A [RadioResponseResult] if the packet matches a request, or null otherwise.
      */
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
-    operator fun invoke(
-        packet: MeshPacket,
-        destNum: Int,
-        requestIds: Set<Int>
-    ): RadioResponseResult? {
-        val data = packet.decoded ?: return null
-        if (data.request_id !in requestIds) return null
-
-        if (data.portnum == PortNum.ROUTING_APP) {
-            val parsed = Routing.ADAPTER.decode(data.payload)
-            if (parsed.error_reason != Routing.Error.NONE) {
-                return RadioResponseResult.Error(UiText.Resource(getStringResFrom(parsed.error_reason?.value ?: 0)))
-            } else if (packet.from == destNum) {
-                return RadioResponseResult.Success
-            }
+    operator fun invoke(packet: MeshPacket, destNum: Int, requestIds: Set<Int>): RadioResponseResult? {
+        val data = packet.decoded
+        if (data == null || data.request_id !in requestIds) {
+            return null
         }
 
-        if (data.portnum == PortNum.ADMIN_APP) {
-            if (destNum != packet.from) {
-                return RadioResponseResult.Error(UiText.DynamicString("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}."))
-            }
+        return when (data.portnum) {
+            PortNum.ROUTING_APP -> processRoutingResponse(packet, data, destNum)
+            PortNum.ADMIN_APP -> processAdminResponse(packet, data, destNum)
+            else -> null
+        }
+    }
 
-            val parsed = AdminMessage.ADAPTER.decode(data.payload)
-            return when {
-                parsed.get_device_metadata_response != null ->
-                    RadioResponseResult.Metadata(parsed.get_device_metadata_response!!)
+    private fun processRoutingResponse(packet: MeshPacket, data: Data, destNum: Int): RadioResponseResult? {
+        val parsed = Routing.ADAPTER.decode(data.payload)
+        return when {
+            parsed.error_reason != Routing.Error.NONE ->
+                RadioResponseResult.Error(UiText.Resource(getStringResFrom(parsed.error_reason?.value ?: 0)))
+            packet.from == destNum -> RadioResponseResult.Success
+            else -> null
+        }
+    }
 
-                parsed.get_channel_response != null ->
-                    RadioResponseResult.ChannelResponse(parsed.get_channel_response!!)
-
-                parsed.get_owner_response != null ->
-                    RadioResponseResult.Owner(parsed.get_owner_response!!)
-
-                parsed.get_config_response != null ->
-                    RadioResponseResult.ConfigResponse(parsed.get_config_response!!)
-
-                parsed.get_module_config_response != null ->
-                    RadioResponseResult.ModuleConfigResponse(parsed.get_module_config_response!!)
-
-                parsed.get_canned_message_module_messages_response != null ->
-                    RadioResponseResult.CannedMessages(parsed.get_canned_message_module_messages_response!!)
-
-                parsed.get_ringtone_response != null ->
-                    RadioResponseResult.Ringtone(parsed.get_ringtone_response!!)
-
-                parsed.get_device_connection_status_response != null ->
-                    RadioResponseResult.ConnectionStatus(parsed.get_device_connection_status_response!!)
-
-                else -> {
-                    Logger.d { "No custom processing needed for $parsed" }
-                    RadioResponseResult.Success
-                }
-            }
+    private fun processAdminResponse(packet: MeshPacket, data: Data, destNum: Int): RadioResponseResult {
+        if (destNum != packet.from) {
+            return RadioResponseResult.Error(
+                UiText.DynamicString("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}."),
+            )
         }
 
-        return null
+        val parsed = AdminMessage.ADAPTER.decode(data.payload)
+        return processAdminMessage(parsed)
+    }
+
+    private fun processAdminMessage(parsed: AdminMessage): RadioResponseResult {
+        return when {
+            parsed.get_device_metadata_response != null ->
+                RadioResponseResult.Metadata(parsed.get_device_metadata_response!!)
+
+            parsed.get_channel_response != null ->
+                RadioResponseResult.ChannelResponse(parsed.get_channel_response!!)
+
+            parsed.get_owner_response != null -> RadioResponseResult.Owner(parsed.get_owner_response!!)
+
+            parsed.get_config_response != null -> RadioResponseResult.ConfigResponse(parsed.get_config_response!!)
+
+            parsed.get_module_config_response != null ->
+                RadioResponseResult.ModuleConfigResponse(parsed.get_module_config_response!!)
+
+            parsed.get_canned_message_module_messages_response != null ->
+                RadioResponseResult.CannedMessages(parsed.get_canned_message_module_messages_response!!)
+
+            parsed.get_ringtone_response != null -> RadioResponseResult.Ringtone(parsed.get_ringtone_response!!)
+
+            parsed.get_device_connection_status_response != null ->
+                RadioResponseResult.ConnectionStatus(parsed.get_device_connection_status_response!!)
+
+            else -> {
+                Logger.d { "No custom processing needed for $parsed" }
+                RadioResponseResult.Success
+            }
+        }
     }
 }

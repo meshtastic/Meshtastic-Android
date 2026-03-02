@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,14 +39,16 @@ class ProcessRadioResponseUseCaseTest {
     @Test
     fun `invoke with routing error returns error result`() {
         // Arrange
-        val packet = MeshPacket(
-            from = 123,
-            decoded = Data(
-                portnum = PortNum.ROUTING_APP,
-                request_id = 42,
-                payload = Routing(error_reason = Routing.Error.NO_ROUTE).encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded =
+                Data(
+                    portnum = PortNum.ROUTING_APP,
+                    request_id = 42,
+                    payload = Routing(error_reason = Routing.Error.NO_ROUTE).encode().toByteString(),
+                ),
             )
-        )
 
         // Act
         val result = useCase(packet, 123, setOf(42))
@@ -60,14 +62,15 @@ class ProcessRadioResponseUseCaseTest {
         // Arrange
         val metadata = DeviceMetadata(firmware_version = "2.5.0")
         val adminMsg = AdminMessage(get_device_metadata_response = metadata)
-        val packet = MeshPacket(
-            from = 123,
-            decoded = Data(
-                portnum = PortNum.ADMIN_APP,
-                request_id = 42,
-                payload = adminMsg.encode().toByteString()
+        val packet =
+            MeshPacket(
+                from = 123,
+                decoded = Data(
+                    portnum = PortNum.ADMIN_APP,
+                    request_id = 42,
+                    payload = adminMsg.encode().toByteString(),
+                ),
             )
-        )
 
         // Act
         val result = useCase(packet, 123, setOf(42))

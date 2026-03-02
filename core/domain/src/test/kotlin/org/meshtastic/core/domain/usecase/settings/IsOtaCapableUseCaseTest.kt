@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,13 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import app.cash.turbine.test
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.data.repository.DeviceHardwareRepository
@@ -44,28 +46,19 @@ class IsOtaCapableUseCaseTest {
 
     @Before
     fun setUp() {
-        nodeRepository = mockk {
-            every { ourNodeInfo } returns ourNodeInfoFlow
-        }
-        radioController = mockk {
-            every { connectionState } returns connectionStateFlow
-        }
+        nodeRepository = mockk { every { ourNodeInfo } returns ourNodeInfoFlow }
+        radioController = mockk { every { connectionState } returns connectionStateFlow }
         radioPrefs = mockk(relaxed = true)
         deviceHardwareRepository = mockk(relaxed = true)
-        
-        useCase = IsOtaCapableUseCase(
-            nodeRepository,
-            radioController,
-            radioPrefs,
-            deviceHardwareRepository
-        )
+
+        useCase = IsOtaCapableUseCase(nodeRepository, radioController, radioPrefs, deviceHardwareRepository)
     }
 
     @Test
     fun `returns false when node is null`() = runTest {
         ourNodeInfoFlow.value = null
         connectionStateFlow.value = ConnectionState.Connected
-        
+
         useCase().test {
             assertFalse(awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -77,7 +70,52 @@ class IsOtaCapableUseCaseTest {
         val node = mockk<Node>(relaxed = true)
         ourNodeInfoFlow.value = node
         connectionStateFlow.value = ConnectionState.Disconnected
-        
+
+        useCase().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `returns false when radio is not BLE, Serial, or TCP`() = runTest {
+        val node = mockk<Node>(relaxed = true)
+        ourNodeInfoFlow.value = node
+        connectionStateFlow.value = ConnectionState.Connected
+        every { radioPrefs.devAddr } returns "m123" // Mock
+
+        useCase().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `returns true when hw requires Dfu`() = runTest {
+        val node = mockk<Node>(relaxed = true)
+        ourNodeInfoFlow.value = node
+        connectionStateFlow.value = ConnectionState.Connected
+        every { radioPrefs.devAddr } returns "x123" // BLE
+
+        val hw = mockk<org.meshtastic.core.model.DeviceHardware> { every { requiresDfu } returns true }
+        coEvery { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+
+        useCase().test {
+            assertTrue(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `returns false when hw does not require Dfu and isEsp32OtaSupported is false`() = runTest {
+        val node = mockk<Node>(relaxed = true)
+        ourNodeInfoFlow.value = node
+        connectionStateFlow.value = ConnectionState.Connected
+        every { radioPrefs.devAddr } returns "x123" // BLE
+
+        val hw = mockk<org.meshtastic.core.model.DeviceHardware> { every { requiresDfu } returns false }
+        coEvery { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+
         useCase().test {
             assertFalse(awaitItem())
             cancelAndIgnoreRemainingEvents()

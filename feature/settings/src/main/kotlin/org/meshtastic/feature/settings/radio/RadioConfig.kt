@@ -81,108 +81,141 @@ fun RadioConfigItemList(
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-            ConfigRoute.radioConfigRoutes.forEach {
-                ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
-            }
-        }
-
-        ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-            ListItem(
-                text = stringResource(Res.string.device_configuration),
-                leadingIcon = Icons.Rounded.AppSettingsAlt,
-                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                enabled = enabled,
-            ) {
-                onNavigate(SettingsRoutes.DeviceConfiguration)
-            }
-        }
-
-        ExpressiveSection(title = stringResource(Res.string.module_settings)) {
-            if (isManaged) {
-                ManagedMessage()
-            }
-            ListItem(
-                text = stringResource(Res.string.module_settings),
-                leadingIcon = Icons.Rounded.Settings,
-                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                enabled = enabled,
-            ) {
-                onNavigate(SettingsRoutes.ModuleConfiguration)
-            }
-        }
+        RadioConfigSection(isManaged, enabled, onRouteClick)
+        DeviceConfigSection(isManaged, enabled, onNavigate)
+        ModuleSettingsSection(isManaged, enabled, onNavigate)
 
         if (state.isLocal) {
-            ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
-                if (isManaged) {
-                    ManagedMessage()
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.import_configuration),
-                    leadingIcon = Icons.Rounded.Download,
-                    enabled = enabled,
-                    onClick = onImport,
-                )
-                ListItem(
-                    text = stringResource(Res.string.export_configuration),
-                    leadingIcon = Icons.Rounded.Upload,
-                    enabled = enabled,
-                    onClick = onExport,
-                )
-            }
+            BackupRestoreSection(isManaged, enabled, onImport, onExport)
         }
 
-        ExpressiveSection(title = stringResource(Res.string.administration)) {
-            ListItem(
-                text = stringResource(Res.string.administration),
-                leadingIcon = Icons.Rounded.AdminPanelSettings,
-                trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
-                leadingIconTint = MaterialTheme.colorScheme.error,
-                textColor = MaterialTheme.colorScheme.error,
-                trailingIconTint = MaterialTheme.colorScheme.error,
-                enabled = enabled,
-            ) {
-                onNavigate(SettingsRoutes.Administration)
-            }
-        }
+        AdministrationSection(enabled, onNavigate)
 
         if (state.isLocal) {
-            ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
-                if (isManaged) {
-                    ManagedMessage()
-                }
-
-                if (isOtaCapable) {
-                    ListItem(
-                        text = stringResource(Res.string.firmware_update_title),
-                        leadingIcon = Icons.Rounded.SystemUpdate,
-                        enabled = enabled,
-                        onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
-                    )
-                }
-
-                ListItem(
-                    text = stringResource(Res.string.clean_node_database_title),
-                    leadingIcon = Icons.Rounded.CleaningServices,
-                    enabled = enabled,
-                    onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
-                )
-
-                ListItem(
-                    text = stringResource(Res.string.debug_panel),
-                    leadingIcon = Icons.Rounded.BugReport,
-                    enabled = enabled,
-                    onClick = { onNavigate(SettingsRoutes.DebugPanel) },
-                )
-            }
+            AdvancedSection(isManaged, isOtaCapable, enabled, onNavigate)
         }
+    }
+}
+
+@Composable
+private fun RadioConfigSection(isManaged: Boolean, enabled: Boolean, onRouteClick: (Enum<*>) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.radio_configuration)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+        ConfigRoute.radioConfigRoutes.forEach {
+            ListItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) { onRouteClick(it) }
+        }
+    }
+}
+
+@Composable
+private fun DeviceConfigSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.device_configuration)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+        ListItem(
+            text = stringResource(Res.string.device_configuration),
+            leadingIcon = Icons.Rounded.AppSettingsAlt,
+            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            enabled = enabled,
+        ) {
+            onNavigate(SettingsRoutes.DeviceConfiguration)
+        }
+    }
+}
+
+@Composable
+private fun ModuleSettingsSection(isManaged: Boolean, enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.module_settings)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+        ListItem(
+            text = stringResource(Res.string.module_settings),
+            leadingIcon = Icons.Rounded.Settings,
+            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            enabled = enabled,
+        ) {
+            onNavigate(SettingsRoutes.ModuleConfiguration)
+        }
+    }
+}
+
+@Composable
+private fun BackupRestoreSection(isManaged: Boolean, enabled: Boolean, onImport: () -> Unit, onExport: () -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.backup_restore)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+
+        ListItem(
+            text = stringResource(Res.string.import_configuration),
+            leadingIcon = Icons.Rounded.Download,
+            enabled = enabled,
+            onClick = onImport,
+        )
+        ListItem(
+            text = stringResource(Res.string.export_configuration),
+            leadingIcon = Icons.Rounded.Upload,
+            enabled = enabled,
+            onClick = onExport,
+        )
+    }
+}
+
+@Composable
+private fun AdministrationSection(enabled: Boolean, onNavigate: (Route) -> Unit) {
+    ExpressiveSection(title = stringResource(Res.string.administration)) {
+        ListItem(
+            text = stringResource(Res.string.administration),
+            leadingIcon = Icons.Rounded.AdminPanelSettings,
+            trailingIcon = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            leadingIconTint = MaterialTheme.colorScheme.error,
+            textColor = MaterialTheme.colorScheme.error,
+            trailingIconTint = MaterialTheme.colorScheme.error,
+            enabled = enabled,
+        ) {
+            onNavigate(SettingsRoutes.Administration)
+        }
+    }
+}
+
+@Composable
+private fun AdvancedSection(
+    isManaged: Boolean,
+    isOtaCapable: Boolean,
+    enabled: Boolean,
+    onNavigate: (Route) -> Unit
+) {
+    ExpressiveSection(title = stringResource(Res.string.advanced_title)) {
+        if (isManaged) {
+            ManagedMessage()
+        }
+
+        if (isOtaCapable) {
+            ListItem(
+                text = stringResource(Res.string.firmware_update_title),
+                leadingIcon = Icons.Rounded.SystemUpdate,
+                enabled = enabled,
+                onClick = { onNavigate(FirmwareRoutes.FirmwareUpdate) },
+            )
+        }
+
+        ListItem(
+            text = stringResource(Res.string.clean_node_database_title),
+            leadingIcon = Icons.Rounded.CleaningServices,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+        )
+
+        ListItem(
+            text = stringResource(Res.string.debug_panel),
+            leadingIcon = Icons.Rounded.BugReport,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoutes.DebugPanel) },
+        )
     }
 }
 

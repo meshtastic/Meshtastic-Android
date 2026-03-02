@@ -16,7 +16,12 @@
  */
 package org.meshtastic.core.domain.usecase
 
-import io.mockk.*
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkConstructor
+import io.mockk.slot
+import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -84,7 +89,7 @@ class SendMessageUseCaseTest {
         // Assert
         assertEquals(0, radioController.favoritedNodes.size)
         assertEquals(0, radioController.sentSharedContacts.size)
-        
+
         coVerify { packetRepository.insert(any<Packet>()) }
         coVerify { messageQueue.enqueue(any()) }
     }
@@ -114,7 +119,7 @@ class SendMessageUseCaseTest {
         // Assert
         assertEquals(1, radioController.favoritedNodes.size)
         assertEquals(12345, radioController.favoritedNodes[0])
-        
+
         coVerify { packetRepository.insert(any<Packet>()) }
         coVerify { messageQueue.enqueue(any()) }
     }
@@ -143,7 +148,7 @@ class SendMessageUseCaseTest {
         // Assert
         assertEquals(1, radioController.sentSharedContacts.size)
         assertEquals(67890, radioController.sentSharedContacts[0])
-        
+
         coVerify { packetRepository.insert(any<Packet>()) }
         coVerify { messageQueue.enqueue(any()) }
     }

@@ -16,7 +16,7 @@
  */
 import com.android.build.api.dsl.LibraryExtension
 
-plugins { 
+plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.hilt)
 }

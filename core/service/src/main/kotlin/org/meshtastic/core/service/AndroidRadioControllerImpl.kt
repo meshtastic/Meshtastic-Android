@@ -26,9 +26,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AndroidRadioControllerImpl @Inject constructor(
+@Suppress("TooManyFunctions")
+class AndroidRadioControllerImpl
+@Inject
+constructor(
     private val serviceRepository: ServiceRepository,
-    private val nodeRepository: NodeRepository
+    private val nodeRepository: NodeRepository,
 ) : RadioController {
 
     override val connectionState: StateFlow<ConnectionState>
@@ -53,11 +56,12 @@ class AndroidRadioControllerImpl @Inject constructor(
 
     override suspend fun sendSharedContact(nodeNum: Int) {
         val nodeDef = nodeRepository.getNode(nodeNum.toString())
-        val contact = org.meshtastic.proto.SharedContact(
-            node_num = nodeDef.num,
-            user = nodeDef.user,
-            manually_verified = nodeDef.manuallyVerified
-        )
+        val contact =
+            org.meshtastic.proto.SharedContact(
+                node_num = nodeDef.num,
+                user = nodeDef.user,
+                manually_verified = nodeDef.manuallyVerified,
+            )
         serviceRepository.onServiceAction(ServiceAction.SendContact(contact))
     }
 
@@ -145,9 +149,7 @@ class AndroidRadioControllerImpl @Inject constructor(
         serviceRepository.meshService?.commitEditSettings(destNum)
     }
 
-    override fun getPacketId(): Int {
-        return serviceRepository.meshService?.getPacketId() ?: 0
-    }
+    override fun getPacketId(): Int = serviceRepository.meshService?.getPacketId() ?: 0
 
     override fun startProvideLocation() {
         serviceRepository.meshService?.startProvideLocation()

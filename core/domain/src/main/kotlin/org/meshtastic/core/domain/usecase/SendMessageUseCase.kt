@@ -35,8 +35,8 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 /**
- * Use case for sending a message.
- * This component handles message transformation, persistence, and enqueuing for durable delivery.
+ * Use case for sending a message. This component handles message transformation, persistence, and enqueuing for durable
+ * delivery.
  */
 @Suppress("TooGenericExceptionCaught")
 class SendMessageUseCase
@@ -86,27 +86,29 @@ constructor(
             }
 
         val packetId = abs(Random.nextInt())
-        
-        val packet = DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply { 
-            from = fromId
-            id = packetId
-            status = MessageStatus.QUEUED
-        }
 
-        val packetToSave = Packet(
-            uuid = 0L,
-            myNodeNum = ourNode?.num ?: 0,
-            packetId = packetId,
-            port_num = packet.dataType,
-            contact_key = contactKey,
-            received_time = nowMillis,
-            read = true, 
-            data = packet,
-            snr = packet.snr,
-            rssi = packet.rssi,
-            hopsAway = packet.hopsAway,
-            filtered = false,
-        )
+        val packet =
+            DataPacket(dest, channel ?: 0, finalMessageText, replyId).apply {
+                from = fromId
+                id = packetId
+                status = MessageStatus.QUEUED
+            }
+
+        val packetToSave =
+            Packet(
+                uuid = 0L,
+                myNodeNum = ourNode?.num ?: 0,
+                packetId = packetId,
+                port_num = packet.dataType,
+                contact_key = contactKey,
+                received_time = nowMillis,
+                read = true,
+                data = packet,
+                snr = packet.snr,
+                rssi = packet.rssi,
+                hopsAway = packet.hopsAway,
+                filtered = false,
+            )
 
         try {
             // Write to the DB to immediately reflect the queued state on the UI

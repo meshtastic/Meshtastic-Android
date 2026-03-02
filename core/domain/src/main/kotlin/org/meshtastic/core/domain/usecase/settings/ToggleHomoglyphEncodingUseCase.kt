@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,8 @@ package org.meshtastic.core.domain.usecase.settings
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import javax.inject.Inject
 
-/**
- * Use case for toggling the homoglyph encoding preference.
- */
-class ToggleHomoglyphEncodingUseCase @Inject constructor(
-    private val homoglyphEncodingPrefs: HomoglyphPrefs
-) {
+/** Use case for toggling the homoglyph encoding preference. */
+class ToggleHomoglyphEncodingUseCase @Inject constructor(private val homoglyphEncodingPrefs: HomoglyphPrefs) {
     operator fun invoke() {
         homoglyphEncodingPrefs.homoglyphEncodingEnabled = !homoglyphEncodingPrefs.homoglyphEncodingEnabled
     }

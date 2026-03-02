@@ -21,9 +21,7 @@ plugins {
     alias(libs.plugins.meshtastic.hilt)
 }
 
-android {
-    namespace = "org.meshtastic.core.domain"
-}
+android { namespace = "org.meshtastic.core.domain" }
 
 dependencies {
     implementation(projects.core.model)
@@ -34,10 +32,10 @@ dependencies {
     implementation(projects.core.data)
     implementation(projects.core.datastore)
     implementation(projects.core.resources)
-    
+
     implementation(libs.kermit)
     implementation(libs.compose.multiplatform.resources)
-    
+
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.robolectric)

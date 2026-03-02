@@ -37,7 +37,7 @@ class SetDatabaseCacheLimitUseCaseTest {
     @Test
     fun `invoke calls setCacheLimit with clamped value`() {
         // Act & Assert
-        useCase(0) 
+        useCase(0)
         verify { databaseManager.setCacheLimit(DatabaseConstants.MIN_CACHE_LIMIT) }
 
         useCase(100)

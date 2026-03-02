@@ -55,7 +55,7 @@ import java.io.FileNotFoundException
 import java.io.FileWriter
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 @HiltViewModel
 class SettingsViewModel
 @Inject
