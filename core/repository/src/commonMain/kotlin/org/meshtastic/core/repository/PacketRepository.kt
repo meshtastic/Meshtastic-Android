@@ -29,9 +29,8 @@ import org.meshtastic.proto.ChannelSettings
 /**
  * Repository interface for managing mesh packets and message history.
  *
- * This component provides methods for persisting received packets, querying message history,
- * tracking unread counts, and managing contact-specific settings. It supports both
- * reactive (Flow) and one-shot (suspend) queries.
+ * This component provides methods for persisting received packets, querying message history, tracking unread counts,
+ * and managing contact-specific settings. It supports both reactive (Flow) and one-shot (suspend) queries.
  */
 @Suppress("TooManyFunctions")
 interface PacketRepository {

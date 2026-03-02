@@ -99,6 +99,7 @@ constructor(
                 }
             }
 
+        @Suppress("MagicNumber")
         val bufferOptions =
             DisconnectedBufferOptions().apply {
                 isBufferEnabled = true
@@ -163,6 +164,7 @@ constructor(
         Logger.i { "MQTT Subscribed to topic: $topic" }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     fun publish(topic: String, data: ByteArray, retained: Boolean) {
         try {
             val token = mqttClient?.publish(topic, data, DEFAULT_QOS, retained)

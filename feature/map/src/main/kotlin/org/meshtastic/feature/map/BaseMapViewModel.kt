@@ -228,6 +228,7 @@ fun BaseMapViewModel.tracerouteNodeSelection(
     )
 }
 
+@Suppress("MagicNumber")
 enum class LastHeardFilter(val label: StringResource, val seconds: Long) {
     Any(Res.string.any, 0L),
     OneHour(Res.string.one_hour, 3600L),

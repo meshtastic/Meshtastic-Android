@@ -37,6 +37,7 @@ constructor(
     private val radioController: RadioController,
 ) : CoroutineWorker(context, params) {
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
     override suspend fun doWork(): Result {
         val packetId = inputData.getInt(KEY_PACKET_ID, 0)
         if (packetId == 0) return Result.failure()

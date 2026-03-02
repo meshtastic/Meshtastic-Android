@@ -735,7 +735,8 @@ constructor(
         // Find the original packet to get the contactKey
         packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
-            val targetId = if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
+            val targetId =
+                if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
             val contactKey = "${originalPacket.channel}$targetId"
             val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true

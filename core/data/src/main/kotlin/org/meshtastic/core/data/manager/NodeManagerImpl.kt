@@ -51,8 +51,7 @@ import org.meshtastic.proto.Position as ProtoPosition
 /**
  * Implementation of [NodeManager] that maintains an in-memory database of the mesh.
  *
- * This component acts as the "brain" for node-related data during a connection session.
- * It manages:
+ * This component acts as the "brain" for node-related data during a connection session. It manages:
  * 1. In-memory maps for fast node lookup by number or ID.
  * 2. Synchronization of node data between the radio and the persistent database.
  * 3. Processing of incoming node-related packets (User, Position, Telemetry).

@@ -29,9 +29,8 @@ import org.meshtastic.proto.MeshPacket
 /**
  * Interface for managing background service state, connection status, and mesh events.
  *
- * This repository acts as the primary data bridge between the long-running mesh service
- * and the UI/Feature layers. It maintains reactive flows for connection status,
- * error messages, and incoming mesh traffic.
+ * This repository acts as the primary data bridge between the long-running mesh service and the UI/Feature layers. It
+ * maintains reactive flows for connection status, error messages, and incoming mesh traffic.
  */
 @Suppress("TooManyFunctions")
 interface ServiceRepository {

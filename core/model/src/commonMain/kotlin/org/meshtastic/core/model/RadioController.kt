@@ -22,9 +22,9 @@ import org.meshtastic.proto.ClientNotification
 /**
  * Central interface for controlling the radio and mesh network.
  *
- * This component provides an abstraction over the underlying communication transport (e.g., BLE, Serial, TCP)
- * and the low-level mesh protocols. It allows feature modules to interact with the mesh without
- * needing to know about platform-specific service details or AIDL interfaces.
+ * This component provides an abstraction over the underlying communication transport (e.g., BLE, Serial, TCP) and the
+ * low-level mesh protocols. It allows feature modules to interact with the mesh without needing to know about
+ * platform-specific service details or AIDL interfaces.
  */
 @Suppress("TooManyFunctions")
 interface RadioController {

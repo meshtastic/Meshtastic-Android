@@ -28,9 +28,8 @@ import org.meshtastic.proto.User
 /**
  * Repository interface for managing node-related data.
  *
- * This component provides access to the mesh's node database, local device information,
- * and mesh-wide statistics. It supports reactive queries for node lists, counts, and
- * filtered/sorted views.
+ * This component provides access to the mesh's node database, local device information, and mesh-wide statistics. It
+ * supports reactive queries for node lists, counts, and filtered/sorted views.
  *
  * This interface is shared across platforms via Kotlin Multiplatform (KMP).
  */

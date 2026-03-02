@@ -21,6 +21,7 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.X509TrustManager
 
 @SuppressLint("CustomX509TrustManager", "TrustAllX509TrustManager")
+@Suppress("EmptyFunctionBlock")
 class TrustAllX509TrustManager : X509TrustManager {
     override fun checkClientTrusted(chain: Array<X509Certificate>?, authType: String?) {}
 
