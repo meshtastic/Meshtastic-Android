@@ -17,8 +17,8 @@
 package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.proto.Config
 

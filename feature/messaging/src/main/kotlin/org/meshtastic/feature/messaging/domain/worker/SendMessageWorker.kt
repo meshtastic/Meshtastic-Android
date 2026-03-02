@@ -28,16 +28,13 @@ import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.PacketRepository
 
 @HiltWorker
-class SendMessageWorker
-@AssistedInject
-constructor(
+class SendMessageWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
     private val packetRepository: PacketRepository,
-    private val radioController: RadioController,
+    private val radioController: RadioController
 ) : CoroutineWorker(context, params) {
 
-    @Suppress("TooGenericExceptionCaught", "SwallowedException", "ReturnCount")
     override suspend fun doWork(): Result {
         val packetId = inputData.getInt(KEY_PACKET_ID, 0)
         if (packetId == 0) return Result.failure()
@@ -47,9 +44,8 @@ constructor(
             return Result.retry()
         }
 
-        val packetData =
-            packetRepository.getPacketByPacketId(packetId)
-                ?: return Result.failure() // Packet no longer exists in DB? Do not retry.
+        val packetData = packetRepository.getPacketByPacketId(packetId)
+            ?: return Result.failure() // Packet no longer exists in DB? Do not retry.
 
         return try {
             radioController.sendMessage(packetData)

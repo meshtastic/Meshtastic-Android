@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.data.manager
+package com.geeksville.mesh.service
 
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
@@ -26,18 +26,17 @@ import org.junit.Test
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.User
 
-class NodeManagerImplTest {
+class NodeManagerTest {
 
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
 
-    private lateinit var nodeManager: NodeManagerImpl
+    private lateinit var nodeManager: NodeManager
 
     @Before
     fun setUp() {
@@ -45,13 +44,13 @@ class NodeManagerImplTest {
     }
 
     @Test
-    fun `getOrCreateNode creates default user for unknown node`() {
+    fun `getOrCreateNodeInfo creates default user for unknown node`() {
         val nodeNum = 1234
-        val result = nodeManager.getOrCreateNode(nodeNum)
+        val result = nodeManager.getOrCreateNodeInfo(nodeNum)
 
         assertNotNull(result)
         assertEquals(nodeNum, result.num)
-        assertTrue(result.user.long_name.startsWith("Meshtastic"))
+        assertTrue(result.user.long_name?.startsWith("Meshtastic") == true)
         assertEquals(DataPacket.nodeNumToDefaultId(nodeNum), result.user.id)
     }
 
@@ -62,7 +61,7 @@ class NodeManagerImplTest {
             User(id = "!12345678", long_name = "My Custom Name", short_name = "MCN", hw_model = HardwareModel.TLORA_V2)
 
         // Setup existing node
-        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
+        nodeManager.updateNode(nodeNum) { it.user = existingUser }
 
         val incomingDefaultUser =
             User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
@@ -80,7 +79,7 @@ class NodeManagerImplTest {
         val existingUser =
             User(id = "!12345678", long_name = "Meshtastic 5678", short_name = "5678", hw_model = HardwareModel.UNSET)
 
-        nodeManager.updateNode(nodeNum) { it.copy(user = existingUser) }
+        nodeManager.updateNode(nodeNum) { it.user = existingUser }
 
         val incomingDetailedUser =
             User(id = "!12345678", long_name = "Real User", short_name = "RU", hw_model = HardwareModel.TLORA_V1)
@@ -97,7 +96,7 @@ class NodeManagerImplTest {
         val nodeNum = 1234
         val position = Position(latitude_i = 450000000, longitude_i = 900000000)
 
-        nodeManager.handleReceivedPosition(nodeNum, 9999, position, 0)
+        nodeManager.handleReceivedPosition(nodeNum, 9999, position)
 
         val result = nodeManager.nodeDBbyNodeNum[nodeNum]
         assertNotNull(result!!.position)
@@ -107,7 +106,7 @@ class NodeManagerImplTest {
 
     @Test
     fun `clear resets internal state`() {
-        nodeManager.updateNode(1234) { it.copy(user = it.user.copy(long_name = "Test")) }
+        nodeManager.updateNode(1234) { it.longName = "Test" }
         nodeManager.clear()
 
         assertTrue(nodeManager.nodeDBbyNodeNum.isEmpty())

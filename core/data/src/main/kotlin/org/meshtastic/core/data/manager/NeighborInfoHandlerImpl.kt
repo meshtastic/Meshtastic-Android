@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.data.manager
+package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -22,10 +22,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.unknown_username
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import java.util.Locale
@@ -33,21 +35,21 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NeighborInfoHandlerImpl
+class MeshNeighborInfoHandler
 @Inject
 constructor(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val commandSender: CommandSender,
     private val serviceBroadcasts: ServiceBroadcasts,
-) : NeighborInfoHandler {
+) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    override fun start(scope: CoroutineScope) {
+    fun start(scope: CoroutineScope) {
         this.scope = scope
     }
 
-    override fun handleNeighborInfo(packet: MeshPacket) {
+    fun handleNeighborInfo(packet: MeshPacket) {
         val payload = packet.decoded?.payload ?: return
         val ni = NeighborInfo.ADAPTER.decode(payload)
 
@@ -68,7 +70,7 @@ constructor(
         val neighbors =
             ni.neighbors.joinToString("\n") { n ->
                 val node = nodeManager.nodeDBbyNodeNum[n.node_id]
-                val name = node?.let { "${it.user.long_name} (${it.user.short_name})" } ?: "Unknown"
+                val name = node?.let { "${it.user.long_name} (${it.user.short_name})" } ?: getString(Res.string.unknown_username)
                 "• $name (SNR: ${n.snr})"
             }
 

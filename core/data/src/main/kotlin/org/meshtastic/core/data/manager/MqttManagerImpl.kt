@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.data.manager
+package com.geeksville.mesh.service
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import com.geeksville.mesh.repository.network.MQTTRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,27 +26,25 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.meshtastic.core.network.repository.MQTTRepository
-import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MqttManagerImpl
+class MeshMqttManager
 @Inject
 constructor(
     private val mqttRepository: MQTTRepository,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
-) : MqttManager {
+) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var mqttMessageFlow: Job? = null
 
-    override fun start(scope: CoroutineScope, enabled: Boolean, proxyToClientEnabled: Boolean) {
+    fun start(scope: CoroutineScope, enabled: Boolean, proxyToClientEnabled: Boolean) {
         this.scope = scope
         if (mqttMessageFlow?.isActive == true) return
         if (enabled && proxyToClientEnabled) {
@@ -62,7 +61,7 @@ constructor(
         }
     }
 
-    override fun stop() {
+    fun stop() {
         if (mqttMessageFlow?.isActive == true) {
             Logger.i { "Stopping MqttClientProxy" }
             mqttMessageFlow?.cancel()
@@ -70,7 +69,7 @@ constructor(
         }
     }
 
-    override fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
+    fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
         val topic = message.topic ?: ""
         Logger.d { "[mqttClientProxyMessage] $topic" }
         val retained = message.retained == true

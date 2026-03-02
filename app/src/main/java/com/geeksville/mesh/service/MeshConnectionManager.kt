@@ -47,9 +47,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketHandler
@@ -88,8 +86,8 @@ constructor(
     private val packetHandler: PacketHandler,
     private val nodeRepository: NodeRepository,
     private val locationManager: MeshLocationManager,
-    private val mqttManager: MqttManager,
-    private val historyManager: HistoryManager,
+    private val mqttManager: MeshMqttManager,
+    private val historyManager: MeshHistoryManager,
     private val radioConfigRepository: RadioConfigRepository,
     private val commandSender: CommandSender,
     private val nodeManager: NodeManager,
@@ -273,15 +271,14 @@ constructor(
             val queuedPackets = packetRepository.getQueuedPackets() ?: emptyList()
             queuedPackets.forEach { packet ->
                 try {
-                    val workRequest =
-                        OneTimeWorkRequestBuilder<SendMessageWorker>()
-                            .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packet.id))
-                            .build()
+                    val workRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
+                        .setInputData(workDataOf(SendMessageWorker.KEY_PACKET_ID to packet.id))
+                        .build()
 
                     workManager.enqueueUniqueWork(
                         "${SendMessageWorker.WORK_NAME_PREFIX}${packet.id}",
                         ExistingWorkPolicy.REPLACE,
-                        workRequest,
+                        workRequest
                     )
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Failed to enqueue queued packet worker" }

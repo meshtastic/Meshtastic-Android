@@ -49,8 +49,8 @@ import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.service.AndroidServiceRepository
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
@@ -60,7 +60,7 @@ class MeshService : Service() {
 
     @Inject lateinit var radioInterfaceService: RadioInterfaceService
 
-    @Inject lateinit var serviceRepository: AndroidServiceRepository
+    @Inject lateinit var serviceRepository: ServiceRepository
 
     @Inject lateinit var connectionStateHolder: ConnectionStateHandler
 

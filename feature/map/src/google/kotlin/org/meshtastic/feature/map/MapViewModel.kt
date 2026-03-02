@@ -46,13 +46,13 @@ import kotlinx.serialization.Serializable
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.data.repository.CustomTileProviderRepository
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Config
 import java.io.File
@@ -86,11 +86,11 @@ constructor(
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
-    radioController: RadioController,
+    serviceRepository: ServiceRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
     uiPreferencesDataSource: UiPreferencesDataSource,
     savedStateHandle: SavedStateHandle,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, serviceRepository) {
 
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.toRoute<MapRoutes.Map>().waypointId)
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
@@ -643,8 +643,6 @@ constructor(
         super.onCleared()
         (currentTileProvider as? MBTilesProvider)?.close()
     }
-
-    override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: org.meshtastic.core.model.DataPacket.ID_BROADCAST)
 }
 
 enum class LayerType {

@@ -16,12 +16,14 @@
  */
 package org.meshtastic.core.ui.qr
 
+import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Channel
@@ -35,7 +37,7 @@ class ScannedQrCodeViewModel
 @Inject
 constructor(
     private val radioConfigRepository: RadioConfigRepository,
-    private val radioController: RadioController,
+    private val serviceRepository: ServiceRepository,
 ) : ViewModel() {
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
@@ -54,15 +56,19 @@ constructor(
     }
 
     private fun setChannel(channel: Channel) {
-        viewModelScope.launch {
-            radioController.setLocalChannel(channel)
+        try {
+            serviceRepository.meshService?.setChannel(Channel.ADAPTER.encode(channel))
+        } catch (ex: RemoteException) {
+            Logger.e(ex) { "Set channel error" }
         }
     }
 
     // Set the radio config (also updates our saved copy in preferences)
     private fun setConfig(config: Config) {
-        viewModelScope.launch {
-            radioController.setLocalConfig(config)
+        try {
+            serviceRepository.meshService?.setConfig(Config.ADAPTER.encode(config))
+        } catch (ex: RemoteException) {
+            Logger.e(ex) { "Set config error" }
         }
     }
 }

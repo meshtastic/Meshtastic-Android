@@ -14,28 +14,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.data.manager
+package com.geeksville.mesh.service
 
-import io.mockk.every
-import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.proto.User
 
-class CommandSenderImplTest {
+class CommandSenderTest {
 
-    private lateinit var commandSender: CommandSenderImpl
+    private lateinit var commandSender: CommandSender
     private lateinit var nodeManager: NodeManager
 
     @Before
     fun setUp() {
-        nodeManager = mockk(relaxed = true)
-        commandSender = CommandSenderImpl(mockk(relaxed = true), nodeManager, mockk(relaxed = true))
+        nodeManager = NodeManagerImpl()
+        commandSender = CommandSenderImpl(null, nodeManager, null, null)
     }
 
     @Test
@@ -63,8 +60,9 @@ class CommandSenderImplTest {
     fun `resolveNodeNum handles custom node ID from database`() {
         val nodeNum = 456
         val userId = "custom_id"
-        val node = Node(num = nodeNum, user = User(id = userId))
-        every { nodeManager.nodeDBbyID } returns mapOf(userId to node)
+        val entity = NodeEntity(num = nodeNum, user = User(id = userId))
+        nodeManager.nodeDBbyNodeNum[nodeNum] = entity
+        nodeManager.nodeDBbyID[userId] = entity
 
         assertEquals(nodeNum, commandSender.resolveNodeNum(userId))
     }

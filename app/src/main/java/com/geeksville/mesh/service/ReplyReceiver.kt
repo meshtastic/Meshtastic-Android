@@ -20,11 +20,9 @@ import android.content.BroadcastReceiver
 import androidx.core.app.RemoteInput
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
-import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.service.ServiceRepository
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
@@ -35,7 +33,7 @@ import org.meshtastic.core.repository.ServiceRepository
  */
 @AndroidEntryPoint
 class ReplyReceiver : BroadcastReceiver() {
-    @Inject lateinit var radioController: RadioController
+    @Inject lateinit var serviceRepository: ServiceRepository
 
     @Inject lateinit var meshServiceNotifications: MeshServiceNotifications
 
@@ -50,9 +48,7 @@ class ReplyReceiver : BroadcastReceiver() {
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
         val p = DataPacket(dest, channel ?: 0, str)
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            radioController.sendMessage(p)
-        }
+        serviceRepository.meshService?.send(p)
     }
 
     override fun onReceive(context: android.content.Context, intent: android.content.Intent) {

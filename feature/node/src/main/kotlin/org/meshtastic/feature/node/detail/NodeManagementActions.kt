@@ -16,16 +16,14 @@
  */
 package org.meshtastic.feature.node.detail
 
+import android.os.RemoteException
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.favorite
 import org.meshtastic.core.resources.favorite_add
@@ -39,6 +37,8 @@ import org.meshtastic.core.resources.mute_remove
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_node_text
 import org.meshtastic.core.resources.unmute
+import org.meshtastic.core.service.ServiceAction
+import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.AlertManager
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -49,7 +49,6 @@ class NodeManagementActions
 constructor(
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
-    private val radioController: RadioController,
     private val alertManager: AlertManager,
 ) {
     fun requestRemoveNode(scope: CoroutineScope, node: Node) {
@@ -63,9 +62,13 @@ constructor(
     fun removeNode(scope: CoroutineScope, nodeNum: Int) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Removing node '$nodeNum'" }
-            val packetId = radioController.getPacketId()
-            radioController.removeByNodenum(packetId, nodeNum)
-            nodeRepository.deleteNode(nodeNum)
+            try {
+                val packetId = serviceRepository.meshService?.packetId ?: return@launch
+                serviceRepository.meshService?.removeByNodenum(packetId, nodeNum)
+                nodeRepository.deleteNode(nodeNum)
+            } catch (ex: RemoteException) {
+                Logger.e { "Remove node error: ${ex.message}" }
+            }
         }
     }
 
@@ -86,7 +89,11 @@ constructor(
 
     fun ignoreNode(scope: CoroutineScope, node: Node) {
         scope.launch(Dispatchers.IO) {
-            serviceRepository.onServiceAction(ServiceAction.Ignore(node))
+            try {
+                serviceRepository.onServiceAction(ServiceAction.Ignore(node))
+            } catch (ex: RemoteException) {
+                Logger.e(ex) { "Ignore node error" }
+            }
         }
     }
 
@@ -104,7 +111,11 @@ constructor(
 
     fun muteNode(scope: CoroutineScope, node: Node) {
         scope.launch(Dispatchers.IO) {
-            serviceRepository.onServiceAction(ServiceAction.Mute(node))
+            try {
+                serviceRepository.onServiceAction(ServiceAction.Mute(node))
+            } catch (ex: RemoteException) {
+                Logger.e(ex) { "Mute node error" }
+            }
         }
     }
 
@@ -125,7 +136,11 @@ constructor(
 
     fun favoriteNode(scope: CoroutineScope, node: Node) {
         scope.launch(Dispatchers.IO) {
-            serviceRepository.onServiceAction(ServiceAction.Favorite(node))
+            try {
+                serviceRepository.onServiceAction(ServiceAction.Favorite(node))
+            } catch (ex: RemoteException) {
+                Logger.e(ex) { "Favorite node error" }
+            }
         }
     }
 

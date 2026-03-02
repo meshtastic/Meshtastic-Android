@@ -41,17 +41,13 @@ import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.meshtastic.core.repository.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
-open class DatabaseManager
-@Inject
-constructor(
-    private val app: Application,
-    private val dispatchers: CoroutineDispatchers,
-) {
+open class DatabaseManager @Inject constructor(private val app: Application, private val dispatchers: CoroutineDispatchers) : SharedDatabaseManager {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 

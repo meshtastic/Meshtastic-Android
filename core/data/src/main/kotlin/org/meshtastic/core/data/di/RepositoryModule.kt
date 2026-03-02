@@ -21,8 +21,18 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.data.manager.CommandSenderImpl
+import org.meshtastic.core.data.manager.NodeManagerImpl
+import org.meshtastic.core.data.repository.DeviceHardwareRepositoryImpl
 import org.meshtastic.core.data.repository.NodeRepositoryImpl
+import org.meshtastic.core.data.repository.PacketRepositoryImpl
+import org.meshtastic.core.data.repository.RadioConfigRepositoryImpl
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import javax.inject.Singleton
 
 @Module
@@ -34,4 +44,34 @@ abstract class RepositoryModule {
     abstract fun bindNodeRepository(
         nodeRepositoryImpl: NodeRepositoryImpl
     ): NodeRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindRadioConfigRepository(
+        radioConfigRepositoryImpl: RadioConfigRepositoryImpl
+    ): RadioConfigRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindDeviceHardwareRepository(
+        deviceHardwareRepositoryImpl: DeviceHardwareRepositoryImpl
+    ): DeviceHardwareRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindPacketRepository(
+        packetRepositoryImpl: PacketRepositoryImpl
+    ): PacketRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNodeManager(
+        nodeManagerImpl: NodeManagerImpl
+    ): NodeManager
+
+    @Binds
+    @Singleton
+    abstract fun bindCommandSender(
+        commandSenderImpl: CommandSenderImpl
+    ): CommandSender
 }

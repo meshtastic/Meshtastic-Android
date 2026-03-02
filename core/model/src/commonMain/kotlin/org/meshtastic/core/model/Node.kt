@@ -21,7 +21,6 @@ import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
-import org.meshtastic.core.model.Node.Companion.ERROR_BYTE_STRING
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.core.model.util.toDistanceString
@@ -215,8 +214,6 @@ data class Node(
 
             return closestRelayNode
         }
-
-        val ERROR_BYTE_STRING: ByteString = ByteArray(32) { 0 }.toByteString()
 
         /** Creates a fallback [Node] when the node is not found in the database. */
         fun createFallback(nodeNum: Int, fallbackNamePrefix: String): Node {
