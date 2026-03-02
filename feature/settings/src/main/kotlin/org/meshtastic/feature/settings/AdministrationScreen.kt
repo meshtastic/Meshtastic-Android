@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
 import org.meshtastic.core.resources.preserve_favorites
@@ -48,6 +49,7 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.feature.settings.radio.AdminRoute
 import org.meshtastic.feature.settings.radio.ExpressiveSection
+import org.meshtastic.feature.settings.radio.RadioConfigState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.component.LoadingOverlay
@@ -90,56 +92,12 @@ fun AdministrationScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     title = stringResource(Res.string.administration),
                     titleColor = MaterialTheme.colorScheme.error,
                 ) {
-                    AdminRoute.entries.forEach { route ->
-                        var showDialog by remember { mutableStateOf(false) }
-                        if (showDialog) {
-                            if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
-                                ShutdownConfirmationDialog(
-                                    title = "${stringResource(route.title)}?",
-                                    node = destNode,
-                                    onDismiss = { showDialog = false },
-                                    isShutdown = route == AdminRoute.SHUTDOWN,
-                                    onConfirm = { viewModel.setResponseStateLoading(route) },
-                                )
-                            } else {
-                                WarningDialog(
-                                    title = "${stringResource(route.title)}?",
-                                    text = {
-                                        if (route == AdminRoute.NODEDB_RESET) {
-                                            Row(
-                                                modifier =
-                                                Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                                    .fillMaxWidth(),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.SpaceBetween,
-                                            ) {
-                                                Text(text = stringResource(Res.string.preserve_favorites))
-                                                Switch(
-                                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                                    enabled = enabled,
-                                                    checked = state.nodeDbResetPreserveFavorites,
-                                                    onCheckedChange = { viewModel.setPreserveFavorites(it) },
-                                                )
-                                            }
-                                        }
-                                    },
-                                    onDismiss = { showDialog = false },
-                                    onConfirm = { viewModel.setResponseStateLoading(route) },
-                                )
-                            }
-                        }
-
-                        ListItem(
-                            enabled = enabled,
-                            text = stringResource(route.title),
-                            leadingIcon = route.icon,
-                            leadingIconTint = MaterialTheme.colorScheme.error,
-                            textColor = MaterialTheme.colorScheme.error,
-                            trailingIcon = null,
-                        ) {
-                            showDialog = true
-                        }
-                    }
+                    AdminRouteItems(
+                        viewModel = viewModel,
+                        enabled = enabled,
+                        state = state,
+                        destNode = destNode,
+                    )
                 }
             }
         }
@@ -156,5 +114,85 @@ fun AdministrationScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                 },
             )
         }
+    }
+}
+
+@Composable
+private fun AdminRouteItems(
+    viewModel: RadioConfigViewModel,
+    enabled: Boolean,
+    state: RadioConfigState,
+    destNode: Node?,
+) {
+    AdminRoute.entries.forEach { route ->
+        var showDialog by remember { mutableStateOf(false) }
+        if (showDialog) {
+            AdminActionDialog(
+                route = route,
+                destNode = destNode,
+                enabled = enabled,
+                state = state,
+                onDismiss = { showDialog = false },
+                onConfirm = { viewModel.setResponseStateLoading(route) },
+                onPreserveFavoritesChange = { viewModel.setPreserveFavorites(it) },
+            )
+        }
+
+        ListItem(
+            enabled = enabled,
+            text = stringResource(route.title),
+            leadingIcon = route.icon,
+            leadingIconTint = MaterialTheme.colorScheme.error,
+            textColor = MaterialTheme.colorScheme.error,
+            trailingIcon = null,
+        ) {
+            showDialog = true
+        }
+    }
+}
+
+@Composable
+private fun AdminActionDialog(
+    route: AdminRoute,
+    destNode: Node?,
+    enabled: Boolean,
+    state: RadioConfigState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    onPreserveFavoritesChange: (Boolean) -> Unit,
+) {
+    if (route == AdminRoute.SHUTDOWN || route == AdminRoute.REBOOT) {
+        ShutdownConfirmationDialog(
+            title = "${stringResource(route.title)}?",
+            node = destNode,
+            onDismiss = onDismiss,
+            isShutdown = route == AdminRoute.SHUTDOWN,
+            onConfirm = onConfirm,
+        )
+    } else {
+        WarningDialog(
+            title = "${stringResource(route.title)}?",
+            text = {
+                if (route == AdminRoute.NODEDB_RESET) {
+                    Row(
+                        modifier =
+                        Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(text = stringResource(Res.string.preserve_favorites))
+                        Switch(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            enabled = enabled,
+                            checked = state.nodeDbResetPreserveFavorites,
+                            onCheckedChange = onPreserveFavoritesChange,
+                        )
+                    }
+                }
+            },
+            onDismiss = onDismiss,
+            onConfirm = onConfirm,
+        )
     }
 }

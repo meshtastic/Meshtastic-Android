@@ -42,15 +42,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.meshtastic.feature.settings.radio.ResponseState
 
+private const val LOADING_OVERLAY_ALPHA = 0.8f
+private const val PERCENTAGE_FACTOR = 100
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
     AnimatedVisibility(visible = state is ResponseState.Loading, enter = fadeIn(), exit = fadeOut()) {
         Box(
-            modifier =
-            modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)).clickable(
-                enabled = false,
-            ) {},
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = LOADING_OVERLAY_ALPHA))
+                .clickable(enabled = false) {},
             contentAlignment = Alignment.Center,
         ) {
             Column(
@@ -72,7 +75,7 @@ fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
                         Text(
-                            text = "%.0f%%".format(progress * 100),
+                            text = "%.0f%%".format(progress * PERCENTAGE_FACTOR),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                         )

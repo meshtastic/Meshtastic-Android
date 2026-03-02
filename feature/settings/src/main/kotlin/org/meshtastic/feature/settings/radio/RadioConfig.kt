@@ -49,7 +49,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -81,9 +80,7 @@ import org.meshtastic.feature.settings.navigation.ConfigRoute
 fun RadioConfigItemList(
     state: RadioConfigState,
     isManaged: Boolean,
-    node: Node? = null,
     isOtaCapable: Boolean = false,
-    onPreserveFavoritesToggle: (Boolean) -> Unit = {},
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},

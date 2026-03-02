@@ -54,7 +54,11 @@ private const val AUTO_DISMISS_DELAY_MS = 1500L
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit = {}, onComplete: () -> Unit = {}) {
+fun <T> PacketResponseStateDialog(
+    state: ResponseState<T>,
+    onDismiss: () -> Unit = {},
+    onComplete: () -> Unit = {},
+) {
     val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     LaunchedEffect(state) {
         if (state is ResponseState.Success) {
@@ -76,80 +80,13 @@ fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit
             ) {
                 when (state) {
                     is ResponseState.Loading -> {
-                        val progress by
-                            animateFloatAsState(
-                                targetValue = state.completed.toFloat() / state.total.toFloat(),
-                                label = "progress",
-                            )
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "%.0f%%".format(progress * 100),
-                                style = MaterialTheme.typography.displaySmall,
-                                color = MaterialTheme.colorScheme.secondary,
-                            )
-                            LinearWavyProgressIndicator(
-                                progress = { progress },
-                                modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-                            state.status?.let {
-                                Text(
-                                    text = it,
-                                    modifier = Modifier.padding(top = 16.dp),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    textAlign = TextAlign.Center,
-                                )
-                            }
-                        }
-                        if (state.completed >= state.total) onComplete()
+                        LoadingContent(state = state, onComplete = onComplete)
                     }
                     is ResponseState.Success -> {
-                        Icon(
-                            imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(84.dp),
-                            tint = MaterialTheme.colorScheme.primary,
-                        )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.delivery_confirmed),
-                                style = MaterialTheme.typography.headlineSmall,
-                                textAlign = TextAlign.Center,
-                            )
-                            Text(
-                                text = stringResource(Res.string.delivery_confirmed_reboot_warning),
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
+                        SuccessContent()
                     }
                     is ResponseState.Error -> {
-                        Icon(
-                            imageVector = Icons.Filled.Error,
-                            contentDescription = null,
-                            modifier = Modifier.size(84.dp),
-                            tint = MaterialTheme.colorScheme.error,
-                        )
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.error),
-                                style = MaterialTheme.typography.headlineSmall,
-                                textAlign = TextAlign.Center,
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                            Text(
-                                text = "${state.error.asString()}.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
+                        ErrorContent(state = state)
                     }
                     ResponseState.Empty -> {}
                 }
@@ -168,6 +105,89 @@ fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit
         confirmText = stringResource(Res.string.close),
         dismissText = if (state is ResponseState.Loading) stringResource(Res.string.cancel) else null,
     )
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit) {
+    val progress by
+        animateFloatAsState(
+            targetValue = state.completed.toFloat() / state.total.toFloat(),
+            label = "progress",
+        )
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "%.0f%%".format(progress * 100),
+            style = MaterialTheme.typography.displaySmall,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+        LinearWavyProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        )
+        state.status?.let {
+            Text(
+                text = it,
+                modifier = Modifier.padding(top = 16.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+    if (state.completed >= state.total) onComplete()
+}
+
+@Composable
+private fun SuccessContent() {
+    Icon(
+        imageVector = Icons.Filled.CheckCircle,
+        contentDescription = null,
+        modifier = Modifier.size(84.dp),
+        tint = MaterialTheme.colorScheme.primary,
+    )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.delivery_confirmed),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            text = stringResource(Res.string.delivery_confirmed_reboot_warning),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun ErrorContent(state: ResponseState.Error) {
+    Icon(
+        imageVector = Icons.Filled.Error,
+        contentDescription = null,
+        modifier = Modifier.size(84.dp),
+        tint = MaterialTheme.colorScheme.error,
+    )
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text(
+            text = stringResource(Res.string.error),
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.error,
+        )
+        Text(
+            text = "${state.error.asString()}.",
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @Preview(showBackground = true)

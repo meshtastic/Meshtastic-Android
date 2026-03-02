@@ -231,9 +231,7 @@ fun SettingsScreen(
             RadioConfigItemList(
                 state = state,
                 isManaged = localConfig.security?.is_managed ?: false,
-                node = destNode,
                 isOtaCapable = isOtaCapable,
-                onPreserveFavoritesToggle = { viewModel.setPreserveFavorites(it) },
                 onRouteClick = { route ->
                     val navRoute =
                         when (route) {
