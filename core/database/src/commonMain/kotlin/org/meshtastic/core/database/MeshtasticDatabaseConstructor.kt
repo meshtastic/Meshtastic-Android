@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+package org.meshtastic.core.database
 
-package org.meshtastic.core.database.entity
+import androidx.room.RoomDatabaseConstructor
 
-import androidx.room.ColumnInfo
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
-@Entity(tableName = "quick_chat")
-data class QuickChatAction(
-    @PrimaryKey(autoGenerate = true) val uuid: Long = 0L,
-    @ColumnInfo(name = "name") val name: String = "",
-    @ColumnInfo(name = "message") val message: String = "",
-    @ColumnInfo(name = "mode") val mode: Mode = Mode.Instant,
-    @ColumnInfo(name = "position") val position: Int,
-) {
-    enum class Mode {
-        Append,
-        Instant,
-    }
+@Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")
+expect object MeshtasticDatabaseConstructor : RoomDatabaseConstructor<MeshtasticDatabase> {
+    override fun initialize(): MeshtasticDatabase
 }

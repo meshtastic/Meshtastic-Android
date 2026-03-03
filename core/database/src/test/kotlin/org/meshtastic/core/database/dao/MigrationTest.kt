@@ -18,7 +18,6 @@ package org.meshtastic.core.database.dao
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okio.ByteString.Companion.toByteString
@@ -57,8 +56,9 @@ class MigrationTest {
 
     @Before
     fun createDb(): Unit = runBlocking {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        database = Room.inMemoryDatabaseBuilder(context, MeshtasticDatabase::class.java).build()
+        database =
+            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
+                .build()
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
         packetDao = database.packetDao()
     }

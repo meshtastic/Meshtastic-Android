@@ -16,15 +16,15 @@
  */
 package org.meshtastic.core.database
 
-import android.content.Context
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.DeleteColumn
 import androidx.room.DeleteTable
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import kotlinx.coroutines.Dispatchers
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
@@ -99,6 +99,7 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
     version = 37,
     exportSchema = true,
 )
+@androidx.room.ConstructedBy(MeshtasticDatabaseConstructor::class)
 @TypeConverters(Converters::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao
@@ -116,11 +117,12 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun tracerouteNodePositionDao(): TracerouteNodePositionDao
 
     companion object {
-        fun getDatabase(context: Context): MeshtasticDatabase =
-            Room.databaseBuilder(context.applicationContext, MeshtasticDatabase::class.java, "meshtastic_database")
-                .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
-                .fallbackToDestructiveMigration(false)
-                .build()
+        /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
+        fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
+            this.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
+                .fallbackToDestructiveMigration(dropAllTables = false)
+                .setDriver(BundledSQLiteDriver())
+                .setQueryCoroutineContext(Dispatchers.IO)
     }
 }
 

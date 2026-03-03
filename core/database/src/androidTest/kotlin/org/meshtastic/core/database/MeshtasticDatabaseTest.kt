@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.database
 
 import androidx.room.Room
@@ -24,6 +23,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
@@ -40,17 +40,20 @@ class MeshtasticDatabaseTest {
     @Test
     @Throws(IOException::class)
     fun migrateAll() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+
         // Create earliest version of the database.
         helper.createDatabase(TEST_DB, 3).apply { close() }
 
         // Open latest version of the database. Room validates the schema
         // once all migrations execute.
-        Room.databaseBuilder(
-            InstrumentationRegistry.getInstrumentation().targetContext,
-            MeshtasticDatabase::class.java,
-            TEST_DB,
+        Room.databaseBuilder<MeshtasticDatabase>(
+            context = context,
+            name = context.getDatabasePath(TEST_DB).absolutePath,
+            factory = { MeshtasticDatabaseConstructor.initialize() },
         )
+            .configureCommon()
             .build()
-            .apply { openHelper.writableDatabase.close() }
+            .apply { close() }
     }
 }
