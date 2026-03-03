@@ -185,9 +185,7 @@ constructor(
 
     val effects: SharedFlow<NodeRequestEffect> = nodeRequestActions.effects
 
-    val lastTraceRouteTime: StateFlow<Long?> =
-        combine(nodeRequestActions.lastTracerouteTimes, activeNodeId) { map, id -> id?.let { map[it] } }
-            .stateInWhileSubscribed(null)
+    val lastTraceRouteTime: StateFlow<Long?> = nodeRequestActions.lastTracerouteTime
 
     val lastRequestNeighborsTime: StateFlow<Long?> =
         combine(nodeRequestActions.lastRequestNeighborTimes, activeNodeId) { map, id -> id?.let { map[it] } }
