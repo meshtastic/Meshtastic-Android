@@ -19,6 +19,7 @@ Internal components that handle raw data fetching from APIs or disk.
 ```mermaid
 graph TB
   :core:data[data]:::android-library
+  :core:data --> :core:repository
   :core:data -.-> :core:analytics
   :core:data -.-> :core:common
   :core:data -.-> :core:database

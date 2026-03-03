@@ -26,6 +26,7 @@ The `NodeInfoDao` implements specific logic to protect against impersonation and
 ```mermaid
 graph TB
   :core:database[database]:::android-library
+  :core:database -.-> :core:repository
   :core:database -.-> :core:common
   :core:database -.-> :core:di
   :core:database -.-> :core:model
