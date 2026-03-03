@@ -19,7 +19,7 @@
     <string name="meshtastic_app_name">Meshtastic</string>
     <!-- Language tags native names (not available via .getDisplayLanguage) -->
     <string name="fallback_node_name">Meshtastic</string>
-    <string name="node_filter_placeholder">筛选器csvfganw</string>
+    <string name="node_filter_placeholder">搜索节点</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_title">筛选条件</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
@@ -35,8 +35,8 @@
     <string name="node_sort_distance">距离</string>
     <string name="node_sort_hops_away">跃点数</string>
     <string name="node_sort_last_heard">上次连接时间</string>
-    <string name="node_sort_via_mqtt">通过 MQTT</string>
-    <string name="via_mqtt">通过 MQTT</string>
+    <string name="node_sort_via_mqtt">MQTT</string>
+    <string name="via_mqtt">MQTT</string>
     <string name="via_udp">UDP</string>
     <string name="via_api">API</string>
     <string name="internal">内置</string>
