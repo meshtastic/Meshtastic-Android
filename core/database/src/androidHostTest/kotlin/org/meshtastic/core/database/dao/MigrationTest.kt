@@ -17,6 +17,7 @@
 package org.meshtastic.core.database.dao
 
 import androidx.room.Room
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -28,13 +29,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.MeshtasticDatabaseConstructor
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.PortNum
+import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
 class MigrationTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var packetDao: PacketDao
@@ -56,8 +60,12 @@ class MigrationTest {
 
     @Before
     fun createDb(): Unit = runBlocking {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         database =
-            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
+            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
+                context = context,
+                factory = { MeshtasticDatabaseConstructor.initialize() },
+            )
                 .build()
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
         packetDao = database.packetDao()

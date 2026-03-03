@@ -54,6 +54,9 @@ class MeshtasticDatabaseTest {
         )
             .configureCommon()
             .build()
-            .apply { close() }
+            .apply {
+                openHelper.writableDatabase
+                close()
+            }
     }
 }

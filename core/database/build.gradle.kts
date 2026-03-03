@@ -22,7 +22,11 @@ plugins {
 }
 
 kotlin {
-    androidLibrary { namespace = "org.meshtastic.core.database" }
+    androidLibrary {
+        namespace = "org.meshtastic.core.database"
+        withHostTest { isIncludeAndroidResources = true }
+        withDeviceTest { instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" }
+    }
 
     sourceSets {
         commonMain.dependencies {
@@ -42,10 +46,28 @@ kotlin {
             implementation(libs.androidx.room.testing)
         }
         androidMain.dependencies { implementation(libs.javax.inject) }
+
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.androidx.room.testing)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+            }
+        }
+        val androidDeviceTest by getting {
+            dependencies {
+                implementation(libs.androidx.room.testing)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.test.runner)
+            }
+            resources.srcDir("$projectDir/schemas")
+        }
     }
 }
 
 dependencies {
-    "kspCommonMainMetadata"(libs.androidx.room.compiler)
-    "kspAndroid"(libs.androidx.room.compiler)
+    "kspAndroidHostTest"(libs.androidx.room.compiler)
+    "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }

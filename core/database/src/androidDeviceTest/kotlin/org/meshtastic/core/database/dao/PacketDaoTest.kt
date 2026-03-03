@@ -18,6 +18,7 @@ package org.meshtastic.core.database.dao
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okio.ByteString.Companion.toByteString
@@ -32,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase
+import org.meshtastic.core.database.MeshtasticDatabaseConstructor
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.database.entity.ReactionEntity
@@ -80,8 +82,12 @@ class PacketDaoTest {
 
     @Before
     fun createDb(): Unit = runBlocking {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
         database =
-            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(factory = { MeshtasticDatabaseConstructor.initialize() })
+            Room.inMemoryDatabaseBuilder<MeshtasticDatabase>(
+                context = context,
+                factory = { MeshtasticDatabaseConstructor.initialize() },
+            )
                 .build()
 
         nodeInfoDao = database.nodeInfoDao().apply { setMyNodeInfo(myNodeInfo) }
