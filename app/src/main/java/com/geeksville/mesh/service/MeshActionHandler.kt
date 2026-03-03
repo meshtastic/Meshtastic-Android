@@ -59,7 +59,7 @@ constructor(
     private val databaseManager: DatabaseManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
-    private val takLockHandler: TakLockHandler,
+    private val lockdownHandler: LockdownHandler,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -331,12 +331,12 @@ constructor(
         }
     }
 
-    fun handleSendTakUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
-        takLockHandler.submitPassphrase(passphrase, bootTtl, hourTtl)
+    fun handleSendLockdownUnlock(passphrase: String, bootTtl: Int, hourTtl: Int) {
+        lockdownHandler.submitPassphrase(passphrase, bootTtl, hourTtl)
     }
 
-    fun handleSendTakLockNow() {
-        takLockHandler.lockNow()
+    fun handleSendLockNow() {
+        lockdownHandler.lockNow()
     }
 
     fun handleUpdateLastAddress(deviceAddr: String?) {

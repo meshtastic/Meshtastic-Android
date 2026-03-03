@@ -46,22 +46,22 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.service.TakLockState
-import org.meshtastic.core.service.TakTokenInfo
+import org.meshtastic.core.service.LockdownState
+import org.meshtastic.core.service.LockdownTokenInfo
 
 @Suppress("LongMethod")
 @Composable
-fun TakUnlockDialog(
-    takLockState: TakLockState,
-    takTokenInfo: TakTokenInfo? = null,
+fun LockdownUnlockDialog(
+    lockdownState: LockdownState,
+    lockdownTokenInfo: LockdownTokenInfo? = null,
     onSubmit: (passphrase: String, boots: Int, hours: Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val shouldShow = when (takLockState) {
-        is TakLockState.Locked -> true
-        is TakLockState.NeedsProvision -> true
-        is TakLockState.UnlockFailed -> true
-        is TakLockState.UnlockBackoff -> true
+    val shouldShow = when (lockdownState) {
+        is LockdownState.Locked -> true
+        is LockdownState.NeedsProvision -> true
+        is LockdownState.UnlockFailed -> true
+        is LockdownState.UnlockBackoff -> true
         else -> false
     }
     BackHandler(enabled = shouldShow, onBack = onDismiss)
@@ -70,9 +70,9 @@ fun TakUnlockDialog(
     var passphrase by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     // Pre-fill from most recent TAK_UNLOCKED token info when available.
-    val initialBoots = takTokenInfo?.bootsRemaining ?: DEFAULT_BOOTS
-    val initialHours = if ((takTokenInfo?.expiryEpoch ?: 0L) > 0L) {
-        ((takTokenInfo!!.expiryEpoch - System.currentTimeMillis() / 1000) / 3600)
+    val initialBoots = lockdownTokenInfo?.bootsRemaining ?: DEFAULT_BOOTS
+    val initialHours = if ((lockdownTokenInfo?.expiryEpoch ?: 0L) > 0L) {
+        ((lockdownTokenInfo!!.expiryEpoch - System.currentTimeMillis() / 1000) / 3600)
             .toInt().coerceAtLeast(0)
     } else {
         0
@@ -80,7 +80,7 @@ fun TakUnlockDialog(
     var boots by rememberSaveable { mutableIntStateOf(initialBoots) }
     var hours by rememberSaveable { mutableIntStateOf(initialHours) }
 
-    val isProvisioning = takLockState is TakLockState.NeedsProvision
+    val isProvisioning = lockdownState is LockdownState.NeedsProvision
     val title = if (isProvisioning) "Set Passphrase" else "Enter Passphrase"
     val isValid = passphrase.isNotEmpty() && passphrase.length <= MAX_PASSPHRASE_LEN
 
@@ -89,17 +89,17 @@ fun TakUnlockDialog(
         title = { Text(text = title) },
         text = {
             Column {
-                when (takLockState) {
-                    is TakLockState.UnlockFailed -> {
+                when (lockdownState) {
+                    is LockdownState.UnlockFailed -> {
                         Text(
                             text = "Incorrect passphrase.",
                             color = MaterialTheme.colorScheme.error,
                         )
                         Spacer(modifier = Modifier.height(SPACING_DP.dp))
                     }
-                    is TakLockState.UnlockBackoff -> {
+                    is LockdownState.UnlockBackoff -> {
                         Text(
-                            text = "Try again in ${takLockState.backoffSeconds} seconds.",
+                            text = "Try again in ${lockdownState.backoffSeconds} seconds.",
                             color = MaterialTheme.colorScheme.error,
                         )
                         Spacer(modifier = Modifier.height(SPACING_DP.dp))

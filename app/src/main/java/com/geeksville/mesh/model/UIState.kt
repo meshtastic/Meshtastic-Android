@@ -58,8 +58,8 @@ import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.MeshServiceNotifications
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.service.TakLockState
-import org.meshtastic.core.service.TakTokenInfo
+import org.meshtastic.core.service.LockdownState
+import org.meshtastic.core.service.LockdownTokenInfo
 import org.meshtastic.core.service.TracerouteResponse
 import org.meshtastic.core.strings.Res
 import org.meshtastic.core.strings.client_notification
@@ -132,19 +132,19 @@ constructor(
         meshServiceNotifications.clearClientNotification(notification)
     }
 
-    val takLockState: StateFlow<TakLockState> = serviceRepository.takLockState
-    val takTokenInfo: StateFlow<TakTokenInfo?> = serviceRepository.takTokenInfo
+    val lockdownState: StateFlow<LockdownState> = serviceRepository.lockdownState
+    val lockdownTokenInfo: StateFlow<LockdownTokenInfo?> = serviceRepository.lockdownTokenInfo
 
-    fun sendTakUnlock(passphrase: String, bootTtl: Int = DEFAULT_BOOT_TTL, hourTtl: Int = 0) {
-        serviceRepository.meshService?.sendTakUnlock(passphrase, bootTtl, hourTtl)
+    fun sendLockdownUnlock(passphrase: String, bootTtl: Int = DEFAULT_BOOT_TTL, hourTtl: Int = 0) {
+        serviceRepository.meshService?.sendLockdownUnlock(passphrase, bootTtl, hourTtl)
     }
 
-    fun sendTakLockNow() {
-        serviceRepository.meshService?.sendTakLockNow()
+    fun sendLockNow() {
+        serviceRepository.meshService?.sendLockNow()
     }
 
-    fun clearTakLockState() {
-        serviceRepository.clearTakLockState()
+    fun clearLockdownState() {
+        serviceRepository.clearLockdownState()
     }
 
     /**

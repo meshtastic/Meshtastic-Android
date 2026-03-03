@@ -147,11 +147,11 @@ constructor(
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
-    fun sendTakLockNow() {
-        meshService?.sendTakLockNow()
+    fun sendLockNow() {
+        meshService?.sendLockNow()
     }
 
-    val takTokenInfo = serviceRepository.takTokenInfo
+    val lockdownTokenInfo = serviceRepository.lockdownTokenInfo
 
     fun setPreserveFavorites(preserveFavorites: Boolean) {
         viewModelScope.launch { _radioConfigState.update { it.copy(nodeDbResetPreserveFavorites = preserveFavorites) } }

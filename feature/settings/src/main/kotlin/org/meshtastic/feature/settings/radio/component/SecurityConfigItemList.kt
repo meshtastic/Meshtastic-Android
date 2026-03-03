@@ -87,7 +87,7 @@ import java.security.SecureRandom
 @Composable
 fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-    val takTokenInfo by viewModel.takTokenInfo.collectAsStateWithLifecycle(initialValue = null)
+    val lockdownTokenInfo by viewModel.lockdownTokenInfo.collectAsStateWithLifecycle(initialValue = null)
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val securityConfig = state.radioConfig.security ?: Config.SecurityConfig()
     val formState = rememberConfigState(initialValue = securityConfig)
@@ -266,9 +266,9 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBa
                     title = "Lock Now",
                     enabled = state.connected,
                     icon = Icons.TwoTone.Warning,
-                    onClick = { viewModel.sendTakLockNow() },
+                    onClick = { viewModel.sendLockNow() },
                 )
-                takTokenInfo?.let { token ->
+                lockdownTokenInfo?.let { token ->
                     HorizontalDivider()
                     val expiryMs = token.expiryEpoch * 1000L
                     val expiryText = when {

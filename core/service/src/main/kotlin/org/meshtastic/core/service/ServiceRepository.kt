@@ -32,26 +32,26 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-sealed class TakLockState {
-    data object None : TakLockState()
-    data object Locked : TakLockState()
-    data object NeedsProvision : TakLockState()
-    data object Unlocked : TakLockState()
+sealed class LockdownState {
+    data object None : LockdownState()
+    data object Locked : LockdownState()
+    data object NeedsProvision : LockdownState()
+    data object Unlocked : LockdownState()
     /** Lock Now ACK received — client should disconnect immediately, no dialog. */
-    data object LockNowAcknowledged : TakLockState()
+    data object LockNowAcknowledged : LockdownState()
     /** Wrong passphrase — retry immediately. */
-    data object UnlockFailed : TakLockState()
+    data object UnlockFailed : LockdownState()
     /** Too many attempts — must wait [backoffSeconds] before retrying. */
-    data class UnlockBackoff(val backoffSeconds: Int) : TakLockState()
+    data class UnlockBackoff(val backoffSeconds: Int) : LockdownState()
 }
 
 /**
- * TAK session token metadata parsed from the TAK_UNLOCKED:boots=N:until=EPOCH: notification.
+ * Lockdown session token metadata parsed from the TAK_UNLOCKED:boots=N:until=EPOCH: notification.
  *
  * @param bootsRemaining Number of reboots before the token expires.
  * @param expiryEpoch Unix epoch seconds; 0 means no time-based expiry.
  */
-data class TakTokenInfo(
+data class LockdownTokenInfo(
     val bootsRemaining: Int,
     val expiryEpoch: Long,
 )
@@ -184,26 +184,26 @@ class ServiceRepository @Inject constructor() {
         _serviceAction.send(action)
     }
 
-    // TAK lock state
-    private val _takLockState: MutableStateFlow<TakLockState> = MutableStateFlow(TakLockState.None)
-    val takLockState: StateFlow<TakLockState>
-        get() = _takLockState
+    // Lockdown state
+    private val _lockdownState: MutableStateFlow<LockdownState> = MutableStateFlow(LockdownState.None)
+    val lockdownState: StateFlow<LockdownState>
+        get() = _lockdownState
 
-    fun setTakLockState(state: TakLockState) {
-        _takLockState.value = state
+    fun setLockdownState(state: LockdownState) {
+        _lockdownState.value = state
     }
 
-    fun clearTakLockState() {
-        _takLockState.value = TakLockState.None
+    fun clearLockdownState() {
+        _lockdownState.value = LockdownState.None
     }
 
-    // TAK token info (boots remaining + expiry) from the most recent TAK_UNLOCKED notification
-    private val _takTokenInfo: MutableStateFlow<TakTokenInfo?> = MutableStateFlow(null)
-    val takTokenInfo: StateFlow<TakTokenInfo?>
-        get() = _takTokenInfo
+    // Lockdown token info (boots remaining + expiry) from the most recent TAK_UNLOCKED notification
+    private val _lockdownTokenInfo: MutableStateFlow<LockdownTokenInfo?> = MutableStateFlow(null)
+    val lockdownTokenInfo: StateFlow<LockdownTokenInfo?>
+        get() = _lockdownTokenInfo
 
-    fun setTakTokenInfo(info: TakTokenInfo?) {
-        _takTokenInfo.value = info
+    fun setLockdownTokenInfo(info: LockdownTokenInfo?) {
+        _lockdownTokenInfo.value = info
     }
 
     // True once TAK passphrase is accepted for this BLE connection; false on disconnect.

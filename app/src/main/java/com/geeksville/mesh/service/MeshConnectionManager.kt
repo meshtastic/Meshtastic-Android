@@ -70,7 +70,7 @@ constructor(
     private val commandSender: MeshCommandSender,
     private val nodeManager: MeshNodeManager,
     private val analytics: PlatformAnalytics,
-    private val takLockHandler: Lazy<TakLockHandler>,
+    private val lockdownHandler: Lazy<LockdownHandler>,
 ) {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var sleepTimeout: Job? = null
@@ -144,7 +144,7 @@ constructor(
         Logger.d { "Starting connect" }
         connectTimeMsec = System.currentTimeMillis()
         scope.handledLaunch { nodeRepository.clearMyNodeInfo() }
-        takLockHandler.get().onConnect()
+        lockdownHandler.get().onConnect()
         startConfigOnly()
     }
 
@@ -183,7 +183,7 @@ constructor(
 
     private fun handleDisconnected() {
         connectionStateHolder.setState(ConnectionState.Disconnected)
-        takLockHandler.get().onDisconnect()
+        lockdownHandler.get().onDisconnect()
         packetHandler.stopPacketQueue()
         locationManager.stop()
         mqttManager.stop()

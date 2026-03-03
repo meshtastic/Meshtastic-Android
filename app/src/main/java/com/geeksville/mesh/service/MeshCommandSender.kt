@@ -469,7 +469,7 @@ constructor(
             ),
         )
 
-    fun sendTakPassphrase(passphrase: String, boots: Int = 0, hours: Int = 0) {
+    fun sendLockdownPassphrase(passphrase: String, boots: Int = 0, hours: Int = 0) {
         val myNum = nodeManager?.myNodeNum ?: return
         // The firmware expects slot 2 as an absolute Unix epoch (seconds), not a duration.
         // Convert hours duration → absolute epoch; 0 hours means no time-based expiry (until=0).
@@ -509,7 +509,7 @@ constructor(
         packetHandler?.sendToRadio(ToRadio(packet = packet))
     }
 
-    fun sendTakLockNow() {
+    fun sendLockNow() {
         val myNum = nodeManager?.myNodeNum ?: return
         val securityConfig = Config.SecurityConfig(
             private_key = ByteString.of(TAK_LOCK_BYTE),

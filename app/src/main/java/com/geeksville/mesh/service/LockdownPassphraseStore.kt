@@ -30,7 +30,7 @@ data class StoredPassphrase(
 )
 
 @Singleton
-class TakPassphraseStore @Inject constructor(app: Application) {
+class LockdownPassphraseStore @Inject constructor(app: Application) {
 
     private val prefs: SharedPreferences by lazy {
         val masterKey = MasterKey.Builder(app)
@@ -74,7 +74,7 @@ class TakPassphraseStore @Inject constructor(app: Application) {
     private fun sanitizeKey(address: String): String = address.replace(":", "_")
 
     companion object {
-        private const val PREFS_FILE_NAME = "tak_passphrase_store"
+        private const val PREFS_FILE_NAME = "lockdown_passphrase_store"
         const val DEFAULT_BOOTS = 50
     }
 }

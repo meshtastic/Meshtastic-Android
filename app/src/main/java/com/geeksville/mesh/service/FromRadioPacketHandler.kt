@@ -59,7 +59,7 @@ constructor(
             }
             configCompleteId != null -> {
                 router.configFlowManager.handleConfigComplete(configCompleteId)
-                router.takLockHandler.onConfigComplete()
+                router.lockdownHandler.onConfigComplete()
             }
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
@@ -69,7 +69,7 @@ constructor(
             clientNotification != null -> {
                 val msg = clientNotification.message
                 if (msg.startsWith("TAK_")) {
-                    router.takLockHandler.handleTakNotification(msg)
+                    router.lockdownHandler.handleLockdownNotification(msg)
                 } else {
                     serviceRepository.setClientNotification(clientNotification)
                     serviceNotifications.showClientNotification(clientNotification)

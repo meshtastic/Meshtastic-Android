@@ -36,7 +36,7 @@ constructor(
     val configFlowManager: MeshConfigFlowManager,
     val mqttManager: MeshMqttManager,
     val actionHandler: MeshActionHandler,
-    val takLockHandler: TakLockHandler,
+    val lockdownHandler: LockdownHandler,
 ) {
     fun start(scope: CoroutineScope) {
         dataHandler.start(scope)

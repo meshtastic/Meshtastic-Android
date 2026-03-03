@@ -19,24 +19,24 @@ package com.geeksville.mesh.service
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import dagger.Lazy
+import org.meshtastic.core.service.LockdownState
+import org.meshtastic.core.service.LockdownTokenInfo
 import org.meshtastic.core.service.ServiceRepository
-import org.meshtastic.core.service.TakLockState
-import org.meshtastic.core.service.TakTokenInfo
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class TakLockHandler @Inject constructor(
+class LockdownHandler @Inject constructor(
     private val serviceRepository: ServiceRepository,
     private val commandSender: MeshCommandSender,
-    private val passphraseStore: TakPassphraseStore,
+    private val passphraseStore: LockdownPassphraseStore,
     private val radioInterfaceService: RadioInterfaceService,
     private val connectionManager: Lazy<MeshConnectionManager>,
 ) {
     @Volatile private var wasAutoAttempt = false
 
     @Volatile private var pendingPassphrase: String? = null
-    @Volatile private var pendingBoots: Int = TakPassphraseStore.DEFAULT_BOOTS
+    @Volatile private var pendingBoots: Int = LockdownPassphraseStore.DEFAULT_BOOTS
     @Volatile private var pendingHours: Int = 0
 
     /** Called when the BLE connection is established, before the first config request. */
@@ -44,15 +44,15 @@ class TakLockHandler @Inject constructor(
         serviceRepository.setSessionAuthorized(false)
         wasAutoAttempt = false
         pendingPassphrase = null
-        pendingBoots = TakPassphraseStore.DEFAULT_BOOTS
+        pendingBoots = LockdownPassphraseStore.DEFAULT_BOOTS
         pendingHours = 0
     }
 
     /** Called when the BLE connection is lost. */
     fun onDisconnect() {
         serviceRepository.setSessionAuthorized(false)
-        serviceRepository.setTakTokenInfo(null)
-        serviceRepository.setTakLockState(TakLockState.None)
+        serviceRepository.setLockdownTokenInfo(null)
+        serviceRepository.setLockdownState(LockdownState.None)
         wasAutoAttempt = false
         pendingPassphrase = null
     }
@@ -60,7 +60,7 @@ class TakLockHandler @Inject constructor(
     /**
      * Called on every config_complete_id. Once [sessionAuthorized] is true (set on TAK_UNLOCKED),
      * this is a no-op — preventing the startConfigOnly config_complete_id from triggering any
-     * further TAK handling. The dialog state is driven entirely by clientNotifications.
+     * further lockdown handling. The dialog state is driven entirely by clientNotifications.
      */
     fun onConfigComplete() {
         // Session already authenticated — this config_complete_id is from the startConfigOnly()
@@ -69,13 +69,13 @@ class TakLockHandler @Inject constructor(
     }
 
     /**
-     * Routes incoming TAK clientNotification messages:
+     * Routes incoming lockdown clientNotification messages:
      *  - TAK_NEEDS_PROVISION → device has no passphrase → show "Set Passphrase" dialog
      *  - TAK_LOCKED:<reason> → device is locked → auto-unlock with stored passphrase or show dialog
      *  - TAK_UNLOCKED        → accepted; save passphrase, authorize session, re-sync config
      *  - TAK_UNLOCK_FAILED   → wrong passphrase; clear stored or increment retry counter
      */
-    fun handleTakNotification(message: String?) {
+    fun handleLockdownNotification(message: String?) {
         when {
             message == TAK_NEEDS_PROVISION -> handleNeedsProvision()
             // Exact "TAK_LOCKED" = Lock Now was acknowledged by the device → re-lock the session.
@@ -88,9 +88,9 @@ class TakLockHandler @Inject constructor(
     }
 
     private fun handleLockNowAcknowledged() {
-        Logger.i { "TAK: Lock Now acknowledged — resetting session authorization" }
+        Logger.i { "Lockdown: Lock Now acknowledged — resetting session authorization" }
         serviceRepository.setSessionAuthorized(false)
-        // Do NOT clear takTokenInfo here — keep it so the dialog pre-fills with the last-known
+        // Do NOT clear lockdownTokenInfo here — keep it so the dialog pre-fills with the last-known
         // TTL values. It is refreshed by the next TAK_UNLOCKED response.
         wasAutoAttempt = false
         pendingPassphrase = null
@@ -98,7 +98,7 @@ class TakLockHandler @Inject constructor(
         // The fresh config is loaded in handleUnlocked() after successful re-authentication.
         connectionManager.get().clearRadioConfig()
         // Signal the UI to disconnect — no dialog, just drop the connection.
-        serviceRepository.setTakLockState(TakLockState.LockNowAcknowledged)
+        serviceRepository.setLockdownState(LockdownState.LockNowAcknowledged)
     }
 
     private fun handleLocked() {
@@ -106,17 +106,17 @@ class TakLockHandler @Inject constructor(
         if (deviceAddress != null) {
             val stored = passphraseStore.getPassphrase(deviceAddress)
             if (stored != null) {
-                Logger.i { "TAK: Auto-unlocking (TAK_LOCKED) with stored passphrase for $deviceAddress" }
+                Logger.i { "Lockdown: Auto-unlocking (TAK_LOCKED) with stored passphrase for $deviceAddress" }
                 wasAutoAttempt = true
-                commandSender.sendTakPassphrase(stored.passphrase, stored.boots, stored.hours)
+                commandSender.sendLockdownPassphrase(stored.passphrase, stored.boots, stored.hours)
                 return
             }
         }
-        serviceRepository.setTakLockState(TakLockState.Locked)
+        serviceRepository.setLockdownState(LockdownState.Locked)
     }
 
     private fun handleNeedsProvision() {
-        serviceRepository.setTakLockState(TakLockState.NeedsProvision)
+        serviceRepository.setLockdownState(LockdownState.NeedsProvision)
     }
 
     private fun handleUnlocked(message: String) {
@@ -124,11 +124,11 @@ class TakLockHandler @Inject constructor(
         val passphrase = pendingPassphrase
         if (deviceAddress != null && passphrase != null) {
             passphraseStore.savePassphrase(deviceAddress, passphrase, pendingBoots, pendingHours)
-            Logger.i { "TAK: Saved passphrase for $deviceAddress" }
+            Logger.i { "Lockdown: Saved passphrase for $deviceAddress" }
         }
         pendingPassphrase = null
-        serviceRepository.setTakTokenInfo(parseTokenInfo(message))
-        serviceRepository.setTakLockState(TakLockState.Unlocked)
+        serviceRepository.setLockdownTokenInfo(parseTokenInfo(message))
+        serviceRepository.setLockdownState(LockdownState.Unlocked)
         // Mark session authorized BEFORE calling startConfigOnly(). When the resulting
         // config_complete_id arrives, onConfigComplete() will see sessionAuthorized=true and return
         // immediately — no passphrase re-send, no loop.
@@ -137,7 +137,7 @@ class TakLockHandler @Inject constructor(
     }
 
     /** Parses boots= and until= fields from TAK_UNLOCKED:boots=N:until=EPOCH: */
-    private fun parseTokenInfo(message: String): TakTokenInfo? {
+    private fun parseTokenInfo(message: String): LockdownTokenInfo? {
         var boots = -1
         var until = 0L
         for (segment in message.split(":")) {
@@ -146,7 +146,7 @@ class TakLockHandler @Inject constructor(
                 segment.startsWith("until=") -> until = segment.removePrefix("until=").toLongOrNull() ?: 0L
             }
         }
-        return if (boots >= 0) TakTokenInfo(boots, until) else null
+        return if (boots >= 0) LockdownTokenInfo(boots, until) else null
     }
 
     private fun handleUnlockFailed(message: String) {
@@ -159,25 +159,25 @@ class TakLockHandler @Inject constructor(
             wasAutoAttempt = false
             if (backoffSeconds != null && backoffSeconds > 0) {
                 // Rate-limited — stored passphrase may still be correct; keep it and show countdown.
-                Logger.i { "TAK: Auto-unlock rate-limited (backoff=${backoffSeconds}s)" }
-                serviceRepository.setTakLockState(TakLockState.UnlockBackoff(backoffSeconds))
+                Logger.i { "Lockdown: Auto-unlock rate-limited (backoff=${backoffSeconds}s)" }
+                serviceRepository.setLockdownState(LockdownState.UnlockBackoff(backoffSeconds))
             } else {
                 // Wrong passphrase — clear stored passphrase.
                 val deviceAddress = radioInterfaceService.getDeviceAddress()
                 if (deviceAddress != null) {
                     passphraseStore.clearPassphrase(deviceAddress)
-                    Logger.i { "TAK: Auto-unlock failed (wrong passphrase), cleared stored passphrase for $deviceAddress" }
+                    Logger.i { "Lockdown: Auto-unlock failed (wrong passphrase), cleared stored passphrase for $deviceAddress" }
                 }
-                serviceRepository.setTakLockState(TakLockState.Locked)
+                serviceRepository.setLockdownState(LockdownState.Locked)
             }
             return
         }
         // Manual attempt.
         if (backoffSeconds != null && backoffSeconds > 0) {
-            Logger.i { "TAK: Unlock failed with backoff of ${backoffSeconds}s" }
-            serviceRepository.setTakLockState(TakLockState.UnlockBackoff(backoffSeconds))
+            Logger.i { "Lockdown: Unlock failed with backoff of ${backoffSeconds}s" }
+            serviceRepository.setLockdownState(LockdownState.UnlockBackoff(backoffSeconds))
         } else {
-            serviceRepository.setTakLockState(TakLockState.UnlockFailed)
+            serviceRepository.setLockdownState(LockdownState.UnlockFailed)
         }
     }
 
@@ -186,12 +186,12 @@ class TakLockHandler @Inject constructor(
         pendingBoots = boots
         pendingHours = hours
         wasAutoAttempt = false
-        serviceRepository.setTakLockState(TakLockState.None) // hide dialog while awaiting response
-        commandSender.sendTakPassphrase(passphrase, boots, hours)
+        serviceRepository.setLockdownState(LockdownState.None) // hide dialog while awaiting response
+        commandSender.sendLockdownPassphrase(passphrase, boots, hours)
     }
 
     fun lockNow() {
-        commandSender.sendTakLockNow()
+        commandSender.sendLockNow()
     }
 
     companion object {
