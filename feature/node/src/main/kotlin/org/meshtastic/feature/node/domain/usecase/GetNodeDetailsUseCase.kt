@@ -123,7 +123,7 @@ constructor(
                     .onStart { emit(null) },
                 firmwareReleaseRepository.stableRelease,
                 firmwareReleaseRepository.alphaRelease,
-                nodeRequestActions.lastTracerouteTimes.map { it[nodeId] },
+                nodeRequestActions.lastTracerouteTime,
                 nodeRequestActions.lastRequestNeighborTimes.map { it[nodeId] },
             ) { edition, stable, alpha, trTime, niTime ->
                 MetadataGroup(edition = edition, stable = stable, alpha = alpha, trTime = trTime, niTime = niTime)

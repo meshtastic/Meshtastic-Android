@@ -58,8 +58,8 @@ class NodeRequestActions @Inject constructor(private val radioController: RadioC
     private val _effects = MutableSharedFlow<NodeRequestEffect>()
     val effects: SharedFlow<NodeRequestEffect> = _effects.asSharedFlow()
 
-    private val _lastTracerouteTimes = MutableStateFlow<Map<Int, Long>>(emptyMap())
-    val lastTracerouteTimes: StateFlow<Map<Int, Long>> = _lastTracerouteTimes.asStateFlow()
+    private val _lastTracerouteTime = MutableStateFlow<Long?>(null)
+    val lastTracerouteTime: StateFlow<Long?> = _lastTracerouteTime.asStateFlow()
 
     private val _lastRequestNeighborTimes = MutableStateFlow<Map<Int, Long>>(emptyMap())
     val lastRequestNeighborTimes: StateFlow<Map<Int, Long>> = _lastRequestNeighborTimes.asStateFlow()
@@ -135,7 +135,7 @@ class NodeRequestActions @Inject constructor(private val radioController: RadioC
             Logger.i { "Requesting traceroute for '$destNum'" }
             val packetId = radioController.getPacketId()
             radioController.requestTraceroute(packetId, destNum)
-            _lastTracerouteTimes.update { it + (destNum to nowMillis) }
+            _lastTracerouteTime.value = nowMillis
             _effects.emit(
                 NodeRequestEffect.ShowFeedback(
                     UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName),

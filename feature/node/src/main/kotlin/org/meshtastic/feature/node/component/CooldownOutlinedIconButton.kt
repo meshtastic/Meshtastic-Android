@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.node.component
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -26,11 +24,15 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
@@ -43,91 +45,93 @@ internal const val REQUEST_NEIGHBORS_COOL_DOWN_TIME_MS = 180000L // 3 minutes
 fun CooldownIconButton(
     onClick: () -> Unit,
     cooldownTimestamp: Long?,
+    modifier: Modifier = Modifier,
     cooldownDuration: Long = COOL_DOWN_TIME_MS,
     content: @Composable () -> Unit,
-) {
-    val progress = remember { Animatable(0f) }
-
-    LaunchedEffect(cooldownTimestamp) {
-        if (cooldownTimestamp == null) {
-            progress.snapTo(0f)
-            return@LaunchedEffect
-        }
-        val timeSinceLast = nowMillis - cooldownTimestamp
-        if (timeSinceLast < cooldownDuration) {
-            val remainingTime = cooldownDuration - timeSinceLast
-            progress.snapTo(remainingTime / cooldownDuration.toFloat())
-            progress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
-            )
-        } else {
-            progress.snapTo(0f)
-        }
-    }
-
-    val isCoolingDown = progress.value > 0f
-
-    IconButton(
-        onClick = { if (!isCoolingDown) onClick() },
-        enabled = !isCoolingDown,
-        colors = IconButtonDefaults.iconButtonColors(),
-    ) {
-        if (isCoolingDown) {
-            CircularProgressIndicator(
-                progress = { progress.value },
-                modifier = Modifier.size(24.dp),
-                strokeCap = StrokeCap.Round,
-            )
-        } else {
-            content()
-        }
-    }
-}
+) = CooldownBaseButton(
+    onClick = onClick,
+    cooldownTimestamp = cooldownTimestamp,
+    cooldownDuration = cooldownDuration,
+    modifier = modifier,
+    outlined = false,
+    content = content,
+)
 
 @Composable
 fun CooldownOutlinedIconButton(
     onClick: () -> Unit,
     cooldownTimestamp: Long?,
+    modifier: Modifier = Modifier,
     cooldownDuration: Long = COOL_DOWN_TIME_MS,
     content: @Composable () -> Unit,
 ) {
-    val progress = remember { Animatable(0f) }
+    CooldownBaseButton(
+        onClick = onClick,
+        cooldownTimestamp = cooldownTimestamp,
+        cooldownDuration = cooldownDuration,
+        modifier = modifier,
+        outlined = true,
+        content = content,
+    )
+}
 
-    LaunchedEffect(cooldownTimestamp) {
-        if (cooldownTimestamp == null) {
-            progress.snapTo(0f)
-            return@LaunchedEffect
+private const val TICK = 100L
+
+@Composable
+private fun CooldownBaseButton(
+    onClick: () -> Unit,
+    cooldownTimestamp: Long?,
+    cooldownDuration: Long,
+    modifier: Modifier = Modifier,
+    outlined: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    var progress by remember { mutableStateOf(0f) }
+    var isCoolingDown by remember { mutableStateOf(false) }
+
+    LaunchedEffect(cooldownTimestamp, cooldownDuration) {
+        val endTime = (cooldownTimestamp ?: 0L) + cooldownDuration
+        isCoolingDown = nowMillis < endTime
+
+        while (isCoolingDown) {
+            val remainingTime = endTime - nowMillis
+            if (remainingTime <= 0) break
+            progress = (remainingTime.toFloat() / cooldownDuration).coerceIn(0f, 1f)
+            delay(TICK)
+            isCoolingDown = nowMillis < endTime
         }
-        val timeSinceLast = nowMillis - cooldownTimestamp
-        if (timeSinceLast < cooldownDuration) {
-            val remainingTime = cooldownDuration - timeSinceLast
-            progress.snapTo(remainingTime / cooldownDuration.toFloat())
-            progress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
-            )
-        } else {
-            progress.snapTo(0f)
-        }
+        progress = 0f
+        isCoolingDown = false
     }
 
-    val isCoolingDown = progress.value > 0f
-
-    OutlinedIconButton(
-        onClick = { if (!isCoolingDown) onClick() },
-        enabled = !isCoolingDown,
-        colors = IconButtonDefaults.outlinedIconButtonColors(),
-    ) {
+    val buttonContent: @Composable () -> Unit = {
         if (isCoolingDown) {
             CircularProgressIndicator(
-                progress = { progress.value },
+                progress = { progress },
                 modifier = Modifier.size(24.dp),
                 strokeCap = StrokeCap.Round,
             )
         } else {
             content()
         }
+    }
+
+    if (outlined) {
+        OutlinedIconButton(
+            onClick = onClick,
+            enabled = !isCoolingDown,
+            colors = IconButtonDefaults.outlinedIconButtonColors(),
+            modifier = modifier,
+            content = buttonContent,
+        )
+    } else {
+        IconButton(
+            onClick = onClick,
+            enabled = !isCoolingDown,
+            colors = IconButtonDefaults.iconButtonColors(),
+            modifier = modifier,
+            content = buttonContent,
+        )
     }
 }
 
