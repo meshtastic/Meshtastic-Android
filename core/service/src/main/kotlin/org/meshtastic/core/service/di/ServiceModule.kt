@@ -21,11 +21,18 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.AndroidRadioControllerImpl
+import org.meshtastic.core.service.AndroidServiceRepository
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ServiceModule {
 
-    @Binds abstract fun bindRadioController(impl: AndroidRadioControllerImpl): RadioController
+    @Binds @Singleton
+    abstract fun bindRadioController(impl: AndroidRadioControllerImpl): RadioController
+
+    @Binds @Singleton
+    abstract fun bindServiceRepository(impl: AndroidServiceRepository): ServiceRepository
 }

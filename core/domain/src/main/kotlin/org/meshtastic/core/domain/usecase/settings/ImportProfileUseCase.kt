@@ -21,7 +21,7 @@ import java.io.InputStream
 import javax.inject.Inject
 
 /** Use case for importing a device profile from an input stream. */
-class ImportProfileUseCase @Inject constructor() {
+open class ImportProfileUseCase @Inject constructor() {
     /**
      * Imports a [DeviceProfile] from the provided [InputStream].
      *

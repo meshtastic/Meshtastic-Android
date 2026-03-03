@@ -32,3 +32,12 @@ data class Contact(
     val isUnmessageable: Boolean,
     val nodeColors: Pair<Int, Int>? = null,
 ) : CommonParcelable
+
+data class ContactSettings(
+    val contactKey: String,
+    val muteUntil: Long = 0L,
+    val lastReadMessageUuid: Long? = null,
+    val lastReadMessageTimestamp: Long? = null,
+    val filteringDisabled: Boolean = false,
+    val isMuted: Boolean = false,
+)

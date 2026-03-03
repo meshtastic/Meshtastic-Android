@@ -17,7 +17,6 @@
 package com.geeksville.mesh.ui.sharing
 
 import android.net.Uri
-import android.os.RemoteException
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
@@ -27,9 +26,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import org.meshtastic.core.data.repository.RadioConfigRepository
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.toChannelSet
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.Channel
@@ -42,12 +41,12 @@ import javax.inject.Inject
 class ChannelViewModel
 @Inject
 constructor(
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
     private val analytics: PlatformAnalytics,
 ) : ViewModel() {
 
-    val connectionState = serviceRepository.connectionState
+    val connectionState = radioController.connectionState
 
     val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())
 
@@ -95,20 +94,12 @@ constructor(
     }
 
     fun setChannel(channel: Channel) {
-        try {
-            serviceRepository.meshService?.setChannel(channel.encode())
-        } catch (ex: RemoteException) {
-            Logger.e(ex) { "Set channel error" }
-        }
+        viewModelScope.launch { radioController.setLocalChannel(channel) }
     }
 
     // Set the radio config (also updates our saved copy in preferences)
     fun setConfig(config: Config) {
-        try {
-            serviceRepository.meshService?.setConfig(config.encode())
-        } catch (ex: RemoteException) {
-            Logger.e(ex) { "Set config error" }
-        }
+        viewModelScope.launch { radioController.setLocalConfig(config) }
     }
 
     fun trackShare() {

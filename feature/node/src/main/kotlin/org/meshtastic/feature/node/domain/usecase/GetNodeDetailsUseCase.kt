@@ -23,17 +23,17 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
-import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.data.repository.MeshLogRepository
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.MeshLog
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
+import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.fallback_node_name
@@ -110,7 +110,7 @@ constructor(
                 nodeRepository.myNodeInfo,
                 radioConfigRepository.deviceProfileFlow.onStart { emit(DeviceProfile()) },
             ) { ourNode, myInfo, profile ->
-                IdentityGroup(ourNode, myInfo?.toMyNodeInfo(), profile)
+                IdentityGroup(ourNode, myInfo, profile)
             }
 
         // 3. Metadata & Request Timestamps

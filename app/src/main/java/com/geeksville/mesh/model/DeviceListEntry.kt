@@ -17,14 +17,14 @@
 package com.geeksville.mesh.model
 
 import android.hardware.usb.UsbManager
-import com.geeksville.mesh.repository.radio.InterfaceId
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.BondState
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.InterfaceId
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /**
  * A sealed class is used here to represent the different types of devices that can be displayed in the list. This is

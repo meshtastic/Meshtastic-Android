@@ -32,6 +32,7 @@ configure<LibraryExtension> {
 }
 
 dependencies {
+    implementation(projects.core.repository)
     implementation(projects.core.common)
     implementation(projects.core.di)
     implementation(projects.core.model)

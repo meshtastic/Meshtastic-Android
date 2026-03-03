@@ -20,22 +20,22 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
-import com.geeksville.mesh.service.MeshCommandSender
-import com.geeksville.mesh.service.MeshNodeManager
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.model.TelemetryType
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NodeManager
 
 class RefreshLocalStatsAction : ActionCallback {
 
     @EntryPoint
     @InstallIn(SingletonComponent::class)
     interface RefreshLocalStatsEntryPoint {
-        fun commandSender(): MeshCommandSender
+        fun commandSender(): CommandSender
 
-        fun nodeManager(): MeshNodeManager
+        fun nodeManager(): NodeManager
     }
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {

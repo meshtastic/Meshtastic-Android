@@ -20,7 +20,7 @@ import org.meshtastic.core.model.RadioController
 import javax.inject.Inject
 
 /** Use case for controlling location sharing with the mesh. */
-class MeshLocationUseCase @Inject constructor(private val radioController: RadioController) {
+open class MeshLocationUseCase @Inject constructor(private val radioController: RadioController) {
     /** Starts providing the phone's location to the mesh. */
     fun startProvidingLocation() {
         radioController.startProvideLocation()

@@ -41,6 +41,7 @@ import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.meshtastic.core.repository.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton
@@ -51,21 +52,21 @@ open class DatabaseManager
 constructor(
     private val app: Application,
     private val dispatchers: CoroutineDispatchers,
-) {
+) : SharedDatabaseManager {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     private val mutex = Mutex()
 
     // Expose the DB cache limit as a reactive stream so UI can observe changes.
-    private val _cacheLimit = MutableStateFlow(getCacheLimit())
-    open val cacheLimit: StateFlow<Int> = _cacheLimit
+    private val _cacheLimit = MutableStateFlow(getCurrentCacheLimit())
+    override val cacheLimit: StateFlow<Int> = _cacheLimit
 
     // Keep cache-limit StateFlow in sync if some other component updates SharedPreferences.
     private val prefsListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == DatabaseConstants.CACHE_LIMIT_KEY) {
-                _cacheLimit.value = getCacheLimit()
+                _cacheLimit.value = getCurrentCacheLimit()
             }
         }
 
@@ -88,7 +89,7 @@ constructor(
     }
 
     /** Switch active database to the one associated with [address]. Serialized via mutex. */
-    suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
+    override suspend fun switchActiveDatabase(address: String?) = mutex.withLock {
         val dbName = buildDbName(address)
 
         // Remember the previously active DB name (any) so we can record its last-used time as well.
@@ -159,7 +160,7 @@ constructor(
     }
 
     private suspend fun enforceCacheLimit(activeDbName: String) = mutex.withLock {
-        val limit = getCacheLimit()
+        val limit = getCurrentCacheLimit()
         val all = listExistingDbNames()
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
         val deviceDbs =
@@ -189,13 +190,13 @@ constructor(
         }
     }
 
-    fun getCacheLimit(): Int = prefs
+    override fun getCurrentCacheLimit(): Int = prefs
         .getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
         .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
 
-    fun setCacheLimit(limit: Int) {
+    override fun setCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
-        if (clamped == getCacheLimit()) return
+        if (clamped == getCurrentCacheLimit()) return
         prefs.edit().putInt(DatabaseConstants.CACHE_LIMIT_KEY, clamped).apply()
         _cacheLimit.value = clamped
         // Enforce asynchronously with current active DB protected

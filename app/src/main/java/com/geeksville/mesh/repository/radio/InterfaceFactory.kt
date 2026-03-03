@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,41 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh.repository.radio
 
+import org.meshtastic.core.model.InterfaceId
 import javax.inject.Inject
 import javax.inject.Provider
 
 /**
  * Entry point for create radio backend instances given a specific address.
  *
- * This class is responsible for building and dissecting radio addresses based upon
- * their interface type and the "rest" of the address (which varies per implementation).
+ * This class is responsible for building and dissecting radio addresses based upon their interface type and the "rest"
+ * of the address (which varies per implementation).
  */
-class InterfaceFactory @Inject constructor(
+class InterfaceFactory
+@Inject
+constructor(
     private val nopInterfaceFactory: NopInterfaceFactory,
-    private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>
+    private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>,
 ) {
-    internal val nopInterface by lazy {
-        nopInterfaceFactory.create("")
-    }
+    internal val nopInterface by lazy { nopInterfaceFactory.create("") }
 
-    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
-        return "${interfaceId.id}$rest"
-    }
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
     fun createInterface(address: String): IRadioInterface {
         val (spec, rest) = splitAddress(address)
         return spec?.createInterface(rest) ?: nopInterface
     }
 
-    fun addressValid(address: String?): Boolean {
-        return address?.let {
-            val (spec, rest) = splitAddress(it)
-            spec?.addressValid(rest)
-        } ?: false
-    }
+    fun addressValid(address: String?): Boolean = address?.let {
+        val (spec, rest) = splitAddress(it)
+        spec?.addressValid(rest)
+    } ?: false
 
     private fun splitAddress(address: String): Pair<InterfaceSpec<*>?, String> {
         val c = address[0].let { InterfaceId.forIdChar(it) }?.let { specMap[it]?.get() }

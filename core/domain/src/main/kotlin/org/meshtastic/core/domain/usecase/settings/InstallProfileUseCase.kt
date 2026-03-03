@@ -27,7 +27,7 @@ import org.meshtastic.proto.User
 import javax.inject.Inject
 
 /** Use case for installing a device profile onto a radio. */
-class InstallProfileUseCase @Inject constructor(private val radioController: RadioController) {
+open class InstallProfileUseCase @Inject constructor(private val radioController: RadioController) {
     /**
      * Installs the provided [DeviceProfile] onto the radio at [destNum].
      *

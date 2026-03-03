@@ -16,14 +16,14 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 
 /** Use case for cleaning up nodes from the database. */
-class CleanNodeDatabaseUseCase
+open class CleanNodeDatabaseUseCase
 @Inject
 constructor(
     private val nodeRepository: NodeRepository,
@@ -43,11 +43,9 @@ constructor(
                 nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
             }
 
-        return nodesToConsider
-            .filterNot { node ->
-                (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) || node.isIgnored || node.isFavorite
-            }
-            .map { it.toModel() }
+        return nodesToConsider.filterNot { node ->
+            (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) || node.isIgnored || node.isFavorite
+        }
     }
 
     /** Performs the cleanup of specified nodes. */

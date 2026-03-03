@@ -20,7 +20,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import org.meshtastic.core.domain.MessageQueue
+import org.meshtastic.core.repository.MessageQueue
 import javax.inject.Inject
 import javax.inject.Singleton
 

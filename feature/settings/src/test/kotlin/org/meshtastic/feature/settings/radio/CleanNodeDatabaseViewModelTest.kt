@@ -30,8 +30,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.domain.usecase.settings.CleanNodeDatabaseUseCase
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.ui.util.AlertManager
 
 @OptIn(ExperimentalCoroutinesApi::class)

@@ -20,7 +20,7 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import javax.inject.Inject
 
 /** Use case for setting the application theme. */
-class SetThemeUseCase @Inject constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
+open class SetThemeUseCase @Inject constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
     operator fun invoke(themeMode: Int) {
         uiPreferencesDataSource.setTheme(themeMode)
     }

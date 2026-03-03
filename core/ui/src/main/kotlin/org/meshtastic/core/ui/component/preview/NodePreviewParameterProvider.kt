@@ -18,8 +18,8 @@ package org.meshtastic.core.ui.component.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics.Companion.currentTime
+import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.EnvironmentMetrics

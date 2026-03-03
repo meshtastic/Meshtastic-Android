@@ -23,6 +23,7 @@ import com.geeksville.mesh.repository.usb.UsbRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.repository.RadioInterfaceService
 import java.util.concurrent.atomic.AtomicReference
 
 /** An interface that assumes we are talking to a meshtastic device via USB serial */

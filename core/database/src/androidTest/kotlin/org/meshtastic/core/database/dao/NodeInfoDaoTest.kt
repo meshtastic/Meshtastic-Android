@@ -34,8 +34,8 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User

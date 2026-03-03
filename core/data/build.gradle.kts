@@ -26,6 +26,7 @@ plugins {
 configure<LibraryExtension> { namespace = "org.meshtastic.core.data" }
 
 dependencies {
+    api(projects.core.repository)
     implementation(projects.core.analytics)
     implementation(projects.core.common)
     implementation(projects.core.database)

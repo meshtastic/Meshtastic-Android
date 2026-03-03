@@ -1,0 +1,36 @@
+/*
+ * Copyright (c) 2025-2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.repository
+
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import org.meshtastic.proto.MeshPacket
+
+/** Interface for handling traceroute responses from the mesh. */
+interface TracerouteHandler {
+    /** Starts the traceroute handler with the given coroutine scope. */
+    fun start(scope: CoroutineScope)
+
+    /**
+     * Processes a traceroute packet.
+     *
+     * @param packet The received mesh packet.
+     * @param logUuid Optional UUID for the associated log entry.
+     * @param logInsertJob Optional job for the log entry insertion, to ensure ordering.
+     */
+    fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: Job?)
+}

@@ -20,7 +20,7 @@ import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import javax.inject.Inject
 
 /** Use case for toggling the analytics preference. */
-class ToggleAnalyticsUseCase @Inject constructor(private val analyticsPrefs: AnalyticsPrefs) {
+open class ToggleAnalyticsUseCase @Inject constructor(private val analyticsPrefs: AnalyticsPrefs) {
     operator fun invoke() {
         analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
     }

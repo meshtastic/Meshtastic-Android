@@ -30,9 +30,6 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.RadioConfigRepository
-import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -44,8 +41,13 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.DatabaseManager
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@Config(sdk = [34])
 class SettingsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
@@ -58,20 +60,29 @@ class SettingsViewModelTest {
     private val databaseManager: DatabaseManager = mockk(relaxed = true)
     private val meshLogPrefs: MeshLogPrefs = mockk(relaxed = true)
 
-    private val setThemeUseCase: SetThemeUseCase = mockk(relaxed = true)
-    private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase = mockk(relaxed = true)
-    private val setProvideLocationUseCase: SetProvideLocationUseCase = mockk(relaxed = true)
-    private val setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase = mockk(relaxed = true)
-    private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase = mockk(relaxed = true)
-    private val meshLocationUseCase: MeshLocationUseCase = mockk(relaxed = true)
-    private val exportDataUseCase: ExportDataUseCase = mockk(relaxed = true)
-    private val isOtaCapableUseCase: IsOtaCapableUseCase = mockk(relaxed = true)
+    private lateinit var setThemeUseCase: SetThemeUseCase
+    private lateinit var setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase
+    private lateinit var setProvideLocationUseCase: SetProvideLocationUseCase
+    private lateinit var setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase
+    private lateinit var setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase
+    private lateinit var meshLocationUseCase: MeshLocationUseCase
+    private lateinit var exportDataUseCase: ExportDataUseCase
+    private lateinit var isOtaCapableUseCase: IsOtaCapableUseCase
 
     private lateinit var viewModel: SettingsViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+
+        setThemeUseCase = mockk(relaxed = true)
+        setAppIntroCompletedUseCase = mockk(relaxed = true)
+        setProvideLocationUseCase = mockk(relaxed = true)
+        setDatabaseCacheLimitUseCase = mockk(relaxed = true)
+        setMeshLogSettingsUseCase = mockk(relaxed = true)
+        meshLocationUseCase = mockk(relaxed = true)
+        exportDataUseCase = mockk(relaxed = true)
+        isOtaCapableUseCase = mockk(relaxed = true)
 
         // Return real StateFlows to avoid ClassCastException
         every { databaseManager.cacheLimit } returns MutableStateFlow(100)

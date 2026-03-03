@@ -24,6 +24,7 @@ plugins {
 android { namespace = "org.meshtastic.core.domain" }
 
 dependencies {
+    implementation(projects.core.repository)
     implementation(projects.core.model)
     implementation(projects.core.proto)
     implementation(projects.core.common)

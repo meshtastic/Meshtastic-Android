@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
@@ -44,7 +45,6 @@ import org.meshtastic.core.resources.requesting_from
 import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
-import org.meshtastic.core.service.ServiceRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -53,7 +53,7 @@ sealed class NodeRequestEffect {
 }
 
 @Singleton
-class NodeRequestActions @Inject constructor(private val serviceRepository: ServiceRepository) {
+class NodeRequestActions @Inject constructor(private val radioController: RadioController) {
 
     private val _effects = MutableSharedFlow<NodeRequestEffect>()
     val effects: SharedFlow<NodeRequestEffect> = _effects.asSharedFlow()
@@ -67,34 +67,26 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
     fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting UserInfo for '$destNum'" }
-            try {
-                serviceRepository.meshService?.requestUserInfo(destNum)
-                _effects.emit(
-                    NodeRequestEffect.ShowFeedback(
-                        UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName),
-                    ),
-                )
-            } catch (ex: android.os.RemoteException) {
-                Logger.e { "Request NodeInfo error: ${ex.message}" }
-            }
+            radioController.requestUserInfo(destNum)
+            _effects.emit(
+                NodeRequestEffect.ShowFeedback(
+                    UiText.Resource(Res.string.requesting_from, Res.string.user_info, longName),
+                ),
+            )
         }
     }
 
     fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting NeighborInfo for '$destNum'" }
-            try {
-                val packetId = serviceRepository.meshService?.packetId ?: return@launch
-                serviceRepository.meshService?.requestNeighborInfo(packetId, destNum)
-                _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
-                _effects.emit(
-                    NodeRequestEffect.ShowFeedback(
-                        UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName),
-                    ),
-                )
-            } catch (ex: android.os.RemoteException) {
-                Logger.e { "Request NeighborInfo error: ${ex.message}" }
-            }
+            val packetId = radioController.getPacketId()
+            radioController.requestNeighborInfo(packetId, destNum)
+            _lastRequestNeighborTimes.update { it + (destNum to nowMillis) }
+            _effects.emit(
+                NodeRequestEffect.ShowFeedback(
+                    UiText.Resource(Res.string.requesting_from, Res.string.neighbor_info, longName),
+                ),
+            )
         }
     }
 
@@ -106,61 +98,49 @@ class NodeRequestActions @Inject constructor(private val serviceRepository: Serv
     ) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting position for '$destNum'" }
-            try {
-                serviceRepository.meshService?.requestPosition(destNum, position)
-                _effects.emit(
-                    NodeRequestEffect.ShowFeedback(
-                        UiText.Resource(Res.string.requesting_from, Res.string.position, longName),
-                    ),
-                )
-            } catch (ex: android.os.RemoteException) {
-                Logger.e { "Request position error: ${ex.message}" }
-            }
+            radioController.requestPosition(destNum, position)
+            _effects.emit(
+                NodeRequestEffect.ShowFeedback(
+                    UiText.Resource(Res.string.requesting_from, Res.string.position, longName),
+                ),
+            )
         }
     }
 
     fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting telemetry for '$destNum'" }
-            try {
-                val packetId = serviceRepository.meshService?.packetId ?: return@launch
-                serviceRepository.meshService?.requestTelemetry(packetId, destNum, type.ordinal)
+            val packetId = radioController.getPacketId()
+            radioController.requestTelemetry(packetId, destNum, type.ordinal)
 
-                val typeRes =
-                    when (type) {
-                        TelemetryType.DEVICE -> Res.string.request_device_metrics
-                        TelemetryType.ENVIRONMENT -> Res.string.request_environment_metrics
-                        TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
-                        TelemetryType.POWER -> Res.string.request_power_metrics
-                        TelemetryType.LOCAL_STATS -> Res.string.signal_quality
-                        TelemetryType.HOST -> Res.string.request_host_metrics
-                        TelemetryType.PAX -> Res.string.request_pax_metrics
-                    }
+            val typeRes =
+                when (type) {
+                    TelemetryType.DEVICE -> Res.string.request_device_metrics
+                    TelemetryType.ENVIRONMENT -> Res.string.request_environment_metrics
+                    TelemetryType.AIR_QUALITY -> Res.string.request_air_quality_metrics
+                    TelemetryType.POWER -> Res.string.request_power_metrics
+                    TelemetryType.LOCAL_STATS -> Res.string.signal_quality
+                    TelemetryType.HOST -> Res.string.request_host_metrics
+                    TelemetryType.PAX -> Res.string.request_pax_metrics
+                }
 
-                _effects.emit(
-                    NodeRequestEffect.ShowFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName)),
-                )
-            } catch (ex: android.os.RemoteException) {
-                Logger.e { "Request telemetry error: ${ex.message}" }
-            }
+            _effects.emit(
+                NodeRequestEffect.ShowFeedback(UiText.Resource(Res.string.requesting_from, typeRes, longName)),
+            )
         }
     }
 
     fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting traceroute for '$destNum'" }
-            try {
-                val packetId = serviceRepository.meshService?.packetId ?: return@launch
-                serviceRepository.meshService?.requestTraceroute(packetId, destNum)
-                _lastTracerouteTimes.update { it + (destNum to nowMillis) }
-                _effects.emit(
-                    NodeRequestEffect.ShowFeedback(
-                        UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName),
-                    ),
-                )
-            } catch (ex: android.os.RemoteException) {
-                Logger.e { "Request traceroute error: ${ex.message}" }
-            }
+            val packetId = radioController.getPacketId()
+            radioController.requestTraceroute(packetId, destNum)
+            _lastTracerouteTimes.update { it + (destNum to nowMillis) }
+            _effects.emit(
+                NodeRequestEffect.ShowFeedback(
+                    UiText.Resource(Res.string.requesting_from, Res.string.traceroute, longName),
+                ),
+            )
         }
     }
 }

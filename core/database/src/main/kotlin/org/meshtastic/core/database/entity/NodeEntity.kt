@@ -26,10 +26,10 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceMetrics
 import org.meshtastic.core.model.EnvironmentMetrics
 import org.meshtastic.core.model.MeshUser
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.onlineTimeThreshold
@@ -65,6 +65,7 @@ data class NodeWithRelations(
             environmentMetrics = environmentMetrics ?: org.meshtastic.proto.EnvironmentMetrics(),
             powerMetrics = powerMetrics ?: org.meshtastic.proto.PowerMetrics(),
             paxcounter = paxcounter,
+            publicKey = publicKey ?: user.public_key,
             notes = notes,
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,
@@ -90,6 +91,7 @@ data class NodeWithRelations(
             environmentTelemetry = environmentTelemetry,
             powerTelemetry = powerTelemetry,
             paxcounter = paxcounter,
+            publicKey = publicKey ?: user.public_key,
             notes = notes,
             manuallyVerified = manuallyVerified,
             nodeStatus = nodeStatus,

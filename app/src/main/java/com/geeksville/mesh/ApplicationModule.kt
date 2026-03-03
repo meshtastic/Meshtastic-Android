@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package com.geeksville.mesh
 
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.geeksville.mesh.repository.radio.AndroidRadioInterfaceService
+import com.geeksville.mesh.service.AndroidAppWidgetUpdater
+import com.geeksville.mesh.service.AndroidMeshLocationManager
+import com.geeksville.mesh.service.AndroidMeshWorkerManager
 import com.geeksville.mesh.service.MeshServiceNotificationsImpl
+import com.geeksville.mesh.service.ServiceBroadcasts
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -28,7 +32,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.di.ProcessLifecycle
-import org.meshtastic.core.service.MeshServiceNotifications
+import org.meshtastic.core.repository.MeshServiceNotifications
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -36,6 +40,20 @@ import javax.inject.Singleton
 interface ApplicationModule {
 
     @Binds fun bindMeshServiceNotifications(impl: MeshServiceNotificationsImpl): MeshServiceNotifications
+
+    @Binds
+    fun bindMeshLocationManager(impl: AndroidMeshLocationManager): org.meshtastic.core.repository.MeshLocationManager
+
+    @Binds fun bindMeshWorkerManager(impl: AndroidMeshWorkerManager): org.meshtastic.core.repository.MeshWorkerManager
+
+    @Binds fun bindAppWidgetUpdater(impl: AndroidAppWidgetUpdater): org.meshtastic.core.repository.AppWidgetUpdater
+
+    @Binds
+    fun bindRadioInterfaceService(
+        impl: AndroidRadioInterfaceService,
+    ): org.meshtastic.core.repository.RadioInterfaceService
+
+    @Binds fun bindServiceBroadcasts(impl: ServiceBroadcasts): org.meshtastic.core.repository.ServiceBroadcasts
 
     companion object {
         @Provides @ProcessLifecycle

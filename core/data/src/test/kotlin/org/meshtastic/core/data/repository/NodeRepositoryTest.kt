@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ class NodeRepositoryTest {
         myNodeInfoFlow.value = createMyNodeEntity(myNodeNum)
 
         val repository =
-            NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
+            NodeRepositoryImpl(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
         testScheduler.runCurrent()
 
         val result = repository.effectiveLogNodeId(myNodeNum).filter { it == MeshLog.NODE_NUM_LOCAL }.first()
@@ -106,7 +106,7 @@ class NodeRepositoryTest {
         myNodeInfoFlow.value = createMyNodeEntity(myNodeNum)
 
         val repository =
-            NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
+            NodeRepositoryImpl(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
         testScheduler.runCurrent()
 
         val result = repository.effectiveLogNodeId(remoteNodeNum).first()
@@ -122,7 +122,7 @@ class NodeRepositoryTest {
 
         myNodeInfoFlow.value = createMyNodeEntity(firstNodeNum)
         val repository =
-            NodeRepository(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
+            NodeRepositoryImpl(lifecycle, readDataSource, writeDataSource, dispatchers, localStatsDataSource)
         testScheduler.runCurrent()
 
         // Initially should be mapped to LOCAL because it matches
