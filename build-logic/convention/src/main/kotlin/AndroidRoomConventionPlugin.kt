@@ -61,10 +61,13 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
             }
 
             pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+                val hasAndroidTest = projectDir.resolve("src/androidTest").exists()
                 dependencies {
                     "implementation"(roomRuntime)
                     "ksp"(roomCompiler)
-                    "androidTestImplementation"(roomTesting)
+                    if (hasAndroidTest) {
+                        "androidTestImplementation"(roomTesting)
+                    }
                 }
             }
         }

@@ -31,10 +31,13 @@ internal fun Project.configureAndroidCompose(
         buildFeatures.compose = true
     }
 
+    val hasAndroidTest = project.projectDir.resolve("src/androidTest").exists()
     dependencies {
         val bom = libs.library("androidx-compose-bom")
         "implementation"(platform(bom))
-        "androidTestImplementation"(platform(bom))
+        if (hasAndroidTest) {
+            "androidTestImplementation"(platform(bom))
+        }
         "implementation"(libs.library("androidx-compose-ui-tooling"))
         "implementation"(libs.library("androidx-compose-runtime"))
         "runtimeOnly"(libs.library("androidx-compose-runtime-tracing"))
@@ -44,7 +47,9 @@ internal fun Project.configureAndroidCompose(
         "implementation"(libs.library("compose-multiplatform-resources"))
 
         // Add Espresso explicitly to avoid version mismatch issues on newer Android versions
-        "androidTestImplementation"(libs.library("androidx-test-espresso-core"))
+        if (hasAndroidTest) {
+            "androidTestImplementation"(libs.library("androidx-test-espresso-core"))
+        }
     }
     configureComposeCompiler()
 }
