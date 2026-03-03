@@ -231,6 +231,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 @Suppress("CyclomaticComplexMethod", "LongParameterList", "LongMethod")
 @Composable
 fun MapView(
+    modifier: Modifier = Modifier,
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
@@ -735,6 +736,7 @@ fun MapView(
     }
 
     Scaffold(
+        modifier = modifier,
         floatingActionButton = {
             DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { showCacheManagerDialog = true }
         },
