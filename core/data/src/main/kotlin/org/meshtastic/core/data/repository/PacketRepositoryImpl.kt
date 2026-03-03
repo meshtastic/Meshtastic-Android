@@ -255,7 +255,10 @@ constructor(
 
     override suspend fun update(packet: DataPacket): Unit = withContext(dispatchers.io) {
         val dao = dbManager.currentDb.value.packetDao()
-        dao.findPacketsWithId(packet.id).find { it.data == packet }?.let { dao.update(it.copy(data = packet)) }
+        // Match on key fields that identify the packet, rather than the entire data object
+        dao.findPacketsWithId(packet.id)
+            .find { it.data.id == packet.id && it.data.from == packet.from && it.data.to == packet.to }
+            ?.let { dao.update(it.copy(data = packet)) }
     }
 
     override suspend fun insertReaction(reaction: Reaction, myNodeNum: Int) =
