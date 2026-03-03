@@ -317,6 +317,7 @@
     <string name="direct_message">Прямое сообщение</string>
     <string name="nodedb_reset">Очистка списка нод сети</string>
     <string name="delivery_confirmed">Доставка подтверждена</string>
+    <string name="delivery_confirmed_reboot_warning">Ваше устройство может отключиться и перезагрузиться во время применения настроек.</string>
     <string name="error">Ошибка</string>
     <string name="ignore">Игнорировать</string>
     <string name="remove_ignored">Удалить из игнорируемых</string>
@@ -1179,6 +1180,8 @@
     <!-- Network Map Layers -->
     <string name="add_network_layer">Добавить сетевой уровень</string>
     <string name="refresh_layer">Обновить уровень</string>
+    <string name="local_mbtiles_file">Локальный файл MBTiles</string>
+    <string name="add_local_mbtiles_file">Добавить локальный файл MBTiles</string>
     <string name="error_invalid_custom_provider">Недопустимое имя, шаблон URL или локальный URI для провайдера плиток пользователя.</string>
     <string name="error_provider_exists">Провайдер плиток с этим именем уже существует.</string>
     <string name="error_copy_mbtiles_failed">Не удалось скопировать файл MBTiles во внутреннее хранилище.</string>
@@ -1216,8 +1219,14 @@
     <string name="traffic_management_position_dedup">Удаление дубликатов позиций</string>
     <string name="traffic_management_position_precision">Точность позиции (бит)</string>
     <string name="traffic_management_position_min_interval">Мин. интервал позиционирования (сек)</string>
+    <string name="traffic_management_nodeinfo_direct_response">Прямой ответ NodeInfo</string>
+    <string name="traffic_management_nodeinfo_direct_response_max_hops">Макс кол-во хопов для прямых сообщений</string>
     <string name="traffic_management_rate_limit_enabled">Ограничение скорости</string>
     <string name="traffic_management_rate_limit_window">Окно ограничения скорости (сек.)</string>
     <string name="traffic_management_rate_limit_max_packets">Макс количество пакетов в окне</string>
+    <string name="traffic_management_drop_unknown_enabled">Отбрасывать неизвестные пакеты</string>
+    <string name="traffic_management_unknown_packet_threshold">Порог передачи неизвестного пакета</string>
+    <string name="traffic_management_exhaust_hop_telemetry">Телеметрия только для локальной сети (ретрансл.)</string>
+    <string name="traffic_management_exhaust_hop_position">Только локальная позиция (ретрансл.)</string>
     <string name="traffic_management_router_preserve_hops">Сохраняить хопы маршрутизатора</string>
 </resources>
