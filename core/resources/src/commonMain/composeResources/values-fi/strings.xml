@@ -311,6 +311,7 @@
     <string name="direct_message">Yksityisviesti</string>
     <string name="nodedb_reset">Tyhjennä NodeDB-tietokanta</string>
     <string name="delivery_confirmed">Toimitus vahvistettu</string>
+    <string name="delivery_confirmed_reboot_warning">Laitteesi saattaa katkaista yhteyden ja käynnistyä uudelleen, kun asetuksia otetaan käyttöön.</string>
     <string name="error">Virhe</string>
     <string name="ignore">Jätä huomiotta</string>
     <string name="remove_ignored">Poista huomioimattomista</string>
