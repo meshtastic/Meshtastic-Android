@@ -83,7 +83,7 @@ fun ChannelSet.hasLoraConfig(): Boolean = lora_config != null
  */
 fun ChannelSet.getChannelUrl(upperCasePrefix: Boolean = false, shouldAdd: Boolean = false): CommonUri {
     val channelBytes = ChannelSet.ADAPTER.encode(this)
-    val enc = channelBytes.toByteString().base64Url()
+    val enc = channelBytes.toByteString().base64Url().replace("=", "")
     val p = if (upperCasePrefix) CHANNEL_URL_PREFIX.uppercase() else CHANNEL_URL_PREFIX
     val query = if (shouldAdd) "?add=true" else ""
     return CommonUri.parse("$p$query#$enc")

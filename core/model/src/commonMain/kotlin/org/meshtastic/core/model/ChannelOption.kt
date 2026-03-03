@@ -103,9 +103,6 @@ enum class RegionInfo(
     val freqEnd: Float,
     val wideLora: Boolean = false,
 ) {
-    /** This needs to be last. Same as US. */
-    UNSET(RegionCode.UNSET, "Please set a region", 902.0f, 928.0f),
-
     /**
      * United States
      *
@@ -288,6 +285,9 @@ enum class RegionInfo(
      * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
      */
     BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false),
+
+    /** This needs to be last. Same as US. */
+    UNSET(RegionCode.UNSET, "Please set a region", 902.0f, 928.0f),
     ;
 
     companion object {
