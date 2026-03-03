@@ -231,10 +231,7 @@ fun MapView(
                                         .build(),
                                 )
                             } else {
-                                CameraUpdateFactory.newLatLngZoom(
-                                    latLng,
-                                    cameraPositionState.position.zoom
-                                )
+                                CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom)
                             }
                         coroutineScope.launch {
                             try {
@@ -292,8 +289,8 @@ fun MapView(
             .filter { node -> !mapFilterState.onlyFavorites || node.isFavorite || node.num == ourNodeInfo?.num }
             .filter { node ->
                 mapFilterState.lastHeardFilter.seconds == 0L ||
-                        (nowSeconds - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
-                        node.num == ourNodeInfo?.num
+                    (nowSeconds - node.lastHeard) <= mapFilterState.lastHeardFilter.seconds ||
+                    node.num == ourNodeInfo?.num
             }
 
     val displayNodes =
@@ -304,20 +301,14 @@ fun MapView(
         }
     LaunchedEffect(tracerouteOverlay, displayNodes) {
         if (tracerouteOverlay != null) {
-            onTracerouteMappableCountChanged(
-                displayNodes.size,
-                tracerouteOverlay.relatedNodeNums.size
-            )
+            onTracerouteMappableCountChanged(displayNodes.size, tracerouteOverlay.relatedNodeNums.size)
         }
     }
 
     val myNodeNum = mapViewModel.myNodeNum
     val nodeClusterItems =
         displayNodes.map { node ->
-            val latLng = LatLng(
-                (node.position.latitude_i ?: 0) * DEG_D,
-                (node.position.longitude_i ?: 0) * DEG_D
-            )
+            val latLng = LatLng((node.position.latitude_i ?: 0) * DEG_D, (node.position.longitude_i ?: 0) * DEG_D)
             NodeClusterItem(
                 node = node,
                 nodePosition = latLng,
@@ -343,8 +334,7 @@ fun MapView(
     val tracerouteForwardPoints =
         remember(tracerouteOverlay, displayNodes) {
             val nodeLookup = displayNodes.associateBy { it.num }
-            tracerouteOverlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.toLatLng() }
-                ?: emptyList()
+            tracerouteOverlay?.forwardRoute?.mapNotNull { nodeLookup[it]?.toLatLng() } ?: emptyList()
         }
     val tracerouteReturnPoints =
         remember(tracerouteOverlay, displayNodes) {
@@ -426,17 +416,11 @@ fun MapView(
         if (allPoints.isNotEmpty()) {
             val cameraUpdate =
                 if (allPoints.size == 1) {
-                    CameraUpdateFactory.newLatLngZoom(
-                        allPoints.first(),
-                        max(cameraPositionState.position.zoom, 12f)
-                    )
+                    CameraUpdateFactory.newLatLngZoom(allPoints.first(), max(cameraPositionState.position.zoom, 12f))
                 } else {
                     val bounds = LatLngBounds.builder()
                     allPoints.forEach { bounds.include(it) }
-                    CameraUpdateFactory.newLatLngBounds(
-                        bounds.build(),
-                        TRACEROUTE_BOUNDS_PADDING_PX
-                    )
+                    CameraUpdateFactory.newLatLngBounds(bounds.build(), TRACEROUTE_BOUNDS_PADDING_PX)
                 }
             try {
                 cameraPositionState.animate(cameraUpdate)
@@ -453,22 +437,21 @@ fun MapView(
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
             uiSettings =
-                MapUiSettings(
-                    zoomControlsEnabled = true,
-                    mapToolbarEnabled = true,
-                    compassEnabled = false,
-                    myLocationButtonEnabled = false,
-                    rotationGesturesEnabled = true,
-                    scrollGesturesEnabled = true,
-                    tiltGesturesEnabled = true,
-                    zoomGesturesEnabled = true,
-                ),
+            MapUiSettings(
+                zoomControlsEnabled = true,
+                mapToolbarEnabled = true,
+                compassEnabled = false,
+                myLocationButtonEnabled = false,
+                rotationGesturesEnabled = true,
+                scrollGesturesEnabled = true,
+                tiltGesturesEnabled = true,
+                zoomGesturesEnabled = true,
+            ),
             properties =
-                MapProperties(
-                    mapType = effectiveGoogleMapType,
-                    isMyLocationEnabled =
-                        isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
-                ),
+            MapProperties(
+                mapType = effectiveGoogleMapType,
+                isMyLocationEnabled = isLocationTrackingEnabled && locationPermissionsState.allPermissionsGranted,
+            ),
             onMapLongClick = { latLng ->
                 if (isConnected) {
                     val newWaypoint =
@@ -487,12 +470,7 @@ fun MapView(
                             it.urlTemplate == url || it.localUri == url
                         }
                     mapViewModel.getTileProvider(config)?.let { tileProvider ->
-                        TileOverlay(
-                            tileProvider = tileProvider,
-                            fadeIn = true,
-                            transparency = 0f,
-                            zIndex = -1f
-                        )
+                        TileOverlay(tileProvider = tileProvider, fadeIn = true, transparency = 0f, zIndex = -1f)
                     }
                 }
             }
@@ -521,7 +499,7 @@ fun MapView(
                 val timeFilteredPositions =
                     nodeTracks.filter {
                         lastHeardTrackFilter == LastHeardFilter.Any ||
-                                it.time > nowSeconds - lastHeardTrackFilter.seconds
+                            it.time > nowSeconds - lastHeardTrackFilter.seconds
                     }
                 val sortedPositions = timeFilteredPositions.sortedBy { it.time }
                 allNodes
@@ -529,12 +507,10 @@ fun MapView(
                     ?.let { focusedNode ->
                         sortedPositions.forEachIndexed { index, position ->
                             key(position.time) {
-                                val markerState =
-                                    rememberUpdatedMarkerState(position = position.toLatLng())
+                                val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
                                 val alpha = (index.toFloat() / (sortedPositions.size.toFloat() - 1))
                                 val color = Color(focusedNode.colors.second).copy(alpha = alpha)
-                                val isHighPriority =
-                                    focusedNode.num == myNodeNum || focusedNode.isFavorite
+                                val isHighPriority = focusedNode.num == myNodeNum || focusedNode.isFavorite
                                 val activeNodeZIndex = if (isHighPriority) 5f else 4f
 
                                 if (index == sortedPositions.lastIndex) {
@@ -552,10 +528,7 @@ fun MapView(
                                         snippet = formatAgo(position.time),
                                         zIndex = 1f + alpha,
                                         infoContent = {
-                                            PositionInfoWindowContent(
-                                                position = position,
-                                                displayUnits = displayUnits,
-                                            )
+                                            PositionInfoWindowContent(position = position, displayUnits = displayUnits)
                                         },
                                     ) {
                                         Icon(
@@ -569,8 +542,7 @@ fun MapView(
                         }
 
                         if (sortedPositions.size > 1) {
-                            val segments =
-                                sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
+                            val segments = sortedPositions.windowed(size = 2, step = 1, partialWindows = false)
                             segments.forEachIndexed { index, segmentPoints ->
                                 val alpha = (index.toFloat() / (segments.size.toFloat() - 1))
                                 Polyline(
@@ -590,8 +562,7 @@ fun MapView(
                     navigateToNodeDetails = navigateToNodeDetails,
                     onClusterClick = { cluster ->
                         val items = cluster.items.toList()
-                        val allSameLocation =
-                            items.size > 1 && items.all { it.position == items.first().position }
+                        val allSameLocation = items.size > 1 && items.all { it.position == items.first().position }
 
                         if (allSameLocation) {
                             showClusterItemsDialog = items
@@ -625,21 +596,12 @@ fun MapView(
                 selectedWaypointId = selectedWaypointId,
             )
 
-            mapLayers.forEach { layerItem ->
-                key(layerItem.id) {
-                    MapLayerOverlay(
-                        layerItem,
-                        mapViewModel
-                    )
-                }
-            }
+            mapLayers.forEach { layerItem -> key(layerItem.id) { MapLayerOverlay(layerItem, mapViewModel) } }
         }
 
         ScaleBar(
             cameraPositionState = cameraPositionState,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(bottom = 48.dp),
+            modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 48.dp),
         )
         editingWaypoint?.let { waypointToEdit ->
             EditWaypointDialog(
@@ -673,9 +635,7 @@ fun MapView(
         val isRefreshingLayers = visibleNetworkLayers.any { it.isRefreshing }
 
         MapControlsOverlay(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 8.dp),
+            modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
             mapFilterMenuExpanded = mapFilterMenuExpanded,
             onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
             onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
@@ -709,13 +669,8 @@ fun MapView(
                     coroutineScope.launch {
                         try {
                             val currentPosition = cameraPositionState.position
-                            val newCameraPosition =
-                                CameraPosition.Builder(currentPosition).bearing(0f).build()
-                            cameraPositionState.animate(
-                                CameraUpdateFactory.newCameraPosition(
-                                    newCameraPosition
-                                )
-                            )
+                            val newCameraPosition = CameraPosition.Builder(currentPosition).bearing(0f).build()
+                            cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
                             Logger.d { "Oriented map to north" }
                         } catch (e: IllegalStateException) {
                             Logger.d { "Error orienting map to north: ${e.message}" }
@@ -770,10 +725,7 @@ private fun MapLayerOverlay(layerItem: MapLayerItem, mapViewModel: MapViewModel)
                 when (layerItem.layerType) {
                     LayerType.KML -> KmlLayer(map, inputStream, context)
                     LayerType.GEOJSON ->
-                        GeoJsonLayer(
-                            map,
-                            JSONObject(inputStream.bufferedReader().use { it.readText() })
-                        )
+                        GeoJsonLayer(map, JSONObject(inputStream.bufferedReader().use { it.readText() }))
                 }
             } catch (e: Exception) {
                 Logger.withTag("MapView").e(e) { "Error loading map layer: ${layerItem.name}" }
@@ -839,8 +791,7 @@ fun Uri.getFileName(context: android.content.Context): String {
     if (this.scheme == "content") {
         context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) {
-                val displayNameIndex =
-                    cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                val displayNameIndex = cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                 if (displayNameIndex != -1) {
                     name = cursor.getString(displayNameIndex)
                 }
@@ -853,16 +804,10 @@ fun Uri.getFileName(context: android.content.Context): String {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
-private fun PositionInfoWindowContent(
-    position: Position,
-    displayUnits: DisplayUnits = DisplayUnits.METRIC
-) {
+private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
     @Composable
     fun PositionRow(label: String, value: String) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(label, style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.width(16.dp))
             Text(value, style = MaterialTheme.typography.labelMediumEmphasized)
@@ -881,30 +826,21 @@ private fun PositionInfoWindowContent(
                 value = "%.5f".format((position.longitude_i ?: 0) * DEG_D),
             )
 
-            PositionRow(
-                label = stringResource(Res.string.sats),
-                value = position.sats_in_view?.toString() ?: ""
-            )
+            PositionRow(label = stringResource(Res.string.sats), value = position.sats_in_view?.toString() ?: "")
 
             PositionRow(
                 label = stringResource(Res.string.alt),
                 value = (position.altitude ?: 0).metersIn(displayUnits).toString(displayUnits),
             )
 
-            PositionRow(
-                label = stringResource(Res.string.speed),
-                value = speedFromPosition(position, displayUnits)
-            )
+            PositionRow(label = stringResource(Res.string.speed), value = speedFromPosition(position, displayUnits))
 
             PositionRow(
                 label = stringResource(Res.string.heading),
                 value = "%.0f°".format((position.ground_track ?: 0) * HEADING_DEG),
             )
 
-            PositionRow(
-                label = stringResource(Res.string.timestamp),
-                value = position.formatPositionTime()
-            )
+            PositionRow(label = stringResource(Res.string.timestamp), value = position.formatPositionTime())
         }
     }
 }
@@ -926,13 +862,11 @@ private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): S
     return speedText
 }
 
-internal fun Position.toLatLng(): LatLng =
-    LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
+internal fun Position.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
-private fun Waypoint.toLatLng(): LatLng =
-    LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
+private fun Waypoint.toLatLng(): LatLng = LatLng((this.latitude_i ?: 0) * DEG_D, (this.longitude_i ?: 0) * DEG_D)
 
 private fun offsetPolyline(
     points: List<LatLng>,
@@ -953,10 +887,7 @@ private fun offsetPolyline(
                         headingPoints[headingPoints.lastIndex],
                     )
 
-                else -> SphericalUtil.computeHeading(
-                    headingPoints[index - 1],
-                    headingPoints[index + 1]
-                )
+                else -> SphericalUtil.computeHeading(headingPoints[index - 1], headingPoints[index + 1])
             }
         }
 

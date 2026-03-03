@@ -54,7 +54,10 @@ fun MapScreen(
             )
         },
     ) { paddingValues ->
-            MapView(modifier= Modifier.fillMaxSize().padding(paddingValues), mapViewModel = mapViewModel, navigateToNodeDetails = navigateToNodeDetails)
-
+        MapView(
+            modifier = Modifier.fillMaxSize().padding(paddingValues),
+            mapViewModel = mapViewModel,
+            navigateToNodeDetails = navigateToNodeDetails,
+        )
     }
 }
