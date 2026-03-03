@@ -59,14 +59,14 @@ constructor(
     private val mutex = Mutex()
 
     // Expose the DB cache limit as a reactive stream so UI can observe changes.
-    private val _cacheLimit = MutableStateFlow(getCacheLimit())
+    private val _cacheLimit = MutableStateFlow(getCurrentCacheLimit())
     override val cacheLimit: StateFlow<Int> = _cacheLimit
 
     // Keep cache-limit StateFlow in sync if some other component updates SharedPreferences.
     private val prefsListener =
         SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
             if (key == DatabaseConstants.CACHE_LIMIT_KEY) {
-                _cacheLimit.value = getCacheLimit()
+                _cacheLimit.value = getCurrentCacheLimit()
             }
         }
 
@@ -160,7 +160,7 @@ constructor(
     }
 
     private suspend fun enforceCacheLimit(activeDbName: String) = mutex.withLock {
-        val limit = getCacheLimit()
+        val limit = getCurrentCacheLimit()
         val all = listExistingDbNames()
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
         val deviceDbs =
@@ -190,13 +190,13 @@ constructor(
         }
     }
 
-    override fun getCacheLimit(): Int = prefs
+    override fun getCurrentCacheLimit(): Int = prefs
         .getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
         .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
 
     override fun setCacheLimit(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
-        if (clamped == getCacheLimit()) return
+        if (clamped == getCurrentCacheLimit()) return
         prefs.edit().putInt(DatabaseConstants.CACHE_LIMIT_KEY, clamped).apply()
         _cacheLimit.value = clamped
         // Enforce asynchronously with current active DB protected

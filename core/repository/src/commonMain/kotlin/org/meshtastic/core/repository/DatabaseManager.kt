@@ -23,8 +23,8 @@ interface DatabaseManager {
     /** Reactive stream of the current database cache limit. */
     val cacheLimit: StateFlow<Int>
 
-    /** Returns the current database cache limit. */
-    fun getCacheLimit(): Int
+    /** Returns the current database cache limit from storage. */
+    fun getCurrentCacheLimit(): Int
 
     /** Sets the database cache limit. */
     fun setCacheLimit(limit: Int)

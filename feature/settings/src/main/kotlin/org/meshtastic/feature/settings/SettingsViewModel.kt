@@ -32,7 +32,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -46,6 +45,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.DatabaseManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
