@@ -14,7 +14,6 @@ jobs:
     uses: ./.github/workflows/reusable-check.yml
     with:
       api_levels: '[26, 35]' # Comprehensive testing for Merge Queue
-      flavors: '["google", "fdroid"]'
       upload_artifacts: false
     secrets: inherit
 
