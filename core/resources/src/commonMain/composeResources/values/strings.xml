@@ -471,6 +471,7 @@
     <string name="channel_2">Channel 2</string>
     <string name="channel_3">Channel 3</string>
     <string name="current">Current</string>
+    <string name="current_value_format">%1$s %2$.2f A</string>
     <string name="voltage">Voltage</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
