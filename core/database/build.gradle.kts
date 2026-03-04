@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.kotlin.parcelize)
 }
 
 kotlin {
@@ -32,9 +33,9 @@ kotlin {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
             implementation(projects.core.repository)
-            implementation(projects.core.common)
+            api(projects.core.common)
             implementation(projects.core.di)
-            implementation(projects.core.model)
+            api(projects.core.model)
             implementation(projects.core.proto)
             implementation(projects.core.resources)
             implementation(libs.androidx.room.paging)

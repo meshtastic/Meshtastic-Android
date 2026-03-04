@@ -119,8 +119,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     companion object {
         /** Configures a [RoomDatabase.Builder] with standard settings for this project. */
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
-            this.setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
-                .fallbackToDestructiveMigration(dropAllTables = false)
+            this.fallbackToDestructiveMigration(dropAllTables = false)
                 .setDriver(BundledSQLiteDriver())
                 .setQueryCoroutineContext(Dispatchers.IO)
     }

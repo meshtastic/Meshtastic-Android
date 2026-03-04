@@ -35,7 +35,7 @@ kotlin {
             implementation(libs.kermit)
         }
         androidMain.dependencies {
-            implementation(libs.androidx.core.ktx)
+            api(libs.androidx.core.ktx)
             api(libs.nordic.common.core)
         }
         commonTest.dependencies {

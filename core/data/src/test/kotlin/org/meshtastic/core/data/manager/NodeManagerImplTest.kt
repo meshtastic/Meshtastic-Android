@@ -106,6 +106,39 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `handleReceivedTelemetry updates device metrics`() {
+        val nodeNum = 1234
+        val telemetry =
+            org.meshtastic.proto.Telemetry(
+                device_metrics = org.meshtastic.proto.DeviceMetrics(battery_level = 75, voltage = 3.8f),
+            )
+
+        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertNotNull(result!!.deviceMetrics)
+        assertEquals(75, result.deviceMetrics.battery_level)
+        assertEquals(3.8f, result.deviceMetrics.voltage)
+    }
+
+    @Test
+    fun `handleReceivedTelemetry updates environment metrics`() {
+        val nodeNum = 1234
+        val telemetry =
+            org.meshtastic.proto.Telemetry(
+                environment_metrics =
+                org.meshtastic.proto.EnvironmentMetrics(temperature = 22.5f, relative_humidity = 45.0f),
+            )
+
+        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertNotNull(result!!.environmentMetrics)
+        assertEquals(22.5f, result.environmentMetrics.temperature)
+        assertEquals(45.0f, result.environmentMetrics.relative_humidity)
+    }
+
+    @Test
     fun `clear resets internal state`() {
         nodeManager.updateNode(1234) { it.copy(user = it.user.copy(long_name = "Test")) }
         nodeManager.clear()

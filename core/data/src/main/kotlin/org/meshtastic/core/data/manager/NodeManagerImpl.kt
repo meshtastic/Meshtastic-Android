@@ -192,23 +192,42 @@ constructor(
     }
 
     override fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long) {
-        if (myNodeNum == fromNum && (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0) {
-            Logger.d { "Ignoring nop position update for the local node" }
-        } else {
-            updateNode(fromNum) { node ->
-                node.copy(position = p.copy(time = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()))
-            }
+        val isZeroPos = (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0
+        if (myNodeNum == fromNum && isZeroPos && p.sats_in_view == 0 && p.time == 0) {
+            Logger.d { "Ignoring empty position update for the local node" }
+            return
+        }
+
+        updateNode(fromNum) { node ->
+            val posTime = if (p.time != 0) p.time else (defaultTime / TIME_MS_TO_S).toInt()
+            val newLastHeard = maxOf(node.lastHeard, posTime)
+
+            val newPos =
+                if (isZeroPos) {
+                    p.copy(
+                        time = posTime,
+                        latitude_i = node.position.latitude_i,
+                        longitude_i = node.position.longitude_i,
+                        altitude = p.altitude ?: node.position.altitude,
+                        sats_in_view = p.sats_in_view,
+                    )
+                } else {
+                    p.copy(time = posTime)
+                }
+
+            node.copy(position = newPos, lastHeard = newLastHeard)
         }
     }
 
     override fun handleReceivedTelemetry(fromNum: Int, telemetry: Telemetry) {
         updateNode(fromNum) { node ->
-            when {
-                telemetry.device_metrics != null -> node.copy(deviceMetrics = telemetry.device_metrics!!)
-                telemetry.environment_metrics != null -> node.copy(environmentMetrics = telemetry.environment_metrics!!)
-                telemetry.power_metrics != null -> node.copy(powerMetrics = telemetry.power_metrics!!)
-                else -> node
-            }
+            var nextNode = node
+            telemetry.device_metrics?.let { nextNode = nextNode.copy(deviceMetrics = it) }
+            telemetry.environment_metrics?.let { nextNode = nextNode.copy(environmentMetrics = it) }
+            telemetry.power_metrics?.let { nextNode = nextNode.copy(powerMetrics = it) }
+            val telemetryTime = if (telemetry.time != 0) telemetry.time else node.lastHeard
+            val newLastHeard = maxOf(node.lastHeard, telemetryTime)
+            nextNode.copy(lastHeard = newLastHeard)
         }
     }
 

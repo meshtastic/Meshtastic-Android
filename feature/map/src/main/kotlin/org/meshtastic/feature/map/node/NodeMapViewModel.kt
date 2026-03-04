@@ -60,7 +60,7 @@ constructor(
 
     val applicationId = buildConfigProvider.applicationId
 
-    private val ourNodeNumFlow = nodeRepository.nodeDBbyNum.map { it.keys.firstOrNull() }.distinctUntilChanged()
+    private val ourNodeNumFlow = nodeRepository.myNodeInfo.map { it?.myNodeNum }.distinctUntilChanged()
 
     val positionLogs: StateFlow<List<Position>> =
         ourNodeNumFlow

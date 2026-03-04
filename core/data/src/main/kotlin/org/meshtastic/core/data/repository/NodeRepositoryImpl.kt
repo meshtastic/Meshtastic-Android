@@ -260,6 +260,8 @@ constructor(
         num = num,
         user = user,
         position = position,
+        latitude = latitude,
+        longitude = longitude,
         snr = snr,
         rssi = rssi,
         lastHeard = lastHeard,
