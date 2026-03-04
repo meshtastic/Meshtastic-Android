@@ -15,9 +15,6 @@ on:
       api_levels:
         type: string
         default: '[35]'
-      num_shards:
-        type: number
-        default: 1
       upload_artifacts:
         type: boolean
         default: true
@@ -48,7 +45,6 @@ jobs:
       matrix:
         api_level: ${{ fromJson(inputs.api_levels) }}
     env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
       DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
       MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
