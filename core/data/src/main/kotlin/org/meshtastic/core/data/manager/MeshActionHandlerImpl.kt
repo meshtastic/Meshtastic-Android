@@ -201,10 +201,12 @@ constructor(
             val currentPosition =
                 when {
                     provideLocation && position.isValid() -> position
-                    else ->
+                    provideLocation ->
                         nodeManager.nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                            ?: Position(0.0, 0.0, 0)
+                    else -> Position(0.0, 0.0, 0)
                 }
-            currentPosition?.let { commandSender.requestPosition(destNum, it) }
+            commandSender.requestPosition(destNum, currentPosition)
         }
     }
 

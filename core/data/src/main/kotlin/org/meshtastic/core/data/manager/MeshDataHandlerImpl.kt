@@ -440,11 +440,13 @@ constructor(
                         }
                     }
                 }
-
                 environment != null -> nextNode = nextNode.copy(environmentMetrics = environment)
                 power != null -> nextNode = nextNode.copy(powerMetrics = power)
             }
-            nextNode
+
+            val telemetryTime = if (t.time != 0) t.time else nextNode.lastHeard
+            val newLastHeard = maxOf(nextNode.lastHeard, telemetryTime)
+            nextNode.copy(lastHeard = newLastHeard)
         }
     }
 

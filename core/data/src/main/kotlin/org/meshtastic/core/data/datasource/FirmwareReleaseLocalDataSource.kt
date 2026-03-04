@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.data.datasource
 
-import dagger.Lazy
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.database.dao.FirmwareReleaseDao
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asDeviceVersion
@@ -30,10 +29,11 @@ import javax.inject.Inject
 class FirmwareReleaseLocalDataSource
 @Inject
 constructor(
-    private val firmwareReleaseDaoLazy: Lazy<FirmwareReleaseDao>,
+    private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    private val firmwareReleaseDao by lazy { firmwareReleaseDaoLazy.get() }
+    private val firmwareReleaseDao
+        get() = dbManager.currentDb.value.firmwareReleaseDao()
 
     suspend fun insertFirmwareReleases(
         firmwareReleases: List<NetworkFirmwareRelease>,
