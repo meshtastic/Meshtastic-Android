@@ -106,6 +106,52 @@ class NodeManagerImplTest {
     }
 
     @Test
+    fun `handleReceivedPosition with zero coordinates preserves last known location but updates satellites`() {
+        val nodeNum = 1234
+        val initialPosition = Position(latitude_i = 450000000, longitude_i = 900000000, sats_in_view = 10)
+        nodeManager.handleReceivedPosition(nodeNum, 9999, initialPosition, 1000000L)
+
+        // Receive "zero" position with new satellite count
+        val zeroPosition = Position(latitude_i = 0, longitude_i = 0, sats_in_view = 5, time = 1001)
+        nodeManager.handleReceivedPosition(nodeNum, 9999, zeroPosition, 1001000L)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertEquals(45.0, result!!.latitude, 0.0001)
+        assertEquals(90.0, result.longitude, 0.0001)
+        assertEquals(5, result.position.sats_in_view)
+        assertEquals(1001, result.lastHeard)
+    }
+
+    @Test
+    fun `handleReceivedPosition for local node ignores purely empty packets`() {
+        val myNum = 1111
+        val emptyPos = Position(latitude_i = 0, longitude_i = 0, sats_in_view = 0, time = 0)
+
+        nodeManager.handleReceivedPosition(myNum, myNum, emptyPos, 0)
+
+        val result = nodeManager.nodeDBbyNodeNum[myNum]
+        // Should still be a default/unset node if it didn't exist, or shouldn't have position
+        assertTrue(result == null || result.position.latitude_i == null)
+    }
+
+    @Test
+    fun `handleReceivedTelemetry updates lastHeard`() {
+        val nodeNum = 1234
+        nodeManager.updateNode(nodeNum) { it.copy(lastHeard = 1000) }
+
+        val telemetry =
+            org.meshtastic.proto.Telemetry(
+                time = 2000,
+                device_metrics = org.meshtastic.proto.DeviceMetrics(battery_level = 50),
+            )
+
+        nodeManager.handleReceivedTelemetry(nodeNum, telemetry)
+
+        val result = nodeManager.nodeDBbyNodeNum[nodeNum]
+        assertEquals(2000, result!!.lastHeard)
+    }
+
+    @Test
     fun `handleReceivedTelemetry updates device metrics`() {
         val nodeNum = 1234
         val telemetry =

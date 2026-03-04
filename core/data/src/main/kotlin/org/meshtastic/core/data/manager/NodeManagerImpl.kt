@@ -193,6 +193,7 @@ constructor(
 
     override fun handleReceivedPosition(fromNum: Int, myNodeNum: Int, p: ProtoPosition, defaultTime: Long) {
         val isZeroPos = (p.latitude_i ?: 0) == 0 && (p.longitude_i ?: 0) == 0
+        @Suppress("ComplexCondition")
         if (myNodeNum == fromNum && isZeroPos && p.sats_in_view == 0 && p.time == 0) {
             Logger.d { "Ignoring empty position update for the local node" }
             return
