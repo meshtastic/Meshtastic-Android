@@ -39,6 +39,8 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     timeout-minutes: 60
     strategy:
       fail-fast: true
@@ -59,6 +61,9 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v5
         with:
@@ -70,6 +75,7 @@ jobs:
         with:
           dependency-graph: generate-and-submit
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-cleanup: true
           build-scan-publish: true
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
