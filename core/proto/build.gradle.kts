@@ -28,7 +28,7 @@ kotlin {
     jvm()
 
     // Override minSdk for ATAK compatibility (standard is 26)
-    androidLibrary { minSdk = 21 }
+    android { minSdk = 21 }
 
     sourceSets { commonMain.dependencies { api(libs.wire.runtime) } }
 }
@@ -39,6 +39,10 @@ wire {
         srcDir("src/main/wire-includes")
     }
     kotlin {
+        // Wire 6 optimization: Avoid unnecessary immutable copies of repeated/map fields.
+        // Improves performance by reducing allocations when decoding/creating messages.
+        makeImmutableCopies = false
+
         // Flattens 'oneof' fields into nullable properties on the parent class.
         // This removes the intermediate sealed classes, simplifying usage and reducing method count/binary size.
         // Codebase is already written to use the nullable properties (e.g. packet.decoded vs
