@@ -255,6 +255,7 @@
     <string name="direct_message">Директно съобщение</string>
     <string name="nodedb_reset">Нулиране на базата данни с възли</string>
     <string name="delivery_confirmed">Съобщението е доставено</string>
+    <string name="delivery_confirmed_reboot_warning">Устройството ви може да прекъсне връзката и да се рестартира, докато се прилагат настройките.</string>
     <string name="error">Грешка</string>
     <string name="ignore">Игнорирай</string>
     <string name="remove_ignored">Премахване от игнорирани</string>
@@ -545,6 +546,7 @@
     <string name="long_name">Дълго име</string>
     <string name="short_name">Кратко име</string>
     <string name="hardware_model">Модел на хардуера</string>
+    <string name="licensed_amateur_radio">Лицензиран радиолюбител (Ham)</string>
     <string name="licensed_amateur_radio_text">Активирането на тази опция дезактивира криптирането и не е съвместимо с мрежата Meshtastic по подразбиране.</string>
     <string name="dew_point">Точка на оросяване</string>
     <string name="pressure">Налягане</string>
@@ -671,6 +673,7 @@
     <string name="type_a_message">Въведете съобщение</string>
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi устройства</string>
+    <string name="ble_devices">Bluetooth устройства</string>
     <string name="bluetooth_paired_devices">Сдвоени устройства</string>
     <string name="connected_device">Свързано устройство</string>
     <string name="view_release">Преглед на изданието</string>
@@ -682,6 +685,7 @@
     <string name="firmware_edition">Версия на фърмуера</string>
     <string name="recent_network_devices">Скорошни мрежови устройства</string>
     <string name="discovered_network_devices">Открити мрежови устройства</string>
+    <string name="bluetooth_available_devices">Налични Bluetooth устройства</string>
     <string name="get_started">Започнете</string>
     <string name="intro_welcome">Добре дошли в</string>
     <string name="stay_connected_anywhere">Останете свързани навсякъде</string>
@@ -752,6 +756,7 @@
     <string name="system_settings">Системни настройки</string>
     <string name="no_local_stats">Няма налична статистика</string>
     <string name="analytics_notice">Анализите се събират, за да ни помогнат да подобрим приложението за Android (благодарим ви). Ще получаваме анонимизирана информация за поведението на потребителите. Това включва отчети за сривове, екрани, използвани в приложението и др.</string>
+    <string name="analytics_platforms">Аналитични платформи:</string>
     <string name="for_more_information_see_our_privacy_policy">За повече информация вижте нашата политика за поверителност.</string>
     <string name="unset">Не е зададен - 0</string>
     <string name="relayed_by">Препредадено от: %1$s</string>
@@ -831,6 +836,14 @@
     <string name="back">Назад</string>
     <string name="interval_unset">Не е зададен</string>
     <string name="interval_always_on">Винаги включен</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d секунда</item>
+        <item quantity="other">%1$d секунди</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d минута</item>
+        <item quantity="other">%1$d минути</item>
+    </plurals>
     <plurals name="plurals_hours">
         <item quantity="one">%1$d час</item>
         <item quantity="other">%1$d часа</item>
@@ -853,6 +866,7 @@
     <string name="loading">Зареждане</string>
     <!-- Message Filter -->
     <string name="filter_enable">Активиране на филтрирането</string>
+    <string name="filter_words_summary">Съобщенията, съдържащи тези думи, ще бъдат скрити</string>
     <string name="filter_filtered_count">%1$d филтрирани</string>
     <string name="filter_show_count">Показване на %1$d филтрирани</string>
     <string name="filter_hide_count">Скриване на %1$d филтрирани</string>
@@ -863,10 +877,45 @@
     <string name="generate_qr_code">Генериране на QR код</string>
     <string name="all_time">Всички</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Конфигуриране на разрешения за Bluetooth</string>
+    <string name="bluetooth_feature_discovery_description">Намерете и идентифицирайте устройства Meshtastic близо до вас.</string>
     <string name="bluetooth_feature_config">Конфигурация</string>
+    <string name="bluetooth_feature_config_description">Управлявайте безжично настройките и каналите на вашето устройство.</string>
+    <string name="map_style_selection">Избор на стил на картата</string>
+    <string name="local_stats_battery">Батерия: %1$d%%</string>
+    <string name="local_stats_nodes">Възли: %1$d онлайн / %2$d общо</string>
+    <string name="local_stats_uptime">Време на работа: %1$s</string>
+    <string name="local_stats_traffic">Трафик: TX %1$d / RX %2$d (D: %3$d)</string>
+    <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="refresh">Опресняване</string>
     <!-- Network Map Layers -->
+    <string name="add_network_layer">Добавяне на мрежов слой</string>
+    <string name="refresh_layer">Опресняване на слоя</string>
+    <string name="tak_config">Конфигурация на TAK</string>
+    <string name="tak_team">Цвят на екипа</string>
+    <string name="tak_role">Роля на члена</string>
+    <string name="tak_team_unspecified_color">Неопределен</string>
+    <string name="tak_team_white">Бял</string>
+    <string name="tak_team_yellow">Жълт</string>
+    <string name="tak_team_orange">Оранжев</string>
+    <string name="tak_team_magenta">Магента</string>
     <string name="tak_team_red">Червен</string>
+    <string name="tak_team_maroon">Кестеняв</string>
+    <string name="tak_team_purple">Лилав</string>
+    <string name="tak_team_dark_blue">Тъмно син</string>
     <string name="tak_team_blue">Син</string>
+    <string name="tak_team_cyan">Циан</string>
+    <string name="tak_team_teal">Тийл</string>
     <string name="tak_team_green">Зелен</string>
+    <string name="tak_team_dark_green">Тъмно зелен</string>
+    <string name="tak_team_brown">Кафяв</string>
+    <string name="tak_role_unspecified">Неопределена</string>
+    <string name="tak_role_teammember">Член на екипа</string>
+    <string name="tak_role_teamlead">Ръководител на екипа</string>
+    <string name="tak_role_sniper">Снайперист</string>
+    <string name="tak_role_medic">Медик</string>
+    <string name="tak_role_rto">Радиотелефонен оператор</string>
+    <string name="traffic_management">Управление на трафика</string>
     <string name="traffic_management_enabled">Модулът е активиран</string>
+    <string name="traffic_management_nodeinfo_direct_response_max_hops">Максимален брой отскоци за директен отговор</string>
 </resources>
