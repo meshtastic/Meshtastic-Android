@@ -32,7 +32,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,7 +89,7 @@ fun NeighborInfoLogScreen(
 
     Scaffold(
         topBar = {
-            val lastRequestNeighborsTime by viewModel.lastRequestNeighborsTime.collectAsState()
+            val lastRequestNeighborsTime by viewModel.lastRequestNeighborsTime.collectAsStateWithLifecycle()
             MainAppBar(
                 title = state.node?.user?.long_name ?: "",
                 subtitle = stringResource(Res.string.neighbor_info),

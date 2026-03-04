@@ -47,13 +47,15 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.data.repository.PacketRepository
-import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.model.DataPacket
+import org.meshtastic.core.model.Message
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.getString
@@ -86,8 +88,6 @@ import org.meshtastic.core.resources.no_local_stats
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.you
-import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.SERVICE_NOTIFY_ID
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
@@ -309,16 +309,14 @@ constructor(
             if (myNodeNum != null) {
                 // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
                 // and we only do this once if the cache is empty.
-                val nodes = runBlocking { repo.getNodeDBbyNum().first() }
-                nodes[myNodeNum]?.let { entity ->
+                val nodes = runBlocking { repo.nodeDBbyNum.first() }
+                nodes[myNodeNum]?.let { node ->
                     if (cachedDeviceMetrics == null) {
-                        cachedDeviceMetrics = entity.deviceTelemetry.device_metrics
+                        cachedDeviceMetrics = node.deviceMetrics
                     }
                     if (cachedLocalStats == null) {
                         // Fallback to DB stats if repository hasn't received any fresh ones yet
-                        cachedLocalStats =
-                            repo.localStats.value.takeIf { it.uptime_seconds != 0 }
-                                ?: entity.deviceTelemetry.local_stats
+                        cachedLocalStats = repo.localStats.value.takeIf { it.uptime_seconds != 0 }
                     }
                 }
             }
@@ -477,12 +475,12 @@ constructor(
         notificationManager.notify(name.hashCode(), notification)
     }
 
-    override fun showNewNodeSeenNotification(node: NodeEntity) {
+    override fun showNewNodeSeenNotification(node: Node) {
         val notification = createNewNodeSeenNotification(node.user.short_name, node.user.long_name, node.num)
         notificationManager.notify(node.num, notification)
     }
 
-    override fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {
+    override fun showOrUpdateLowBatteryNotification(node: Node, isRemote: Boolean) {
         val notification = createLowBatteryNotification(node, isRemote)
         notificationManager.notify(node.num, notification)
     }
@@ -495,7 +493,7 @@ constructor(
 
     override fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
 
-    override fun cancelLowBatteryNotification(node: NodeEntity) = notificationManager.cancel(node.num)
+    override fun cancelLowBatteryNotification(node: Node) = notificationManager.cancel(node.num)
 
     override fun clearClientNotification(notification: ClientNotification) =
         notificationManager.cancel(notification.toString().hashCode())
@@ -673,11 +671,11 @@ constructor(
         return builder.build()
     }
 
-    private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
+    private fun createLowBatteryNotification(node: Node, isRemote: Boolean): Notification {
         val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
-        val title = getString(Res.string.low_battery_title).format(node.shortName)
-        val batteryLevel = node.deviceMetrics?.battery_level ?: 0
-        val message = getString(Res.string.low_battery_message).format(node.longName, batteryLevel)
+        val title = getString(Res.string.low_battery_title).format(node.user.short_name)
+        val batteryLevel = node.deviceMetrics.battery_level ?: 0
+        val message = getString(Res.string.low_battery_message).format(node.user.long_name, batteryLevel)
 
         return commonBuilder(type, createOpenNodeDetailIntent(node.num))
             .setCategory(Notification.CATEGORY_STATUS)

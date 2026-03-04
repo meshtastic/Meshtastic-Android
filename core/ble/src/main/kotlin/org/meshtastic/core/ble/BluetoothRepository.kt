@@ -81,7 +81,7 @@ constructor(
     @SuppressLint("MissingPermission")
     suspend fun bond(peripheral: Peripheral) {
         peripheral.createBond()
-        refreshState()
+        updateBluetoothState()
     }
 
     internal suspend fun updateBluetoothState() {
@@ -111,6 +111,24 @@ constructor(
         } else {
             emptyList()
         }
+
+    /** @return true if the given address is currently bonded to the system. */
+    @SuppressLint("MissingPermission")
+    fun isBonded(address: String): Boolean {
+        val enabled = androidEnvironment.isBluetoothEnabled
+        val hasPerms =
+            if (androidEnvironment.requiresBluetoothRuntimePermissions) {
+                androidEnvironment.isBluetoothScanPermissionGranted &&
+                    androidEnvironment.isBluetoothConnectPermissionGranted
+            } else {
+                androidEnvironment.isLocationPermissionGranted
+            }
+        return if (enabled && hasPerms) {
+            centralManager.getBondedPeripherals().any { it.address == address }
+        } else {
+            false
+        }
+    }
 
     /** Checks if a peripheral is one of ours, either by its advertised name or by the services it provides. */
     private fun isMatchingPeripheral(peripheral: Peripheral): Boolean {

@@ -69,6 +69,7 @@ import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.util.formatUptime
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.air_utilization
@@ -92,7 +93,6 @@ import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.updated
 import org.meshtastic.core.resources.uptime
-import org.meshtastic.core.service.ConnectionState
 
 class LocalStatsWidget : GlanceAppWidget() {
 

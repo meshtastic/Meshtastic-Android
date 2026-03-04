@@ -1152,4 +1152,8 @@
     <string name="refresh">Actualiser</string>
     <string name="updated">Mis à jour</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Rouge</string>
+    <string name="tak_team_blue">Bleu</string>
+    <string name="tak_team_green">Vert</string>
+    <string name="traffic_management_enabled">Module activé</string>
 </resources>

@@ -23,12 +23,13 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_downloading_percent
 import org.meshtastic.core.resources.firmware_update_rebooting
 import org.meshtastic.core.resources.firmware_update_retrieval_failed
 import org.meshtastic.core.resources.firmware_update_usb_failed
-import org.meshtastic.core.service.ServiceRepository
 import java.io.File
 import javax.inject.Inject
 
@@ -40,7 +41,8 @@ class UsbUpdateHandler
 @Inject
 constructor(
     private val firmwareRetriever: FirmwareRetriever,
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
+    private val nodeRepository: NodeRepository,
 ) : FirmwareUpdateHandler {
 
     override suspend fun startUpdate(
@@ -62,8 +64,8 @@ constructor(
 
             if (firmwareUri != null) {
                 updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
-                val myNodeNum = serviceRepository.meshService?.getMyNodeInfo()?.myNodeNum ?: 0
-                serviceRepository.meshService?.rebootToDfu(myNodeNum)
+                val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
+                radioController.rebootToDfu(myNodeNum)
                 delay(REBOOT_DELAY)
 
                 updateState(FirmwareUpdateState.AwaitingFileSave(null, "firmware.uf2", firmwareUri))
@@ -85,8 +87,8 @@ constructor(
                     null
                 } else {
                     updateState(FirmwareUpdateState.Processing(ProgressState(rebootingMsg)))
-                    val myNodeNum = serviceRepository.meshService?.getMyNodeInfo()?.myNodeNum ?: 0
-                    serviceRepository.meshService?.rebootToDfu(myNodeNum)
+                    val myNodeNum = nodeRepository.myNodeInfo.value?.myNodeNum ?: 0
+                    radioController.rebootToDfu(myNodeNum)
                     delay(REBOOT_DELAY)
 
                     updateState(FirmwareUpdateState.AwaitingFileSave(firmwareFile, firmwareFile.name))

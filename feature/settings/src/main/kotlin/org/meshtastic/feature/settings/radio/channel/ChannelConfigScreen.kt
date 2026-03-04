@@ -67,11 +67,13 @@ import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
 import org.meshtastic.feature.settings.radio.channel.component.ChannelConfigHeader
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegend
 import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDialog
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
+import org.meshtastic.feature.settings.radio.component.LoadingOverlay
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -80,20 +82,24 @@ import org.meshtastic.proto.Config
 fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        ChannelConfigScreen(
+            title = stringResource(Res.string.channels),
+            onBack = onBack,
+            settingsList = state.channelList,
+            loraConfig = state.radioConfig.lora ?: Config.LoRaConfig(),
+            maxChannels = viewModel.maxChannels,
+            firmwareVersion = state.metadata?.firmware_version ?: "0.0.0",
+            enabled = state.connected,
+            onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
+        )
 
-    ChannelConfigScreen(
-        title = stringResource(Res.string.channels),
-        onBack = onBack,
-        settingsList = state.channelList,
-        loraConfig = state.radioConfig.lora ?: Config.LoRaConfig(),
-        maxChannels = viewModel.maxChannels,
-        firmwareVersion = state.metadata?.firmware_version ?: "0.0.0",
-        enabled = state.connected,
-        onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
-    )
+        LoadingOverlay(state = state.responseState)
+
+        if (state.responseState is ResponseState.Success || state.responseState is ResponseState.Error) {
+            PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
+        }
+    }
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")

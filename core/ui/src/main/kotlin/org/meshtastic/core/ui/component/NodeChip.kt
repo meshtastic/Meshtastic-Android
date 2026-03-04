@@ -36,7 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.User

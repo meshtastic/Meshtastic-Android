@@ -569,4 +569,7 @@
     <string name="bluetooth_permission">블루투스</string>
     <string name="bluetooth_feature_config">설정</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">빨강</string>
+    <string name="tak_team_blue">파랑</string>
+    <string name="tak_team_green">초록</string>
 </resources>

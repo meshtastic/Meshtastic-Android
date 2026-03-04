@@ -53,6 +53,7 @@ import com.geeksville.mesh.ui.connections.ScannerViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.isValidAddress
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device
 import org.meshtastic.core.resources.address
@@ -63,7 +64,6 @@ import org.meshtastic.core.resources.forget_connection
 import org.meshtastic.core.resources.ip_port
 import org.meshtastic.core.resources.no_network_devices
 import org.meshtastic.core.resources.recent_network_devices
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.MeshtasticResourceDialog
 import org.meshtastic.core.ui.theme.AppTheme
 

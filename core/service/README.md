@@ -25,6 +25,7 @@ graph TB
   :core:service[service]:::android-library
   :core:service --> :core:api
   :core:service -.-> :core:common
+  :core:service -.-> :core:data
   :core:service -.-> :core:database
   :core:service -.-> :core:model
   :core:service -.-> :core:prefs

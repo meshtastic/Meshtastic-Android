@@ -29,8 +29,9 @@ import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.asDeviceVersion
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.administration
@@ -41,7 +42,6 @@ import org.meshtastic.core.resources.latest_alpha_firmware
 import org.meshtastic.core.resources.latest_stable_firmware
 import org.meshtastic.core.resources.remote_admin
 import org.meshtastic.core.resources.request_metadata
-import org.meshtastic.core.service.ServiceAction
 import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange

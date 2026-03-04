@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.recalculateWindowInsets
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -64,7 +66,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,7 +86,6 @@ import com.geeksville.mesh.navigation.firmwareGraph
 import com.geeksville.mesh.navigation.mapGraph
 import com.geeksville.mesh.navigation.nodesGraph
 import com.geeksville.mesh.navigation.settingsGraph
-import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.ScannerViewModel
@@ -96,7 +96,9 @@ import no.nordicsemi.android.common.permissions.notification.RequestNotification
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceVersion
+import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.MapRoutes
@@ -123,7 +125,6 @@ import org.meshtastic.core.resources.should_update
 import org.meshtastic.core.resources.should_update_firmware
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.icon.Conversations
@@ -446,7 +447,7 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerVie
         NavHost(
             navController = navController,
             startDestination = NodesRoutes.NodesGraph,
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
         ) {
             contactsGraph(navController, uIViewModel.scrollToTopEventFlow)
             nodesGraph(navController, uIViewModel.scrollToTopEventFlow)
@@ -464,7 +465,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerVie
 private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
-    val context = LocalContext.current
 
     val myFirmwareVersion = myNodeInfo?.firmwareVersion
 
@@ -499,10 +499,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                     viewModel.showAlert(
                         titleRes = Res.string.app_too_old,
                         messageRes = Res.string.must_update,
-                        onConfirm = {
-                            val service = viewModel.meshService ?: return@showAlert
-                            MeshService.changeDeviceAddress(context, service, "n")
-                        },
+                        onConfirm = { viewModel.setDeviceAddress("n") },
                     )
                 } else {
                     myFirmwareVersion
@@ -526,10 +523,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
                                 viewModel.showAlert(
                                     title = title,
                                     html = message,
-                                    onConfirm = {
-                                        val service = viewModel.meshService ?: return@showAlert
-                                        MeshService.changeDeviceAddress(context, service, "n")
-                                    },
+                                    onConfirm = { viewModel.setDeviceAddress("n") },
                                 )
                             } else if (curVer < MeshService.minDeviceVersion) {
                                 Logger.w {

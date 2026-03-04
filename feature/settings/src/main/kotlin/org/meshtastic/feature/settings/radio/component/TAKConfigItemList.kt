@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.model.getColorFrom
-import org.meshtastic.core.database.model.getStringResFrom
+import org.meshtastic.core.model.getColorFrom
+import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.tak
 import org.meshtastic.core.resources.tak_config

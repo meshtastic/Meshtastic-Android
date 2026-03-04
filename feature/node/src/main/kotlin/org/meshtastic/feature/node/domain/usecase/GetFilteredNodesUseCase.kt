@@ -18,9 +18,9 @@ package org.meshtastic.feature.node.domain.usecase
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.node.list.NodeFilterState
 import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.Config

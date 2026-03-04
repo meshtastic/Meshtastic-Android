@@ -1031,4 +1031,8 @@
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="bluetooth_feature_config">Konfiguration</string>
     <!-- Network Map Layers -->
+    <string name="tak_team_red">Rött</string>
+    <string name="tak_team_blue">Blått</string>
+    <string name="tak_team_green">Grönt</string>
+    <string name="traffic_management_enabled">Modul aktiverad</string>
 </resources>

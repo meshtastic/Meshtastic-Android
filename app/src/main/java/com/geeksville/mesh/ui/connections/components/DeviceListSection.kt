@@ -28,7 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DeviceListEntry
-import org.meshtastic.core.service.ConnectionState
+import org.meshtastic.core.model.ConnectionState
 
 @Composable
 fun List<DeviceListEntry>.DeviceListSection(

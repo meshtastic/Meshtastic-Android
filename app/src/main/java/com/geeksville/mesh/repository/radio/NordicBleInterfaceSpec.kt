@@ -31,13 +31,10 @@ constructor(
     override fun createInterface(rest: String): NordicBleInterface = factory.create(rest)
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */
-    override fun addressValid(rest: String): Boolean {
-        val allPaired = bluetoothRepository.state.value.bondedDevices.map { it.address }.toSet()
-        return if (!allPaired.contains(rest)) {
-            Logger.w { "Ignoring stale bond to ${rest.anonymize}" }
-            false
-        } else {
-            true
-        }
+    override fun addressValid(rest: String): Boolean = if (!bluetoothRepository.isBonded(rest)) {
+        Logger.w { "Ignoring stale bond to ${rest.anonymize}" }
+        false
+    } else {
+        true
     }
 }

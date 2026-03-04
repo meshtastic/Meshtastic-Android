@@ -25,7 +25,13 @@ fun getString(stringResource: StringResource): String = runBlocking { composeGet
 
 /** Retrieves a formatted string from the [StringResource] in a blocking manner. */
 fun getString(stringResource: StringResource, vararg formatArgs: Any): String = runBlocking {
-    composeGetString(stringResource, *formatArgs)
+    val pattern = composeGetString(stringResource)
+    if (formatArgs.isNotEmpty()) {
+        @Suppress("SpreadOperator")
+        pattern.format(*formatArgs)
+    } else {
+        pattern
+    }
 }
 
 /** Retrieves a string from the [StringResource] in a suspending manner. */
@@ -44,6 +50,11 @@ suspend fun getStringSuspend(stringResource: StringResource, vararg formatArgs: 
             }
             .toTypedArray()
 
-    @Suppress("SpreadOperator")
-    return composeGetString(stringResource, *resolvedArgs)
+    val pattern = composeGetString(stringResource)
+    return if (resolvedArgs.isNotEmpty()) {
+        @Suppress("SpreadOperator")
+        pattern.format(*resolvedArgs)
+    } else {
+        pattern
+    }
 }

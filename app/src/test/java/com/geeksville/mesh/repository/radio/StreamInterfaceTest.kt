@@ -20,6 +20,7 @@ import io.mockk.confirmVerified
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Test
+import org.meshtastic.core.repository.RadioInterfaceService
 
 class StreamInterfaceTest {
 

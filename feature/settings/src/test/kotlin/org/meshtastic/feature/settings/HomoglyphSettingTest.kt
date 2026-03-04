@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
 import org.meshtastic.core.resources.use_homoglyph_characters_encoding
+import org.meshtastic.feature.settings.component.HomoglyphSetting
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.util.Locale

@@ -33,8 +33,8 @@ import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.toDistanceString
 import org.meshtastic.core.ui.component.precisionBitsToMeters
 import org.meshtastic.proto.Config

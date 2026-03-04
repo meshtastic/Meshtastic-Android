@@ -24,11 +24,12 @@ import org.meshtastic.core.prefs.PrefDelegate
 import org.meshtastic.core.prefs.di.HomoglyphEncodingSharedPreferences
 import javax.inject.Inject
 import javax.inject.Singleton
+import org.meshtastic.core.repository.HomoglyphPrefs as SharedHomoglyphPrefs
 
-interface HomoglyphPrefs {
+interface HomoglyphPrefs : SharedHomoglyphPrefs {
 
     /** Preference for whether homoglyph encoding is enabled by the user. */
-    var homoglyphEncodingEnabled: Boolean
+    override var homoglyphEncodingEnabled: Boolean
 
     /**
      * Provides a [Flow] that emits the current state of [homoglyphEncodingEnabled] and subsequent changes.

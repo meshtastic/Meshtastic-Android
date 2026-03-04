@@ -37,18 +37,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
-import org.meshtastic.core.data.repository.DeviceHardwareRepository
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
-import org.meshtastic.core.data.repository.NodeRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
-import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MyNodeInfo
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.isBle
 import org.meshtastic.core.prefs.radio.isSerial
 import org.meshtastic.core.prefs.radio.isTcp
+import org.meshtastic.core.repository.DeviceHardwareRepository
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
@@ -71,8 +73,6 @@ import org.meshtastic.core.resources.firmware_update_unknown_hardware
 import org.meshtastic.core.resources.firmware_update_updating
 import org.meshtastic.core.resources.firmware_update_validating
 import org.meshtastic.core.resources.unknown
-import org.meshtastic.core.service.ConnectionState
-import org.meshtastic.core.service.ServiceRepository
 import java.io.File
 import javax.inject.Inject
 
@@ -95,7 +95,7 @@ constructor(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
+    private val radioController: RadioController,
     private val radioPrefs: RadioPrefs,
     private val bootloaderWarningDataSource: BootloaderWarningDataSource,
     private val firmwareUpdateManager: FirmwareUpdateManager,
@@ -105,6 +105,8 @@ constructor(
 
     private val _state = MutableStateFlow<FirmwareUpdateState>(FirmwareUpdateState.Idle)
     val state: StateFlow<FirmwareUpdateState> = _state.asStateFlow()
+
+    val connectionState = radioController.connectionState
 
     private val _selectedReleaseType = MutableStateFlow(FirmwareReleaseType.STABLE)
     val selectedReleaseType: StateFlow<FirmwareReleaseType> = _selectedReleaseType.asStateFlow()
@@ -429,14 +431,14 @@ constructor(
         // Trigger a fresh connection attempt by MeshService
         address?.let { currentAddr ->
             Logger.i { "Post-update: Requesting MeshService to reconnect to $currentAddr" }
-            serviceRepository.meshService?.setDeviceAddress("$DFU_RECONNECT_PREFIX$currentAddr")
+            radioController.setDeviceAddress("$DFU_RECONNECT_PREFIX$currentAddr")
         }
 
         // Wait for device to reconnect and settle
         val result =
             withTimeoutOrNull(VERIFY_TIMEOUT) {
                 // Wait for both Connected state and node info to be present
-                serviceRepository.connectionState.first { it is ConnectionState.Connected }
+                connectionState.first { it is ConnectionState.Connected }
                 nodeRepository.ourNodeInfo.filterNotNull().first()
                 delay(VERIFY_DELAY) // Extra buffer for initial config sync
                 true
@@ -462,7 +464,7 @@ constructor(
         return !isBatteryLow
     }
 
-    private suspend fun getDeviceHardware(ourNode: MyNodeEntity): DeviceHardware? {
+    private suspend fun getDeviceHardware(ourNode: MyNodeInfo): DeviceHardware? {
         val nodeInfo = nodeRepository.ourNodeInfo.value
         val hwModelInt = nodeInfo?.user?.hw_model?.value
         val target = ourNode.pioEnv

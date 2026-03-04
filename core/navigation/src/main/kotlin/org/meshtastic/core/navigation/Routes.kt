@@ -91,6 +91,12 @@ object SettingsRoutes {
 
     @Serializable data class Settings(val destNum: Int? = null) : Route
 
+    @Serializable data object DeviceConfiguration : Route
+
+    @Serializable data object ModuleConfiguration : Route
+
+    @Serializable data object Administration : Route
+
     // region radio Config Routes
 
     @Serializable data object User : Route

@@ -47,6 +47,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
+import org.meshtastic.core.repository.RadioInterfaceService
 import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -662,7 +663,7 @@ class NordicBleInterfaceTest {
         advanceUntilIdle()
 
         // Verify handleFromRadio was called directly with the payload
-        verify(timeout = 2000) { service.handleFromRadio(p = payload) }
+        verify(timeout = 2000) { service.handleFromRadio(payload) }
 
         nordicInterface.close()
     }

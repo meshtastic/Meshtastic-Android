@@ -18,7 +18,6 @@ package com.geeksville.mesh.repository.radio
 
 import android.annotation.SuppressLint
 import co.touchlab.kermit.Logger
-import com.geeksville.mesh.service.RadioNotConnectedException
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CompletableDeferred
@@ -58,6 +57,8 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.model.RadioNotConnectedException
+import org.meshtastic.core.repository.RadioInterfaceService
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
@@ -95,7 +96,7 @@ constructor(
                 Logger.w(e) { "[$address] Failed to disconnect in exception handler" }
             }
         }
-        service.onDisconnect(BleError.from(throwable))
+        service.onDisconnect(error = BleError.from(throwable))
     }
 
     private val connectionScope: CoroutineScope =
@@ -152,7 +153,7 @@ constructor(
                 "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
         }
         try {
-            service.handleFromRadio(p = packet)
+            service.handleFromRadio(packet)
         } catch (t: Throwable) {
             Logger.e(t) { "[$address] Failed to execute service.handleFromRadio()" }
         }
@@ -208,6 +209,10 @@ constructor(
                             onDisconnected(state)
                         }
                     }
+                    .catch { e ->
+                        Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
+                        service.onDisconnect(BleError.from(e))
+                    }
                     .launchIn(connectionScope)
 
                 val p = retryBleOperation(tag = address) { findPeripheral() }
@@ -252,7 +257,7 @@ constructor(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        service.onDisconnect(BleError.Disconnected(reason = state.reason))
+        service.onDisconnect(error = BleError.Disconnected(reason = state.reason))
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
@@ -282,12 +287,12 @@ constructor(
                 service.onConnect()
             } else {
                 Logger.w { "[$address] Discovery failed: missing required characteristics" }
-                service.onDisconnect(BleError.DiscoveryFailed("One or more characteristics not found"))
+                service.onDisconnect(error = BleError.DiscoveryFailed("One or more characteristics not found"))
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Service discovery failed" }
             bleConnection.disconnect()
-            service.onDisconnect(BleError.from(e))
+            service.onDisconnect(error = BleError.from(e))
         }
     }
 

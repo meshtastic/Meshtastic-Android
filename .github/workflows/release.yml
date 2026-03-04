@@ -44,6 +44,10 @@ on:
         required: false
       GRADLE_CACHE_PASSWORD:
         required: false
+      INTERNAL_BUILDS_HOST:
+        required: false
+      INTERNAL_BUILDS_HOST_PAT:
+        required: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ inputs.tag_name }}
@@ -62,7 +66,6 @@ jobs:
       run_lint: true
       run_unit_tests: false
       run_instrumented_tests: false
-      flavors: '["google"]'
       upload_artifacts: false
     secrets: inherit
 
@@ -72,7 +75,6 @@ jobs:
       APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
       APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -120,7 +122,6 @@ jobs:
     needs: [prepare-build-info, run-lint]
     environment: Release
     env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -212,7 +213,6 @@ jobs:
     needs: [prepare-build-info, run-lint]
     environment: Release
     env:
-      GRADLE_OPTS: "-Dorg.gradle.daemon=false"
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -277,6 +277,11 @@ jobs:
   github-release:
     runs-on: ubuntu-latest
     needs: [prepare-build-info, release-google, release-fdroid]
+    environment: Release
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -294,7 +299,7 @@ jobs:
         with:
           tag_name: ${{ inputs.tag_name }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
-          generate_release_notes: true
+          generate_release_notes: false
           files: ./artifacts/*/*
           draft: true
           prerelease: true

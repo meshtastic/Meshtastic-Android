@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.data.datasource
 
-import dagger.Lazy
 import kotlinx.coroutines.withContext
-import org.meshtastic.core.database.dao.DeviceHardwareDao
+import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -28,10 +27,11 @@ import javax.inject.Inject
 class DeviceHardwareLocalDataSource
 @Inject
 constructor(
-    private val deviceHardwareDaoLazy: Lazy<DeviceHardwareDao>,
+    private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
 ) {
-    private val deviceHardwareDao by lazy { deviceHardwareDaoLazy.get() }
+    private val deviceHardwareDao
+        get() = dbManager.currentDb.value.deviceHardwareDao()
 
     suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) =
         withContext(dispatchers.io) { deviceHardwareDao.insertAll(deviceHardware.map { it.asEntity() }) }

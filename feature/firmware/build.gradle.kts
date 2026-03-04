@@ -58,9 +58,6 @@ dependencies {
     implementation(libs.markdown.renderer)
     implementation(libs.markdown.renderer.m3)
 
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.nordic.client.android.mock)

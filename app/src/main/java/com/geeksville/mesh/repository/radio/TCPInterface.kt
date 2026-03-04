@@ -26,6 +26,7 @@ import org.meshtastic.core.common.util.Exceptions
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import java.io.BufferedInputStream

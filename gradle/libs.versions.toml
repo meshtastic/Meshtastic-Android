@@ -1,6 +1,6 @@
 [versions]
 # Android
-agp = "9.0.1"
+agp = "9.1.0"
 appcompat = "1.7.1"
 accompanist = "0.37.3"
 
@@ -26,6 +26,7 @@ ktlint = "1.7.1"
 kover = "0.9.7"
 mockk = "1.14.9"
 testRetry = "1.6.4"
+turbine = "1.2.1"
 
 # Compose Multiplatform
 compose-multiplatform = "1.11.0-alpha03"
@@ -41,21 +42,21 @@ mlkit-barcode-scanning = "17.3.0"
 camerax = "1.5.3"
 
 # Networking
-ktor = "3.4.0"
+ktor = "3.4.1"
 
 # Other
 aboutlibraries = "13.2.1"
 coil = "3.4.0"
-dd-sdk-android = "3.6.0"
+dd-sdk-android = "3.7.0"
 detekt = "1.23.8"
 dokka = "2.2.0-Beta"
 devtools-ksp = "2.3.6"
 markdownRenderer = "0.39.2"
 okio = "3.16.4"
 osmdroid-android = "6.1.20"
-spotless = "8.2.1"
-wire = "6.0.0-alpha02"
-vico = "3.0.1"
+spotless = "8.3.0"
+wire = "6.0.0-alpha03"
+vico = "3.0.2"
 dependency-guard = "0.5.0"
 nordic-ble = "2.0.0-alpha15"
 nordic-common = "2.9.1"
@@ -105,12 +106,14 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.6.2" }
 androidx-savedstate-compose = { module = "androidx.savedstate:savedstate-compose", version.ref = "savedstate" }
 androidx-savedstate-ktx = { module = "androidx.savedstate:savedstate-ktx", version.ref = "savedstate" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.1" }
+androidx-work-testing = { module = "androidx.work:work-testing", version = "2.11.1" }
 
 # AndroidX Compose
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2026.02.00" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2026.02.01" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
@@ -178,6 +181,7 @@ androidx-test-espresso-core = { module = "androidx.test.espresso:espresso-core",
 junit = { module = "junit:junit", version = "4.13.2" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 robolectric = { module = "org.robolectric:robolectric", version = "4.16.1" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 # Other
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
@@ -219,7 +223,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { module = "org.osmdroid:osmdroid-geopackage", version.ref = "osmdroid-android" }
-kermit = { module = "co.touchlab:kermit", version = "2.0.8" }
+kermit = { module = "co.touchlab:kermit", version = "2.1.0" }
 
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version = "3.10.0" }
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
@@ -228,7 +232,7 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 
 # Build Logic
 android-gradleApiPlugin = { module = "com.android.tools.build:gradle-api", version.ref = "agp" }
-android-tools-common = { module = "com.android.tools:common", version = "32.0.1" }
+android-tools-common = { module = "com.android.tools:common", version = "32.1.0" }
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }

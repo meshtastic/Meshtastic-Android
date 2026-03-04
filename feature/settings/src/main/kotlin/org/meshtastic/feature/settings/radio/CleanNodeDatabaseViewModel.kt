@@ -24,16 +24,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.domain.usecase.settings.CleanNodeDatabaseUseCase
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.are_you_sure
 import org.meshtastic.core.resources.clean_node_database_confirmation
 import org.meshtastic.core.resources.clean_now
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.core.ui.util.AlertManager
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.days
 
 private const val MIN_DAYS_THRESHOLD = 7f
 
@@ -45,8 +43,7 @@ private const val MIN_DAYS_THRESHOLD = 7f
 class CleanNodeDatabaseViewModel
 @Inject
 constructor(
-    private val nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
+    private val cleanNodeDatabaseUseCase: CleanNodeDatabaseUseCase,
     private val alertManager: AlertManager,
 ) : ViewModel() {
     private val _olderThanDays = MutableStateFlow(30f)
@@ -55,7 +52,7 @@ constructor(
     private val _onlyUnknownNodes = MutableStateFlow(false)
     val onlyUnknownNodes = _onlyUnknownNodes.asStateFlow()
 
-    private val _nodesToDelete = MutableStateFlow<List<NodeEntity>>(emptyList())
+    private val _nodesToDelete = MutableStateFlow<List<Node>>(emptyList())
     val nodesToDelete = _nodesToDelete.asStateFlow()
 
     fun onOlderThanDaysChanged(value: Float) {
@@ -69,40 +66,15 @@ constructor(
         }
     }
 
-    /**
-     * Updates the list of nodes to be deleted based on the current filter criteria. The logic is as follows:
-     * - The "older than X days" filter (controlled by the slider) is always active.
-     * - If "only unknown nodes" is also enabled, nodes that are BOTH unknown AND older than X days are selected.
-     * - If "only unknown nodes" is not enabled, all nodes older than X days are selected.
-     * - Nodes with an associated public key (PKI) heard from within the last 7 days are always excluded from deletion.
-     * - Nodes marked as ignored or favorite are always excluded from deletion.
-     */
+    /** Updates the list of nodes to be deleted based on the current filter criteria. */
     fun getNodesToDelete() {
         viewModelScope.launch {
-            val onlyUnknownEnabled = _onlyUnknownNodes.value
-            val currentTimeSeconds = nowSeconds
-            val sevenDaysAgoSeconds = currentTimeSeconds - 7.days.inWholeSeconds
-            val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
-
-            val initialNodesToConsider =
-                if (onlyUnknownEnabled) {
-                    // Both "older than X days" and "only unknown nodes" filters apply
-                    val olderNodes = nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
-                    val unknownNodes = nodeRepository.getUnknownNodes()
-                    olderNodes.filter { itNode -> unknownNodes.any { unknownNode -> itNode.num == unknownNode.num } }
-                } else {
-                    // Only "older than X days" filter applies
-                    nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
-                }
-
             _nodesToDelete.value =
-                initialNodesToConsider.filterNot { node ->
-                    // Exclude nodes with PKI heard in the last 7 days
-                    (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) ||
-                        // Exclude ignored or favorite nodes
-                        node.isIgnored ||
-                        node.isFavorite
-                }
+                cleanNodeDatabaseUseCase.getNodesToClean(
+                    olderThanDays = _olderThanDays.value,
+                    onlyUnknownNodes = _onlyUnknownNodes.value,
+                    currentTimeSeconds = nowSeconds,
+                )
         }
     }
 
@@ -126,16 +98,7 @@ constructor(
     fun cleanNodes() {
         viewModelScope.launch {
             val nodeNums = _nodesToDelete.value.map { it.num }
-            if (nodeNums.isNotEmpty()) {
-                nodeRepository.deleteNodes(nodeNums)
-
-                val service = serviceRepository.meshService
-                if (service != null) {
-                    for (nodeNum in nodeNums) {
-                        service.removeByNodenum(service.packetId, nodeNum)
-                    }
-                }
-            }
+            cleanNodeDatabaseUseCase.cleanNodes(nodeNums)
             // Clear the list after deletion or if it was empty
             _nodesToDelete.value = emptyList()
         }

@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.prefs.filter.FilterPrefs
-import org.meshtastic.core.service.filter.MessageFilterService
+import org.meshtastic.core.repository.MessageFilter
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,7 +30,7 @@ class FilterSettingsViewModel
 @Inject
 constructor(
     private val filterPrefs: FilterPrefs,
-    private val messageFilterService: MessageFilterService,
+    private val messageFilter: MessageFilter,
 ) : ViewModel() {
 
     private val _filterEnabled = MutableStateFlow(filterPrefs.filterEnabled)
@@ -51,7 +51,7 @@ constructor(
         if (current.add(trimmed)) {
             filterPrefs.filterWords = current
             _filterWords.value = current.toList().sorted()
-            messageFilterService.rebuildPatterns()
+            messageFilter.rebuildPatterns()
         }
     }
 
@@ -60,7 +60,7 @@ constructor(
         if (current.remove(word)) {
             filterPrefs.filterWords = current
             _filterWords.value = current.toList().sorted()
-            messageFilterService.rebuildPatterns()
+            messageFilter.rebuildPatterns()
         }
     }
 }

@@ -17,12 +17,19 @@
 package com.geeksville.mesh.service
 
 import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import androidx.core.app.RemoteInput
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.ServiceRepository
+import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.ServiceRepository
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
@@ -33,9 +40,11 @@ import org.meshtastic.core.service.ServiceRepository
  */
 @AndroidEntryPoint
 class ReplyReceiver : BroadcastReceiver() {
-    @Inject lateinit var serviceRepository: ServiceRepository
+    @Inject lateinit var radioController: RadioController
 
     @Inject lateinit var meshServiceNotifications: MeshServiceNotifications
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     companion object {
         const val REPLY_ACTION = "com.geeksville.mesh.REPLY_ACTION"
@@ -43,22 +52,30 @@ class ReplyReceiver : BroadcastReceiver() {
         const val KEY_TEXT_REPLY = "key_text_reply"
     }
 
-    private fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
-        // contactKey: unique contact key filter (channel)+(nodeId)
-        val channel = contactKey[0].digitToIntOrNull()
-        val dest = if (channel != null) contactKey.substring(1) else contactKey
-        val p = DataPacket(dest, channel ?: 0, str)
-        serviceRepository.meshService?.send(p)
-    }
-
-    override fun onReceive(context: android.content.Context, intent: android.content.Intent) {
+    override fun onReceive(context: Context, intent: Intent) {
         val remoteInput = RemoteInput.getResultsFromIntent(intent)
 
         if (remoteInput != null) {
             val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
             val message = remoteInput.getCharSequence(KEY_TEXT_REPLY)?.toString() ?: ""
-            sendMessage(message, contactKey)
-            meshServiceNotifications.cancelMessageNotification(contactKey)
+
+            val pendingResult = goAsync()
+            scope.launch {
+                try {
+                    sendMessage(message, contactKey)
+                    meshServiceNotifications.cancelMessageNotification(contactKey)
+                } finally {
+                    pendingResult.finish()
+                }
+            }
         }
+    }
+
+    private suspend fun sendMessage(str: String, contactKey: String) {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey.getOrNull(0)?.digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+        val p = DataPacket(dest, channel ?: 0, str)
+        radioController.sendMessage(p)
     }
 }

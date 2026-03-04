@@ -24,9 +24,9 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.NodeRepository
-import org.meshtastic.core.database.model.Node
-import org.meshtastic.core.database.model.NodeSortOption
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeSortOption
+import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.node.list.NodeFilterState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.User

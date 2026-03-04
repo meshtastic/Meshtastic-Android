@@ -16,25 +16,45 @@
  */
 package org.meshtastic.core.common.util
 
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.withTimeout
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 
 /**
- * A helper class that manages a single [Job]. When a new job is launched, the previous one is cancelled. This is useful
- * for ensuring that only one operation of a certain type is running at a time.
+ * A helper class that manages a single [Job]. When a new job is launched, any previous job is cancelled. This is useful
+ * for ensuring that only the latest operation of a certain type is running at a time (e.g. for search or settings
+ * updates).
  */
 class SequentialJob @Inject constructor() {
-    private val job = AtomicReference<Job?>(null)
+    private val job = AtomicReference<Job?>()
 
     /**
      * Cancels the previous job (if any) and launches a new one in the given [scope]. The new job uses [handledLaunch]
      * to ensure exceptions are reported.
+     *
+     * @param timeoutMs Optional timeout in milliseconds. If > 0, the [block] is wrapped in [withTimeout] so that
+     *   indefinitely-suspended coroutines (e.g. blocked DataStore reads) throw [TimeoutCancellationException] instead
+     *   of hanging silently.
      */
-    fun launch(scope: CoroutineScope, block: suspend CoroutineScope.() -> Unit) {
+    fun launch(scope: CoroutineScope, timeoutMs: Long = 0, block: suspend CoroutineScope.() -> Unit) {
         cancel()
-        val newJob = scope.handledLaunch(block = block)
+        val newJob =
+            scope.handledLaunch {
+                if (timeoutMs > 0) {
+                    try {
+                        withTimeout(timeoutMs, block)
+                    } catch (e: TimeoutCancellationException) {
+                        Logger.w { "SequentialJob timed out after ${timeoutMs}ms" }
+                        throw e
+                    }
+                } else {
+                    block()
+                }
+            }
         job.set(newJob)
 
         newJob.invokeOnCompletion { job.compareAndSet(newJob, null) }

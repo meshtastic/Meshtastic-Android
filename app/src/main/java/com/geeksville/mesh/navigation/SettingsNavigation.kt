@@ -19,8 +19,11 @@
 package com.geeksville.mesh.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -32,7 +35,11 @@ import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.feature.settings.AboutScreen
+import org.meshtastic.feature.settings.AdministrationScreen
+import org.meshtastic.feature.settings.DeviceConfigurationScreen
+import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.SettingsScreen
+import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -76,6 +83,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
             SettingsScreen(
+                settingsViewModel = hiltViewModel(parentEntry),
                 viewModel = hiltViewModel(parentEntry),
                 onClickNodeChip = {
                     navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
@@ -84,8 +92,37 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                     }
                 },
             ) {
-                navController.navigate(it) { popUpTo(SettingsRoutes.Settings()) { inclusive = false } }
+                navController.navigate(it)
             }
+        }
+
+        composable<SettingsRoutes.DeviceConfiguration> { backStackEntry ->
+            val parentEntry =
+                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
+            DeviceConfigurationScreen(
+                viewModel = hiltViewModel(parentEntry),
+                onBack = navController::popBackStack,
+                onNavigate = { route -> navController.navigate(route) },
+            )
+        }
+
+        composable<SettingsRoutes.ModuleConfiguration> { backStackEntry ->
+            val parentEntry =
+                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
+            val settingsViewModel: SettingsViewModel = hiltViewModel(parentEntry)
+            val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+            ModuleConfigurationScreen(
+                viewModel = hiltViewModel(parentEntry),
+                excludedModulesUnlocked = excludedModulesUnlocked,
+                onBack = navController::popBackStack,
+                onNavigate = { route -> navController.navigate(route) },
+            )
+        }
+
+        composable<SettingsRoutes.Administration> { backStackEntry ->
+            val parentEntry =
+                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
+            AdministrationScreen(viewModel = hiltViewModel(parentEntry), onBack = navController::popBackStack)
         }
 
         composable<SettingsRoutes.CleanNodeDb>(
@@ -104,6 +141,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                 route = entry.route::class,
                 parentGraphRoute = SettingsRoutes.SettingsGraph::class,
             ) { viewModel ->
+                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(entry) }
                 when (entry) {
                     ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = navController::popBackStack)
 
@@ -133,6 +171,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
                 route = entry.route::class,
                 parentGraphRoute = SettingsRoutes.SettingsGraph::class,
             ) { viewModel ->
+                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(entry) }
                 when (entry) {
                     ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = navController::popBackStack)
 

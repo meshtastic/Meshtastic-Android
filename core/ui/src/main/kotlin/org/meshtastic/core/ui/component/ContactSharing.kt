@@ -28,7 +28,7 @@ import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.toPlatformUri
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact

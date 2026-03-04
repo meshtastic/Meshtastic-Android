@@ -26,6 +26,7 @@ plugins {
 configure<LibraryExtension> { namespace = "org.meshtastic.core.data" }
 
 dependencies {
+    api(projects.core.repository)
     implementation(projects.core.analytics)
     implementation(projects.core.common)
     implementation(projects.core.database)
@@ -39,6 +40,7 @@ dependencies {
     // Needed because core:data references MeshtasticDatabase (supertype RoomDatabase)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.paging)
+    implementation(libs.androidx.sqlite.bundled)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime)

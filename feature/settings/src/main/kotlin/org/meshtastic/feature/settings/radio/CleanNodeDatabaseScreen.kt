@@ -33,14 +33,14 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.entity.NodeEntity
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clean_node_database_description
 import org.meshtastic.core.resources.clean_node_database_title
@@ -56,9 +56,9 @@ import org.meshtastic.core.ui.component.NodeChip
  */
 @Composable
 fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewModel()) {
-    val olderThanDays by viewModel.olderThanDays.collectAsState()
-    val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsState()
-    val nodesToDelete by viewModel.nodesToDelete.collectAsState()
+    val olderThanDays by viewModel.olderThanDays.collectAsStateWithLifecycle()
+    val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsStateWithLifecycle()
+    val nodesToDelete by viewModel.nodesToDelete.collectAsStateWithLifecycle()
 
     LaunchedEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
 
@@ -150,7 +150,7 @@ private fun UnknownNodesFilter(onlyUnknownNodes: Boolean, onCheckedChanged: (Boo
  * @param nodesToDelete The list of nodes to be deleted.
  */
 @Composable
-private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
+private fun NodesDeletionPreview(nodesToDelete: List<Node>) {
     Text(
         stringResource(Res.string.nodes_queued_for_deletion, nodesToDelete.size),
         modifier = Modifier.padding(bottom = 16.dp),
@@ -160,8 +160,6 @@ private fun NodesDeletionPreview(nodesToDelete: List<NodeEntity>) {
         horizontalArrangement = Arrangement.Center,
         verticalArrangement = Arrangement.Center,
     ) {
-        nodesToDelete.forEach { node ->
-            NodeChip(node = node.toModel(), modifier = Modifier.padding(end = 8.dp, bottom = 8.dp))
-        }
+        nodesToDelete.forEach { node -> NodeChip(node = node, modifier = Modifier.padding(end = 8.dp, bottom = 8.dp)) }
     }
 }

@@ -25,30 +25,37 @@ import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
 import com.geeksville.mesh.BuildConfig
-import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.ui.connections.NO_DEVICE_SELECTED
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.toRemoteExceptions
-import org.meshtastic.core.data.repository.RadioConfigRepository
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.RadioNotConnectedException
+import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshLocationManager
+import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.PacketHandler
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.SERVICE_NOTIFY_ID
-import org.meshtastic.core.service.ServiceRepository
 import org.meshtastic.proto.PortNum
 import javax.inject.Inject
 
@@ -60,17 +67,15 @@ class MeshService : Service() {
 
     @Inject lateinit var serviceRepository: ServiceRepository
 
-    @Inject lateinit var connectionStateHolder: ConnectionStateHandler
-
     @Inject lateinit var packetHandler: PacketHandler
 
-    @Inject lateinit var serviceBroadcasts: MeshServiceBroadcasts
+    @Inject lateinit var serviceBroadcasts: ServiceBroadcasts
 
-    @Inject lateinit var nodeManager: MeshNodeManager
+    @Inject lateinit var nodeManager: NodeManager
 
     @Inject lateinit var messageProcessor: MeshMessageProcessor
 
-    @Inject lateinit var commandSender: MeshCommandSender
+    @Inject lateinit var commandSender: CommandSender
 
     @Inject lateinit var locationManager: MeshLocationManager
 
@@ -92,7 +97,7 @@ class MeshService : Service() {
         fun actionReceived(portNum: Int): String {
             val portType = PortNum.fromValue(portNum)
             val portStr = portType?.toString() ?: portNum.toString()
-            return com.geeksville.mesh.service.actionReceived(portStr)
+            return actionReceived(portStr)
         }
 
         fun createIntent(context: Context) = Intent(context, MeshService::class.java)
@@ -145,7 +150,7 @@ class MeshService : Service() {
         val a = radioInterfaceService.getDeviceAddress()
         val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
-        val notification = connectionManager.updateStatusNotification()
+        val notification = connectionManager.updateStatusNotification() as android.app.Notification
 
         val foregroundServiceType =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -249,9 +254,7 @@ class MeshService : Service() {
 
             override fun send(p: DataPacket) = toRemoteExceptions { router.actionHandler.handleSend(p, myNodeNum) }
 
-            override fun getConfig(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.localConfigFlow.first().encode() }
-            }
+            override fun getConfig(): ByteArray = toRemoteExceptions { commandSender.getCachedLocalConfig().encode() }
 
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
                 router.actionHandler.handleSetConfig(payload, myNodeNum)
@@ -310,12 +313,12 @@ class MeshService : Service() {
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions {
-                runBlocking { radioConfigRepository.channelSetFlow.first().encode() }
+                commandSender.getCachedChannelSet().encode()
             }
 
             override fun getNodes(): List<NodeInfo> = nodeManager.getNodes()
 
-            override fun connectionState(): String = connectionStateHolder.connectionState.value.toString()
+            override fun connectionState(): String = serviceRepository.connectionState.value.toString()
 
             override fun startProvideLocation() {
                 locationManager.start(serviceScope) { commandSender.sendPosition(it) }

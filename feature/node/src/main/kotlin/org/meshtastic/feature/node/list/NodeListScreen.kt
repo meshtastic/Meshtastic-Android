@@ -67,7 +67,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.channel_invalid
@@ -79,7 +80,6 @@ import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
 import org.meshtastic.core.resources.unmute
-import org.meshtastic.core.service.ConnectionState
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent

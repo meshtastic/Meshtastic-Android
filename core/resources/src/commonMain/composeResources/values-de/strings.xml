@@ -1168,4 +1168,10 @@
     <string name="error_invalid_custom_provider">Ungültiger Name, URL oder lokale URI für benutzerdefinierten Kachelanbieter.</string>
     <string name="error_provider_exists">Ein benutzerdefinierter Kachelanbieter mit diesem Namen existiert bereits.</string>
     <string name="error_copy_mbtiles_failed">Fehler beim Kopieren der MB Kacheldatei in den internen Speicher.</string>
+    <string name="tak_team_unspecified_color">Unspecified</string>
+    <string name="tak_team_red">Rot</string>
+    <string name="tak_team_blue">Blau</string>
+    <string name="tak_team_green">Grün</string>
+    <string name="tak_role_unspecified">Unspecified</string>
+    <string name="traffic_management_enabled">Modul aktiviert</string>
 </resources>

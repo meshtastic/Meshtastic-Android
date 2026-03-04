@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /**
  * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP

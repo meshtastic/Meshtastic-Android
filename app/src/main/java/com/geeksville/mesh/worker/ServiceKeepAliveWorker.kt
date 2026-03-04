@@ -31,8 +31,8 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.startService
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import org.meshtastic.core.service.MeshServiceNotifications
-import org.meshtastic.core.service.SERVICE_NOTIFY_ID
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 
 /**
  * A worker whose sole purpose is to start the MeshService from the background. This is used as a fallback when

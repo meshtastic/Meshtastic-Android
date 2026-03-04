@@ -47,7 +47,7 @@ import no.nordicsemi.android.common.ui.view.RssiIcon
 import no.nordicsemi.kotlin.ble.client.exception.OperationFailedException
 import no.nordicsemi.kotlin.ble.client.exception.PeripheralNotConnectedException
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.disconnect
 import org.meshtastic.core.resources.firmware_version

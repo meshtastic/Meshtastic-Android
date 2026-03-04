@@ -24,7 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.model.Message
+import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 

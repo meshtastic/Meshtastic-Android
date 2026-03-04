@@ -29,8 +29,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.database.model.isUnmessageableRole
 import org.meshtastic.core.model.Capabilities
+import org.meshtastic.core.model.isUnmessageableRole
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.hardware_model
 import org.meshtastic.core.resources.licensed_amateur_radio
