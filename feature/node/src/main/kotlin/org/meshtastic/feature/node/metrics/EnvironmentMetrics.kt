@@ -299,17 +299,19 @@ private fun VoltageCurrentDisplay(envMetrics: org.meshtastic.proto.EnvironmentMe
                 )
             }
             if (hasCurrent) {
-                val currentValue = envMetrics.current!!.milliToBase
-                Text(
-                    text =
-                    stringResource(
-                        Res.string.current_value_format,
-                        stringResource(Res.string.current),
-                        currentValue,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                )
+                envMetrics.current?.let { currentMilli ->
+                    val currentValue = currentMilli.milliToBase
+                    Text(
+                        text =
+                        stringResource(
+                            Res.string.current_value_format,
+                            stringResource(Res.string.current),
+                            currentValue,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
             }
         }
     }
