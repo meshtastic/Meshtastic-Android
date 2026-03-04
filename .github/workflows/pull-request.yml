@@ -20,7 +20,7 @@ jobs:
     outputs:
       android: ${{ steps.filter.outputs.android }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -46,3 +46,21 @@ jobs:
       api_levels: '[35]'
       upload_artifacts: true
     secrets: inherit
+
+  # 3. WORKFLOW STATUS: Ensures required checks are satisfied
+  check-workflow-status:
+    name: Check Workflow Status
+    runs-on: ubuntu-latest
+    needs: [check-changes, validate-and-build]
+    if: always()
+    steps:
+      - name: Check Workflow Status
+        run: |
+          # If changes were detected but build failed, fail the status check
+          if [[ "${{ needs.check-changes.outputs.android }}" == "true" && ("${{ needs.validate-and-build.result }}" == "failure" || "${{ needs.validate-and-build.result }}" == "cancelled") ]]; then
+            echo "::error::Android Check failed"
+            exit 1
+          fi
+          
+          # If no changes were detected, this still succeeds to satisfy required status check
+          echo "Workflow status satisfied."
