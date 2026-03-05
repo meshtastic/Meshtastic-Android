@@ -86,13 +86,7 @@ constructor(
     }
 
     internal suspend fun updateBluetoothState() {
-        val hasPerms =
-            if (androidEnvironment.requiresBluetoothRuntimePermissions) {
-                androidEnvironment.isBluetoothScanPermissionGranted &&
-                    androidEnvironment.isBluetoothConnectPermissionGranted
-            } else {
-                androidEnvironment.isLocationPermissionGranted
-            }
+        val hasPerms = hasRequiredPermissions()
         val enabled = androidEnvironment.isBluetoothEnabled
         val newState =
             BluetoothState(
@@ -117,18 +111,19 @@ constructor(
     @SuppressLint("MissingPermission")
     fun isBonded(address: String): Boolean {
         val enabled = androidEnvironment.isBluetoothEnabled
-        val hasPerms =
-            if (androidEnvironment.requiresBluetoothRuntimePermissions) {
-                androidEnvironment.isBluetoothScanPermissionGranted &&
-                    androidEnvironment.isBluetoothConnectPermissionGranted
-            } else {
-                androidEnvironment.isLocationPermissionGranted
-            }
+        val hasPerms = hasRequiredPermissions()
         return if (enabled && hasPerms) {
             centralManager.getBondedPeripherals().any { it.address == address }
         } else {
             false
         }
+    }
+
+    private fun hasRequiredPermissions(): Boolean = if (androidEnvironment.requiresBluetoothRuntimePermissions) {
+        androidEnvironment.isBluetoothScanPermissionGranted &&
+            androidEnvironment.isBluetoothConnectPermissionGranted
+    } else {
+        androidEnvironment.isLocationPermissionGranted
     }
 
     /** Checks if a peripheral is one of ours, either by its advertised name or by the services it provides. */

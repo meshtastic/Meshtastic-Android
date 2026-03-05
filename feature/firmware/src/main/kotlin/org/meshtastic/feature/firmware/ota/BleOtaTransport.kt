@@ -26,9 +26,11 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
@@ -165,42 +167,73 @@ class BleOtaTransport(
         // Increase connection priority for OTA
         bleConnection.requestConnectionPriority(ConnectionPriority.HIGH)
 
-        // Discover services
-        val chars =
-            bleConnection.discoverCharacteristics(SERVICE_UUID, listOf(OTA_CHARACTERISTIC_UUID, TX_CHARACTERISTIC_UUID))
-                ?: throw OtaProtocolException.ConnectionFailed("Required OTA service or characteristics not found")
+        // Discover services using Nordic's profile API
+        val peripheral =
+            bleConnection.peripheralFlow.first { it != null }
+                ?: throw OtaProtocolException.ConnectionFailed("No peripheral available")
 
-        otaCharacteristic = chars[OTA_CHARACTERISTIC_UUID]
-        val txChar = chars[TX_CHARACTERISTIC_UUID]
+        val serviceDiscovered = CompletableDeferred<Unit>()
+        val profileJob = transportScope.launch {
+            try {
+                peripheral.profile(serviceUuid = SERVICE_UUID, required = true, scope = this) { service ->
+                    try {
+                        val ota =
+                            requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_CHARACTERISTIC_UUID }) {
+                                "OTA characteristic not found"
+                            }
+                        val txChar =
+                            requireNotNull(service.characteristics.firstOrNull { it.uuid == TX_CHARACTERISTIC_UUID }) {
+                                "TX characteristic not found"
+                            }
 
-        if (otaCharacteristic == null || txChar == null) {
-            throw OtaProtocolException.ConnectionFailed("Required characteristics not found")
+                        otaCharacteristic = ota
+
+                        // Enable notifications and collect responses
+                        val subscribed = CompletableDeferred<Unit>()
+                        txChar
+                            .subscribe {
+                                Logger.d { "BLE OTA: TX characteristic subscribed" }
+                                subscribed.complete(Unit)
+                            }
+                            .onEach { notifyBytes ->
+                                try {
+                                    val response = notifyBytes.decodeToString()
+                                    Logger.d { "BLE OTA: Received response: $response" }
+                                    responseChannel.trySend(response)
+                                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                                    Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
+                                }
+                            }
+                            .catch { e ->
+                                if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
+                                Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
+                            }
+                            .launchIn(this)
+
+                        subscribed.await()
+                        serviceDiscovered.complete(Unit)
+                        Logger.i { "BLE OTA: Service discovered and ready" }
+
+                        // Keep the profile scope active until transport is closed
+                        kotlinx.coroutines.awaitCancellation()
+                    } catch (e: Throwable) {
+                        if (!serviceDiscovered.isCompleted) serviceDiscovered.completeExceptionally(e)
+                        throw e
+                    }
+                }
+            } catch (e: Throwable) {
+                if (!serviceDiscovered.isCompleted) serviceDiscovered.completeExceptionally(e)
+            }
         }
 
-        // Enable notifications and collect responses
-        val subscribed = CompletableDeferred<Unit>()
-        txChar
-            .subscribe {
-                Logger.d { "BLE OTA: TX characteristic subscribed" }
-                subscribed.complete(Unit)
+        try {
+            withTimeout(10_000L) {
+                serviceDiscovered.await()
             }
-            .onEach { notifyBytes ->
-                try {
-                    val response = notifyBytes.decodeToString()
-                    Logger.d { "BLE OTA: Received response: $response" }
-                    responseChannel.trySend(response)
-                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
-                }
-            }
-            .catch { e ->
-                if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
-            }
-            .launchIn(transportScope)
-
-        subscribed.await()
-        Logger.i { "BLE OTA: Service discovered and ready" }
+        } catch (e: Throwable) {
+            profileJob.cancel()
+            throw e
+        }
     }
 
     override suspend fun startOta(

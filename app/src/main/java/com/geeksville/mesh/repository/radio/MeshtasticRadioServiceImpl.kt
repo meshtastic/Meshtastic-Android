@@ -17,6 +17,7 @@
 package com.geeksville.mesh.repository.radio
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapConcat
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -51,8 +52,26 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
         require(logRadioCharacteristic.isSubscribable()) { "LOGRADIO must be subscribable" }
     }
 
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override val fromRadio: Flow<ByteArray> =
-        fromRadioSyncCharacteristic?.subscribe() ?: fromNumCharacteristic!!.subscribe()
+        if (fromRadioSyncCharacteristic != null) {
+            fromRadioSyncCharacteristic.subscribe()
+        } else {
+            // Legacy path: Whenever notified by fromNum, read from fromRadio characteristic
+            fromNumCharacteristic!!.subscribe().flatMapConcat { countBytes ->
+                // The byte from FROMNUM notification is the number of packets waiting
+                val count = if (countBytes.isNotEmpty()) countBytes[0].toUByte().toInt() else 1
+                kotlinx.coroutines.flow.flow {
+                    repeat(count) {
+                        try {
+                            emit(fromRadioCharacteristic.read())
+                        } catch (e: Exception) {
+                            co.touchlab.kermit.Logger.e(e) { "BLE: Failed to read from FROMRADIO" }
+                        }
+                    }
+                }
+            }
+        }
 
     override val logRadio: Flow<ByteArray> = logRadioCharacteristic.subscribe()
 

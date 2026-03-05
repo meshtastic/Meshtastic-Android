@@ -144,7 +144,7 @@ constructor(
                     }
                     .launchIn(connectionScope)
 
-                val p = retryBleOperation(tag = address) { findPeripheral() }
+                val p = findPeripheral()
                 val state = bleConnection.connectAndAwait(p, CONNECTION_TIMEOUT_MS)
                 if (state !is ConnectionState.Connected) {
                     throw RadioNotConnectedException("Failed to connect to device at address $address")

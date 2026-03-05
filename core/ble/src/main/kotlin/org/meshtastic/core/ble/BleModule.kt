@@ -23,12 +23,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.native
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import no.nordicsemi.kotlin.ble.environment.android.NativeAndroidEnvironment
+import org.meshtastic.core.di.CoroutineDispatchers
 import javax.inject.Singleton
 
 @Module
@@ -47,5 +47,6 @@ object BleModule {
 
     @Provides
     @Singleton
-    fun provideBleSingletonCoroutineScope(): CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    fun provideBleSingletonCoroutineScope(dispatchers: CoroutineDispatchers): CoroutineScope =
+        CoroutineScope(SupervisorJob() + dispatchers.default)
 }
