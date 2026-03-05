@@ -211,6 +211,12 @@ class BleOtaTransport(
         }
     }
 
+    /**
+     * Initiates the OTA update by sending the size and hash.
+     *
+     * Note: If the start command is fragmented into multiple BLE packets, the protocol may send multiple responses
+     * (usually one ACK per packet followed by a final OK/ERASING).
+     */
     @Suppress("CyclomaticComplexMethod")
     override suspend fun startOta(
         sizeBytes: Long,
@@ -252,6 +258,13 @@ class BleOtaTransport(
         }
     }
 
+    /**
+     * Streams the firmware data in chunks.
+     *
+     * Each chunk is potentially fragmented into multiple BLE packets based on the negotiated MTU. The transport ensures
+     * that every fragmented packet is acknowledged by the device before proceeding, preventing buffer overflows on the
+     * radio.
+     */
     override suspend fun streamFirmware(
         data: ByteArray,
         chunkSize: Int,

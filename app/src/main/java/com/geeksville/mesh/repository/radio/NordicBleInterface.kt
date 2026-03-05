@@ -55,7 +55,11 @@ private val SCAN_TIMEOUT = 5.seconds
  * A [IRadioInterface] implementation for BLE devices using Nordic Kotlin BLE Library.
  * https://github.com/NordicSemiconductor/Kotlin-BLE-Library.
  *
- * This class is responsible for connecting to and communicating with a Meshtastic device over BLE.
+ * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
+ * - Bonding and discovery.
+ * - Automatic reconnection logic.
+ * - MTU and connection parameter monitoring.
+ * - Routing raw byte packets between the radio and [RadioInterfaceService].
  *
  * @param serviceScope The coroutine scope to use for launching coroutines.
  * @param centralManager The central manager provided by Nordic BLE Library.
