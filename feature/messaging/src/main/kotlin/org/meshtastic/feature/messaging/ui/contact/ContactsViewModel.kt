@@ -55,6 +55,8 @@ constructor(
 
     val connectionState = serviceRepository.connectionState
 
+    val unreadCountTotal = packetRepository.getUnreadCountTotal().stateInWhileSubscribed(0)
+
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(initialValue = ChannelSet())
 
     // Combine node info and myId to reduce argument count in subsequent combines
@@ -191,6 +193,8 @@ constructor(
 
     fun deleteContacts(contacts: List<String>) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
+
+    fun markAllAsRead() = viewModelScope.launch(Dispatchers.IO) { packetRepository.clearAllUnreadCounts() }
 
     fun setMuteUntil(contacts: List<String>, until: Long) =
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
