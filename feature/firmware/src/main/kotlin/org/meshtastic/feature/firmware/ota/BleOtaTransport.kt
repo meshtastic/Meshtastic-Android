@@ -169,12 +169,14 @@ class BleOtaTransport(
 
         // Discover services using our unified profile helper
         bleConnection.profile(OTA_SERVICE_UUID) { service ->
-            val ota = requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_WRITE_CHARACTERISTIC }) {
-                "OTA characteristic not found"
-            }
-            val txChar = requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_NOTIFY_CHARACTERISTIC }) {
-                "TX characteristic not found"
-            }
+            val ota =
+                requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_WRITE_CHARACTERISTIC }) {
+                    "OTA characteristic not found"
+                }
+            val txChar =
+                requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_NOTIFY_CHARACTERISTIC }) {
+                    "TX characteristic not found"
+                }
 
             otaCharacteristic = ota
 

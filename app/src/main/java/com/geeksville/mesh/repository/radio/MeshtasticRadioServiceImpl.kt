@@ -53,6 +53,7 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
     }
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Suppress("TooGenericExceptionCaught")
     override val fromRadio: Flow<ByteArray> =
         if (fromRadioSyncCharacteristic != null) {
             fromRadioSyncCharacteristic.subscribe()

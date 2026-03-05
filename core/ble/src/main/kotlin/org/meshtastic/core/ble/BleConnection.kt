@@ -48,6 +48,7 @@ import kotlin.uuid.Uuid
  * @param scope The [CoroutineScope] in which to monitor connection state.
  * @param tag A tag for logging.
  */
+@Suppress("TooGenericExceptionCaught")
 class BleConnection(
     private val centralManager: CentralManager,
     private val scope: CoroutineScope,
@@ -135,9 +136,7 @@ class BleConnection(
             .launchIn(scope)
     }
 
-    /**
-     * Disconnects from the current peripheral.
-     */
+    /** Disconnects from the current peripheral. */
     suspend fun disconnect() = withContext(NonCancellable) {
         stateJob?.cancel()
         stateJob = null
@@ -149,8 +148,8 @@ class BleConnection(
     }
 
     /**
-     * Executes a block within a discovered profile. Handles peripheral readiness, discovery with a timeout, and cleans up
-     * the profile job if discovery fails.
+     * Executes a block within a discovered profile. Handles peripheral readiness, discovery with a timeout, and cleans
+     * up the profile job if discovery fails.
      *
      * @param serviceUuid The UUID of the service to discover.
      * @param timeout The duration to wait for discovery.
@@ -165,30 +164,29 @@ class BleConnection(
         val serviceReady = CompletableDeferred<T>()
 
         profileJob?.cancel()
-        val job = scope.launch {
-            try {
-                val profileScope = this
-                p.profile(serviceUuid = serviceUuid, required = true, scope = profileScope) { service ->
-                    try {
-                        val result = setup(service)
-                        serviceReady.complete(result)
-                        // Keep the profile active until this launch scope (profileJob) is cancelled
-                        awaitCancellation()
-                    } catch (e: Throwable) {
-                        if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
-                        throw e
+        val job =
+            scope.launch {
+                try {
+                    val profileScope = this
+                    p.profile(serviceUuid = serviceUuid, required = true, scope = profileScope) { service ->
+                        try {
+                            val result = setup(service)
+                            serviceReady.complete(result)
+                            // Keep the profile active until this launch scope (profileJob) is cancelled
+                            awaitCancellation()
+                        } catch (e: Throwable) {
+                            if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
+                            throw e
+                        }
                     }
+                } catch (e: Throwable) {
+                    if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
                 }
-            } catch (e: Throwable) {
-                if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
             }
-        }
         profileJob = job
 
         return try {
-            withTimeout(timeout) {
-                serviceReady.await()
-            }
+            withTimeout(timeout) { serviceReady.await() }
         } catch (e: Throwable) {
             profileJob?.cancel()
             throw e
