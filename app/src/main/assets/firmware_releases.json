@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9827",
+      "title": "Align 920–925 MHz limits as per NBTC regulations in Thailand (27 dBm, 10% duty cycle) ",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9827",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9798",
       "title": "Attempt to fix issue 9713",
       "page_url": "https://github.com/meshtastic/firmware/pull/9798",
