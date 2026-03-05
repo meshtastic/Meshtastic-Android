@@ -26,7 +26,7 @@ import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -52,9 +52,9 @@ constructor(
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     var mapStyleId: Int
-        get() = mapPrefs.mapStyle
+        get() = mapPrefs.mapStyle.value
         set(value) {
-            mapPrefs.mapStyle = value
+            mapPrefs.setMapStyle(value)
         }
 
     val localConfig = radioConfigRepository.localConfigFlow.stateInWhileSubscribed(initialValue = LocalConfig())

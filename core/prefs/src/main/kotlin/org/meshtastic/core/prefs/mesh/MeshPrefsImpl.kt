@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,41 +14,62 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.prefs.mesh
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.MeshSharedPreferences
+import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.repository.MeshPrefs
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface MeshPrefs {
-    var deviceAddress: String?
-
-    fun shouldProvideNodeLocation(nodeNum: Int?): Boolean
-
-    fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean)
-
-    fun getStoreForwardLastRequest(address: String?): Int
-
-    fun setStoreForwardLastRequest(address: String?, value: Int)
-}
-
 @Singleton
-class MeshPrefsImpl @Inject constructor(@MeshSharedPreferences private val prefs: SharedPreferences) : MeshPrefs {
-    override var deviceAddress: String? by NullableStringPrefDelegate(prefs, "device_address", NO_DEVICE_SELECTED)
+class MeshPrefsImpl
+@Inject
+constructor(
+    @MeshSharedPreferences private val prefs: SharedPreferences,
+    dispatchers: CoroutineDispatchers,
+) : MeshPrefs {
+    private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =
-        prefs.getBoolean(provideLocationKey(nodeNum), false)
+    private val locationFlows = ConcurrentHashMap<Int?, StateFlow<Boolean>>()
+    private val storeForwardFlows = ConcurrentHashMap<String?, StateFlow<Int>>()
+
+    override val deviceAddress: StateFlow<String?> =
+        prefs
+            .preferenceFlow("device_address") { p, k -> p.getString(k, NO_DEVICE_SELECTED) }
+            .stateIn(scope, SharingStarted.Eagerly, prefs.getString("device_address", NO_DEVICE_SELECTED))
+
+    override fun setDeviceAddress(address: String?) {
+        prefs.edit { putString("device_address", address) }
+    }
+
+    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = locationFlows.getOrPut(nodeNum) {
+        val key = provideLocationKey(nodeNum)
+        prefs
+            .preferenceFlow(key) { p, k -> p.getBoolean(k, false) }
+            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(key, false))
+    }
 
     override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
         prefs.edit { putBoolean(provideLocationKey(nodeNum), value) }
     }
 
-    override fun getStoreForwardLastRequest(address: String?): Int = prefs.getInt(storeForwardKey(address), 0)
+    override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = storeForwardFlows.getOrPut(address) {
+        val key = storeForwardKey(address)
+        prefs
+            .preferenceFlow(key) { p, k -> p.getInt(k, 0) }
+            .stateIn(scope, SharingStarted.Eagerly, prefs.getInt(key, 0))
+    }
 
     override fun setStoreForwardLastRequest(address: String?, value: Int) {
         prefs.edit {

@@ -16,12 +16,13 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
+import org.meshtastic.core.repository.HomoglyphPrefs
 import javax.inject.Inject
 
 /** Use case for toggling the homoglyph encoding preference. */
 open class ToggleHomoglyphEncodingUseCase @Inject constructor(private val homoglyphEncodingPrefs: HomoglyphPrefs) {
     operator fun invoke() {
-        homoglyphEncodingPrefs.homoglyphEncodingEnabled = !homoglyphEncodingPrefs.homoglyphEncodingEnabled
+        homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
     }
+
 }

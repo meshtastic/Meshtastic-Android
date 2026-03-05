@@ -81,7 +81,7 @@ class SendMessageUseCaseTest {
         val ourNode = mockk<Node>(relaxed = true)
         every { ourNode.user.id } returns "!1234"
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(ourNode)
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns false
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns false
 
         // Act
         useCase("Hello broadcast", "0${DataPacket.ID_BROADCAST}", null)
@@ -110,7 +110,7 @@ class SendMessageUseCaseTest {
         every { destNode.num } returns 12345
         every { nodeRepository.getNode("!dest") } returns destNode
 
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns false
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns false
         every { anyConstructed<Capabilities>().canSendVerifiedContacts } returns false
 
         // Act
@@ -139,7 +139,7 @@ class SendMessageUseCaseTest {
         every { destNode.num } returns 67890
         every { nodeRepository.getNode("!dest") } returns destNode
 
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns false
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns false
         every { anyConstructed<Capabilities>().canSendVerifiedContacts } returns true
 
         // Act
@@ -158,7 +158,7 @@ class SendMessageUseCaseTest {
         // Arrange
         val ourNode = mockk<Node>(relaxed = true)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(ourNode)
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns true
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns true
 
         val originalText = "\u0410pple" // Cyrillic A
 

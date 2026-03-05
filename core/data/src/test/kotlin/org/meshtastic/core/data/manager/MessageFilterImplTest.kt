@@ -22,7 +22,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.repository.FilterPrefs
 
 class MessageFilterImplTest {
     private lateinit var filterPrefs: FilterPrefs
@@ -39,13 +39,13 @@ class MessageFilterImplTest {
 
     @Test
     fun `shouldFilter returns false when filter is disabled`() {
-        every { filterPrefs.filterEnabled } returns false
+        every { filterPrefs.filterEnabled.value } returns false
         assertFalse(filterService.shouldFilter("spam message"))
     }
 
     @Test
     fun `shouldFilter returns false when filter words is empty`() {
-        every { filterPrefs.filterWords } returns emptySet()
+        every { filterPrefs.filterWords.value } returns emptySet()
         filterService.rebuildPatterns()
         assertFalse(filterService.shouldFilter("any message"))
     }
@@ -70,7 +70,7 @@ class MessageFilterImplTest {
 
     @Test
     fun `shouldFilter supports regex patterns`() {
-        every { filterPrefs.filterWords } returns setOf("regex:test\\d+")
+        every { filterPrefs.filterWords.value } returns setOf("regex:test\\d+")
         filterService.rebuildPatterns()
         assertTrue(filterService.shouldFilter("this is test123"))
         assertFalse(filterService.shouldFilter("this is test"))
@@ -78,7 +78,7 @@ class MessageFilterImplTest {
 
     @Test
     fun `shouldFilter handles invalid regex gracefully`() {
-        every { filterPrefs.filterWords } returns setOf("regex:[invalid")
+        every { filterPrefs.filterWords.value } returns setOf("regex:[invalid")
         filterService.rebuildPatterns()
         assertFalse(filterService.shouldFilter("any message"))
     }

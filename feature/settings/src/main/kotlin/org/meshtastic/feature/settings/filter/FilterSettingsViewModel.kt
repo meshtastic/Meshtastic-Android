@@ -21,7 +21,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
 import javax.inject.Inject
 
@@ -33,32 +33,32 @@ constructor(
     private val messageFilter: MessageFilter,
 ) : ViewModel() {
 
-    private val _filterEnabled = MutableStateFlow(filterPrefs.filterEnabled)
+    private val _filterEnabled = MutableStateFlow(filterPrefs.filterEnabled.value)
     val filterEnabled: StateFlow<Boolean> = _filterEnabled.asStateFlow()
 
-    private val _filterWords = MutableStateFlow(filterPrefs.filterWords.toList().sorted())
+    private val _filterWords = MutableStateFlow(filterPrefs.filterWords.value.toList().sorted())
     val filterWords: StateFlow<List<String>> = _filterWords.asStateFlow()
 
     fun setFilterEnabled(enabled: Boolean) {
-        filterPrefs.filterEnabled = enabled
+        filterPrefs.setFilterEnabled(enabled)
         _filterEnabled.value = enabled
     }
 
     fun addFilterWord(word: String) {
         if (word.isBlank()) return
         val trimmed = word.trim()
-        val current = filterPrefs.filterWords.toMutableSet()
+        val current = filterPrefs.filterWords.value.toMutableSet()
         if (current.add(trimmed)) {
-            filterPrefs.filterWords = current
+            filterPrefs.setFilterWords(current)
             _filterWords.value = current.toList().sorted()
             messageFilter.rebuildPatterns()
         }
     }
 
     fun removeFilterWord(word: String) {
-        val current = filterPrefs.filterWords.toMutableSet()
+        val current = filterPrefs.filterWords.value.toMutableSet()
         if (current.remove(word)) {
-            filterPrefs.filterWords = current
+            filterPrefs.setFilterWords(current)
             _filterWords.value = current.toList().sorted()
             messageFilter.rebuildPatterns()
         }

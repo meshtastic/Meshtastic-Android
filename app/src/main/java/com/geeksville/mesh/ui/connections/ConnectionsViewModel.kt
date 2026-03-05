@@ -23,10 +23,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 import javax.inject.Inject
@@ -50,11 +50,11 @@ constructor(
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
-    private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning)
+    private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning.value)
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
 
     fun suppressNoPairedWarning() {
         _hasShownNotPairedWarning.value = true
-        uiPrefs.hasShownNotPairedWarning = true
+        uiPrefs.setHasShownNotPairedWarning(true)
     }
 }

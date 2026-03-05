@@ -20,10 +20,10 @@ import android.net.Uri
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.prefs.radio.RadioPrefs
-import org.meshtastic.core.prefs.radio.isBle
-import org.meshtastic.core.prefs.radio.isSerial
-import org.meshtastic.core.prefs.radio.isTcp
+import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.isBle
+import org.meshtastic.core.repository.isSerial
+import org.meshtastic.core.repository.isTcp
 import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
 import java.io.File
 import javax.inject.Inject
@@ -90,7 +90,7 @@ constructor(
     private fun getTarget(address: String): String = when {
         radioPrefs.isSerial() -> ""
         radioPrefs.isBle() -> address
-        radioPrefs.isTcp() -> extractIpFromAddress(radioPrefs.devAddr) ?: ""
+        radioPrefs.isTcp() -> extractIpFromAddress(radioPrefs.devAddr.value) ?: ""
         else -> ""
     }
 

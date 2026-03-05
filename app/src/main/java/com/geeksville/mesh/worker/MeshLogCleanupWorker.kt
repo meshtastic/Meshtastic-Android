@@ -27,7 +27,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 
 @HiltWorker
@@ -53,14 +53,14 @@ constructor(
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun doWork(): Result = try {
-        val retentionDays = meshLogPrefs.retentionDays
-        if (!meshLogPrefs.loggingEnabled) {
+        val retentionDays = meshLogPrefs.retentionDays.value
+        if (!meshLogPrefs.loggingEnabled.value) {
             logger.i { "Skipping cleanup because mesh log storage is disabled" }
-        } else if (retentionDays == MeshLogPrefs.NEVER_CLEAR_RETENTION_DAYS) {
+        } else if (retentionDays == 0) {
             logger.i { "Skipping cleanup because retention is set to never delete" }
         } else {
             val retentionLabel =
-                if (retentionDays == MeshLogPrefs.ONE_HOUR_RETENTION_DAYS) {
+                if (retentionDays == -1) {
                     "1 hour"
                 } else {
                     "$retentionDays days"

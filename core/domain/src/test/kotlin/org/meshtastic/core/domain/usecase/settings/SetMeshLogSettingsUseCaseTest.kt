@@ -23,7 +23,7 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 
 class SetMeshLogSettingsUseCaseTest {
@@ -45,20 +45,20 @@ class SetMeshLogSettingsUseCaseTest {
         useCase.setRetentionDays(MeshLogPrefs.MIN_RETENTION_DAYS - 1)
 
         // Assert
-        verify { meshLogPrefs.retentionDays = MeshLogPrefs.MIN_RETENTION_DAYS }
+        verify { meshLogPrefs.setRetentionDays(MeshLogPrefs.MIN_RETENTION_DAYS) }
         coVerify { meshLogRepository.deleteLogsOlderThan(MeshLogPrefs.MIN_RETENTION_DAYS) }
     }
 
     @Test
     fun `setLoggingEnabled true triggers cleanup`() = runTest {
         // Arrange
-        every { meshLogPrefs.retentionDays } returns 30
+        every { meshLogPrefs.retentionDays.value } returns 30
 
         // Act
         useCase.setLoggingEnabled(true)
 
         // Assert
-        verify { meshLogPrefs.loggingEnabled = true }
+        verify { meshLogPrefs.setLoggingEnabled(true) }
         coVerify { meshLogRepository.deleteLogsOlderThan(30) }
     }
 
@@ -68,7 +68,7 @@ class SetMeshLogSettingsUseCaseTest {
         useCase.setLoggingEnabled(false)
 
         // Assert
-        verify { meshLogPrefs.loggingEnabled = false }
+        verify { meshLogPrefs.setLoggingEnabled(false) }
         coVerify { meshLogRepository.deleteAll() }
     }
 }

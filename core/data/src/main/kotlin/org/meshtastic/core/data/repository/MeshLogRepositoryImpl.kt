@@ -30,7 +30,7 @@ import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshLogRepository.Companion.DEFAULT_MAX_LOGS
 import org.meshtastic.proto.MeshPacket
@@ -149,7 +149,7 @@ constructor(
 
     /** Persists a new log entry to the database if logging is enabled in preferences. */
     override suspend fun insert(log: MeshLog) = withContext(dispatchers.io) {
-        if (!meshLogPrefs.loggingEnabled) return@withContext
+        if (!meshLogPrefs.loggingEnabled.value) return@withContext
         dbManager.currentDb.value.meshLogDao().insert(log)
     }
 

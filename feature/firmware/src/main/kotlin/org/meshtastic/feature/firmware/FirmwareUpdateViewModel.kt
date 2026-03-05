@@ -45,12 +45,12 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.radio.RadioPrefs
-import org.meshtastic.core.prefs.radio.isBle
-import org.meshtastic.core.prefs.radio.isSerial
-import org.meshtastic.core.prefs.radio.isTcp
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.isBle
+import org.meshtastic.core.repository.isSerial
+import org.meshtastic.core.repository.isTcp
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.firmware_update_battery_low
 import org.meshtastic.core.resources.firmware_update_copying
@@ -157,7 +157,7 @@ constructor(
                 _state.value = FirmwareUpdateState.Checking
                 runCatching {
                     val ourNode = nodeRepository.myNodeInfo.value
-                    val address = radioPrefs.devAddr?.drop(1)
+                    val address = radioPrefs.devAddr.value?.drop(1)
                     if (address == null || ourNode == null) {
                         _state.value = FirmwareUpdateState.Error(getString(Res.string.firmware_update_no_device))
                         return@launch

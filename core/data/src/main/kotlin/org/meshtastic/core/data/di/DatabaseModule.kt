@@ -27,6 +27,7 @@ import javax.inject.Singleton
 @Module
 interface DatabaseModule {
 
-    @Binds @Singleton
+    @Binds
+    @Singleton
     fun bindDatabaseManager(impl: DatabaseManager): org.meshtastic.core.common.database.DatabaseManager
 }

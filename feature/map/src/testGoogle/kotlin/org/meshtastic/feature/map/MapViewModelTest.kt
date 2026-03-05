@@ -44,7 +44,7 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
-import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository

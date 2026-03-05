@@ -61,7 +61,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel(), onBack: 
 
     val currentMapReportSettings = formState.value.map_report_settings ?: ModuleConfig.MapReportSettings()
     if (!(currentMapReportSettings.should_report_location ?: false)) {
-        val settings = currentMapReportSettings.copy(should_report_location = viewModel.shouldReportLocation(destNum))
+        val settings = currentMapReportSettings.copy(should_report_location = viewModel.shouldReportLocation(destNum).value)
         formState.value = formState.value.copy(map_report_settings = settings)
     }
 

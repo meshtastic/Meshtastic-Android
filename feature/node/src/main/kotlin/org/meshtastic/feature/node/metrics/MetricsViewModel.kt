@@ -222,8 +222,7 @@ constructor(
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
 
-    fun positionedNodeNums(): Set<Int> =
-        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
+    fun positionedNodeNums(): Set<Int> = nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
 
     private fun List<Node>.numSet(): Set<Int> = map { it.num }.toSet()
 

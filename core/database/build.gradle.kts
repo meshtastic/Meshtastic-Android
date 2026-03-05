@@ -32,7 +32,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
-            
+
             api(projects.core.common)
             implementation(projects.core.di)
             api(projects.core.model)

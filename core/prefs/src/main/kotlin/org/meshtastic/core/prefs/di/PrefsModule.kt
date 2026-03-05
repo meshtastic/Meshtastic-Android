@@ -24,28 +24,28 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefsImpl
-import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
-import org.meshtastic.core.prefs.filter.FilterPrefs
 import org.meshtastic.core.prefs.filter.FilterPrefsImpl
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
 import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefsImpl
-import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.prefs.map.MapConsentPrefsImpl
-import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.prefs.map.MapPrefsImpl
-import org.meshtastic.core.prefs.map.MapTileProviderPrefs
 import org.meshtastic.core.prefs.map.MapTileProviderPrefsImpl
-import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.prefs.mesh.MeshPrefsImpl
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefsImpl
-import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.prefs.radio.RadioPrefsImpl
-import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.prefs.ui.UiPrefsImpl
+import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.CustomEmojiPrefs
+import org.meshtastic.core.repository.FilterPrefs
+import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.core.repository.MapTileProviderPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
+import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.UiPrefs
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -108,11 +108,6 @@ interface PrefsModule {
     @Binds fun bindAnalyticsPrefs(analyticsPrefsImpl: AnalyticsPrefsImpl): AnalyticsPrefs
 
     @Binds fun bindHomoglyphEncodingPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): HomoglyphPrefs
-
-    @Binds
-    fun bindSharedHomoglyphPrefs(
-        homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl,
-    ): org.meshtastic.core.repository.HomoglyphPrefs
 
     @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
 
@@ -204,6 +199,6 @@ interface PrefsModule {
         @Singleton
         @FilterSharedPreferences
         fun provideFilterSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences(FilterPrefs.FILTER_PREFS_NAME, Context.MODE_PRIVATE)
+            context.getSharedPreferences("filter-prefs", Context.MODE_PRIVATE)
     }
 }

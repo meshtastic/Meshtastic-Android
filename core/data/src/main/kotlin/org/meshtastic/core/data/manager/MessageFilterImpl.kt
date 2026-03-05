@@ -17,7 +17,7 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
 import java.util.regex.PatternSyntaxException
 import javax.inject.Inject
@@ -33,7 +33,7 @@ class MessageFilterImpl @Inject constructor(private val filterPrefs: FilterPrefs
     }
 
     override fun shouldFilter(message: String, isFilteringDisabled: Boolean): Boolean {
-        if (!filterPrefs.filterEnabled || compiledPatterns.isEmpty() || isFilteringDisabled) {
+        if (!filterPrefs.filterEnabled.value || compiledPatterns.isEmpty() || isFilteringDisabled) {
             return false
         }
         val textToCheck = message.take(MAX_CHECK_LENGTH)
@@ -42,7 +42,7 @@ class MessageFilterImpl @Inject constructor(private val filterPrefs: FilterPrefs
 
     override fun rebuildPatterns() {
         compiledPatterns =
-            filterPrefs.filterWords.mapNotNull { word ->
+            filterPrefs.filterWords.value.mapNotNull { word ->
                 try {
                     if (word.startsWith(REGEX_PREFIX)) {
                         Regex(word.removePrefix(REGEX_PREFIX), RegexOption.IGNORE_CASE)

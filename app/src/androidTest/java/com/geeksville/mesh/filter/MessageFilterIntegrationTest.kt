@@ -25,7 +25,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
 import javax.inject.Inject
 
@@ -46,8 +46,8 @@ class MessageFilterIntegrationTest {
 
     @Test
     fun filterPrefsIntegration() = runTest {
-        filterPrefs.filterEnabled = true
-        filterPrefs.filterWords = setOf("test", "spam")
+        filterPrefs.setFilterEnabled(true)
+        filterPrefs.setFilterWords(setOf("test", "spam"))
         filterService.rebuildPatterns()
 
         assertTrue(filterService.shouldFilter("this is a test message"))

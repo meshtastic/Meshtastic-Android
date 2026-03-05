@@ -40,10 +40,10 @@ import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.robolectric.annotation.Config
 
 @OptIn(ExperimentalCoroutinesApi::class)

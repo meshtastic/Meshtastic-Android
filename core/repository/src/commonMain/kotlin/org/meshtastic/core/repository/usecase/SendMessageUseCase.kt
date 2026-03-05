@@ -89,7 +89,7 @@ class SendMessageUseCase(
 
         // Apply homoglyph encoding
         val finalMessageText =
-            if (homoglyphEncodingPrefs.homoglyphEncodingEnabled) {
+            if (homoglyphEncodingPrefs.homoglyphEncodingEnabled.value) {
                 HomoglyphCharacterStringTransformer.optimizeUtf8StringWithHomoglyphs(text)
             } else {
                 text

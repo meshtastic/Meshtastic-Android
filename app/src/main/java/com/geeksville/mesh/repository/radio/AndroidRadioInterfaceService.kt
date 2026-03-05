@@ -51,8 +51,8 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.util.anonymize
-import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 import javax.inject.Inject
@@ -92,7 +92,7 @@ constructor(
     val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
 
     // Thread-safe StateFlow for tracking device address changes
-    private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
+    private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr.value)
     override val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
     private val logSends = false
@@ -192,7 +192,7 @@ constructor(
      */
     override fun getDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
-        var address = radioPrefs.devAddr
+        var address = radioPrefs.devAddr.value
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the
         // user
@@ -352,7 +352,7 @@ constructor(
             Logger.d { "Setting bonded device to ${address.anonymize}" }
 
             // Stores the address if non-null, otherwise removes the pref
-            radioPrefs.devAddr = address
+            radioPrefs.setDevAddr(address)
             _currentDeviceAddressFlow.value = address
 
             // Force the service to reconnect

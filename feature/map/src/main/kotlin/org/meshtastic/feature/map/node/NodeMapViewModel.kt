@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.toList
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.ui.util.toPosition
@@ -81,5 +81,5 @@ constructor(
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val tileSource
-        get() = CustomTileSource.getTileSource(mapPrefs.mapStyle)
+        get() = CustomTileSource.getTileSource(mapPrefs.mapStyle.value)
 }

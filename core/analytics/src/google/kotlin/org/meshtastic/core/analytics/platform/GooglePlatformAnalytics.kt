@@ -58,7 +58,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.analytics.BuildConfig
 import org.meshtastic.core.analytics.DataPair
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
+import org.meshtastic.core.repository.AnalyticsPrefs
 import javax.inject.Inject
 import co.touchlab.kermit.Logger as KermitLogger
 
@@ -109,11 +109,11 @@ constructor(
         KermitLogger.setMinSeverity(if (BuildConfig.DEBUG) Severity.Debug else Severity.Info)
 
         // Initial consent state
-        updateAnalyticsConsent(analyticsPrefs.analyticsAllowed)
+        updateAnalyticsConsent(analyticsPrefs.analyticsAllowed.value)
 
         // Subscribe to analytics preference changes
         analyticsPrefs
-            .getAnalyticsAllowedChangesFlow()
+            .analyticsAllowed
             .onEach { allowed -> updateAnalyticsConsent(allowed) }
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
@@ -122,7 +122,7 @@ constructor(
      * Ensures that Datadog and Firebase SDKs are initialized if allowed. This is called lazily when consent is granted.
      */
     private fun ensureInitialized() {
-        if (!analyticsPrefs.analyticsAllowed || isInTestLab) return
+        if (!analyticsPrefs.analyticsAllowed.value || isInTestLab) return
 
         if (!Datadog.isInitialized()) {
             initDatadog(context as Application)

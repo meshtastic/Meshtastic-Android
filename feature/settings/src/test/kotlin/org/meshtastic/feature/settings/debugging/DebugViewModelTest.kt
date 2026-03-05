@@ -32,7 +32,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.ui.util.AlertManager
@@ -56,8 +56,8 @@ class DebugViewModelTest {
         every { meshLogRepository.getAllLogs() } returns flowOf(emptyList())
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(emptyMap())
-        every { meshLogPrefs.retentionDays } returns 7
-        every { meshLogPrefs.loggingEnabled } returns true
+        every { meshLogPrefs.retentionDays.value } returns 7
+        every { meshLogPrefs.loggingEnabled.value } returns true
 
         viewModel =
             DebugViewModel(
@@ -77,7 +77,7 @@ class DebugViewModelTest {
     fun `setRetentionDays updates prefs and deletes old logs`() = runTest {
         viewModel.setRetentionDays(14)
 
-        verify { meshLogPrefs.retentionDays = 14 }
+        verify { meshLogPrefs.setRetentionDays(14) }
         coVerify { meshLogRepository.deleteLogsOlderThan(14) }
         assertEquals(14, viewModel.retentionDays.value)
     }
@@ -86,7 +86,7 @@ class DebugViewModelTest {
     fun `setLoggingEnabled false deletes all logs`() = runTest {
         viewModel.setLoggingEnabled(false)
 
-        verify { meshLogPrefs.loggingEnabled = false }
+        verify { meshLogPrefs.setLoggingEnabled(false) }
         coVerify { meshLogRepository.deleteAll() }
         assertEquals(false, viewModel.loggingEnabled.value)
     }

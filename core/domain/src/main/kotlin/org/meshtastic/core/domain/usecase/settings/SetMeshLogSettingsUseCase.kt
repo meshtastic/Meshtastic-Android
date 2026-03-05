@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import javax.inject.Inject
 
@@ -34,7 +34,7 @@ constructor(
      */
     suspend fun setRetentionDays(days: Int) {
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
-        meshLogPrefs.retentionDays = clamped
+        meshLogPrefs.setRetentionDays(clamped)
         meshLogRepository.deleteLogsOlderThan(clamped)
     }
 
@@ -44,11 +44,11 @@ constructor(
      * @param enabled True to enable logging, false to disable.
      */
     suspend fun setLoggingEnabled(enabled: Boolean) {
-        meshLogPrefs.loggingEnabled = enabled
+        meshLogPrefs.setLoggingEnabled(enabled)
         if (!enabled) {
             meshLogRepository.deleteAll()
         } else {
-            meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays)
+            meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value)
         }
     }
 }

@@ -26,6 +26,10 @@ configure<LibraryExtension> { namespace = "org.meshtastic.core.prefs" }
 
 dependencies {
     implementation(projects.core.repository)
+    implementation(projects.core.common)
+    implementation(projects.core.di)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.coroutines.core)
     googleImplementation(libs.maps.compose)
 
     testImplementation(libs.junit)

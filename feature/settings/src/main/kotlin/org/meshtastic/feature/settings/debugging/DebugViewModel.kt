@@ -41,7 +41,7 @@ import org.meshtastic.core.database.entity.Packet
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.resources.Res
@@ -230,10 +230,10 @@ constructor(
             .mapLatest { logs -> withContext(Dispatchers.Default) { toUiState(logs) } }
             .stateInWhileSubscribed(initialValue = persistentListOf())
 
-    private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
+    private val _retentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)
     val retentionDays: StateFlow<Int> = _retentionDays.asStateFlow()
 
-    private val _loggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled)
+    private val _loggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled.value)
     val loggingEnabled: StateFlow<Boolean> = _loggingEnabled.asStateFlow()
 
     // --- Managers ---
@@ -265,18 +265,18 @@ constructor(
 
     fun setRetentionDays(days: Int) {
         val clamped = days.coerceIn(MeshLogPrefs.MIN_RETENTION_DAYS, MeshLogPrefs.MAX_RETENTION_DAYS)
-        meshLogPrefs.retentionDays = clamped
+        meshLogPrefs.setRetentionDays(clamped)
         _retentionDays.value = clamped
         viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(clamped) }
     }
 
     fun setLoggingEnabled(enabled: Boolean) {
-        meshLogPrefs.loggingEnabled = enabled
+        meshLogPrefs.setLoggingEnabled(enabled)
         _loggingEnabled.value = enabled
         if (!enabled) {
             viewModelScope.launch { meshLogRepository.deleteAll() }
         } else {
-            viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays) }
+            viewModelScope.launch { meshLogRepository.deleteLogsOlderThan(meshLogPrefs.retentionDays.value) }
         }
     }
 

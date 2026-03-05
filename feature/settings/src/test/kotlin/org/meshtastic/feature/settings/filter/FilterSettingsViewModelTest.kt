@@ -22,7 +22,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.prefs.filter.FilterPrefs
+import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
 
 class FilterSettingsViewModelTest {
@@ -34,8 +34,8 @@ class FilterSettingsViewModelTest {
 
     @Before
     fun setUp() {
-        every { filterPrefs.filterEnabled } returns true
-        every { filterPrefs.filterWords } returns setOf("apple", "banana")
+        every { filterPrefs.filterEnabled.value } returns true
+        every { filterPrefs.filterWords.value } returns setOf("apple", "banana")
 
         viewModel = FilterSettingsViewModel(filterPrefs = filterPrefs, messageFilter = messageFilter)
     }
@@ -43,7 +43,7 @@ class FilterSettingsViewModelTest {
     @Test
     fun `setFilterEnabled updates prefs and state`() {
         viewModel.setFilterEnabled(false)
-        verify { filterPrefs.filterEnabled = false }
+        verify { filterPrefs.setFilterEnabled(false) }
         assertEquals(false, viewModel.filterEnabled.value)
     }
 
@@ -51,7 +51,7 @@ class FilterSettingsViewModelTest {
     fun `addFilterWord updates prefs and rebuilds patterns`() {
         viewModel.addFilterWord("cherry")
 
-        verify { filterPrefs.filterWords = any() }
+        verify { filterPrefs.setFilterWords(any()) }
         verify { messageFilter.rebuildPatterns() }
         assertEquals(listOf("apple", "banana", "cherry"), viewModel.filterWords.value)
     }
@@ -60,7 +60,7 @@ class FilterSettingsViewModelTest {
     fun `removeFilterWord updates prefs and rebuilds patterns`() {
         viewModel.removeFilterWord("apple")
 
-        verify { filterPrefs.filterWords = any() }
+        verify { filterPrefs.setFilterWords(any()) }
         verify { messageFilter.rebuildPatterns() }
         assertEquals(listOf("banana"), viewModel.filterWords.value)
     }
