@@ -35,7 +35,7 @@ platform :android do
   desc "Build the F-Droid release"
   lane :fdroid_build do
     gradle(
-      task: "clean assembleFdroidRelease",
+      task: "assembleFdroidRelease",
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],
         "android.injected.version.code" => ENV['VERSION_CODE']
@@ -46,7 +46,7 @@ platform :android do
   desc "Build the Google Release"
   private_lane :build_google_release do
     gradle(
-      task: "clean bundleGoogleRelease assembleGoogleRelease",
+      task: "bundleGoogleRelease assembleGoogleRelease",
       print_command: false,
       properties: {
         "android.injected.version.name" => ENV['VERSION_NAME'],

@@ -141,16 +141,20 @@ jobs:
 
   cleanup-on-failure:
     needs: [determine-tags, call-release-workflow]
-    if: ${{ failure() && !inputs.dry_run && inputs.channel == 'internal' }}
+    if: ${{ (failure() || cancelled()) && !inputs.dry_run && inputs.channel == 'internal' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Delete Failed Tag
+      - name: Delete Failed or Cancelled Tag
         env:
           FINAL_TAG: ${{ needs.determine-tags.outputs.final_tag }}
         run: |
-          echo "Release workflow failed. Deleting tag $FINAL_TAG to allow a clean retry..."
-          git push origin :refs/tags/"$FINAL_TAG" || echo "Tag was not pushed or already deleted."
+          if [ -n "$FINAL_TAG" ]; then
+            echo "Release workflow failed or was cancelled. Deleting tag $FINAL_TAG to allow a clean retry..."
+            git push origin :refs/tags/"$FINAL_TAG" || echo "Tag was not pushed or already deleted."
+          else
+            echo "No tag was created to delete."
+          fi
