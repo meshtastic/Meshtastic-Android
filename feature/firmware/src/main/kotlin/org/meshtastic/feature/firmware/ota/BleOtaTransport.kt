@@ -265,6 +265,7 @@ class BleOtaTransport(
      * that every fragmented packet is acknowledged by the device before proceeding, preventing buffer overflows on the
      * radio.
      */
+    @Suppress("CyclomaticComplexMethod")
     override suspend fun streamFirmware(
         data: ByteArray,
         chunkSize: Int,

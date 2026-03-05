@@ -17,7 +17,9 @@
 package com.geeksville.mesh.repository.radio
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -44,6 +46,8 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
     private val logRadioCharacteristic: RemoteCharacteristic =
         remoteService.characteristics.first { it.uuid == LOGRADIO_CHARACTERISTIC }
 
+    private val triggerDrain = MutableSharedFlow<Unit>(extraBufferCapacity = 64)
+
     init {
         require(toRadioCharacteristic.isWritable()) { "TORADIO must be writable" }
         require(fromRadioCharacteristic.isReadable()) { "FROMRADIO must be readable" }
@@ -52,21 +56,27 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
         require(logRadioCharacteristic.isSubscribable()) { "LOGRADIO must be subscribable" }
     }
 
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
     override val fromRadio: Flow<ByteArray> =
         if (fromRadioSyncCharacteristic != null) {
             fromRadioSyncCharacteristic.subscribe()
         } else {
-            // Legacy path: Whenever notified by fromNum, read from fromRadio characteristic
-            fromNumCharacteristic!!.subscribe().flatMapConcat { countBytes ->
-                // The byte from FROMNUM notification is the number of packets waiting
-                val count = if (countBytes.isNotEmpty()) countBytes[0].toUByte().toInt() else 1
-                kotlinx.coroutines.flow.flow {
-                    repeat(count) {
+            // Legacy path: drain fromRadio characteristic when notified or after write
+            channelFlow {
+                launch { fromNumCharacteristic!!.subscribe().collect { triggerDrain.tryEmit(Unit) } }
+
+                triggerDrain.collect {
+                    var keepReading = true
+                    while (keepReading) {
                         try {
-                            emit(fromRadioCharacteristic.read())
+                            val packet = fromRadioCharacteristic.read()
+                            if (packet.isEmpty()) {
+                                keepReading = false
+                            } else {
+                                send(packet)
+                            }
                         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                             co.touchlab.kermit.Logger.e(e) { "BLE: Failed to read from FROMRADIO" }
+                            keepReading = false
                         }
                     }
                 }
@@ -77,5 +87,8 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
 
     override suspend fun sendToRadio(packet: ByteArray) {
         toRadioCharacteristic.write(packet, WriteType.WITHOUT_RESPONSE)
+        if (fromRadioSyncCharacteristic == null) {
+            triggerDrain.tryEmit(Unit)
+        }
     }
 }
