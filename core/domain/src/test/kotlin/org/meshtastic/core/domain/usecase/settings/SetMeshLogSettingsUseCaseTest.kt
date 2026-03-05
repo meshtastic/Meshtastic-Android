@@ -23,8 +23,8 @@ import io.mockk.verify
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogRepository
 
 class SetMeshLogSettingsUseCaseTest {
 

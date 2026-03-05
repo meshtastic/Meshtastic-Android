@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.database.DatabaseConstants
-import org.meshtastic.core.repository.DatabaseManager
 import javax.inject.Inject
 
 /** Use case for setting the database cache limit. */

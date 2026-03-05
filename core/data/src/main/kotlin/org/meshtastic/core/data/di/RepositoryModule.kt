@@ -38,6 +38,7 @@ import org.meshtastic.core.data.manager.NodeManagerImpl
 import org.meshtastic.core.data.manager.PacketHandlerImpl
 import org.meshtastic.core.data.manager.TracerouteHandlerImpl
 import org.meshtastic.core.data.repository.DeviceHardwareRepositoryImpl
+import org.meshtastic.core.data.repository.MeshLogRepositoryImpl
 import org.meshtastic.core.data.repository.NodeRepositoryImpl
 import org.meshtastic.core.data.repository.PacketRepositoryImpl
 import org.meshtastic.core.data.repository.RadioConfigRepositoryImpl
@@ -51,6 +52,7 @@ import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshDataHandler
+import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MessageFilter
@@ -84,6 +86,10 @@ abstract class RepositoryModule {
 
     @Binds @Singleton
     abstract fun bindPacketRepository(packetRepositoryImpl: PacketRepositoryImpl): PacketRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMeshLogRepository(meshLogRepositoryImpl: MeshLogRepositoryImpl): MeshLogRepository
 
     @Binds @Singleton
     abstract fun bindNodeManager(nodeManagerImpl: NodeManagerImpl): NodeManager

@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogRepository
 import javax.inject.Inject
 
 /** Use case for managing mesh log settings. */

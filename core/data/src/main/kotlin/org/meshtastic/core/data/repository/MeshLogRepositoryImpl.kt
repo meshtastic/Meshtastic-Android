@@ -31,6 +31,8 @@ import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.MeshLogRepository.Companion.DEFAULT_MAX_LOGS
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
@@ -39,48 +41,48 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repository for managing and retrieving logs from the local database.
+ * Repository implementation for managing and retrieving logs from the local database.
  *
  * This repository provides methods for inserting, deleting, and querying logs, including specialized methods for
  * telemetry and traceroute data.
  */
 @Suppress("TooManyFunctions")
 @Singleton
-class MeshLogRepository
+class MeshLogRepositoryImpl
 @Inject
 constructor(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogPrefs: MeshLogPrefs,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
-) {
+) : MeshLogRepository {
 
     /** Retrieves all [MeshLog]s in the database, up to [maxItem]. */
-    fun getAllLogs(maxItem: Int = MAX_MESH_PACKETS): Flow<List<MeshLog>> =
+    override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> =
         dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItem) }.flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s in the database in the order they were received. */
-    fun getAllLogsInReceiveOrder(maxItem: Int = MAX_MESH_PACKETS): Flow<List<MeshLog>> =
+    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> =
         dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItem) }.flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s in the database without any limit. */
-    fun getAllLogsUnbounded(): Flow<List<MeshLog>> = getAllLogs(Int.MAX_VALUE)
+    override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = getAllLogs(Int.MAX_VALUE)
 
     /** Retrieves all [MeshLog]s associated with a specific [nodeNum] and [portNum]. */
-    fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = dbManager.currentDb
-        .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, portNum, MAX_MESH_PACKETS) }
+    override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = dbManager.currentDb
+        .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, portNum, DEFAULT_MAX_LOGS) }
         .distinctUntilChanged()
         .flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s containing [MeshPacket]s for a specific [nodeNum]. */
-    fun getMeshPacketsFrom(nodeNum: Int, portNum: Int = -1): Flow<List<MeshPacket>> =
+    override fun getMeshPacketsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshPacket>> =
         getLogsFrom(nodeNum, portNum).map { list -> list.mapNotNull { it.fromRadio.packet } }.flowOn(dispatchers.io)
 
     /** Retrieves telemetry history for a specific node, automatically handling local node redirection. */
-    fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = effectiveLogId(nodeNum)
+    override fun getTelemetryFrom(nodeNum: Int): Flow<List<Telemetry>> = effectiveLogId(nodeNum)
         .flatMapLatest { logId ->
             dbManager.currentDb
-                .flatMapLatest { it.meshLogDao().getLogsFrom(logId, PortNum.TELEMETRY_APP.value, MAX_MESH_PACKETS) }
+                .flatMapLatest { it.meshLogDao().getLogsFrom(logId, PortNum.TELEMETRY_APP.value, DEFAULT_MAX_LOGS) }
                 .distinctUntilChanged()
                 .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
         }
@@ -91,8 +93,8 @@ constructor(
      *
      * A request log is defined as an outgoing packet (`fromNum = 0`) where `want_response` is true.
      */
-    fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> = dbManager.currentDb
-        .flatMapLatest { it.meshLogDao().getLogsFrom(MeshLog.NODE_NUM_LOCAL, portNum.value, MAX_MESH_PACKETS) }
+    override fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> = dbManager.currentDb
+        .flatMapLatest { it.meshLogDao().getLogsFrom(MeshLog.NODE_NUM_LOCAL, portNum.value, DEFAULT_MAX_LOGS) }
         .map { list ->
             list.filter { log ->
                 val packet = log.fromRadio.packet ?: return@filter false
@@ -140,26 +142,27 @@ constructor(
         .distinctUntilChanged()
 
     /** Returns the cached [MyNodeInfo] from the system logs. */
-    fun getMyNodeInfo(): Flow<MyNodeInfo?> = dbManager.currentDb
-        .flatMapLatest { db -> db.meshLogDao().getLogsFrom(MeshLog.NODE_NUM_LOCAL, 0, MAX_MESH_PACKETS) }
+    override fun getMyNodeInfo(): Flow<MyNodeInfo?> = dbManager.currentDb
+        .flatMapLatest { db -> db.meshLogDao().getLogsFrom(MeshLog.NODE_NUM_LOCAL, 0, DEFAULT_MAX_LOGS) }
         .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
         .flowOn(dispatchers.io)
 
     /** Persists a new log entry to the database if logging is enabled in preferences. */
-    suspend fun insert(log: MeshLog) = withContext(dispatchers.io) {
+    override suspend fun insert(log: MeshLog) = withContext(dispatchers.io) {
         if (!meshLogPrefs.loggingEnabled) return@withContext
         dbManager.currentDb.value.meshLogDao().insert(log)
     }
 
     /** Clears all logs from the database. */
-    suspend fun deleteAll() = withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteAll() }
+    override suspend fun deleteAll() =
+        withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteAll() }
 
     /** Deletes a specific log entry by its [uuid]. */
-    suspend fun deleteLog(uuid: String) =
+    override suspend fun deleteLog(uuid: String) =
         withContext(dispatchers.io) { dbManager.currentDb.value.meshLogDao().deleteLog(uuid) }
 
     /** Deletes all logs associated with a specific [nodeNum] and [portNum]. */
-    suspend fun deleteLogs(nodeNum: Int, portNum: Int) = withContext(dispatchers.io) {
+    override suspend fun deleteLogs(nodeNum: Int, portNum: Int) = withContext(dispatchers.io) {
         val myNodeNum = nodeInfoReadDataSource.myNodeInfoFlow().firstOrNull()?.myNodeNum
         val logId = if (nodeNum == myNodeNum) MeshLog.NODE_NUM_LOCAL else nodeNum
         dbManager.currentDb.value.meshLogDao().deleteLogs(logId, portNum)
@@ -167,13 +170,12 @@ constructor(
 
     /** Prunes the log database based on the configured [retentionDays]. */
     @Suppress("MagicNumber")
-    suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
+    override suspend fun deleteLogsOlderThan(retentionDays: Int) = withContext(dispatchers.io) {
         val cutoffTime = nowMillis - (retentionDays.toLong() * 24 * 60 * 60 * 1000)
         dbManager.currentDb.value.meshLogDao().deleteOlderThan(cutoffTime)
     }
 
     companion object {
-        private const val MAX_MESH_PACKETS = 5000
         private const val MILLIS_PER_SEC = 1000L
     }
 }

@@ -20,7 +20,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.common.database.DatabaseManager
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -28,5 +28,5 @@ import javax.inject.Singleton
 interface DatabaseModule {
 
     @Binds @Singleton
-    fun bindDatabaseManager(impl: DatabaseManager): org.meshtastic.core.repository.DatabaseManager
+    fun bindDatabaseManager(impl: DatabaseManager): org.meshtastic.core.common.database.DatabaseManager
 }

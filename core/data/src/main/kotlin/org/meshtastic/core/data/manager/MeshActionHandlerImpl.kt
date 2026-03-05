@@ -23,6 +23,7 @@ import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.nowMillis
@@ -34,7 +35,6 @@ import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.DatabaseManager
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshMessageProcessor

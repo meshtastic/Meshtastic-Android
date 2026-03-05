@@ -17,24 +17,25 @@
 package org.meshtastic.core.datastore.serializer
 
 import androidx.datastore.core.CorruptionException
-import androidx.datastore.core.Serializer
+import androidx.datastore.core.okio.OkioSerializer
+import okio.BufferedSink
+import okio.BufferedSource
 import okio.IOException
-import org.meshtastic.proto.ChannelSet
-import java.io.InputStream
-import java.io.OutputStream
+import org.meshtastic.proto.LocalModuleConfig
 
-/** Serializer for the [ChannelSet] object defined in apponly.proto. */
-@Suppress("BlockingMethodInNonBlockingContext")
-object ChannelSetSerializer : Serializer<ChannelSet> {
-    override val defaultValue: ChannelSet = ChannelSet()
+/** Serializer for the [LocalModuleConfig] object defined in localonly.proto. */
+object ModuleConfigSerializer : OkioSerializer<LocalModuleConfig> {
+    override val defaultValue: LocalModuleConfig = LocalModuleConfig()
 
-    override suspend fun readFrom(input: InputStream): ChannelSet {
+    override suspend fun readFrom(source: BufferedSource): LocalModuleConfig {
         try {
-            return ChannelSet.ADAPTER.decode(input)
+            return LocalModuleConfig.ADAPTER.decode(source)
         } catch (exception: IOException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
 
-    override suspend fun writeTo(t: ChannelSet, output: OutputStream) = ChannelSet.ADAPTER.encode(output, t)
+    override suspend fun writeTo(t: LocalModuleConfig, sink: BufferedSink) {
+        LocalModuleConfig.ADAPTER.encode(sink, t)
+    }
 }

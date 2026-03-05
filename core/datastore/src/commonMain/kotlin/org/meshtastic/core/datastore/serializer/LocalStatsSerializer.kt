@@ -17,24 +17,25 @@
 package org.meshtastic.core.datastore.serializer
 
 import androidx.datastore.core.CorruptionException
-import androidx.datastore.core.Serializer
+import androidx.datastore.core.okio.OkioSerializer
+import okio.BufferedSink
+import okio.BufferedSource
 import okio.IOException
 import org.meshtastic.proto.LocalStats
-import java.io.InputStream
-import java.io.OutputStream
 
 /** Serializer for the [LocalStats] object defined in telemetry.proto. */
-@Suppress("BlockingMethodInNonBlockingContext")
-object LocalStatsSerializer : Serializer<LocalStats> {
+object LocalStatsSerializer : OkioSerializer<LocalStats> {
     override val defaultValue: LocalStats = LocalStats()
 
-    override suspend fun readFrom(input: InputStream): LocalStats {
+    override suspend fun readFrom(source: BufferedSource): LocalStats {
         try {
-            return LocalStats.ADAPTER.decode(input)
+            return LocalStats.ADAPTER.decode(source)
         } catch (exception: IOException) {
             throw CorruptionException("Cannot read proto.", exception)
         }
     }
 
-    override suspend fun writeTo(t: LocalStats, output: OutputStream) = LocalStats.ADAPTER.encode(output, t)
+    override suspend fun writeTo(t: LocalStats, sink: BufferedSink) {
+        LocalStats.ADAPTER.encode(sink, t)
+    }
 }

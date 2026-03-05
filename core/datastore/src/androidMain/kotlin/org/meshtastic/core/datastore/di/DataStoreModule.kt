@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
+import androidx.datastore.core.okio.OkioStorage
 import androidx.datastore.dataStoreFile
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -34,6 +35,8 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import okio.FileSystem
+import okio.Path.Companion.toOkioPath
 import org.meshtastic.core.datastore.KEY_APP_INTRO_COMPLETED
 import org.meshtastic.core.datastore.KEY_INCLUDE_UNKNOWN
 import org.meshtastic.core.datastore.KEY_NODE_SORT
@@ -102,8 +105,12 @@ object DataStoreModule {
         @ApplicationContext appContext: Context,
         @DataStoreScope scope: CoroutineScope,
     ): DataStore<LocalConfig> = DataStoreFactory.create(
-        serializer = LocalConfigSerializer,
-        produceFile = { appContext.dataStoreFile("local_config.pb") },
+        storage =
+        OkioStorage(
+            fileSystem = FileSystem.SYSTEM,
+            serializer = LocalConfigSerializer,
+            producePath = { appContext.dataStoreFile("local_config.pb").toOkioPath() },
+        ),
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig() }),
         scope = scope,
     )
@@ -114,8 +121,12 @@ object DataStoreModule {
         @ApplicationContext appContext: Context,
         @DataStoreScope scope: CoroutineScope,
     ): DataStore<LocalModuleConfig> = DataStoreFactory.create(
-        serializer = ModuleConfigSerializer,
-        produceFile = { appContext.dataStoreFile("module_config.pb") },
+        storage =
+        OkioStorage(
+            fileSystem = FileSystem.SYSTEM,
+            serializer = ModuleConfigSerializer,
+            producePath = { appContext.dataStoreFile("module_config.pb").toOkioPath() },
+        ),
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig() }),
         scope = scope,
     )
@@ -126,8 +137,12 @@ object DataStoreModule {
         @ApplicationContext appContext: Context,
         @DataStoreScope scope: CoroutineScope,
     ): DataStore<ChannelSet> = DataStoreFactory.create(
-        serializer = ChannelSetSerializer,
-        produceFile = { appContext.dataStoreFile("channel_set.pb") },
+        storage =
+        OkioStorage(
+            fileSystem = FileSystem.SYSTEM,
+            serializer = ChannelSetSerializer,
+            producePath = { appContext.dataStoreFile("channel_set.pb").toOkioPath() },
+        ),
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet() }),
         scope = scope,
     )
@@ -138,8 +153,12 @@ object DataStoreModule {
         @ApplicationContext appContext: Context,
         @DataStoreScope scope: CoroutineScope,
     ): DataStore<LocalStats> = DataStoreFactory.create(
-        serializer = LocalStatsSerializer,
-        produceFile = { appContext.dataStoreFile("local_stats.pb") },
+        storage =
+        OkioStorage(
+            fileSystem = FileSystem.SYSTEM,
+            serializer = LocalStatsSerializer,
+            producePath = { appContext.dataStoreFile("local_stats.pb").toOkioPath() },
+        ),
         corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalStats() }),
         scope = scope,
     )

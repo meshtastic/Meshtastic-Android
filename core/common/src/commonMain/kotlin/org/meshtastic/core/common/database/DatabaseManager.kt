@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.repository
+package org.meshtastic.core.common.database
 
 import kotlinx.coroutines.flow.StateFlow
 

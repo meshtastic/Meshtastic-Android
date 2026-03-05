@@ -27,11 +27,11 @@ import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.isLora
 import org.meshtastic.core.repository.FromRadioPacketHandler
+import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
