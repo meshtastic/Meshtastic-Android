@@ -36,6 +36,7 @@ import kotlinx.coroutines.sync.withLock
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.WriteType
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
@@ -232,6 +233,11 @@ constructor(
                 this@NordicBleInterface.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
+
+                // Log negotiated MTU for diagnostics
+                val maxLen = bleConnection.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)
+                Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
+
                 this@NordicBleInterface.service.onConnect()
             }
         } catch (e: Exception) {
@@ -328,6 +334,7 @@ constructor(
                 is NoSuchElementException,
                 is IllegalArgumentException,
                 -> "Required characteristic missing"
+                is no.nordicsemi.kotlin.ble.core.exception.GattException -> "GATT Error: ${this.message}"
                 else -> this.message ?: this.javaClass.simpleName
             }
         return Pair(isPermanent, msg)

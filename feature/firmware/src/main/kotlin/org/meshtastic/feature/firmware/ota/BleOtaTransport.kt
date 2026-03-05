@@ -178,6 +178,10 @@ class BleOtaTransport(
 
             otaCharacteristic = ota
 
+            // Log negotiated MTU for diagnostics
+            val maxLen = bleConnection.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)
+            Logger.i { "BLE OTA: Service ready. Max write value length: $maxLen bytes" }
+
             // Enable notifications and collect responses
             val subscribed = CompletableDeferred<Unit>()
             txChar
@@ -316,14 +320,26 @@ class BleOtaTransport(
         writeData(data, WriteType.WITH_RESPONSE)
     }
 
+    /**
+     * Writes data to the OTA characteristic, fragmenting the data into multiple BLE packets if it exceeds the
+     * negotiated MTU (maximum write length).
+     */
     private suspend fun writeData(data: ByteArray, writeType: WriteType) {
         val characteristic =
             otaCharacteristic ?: throw OtaProtocolException.ConnectionFailed("OTA characteristic not available")
 
+        val maxLen = bleConnection.maximumWriteValueLength(writeType) ?: data.size
+        var offset = 0
+
         try {
-            characteristic.write(data, writeType = writeType)
+            while (offset < data.size) {
+                val chunkSize = minOf(data.size - offset, maxLen)
+                val packet = data.copyOfRange(offset, offset + chunkSize)
+                characteristic.write(packet, writeType = writeType)
+                offset += chunkSize
+            }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            throw OtaProtocolException.TransferFailed("Failed to write data", e)
+            throw OtaProtocolException.TransferFailed("Failed to write data at offset $offset", e)
         }
     }
 
