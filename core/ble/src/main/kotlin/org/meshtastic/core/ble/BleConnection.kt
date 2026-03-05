@@ -30,7 +30,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
@@ -105,10 +107,17 @@ class BleConnection(
      *
      * @param p The peripheral to connect to.
      * @param timeoutMs The maximum time to wait for a connection in milliseconds.
+     * @param onRegister Optional block to run before connecting, allowing for profile registration.
      * @return The final [ConnectionState].
      * @throws kotlinx.coroutines.TimeoutCancellationException if the timeout is reached.
      */
-    suspend fun connectAndAwait(p: Peripheral, timeoutMs: Long): ConnectionState {
+    suspend fun connectAndAwait(
+        p: Peripheral,
+        timeoutMs: Long,
+        onRegister: suspend () -> Unit = {},
+    ): ConnectionState {
+        peripheral = p
+        onRegister()
         connect(p)
         return withTimeout(timeoutMs) {
             connectionState.first { it is ConnectionState.Connected || it is ConnectionState.Disconnected }
@@ -121,15 +130,35 @@ class BleConnection(
             .asSharedFlow()
             .filter { it is ConnectionState.Connected }
             .flatMapLatest {
-                peripheral?.services()?.onEach {
-                    if (it is RemoteServices.Failed) {
-                        Logger.w { "[$tag] Service discovery failed: ${it.reason}" }
+                peripheral?.services()
+                    ?.onEach {
+                        if (it is RemoteServices.Failed) {
+                            Logger.w { "[$tag] Service discovery failed: ${it.reason}" }
+                        }
                     }
-                }?.mapNotNull { (it as? RemoteServices.Discovered)?.services }
+                    ?.mapNotNull { (it as? RemoteServices.Discovered)?.services }
+                    ?.onEmpty { Logger.w { "[$tag] No services found" } }
+                    ?.onCompletion { Logger.d { "[$tag] Service collection completed" } }
                     ?: flowOf(emptyList())
             }
             .filterNotNull()
             .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
+
+    /**
+     * Registers a profile implementation for the given service UUIDs.
+     *
+     * @param requiredServiceUuids List of required service UUIDs.
+     * @param optionalServiceUuids List of optional service UUIDs.
+     * @param block The implementation block.
+     */
+    fun profile(
+        requiredServiceUuids: List<Uuid>,
+        optionalServiceUuids: List<Uuid> = emptyList(),
+        block: suspend CoroutineScope.(List<RemoteService>) -> Unit,
+    ) {
+        val p = peripheral ?: return
+        p.profile(requiredServiceUuids, optionalServiceUuids, required = true, scope = scope, block = block)
+    }
 
     /** Discovers characteristics for a specific service. */
     suspend fun discoverCharacteristics(
