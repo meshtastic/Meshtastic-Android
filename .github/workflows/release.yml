@@ -282,6 +282,8 @@ jobs:
           prerelease: true
 
       - name: Create or Update internal GitHub Release
+        continue-on-error: true
+        if: ${{ secrets.INTERNAL_BUILDS_HOST != '' }}
         uses: softprops/action-gh-release@v2
         with:
           repository: ${{ secrets.INTERNAL_BUILDS_HOST }}
