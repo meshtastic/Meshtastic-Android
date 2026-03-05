@@ -40,7 +40,6 @@ import no.nordicsemi.kotlin.ble.core.and
 import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
@@ -400,8 +399,7 @@ class NordicBleInterfaceTest {
         advanceUntilIdle()
 
         // Verify onDisconnect was called on the service
-        // NordicBleInterface calls onDisconnect(BleError.Disconnected)
-        verify { service.onDisconnect(any<BleError.Disconnected>()) }
+        verify { service.onDisconnect(any(), any()) }
 
         nordicInterface.close()
     }
@@ -481,7 +479,7 @@ class NordicBleInterfaceTest {
         advanceUntilIdle()
 
         // Verify that discovery failed
-        verify { service.onDisconnect(any<BleError.DiscoveryFailed>()) }
+        verify { service.onDisconnect(false, "Required characteristic missing") }
 
         nordicInterface.close()
     }
@@ -575,7 +573,7 @@ class NordicBleInterfaceTest {
         advanceUntilIdle()
 
         // Verify onDisconnect was called with error
-        verify { service.onDisconnect(any<BleError>()) }
+        verify { service.onDisconnect(any(), any()) }
 
         nordicInterface.close()
     }

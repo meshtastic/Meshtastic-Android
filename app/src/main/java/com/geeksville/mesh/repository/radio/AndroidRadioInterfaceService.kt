@@ -38,7 +38,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
-import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.util.BinaryLogFile
 import org.meshtastic.core.common.util.BuildUtils
@@ -89,8 +88,8 @@ constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
     override val receivedData: SharedFlow<ByteArray> = _receivedData
 
-    private val _connectionError = MutableSharedFlow<BleError>(extraBufferCapacity = 64)
-    val connectionError: SharedFlow<BleError> = _connectionError.asSharedFlow()
+    private val _connectionError = MutableSharedFlow<String>(extraBufferCapacity = 64)
+    val connectionError: SharedFlow<String> = _connectionError.asSharedFlow()
 
     // Thread-safe StateFlow for tracking device address changes
     private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
@@ -259,19 +258,13 @@ constructor(
         }
     }
 
-    override fun onDisconnect(isPermanent: Boolean) {
+    override fun onDisconnect(isPermanent: Boolean, errorMessage: String?) {
+        if (errorMessage != null) {
+            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(errorMessage) }
+        }
         val newTargetState = if (isPermanent) ConnectionState.Disconnected else ConnectionState.DeviceSleep
         if (_connectionState.value != newTargetState) {
             broadcastConnectionChanged(newTargetState)
-        }
-    }
-
-    override fun onDisconnect(error: Any) {
-        if (error is BleError) {
-            processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionError.emit(error) }
-            onDisconnect(!error.shouldReconnect)
-        } else {
-            onDisconnect(isPermanent = true)
         }
     }
 

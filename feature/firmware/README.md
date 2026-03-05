@@ -42,11 +42,12 @@ The `:feature:firmware` module provides a unified interface for updating Meshtas
 Meshtastic-Android supports three primary firmware update flows:
 
 #### 1. ESP32 Unified OTA (WiFi & BLE)
-Used for modern ESP32 devices (e.g., Heltec V3, T-Beam S3). This method utilizes the **Unified OTA Protocol**, which enables high-speed transfers over TCP (port 3232) or BLE. The BLE transport uses the **Nordic Semiconductor Kotlin-BLE-Library** for architectural consistency with the rest of the application.
+Used for modern ESP32 devices (e.g., Heltec V3, T-Beam S3). This method utilizes the **Unified OTA Protocol**, which enables high-speed transfers over TCP (port 3232) or BLE. The BLE transport uses the **Nordic Semiconductor Kotlin-BLE-Library** for architectural consistency and modern coroutine support.
 
 **Key Features:**
 - **Pre-shared Hash Verification**: The app sends the firmware SHA256 hash in an initial `AdminMessage` trigger. The device stores this in NVS and verifies the incoming stream against it.
 - **Connection Retry**: Robust logic to wait for the device to reboot and start the OTA listener.
+- **Automatic MTU Handling & Fragmentation**: The BLE transport automatically detects the negotiated MTU and fragments data chunks into packets that fit. It carefully manages acknowledgments for each fragmented packet to ensure reliability even on congested connections.
 
 ```mermaid
 sequenceDiagram

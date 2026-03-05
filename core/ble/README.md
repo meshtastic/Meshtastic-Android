@@ -31,33 +31,32 @@ This modernization replaces legacy callback-based implementations with robust, C
 
 ## Key Components
 
-### 1. `NordicBleInterface`
-The primary implementation of `IRadioInterface` for BLE devices. It acts as the bridge between the app's `RadioInterfaceService` and the physical Bluetooth device.
+### 1. `BleConnection`
+A robust wrapper around Nordic's `Peripheral` and `CentralManager` that simplifies the connection lifecycle and service discovery using modern Coroutine APIs.
 
-- **Responsibility:**
-    - Managing the connection lifecycle.
-    - Discovering GATT services and characteristics.
-    - Handling data transmission (ToRadio) and reception (FromRadio).
-    - Managing MTU negotiation and connection priority.
+- **Features:**
+    - **Connection & Await:** Provides suspend functions to connect and wait for a terminal state (Connected or Disconnected).
+    - **Unified Profile Helper:** A `profile` function that manages service discovery, characteristic setup, and lifecycle in a single block, with automatic timeout and error handling.
+    - **Observability:** Exposes `peripheralFlow` and `connectionState` as Flows for reactive UI and service updates.
+    - **Connection Management:** Handles PHY updates, MTU logging, and connection priority requests automatically.
 
 ### 2. `BluetoothRepository`
 A Singleton repository responsible for the global state of Bluetooth on the Android device.
 
 - **Features:**
     - **State Management:** Exposes a `StateFlow<BluetoothState>` reflecting whether Bluetooth is enabled, permissions are granted, and which devices are bonded.
-    - **Scanning:** Uses Nordic's `Scanner` to find devices.
-    - **Bonding:** Handles the creation of bonds with peripherals.
+    - **Permission Handling:** Centralizes logic for checking Bluetooth and Location permissions across different Android versions.
+    - **Bonding:** Simplifies the process of creating bonds with peripherals.
 
-### 3. `BleConnection`
-A wrapper around Nordic's `ClientBleGatt` that simplifies the connection process.
-
-- **Features:**
-    - **Connection & Await:** Provides suspend functions to connect and wait for a specific connection state.
-    - **Service Discovery:** Helper functions to discover specific services and characteristics with timeouts and retries.
-    - **Observability:** Logs connection parameters, PHY updates, and state changes.
+### 3. `BleScanner`
+A wrapper around Nordic's `CentralManager` scanning capabilities to provide a consistent and easy-to-use API for BLE scanning with built-in peripheral deduplication.
 
 ### 4. `BleRetry`
-A utility for executing BLE operations with exponential backoff and retry logic. This is crucial for handling the inherent unreliability of wireless communication.
+A utility for executing BLE operations with retry logic, essential for handling the inherent unreliability of wireless communication.
+
+## Integration in `app`
+
+The `:core:ble` module is used by `NordicBleInterface` in the main application module to implement the `IRadioInterface` for Bluetooth devices.
 
 ## Usage
 

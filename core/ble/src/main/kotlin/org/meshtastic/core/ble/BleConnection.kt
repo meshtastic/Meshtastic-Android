@@ -17,32 +17,28 @@
 package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.core.simpleSharedFlow
-import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
-import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.WriteType
+import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
-
-private const val SERVICE_DISCOVERY_TIMEOUT_MS = 10_000L
 
 /**
  * Encapsulates a BLE connection to a [Peripheral]. Handles connection lifecycle, state monitoring, and service
@@ -61,12 +57,18 @@ class BleConnection(
     var peripheral: Peripheral? = null
         private set
 
+    private val _peripheral = MutableSharedFlow<Peripheral?>(replay = 1)
+
+    /** A flow of the current peripheral. */
+    val peripheralFlow = _peripheral.asSharedFlow()
+
     private val _connectionState = simpleSharedFlow<ConnectionState>()
 
     /** A flow of [ConnectionState] changes for the current [peripheral]. */
     val connectionState: SharedFlow<ConnectionState> = _connectionState.asSharedFlow()
 
     private var stateJob: Job? = null
+    private var profileJob: Job? = null
 
     /**
      * Connects to the given [Peripheral]. Note that this method returns as soon as the connection attempt is initiated.
@@ -77,6 +79,7 @@ class BleConnection(
     suspend fun connect(p: Peripheral) = withContext(NonCancellable) {
         stateJob?.cancel()
         peripheral = p
+        _peripheral.emit(p)
 
         centralManager.connect(
             peripheral = p,
@@ -103,57 +106,32 @@ class BleConnection(
      *
      * @param p The peripheral to connect to.
      * @param timeoutMs The maximum time to wait for a connection in milliseconds.
+     * @param onRegister Optional block to run before connecting, allowing for profile registration.
      * @return The final [ConnectionState].
      * @throws kotlinx.coroutines.TimeoutCancellationException if the timeout is reached.
      */
-    suspend fun connectAndAwait(p: Peripheral, timeoutMs: Long): ConnectionState {
+    suspend fun connectAndAwait(p: Peripheral, timeoutMs: Long, onRegister: suspend () -> Unit = {}): ConnectionState {
+        onRegister()
         connect(p)
         return withTimeout(timeoutMs) {
             connectionState.first { it is ConnectionState.Connected || it is ConnectionState.Disconnected }
         }
     }
 
-    /** A flow of discovered services. Useful for reacting to "Service Changed" indications. */
-    val services: SharedFlow<List<RemoteService>> =
-        _connectionState
-            .asSharedFlow()
-            .filter { it is ConnectionState.Connected }
-            .flatMapLatest { peripheral?.services() ?: flowOf(emptyList()) }
-            .filterNotNull()
-            .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
-
-    /** Discovers characteristics for a specific service. */
-    suspend fun discoverCharacteristics(
-        serviceUuid: Uuid,
-        requiredUuids: List<Uuid>,
-        optionalUuids: List<Uuid> = emptyList(),
-    ): Map<Uuid, RemoteCharacteristic>? {
-        val p = peripheral ?: return null
-
-        return retryBleOperation(tag = tag) {
-            val allRequested = requiredUuids + optionalUuids
-            val serviceList =
-                withTimeout(SERVICE_DISCOVERY_TIMEOUT_MS) { p.services(listOf(serviceUuid)).filterNotNull().first() }
-            val service = serviceList.find { it.uuid == serviceUuid } ?: return@retryBleOperation null
-
-            val result = mutableMapOf<Uuid, RemoteCharacteristic>()
-            for (uuid in allRequested) {
-                val char = service.characteristics.find { it.uuid == uuid }
-                if (char != null) {
-                    result[uuid] = char
-                }
-            }
-
-            val hasAllRequired = requiredUuids.all { result.containsKey(it) }
-            if (hasAllRequired) result else null
-        }
-    }
-
+    @Suppress("TooGenericExceptionCaught")
     private fun observePeripheralDetails(p: Peripheral) {
         p.phy.onEach { phy -> Logger.i { "[$tag] BLE PHY changed to $phy" } }.launchIn(scope)
 
         p.connectionParameters
-            .onEach { params -> Logger.i { "[$tag] BLE connection parameters changed to $params" } }
+            .onEach { params ->
+                Logger.i { "[$tag] BLE connection parameters changed to $params" }
+                try {
+                    val maxWriteLen = p.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)
+                    Logger.i { "[$tag] Negotiated MTU (Write): $maxWriteLen bytes" }
+                } catch (e: Exception) {
+                    Logger.d { "[$tag] Could not read MTU: ${e.message}" }
+                }
+            }
             .launchIn(scope)
     }
 
@@ -161,7 +139,65 @@ class BleConnection(
     suspend fun disconnect() = withContext(NonCancellable) {
         stateJob?.cancel()
         stateJob = null
+        profileJob?.cancel()
+        profileJob = null
         peripheral?.disconnect()
         peripheral = null
+        _peripheral.emit(null)
+    }
+
+    /**
+     * Executes a block within a discovered profile. Handles peripheral readiness, discovery with a timeout, and cleans
+     * up the profile job if discovery fails.
+     *
+     * @param serviceUuid The UUID of the service to discover.
+     * @param timeout The duration to wait for discovery.
+     * @param block The block to execute with the discovered service.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    suspend fun <T> profile(
+        serviceUuid: Uuid,
+        timeout: kotlin.time.Duration = 10.seconds,
+        setup: suspend CoroutineScope.(no.nordicsemi.kotlin.ble.client.RemoteService) -> T,
+    ): T {
+        val p = peripheralFlow.first { it != null }!!
+        val serviceReady = CompletableDeferred<T>()
+
+        profileJob?.cancel()
+        val job =
+            scope.launch {
+                try {
+                    val profileScope = this
+                    p.profile(serviceUuid = serviceUuid, required = true, scope = profileScope) { service ->
+                        try {
+                            val result = setup(service)
+                            serviceReady.complete(result)
+                            // Keep the profile active until this launch scope (profileJob) is cancelled
+                            awaitCancellation()
+                        } catch (e: Throwable) {
+                            if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
+                            throw e
+                        }
+                    }
+                } catch (e: Throwable) {
+                    if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
+                }
+            }
+        profileJob = job
+
+        return try {
+            withTimeout(timeout) { serviceReady.await() }
+        } catch (e: Throwable) {
+            profileJob?.cancel()
+            throw e
+        }
+    }
+
+    /** Returns the maximum write value length for the given write type. */
+    fun maximumWriteValueLength(writeType: WriteType): Int? = peripheral?.maximumWriteValueLength(writeType)
+
+    /** Requests a new connection priority for the current peripheral. */
+    suspend fun requestConnectionPriority(priority: ConnectionPriority) {
+        peripheral?.requestConnectionPriority(priority)
     }
 }

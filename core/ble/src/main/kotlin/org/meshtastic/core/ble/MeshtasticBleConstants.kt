@@ -39,4 +39,15 @@ object MeshtasticBleConstants {
     val LOGRADIO_CHARACTERISTIC: Uuid = Uuid.parse("5a3d6e49-06e6-4423-9944-e9de8cdf9547")
 
     val FROMRADIOSYNC_CHARACTERISTIC: Uuid = Uuid.parse("888a50c3-982d-45db-9963-c7923769165d")
+
+    // --- OTA Characteristics ---
+
+    /** The Meshtastic OTA service UUID (ESP32 Unified OTA). */
+    val OTA_SERVICE_UUID: Uuid = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
+
+    /** Characteristic for writing OTA commands and firmware data. */
+    val OTA_WRITE_CHARACTERISTIC: Uuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
+
+    /** Characteristic for receiving OTA status notifications/ACKs. */
+    val OTA_NOTIFY_CHARACTERISTIC: Uuid = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
 }
