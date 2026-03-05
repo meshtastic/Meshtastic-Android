@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,37 +27,34 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 
-class MeshtasticRadioServiceImpl(
-    private val remoteService: RemoteService,
-    private val scope: CoroutineScope,
-) : MeshtasticRadioProfile.State {
+class MeshtasticRadioServiceImpl(private val remoteService: RemoteService, private val scope: CoroutineScope) :
+    MeshtasticRadioProfile.State {
 
-    private val toRadioCharacteristic: RemoteCharacteristic = remoteService.characteristics
-        .first { it.uuid == TORADIO_CHARACTERISTIC }
-    private val fromRadioCharacteristic: RemoteCharacteristic = remoteService.characteristics
-        .first { it.uuid == FROMRADIO_CHARACTERISTIC }
-    private val fromRadioSyncCharacteristic: RemoteCharacteristic? = remoteService.characteristics
-        .firstOrNull { it.uuid == FROMRADIOSYNC_CHARACTERISTIC }
-    private val fromNumCharacteristic: RemoteCharacteristic? = if (fromRadioSyncCharacteristic == null) {
-        remoteService.characteristics.first { it.uuid == FROMNUM_CHARACTERISTIC }
-    } else null
-    private val logRadioCharacteristic: RemoteCharacteristic = remoteService.characteristics
-        .first { it.uuid == LOGRADIO_CHARACTERISTIC }
+    private val toRadioCharacteristic: RemoteCharacteristic =
+        remoteService.characteristics.first { it.uuid == TORADIO_CHARACTERISTIC }
+    private val fromRadioCharacteristic: RemoteCharacteristic =
+        remoteService.characteristics.first { it.uuid == FROMRADIO_CHARACTERISTIC }
+    private val fromRadioSyncCharacteristic: RemoteCharacteristic? =
+        remoteService.characteristics.firstOrNull { it.uuid == FROMRADIOSYNC_CHARACTERISTIC }
+    private val fromNumCharacteristic: RemoteCharacteristic? =
+        if (fromRadioSyncCharacteristic == null) {
+            remoteService.characteristics.first { it.uuid == FROMNUM_CHARACTERISTIC }
+        } else {
+            null
+        }
+    private val logRadioCharacteristic: RemoteCharacteristic =
+        remoteService.characteristics.first { it.uuid == LOGRADIO_CHARACTERISTIC }
 
     init {
         require(toRadioCharacteristic.isWritable()) { "TORADIO must be writable" }
         require(fromRadioCharacteristic.isReadable()) { "FROMRADIO must be readable" }
-        fromRadioSyncCharacteristic?.let {
-            require(it.isSubscribable()) { "FROMRADIOSYNC must be subscribable" }
-        }
-        fromNumCharacteristic?.let {
-            require(it.isSubscribable()) { "FROMNUM must be subscribable" }
-        }
+        fromRadioSyncCharacteristic?.let { require(it.isSubscribable()) { "FROMRADIOSYNC must be subscribable" } }
+        fromNumCharacteristic?.let { require(it.isSubscribable()) { "FROMNUM must be subscribable" } }
         require(logRadioCharacteristic.isSubscribable()) { "LOGRADIO must be subscribable" }
     }
 
-    override val fromRadio: Flow<ByteArray> = fromRadioSyncCharacteristic?.subscribe()
-        ?: fromNumCharacteristic!!.subscribe()
+    override val fromRadio: Flow<ByteArray> =
+        fromRadioSyncCharacteristic?.subscribe() ?: fromNumCharacteristic!!.subscribe()
 
     override val logRadio: Flow<ByteArray> = logRadioCharacteristic.subscribe()
 

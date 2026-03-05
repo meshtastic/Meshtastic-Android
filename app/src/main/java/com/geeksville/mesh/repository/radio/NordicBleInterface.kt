@@ -36,7 +36,6 @@ import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import org.meshtastic.core.ble.BleConnection
-import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.retryBleOperation
@@ -80,7 +79,8 @@ constructor(
                 Logger.w(e) { "[$address] Failed to disconnect in exception handler" }
             }
         }
-        service.onDisconnect(error = BleError.from(throwable))
+        val (isPermanent, msg) = throwable.toDisconnectReason()
+        service.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     private val connectionScope: CoroutineScope =
@@ -138,7 +138,8 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
-                        service.onDisconnect(BleError.from(e))
+                        val (isPermanent, msg) = e.toDisconnectReason()
+                        service.onDisconnect(isPermanent, errorMessage = msg)
                     }
                     .launchIn(connectionScope)
 
@@ -153,7 +154,8 @@ constructor(
             } catch (e: Exception) {
                 val failureTime = nowMillis - connectionStartTime
                 Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
-                service.onDisconnect(BleError.from(e))
+                val (isPermanent, msg) = e.toDisconnectReason()
+                service.onDisconnect(isPermanent, errorMessage = msg)
             }
         }
     }
@@ -184,13 +186,12 @@ constructor(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        val error =
-            when (state.reason) {
-                is ConnectionState.Disconnected.Reason.InsufficientAuthentication -> BleError.InsufficientAuthentication
-                is ConnectionState.Disconnected.Reason.RequiredServiceNotFound -> BleError.DiscoveryFailed("Required characteristic missing")
-                else -> BleError.Disconnected(reason = state.reason)
-            }
-        service.onDisconnect(error = error)
+        val (isPermanent, msg) = when (val reason = state.reason) {
+            is ConnectionState.Disconnected.Reason.InsufficientAuthentication -> Pair(true, "Insufficient authentication: please unpair and repair the device")
+            is ConnectionState.Disconnected.Reason.RequiredServiceNotFound -> Pair(false, "Required characteristic missing")
+            else -> Pair(false, reason.toString())
+        }
+        service.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
@@ -201,10 +202,7 @@ constructor(
                 return
             }
 
-            peripheral.profile(
-                serviceUuid = SERVICE_UUID,
-                required = true
-            ) { service ->
+            peripheral.profile(serviceUuid = SERVICE_UUID, required = true) { service ->
                 val radioService = MeshtasticRadioServiceImpl(service, connectionScope)
 
                 // Wire up notifications
@@ -215,7 +213,8 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] Error in fromRadio flow" }
-                        this@NordicBleInterface.service.onDisconnect(BleError.from(e))
+                        val (isPermanent, msg) = e.toDisconnectReason()
+                        this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
                     }
                     .launchIn(connectionScope)
 
@@ -226,7 +225,8 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] Error in logRadio flow" }
-                        this@NordicBleInterface.service.onDisconnect(BleError.from(e))
+                        val (isPermanent, msg) = e.toDisconnectReason()
+                        this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
                     }
                     .launchIn(connectionScope)
 
@@ -242,12 +242,12 @@ constructor(
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
             bleConnection.disconnect()
-            this@NordicBleInterface.service.onDisconnect(error = BleError.from(e))
+            val (isPermanent, msg) = e.toDisconnectReason()
+            this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
         }
     }
 
     private var radioService: MeshtasticRadioProfile.State? = null
-
 
     // --- IRadioInterface Implementation ---
 
@@ -262,9 +262,7 @@ constructor(
             connectionScope.launch {
                 writeMutex.withLock {
                     try {
-                        retryBleOperation(tag = address) {
-                            radioService.sendToRadio(p)
-                        }
+                        retryBleOperation(tag = address) { radioService.sendToRadio(p) }
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
@@ -277,7 +275,8 @@ constructor(
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
                                 "$packetsSent successful writes"
                         }
-                        service.onDisconnect(BleError.from(e))
+                        val (isPermanent, msg) = e.toDisconnectReason()
+                        service.onDisconnect(isPermanent, errorMessage = msg)
                     }
                 }
             }
@@ -285,7 +284,6 @@ constructor(
             Logger.w { "[$address] toRadio characteristic unavailable, can't send data" }
         }
     }
-
 
     override fun keepAlive() {
         Logger.d { "[$address] BLE keepAlive" }
@@ -324,5 +322,16 @@ constructor(
         } catch (t: Throwable) {
             Logger.e(t) { "[$address] Failed to execute service.handleFromRadio()" }
         }
+    }
+
+    private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
+        val isPermanent =
+            this is no.nordicsemi.kotlin.ble.core.exception.BluetoothUnavailableException ||
+                this is no.nordicsemi.kotlin.ble.core.exception.ManagerClosedException
+        val msg = when (this) {
+            is NoSuchElementException, is IllegalArgumentException -> "Required characteristic missing"
+            else -> this.message ?: this.javaClass.simpleName
+        }
+        return Pair(isPermanent, msg)
     }
 }

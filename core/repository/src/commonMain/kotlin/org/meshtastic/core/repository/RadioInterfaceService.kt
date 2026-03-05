@@ -59,10 +59,7 @@ interface RadioInterfaceService {
     fun onConnect()
 
     /** Called by an interface when it has disconnected. */
-    fun onDisconnect(isPermanent: Boolean)
-
-    /** Called by an interface when it has disconnected with an error. */
-    fun onDisconnect(error: Any)
+    fun onDisconnect(isPermanent: Boolean, errorMessage: String? = null)
 
     /** Called by an interface when it has received raw data from the radio. */
     fun handleFromRadio(bytes: ByteArray)

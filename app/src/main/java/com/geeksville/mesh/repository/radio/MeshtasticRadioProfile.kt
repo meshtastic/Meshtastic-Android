@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,24 +18,16 @@ package com.geeksville.mesh.repository.radio
 
 import kotlinx.coroutines.flow.Flow
 
-/**
- * A definition of the Meshtastic BLE Service profile.
- */
+/** A definition of the Meshtastic BLE Service profile. */
 interface MeshtasticRadioProfile {
     interface State {
-        /**
-         * The flow of incoming packets from the radio.
-         */
+        /** The flow of incoming packets from the radio. */
         val fromRadio: Flow<ByteArray>
 
-        /**
-         * The flow of incoming log packets from the radio.
-         */
+        /** The flow of incoming log packets from the radio. */
         val logRadio: Flow<ByteArray>
 
-        /**
-         * Sends a packet to the radio.
-         */
+        /** Sends a packet to the radio. */
         suspend fun sendToRadio(packet: ByteArray)
     }
 }
