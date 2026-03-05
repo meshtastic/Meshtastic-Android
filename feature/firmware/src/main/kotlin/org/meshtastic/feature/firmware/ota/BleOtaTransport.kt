@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
+import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
@@ -160,6 +161,9 @@ class BleOtaTransport(
         }
 
         Logger.i { "BLE OTA: Connected to ${p.address}, discovering services..." }
+
+        // Increase connection priority for OTA
+        bleConnection.requestConnectionPriority(ConnectionPriority.HIGH)
 
         // Discover services
         val chars =

@@ -26,6 +26,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -162,7 +163,7 @@ constructor(
 
     private suspend fun onConnected() {
         try {
-            bleConnection.peripheral?.let { p ->
+            bleConnection.peripheralFlow.first()?.let { p ->
                 val rssi = retryBleOperation(tag = address) { p.readRssi() }
                 Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
@@ -199,11 +200,7 @@ constructor(
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
         try {
-            val peripheral = bleConnection.peripheral
-            if (peripheral == null) {
-                Logger.w { "[$address] Peripheral is null during discovery" }
-                return
-            }
+            val peripheral = bleConnection.peripheralFlow.first { it != null } ?: return
 
             peripheral.profile(serviceUuid = SERVICE_UUID, required = true) { service ->
                 val radioService = MeshtasticRadioServiceImpl(service)

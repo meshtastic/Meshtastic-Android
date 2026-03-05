@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asSharedFlow
@@ -44,6 +45,7 @@ import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
+import no.nordicsemi.kotlin.ble.core.WriteType
 import kotlin.uuid.Uuid
 
 private const val SERVICE_DISCOVERY_TIMEOUT_MS = 10_000L
@@ -65,6 +67,11 @@ class BleConnection(
     var peripheral: Peripheral? = null
         private set
 
+    private val _peripheral = MutableSharedFlow<Peripheral?>(replay = 1)
+
+    /** A flow of the current peripheral. */
+    val peripheralFlow = _peripheral.asSharedFlow()
+
     private val _connectionState = simpleSharedFlow<ConnectionState>()
 
     /** A flow of [ConnectionState] changes for the current [peripheral]. */
@@ -81,6 +88,7 @@ class BleConnection(
     suspend fun connect(p: Peripheral) = withContext(NonCancellable) {
         stateJob?.cancel()
         peripheral = p
+        _peripheral.emit(p)
 
         centralManager.connect(
             peripheral = p,
@@ -113,6 +121,7 @@ class BleConnection(
      */
     suspend fun connectAndAwait(p: Peripheral, timeoutMs: Long, onRegister: suspend () -> Unit = {}): ConnectionState {
         peripheral = p
+        _peripheral.emit(p)
         onRegister()
         connect(p)
         return withTimeout(timeoutMs) {
@@ -195,11 +204,18 @@ class BleConnection(
     }
 
     private fun observePeripheralDetails(p: Peripheral) {
-        p.phy.onEach { phy -> Logger.i { "[$tag] BLE PHY changed to $phy" } }.launchIn(scope)
+        p.phy.onEach { phy ->
+            Logger.i { "[$tag] BLE PHY changed to $phy" }
+        }.launchIn(scope)
 
-        p.connectionParameters
-            .onEach { params -> Logger.i { "[$tag] BLE connection parameters changed to $params" } }
-            .launchIn(scope)
+        p.connectionParameters.onEach { params ->
+            Logger.i { "[$tag] BLE connection parameters changed to $params" }
+            try {
+                Logger.i { "[$tag] Negotiated MTU (Write): ${p.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)} bytes" }
+            } catch (e: Exception) {
+                Logger.d { "[$tag] Could not read MTU: ${e.message}" }
+            }
+        }.launchIn(scope)
     }
 
     /** Disconnects from the current peripheral. */
@@ -208,5 +224,16 @@ class BleConnection(
         stateJob = null
         peripheral?.disconnect()
         peripheral = null
+        _peripheral.emit(null)
+    }
+
+    /** Returns the maximum write value length for the given write type. */
+    fun maximumWriteValueLength(writeType: WriteType): Int? {
+        return peripheral?.maximumWriteValueLength(writeType)
+    }
+
+    /** Requests a new connection priority for the current peripheral. */
+    suspend fun requestConnectionPriority(priority: ConnectionPriority) {
+        peripheral?.requestConnectionPriority(priority)
     }
 }
