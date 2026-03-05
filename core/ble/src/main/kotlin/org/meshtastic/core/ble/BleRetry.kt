@@ -30,7 +30,6 @@ import kotlinx.coroutines.delay
  * @return The result of the operation.
  * @throws Exception if the operation fails after all attempts.
  */
-@Suppress("TooGenericExceptionCaught")
 suspend fun <T> retryBleOperation(
     count: Int = 3,
     delayMs: Long = 500L,
@@ -43,7 +42,7 @@ suspend fun <T> retryBleOperation(
             return block()
         } catch (e: CancellationException) {
             throw e
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             currentAttempt++
             if (currentAttempt >= count) {
                 Logger.w(e) { "[$tag] BLE operation failed after $count attempts, giving up" }

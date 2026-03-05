@@ -48,7 +48,6 @@ import kotlin.uuid.Uuid
  * @param scope The [CoroutineScope] in which to monitor connection state.
  * @param tag A tag for logging.
  */
-@Suppress("TooGenericExceptionCaught")
 class BleConnection(
     private val centralManager: CentralManager,
     private val scope: CoroutineScope,
@@ -119,6 +118,7 @@ class BleConnection(
         }
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun observePeripheralDetails(p: Peripheral) {
         p.phy.onEach { phy -> Logger.i { "[$tag] BLE PHY changed to $phy" } }.launchIn(scope)
 
@@ -126,9 +126,8 @@ class BleConnection(
             .onEach { params ->
                 Logger.i { "[$tag] BLE connection parameters changed to $params" }
                 try {
-                    Logger.i {
-                        "[$tag] Negotiated MTU (Write): ${p.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)} bytes"
-                    }
+                    val maxWriteLen = p.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)
+                    Logger.i { "[$tag] Negotiated MTU (Write): $maxWriteLen bytes" }
                 } catch (e: Exception) {
                     Logger.d { "[$tag] Could not read MTU: ${e.message}" }
                 }
@@ -155,6 +154,7 @@ class BleConnection(
      * @param timeout The duration to wait for discovery.
      * @param block The block to execute with the discovered service.
      */
+    @Suppress("TooGenericExceptionCaught")
     suspend fun <T> profile(
         serviceUuid: Uuid,
         timeout: kotlin.time.Duration = 10.seconds,

@@ -53,7 +53,6 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
     }
 
     @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    @Suppress("TooGenericExceptionCaught")
     override val fromRadio: Flow<ByteArray> =
         if (fromRadioSyncCharacteristic != null) {
             fromRadioSyncCharacteristic.subscribe()
@@ -66,7 +65,7 @@ class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : Mes
                     repeat(count) {
                         try {
                             emit(fromRadioCharacteristic.read())
-                        } catch (e: Exception) {
+                        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                             co.touchlab.kermit.Logger.e(e) { "BLE: Failed to read from FROMRADIO" }
                         }
                     }

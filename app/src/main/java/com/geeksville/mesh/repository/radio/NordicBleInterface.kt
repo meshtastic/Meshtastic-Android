@@ -140,8 +140,7 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
-                        val (isPermanent, msg) = e.toDisconnectReason()
-                        service.onDisconnect(isPermanent, errorMessage = msg)
+                        handleFailure(e)
                     }
                     .launchIn(connectionScope)
 
@@ -156,8 +155,7 @@ constructor(
             } catch (e: Exception) {
                 val failureTime = nowMillis - connectionStartTime
                 Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
-                val (isPermanent, msg) = e.toDisconnectReason()
-                service.onDisconnect(isPermanent, errorMessage = msg)
+                handleFailure(e)
             }
         }
     }
@@ -212,8 +210,7 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] Error in fromRadio flow" }
-                        val (isPermanent, msg) = e.toDisconnectReason()
-                        this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
+                        handleFailure(e)
                     }
                     .launchIn(this)
 
@@ -224,8 +221,7 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] Error in logRadio flow" }
-                        val (isPermanent, msg) = e.toDisconnectReason()
-                        this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
+                        handleFailure(e)
                     }
                     .launchIn(this)
 
@@ -243,8 +239,7 @@ constructor(
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
             bleConnection.disconnect()
-            val (isPermanent, msg) = e.toDisconnectReason()
-            this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
+            handleFailure(e)
         }
     }
 
@@ -258,12 +253,12 @@ constructor(
      * @param p The packet to send.
      */
     override fun handleSendToRadio(p: ByteArray) {
-        val radioService = radioService
-        if (radioService != null) {
+        val currentService = radioService
+        if (currentService != null) {
             connectionScope.launch {
                 writeMutex.withLock {
                     try {
-                        retryBleOperation(tag = address) { radioService.sendToRadio(p) }
+                        retryBleOperation(tag = address) { currentService.sendToRadio(p) }
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
@@ -276,8 +271,7 @@ constructor(
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
                                 "$packetsSent successful writes"
                         }
-                        val (isPermanent, msg) = e.toDisconnectReason()
-                        service.onDisconnect(isPermanent, errorMessage = msg)
+                        handleFailure(e)
                     }
                 }
             }
@@ -318,11 +312,12 @@ constructor(
             "[$address] Dispatching packet to service.handleFromRadio() - " +
                 "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
         }
-        try {
-            service.handleFromRadio(packet)
-        } catch (t: Throwable) {
-            Logger.e(t) { "[$address] Failed to execute service.handleFromRadio()" }
-        }
+        service.handleFromRadio(packet)
+    }
+
+    private fun handleFailure(throwable: Throwable) {
+        val (isPermanent, msg) = throwable.toDisconnectReason()
+        service.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
@@ -331,6 +326,7 @@ constructor(
                 this is no.nordicsemi.kotlin.ble.core.exception.ManagerClosedException
         val msg =
             when (this) {
+                is RadioNotConnectedException -> this.message ?: "Device not found"
                 is NoSuchElementException,
                 is IllegalArgumentException,
                 -> "Required characteristic missing"

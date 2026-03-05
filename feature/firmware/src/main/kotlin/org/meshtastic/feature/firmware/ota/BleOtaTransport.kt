@@ -211,19 +211,28 @@ class BleOtaTransport(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     override suspend fun startOta(
         sizeBytes: Long,
         sha256Hash: String,
         onHandshakeStatus: suspend (OtaHandshakeStatus) -> Unit,
     ): Result<Unit> = runCatching {
         val command = OtaCommand.StartOta(sizeBytes, sha256Hash)
-        sendCommand(command)
+        val packetsSent = sendCommand(command)
 
         var handshakeComplete = false
+        var responsesReceived = 0
         while (!handshakeComplete) {
             val response = waitForResponse(ERASING_TIMEOUT_MS)
+            responsesReceived++
             when (val parsed = OtaResponse.parse(response)) {
-                is OtaResponse.Ok -> handshakeComplete = true
+                is OtaResponse.Ok -> {
+                    // Only consider handshake complete after consuming all potential fragmented responses
+                    if (responsesReceived >= packetsSent) {
+                        handshakeComplete = true
+                    }
+                }
+
                 is OtaResponse.Erasing -> {
                     Logger.i { "BLE OTA: Device erasing flash..." }
                     onHandshakeStatus(OtaHandshakeStatus.Erasing)
@@ -260,43 +269,49 @@ class BleOtaTransport(
             val currentChunkSize = minOf(chunkSize, remainingBytes)
             val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
 
-            // Write chunk
-            writeData(chunk, WriteType.WITHOUT_RESPONSE)
+            // Write chunk (potentially fragmented into multiple BLE packets)
+            val packetsSentForChunk = writeData(chunk, WriteType.WITHOUT_RESPONSE)
 
-            // Wait for response (ACK or OK for last chunk)
-            val response = waitForResponse(ACK_TIMEOUT_MS)
+            // Wait for responses (The protocol expects one response per GATT write)
             val nextSentBytes = sentBytes + currentChunkSize
-            when (val parsed = OtaResponse.parse(response)) {
-                is OtaResponse.Ack -> {
-                    // Normal chunk success
-                }
+            repeat(packetsSentForChunk) { i ->
+                val response = waitForResponse(ACK_TIMEOUT_MS)
+                val isLastPacketOfChunk = i == packetsSentForChunk - 1
 
-                is OtaResponse.Ok -> {
-                    // OK indicates completion (usually on last chunk)
-                    if (nextSentBytes >= totalBytes) {
-                        sentBytes = nextSentBytes
-                        onProgress(1.0f)
-                        return@runCatching Unit
-                    } else {
-                        throw OtaProtocolException.TransferFailed("Premature OK received at offset $nextSentBytes")
+                when (val parsed = OtaResponse.parse(response)) {
+                    is OtaResponse.Ack -> {
+                        // Normal packet success
                     }
-                }
 
-                is OtaResponse.Error -> {
-                    if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
-                        throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+                    is OtaResponse.Ok -> {
+                        // OK indicates completion (usually on last packet of last chunk)
+                        if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
+                            sentBytes = nextSentBytes
+                            onProgress(1.0f)
+                            return@runCatching Unit
+                        } else if (!isLastPacketOfChunk) {
+                            // Intermediate OK might happen if the device treats packets as chunks
+                        } else {
+                            throw OtaProtocolException.TransferFailed("Premature OK received at offset $nextSentBytes")
+                        }
                     }
-                    throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
-                }
 
-                else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
+                    is OtaResponse.Error -> {
+                        if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
+                            throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
+                        }
+                        throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
+                    }
+
+                    else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
+                }
             }
 
             sentBytes = nextSentBytes
             onProgress(sentBytes.toFloat() / totalBytes)
         }
 
-        // If we finished the loop without receiving OK, wait for it now
+        // If we finished the loop without receiving OK, wait for it now (verification stage)
         val finalResponse = waitForResponse(VERIFICATION_TIMEOUT_MS)
         when (val parsed = OtaResponse.parse(finalResponse)) {
             is OtaResponse.Ok -> Unit
@@ -317,21 +332,24 @@ class BleOtaTransport(
         transportScope.cancel()
     }
 
-    private suspend fun sendCommand(command: OtaCommand) {
+    private suspend fun sendCommand(command: OtaCommand): Int {
         val data = command.toString().toByteArray()
-        writeData(data, WriteType.WITH_RESPONSE)
+        return writeData(data, WriteType.WITH_RESPONSE)
     }
 
     /**
      * Writes data to the OTA characteristic, fragmenting the data into multiple BLE packets if it exceeds the
      * negotiated MTU (maximum write length).
+     *
+     * @return The number of packets sent.
      */
-    private suspend fun writeData(data: ByteArray, writeType: WriteType) {
+    private suspend fun writeData(data: ByteArray, writeType: WriteType): Int {
         val characteristic =
             otaCharacteristic ?: throw OtaProtocolException.ConnectionFailed("OTA characteristic not available")
 
         val maxLen = bleConnection.maximumWriteValueLength(writeType) ?: data.size
         var offset = 0
+        var packetsSent = 0
 
         try {
             while (offset < data.size) {
@@ -339,10 +357,12 @@ class BleOtaTransport(
                 val packet = data.copyOfRange(offset, offset + chunkSize)
                 characteristic.write(packet, writeType = writeType)
                 offset += chunkSize
+                packetsSent++
             }
         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             throw OtaProtocolException.TransferFailed("Failed to write data at offset $offset", e)
         }
+        return packetsSent
     }
 
     private suspend fun waitForResponse(timeoutMs: Long): String = try {
