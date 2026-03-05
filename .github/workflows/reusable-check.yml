@@ -75,15 +75,11 @@ jobs:
         with:
           dependency-graph: generate-and-submit
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          cache-cleanup: true
+          cache-cleanup: on-success
           build-scan-publish: true
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
-
-      - name: Calculate Version Code
-        id: calculate_version_code
-        uses: ./.github/actions/calculate-version-code
 
       - name: Determine Tasks
         id: tasks
@@ -120,8 +116,6 @@ jobs:
       - name: Run Flavor Check (with Emulator)
         if: inputs.run_instrumented_tests == true
         uses: reactivecircus/android-emulator-runner@v2
-        env:
-          VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
         with:
           api-level: ${{ matrix.api_level }}
           arch: x86_64
@@ -132,8 +126,6 @@ jobs:
 
       - name: Run Flavor Check (no Emulator)
         if: inputs.run_instrumented_tests == false
-        env:
-          VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
         run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --parallel --configuration-cache --continue --scan
 
       - name: Upload coverage results to Codecov
