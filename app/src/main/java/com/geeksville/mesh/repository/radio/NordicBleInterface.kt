@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
@@ -186,10 +185,10 @@ constructor(
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
         val error =
-            if (state.reason is ConnectionState.Disconnected.Reason.InsufficientAuthentication) {
-                BleError.InsufficientAuthentication
-            } else {
-                BleError.Disconnected(reason = state.reason)
+            when (state.reason) {
+                is ConnectionState.Disconnected.Reason.InsufficientAuthentication -> BleError.InsufficientAuthentication
+                is ConnectionState.Disconnected.Reason.RequiredServiceNotFound -> BleError.DiscoveryFailed("Required characteristic missing")
+                else -> BleError.Disconnected(reason = state.reason)
             }
         service.onDisconnect(error = error)
     }
@@ -263,7 +262,9 @@ constructor(
             connectionScope.launch {
                 writeMutex.withLock {
                     try {
-                        radioService.sendToRadio(p)
+                        retryBleOperation(tag = address) {
+                            radioService.sendToRadio(p)
+                        }
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
@@ -292,19 +293,19 @@ constructor(
 
     /** Closes the connection to the device. */
     override fun close() {
-        runBlocking {
-            val uptime =
-                if (connectionStartTime > 0) {
-                    nowMillis - connectionStartTime
-                } else {
-                    0
-                }
-            Logger.i {
-                "[$address] BLE close() called - " +
-                    "Uptime: ${uptime}ms, " +
-                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                    "Packets TX: $packetsSent ($bytesSent bytes)"
+        val uptime =
+            if (connectionStartTime > 0) {
+                nowMillis - connectionStartTime
+            } else {
+                0
             }
+        Logger.i {
+            "[$address] BLE close() called - " +
+                "Uptime: ${uptime}ms, " +
+                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                "Packets TX: $packetsSent ($bytesSent bytes)"
+        }
+        serviceScope.launch {
             connectionScope.cancel()
             bleConnection.disconnect()
             service.onDisconnect(true)

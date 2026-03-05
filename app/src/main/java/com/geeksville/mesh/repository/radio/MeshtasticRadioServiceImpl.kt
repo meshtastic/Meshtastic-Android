@@ -22,6 +22,7 @@ import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
 import no.nordicsemi.kotlin.ble.core.WriteType
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
@@ -35,19 +36,28 @@ class MeshtasticRadioServiceImpl(
         .first { it.uuid == TORADIO_CHARACTERISTIC }
     private val fromRadioCharacteristic: RemoteCharacteristic = remoteService.characteristics
         .first { it.uuid == FROMRADIO_CHARACTERISTIC }
-    private val fromNumCharacteristic: RemoteCharacteristic = remoteService.characteristics
-        .first { it.uuid == FROMNUM_CHARACTERISTIC }
+    private val fromRadioSyncCharacteristic: RemoteCharacteristic? = remoteService.characteristics
+        .firstOrNull { it.uuid == FROMRADIOSYNC_CHARACTERISTIC }
+    private val fromNumCharacteristic: RemoteCharacteristic? = if (fromRadioSyncCharacteristic == null) {
+        remoteService.characteristics.first { it.uuid == FROMNUM_CHARACTERISTIC }
+    } else null
     private val logRadioCharacteristic: RemoteCharacteristic = remoteService.characteristics
         .first { it.uuid == LOGRADIO_CHARACTERISTIC }
 
     init {
         require(toRadioCharacteristic.isWritable()) { "TORADIO must be writable" }
         require(fromRadioCharacteristic.isReadable()) { "FROMRADIO must be readable" }
-        require(fromNumCharacteristic.isSubscribable()) { "FROMNUM must be subscribable" }
+        fromRadioSyncCharacteristic?.let {
+            require(it.isSubscribable()) { "FROMRADIOSYNC must be subscribable" }
+        }
+        fromNumCharacteristic?.let {
+            require(it.isSubscribable()) { "FROMNUM must be subscribable" }
+        }
         require(logRadioCharacteristic.isSubscribable()) { "LOGRADIO must be subscribable" }
     }
 
-    override val fromRadio: Flow<ByteArray> = fromNumCharacteristic.subscribe()
+    override val fromRadio: Flow<ByteArray> = fromRadioSyncCharacteristic?.subscribe()
+        ?: fromNumCharacteristic!!.subscribe()
 
     override val logRadio: Flow<ByteArray> = logRadioCharacteristic.subscribe()
 

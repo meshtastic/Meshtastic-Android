@@ -135,6 +135,8 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
                     else -> BluetoothError(exception)
                 }
             }
+            is NoSuchElementException -> DiscoveryFailed(exception.message ?: "Characteristic not found")
+            is IllegalArgumentException -> DiscoveryFailed(exception.message ?: "Validation failed")
             else -> GenericError(exception)
         }
     }
