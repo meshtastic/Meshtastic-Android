@@ -16,7 +16,6 @@
  */
 package com.geeksville.mesh.repository.radio
 
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
@@ -27,8 +26,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 
-class MeshtasticRadioServiceImpl(private val remoteService: RemoteService, private val scope: CoroutineScope) :
-    MeshtasticRadioProfile.State {
+class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : MeshtasticRadioProfile.State {
 
     private val toRadioCharacteristic: RemoteCharacteristic =
         remoteService.characteristics.first { it.uuid == TORADIO_CHARACTERISTIC }

@@ -186,11 +186,14 @@ constructor(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        val (isPermanent, msg) = when (val reason = state.reason) {
-            is ConnectionState.Disconnected.Reason.InsufficientAuthentication -> Pair(true, "Insufficient authentication: please unpair and repair the device")
-            is ConnectionState.Disconnected.Reason.RequiredServiceNotFound -> Pair(false, "Required characteristic missing")
-            else -> Pair(false, reason.toString())
-        }
+        val (isPermanent, msg) =
+            when (val reason = state.reason) {
+                is ConnectionState.Disconnected.Reason.InsufficientAuthentication ->
+                    Pair(true, "Insufficient authentication: please unpair and repair the device")
+                is ConnectionState.Disconnected.Reason.RequiredServiceNotFound ->
+                    Pair(false, "Required characteristic missing")
+                else -> Pair(false, reason.toString())
+            }
         service.onDisconnect(isPermanent, errorMessage = msg)
     }
 
@@ -203,7 +206,7 @@ constructor(
             }
 
             peripheral.profile(serviceUuid = SERVICE_UUID, required = true) { service ->
-                val radioService = MeshtasticRadioServiceImpl(service, connectionScope)
+                val radioService = MeshtasticRadioServiceImpl(service)
 
                 // Wire up notifications
                 radioService.fromRadio
@@ -328,10 +331,13 @@ constructor(
         val isPermanent =
             this is no.nordicsemi.kotlin.ble.core.exception.BluetoothUnavailableException ||
                 this is no.nordicsemi.kotlin.ble.core.exception.ManagerClosedException
-        val msg = when (this) {
-            is NoSuchElementException, is IllegalArgumentException -> "Required characteristic missing"
-            else -> this.message ?: this.javaClass.simpleName
-        }
+        val msg =
+            when (this) {
+                is NoSuchElementException,
+                is IllegalArgumentException,
+                -> "Required characteristic missing"
+                else -> this.message ?: this.javaClass.simpleName
+            }
         return Pair(isPermanent, msg)
     }
 }
