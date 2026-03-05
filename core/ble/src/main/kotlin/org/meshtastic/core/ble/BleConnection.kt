@@ -157,7 +157,7 @@ class BleConnection(
     @Suppress("TooGenericExceptionCaught")
     suspend fun <T> profile(
         serviceUuid: Uuid,
-        timeout: kotlin.time.Duration = 10.seconds,
+        timeout: kotlin.time.Duration = 30.seconds,
         setup: suspend CoroutineScope.(no.nordicsemi.kotlin.ble.client.RemoteService) -> T,
     ): T {
         val p = peripheralFlow.first { it != null }!!
