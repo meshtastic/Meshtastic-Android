@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ble
 
+import no.nordicsemi.kotlin.ble.client.RemoteServices
 import no.nordicsemi.kotlin.ble.client.exception.ConnectionFailedException
 import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
 import no.nordicsemi.kotlin.ble.client.exception.OperationFailedException
@@ -40,6 +41,10 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
      */
     data object PeripheralNotFound : BleError("Peripheral not found", shouldReconnect = false)
 
+    /** Insufficient authentication. This usually means bond information is mismatched. */
+    data object InsufficientAuthentication :
+        BleError("Insufficient authentication: please unpair and repair the device", shouldReconnect = false)
+
     /**
      * An error indicating a failure during the connection attempt. This may be recoverable, so a reconnect attempt is
      * warranted.
@@ -51,7 +56,8 @@ sealed class BleError(val message: String, val shouldReconnect: Boolean) {
      * An error indicating a failure during the service discovery process. This may be recoverable, so a reconnect
      * attempt is warranted.
      */
-    class DiscoveryFailed(message: String) : BleError("Discovery failed: $message", shouldReconnect = true)
+    class DiscoveryFailed(message: String, val reason: RemoteServices.Failed.Reason? = null) :
+        BleError("Discovery failed: $message", shouldReconnect = true)
 
     /**
      * An error indicating a disconnection initiated by the peripheral. This may be recoverable, so a reconnect attempt

@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import no.nordicsemi.kotlin.ble.client.RemoteServices
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
@@ -133,7 +134,9 @@ constructor(
     /** Checks if a peripheral is one of ours, either by its advertised name or by the services it provides. */
     private fun isMatchingPeripheral(peripheral: Peripheral): Boolean {
         val nameMatches = peripheral.name?.matches(Regex(BLE_NAME_PATTERN)) ?: false
-        val hasRequiredService = peripheral.services(listOf(SERVICE_UUID)).value?.isNotEmpty() ?: false
+        val hasRequiredService =
+            (peripheral.services(listOf(SERVICE_UUID)).value as? RemoteServices.Discovered)?.services?.isNotEmpty()
+                ?: false
 
         return nameMatches || hasRequiredService
     }

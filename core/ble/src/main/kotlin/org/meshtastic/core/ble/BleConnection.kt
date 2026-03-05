@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.withContext
@@ -36,6 +37,7 @@ import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.core.simpleSharedFlow
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.RemoteService
+import no.nordicsemi.kotlin.ble.client.RemoteServices
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
@@ -118,7 +120,14 @@ class BleConnection(
         _connectionState
             .asSharedFlow()
             .filter { it is ConnectionState.Connected }
-            .flatMapLatest { peripheral?.services() ?: flowOf(emptyList()) }
+            .flatMapLatest {
+                peripheral?.services()?.onEach {
+                    if (it is RemoteServices.Failed) {
+                        Logger.w { "[$tag] Service discovery failed: ${it.reason}" }
+                    }
+                }?.mapNotNull { (it as? RemoteServices.Discovered)?.services }
+                    ?: flowOf(emptyList())
+            }
             .filterNotNull()
             .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
 
@@ -133,7 +142,17 @@ class BleConnection(
         return retryBleOperation(tag = tag) {
             val allRequested = requiredUuids + optionalUuids
             val serviceList =
-                withTimeout(SERVICE_DISCOVERY_TIMEOUT_MS) { p.services(listOf(serviceUuid)).filterNotNull().first() }
+                withTimeout(SERVICE_DISCOVERY_TIMEOUT_MS) {
+                    p.services(listOf(serviceUuid))
+                        .filter { it is RemoteServices.Discovered || it is RemoteServices.Failed }
+                        .first()
+                        .let {
+                            if (it is RemoteServices.Failed) {
+                                throw Exception("Discovery failed: ${it.reason}")
+                            }
+                            (it as RemoteServices.Discovered).services
+                        }
+                }
             val service = serviceList.find { it.uuid == serviceUuid } ?: return@retryBleOperation null
 
             val result = mutableMapOf<Uuid, RemoteCharacteristic>()

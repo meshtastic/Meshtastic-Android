@@ -257,7 +257,13 @@ constructor(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        service.onDisconnect(error = BleError.Disconnected(reason = state.reason))
+        val error =
+            if (state.reason is ConnectionState.Disconnected.Reason.InsufficientAuthentication) {
+                BleError.InsufficientAuthentication
+            } else {
+                BleError.Disconnected(reason = state.reason)
+            }
+        service.onDisconnect(error = error)
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
