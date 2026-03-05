@@ -17,15 +17,18 @@
 package org.meshtastic.core.ble
 
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.core.simpleSharedFlow
@@ -34,6 +37,8 @@ import no.nordicsemi.kotlin.ble.client.android.ConnectionPriority
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
+import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 /**
  * Encapsulates a BLE connection to a [Peripheral]. Handles connection lifecycle, state monitoring, and service
@@ -63,6 +68,7 @@ class BleConnection(
     val connectionState: SharedFlow<ConnectionState> = _connectionState.asSharedFlow()
 
     private var stateJob: Job? = null
+    private var profileJob: Job? = null
 
     /**
      * Connects to the given [Peripheral]. Note that this method returns as soon as the connection attempt is initiated.
@@ -129,13 +135,64 @@ class BleConnection(
             .launchIn(scope)
     }
 
-    /** Disconnects from the current peripheral. */
+    /**
+     * Disconnects from the current peripheral.
+     */
     suspend fun disconnect() = withContext(NonCancellable) {
         stateJob?.cancel()
         stateJob = null
+        profileJob?.cancel()
+        profileJob = null
         peripheral?.disconnect()
         peripheral = null
         _peripheral.emit(null)
+    }
+
+    /**
+     * Executes a block within a discovered profile. Handles peripheral readiness, discovery with a timeout, and cleans up
+     * the profile job if discovery fails.
+     *
+     * @param serviceUuid The UUID of the service to discover.
+     * @param timeout The duration to wait for discovery.
+     * @param block The block to execute with the discovered service.
+     */
+    suspend fun <T> profile(
+        serviceUuid: Uuid,
+        timeout: kotlin.time.Duration = 10.seconds,
+        setup: suspend CoroutineScope.(no.nordicsemi.kotlin.ble.client.RemoteService) -> T,
+    ): T {
+        val p = peripheralFlow.first { it != null }!!
+        val serviceReady = CompletableDeferred<T>()
+
+        profileJob?.cancel()
+        val job = scope.launch {
+            try {
+                val profileScope = this
+                p.profile(serviceUuid = serviceUuid, required = true, scope = profileScope) { service ->
+                    try {
+                        val result = setup(service)
+                        serviceReady.complete(result)
+                        // Keep the profile active until this launch scope (profileJob) is cancelled
+                        awaitCancellation()
+                    } catch (e: Throwable) {
+                        if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
+                        throw e
+                    }
+                }
+            } catch (e: Throwable) {
+                if (!serviceReady.isCompleted) serviceReady.completeExceptionally(e)
+            }
+        }
+        profileJob = job
+
+        return try {
+            withTimeout(timeout) {
+                serviceReady.await()
+            }
+        } catch (e: Throwable) {
+            profileJob?.cancel()
+            throw e
+        }
     }
 
     /** Returns the maximum write value length for the given write type. */

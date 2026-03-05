@@ -26,11 +26,9 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
@@ -40,8 +38,10 @@ import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
+import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
+import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.Uuid
 
 /**
  * BLE transport implementation for ESP32 Unified OTA protocol. Uses Nordic Kotlin-BLE-Library for modern coroutine
@@ -167,72 +167,41 @@ class BleOtaTransport(
         // Increase connection priority for OTA
         bleConnection.requestConnectionPriority(ConnectionPriority.HIGH)
 
-        // Discover services using Nordic's profile API
-        val peripheral =
-            bleConnection.peripheralFlow.first { it != null }
-                ?: throw OtaProtocolException.ConnectionFailed("No peripheral available")
+        // Discover services using our unified profile helper
+        bleConnection.profile(OTA_SERVICE_UUID) { service ->
+            val ota = requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_WRITE_CHARACTERISTIC }) {
+                "OTA characteristic not found"
+            }
+            val txChar = requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_NOTIFY_CHARACTERISTIC }) {
+                "TX characteristic not found"
+            }
 
-        val serviceDiscovered = CompletableDeferred<Unit>()
-        val profileJob = transportScope.launch {
-            try {
-                peripheral.profile(serviceUuid = SERVICE_UUID, required = true, scope = this) { service ->
+            otaCharacteristic = ota
+
+            // Enable notifications and collect responses
+            val subscribed = CompletableDeferred<Unit>()
+            txChar
+                .subscribe {
+                    Logger.d { "BLE OTA: TX characteristic subscribed" }
+                    subscribed.complete(Unit)
+                }
+                .onEach { notifyBytes ->
                     try {
-                        val ota =
-                            requireNotNull(service.characteristics.firstOrNull { it.uuid == OTA_CHARACTERISTIC_UUID }) {
-                                "OTA characteristic not found"
-                            }
-                        val txChar =
-                            requireNotNull(service.characteristics.firstOrNull { it.uuid == TX_CHARACTERISTIC_UUID }) {
-                                "TX characteristic not found"
-                            }
-
-                        otaCharacteristic = ota
-
-                        // Enable notifications and collect responses
-                        val subscribed = CompletableDeferred<Unit>()
-                        txChar
-                            .subscribe {
-                                Logger.d { "BLE OTA: TX characteristic subscribed" }
-                                subscribed.complete(Unit)
-                            }
-                            .onEach { notifyBytes ->
-                                try {
-                                    val response = notifyBytes.decodeToString()
-                                    Logger.d { "BLE OTA: Received response: $response" }
-                                    responseChannel.trySend(response)
-                                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                                    Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
-                                }
-                            }
-                            .catch { e ->
-                                if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
-                                Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
-                            }
-                            .launchIn(this)
-
-                        subscribed.await()
-                        serviceDiscovered.complete(Unit)
-                        Logger.i { "BLE OTA: Service discovered and ready" }
-
-                        // Keep the profile scope active until transport is closed
-                        kotlinx.coroutines.awaitCancellation()
-                    } catch (e: Throwable) {
-                        if (!serviceDiscovered.isCompleted) serviceDiscovered.completeExceptionally(e)
-                        throw e
+                        val response = notifyBytes.decodeToString()
+                        Logger.d { "BLE OTA: Received response: $response" }
+                        responseChannel.trySend(response)
+                    } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                        Logger.e(e) { "BLE OTA: Failed to decode response bytes" }
                     }
                 }
-            } catch (e: Throwable) {
-                if (!serviceDiscovered.isCompleted) serviceDiscovered.completeExceptionally(e)
-            }
-        }
+                .catch { e ->
+                    if (!subscribed.isCompleted) subscribed.completeExceptionally(e)
+                    Logger.e(e) { "BLE OTA: Error in TX characteristic subscription" }
+                }
+                .launchIn(this)
 
-        try {
-            withTimeout(10_000L) {
-                serviceDiscovered.await()
-            }
-        } catch (e: Throwable) {
-            profileJob.cancel()
-            throw e
+            subscribed.await()
+            Logger.i { "BLE OTA: Service discovered and ready" }
         }
     }
 
@@ -365,11 +334,6 @@ class BleOtaTransport(
     }
 
     companion object {
-        // Service and Characteristic UUIDs from ESP32 Unified OTA spec
-        private val SERVICE_UUID = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
-        private val OTA_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130005")
-        private val TX_CHARACTERISTIC_UUID = Uuid.parse("62ec0272-3ec5-11eb-b378-0242ac130003")
-
         // Timeouts and retries
         private val SCAN_TIMEOUT = 10.seconds
         private const val CONNECTION_TIMEOUT_MS = 15_000L

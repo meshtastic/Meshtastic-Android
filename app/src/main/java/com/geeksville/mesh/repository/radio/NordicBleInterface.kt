@@ -200,9 +200,7 @@ constructor(
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
         try {
-            val peripheral = bleConnection.peripheralFlow.first { it != null } ?: return
-
-            peripheral.profile(serviceUuid = SERVICE_UUID, required = true) { service ->
+            bleConnection.profile(serviceUuid = SERVICE_UUID) { service ->
                 val radioService = MeshtasticRadioServiceImpl(service)
 
                 // Wire up notifications
@@ -216,7 +214,7 @@ constructor(
                         val (isPermanent, msg) = e.toDisconnectReason()
                         this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
                     }
-                    .launchIn(connectionScope)
+                    .launchIn(this)
 
                 radioService.logRadio
                     .onEach { packet ->
@@ -228,16 +226,13 @@ constructor(
                         val (isPermanent, msg) = e.toDisconnectReason()
                         this@NordicBleInterface.service.onDisconnect(isPermanent, errorMessage = msg)
                     }
-                    .launchIn(connectionScope)
+                    .launchIn(this)
 
                 // Store reference for handleSendToRadio
                 this@NordicBleInterface.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
                 this@NordicBleInterface.service.onConnect()
-
-                // Keep the profile active
-                kotlinx.coroutines.awaitCancellation()
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
