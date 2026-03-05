@@ -49,6 +49,9 @@ interface PacketRepository {
     /** Returns the count of unread messages in a conversation. */
     suspend fun getUnreadCount(contact: String): Int
 
+    /** Reactive flow of the unread message count in a conversation. */
+    fun getUnreadCountFlow(contact: String): Flow<Int>
+
     /** Reactive flow of the UUID of the first unread message in a conversation. */
     fun getFirstUnreadMessageUuid(contact: String): Flow<Long?>
 
@@ -60,6 +63,9 @@ interface PacketRepository {
 
     /** Clears the unread status for messages in a conversation up to the given timestamp. */
     suspend fun clearUnreadCount(contact: String, timestamp: Long)
+
+    /** Clears the unread status for all messages across all conversations. */
+    suspend fun clearAllUnreadCounts()
 
     /** Updates the identifier of the last read message in a conversation. */
     suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long)

@@ -127,11 +127,17 @@ constructor(
             .flatMapLatest { packetRepository.getFirstUnreadMessageUuid(it) }
             .stateInWhileSubscribed(null)
 
-    val hasUnreadMessages: StateFlow<Boolean> =
+    val hasUnreadMessages: StateFlow<Boolean?> =
         contactKeyForPagedMessages
             .filterNotNull()
             .flatMapLatest { packetRepository.hasUnreadMessages(it) }
-            .stateInWhileSubscribed(false)
+            .stateInWhileSubscribed(null)
+
+    val unreadCount: StateFlow<Int> =
+        contactKeyForPagedMessages
+            .filterNotNull()
+            .flatMapLatest { packetRepository.getUnreadCountFlow(it) }
+            .stateInWhileSubscribed(0)
 
     val filteredCount: StateFlow<Int> =
         contactKeyForPagedMessages

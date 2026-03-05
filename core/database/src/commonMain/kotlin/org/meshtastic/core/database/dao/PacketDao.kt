@@ -94,16 +94,25 @@ interface PacketDao {
         """
     SELECT COUNT(*) FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1 AND contact_key = :contact AND read = 0
+        AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     """,
     )
     suspend fun getUnreadCount(contact: String): Int
 
     @Query(
         """
+    SELECT COUNT(*) FROM packet
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
+    """,
+    )
+    fun getUnreadCountFlow(contact: String): Flow<Int>
+
+    @Query(
+        """
     SELECT uuid FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1 AND contact_key = :contact AND read = 0
+        AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     ORDER BY received_time ASC
     LIMIT 1
     """,
@@ -114,7 +123,7 @@ interface PacketDao {
         """
     SELECT COUNT(*) > 0 FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1 AND contact_key = :contact AND read = 0
+        AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0
     """,
     )
     fun hasUnreadMessages(contact: String): Flow<Boolean>
@@ -123,7 +132,7 @@ interface PacketDao {
         """
     SELECT COUNT(*) FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1 AND read = 0
+        AND port_num = 1 AND read = 0 AND filtered = 0
     """,
     )
     fun getUnreadCountTotal(): Flow<Int>
@@ -133,10 +142,20 @@ interface PacketDao {
     UPDATE packet
     SET read = 1
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1 AND contact_key = :contact AND read = 0 AND received_time <= :timestamp
+        AND port_num = 1 AND contact_key = :contact AND read = 0 AND filtered = 0 AND received_time <= :timestamp
     """,
     )
     suspend fun clearUnreadCount(contact: String, timestamp: Long)
+
+    @Query(
+        """
+    UPDATE packet
+    SET read = 1
+    WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
+        AND port_num = 1 AND read = 0 AND filtered = 0
+    """,
+    )
+    suspend fun clearAllUnreadCounts()
 
     @Upsert suspend fun insert(packet: Packet)
 

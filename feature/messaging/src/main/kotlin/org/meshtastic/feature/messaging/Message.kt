@@ -61,6 +61,8 @@ import androidx.compose.material.icons.rounded.SelectAll
 import androidx.compose.material.icons.rounded.SpeakerNotesOff
 import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.VisibilityOff
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -222,6 +224,7 @@ fun MessageScreen(
 
     // Track unread messages using lightweight metadata queries
     val hasUnreadMessages by viewModel.hasUnreadMessages.collectAsStateWithLifecycle()
+    val unreadCount by viewModel.unreadCount.collectAsStateWithLifecycle()
     val firstUnreadMessageUuid by viewModel.firstUnreadMessageUuid.collectAsStateWithLifecycle()
 
     var hasPerformedInitialScroll by rememberSaveable(contactKey) { mutableStateOf(false) }
@@ -231,21 +234,36 @@ fun MessageScreen(
         remember(pagedMessages.itemCount, firstUnreadMessageUuid) {
             derivedStateOf {
                 firstUnreadMessageUuid?.let { uuid ->
-                    (0 until pagedMessages.itemCount).firstOrNull { index -> pagedMessages[index]?.uuid == uuid }
+                    pagedMessages.itemSnapshotList.indexOfFirst { it?.uuid == uuid }.takeIf { it != -1 }
                 }
             }
         }
 
     // Scroll to first unread message on initial load
-    LaunchedEffect(hasPerformedInitialScroll, firstUnreadIndex, pagedMessages.itemCount) {
+    LaunchedEffect(
+        hasPerformedInitialScroll,
+        firstUnreadIndex,
+        pagedMessages.itemCount,
+        hasUnreadMessages,
+        firstUnreadMessageUuid,
+    ) {
         if (hasPerformedInitialScroll || pagedMessages.itemCount == 0) return@LaunchedEffect
+        if (hasUnreadMessages == null) return@LaunchedEffect // Wait for DB state to initialize
 
-        val shouldScrollToUnread = hasUnreadMessages && firstUnreadIndex != null
-        if (shouldScrollToUnread) {
-            val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
-            listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
-            hasPerformedInitialScroll = true
-        } else if (!hasUnreadMessages) {
+        if (hasUnreadMessages == true) {
+            if (firstUnreadMessageUuid == null) return@LaunchedEffect // Wait for UUID query
+
+            if (firstUnreadIndex != null) {
+                val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
+                listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
+                hasPerformedInitialScroll = true
+            } else {
+                // The first unread message is deeper than the currently loaded pages.
+                // Scroll to the end of the loaded items to trigger the next page load.
+                // This will re-trigger this LaunchedEffect until we find the message.
+                listState.scrollToItem(pagedMessages.itemCount - 1)
+            }
+        } else {
             // If no unread messages, just scroll to bottom (most recent)
             listState.scrollToItem(0)
             hasPerformedInitialScroll = true
@@ -410,7 +428,7 @@ fun MessageScreen(
                     selectedIds = selectedMessageIds,
                     contactKey = contactKey,
                     firstUnreadMessageUuid = firstUnreadMessageUuid,
-                    hasUnreadMessages = hasUnreadMessages,
+                    hasUnreadMessages = hasUnreadMessages == true,
                     filteredCount = filteredCount,
                     showFiltered = showFiltered,
                     filteringDisabled = filteringDisabled,
@@ -430,7 +448,7 @@ fun MessageScreen(
             )
             // Show FAB if we can scroll towards the newest messages (index 0).
             if (listState.canScrollBackward) {
-                ScrollToBottomFab(coroutineScope, listState)
+                ScrollToBottomFab(coroutineScope, listState, unreadCount)
             }
         }
     }
@@ -441,9 +459,11 @@ fun MessageScreen(
  *
  * @param coroutineScope The coroutine scope for launching the scroll animation.
  * @param listState The [LazyListState] of the message list.
+ * @param unreadCount The number of unread messages to display as a badge.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyListState) {
+private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyListState, unreadCount: Int) {
     FloatingActionButton(
         modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
         onClick = {
@@ -453,10 +473,19 @@ private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState
             }
         },
     ) {
-        Icon(
-            imageVector = Icons.Rounded.ArrowDownward,
-            contentDescription = stringResource(Res.string.scroll_to_bottom),
-        )
+        if (unreadCount > 0) {
+            BadgedBox(badge = { Badge { Text(unreadCount.toString()) } }) {
+                Icon(
+                    imageVector = Icons.Rounded.ArrowDownward,
+                    contentDescription = stringResource(Res.string.scroll_to_bottom),
+                )
+            }
+        } else {
+            Icon(
+                imageVector = Icons.Rounded.ArrowDownward,
+                contentDescription = stringResource(Res.string.scroll_to_bottom),
+            )
+        }
     }
 }
 

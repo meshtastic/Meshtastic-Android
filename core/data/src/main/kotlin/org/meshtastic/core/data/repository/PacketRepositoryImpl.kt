@@ -77,6 +77,9 @@ constructor(
     override suspend fun getUnreadCount(contact: String): Int =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().getUnreadCount(contact) }
 
+    override fun getUnreadCountFlow(contact: String): Flow<Int> =
+        dbManager.currentDb.flatMapLatest { db -> db.packetDao().getUnreadCountFlow(contact) }
+
     override fun getFirstUnreadMessageUuid(contact: String): Flow<Long?> =
         dbManager.currentDb.flatMapLatest { db -> db.packetDao().getFirstUnreadMessageUuid(contact) }
 
@@ -88,6 +91,9 @@ constructor(
 
     override suspend fun clearUnreadCount(contact: String, timestamp: Long) =
         withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearUnreadCount(contact, timestamp) }
+
+    override suspend fun clearAllUnreadCounts() =
+        withContext(dispatchers.io) { dbManager.currentDb.value.packetDao().clearAllUnreadCounts() }
 
     override suspend fun updateLastReadMessage(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
         withContext(dispatchers.io) {

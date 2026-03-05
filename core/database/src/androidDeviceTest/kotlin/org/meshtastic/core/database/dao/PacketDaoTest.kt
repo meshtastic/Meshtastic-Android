@@ -159,6 +159,26 @@ class PacketDaoTest {
     }
 
     @Test
+    fun test_getUnreadCount_excludesFiltered() = runBlocking {
+        val filteredContactKey = "0!filteredonly"
+        val filteredPacket =
+            Packet(
+                uuid = 0L,
+                myNodeNum = myNodeNum,
+                port_num = 1,
+                contact_key = filteredContactKey,
+                received_time = nowMillis,
+                read = false,
+                filtered = true,
+                data = DataPacket(DataPacket.ID_BROADCAST, 0, "Filtered message"),
+            )
+        packetDao.insert(filteredPacket)
+
+        val unreadCount = packetDao.getUnreadCount(filteredContactKey)
+        assertEquals(0, unreadCount)
+    }
+
+    @Test
     fun test_clearUnreadCount() = runBlocking {
         val timestamp = nowMillis
         testContactKeys.forEach { contactKey ->
