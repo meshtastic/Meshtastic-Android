@@ -80,6 +80,7 @@ import org.meshtastic.core.resources.currently
 import org.meshtastic.core.resources.delete
 import org.meshtastic.core.resources.delete_messages
 import org.meshtastic.core.resources.delete_selection
+import org.meshtastic.core.resources.mark_as_read
 import org.meshtastic.core.resources.mute_1_week
 import org.meshtastic.core.resources.mute_8_hours
 import org.meshtastic.core.resources.mute_always
@@ -99,6 +100,7 @@ import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.icon.Close
 import org.meshtastic.core.ui.icon.Delete
+import org.meshtastic.core.ui.icon.MarkChatRead
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.SelectAll
 import org.meshtastic.core.ui.icon.VolumeMuteTwoTone
@@ -235,7 +237,17 @@ fun ContactsScreen(
                 showNodeChip = ourNode != null && connectionState.isConnected(),
                 canNavigateUp = false,
                 onNavigateUp = {},
-                actions = {},
+                actions = {
+                    val unreadCountTotal by viewModel.unreadCountTotal.collectAsStateWithLifecycle(0)
+                    if (unreadCountTotal > 0) {
+                        IconButton(onClick = { viewModel.markAllAsRead() }) {
+                            Icon(
+                                MeshtasticIcons.MarkChatRead,
+                                contentDescription = stringResource(Res.string.mark_as_read),
+                            )
+                        }
+                    }
+                },
                 onClickChip = { onClickNodeChip(it.num) },
             )
         },
