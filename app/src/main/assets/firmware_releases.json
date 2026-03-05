@@ -205,12 +205,6 @@
       "title": "Add VL53L0 distance sensor.",
       "page_url": "https://github.com/meshtastic/firmware/pull/9706",
       "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9675",
-      "title": "add FromRadioSync BLE characteristic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9675",
-      "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
 }
