@@ -278,7 +278,7 @@ jobs:
           tag_name: ${{ inputs.tag_name }}
           target_commitish: ${{ inputs.commit_sha || github.sha }}
           name: ${{ inputs.tag_name }} (${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }})
-          generate_release_notes: false
+          generate_release_notes: true
           files: ./artifacts/*/*
           draft: true
           prerelease: true
