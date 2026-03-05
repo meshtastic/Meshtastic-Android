@@ -38,7 +38,6 @@ import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
@@ -169,7 +168,7 @@ class NordicBleInterfaceRetryTest {
         assert(writtenValue!!.contentEquals(dataToSend))
 
         // Verify we didn't disconnect due to the retryable error
-        verify(exactly = 0) { service.onDisconnect(any<BleError.BluetoothError>()) }
+        verify(exactly = 0) { service.onDisconnect(any(), any()) }
 
         nordicInterface.close()
     }
@@ -274,7 +273,7 @@ class NordicBleInterfaceRetryTest {
 
         // Verify onDisconnect was called after retries exhausted
         // Nordic BLE wraps RuntimeException in BluetoothException
-        verify { service.onDisconnect(any<BleError.BluetoothError>()) }
+        verify { service.onDisconnect(any(), any()) }
 
         nordicInterface.close()
     }

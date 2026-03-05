@@ -20,41 +20,26 @@ import android.annotation.SuppressLint
 import co.touchlab.kermit.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
-import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.client.exception.InvalidAttributeException
-import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.ConnectionState
 import no.nordicsemi.kotlin.ble.core.WriteType
 import org.meshtastic.core.ble.BleConnection
-import org.meshtastic.core.ble.BleError
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.ble.MeshtasticBleConstants.FROMNUM_CHARACTERISTIC
-import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIOSYNC_CHARACTERISTIC
-import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
-import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
-import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
@@ -70,7 +55,11 @@ private val SCAN_TIMEOUT = 5.seconds
  * A [IRadioInterface] implementation for BLE devices using Nordic Kotlin BLE Library.
  * https://github.com/NordicSemiconductor/Kotlin-BLE-Library.
  *
- * This class is responsible for connecting to and communicating with a Meshtastic device over BLE.
+ * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
+ * - Bonding and discovery.
+ * - Automatic reconnection logic.
+ * - MTU and connection parameter monitoring.
+ * - Routing raw byte packets between the radio and [RadioInterfaceService].
  *
  * @param serviceScope The coroutine scope to use for launching coroutines.
  * @param centralManager The central manager provided by Nordic BLE Library.
@@ -96,13 +85,13 @@ constructor(
                 Logger.w(e) { "[$address] Failed to disconnect in exception handler" }
             }
         }
-        service.onDisconnect(error = BleError.from(throwable))
+        val (isPermanent, msg) = throwable.toDisconnectReason()
+        service.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     private val connectionScope: CoroutineScope =
         CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
     private val bleConnection: BleConnection = BleConnection(centralManager, connectionScope, address)
-    private val drainMutex: Mutex = Mutex()
     private val writeMutex: Mutex = Mutex()
 
     private var connectionStartTime: Long = 0
@@ -111,64 +100,8 @@ constructor(
     private var bytesReceived: Long = 0
     private var bytesSent: Long = 0
 
-    private var toRadioCharacteristic: RemoteCharacteristic? = null
-    private var fromNumCharacteristic: RemoteCharacteristic? = null
-    private var fromRadioCharacteristic: RemoteCharacteristic? = null
-    private var logRadioCharacteristic: RemoteCharacteristic? = null
-    private var fromRadioSyncCharacteristic: RemoteCharacteristic? = null
-
     init {
         connect()
-    }
-
-    // --- Packet Flow Management ---
-
-    private fun fromRadioPacketFlow(): Flow<ByteArray> = channelFlow {
-        while (isActive) {
-            val packet =
-                try {
-                    fromRadioCharacteristic?.read()?.takeIf { it.isNotEmpty() }
-                } catch (e: InvalidAttributeException) {
-                    Logger.w(e) { "[$address] Attribute invalidated during read, clearing characteristics" }
-                    handleInvalidAttribute(e)
-                    null
-                } catch (e: Exception) {
-                    Logger.w(e) { "[$address] Error reading fromRadioCharacteristic (likely disconnected)" }
-                    null
-                }
-
-            if (packet == null) {
-                Logger.d { "[$address] fromRadio queue drain complete or error reading characteristic" }
-                break
-            }
-            send(packet)
-        }
-    }
-
-    private fun dispatchPacket(packet: ByteArray) {
-        packetsReceived++
-        bytesReceived += packet.size
-        Logger.d {
-            "[$address] Dispatching packet to service.handleFromRadio() - " +
-                "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
-        }
-        try {
-            service.handleFromRadio(packet)
-        } catch (t: Throwable) {
-            Logger.e(t) { "[$address] Failed to execute service.handleFromRadio()" }
-        }
-    }
-
-    private suspend fun drainPacketQueueAndDispatch() {
-        drainMutex.withLock {
-            fromRadioPacketFlow()
-                .onEach { packet ->
-                    Logger.d { "[$address] Read packet from queue (${packet.size} bytes)" }
-                    dispatchPacket(packet)
-                }
-                .catch { ex -> Logger.w(ex) { "[$address] Exception while draining packet queue" } }
-                .collect()
-        }
     }
 
     // --- Connection & Discovery Logic ---
@@ -211,11 +144,11 @@ constructor(
                     }
                     .catch { e ->
                         Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
-                        service.onDisconnect(BleError.from(e))
+                        handleFailure(e)
                     }
                     .launchIn(connectionScope)
 
-                val p = retryBleOperation(tag = address) { findPeripheral() }
+                val p = findPeripheral()
                 val state = bleConnection.connectAndAwait(p, CONNECTION_TIMEOUT_MS)
                 if (state !is ConnectionState.Connected) {
                     throw RadioNotConnectedException("Failed to connect to device at address $address")
@@ -226,14 +159,14 @@ constructor(
             } catch (e: Exception) {
                 val failureTime = nowMillis - connectionStartTime
                 Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
-                service.onDisconnect(BleError.from(e))
+                handleFailure(e)
             }
         }
     }
 
     private suspend fun onConnected() {
         try {
-            bleConnection.peripheral?.let { p ->
+            bleConnection.peripheralFlow.first()?.let { p ->
                 val rssi = retryBleOperation(tag = address) { p.readRssi() }
                 Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
@@ -243,7 +176,7 @@ constructor(
     }
 
     private fun onDisconnected(state: ConnectionState.Disconnected) {
-        clearCharacteristics()
+        radioService = null
 
         val uptime =
             if (connectionStartTime > 0) {
@@ -257,117 +190,64 @@ constructor(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        service.onDisconnect(error = BleError.Disconnected(reason = state.reason))
+        val (isPermanent, msg) =
+            when (val reason = state.reason) {
+                is ConnectionState.Disconnected.Reason.InsufficientAuthentication ->
+                    Pair(true, "Insufficient authentication: please unpair and repair the device")
+                is ConnectionState.Disconnected.Reason.RequiredServiceNotFound ->
+                    Pair(false, "Required characteristic missing")
+                else -> Pair(false, reason.toString())
+            }
+        service.onDisconnect(isPermanent, errorMessage = msg)
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
         try {
-            val chars =
-                bleConnection.discoverCharacteristics(
-                    serviceUuid = SERVICE_UUID,
-                    requiredUuids =
-                    listOf(
-                        TORADIO_CHARACTERISTIC,
-                        FROMNUM_CHARACTERISTIC,
-                        FROMRADIO_CHARACTERISTIC,
-                        LOGRADIO_CHARACTERISTIC,
-                    ),
-                    optionalUuids = listOf(FROMRADIOSYNC_CHARACTERISTIC),
-                )
+            bleConnection.profile(serviceUuid = SERVICE_UUID) { service ->
+                val radioService = MeshtasticRadioServiceImpl(service)
 
-            if (chars != null) {
-                toRadioCharacteristic = chars[TORADIO_CHARACTERISTIC]
-                fromNumCharacteristic = chars[FROMNUM_CHARACTERISTIC]
-                fromRadioCharacteristic = chars[FROMRADIO_CHARACTERISTIC]
-                logRadioCharacteristic = chars[LOGRADIO_CHARACTERISTIC]
-                fromRadioSyncCharacteristic = chars[FROMRADIOSYNC_CHARACTERISTIC]
+                // Wire up notifications
+                radioService.fromRadio
+                    .onEach { packet ->
+                        Logger.d { "[$address] Received packet fromRadio (${packet.size} bytes)" }
+                        dispatchPacket(packet)
+                    }
+                    .catch { e ->
+                        Logger.w(e) { "[$address] Error in fromRadio flow" }
+                        handleFailure(e)
+                    }
+                    .launchIn(this)
 
-                Logger.d { "[$address] Characteristics discovered successfully" }
-                setupNotifications()
-                service.onConnect()
-            } else {
-                Logger.w { "[$address] Discovery failed: missing required characteristics" }
-                service.onDisconnect(error = BleError.DiscoveryFailed("One or more characteristics not found"))
+                radioService.logRadio
+                    .onEach { packet ->
+                        Logger.d { "[$address] Received packet logRadio (${packet.size} bytes)" }
+                        dispatchPacket(packet)
+                    }
+                    .catch { e ->
+                        Logger.w(e) { "[$address] Error in logRadio flow" }
+                        handleFailure(e)
+                    }
+                    .launchIn(this)
+
+                // Store reference for handleSendToRadio
+                this@NordicBleInterface.radioService = radioService
+
+                Logger.i { "[$address] Profile service active and characteristics subscribed" }
+
+                // Log negotiated MTU for diagnostics
+                val maxLen = bleConnection.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)
+                Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
+
+                this@NordicBleInterface.service.onConnect()
             }
         } catch (e: Exception) {
-            Logger.w(e) { "[$address] Service discovery failed" }
+            Logger.w(e) { "[$address] Profile service discovery or operation failed" }
             bleConnection.disconnect()
-            service.onDisconnect(error = BleError.from(e))
+            handleFailure(e)
         }
     }
 
-    // --- Notification Setup ---
-
-    @Suppress("LongMethod")
-    private suspend fun setupNotifications() {
-        val fromRadioReady = CompletableDeferred<Unit>()
-        val logRadioReady = CompletableDeferred<Unit>()
-
-        // 1. Prefer FromRadioSync (Indicate) if available
-        if (fromRadioSyncCharacteristic != null) {
-            Logger.i { "[$address] Using FromRadioSync for packet reception" }
-            fromRadioSyncCharacteristic
-                ?.subscribe {
-                    Logger.d { "[$address] FromRadioSync subscription active" }
-                    fromRadioReady.complete(Unit)
-                }
-                ?.onEach { payload ->
-                    Logger.d { "[$address] FromRadioSync Indication (${payload.size} bytes)" }
-                    dispatchPacket(payload)
-                }
-                ?.catch { e ->
-                    if (!fromRadioReady.isCompleted) fromRadioReady.completeExceptionally(e)
-                    Logger.w(e) { "[$address] Error in fromRadioSyncCharacteristic subscription" }
-                    service.onDisconnect(BleError.from(e))
-                }
-                ?.launchIn(connectionScope) ?: fromRadioReady.complete(Unit)
-        } else {
-            // 2. Fallback to legacy FromNum (Notify) + FromRadio (Read)
-            Logger.i { "[$address] Using legacy FromNum/FromRadio for packet reception" }
-            fromNumCharacteristic
-                ?.subscribe {
-                    Logger.d { "[$address] FromNum subscription active" }
-                    fromRadioReady.complete(Unit)
-                }
-                ?.onEach { notifyBytes ->
-                    Logger.d { "[$address] FromNum Notification (${notifyBytes.size} bytes), draining queue" }
-                    connectionScope.launch { drainPacketQueueAndDispatch() }
-                }
-                ?.catch { e ->
-                    if (!fromRadioReady.isCompleted) fromRadioReady.completeExceptionally(e)
-                    Logger.w(e) { "[$address] Error in fromNumCharacteristic subscription" }
-                    service.onDisconnect(BleError.from(e))
-                }
-                ?.launchIn(connectionScope) ?: fromRadioReady.complete(Unit)
-        }
-
-        logRadioCharacteristic
-            ?.subscribe {
-                Logger.d { "[$address] LogRadio subscription active" }
-                logRadioReady.complete(Unit)
-            }
-            ?.onEach { notifyBytes ->
-                Logger.d { "[$address] LogRadio Notification (${notifyBytes.size} bytes), dispatching packet" }
-                dispatchPacket(notifyBytes)
-            }
-            ?.catch { e ->
-                if (!logRadioReady.isCompleted) logRadioReady.completeExceptionally(e)
-                Logger.w(e) { "[$address] Error in logRadioCharacteristic subscription" }
-                service.onDisconnect(BleError.from(e))
-            }
-            ?.launchIn(connectionScope) ?: logRadioReady.complete(Unit)
-
-        try {
-            withTimeout(CONNECTION_TIMEOUT_MS) {
-                fromRadioReady.await()
-                logRadioReady.await()
-            }
-            Logger.d { "[$address] All notifications successfully subscribed" }
-        } catch (e: Exception) {
-            Logger.e(e) { "[$address] Timeout or error waiting for characteristic subscriptions" }
-            throw e
-        }
-    }
+    private var radioService: MeshtasticRadioProfile.State? = null
 
     // --- IRadioInterface Implementation ---
 
@@ -377,44 +257,31 @@ constructor(
      * @param p The packet to send.
      */
     override fun handleSendToRadio(p: ByteArray) {
-        toRadioCharacteristic?.let { characteristic ->
+        val currentService = radioService
+        if (currentService != null) {
             connectionScope.launch {
                 writeMutex.withLock {
                     try {
-                        val writeType =
-                            if (characteristic.properties.contains(CharacteristicProperty.WRITE_WITHOUT_RESPONSE)) {
-                                WriteType.WITHOUT_RESPONSE
-                            } else {
-                                WriteType.WITH_RESPONSE
-                            }
-
-                        retryBleOperation(tag = address) { characteristic.write(p, writeType = writeType) }
-
+                        retryBleOperation(tag = address) { currentService.sendToRadio(p) }
                         packetsSent++
                         bytesSent += p.size
                         Logger.d {
                             "[$address] Successfully wrote packet #$packetsSent " +
-                                "to toRadioCharacteristic with $writeType - " +
+                                "to toRadioCharacteristic - " +
                                 "${p.size} bytes (Total TX: $bytesSent bytes)"
                         }
-
-                        // Only manually drain if we are using the legacy FromNum/FromRadio flow
-                        if (fromRadioSyncCharacteristic == null) {
-                            drainPacketQueueAndDispatch()
-                        }
-                    } catch (e: InvalidAttributeException) {
-                        Logger.w(e) { "[$address] Attribute invalidated during write, clearing characteristics" }
-                        handleInvalidAttribute(e)
                     } catch (e: Exception) {
                         Logger.w(e) {
                             "[$address] Failed to write packet to toRadioCharacteristic after " +
                                 "$packetsSent successful writes"
                         }
-                        service.onDisconnect(BleError.from(e))
+                        handleFailure(e)
                     }
                 }
             }
-        } ?: Logger.w { "[$address] toRadio characteristic unavailable, can't send data" }
+        } else {
+            Logger.w { "[$address] toRadio characteristic unavailable, can't send data" }
+        }
     }
 
     override fun keepAlive() {
@@ -423,35 +290,53 @@ constructor(
 
     /** Closes the connection to the device. */
     override fun close() {
-        runBlocking {
-            val uptime =
-                if (connectionStartTime > 0) {
-                    nowMillis - connectionStartTime
-                } else {
-                    0
-                }
-            Logger.i {
-                "[$address] BLE close() called - " +
-                    "Uptime: ${uptime}ms, " +
-                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                    "Packets TX: $packetsSent ($bytesSent bytes)"
+        val uptime =
+            if (connectionStartTime > 0) {
+                nowMillis - connectionStartTime
+            } else {
+                0
             }
+        Logger.i {
+            "[$address] BLE close() called - " +
+                "Uptime: ${uptime}ms, " +
+                "Packets RX: $packetsReceived ($bytesReceived bytes), " +
+                "Packets TX: $packetsSent ($bytesSent bytes)"
+        }
+        serviceScope.launch {
             connectionScope.cancel()
             bleConnection.disconnect()
             service.onDisconnect(true)
         }
     }
 
-    private fun handleInvalidAttribute(e: InvalidAttributeException) {
-        clearCharacteristics()
-        service.onDisconnect(BleError.from(e))
+    private fun dispatchPacket(packet: ByteArray) {
+        packetsReceived++
+        bytesReceived += packet.size
+        Logger.d {
+            "[$address] Dispatching packet to service.handleFromRadio() - " +
+                "Packet #$packetsReceived, ${packet.size} bytes (Total: $bytesReceived bytes)"
+        }
+        service.handleFromRadio(packet)
     }
 
-    private fun clearCharacteristics() {
-        toRadioCharacteristic = null
-        fromNumCharacteristic = null
-        fromRadioCharacteristic = null
-        logRadioCharacteristic = null
-        fromRadioSyncCharacteristic = null
+    private fun handleFailure(throwable: Throwable) {
+        val (isPermanent, msg) = throwable.toDisconnectReason()
+        service.onDisconnect(isPermanent, errorMessage = msg)
+    }
+
+    private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
+        val isPermanent =
+            this is no.nordicsemi.kotlin.ble.core.exception.BluetoothUnavailableException ||
+                this is no.nordicsemi.kotlin.ble.core.exception.ManagerClosedException
+        val msg =
+            when (this) {
+                is RadioNotConnectedException -> this.message ?: "Device not found"
+                is NoSuchElementException,
+                is IllegalArgumentException,
+                -> "Required characteristic missing"
+                is no.nordicsemi.kotlin.ble.core.exception.GattException -> "GATT Error: ${this.message}"
+                else -> this.message ?: this.javaClass.simpleName
+            }
+        return Pair(isPermanent, msg)
     }
 }

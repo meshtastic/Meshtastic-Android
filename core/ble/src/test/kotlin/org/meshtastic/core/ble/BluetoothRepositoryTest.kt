@@ -124,4 +124,37 @@ class BluetoothRepositoryTest {
         assertEquals("Should find 1 bonded device", 1, state.bondedDevices.size)
         assertEquals(address, state.bondedDevices.first().address)
     }
+
+    @Test
+    fun `isBonded returns false when permissions are not granted`() = runTest(testDispatcher) {
+        val noPermsEnv =
+            MockAndroidEnvironment.Api31(
+                isBluetoothEnabled = true,
+                isBluetoothScanPermissionGranted = false,
+                isBluetoothConnectPermissionGranted = false,
+            )
+        val centralManager = CentralManager.mock(noPermsEnv, backgroundScope)
+
+        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, noPermsEnv)
+        runCurrent()
+
+        assertFalse(repository.isBonded("C0:00:00:00:00:03"))
+    }
+
+    @Test
+    fun `state has no permissions when bluetooth permissions denied`() = runTest(testDispatcher) {
+        val noPermsEnv =
+            MockAndroidEnvironment.Api31(
+                isBluetoothEnabled = true,
+                isBluetoothScanPermissionGranted = true,
+                isBluetoothConnectPermissionGranted = false,
+            )
+        val centralManager = CentralManager.mock(noPermsEnv, backgroundScope)
+
+        val repository = BluetoothRepository(dispatchers, lifecycleOwner.lifecycle, centralManager, noPermsEnv)
+        runCurrent()
+
+        val state = repository.state.value
+        assertFalse("hasPermissions should be false when connect permission is denied", state.hasPermissions)
+    }
 }
