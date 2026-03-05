@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.ble
+package com.geeksville.mesh.repository.radio
 
-import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import org.junit.Test
+import kotlinx.coroutines.flow.Flow
 
-class ProfileTest {
-    @Test
-    fun testProfileApi() = runTest {
-        val p = mockk<Peripheral>(relaxed = true)
-        // p.profile(serviceUuid = Uuid.random(), required = true) { service -> }
+/**
+ * A definition of the Meshtastic BLE Service profile.
+ */
+interface MeshtasticRadioProfile {
+    interface State {
+        /**
+         * The flow of incoming packets from the radio.
+         */
+        val fromRadio: Flow<ByteArray>
+
+        /**
+         * The flow of incoming log packets from the radio.
+         */
+        val logRadio: Flow<ByteArray>
+
+        /**
+         * Sends a packet to the radio.
+         */
+        suspend fun sendToRadio(packet: ByteArray)
     }
 }

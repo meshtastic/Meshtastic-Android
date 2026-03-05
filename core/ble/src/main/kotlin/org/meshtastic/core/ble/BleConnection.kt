@@ -111,11 +111,7 @@ class BleConnection(
      * @return The final [ConnectionState].
      * @throws kotlinx.coroutines.TimeoutCancellationException if the timeout is reached.
      */
-    suspend fun connectAndAwait(
-        p: Peripheral,
-        timeoutMs: Long,
-        onRegister: suspend () -> Unit = {},
-    ): ConnectionState {
+    suspend fun connectAndAwait(p: Peripheral, timeoutMs: Long, onRegister: suspend () -> Unit = {}): ConnectionState {
         peripheral = p
         onRegister()
         connect(p)
@@ -130,7 +126,8 @@ class BleConnection(
             .asSharedFlow()
             .filter { it is ConnectionState.Connected }
             .flatMapLatest {
-                peripheral?.services()
+                peripheral
+                    ?.services()
                     ?.onEach {
                         if (it is RemoteServices.Failed) {
                             Logger.w { "[$tag] Service discovery failed: ${it.reason}" }
@@ -138,8 +135,7 @@ class BleConnection(
                     }
                     ?.mapNotNull { (it as? RemoteServices.Discovered)?.services }
                     ?.onEmpty { Logger.w { "[$tag] No services found" } }
-                    ?.onCompletion { Logger.d { "[$tag] Service collection completed" } }
-                    ?: flowOf(emptyList())
+                    ?.onCompletion { Logger.d { "[$tag] Service collection completed" } } ?: flowOf(emptyList())
             }
             .filterNotNull()
             .shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
@@ -177,6 +173,7 @@ class BleConnection(
                         .first()
                         .let {
                             if (it is RemoteServices.Failed) {
+                                @Suppress("TooGenericExceptionThrown")
                                 throw Exception("Discovery failed: ${it.reason}")
                             }
                             (it as RemoteServices.Discovered).services
