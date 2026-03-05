@@ -186,14 +186,16 @@ constructor(
         Logger.i { "Starting mesh handshake (Stage 1)" }
         connectTimeMsec = nowMillis
         startConfigOnly()
+    }
 
-        // Guard against handshake stalls
+    private fun startHandshakeStallGuard(stage: Int, action: () -> Unit) {
+        handshakeTimeout?.cancel()
         handshakeTimeout =
             scope.handledLaunch {
                 delay(HANDSHAKE_TIMEOUT)
                 if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
-                    Logger.w { "Handshake stall detected! Retrying Stage 1." }
-                    startConfigOnly()
+                    Logger.w { "Handshake stall detected! Retrying Stage $stage." }
+                    action()
                     // Recursive timeout for one more try
                     delay(HANDSHAKE_TIMEOUT)
                     if (serviceRepository.connectionState.value is ConnectionState.Connecting) {
@@ -254,11 +256,15 @@ constructor(
     }
 
     override fun startConfigOnly() {
-        packetHandler.sendToRadio(ToRadio(want_config_id = CONFIG_ONLY_NONCE))
+        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = CONFIG_ONLY_NONCE)) }
+        startHandshakeStallGuard(1, action)
+        action()
     }
 
     override fun startNodeInfoOnly() {
-        packetHandler.sendToRadio(ToRadio(want_config_id = NODE_INFO_NONCE))
+        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = NODE_INFO_NONCE)) }
+        startHandshakeStallGuard(2, action)
+        action()
     }
 
     override fun onRadioConfigLoaded() {
@@ -340,7 +346,7 @@ constructor(
         private const val CONFIG_ONLY_NONCE = 69420
         private const val NODE_INFO_NONCE = 69421
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
-        private val HANDSHAKE_TIMEOUT = 10.seconds
+        private val HANDSHAKE_TIMEOUT = 30.seconds
 
         private const val EVENT_CONNECTED_SECONDS = "connected_seconds"
         private const val EVENT_MESH_DISCONNECT = "mesh_disconnect"
