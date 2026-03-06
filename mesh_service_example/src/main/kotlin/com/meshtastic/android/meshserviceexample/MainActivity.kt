@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
                 Log.i(TAG, "Found service in package: ${serviceInfo.packageName}")
             } else {
                 Log.w(TAG, "No service found for action com.geeksville.mesh.Service. Falling back to default.")
-                intent.setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
+                intent.setClassName("com.geeksville.mesh", "org.meshtastic.app.service.MeshService")
             }
 
             val success = bindService(intent, serviceConnection, BIND_AUTO_CREATE)

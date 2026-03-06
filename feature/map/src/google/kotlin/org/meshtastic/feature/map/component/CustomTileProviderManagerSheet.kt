@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_custom_tile_source
 import org.meshtastic.core.resources.add_local_mbtiles_file
@@ -72,6 +71,7 @@ import org.meshtastic.core.resources.url_template_hint
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.MapViewModel
+import org.meshtastic.feature.map.model.CustomTileProviderConfig
 
 @Suppress("LongMethod")
 @Composable

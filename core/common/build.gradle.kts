@@ -32,6 +32,7 @@ kotlin {
             implementation(libs.javax.inject)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
+            api(libs.okio)
             implementation(libs.kermit)
         }
         androidMain.dependencies {

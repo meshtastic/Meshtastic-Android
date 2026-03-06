@@ -102,7 +102,7 @@
     </queries>
 
     <application
-        android:name="com.geeksville.mesh.MeshUtilApplication"
+        android:name="org.meshtastic.app.MeshUtilApplication"
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
@@ -152,7 +152,7 @@
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
-            android:name="com.geeksville.mesh.service.MeshService"
+            android:name="org.meshtastic.app.service.MeshService"
             android:enabled="true"
             android:foregroundServiceType="connectedDevice|location"
             android:exported="true" tools:ignore="ExportedActivity">
@@ -171,7 +171,7 @@
         </service>
 
         <activity
-            android:name="com.geeksville.mesh.MainActivity"
+            android:name="org.meshtastic.app.MainActivity"
             android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
@@ -228,7 +228,7 @@
                 android:resource="@xml/device_filter" />
         </activity>
 
-        <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver"
+        <receiver android:name="org.meshtastic.app.service.BootCompleteReceiver"
             android:exported="false">
             <!-- handle boot events -->
             <intent-filter>
@@ -252,12 +252,12 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
-        <receiver android:name="com.geeksville.mesh.service.ReplyReceiver" android:exported="false" />
-        <receiver android:name="com.geeksville.mesh.service.MarkAsReadReceiver" android:exported="false" />
-        <receiver android:name="com.geeksville.mesh.service.ReactionReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.app.service.ReplyReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.app.service.MarkAsReadReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.app.service.ReactionReceiver" android:exported="false" />
 
         <receiver
-            android:name="com.geeksville.mesh.widget.LocalStatsWidgetReceiver"
+            android:name="org.meshtastic.app.widget.LocalStatsWidgetReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

@@ -14,36 +14,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.devtools.ksp)
 }
 
-configure<LibraryExtension> {
-    buildFeatures { buildConfig = true }
-    namespace = "org.meshtastic.core.network"
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.network"
+        androidResources.enable = false
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.core.repository)
+            implementation(projects.core.di)
+            implementation(projects.core.model)
+            implementation(projects.core.proto)
+
+            api(libs.javax.inject)
+            implementation(libs.okio)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.kermit)
+        }
+        androidMain.dependencies {
+            implementation(libs.hilt.android)
+            implementation(libs.org.eclipse.paho.client.mqttv3)
+            implementation(libs.coil.network.okhttp)
+            implementation(libs.coil.svg)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.okhttp3.logging.interceptor)
+        }
+    }
 }
 
-dependencies {
-    api(projects.core.repository)
-    implementation(projects.core.di)
-    implementation(projects.core.model)
-    implementation(projects.core.proto)
+val marketplaceAttr = Attribute.of("marketplace", String::class.java)
 
-    implementation(libs.org.eclipse.paho.client.mqttv3)
-    implementation(libs.okio)
-    implementation(libs.coil.network.okhttp)
-    implementation(libs.coil.svg)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.serialization.kotlinx.json)
-    implementation(libs.okhttp3.logging.interceptor)
-    implementation(libs.kermit)
-
-    googleImplementation(libs.dd.sdk.android.okhttp)
+configurations.all {
+    if (name.contains("android", ignoreCase = true)) {
+        attributes.attribute(marketplaceAttr, "fdroid")
+    }
 }
+
+dependencies { add("kspAndroid", libs.hilt.compiler) }

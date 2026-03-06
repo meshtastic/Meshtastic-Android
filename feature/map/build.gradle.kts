@@ -37,7 +37,10 @@ dependencies {
     implementation(projects.core.service)
     implementation(projects.core.resources)
     implementation(projects.core.ui)
+    implementation(projects.core.di)
 
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.preferences)
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.annotation)

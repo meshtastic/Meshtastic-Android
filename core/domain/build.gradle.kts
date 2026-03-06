@@ -16,28 +16,42 @@
  */
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.devtools.ksp)
 }
 
-android { namespace = "org.meshtastic.core.domain" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.domain"
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
 
-dependencies {
-    implementation(projects.core.repository)
-    implementation(projects.core.model)
-    implementation(projects.core.proto)
-    implementation(projects.core.common)
-    implementation(projects.core.database)
-    implementation(projects.core.datastore)
-    implementation(projects.core.resources)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.repository)
+            implementation(projects.core.model)
+            implementation(projects.core.proto)
+            implementation(projects.core.common)
+            implementation(projects.core.database)
+            implementation(projects.core.datastore)
+            implementation(projects.core.resources)
 
-    implementation(libs.kermit)
-    implementation(libs.compose.multiplatform.resources)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.robolectric)
-    testImplementation(libs.turbine)
-    testImplementation(libs.kotlinx.coroutines.test)
+            api(libs.javax.inject)
+            implementation(libs.kermit)
+            implementation(libs.compose.multiplatform.resources)
+            implementation(libs.okio)
+            implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.serialization.json)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+            implementation(libs.mockk)
+        }
+    }
 }
+
+dependencies { add("kspAndroid", libs.hilt.compiler) }
