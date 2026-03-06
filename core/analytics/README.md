@@ -20,6 +20,7 @@ An interface defining the standard operations for tracking events and reporting 
 graph TB
   :core:analytics[analytics]:::android-library
   :core:analytics -.-> :core:prefs
+  :core:analytics -.-> :core:repository
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

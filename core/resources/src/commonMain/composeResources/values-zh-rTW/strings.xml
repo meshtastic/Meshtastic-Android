@@ -308,6 +308,7 @@
     <string name="direct_message">直通訊息</string>
     <string name="nodedb_reset">重設節點資料庫</string>
     <string name="delivery_confirmed">已確認送達</string>
+    <string name="delivery_confirmed_reboot_warning">在設定套用的過程中，您的裝置可能會斷開連線並重新啟動。</string>
     <string name="error">錯誤</string>
     <string name="ignore">忽略</string>
     <string name="remove_ignored">從忽略清單中移除</string>
