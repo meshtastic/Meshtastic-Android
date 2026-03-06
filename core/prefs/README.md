@@ -18,8 +18,7 @@ Uses Kotlin property delegates to simplify reading and writing preferences.
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:prefs[prefs]:::android-library
-  :core:prefs -.-> :core:repository
+  :core:prefs[prefs]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

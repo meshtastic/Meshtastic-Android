@@ -38,6 +38,7 @@ graph TB
   :feature:map -.-> :core:service
   :feature:map -.-> :core:resources
   :feature:map -.-> :core:ui
+  :feature:map -.-> :core:di
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

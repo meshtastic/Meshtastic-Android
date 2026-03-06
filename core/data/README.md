@@ -18,17 +18,7 @@ Internal components that handle raw data fetching from APIs or disk.
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:data[data]:::android-library
-  :core:data --> :core:repository
-  :core:data -.-> :core:analytics
-  :core:data -.-> :core:common
-  :core:data -.-> :core:database
-  :core:data -.-> :core:datastore
-  :core:data -.-> :core:di
-  :core:data -.-> :core:model
-  :core:data -.-> :core:network
-  :core:data -.-> :core:prefs
-  :core:data -.-> :core:proto
+  :core:data[data]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

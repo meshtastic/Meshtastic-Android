@@ -17,11 +17,7 @@ The module uses **Ktor** as its primary HTTP client for high-performance, asynch
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:network[network]:::android-library
-  :core:network --> :core:repository
-  :core:network -.-> :core:di
-  :core:network -.-> :core:model
-  :core:network -.-> :core:proto
+  :core:network[network]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
