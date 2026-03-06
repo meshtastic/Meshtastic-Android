@@ -33,16 +33,16 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
-internal const val KEY_THEME = "theme"
+const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
+const val KEY_THEME = "theme"
 
 // Node list filters/sort
-internal const val KEY_NODE_SORT = "node-sort-option"
-internal const val KEY_INCLUDE_UNKNOWN = "include-unknown"
-internal const val KEY_EXCLUDE_INFRASTRUCTURE = "exclude-infrastructure"
-internal const val KEY_ONLY_ONLINE = "only-online"
-internal const val KEY_ONLY_DIRECT = "only-direct"
-internal const val KEY_SHOW_IGNORED = "show-ignored"
+const val KEY_NODE_SORT = "node-sort-option"
+const val KEY_INCLUDE_UNKNOWN = "include-unknown"
+const val KEY_EXCLUDE_INFRASTRUCTURE = "exclude-infrastructure"
+const val KEY_ONLY_ONLINE = "only-online"
+const val KEY_ONLY_DIRECT = "only-direct"
+const val KEY_SHOW_IGNORED = "show-ignored"
 
 @Singleton
 class UiPreferencesDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {

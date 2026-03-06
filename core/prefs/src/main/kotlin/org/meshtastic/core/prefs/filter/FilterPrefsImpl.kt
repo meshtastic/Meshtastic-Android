@@ -16,16 +16,20 @@
  */
 package org.meshtastic.core.prefs.filter
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.FilterSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.FilterDataStore
 import org.meshtastic.core.repository.FilterPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,32 +38,43 @@ import javax.inject.Singleton
 class FilterPrefsImpl
 @Inject
 constructor(
-    @FilterSharedPreferences private val prefs: SharedPreferences,
+    @FilterDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : FilterPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val filterEnabled: StateFlow<Boolean> =
-        prefs
-            .preferenceFlow(KEY_FILTER_ENABLED) { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(KEY_FILTER_ENABLED, false))
+        dataStore.data
+            .map { it[KEY_FILTER_ENABLED_PREF] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setFilterEnabled(enabled: Boolean) {
-        prefs.edit { putBoolean(KEY_FILTER_ENABLED, enabled) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                prefs[KEY_FILTER_ENABLED_PREF] = enabled
+            }
+        }
     }
 
     override val filterWords: StateFlow<Set<String>> =
-        prefs
-            .preferenceFlow(KEY_FILTER_WORDS) { p, k -> p.getStringSet(k, emptySet()) ?: emptySet() }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getStringSet(KEY_FILTER_WORDS, emptySet()) ?: emptySet())
+        dataStore.data
+            .map { it[KEY_FILTER_WORDS_PREF] ?: emptySet() }
+            .stateIn(scope, SharingStarted.Eagerly, emptySet())
 
     override fun setFilterWords(words: Set<String>) {
-        prefs.edit { putStringSet(KEY_FILTER_WORDS, words) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                prefs[KEY_FILTER_WORDS_PREF] = words
+            }
+        }
     }
 
     companion object {
         const val KEY_FILTER_ENABLED = "filter_enabled"
         const val KEY_FILTER_WORDS = "filter_words"
         const val FILTER_PREFS_NAME = "filter-prefs"
+
+        val KEY_FILTER_ENABLED_PREF = booleanPreferencesKey(KEY_FILTER_ENABLED)
+        val KEY_FILTER_WORDS_PREF = stringSetPreferencesKey(KEY_FILTER_WORDS)
     }
 }

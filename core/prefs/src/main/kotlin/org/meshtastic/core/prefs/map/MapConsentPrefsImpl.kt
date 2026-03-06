@@ -16,16 +16,19 @@
  */
 package org.meshtastic.core.prefs.map
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MapConsentSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.MapConsentDataStore
 import org.meshtastic.core.repository.MapConsentPrefs
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -35,7 +38,7 @@ import javax.inject.Singleton
 class MapConsentPrefsImpl
 @Inject
 constructor(
-    @MapConsentSharedPreferences private val prefs: SharedPreferences,
+    @MapConsentDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapConsentPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -43,13 +46,17 @@ constructor(
     private val consentFlows = ConcurrentHashMap<Int?, StateFlow<Boolean>>()
 
     override fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean> = consentFlows.getOrPut(nodeNum) {
-        val key = nodeNum.toString()
-        prefs
-            .preferenceFlow(key) { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(key, false))
+        val key = booleanPreferencesKey(nodeNum.toString())
+        dataStore.data
+            .map { it[key] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
     }
 
     override fun setShouldReportLocation(nodeNum: Int?, report: Boolean) {
-        prefs.edit { putBoolean(nodeNum.toString(), report) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                prefs[booleanPreferencesKey(nodeNum.toString())] = report
+            }
+        }
     }
 }

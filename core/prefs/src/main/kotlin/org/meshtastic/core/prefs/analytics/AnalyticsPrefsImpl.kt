@@ -16,17 +16,22 @@
  */
 package org.meshtastic.core.prefs.analytics
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.AnalyticsSharedPreferences
-import org.meshtastic.core.prefs.di.AppSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.AnalyticsDataStore
+import org.meshtastic.core.prefs.di.AppDataStore
 import org.meshtastic.core.repository.AnalyticsPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -36,24 +41,37 @@ import kotlin.uuid.Uuid
 class AnalyticsPrefsImpl
 @Inject
 constructor(
-    @AnalyticsSharedPreferences private val analyticsSharedPreferences: SharedPreferences,
-    @AppSharedPreferences private val appPrefs: SharedPreferences,
+    @AnalyticsDataStore private val analyticsDataStore: DataStore<Preferences>,
+    @AppDataStore private val appDataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : AnalyticsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val analyticsAllowed: StateFlow<Boolean> =
-        analyticsSharedPreferences
-            .preferenceFlow(KEY_ANALYTICS_ALLOWED) { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, analyticsSharedPreferences.getBoolean(KEY_ANALYTICS_ALLOWED, false))
+        analyticsDataStore.data
+            .map { it[KEY_ANALYTICS_ALLOWED_PREF] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setAnalyticsAllowed(allowed: Boolean) {
-        analyticsSharedPreferences.edit { putBoolean(KEY_ANALYTICS_ALLOWED, allowed) }
+        scope.launch {
+            analyticsDataStore.edit { prefs ->
+                prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed
+            }
+        }
     }
 
     private var _installId: String?
-        get() = appPrefs.getString(KEY_INSTALL_ID, null)
-        set(value) = appPrefs.edit { putString(KEY_INSTALL_ID, value) }
+        get() = runBlocking {
+            appDataStore.data.map { it[KEY_INSTALL_ID_PREF] }.stateIn(scope).value
+        }
+        set(value) {
+            scope.launch {
+                appDataStore.edit { prefs ->
+                    if (value == null) prefs.remove(KEY_INSTALL_ID_PREF)
+                    else prefs[KEY_INSTALL_ID_PREF] = value
+                }
+            }
+        }
 
     override val installId: String
         get() = _installId ?: Uuid.random().toString().also { _installId = it }
@@ -61,5 +79,8 @@ constructor(
     companion object {
         const val KEY_ANALYTICS_ALLOWED = "allowed"
         const val KEY_INSTALL_ID = "appPrefs_install_id"
+
+        val KEY_ANALYTICS_ALLOWED_PREF = booleanPreferencesKey(KEY_ANALYTICS_ALLOWED)
+        val KEY_INSTALL_ID_PREF = stringPreferencesKey(KEY_INSTALL_ID)
     }
 }

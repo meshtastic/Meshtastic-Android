@@ -16,16 +16,19 @@
  */
 package org.meshtastic.core.prefs.homoglyph
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.HomoglyphEncodingSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.HomoglyphEncodingDataStore
 import org.meshtastic.core.repository.HomoglyphPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,21 +37,26 @@ import javax.inject.Singleton
 class HomoglyphPrefsImpl
 @Inject
 constructor(
-    @HomoglyphEncodingSharedPreferences private val prefs: SharedPreferences,
+    @HomoglyphEncodingDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : HomoglyphPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val homoglyphEncodingEnabled: StateFlow<Boolean> =
-        prefs
-            .preferenceFlow(KEY_ENABLED) { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(KEY_ENABLED, false))
+        dataStore.data
+            .map { it[KEY_ENABLED_PREF] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setHomoglyphEncodingEnabled(enabled: Boolean) {
-        prefs.edit { putBoolean(KEY_ENABLED, enabled) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                prefs[KEY_ENABLED_PREF] = enabled
+            }
+        }
     }
 
     companion object {
         const val KEY_ENABLED = "enabled"
+        val KEY_ENABLED_PREF = booleanPreferencesKey(KEY_ENABLED)
     }
 }

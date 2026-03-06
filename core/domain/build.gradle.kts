@@ -29,7 +29,6 @@ dependencies {
     implementation(projects.core.proto)
     implementation(projects.core.common)
     implementation(projects.core.database)
-    implementation(projects.core.prefs)
     implementation(projects.core.datastore)
     implementation(projects.core.resources)
 

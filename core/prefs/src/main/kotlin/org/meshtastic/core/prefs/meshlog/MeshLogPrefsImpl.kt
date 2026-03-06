@@ -16,16 +16,20 @@
  */
 package org.meshtastic.core.prefs.meshlog
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MeshLogSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.MeshLogDataStore
 import org.meshtastic.core.repository.MeshLogPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,27 +38,27 @@ import javax.inject.Singleton
 class MeshLogPrefsImpl
 @Inject
 constructor(
-    @MeshLogSharedPreferences private val prefs: SharedPreferences,
+    @MeshLogDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MeshLogPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val retentionDays: StateFlow<Int> =
-        prefs
-            .preferenceFlow(RETENTION_DAYS_KEY) { p, k -> p.getInt(k, DEFAULT_RETENTION_DAYS) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getInt(RETENTION_DAYS_KEY, DEFAULT_RETENTION_DAYS))
+        dataStore.data
+            .map { it[KEY_RETENTION_DAYS_PREF] ?: DEFAULT_RETENTION_DAYS }
+            .stateIn(scope, SharingStarted.Eagerly, DEFAULT_RETENTION_DAYS)
 
     override fun setRetentionDays(days: Int) {
-        prefs.edit { putInt(RETENTION_DAYS_KEY, days) }
+        scope.launch { dataStore.edit { it[KEY_RETENTION_DAYS_PREF] = days } }
     }
 
     override val loggingEnabled: StateFlow<Boolean> =
-        prefs
-            .preferenceFlow(LOGGING_ENABLED_KEY) { p, k -> p.getBoolean(k, DEFAULT_LOGGING_ENABLED) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(LOGGING_ENABLED_KEY, DEFAULT_LOGGING_ENABLED))
+        dataStore.data
+            .map { it[KEY_LOGGING_ENABLED_PREF] ?: DEFAULT_LOGGING_ENABLED }
+            .stateIn(scope, SharingStarted.Eagerly, DEFAULT_LOGGING_ENABLED)
 
     override fun setLoggingEnabled(enabled: Boolean) {
-        prefs.edit { putBoolean(LOGGING_ENABLED_KEY, enabled) }
+        scope.launch { dataStore.edit { it[KEY_LOGGING_ENABLED_PREF] = enabled } }
     }
 
     companion object {
@@ -62,5 +66,9 @@ constructor(
         const val LOGGING_ENABLED_KEY = "meshlog_logging_enabled"
         const val DEFAULT_RETENTION_DAYS = 30
         const val DEFAULT_LOGGING_ENABLED = true
+
+        val KEY_RETENTION_DAYS_PREF = intPreferencesKey(RETENTION_DAYS_KEY)
+        val KEY_LOGGING_ENABLED_PREF = booleanPreferencesKey(LOGGING_ENABLED_KEY)
     }
 }
+

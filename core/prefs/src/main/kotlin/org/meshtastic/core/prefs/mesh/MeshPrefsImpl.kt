@@ -16,16 +16,21 @@
  */
 package org.meshtastic.core.prefs.mesh
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MeshSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.MeshDataStore
 import org.meshtastic.core.repository.MeshPrefs
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -36,7 +41,7 @@ import javax.inject.Singleton
 class MeshPrefsImpl
 @Inject
 constructor(
-    @MeshSharedPreferences private val prefs: SharedPreferences,
+    @MeshDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -45,38 +50,50 @@ constructor(
     private val storeForwardFlows = ConcurrentHashMap<String?, StateFlow<Int>>()
 
     override val deviceAddress: StateFlow<String?> =
-        prefs
-            .preferenceFlow("device_address") { p, k -> p.getString(k, NO_DEVICE_SELECTED) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getString("device_address", NO_DEVICE_SELECTED))
+        dataStore.data
+            .map { it[KEY_DEVICE_ADDRESS_PREF] ?: NO_DEVICE_SELECTED }
+            .stateIn(scope, SharingStarted.Eagerly, NO_DEVICE_SELECTED)
 
     override fun setDeviceAddress(address: String?) {
-        prefs.edit { putString("device_address", address) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                if (address == null) prefs.remove(KEY_DEVICE_ADDRESS_PREF)
+                else prefs[KEY_DEVICE_ADDRESS_PREF] = address
+            }
+        }
     }
 
     override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = locationFlows.getOrPut(nodeNum) {
-        val key = provideLocationKey(nodeNum)
-        prefs
-            .preferenceFlow(key) { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(key, false))
+        val key = booleanPreferencesKey(provideLocationKey(nodeNum))
+        dataStore.data
+            .map { it[key] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
     }
 
     override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
-        prefs.edit { putBoolean(provideLocationKey(nodeNum), value) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = value
+            }
+        }
     }
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = storeForwardFlows.getOrPut(address) {
-        val key = storeForwardKey(address)
-        prefs
-            .preferenceFlow(key) { p, k -> p.getInt(k, 0) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getInt(key, 0))
+        val key = intPreferencesKey(storeForwardKey(address))
+        dataStore.data
+            .map { it[key] ?: 0 }
+            .stateIn(scope, SharingStarted.Eagerly, 0)
     }
 
     override fun setStoreForwardLastRequest(address: String?, value: Int) {
-        prefs.edit {
-            if (value <= 0) {
-                remove(storeForwardKey(address))
-            } else {
-                putInt(storeForwardKey(address), value)
+        scope.launch {
+            dataStore.edit { prefs ->
+                val key = intPreferencesKey(storeForwardKey(address))
+                if (value <= 0) {
+                    prefs.remove(key)
+                } else {
+                    prefs[key] = value
+                }
             }
         }
     }
@@ -93,6 +110,11 @@ constructor(
             else -> raw.uppercase(Locale.US).replace(":", "")
         }
     }
+
+    companion object {
+        val KEY_DEVICE_ADDRESS_PREF = stringPreferencesKey("device_address")
+    }
 }
 
 private const val NO_DEVICE_SELECTED = "n"
+

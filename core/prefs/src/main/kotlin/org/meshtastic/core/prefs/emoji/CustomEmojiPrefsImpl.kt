@@ -16,16 +16,19 @@
  */
 package org.meshtastic.core.prefs.emoji
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.CustomEmojiSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.CustomEmojiDataStore
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,21 +37,27 @@ import javax.inject.Singleton
 class CustomEmojiPrefsImpl
 @Inject
 constructor(
-    @CustomEmojiSharedPreferences private val prefs: SharedPreferences,
+    @CustomEmojiDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : CustomEmojiPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val customEmojiFrequency: StateFlow<String?> =
-        prefs
-            .preferenceFlow(KEY_EMOJI_FREQ) { p, k -> p.getString(k, null) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getString(KEY_EMOJI_FREQ, null))
+        dataStore.data
+            .map { it[KEY_EMOJI_FREQ_PREF] }
+            .stateIn(scope, SharingStarted.Eagerly, null)
 
     override fun setCustomEmojiFrequency(frequency: String?) {
-        prefs.edit { putString(KEY_EMOJI_FREQ, frequency) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                if (frequency == null) prefs.remove(KEY_EMOJI_FREQ_PREF)
+                else prefs[KEY_EMOJI_FREQ_PREF] = frequency
+            }
+        }
     }
 
     companion object {
         const val KEY_EMOJI_FREQ = "pref_key_custom_emoji_freq"
+        val KEY_EMOJI_FREQ_PREF = stringPreferencesKey(KEY_EMOJI_FREQ)
     }
 }

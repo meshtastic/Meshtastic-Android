@@ -96,9 +96,9 @@ constructor(
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     private val targetLatLng =
-        googleMapsPrefs.cameraTargetLat
+        googleMapsPrefs.cameraTargetLat.value
             .takeIf { it != 0.0 }
-            ?.let { lat -> googleMapsPrefs.cameraTargetLng.takeIf { it != 0.0 }?.let { lng -> LatLng(lat, lng) } }
+            ?.let { lat -> googleMapsPrefs.cameraTargetLng.value.takeIf { it != 0.0 }?.let { lng -> LatLng(lat, lng) } }
             ?: ourNodeInfo.value?.position?.toLatLng()
             ?: LatLng(0.0, 0.0)
 
@@ -107,9 +107,9 @@ constructor(
             position =
             CameraPosition(
                 targetLatLng,
-                googleMapsPrefs.cameraZoom,
-                googleMapsPrefs.cameraTilt,
-                googleMapsPrefs.cameraBearing,
+                googleMapsPrefs.cameraZoom.value,
+                googleMapsPrefs.cameraTilt.value,
+                googleMapsPrefs.cameraBearing.value,
             ),
         )
 
@@ -222,7 +222,7 @@ constructor(
                 ) {
                     _selectedCustomTileProviderUrl.value = null
                     // Also clear from prefs
-                    googleMapsPrefs.selectedCustomTileUrl = null
+                    googleMapsPrefs.setSelectedCustomTileUrl(null)
                 }
 
                 if (configToRemove.localUri != null) {
@@ -238,28 +238,28 @@ constructor(
             if (!config.isLocal && !isValidTileUrlTemplate(config.urlTemplate)) {
                 Logger.withTag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
-                googleMapsPrefs.selectedCustomTileUrl = null
+                googleMapsPrefs.setSelectedCustomTileUrl(null)
                 return
             }
             // Use localUri if present, otherwise urlTemplate
             val selectedUrl = config.localUri ?: config.urlTemplate
             _selectedCustomTileProviderUrl.value = selectedUrl
             _selectedGoogleMapType.value = MapType.NONE
-            googleMapsPrefs.selectedCustomTileUrl = selectedUrl
-            googleMapsPrefs.selectedGoogleMapType = null
+            googleMapsPrefs.setSelectedCustomTileUrl(selectedUrl)
+            googleMapsPrefs.setSelectedGoogleMapType(null)
         } else {
             _selectedCustomTileProviderUrl.value = null
             _selectedGoogleMapType.value = MapType.NORMAL
-            googleMapsPrefs.selectedCustomTileUrl = null
-            googleMapsPrefs.selectedGoogleMapType = MapType.NORMAL.name
+            googleMapsPrefs.setSelectedCustomTileUrl(null)
+            googleMapsPrefs.setSelectedGoogleMapType(MapType.NORMAL.name)
         }
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
         _selectedGoogleMapType.value = mapType
         _selectedCustomTileProviderUrl.value = null // Clear custom selection
-        googleMapsPrefs.selectedGoogleMapType = mapType.name
-        googleMapsPrefs.selectedCustomTileUrl = null
+        googleMapsPrefs.setSelectedGoogleMapType(mapType.name)
+        googleMapsPrefs.setSelectedCustomTileUrl(null)
     }
 
     private var currentTileProvider: TileProvider? = null
@@ -354,16 +354,16 @@ constructor(
 
     fun saveCameraPosition(cameraPosition: CameraPosition) {
         viewModelScope.launch {
-            googleMapsPrefs.cameraTargetLat = cameraPosition.target.latitude
-            googleMapsPrefs.cameraTargetLng = cameraPosition.target.longitude
-            googleMapsPrefs.cameraZoom = cameraPosition.zoom
-            googleMapsPrefs.cameraTilt = cameraPosition.tilt
-            googleMapsPrefs.cameraBearing = cameraPosition.bearing
+            googleMapsPrefs.setCameraTargetLat(cameraPosition.target.latitude)
+            googleMapsPrefs.setCameraTargetLng(cameraPosition.target.longitude)
+            googleMapsPrefs.setCameraZoom(cameraPosition.zoom)
+            googleMapsPrefs.setCameraTilt(cameraPosition.tilt)
+            googleMapsPrefs.setCameraBearing(cameraPosition.bearing)
         }
     }
 
     private fun loadPersistedMapType() {
-        val savedCustomUrl = googleMapsPrefs.selectedCustomTileUrl
+        val savedCustomUrl = googleMapsPrefs.selectedCustomTileUrl.value
         if (savedCustomUrl != null) {
             // Check if this custom provider still exists
             if (
@@ -375,18 +375,18 @@ constructor(
                     MapType.NONE // MapType.NONE to hide google basemap when using custom provider
             } else {
                 // The saved custom URL is no longer valid or doesn't exist, remove preference
-                googleMapsPrefs.selectedCustomTileUrl = null
+                googleMapsPrefs.setSelectedCustomTileUrl(null)
                 // Fallback to default Google Map type
                 _selectedGoogleMapType.value = MapType.NORMAL
             }
         } else {
-            val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType
+            val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType.value
             try {
                 _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
             } catch (e: IllegalArgumentException) {
                 Logger.e(e) { "Invalid saved Google Map type: $savedGoogleMapTypeName" }
                 _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
-                googleMapsPrefs.selectedGoogleMapType = null
+                googleMapsPrefs.setSelectedGoogleMapType(null)
             }
         }
     }
@@ -399,7 +399,7 @@ constructor(
                     val persistedLayerFiles = layersDir.listFiles()
 
                     if (persistedLayerFiles != null) {
-                        val hiddenLayerUrls = googleMapsPrefs.hiddenLayerUrls
+                        val hiddenLayerUrls = googleMapsPrefs.hiddenLayerUrls.value
                         val loadedItems =
                             persistedLayerFiles.mapNotNull { file ->
                                 if (file.isFile) {
@@ -429,7 +429,7 @@ constructor(
                             }
 
                         val networkItems =
-                            googleMapsPrefs.networkMapLayers.mapNotNull { networkString ->
+                            googleMapsPrefs.networkMapLayers.value.mapNotNull { networkString ->
                                 try {
                                     val parts = networkString.split("|:|")
                                     if (parts.size == 3) {
@@ -532,7 +532,7 @@ constructor(
                 _mapLayers.value = _mapLayers.value + newItem
 
                 val networkLayerString = "${newItem.id}|:|${newItem.name}|:|${newItem.uri}"
-                googleMapsPrefs.networkMapLayers = googleMapsPrefs.networkMapLayers + networkLayerString
+                googleMapsPrefs.setNetworkMapLayers(googleMapsPrefs.networkMapLayers.value + networkLayerString)
             } catch (e: Exception) {
                 _errorFlow.emit("Invalid URL.")
             }
@@ -572,9 +572,9 @@ constructor(
 
         toggledLayer?.let {
             if (it.isVisible) {
-                googleMapsPrefs.hiddenLayerUrls -= it.uri.toString()
+                googleMapsPrefs.setHiddenLayerUrls(googleMapsPrefs.hiddenLayerUrls.value - it.uri.toString())
             } else {
-                googleMapsPrefs.hiddenLayerUrls += it.uri.toString()
+                googleMapsPrefs.setHiddenLayerUrls(googleMapsPrefs.hiddenLayerUrls.value + it.uri.toString())
             }
         }
     }
@@ -584,12 +584,13 @@ constructor(
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
             layerToRemove?.uri?.let { uri ->
                 if (layerToRemove.isNetwork) {
-                    googleMapsPrefs.networkMapLayers =
-                        googleMapsPrefs.networkMapLayers.filterNot { it.startsWith("$layerId|:|") }.toSet()
+                    googleMapsPrefs.setNetworkMapLayers(
+                        googleMapsPrefs.networkMapLayers.value.filterNot { it.startsWith("$layerId|:|") }.toSet()
+                    )
                 } else {
                     deleteFileToInternalStorage(uri)
                 }
-                googleMapsPrefs.hiddenLayerUrls -= uri.toString()
+                googleMapsPrefs.setHiddenLayerUrls(googleMapsPrefs.hiddenLayerUrls.value - uri.toString())
             }
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
         }

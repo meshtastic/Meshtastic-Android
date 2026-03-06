@@ -16,56 +16,65 @@
  */
 package org.meshtastic.core.prefs.filter
 
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FilterPrefs
 
 class FilterPrefsTest {
-    private lateinit var sharedPreferences: SharedPreferences
-    private lateinit var editor: SharedPreferences.Editor
+    @get:Rule val tmpFolder: TemporaryFolder = TemporaryFolder.builder().assureDeletion().build()
+
+    private lateinit var dataStore: DataStore<Preferences>
     private lateinit var filterPrefs: FilterPrefs
     private lateinit var dispatchers: CoroutineDispatchers
 
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
+
     @Before
     fun setup() {
-        editor = mockk(relaxed = true)
-        sharedPreferences = mockk {
-            every { getBoolean(FilterPrefsImpl.KEY_FILTER_ENABLED, false) } returns false
-            every { getStringSet(FilterPrefsImpl.KEY_FILTER_WORDS, emptySet()) } returns emptySet()
-            every { edit() } returns editor
-        }
-        dispatchers = mockk { every { default } returns Dispatchers.Unconfined }
-        filterPrefs = FilterPrefsImpl(sharedPreferences, dispatchers)
+        dataStore = PreferenceDataStoreFactory.create(
+            scope = testScope,
+            produceFile = { tmpFolder.newFile("test.preferences_pb") }
+        )
+        dispatchers = mockk { every { default } returns testDispatcher }
+        filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
     }
 
     @Test
-    fun `filterEnabled defaults to false`() {
+    fun `filterEnabled defaults to false`() = testScope.runTest {
         assertFalse(filterPrefs.filterEnabled.value)
     }
 
     @Test
-    fun `filterWords defaults to empty set`() {
+    fun `filterWords defaults to empty set`() = testScope.runTest {
         assertTrue(filterPrefs.filterWords.value.isEmpty())
     }
 
     @Test
-    fun `setting filterEnabled updates preference`() {
+    fun `setting filterEnabled updates preference`() = testScope.runTest {
         filterPrefs.setFilterEnabled(true)
-        verify { editor.putBoolean(FilterPrefsImpl.KEY_FILTER_ENABLED, true) }
+        assertTrue(filterPrefs.filterEnabled.value)
     }
 
     @Test
-    fun `setting filterWords updates preference`() {
+    fun `setting filterWords updates preference`() = testScope.runTest {
         val words = setOf("test", "word")
         filterPrefs.setFilterWords(words)
-        verify { editor.putStringSet(FilterPrefsImpl.KEY_FILTER_WORDS, words) }
+        assertEquals(words, filterPrefs.filterWords.value)
     }
 }
+

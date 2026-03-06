@@ -16,16 +16,19 @@
  */
 package org.meshtastic.core.prefs.ui
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.UiSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.repository.UiPrefs
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -35,7 +38,7 @@ import javax.inject.Singleton
 class UiPrefsImpl
 @Inject
 constructor(
-    @UiSharedPreferences private val prefs: SharedPreferences,
+    @UiDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : UiPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -44,34 +47,39 @@ constructor(
     private val provideNodeLocationFlows = ConcurrentHashMap<Int, StateFlow<Boolean>>()
 
     override val hasShownNotPairedWarning: StateFlow<Boolean> =
-        prefs
-            .preferenceFlow("has_shown_not_paired_warning") { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean("has_shown_not_paired_warning", false))
+        dataStore.data
+            .map { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setHasShownNotPairedWarning(value: Boolean) {
-        prefs.edit { putBoolean("has_shown_not_paired_warning", value) }
+        scope.launch { dataStore.edit { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] = value } }
     }
 
     override val showQuickChat: StateFlow<Boolean> =
-        prefs
-            .preferenceFlow("show-quick-chat") { p, k -> p.getBoolean(k, false) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean("show-quick-chat", false))
+        dataStore.data
+            .map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: false }
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setShowQuickChat(value: Boolean) {
-        prefs.edit { putBoolean("show-quick-chat", value) }
+        scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = value } }
     }
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
         provideNodeLocationFlows.getOrPut(nodeNum) {
-            val key = provideLocationKey(nodeNum)
-            prefs
-                .preferenceFlow(key) { p, k -> p.getBoolean(k, false) }
-                .stateIn(scope, SharingStarted.Eagerly, prefs.getBoolean(key, false))
+            val key = booleanPreferencesKey(provideLocationKey(nodeNum))
+            dataStore.data
+                .map { it[key] ?: false }
+                .stateIn(scope, SharingStarted.Eagerly, false)
         }
 
     override fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean) {
-        prefs.edit { putBoolean(provideLocationKey(nodeNum), value) }
+        scope.launch { dataStore.edit { it[booleanPreferencesKey(provideLocationKey(nodeNum))] = value } }
     }
 
     private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"
+
+    companion object {
+        val KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF = booleanPreferencesKey("has_shown_not_paired_warning")
+        val KEY_SHOW_QUICK_CHAT_PREF = booleanPreferencesKey("show-quick-chat")
+    }
 }

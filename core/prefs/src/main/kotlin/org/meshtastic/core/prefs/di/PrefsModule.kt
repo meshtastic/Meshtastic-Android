@@ -17,13 +17,20 @@
 package org.meshtastic.core.prefs.di
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.prefs.analytics.AnalyticsPrefsImpl
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
 import org.meshtastic.core.prefs.filter.FilterPrefsImpl
@@ -49,56 +56,53 @@ import org.meshtastic.core.repository.UiPrefs
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-// These pref store qualifiers are internal to prevent prefs stores from being injected directly.
-// Consuming code should always inject one of the prefs repositories.
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+internal annotation class AnalyticsDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class AnalyticsSharedPreferences
+internal annotation class HomoglyphEncodingDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class HomoglyphEncodingSharedPreferences
+internal annotation class AppDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class AppSharedPreferences
+internal annotation class CustomEmojiDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class CustomEmojiSharedPreferences
+internal annotation class MapDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class MapSharedPreferences
+internal annotation class MapConsentDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class MapConsentSharedPreferences
+internal annotation class MapTileProviderDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class MapTileProviderSharedPreferences
+internal annotation class MeshDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class MeshSharedPreferences
+internal annotation class RadioDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class RadioSharedPreferences
+internal annotation class UiDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class UiSharedPreferences
+internal annotation class MeshLogDataStore
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class MeshLogSharedPreferences
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
-internal annotation class FilterSharedPreferences
+internal annotation class FilterDataStore
 
 @Suppress("TooManyFunctions")
 @InstallIn(SingletonComponent::class)
@@ -106,99 +110,138 @@ internal annotation class FilterSharedPreferences
 interface PrefsModule {
 
     @Binds fun bindAnalyticsPrefs(analyticsPrefsImpl: AnalyticsPrefsImpl): AnalyticsPrefs
-
     @Binds fun bindHomoglyphEncodingPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): HomoglyphPrefs
-
     @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
-
     @Binds fun bindMapConsentPrefs(mapConsentPrefsImpl: MapConsentPrefsImpl): MapConsentPrefs
-
     @Binds fun bindMapPrefs(mapPrefsImpl: MapPrefsImpl): MapPrefs
-
     @Binds fun bindMapTileProviderPrefs(mapTileProviderPrefsImpl: MapTileProviderPrefsImpl): MapTileProviderPrefs
-
     @Binds fun bindMeshPrefs(meshPrefsImpl: MeshPrefsImpl): MeshPrefs
-
     @Binds fun bindMeshLogPrefs(meshLogPrefsImpl: MeshLogPrefsImpl): MeshLogPrefs
-
     @Binds fun bindRadioPrefs(radioPrefsImpl: RadioPrefsImpl): RadioPrefs
-
     @Binds fun bindUiPrefs(uiPrefsImpl: UiPrefsImpl): UiPrefs
-
     @Binds fun bindFilterPrefs(filterPrefsImpl: FilterPrefsImpl): FilterPrefs
 
     companion object {
+        private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
         @Provides
         @Singleton
-        @AnalyticsSharedPreferences
-        fun provideAnalyticsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
+        @AnalyticsDataStore
+        fun provideAnalyticsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "analytics-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("analytics_ds") }
+            )
 
         @Provides
         @Singleton
-        @HomoglyphEncodingSharedPreferences
-        fun provideHomoglyphEncodingSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("homoglyph-encoding-prefs", Context.MODE_PRIVATE)
+        @HomoglyphEncodingDataStore
+        fun provideHomoglyphEncodingDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "homoglyph-encoding-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("homoglyph_encoding_ds") }
+            )
 
         @Provides
         @Singleton
-        @AppSharedPreferences
-        fun provideAppSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+        @AppDataStore
+        fun provideAppDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("app_ds") }
+            )
 
         @Provides
         @Singleton
-        @CustomEmojiSharedPreferences
-        fun provideCustomEmojiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("org.geeksville.emoji.prefs", Context.MODE_PRIVATE)
+        @CustomEmojiDataStore
+        fun provideCustomEmojiDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "org.geeksville.emoji.prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("custom_emoji_ds") }
+            )
 
         @Provides
         @Singleton
-        @MapSharedPreferences
-        fun provideMapSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+        @MapDataStore
+        fun provideMapDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "map_prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("map_ds") }
+            )
 
         @Provides
         @Singleton
-        @MapConsentSharedPreferences
-        fun provideMapConsentSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("map_consent_preferences", Context.MODE_PRIVATE)
+        @MapConsentDataStore
+        fun provideMapConsentDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "map_consent_preferences")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("map_consent_ds") }
+            )
 
         @Provides
         @Singleton
-        @MapTileProviderSharedPreferences
-        fun provideMapTileProviderSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("map_tile_provider_prefs", Context.MODE_PRIVATE)
+        @MapTileProviderDataStore
+        fun provideMapTileProviderDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "map_tile_provider_prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("map_tile_provider_ds") }
+            )
 
         @Provides
         @Singleton
-        @MeshSharedPreferences
-        fun provideMeshSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
+        @MeshDataStore
+        fun provideMeshDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "mesh-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("mesh_ds") }
+            )
 
         @Provides
         @Singleton
-        @RadioSharedPreferences
-        fun provideRadioSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
+        @RadioDataStore
+        fun provideRadioDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "radio-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("radio_ds") }
+            )
 
         @Provides
         @Singleton
-        @UiSharedPreferences
-        fun provideUiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+        @UiDataStore
+        fun provideUiDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "ui-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("ui_ds") }
+            )
 
         @Provides
         @Singleton
-        @MeshLogSharedPreferences
-        fun provideMeshLogSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("meshlog-prefs", Context.MODE_PRIVATE)
+        @MeshLogDataStore
+        fun provideMeshLogDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "meshlog-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("meshlog_ds") }
+            )
 
         @Provides
         @Singleton
-        @FilterSharedPreferences
-        fun provideFilterSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("filter-prefs", Context.MODE_PRIVATE)
+        @FilterDataStore
+        fun provideFilterDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "filter-prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("filter_ds") }
+            )
     }
 }

@@ -16,16 +16,19 @@
  */
 package org.meshtastic.core.prefs.map
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MapTileProviderSharedPreferences
-import org.meshtastic.core.prefs.preferenceFlow
+import org.meshtastic.core.prefs.di.MapTileProviderDataStore
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -34,21 +37,27 @@ import javax.inject.Singleton
 class MapTileProviderPrefsImpl
 @Inject
 constructor(
-    @MapTileProviderSharedPreferences private val prefs: SharedPreferences,
+    @MapTileProviderDataStore private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapTileProviderPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val customTileProviders: StateFlow<String?> =
-        prefs
-            .preferenceFlow(KEY_CUSTOM_PROVIDERS) { p, k -> p.getString(k, null) }
-            .stateIn(scope, SharingStarted.Eagerly, prefs.getString(KEY_CUSTOM_PROVIDERS, null))
+        dataStore.data
+            .map { it[KEY_CUSTOM_PROVIDERS_PREF] }
+            .stateIn(scope, SharingStarted.Eagerly, null)
 
     override fun setCustomTileProviders(providers: String?) {
-        prefs.edit { putString(KEY_CUSTOM_PROVIDERS, providers) }
+        scope.launch {
+            dataStore.edit { prefs ->
+                if (providers == null) prefs.remove(KEY_CUSTOM_PROVIDERS_PREF)
+                else prefs[KEY_CUSTOM_PROVIDERS_PREF] = providers
+            }
+        }
     }
 
     companion object {
         const val KEY_CUSTOM_PROVIDERS = "custom_tile_providers"
+        val KEY_CUSTOM_PROVIDERS_PREF = stringPreferencesKey(KEY_CUSTOM_PROVIDERS)
     }
 }
