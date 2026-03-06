@@ -24,7 +24,7 @@ interface AnalyticsPrefs {
 
     fun setAnalyticsAllowed(allowed: Boolean)
 
-    val installId: String
+    val installId: StateFlow<String>
 }
 
 /** Reactive interface for homoglyph encoding preferences. */

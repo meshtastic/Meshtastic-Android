@@ -341,7 +341,7 @@ constructor(
             val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
 
             positions.forEach { position ->
-                val rxDateTime = dateFormat.format(((position.time ?: 0).toLong() * 1000L).toInstant().toDate())
+                val rxDateTime = dateFormat.format((position.time.toLong() * 1000L).toInstant().toDate())
                 val latitude = (position.latitude_i ?: 0) * 1e-7
                 val longitude = (position.longitude_i ?: 0) * 1e-7
                 val altitude = position.altitude
@@ -377,7 +377,7 @@ constructor(
             if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
                 if (decoded.want_response == true) return null
                 val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
-                if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
+                if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) return pax
             }
         } catch (e: IOException) {
             Logger.e(e) { "Failed to parse Paxcount from binary data" }

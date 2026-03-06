@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.prefs.di.AnalyticsDataStore
 import org.meshtastic.core.prefs.di.AppDataStore
@@ -56,22 +55,18 @@ constructor(
         scope.launch { analyticsDataStore.edit { prefs -> prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed } }
     }
 
-    private var _installId: String?
-        get() = runBlocking { appDataStore.data.map { it[KEY_INSTALL_ID_PREF] }.stateIn(scope).value }
-        set(value) {
-            scope.launch {
-                appDataStore.edit { prefs ->
-                    if (value == null) {
-                        prefs.remove(KEY_INSTALL_ID_PREF)
-                    } else {
-                        prefs[KEY_INSTALL_ID_PREF] = value
-                    }
+    override val installId: StateFlow<String> =
+        appDataStore.data.map { it[KEY_INSTALL_ID_PREF] ?: "" }.stateIn(scope, SharingStarted.Eagerly, "")
+
+    init {
+        scope.launch {
+            appDataStore.edit { prefs ->
+                if (prefs[KEY_INSTALL_ID_PREF] == null) {
+                    prefs[KEY_INSTALL_ID_PREF] = Uuid.random().toString()
                 }
             }
         }
-
-    override val installId: String
-        get() = _installId ?: Uuid.random().toString().also { _installId = it }
+    }
 
     companion object {
         const val KEY_ANALYTICS_ALLOWED = "allowed"
