@@ -47,7 +47,7 @@ ktor = "3.4.1"
 # Other
 aboutlibraries = "13.2.1"
 coil = "3.4.0"
-dd-sdk-android = "3.7.0"
+dd-sdk-android = "3.7.1"
 detekt = "1.23.8"
 dokka = "2.2.0-Beta"
 devtools-ksp = "2.3.6"
