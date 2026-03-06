@@ -2,91 +2,26 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CommentSpacing:Coroutines.kt$/// Wrap launch with an exception handler, FIXME, move into a utility lib</ID>
-    <ID>CyclomaticComplexMethod:BleError.kt$BleError.Companion$fun from(exception: Throwable): BleError</ID>
-    <ID>CyclomaticComplexMethod:MeshMessageProcessor.kt$MeshMessageProcessor$private fun processReceivedMeshPacket(packet: MeshPacket, myNodeNum: Int?)</ID>
     <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
-    <ID>EmptyClassBlock:DebugLogFile.kt$BinaryLogFile${ }</ID>
-    <ID>EmptyFunctionBlock:NopInterface.kt$NopInterface${ }</ID>
-    <ID>EmptyFunctionBlock:TrustAllX509TrustManager.kt$TrustAllX509TrustManager${}</ID>
-    <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
-    <ID>FinalNewline:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
-    <ID>FinalNewline:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
-    <ID>FinalNewline:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
-    <ID>FinalNewline:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
-    <ID>FinalNewline:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
-    <ID>FinalNewline:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
-    <ID>FinalNewline:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
-    <ID>FinalNewline:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>FinalNewline:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
-    <ID>FinalNewline:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
-    <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
-    <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
-    <ID>FinalNewline:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
     <ID>LongMethod:TCPInterface.kt$TCPInterface$private suspend fun startConnect()</ID>
-    <ID>MagicNumber:Contacts.kt$7</ID>
-    <ID>MagicNumber:Contacts.kt$8</ID>
-    <ID>MagicNumber:MQTTRepository.kt$MQTTRepository$512</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$21972</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
     <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
-    <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$0xff</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$3</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$4</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$8</ID>
     <ID>MagicNumber:TCPInterface.kt$TCPInterface$1000</ID>
-    <ID>MagicNumber:UIState.kt$4</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromNum: ${fromNumCharacteristic?.uuid}, ${fromNumCharacteristic?.instanceId}"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found fromRadio: ${fromRadioCharacteristic?.uuid}, ${fromRadioCharacteristic?.instanceId}"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found logRadio: ${logRadioCharacteristic?.uuid}, ${logRadioCharacteristic?.instanceId}"</ID>
-    <ID>MaxLineLength:NordicBleInterface.kt$NordicBleInterface$"[$address] Found toRadio: ${toRadioCharacteristic?.uuid}, ${toRadioCharacteristic?.instanceId}"</ID>
-    <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
-    <ID>NewLineAtEndOfFile:DateUtils.kt$com.geeksville.mesh.android.DateUtils.kt</ID>
-    <ID>NewLineAtEndOfFile:DebugLogFile.kt$com.geeksville.mesh.android.DebugLogFile.kt</ID>
-    <ID>NewLineAtEndOfFile:InterfaceId.kt$com.geeksville.mesh.repository.radio.InterfaceId.kt</ID>
-    <ID>NewLineAtEndOfFile:InterfaceSpec.kt$com.geeksville.mesh.repository.radio.InterfaceSpec.kt</ID>
-    <ID>NewLineAtEndOfFile:MockInterfaceFactory.kt$com.geeksville.mesh.repository.radio.MockInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
-    <ID>NewLineAtEndOfFile:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
-    <ID>NewLineAtEndOfFile:SerialConnection.kt$com.geeksville.mesh.repository.usb.SerialConnection.kt</ID>
-    <ID>NewLineAtEndOfFile:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
-    <ID>NewLineAtEndOfFile:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:UsbRepositoryModule.kt$com.geeksville.mesh.repository.usb.UsbRepositoryModule.kt</ID>
-    <ID>NoBlankLineBeforeRbrace:DebugLogFile.kt$BinaryLogFile$ </ID>
-    <ID>NoBlankLineBeforeRbrace:NopInterface.kt$NopInterface$ </ID>
-    <ID>NoConsecutiveBlankLines:DebugLogFile.kt$ </ID>
-    <ID>NoEmptyClassBody:DebugLogFile.kt$BinaryLogFile${ }</ID>
-    <ID>NoSemicolons:DateUtils.kt$DateUtils$;</ID>
-    <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
-    <ID>RethrowCaughtException:SyncContinuation.kt$Continuation$throw ex</ID>
-    <ID>ReturnCount:MeshDataHandler.kt$MeshDataHandler$@Suppress("LongMethod") private fun handleStoreForwardPlusPlus(packet: MeshPacket)</ID>
-    <ID>ReturnCount:MeshDataHandler.kt$MeshDataHandler$private fun shouldBatteryNotificationShow(fromNum: Int, t: Telemetry, myNodeNum: Int): Boolean</ID>
-    <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
+    <ID>MaxLineLength:DataSourceModule.kt$DataSourceModule$fun</ID>
+    <ID>ParameterListWrapping:DataSourceModule.kt$DataSourceModule$(impl: BootloaderOtaQuirksJsonDataSourceImpl)</ID>
     <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
-    <ID>SwallowedException:ServiceClient.kt$ServiceClient$ex: IllegalArgumentException</ID>
     <ID>SwallowedException:TCPInterface.kt$TCPInterface$ex: SocketTimeoutException</ID>
-    <ID>TooGenericExceptionCaught:Exceptions.kt$ex: Throwable</ID>
-    <ID>TooGenericExceptionCaught:MQTTRepository.kt$MQTTRepository$ex: Exception</ID>
-    <ID>TooGenericExceptionCaught:MeshDataHandler.kt$MeshDataHandler$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:MeshService.kt$MeshService$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:RadioInterfaceService.kt$RadioInterfaceService$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:SyncContinuation.kt$Continuation$ex: Throwable</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
-    <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Haven't called connect")</ID>
-    <ID>TooGenericExceptionThrown:ServiceClient.kt$ServiceClient$throw Exception("Service not bound")</ID>
-    <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("SyncContinuation timeout")</ID>
-    <ID>TooGenericExceptionThrown:SyncContinuation.kt$SyncContinuation$throw Exception("This shouldn't happen")</ID>
     <ID>TooManyFunctions:NordicBleInterface.kt$NordicBleInterface : IRadioInterface</ID>
-    <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService</ID>
-    <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModel</ID>
     <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
   </CurrentIssues>
 </SmellBaseline>

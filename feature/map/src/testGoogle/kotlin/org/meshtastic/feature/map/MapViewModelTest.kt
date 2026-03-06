@@ -38,16 +38,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.meshtastic.core.data.model.CustomTileProviderConfig
-import org.meshtastic.core.data.repository.CustomTileProviderRepository
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.feature.map.model.CustomTileProviderConfig
+import org.meshtastic.feature.map.prefs.map.GoogleMapsPrefs
+import org.meshtastic.feature.map.repository.CustomTileProviderRepository
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(ExperimentalCoroutinesApi::class)

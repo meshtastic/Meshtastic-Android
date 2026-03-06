@@ -27,15 +27,13 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(projects.core.proto)
-            implementation(libs.androidx.datastore)
-            implementation(libs.androidx.datastore.preferences)
+            api(libs.androidx.datastore)
+            api(libs.androidx.datastore.preferences)
+            api(libs.javax.inject)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }
-        androidMain.dependencies {
-            implementation(libs.hilt.android)
-            implementation(libs.javax.inject)
-        }
+        androidMain.dependencies { implementation(libs.hilt.android) }
     }
 }
 

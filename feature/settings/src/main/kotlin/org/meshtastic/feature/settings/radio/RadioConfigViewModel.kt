@@ -41,8 +41,10 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.buffer
+import okio.sink
+import okio.source
 import org.jetbrains.compose.resources.StringResource
-import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -60,6 +62,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -450,7 +453,7 @@ constructor(
 
     fun importProfile(uri: Uri, onResult: (DeviceProfile) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
-            app.contentResolver.openInputStream(uri)?.use { inputStream ->
+            app.contentResolver.openInputStream(uri)?.source()?.buffer()?.use { inputStream ->
                 importProfileUseCase(inputStream).onSuccess(onResult).onFailure { throw it }
             }
         } catch (ex: Exception) {
@@ -463,7 +466,7 @@ constructor(
         withContext(Dispatchers.IO) {
             try {
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                    FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                    FileOutputStream(parcelFileDescriptor.fileDescriptor).sink().buffer().use { outputStream ->
                         exportProfileUseCase(outputStream, profile)
                             .onSuccess { setResponseStateSuccess() }
                             .onFailure { throw it }
@@ -480,7 +483,7 @@ constructor(
         withContext(Dispatchers.IO) {
             try {
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                    FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                    FileOutputStream(parcelFileDescriptor.fileDescriptor).sink().buffer().use { outputStream ->
                         exportSecurityConfigUseCase(outputStream, securityConfig)
                             .onSuccess { setResponseStateSuccess() }
                             .onFailure { throw it }

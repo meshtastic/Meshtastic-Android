@@ -253,8 +253,9 @@ fun MessageScreen(
         if (hasUnreadMessages == true) {
             if (firstUnreadMessageUuid == null) return@LaunchedEffect // Wait for UUID query
 
-            if (firstUnreadIndex != null) {
-                val targetIndex = (firstUnreadIndex!! - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
+            val index = firstUnreadIndex
+            if (index != null) {
+                val targetIndex = (index - (UnreadUiDefaults.VISIBLE_CONTEXT_COUNT - 1)).coerceAtLeast(0)
                 listState.smartScrollToIndex(coroutineScope = coroutineScope, targetIndex = targetIndex)
                 hasPerformedInitialScroll = true
             } else {

@@ -33,7 +33,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.data.repository.LocationRepository
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -47,6 +46,7 @@ import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCas
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository

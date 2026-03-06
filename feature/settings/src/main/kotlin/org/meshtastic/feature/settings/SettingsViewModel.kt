@@ -31,6 +31,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.BufferedSink
+import okio.buffer
+import okio.sink
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
@@ -50,9 +53,8 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
-import java.io.BufferedWriter
 import java.io.FileNotFoundException
-import java.io.FileWriter
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -176,12 +178,12 @@ constructor(
         }
     }
 
-    private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) {
+    private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedSink) -> Unit) {
         withContext(Dispatchers.IO) {
             try {
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                    FileWriter(parcelFileDescriptor.fileDescriptor).use { fileWriter ->
-                        BufferedWriter(fileWriter).use { writer -> block.invoke(writer) }
+                    FileOutputStream(parcelFileDescriptor.fileDescriptor).sink().buffer().use { writer ->
+                        block.invoke(writer)
                     }
                 }
             } catch (ex: FileNotFoundException) {

@@ -14,44 +14,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.devtools.ksp)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.data" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.data"
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
 
-dependencies {
-    api(projects.core.repository)
-    implementation(projects.core.analytics)
-    implementation(projects.core.common)
-    implementation(projects.core.database)
-    implementation(projects.core.datastore)
-    implementation(libs.androidx.datastore)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(projects.core.di)
-    implementation(projects.core.model)
-    implementation(projects.core.network)
-    implementation(projects.core.prefs)
-    implementation(projects.core.proto)
+    sourceSets {
+        commonMain.dependencies {
+            api(projects.core.repository)
+            implementation(projects.core.common)
+            implementation(projects.core.database)
+            implementation(projects.core.datastore)
+            implementation(projects.core.di)
+            implementation(projects.core.model)
+            implementation(projects.core.network)
+            implementation(projects.core.prefs)
+            implementation(projects.core.proto)
 
-    // Needed because core:data references MeshtasticDatabase (supertype RoomDatabase)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.paging)
-    implementation(libs.androidx.sqlite.bundled)
+            api(libs.javax.inject)
+            implementation(libs.androidx.lifecycle.runtime)
+            implementation(libs.androidx.paging.common)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kermit)
+            implementation(libs.kotlinx.atomicfu)
+            implementation(libs.kotlinx.collections.immutable)
+        }
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime)
-    implementation(libs.androidx.core.location.altitude)
-    implementation(libs.androidx.paging.common)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kermit)
+        androidMain.dependencies {
+            implementation(libs.hilt.android)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.core.location.altitude)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
+            // Needed because core:data references MeshtasticDatabase (supertype RoomDatabase)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.room.paging)
+            implementation(libs.androidx.sqlite.bundled)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mockk)
+        }
+    }
 }
+
+dependencies { add("kspAndroid", libs.hilt.compiler) }

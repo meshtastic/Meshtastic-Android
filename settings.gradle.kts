@@ -17,7 +17,6 @@
 
 include(
     ":app",
-    ":core:analytics",
     ":core:api",
     ":core:barcode",
     ":core:ble",

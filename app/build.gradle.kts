@@ -44,7 +44,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 configure<ApplicationExtension> {
-    namespace = configProperties.getProperty("APPLICATION_ID")
+    namespace = "org.meshtastic.app"
 
     signingConfigs {
         create("release") {
@@ -150,7 +150,7 @@ configure<ApplicationExtension> {
             includeInBundle = false
         }
 
-        testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
+        testInstrumentationRunner = "org.meshtastic.app.TestRunner"
     }
 
     // Configure existing product flavors (defined by convention plugin)
@@ -210,7 +210,6 @@ project.afterEvaluate {
 }
 
 dependencies {
-    implementation(projects.core.analytics)
     implementation(projects.core.ble)
     implementation(projects.core.common)
     implementation(projects.core.data)
@@ -251,10 +250,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.paging.compose)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.okhttp3.logging.interceptor)
     implementation(libs.org.eclipse.paho.client.mqttv3)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
@@ -275,6 +278,16 @@ dependencies {
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
+    googleImplementation(libs.dd.sdk.android.okhttp)
+    googleImplementation(libs.dd.sdk.android.compose)
+    googleImplementation(libs.dd.sdk.android.logs)
+    googleImplementation(libs.dd.sdk.android.rum)
+    googleImplementation(libs.dd.sdk.android.timber)
+    googleImplementation(libs.dd.sdk.android.trace)
+    googleImplementation(libs.dd.sdk.android.trace.otel)
+    googleImplementation(platform(libs.firebase.bom))
+    googleImplementation(libs.firebase.analytics)
+    googleImplementation(libs.firebase.crashlytics)
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }

@@ -14,25 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.flavors)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.devtools.ksp)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.prefs" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.prefs"
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
 
-dependencies {
-    implementation(projects.core.repository)
-    implementation(projects.core.common)
-    implementation(projects.core.di)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.kotlinx.coroutines.core)
-    googleImplementation(libs.maps.compose)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.repository)
+            implementation(projects.core.common)
+            implementation(projects.core.di)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
+            api(libs.javax.inject)
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mockk)
+        }
+    }
 }
+
+dependencies { add("kspAndroid", libs.hilt.compiler) }
