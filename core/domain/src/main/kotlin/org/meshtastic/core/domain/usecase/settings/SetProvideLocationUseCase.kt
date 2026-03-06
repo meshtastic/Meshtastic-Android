@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.UiPrefs
 import javax.inject.Inject
 
 /** Use case for setting whether to provide the node location to the mesh. */

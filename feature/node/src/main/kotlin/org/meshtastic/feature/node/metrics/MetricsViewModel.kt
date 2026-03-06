@@ -45,7 +45,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
-import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -54,6 +53,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
@@ -134,7 +134,7 @@ constructor(
     val availableTimeFrames: StateFlow<List<TimeFrame>> =
         combine(state, environmentState) { currentState, envState ->
             val stateOldest = currentState.oldestTimestampSeconds()
-            val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
+            val envOldest = envState.environmentMetrics.minOfOrNull { it.time.toLong() }?.takeIf { it > 0 }
             val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: nowSeconds
             TimeFrame.entries.filter { it.isAvailable(oldest) }
         }
@@ -148,7 +148,7 @@ constructor(
     val filteredEnvironmentMetrics: StateFlow<List<Telemetry>> =
         combine(environmentState, _timeFrame, state) { envState, timeFrame, currentState ->
             val threshold = timeFrame.timeThreshold()
-            val data = envState.environmentMetrics.filter { (it.time ?: 0).toLong() >= threshold }
+            val data = envState.environmentMetrics.filter { it.time.toLong() >= threshold }
             if (currentState.isFahrenheit) {
                 data.map { telemetry ->
                     val em = telemetry.environment_metrics ?: return@map telemetry
@@ -341,7 +341,7 @@ constructor(
             val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
 
             positions.forEach { position ->
-                val rxDateTime = dateFormat.format(((position.time ?: 0).toLong() * 1000L).toInstant().toDate())
+                val rxDateTime = dateFormat.format((position.time.toLong() * 1000L).toInstant().toDate())
                 val latitude = (position.latitude_i ?: 0) * 1e-7
                 val longitude = (position.longitude_i ?: 0) * 1e-7
                 val altitude = position.altitude
@@ -377,7 +377,7 @@ constructor(
             if (packet != null && decoded != null && decoded.portnum == PortNum.PAXCOUNTER_APP) {
                 if (decoded.want_response == true) return null
                 val pax = ProtoPaxcount.ADAPTER.decode(decoded.payload)
-                if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0 || (pax.uptime ?: 0) != 0) return pax
+                if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) return pax
             }
         } catch (e: IOException) {
             Logger.e(e) { "Failed to parse Paxcount from binary data" }

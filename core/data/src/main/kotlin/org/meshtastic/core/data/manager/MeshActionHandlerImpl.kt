@@ -23,6 +23,7 @@ import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.analytics.DataPair
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.nowMillis
@@ -32,12 +33,11 @@ import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.Reaction
 import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.CommandSender
-import org.meshtastic.core.repository.DatabaseManager
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshMessageProcessor
+import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketRepository
@@ -197,7 +197,7 @@ constructor(
 
     override fun handleRequestPosition(destNum: Int, position: Position, myNodeNum: Int) {
         if (destNum != myNodeNum) {
-            val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
+            val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum).value
             val currentPosition =
                 when {
                     provideLocation && position.isValid() -> position
@@ -343,9 +343,9 @@ constructor(
     }
 
     override fun handleUpdateLastAddress(deviceAddr: String?) {
-        val currentAddr = meshPrefs.deviceAddress
+        val currentAddr = meshPrefs.deviceAddress.value
         if (deviceAddr != currentAddr) {
-            meshPrefs.deviceAddress = deviceAddr
+            meshPrefs.setDeviceAddress(deviceAddr)
             scope.handledLaunch {
                 nodeManager.clear()
                 messageProcessor.get().clearEarlyPackets()

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
@@ -26,7 +25,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.map.MapTileProviderPrefs
+import org.meshtastic.core.repository.MapTileProviderPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -82,7 +81,7 @@ constructor(
         customTileProvidersStateFlow.value.find { it.id == configId }
 
     private fun loadDataFromPrefs() {
-        val jsonString = mapTileProviderPrefs.customTileProviders
+        val jsonString = mapTileProviderPrefs.customTileProviders.value
         if (jsonString != null) {
             try {
                 customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
@@ -99,7 +98,7 @@ constructor(
         withContext(dispatchers.io) {
             try {
                 val jsonString = json.encodeToString(providers)
-                mapTileProviderPrefs.customTileProviders = jsonString
+                mapTileProviderPrefs.setCustomTileProviders(jsonString)
             } catch (e: SerializationException) {
                 Logger.e(e) { "Error serializing tile providers" }
             }

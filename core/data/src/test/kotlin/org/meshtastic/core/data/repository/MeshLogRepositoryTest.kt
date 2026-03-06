@@ -36,7 +36,7 @@ import org.meshtastic.core.database.dao.MeshLogDao
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.EnvironmentMetrics
 import org.meshtastic.proto.FromRadio
@@ -55,7 +55,7 @@ class MeshLogRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
-    private val repository = MeshLogRepository(dbManager, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
+    private val repository = MeshLogRepositoryImpl(dbManager, dispatchers, meshLogPrefs, nodeInfoReadDataSource)
 
     init {
         every { dbManager.currentDb } returns MutableStateFlow(appDatabase)
@@ -81,7 +81,7 @@ class MeshLogRepositoryTest {
             )
 
         // Using reflection to test private method parseTelemetryLog
-        val method = MeshLogRepository::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
+        val method = MeshLogRepositoryImpl::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
         method.isAccessible = true
         val result = method.invoke(repository, meshLog) as Telemetry?
 
@@ -107,7 +107,7 @@ class MeshLogRepositoryTest {
                 fromRadio = FromRadio(packet = meshPacket),
             )
 
-        val method = MeshLogRepository::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
+        val method = MeshLogRepositoryImpl::class.java.getDeclaredMethod("parseTelemetryLog", MeshLog::class.java)
         method.isAccessible = true
         val result = method.invoke(repository, meshLog) as Telemetry?
 

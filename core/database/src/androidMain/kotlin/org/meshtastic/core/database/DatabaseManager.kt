@@ -40,7 +40,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
-import org.meshtastic.core.repository.DatabaseManager as SharedDatabaseManager
+import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Singleton

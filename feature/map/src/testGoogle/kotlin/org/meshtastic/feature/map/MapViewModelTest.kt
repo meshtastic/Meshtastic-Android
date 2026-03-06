@@ -44,7 +44,7 @@ import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
-import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -72,6 +72,22 @@ class MapViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        every { mapPrefs.mapStyle } returns MutableStateFlow(0)
+        every { mapPrefs.showOnlyFavorites } returns MutableStateFlow(false)
+        every { mapPrefs.showWaypointsOnMap } returns MutableStateFlow(true)
+        every { mapPrefs.showPrecisionCircleOnMap } returns MutableStateFlow(true)
+        every { mapPrefs.lastHeardFilter } returns MutableStateFlow(0L)
+        every { mapPrefs.lastHeardTrackFilter } returns MutableStateFlow(0L)
+
+        every { googleMapsPrefs.cameraTargetLat } returns MutableStateFlow(0.0)
+        every { googleMapsPrefs.cameraTargetLng } returns MutableStateFlow(0.0)
+        every { googleMapsPrefs.cameraZoom } returns MutableStateFlow(0f)
+        every { googleMapsPrefs.cameraTilt } returns MutableStateFlow(0f)
+        every { googleMapsPrefs.cameraBearing } returns MutableStateFlow(0f)
+        every { googleMapsPrefs.selectedCustomTileUrl } returns MutableStateFlow(null)
+        every { googleMapsPrefs.selectedGoogleMapType } returns MutableStateFlow(null)
+        every { googleMapsPrefs.hiddenLayerUrls } returns MutableStateFlow(emptySet())
+
         every { customTileProviderRepository.getCustomTileProviders() } returns flowOf(emptyList())
         every { radioConfigRepository.deviceProfileFlow } returns flowOf(mockk(relaxed = true))
         every { uiPreferencesDataSource.theme } returns MutableStateFlow(1)

@@ -38,14 +38,14 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
-import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.repository.CustomEmojiPrefs
+import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
@@ -79,7 +79,7 @@ constructor(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
+    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat.value)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     private val _showFiltered = MutableStateFlow(false)
@@ -109,7 +109,7 @@ constructor(
 
     val frequentEmojis: List<String>
         get() =
-            customEmojiPrefs.customEmojiFrequency
+            customEmojiPrefs.customEmojiFrequency.value
                 ?.split(",")
                 ?.associate { entry ->
                     entry.split("=", limit = 2).takeIf { it.size == 2 }?.let { it[0] to it[1].toInt() } ?: ("" to 0)
@@ -119,7 +119,7 @@ constructor(
                 ?.map { it.first }
                 ?.take(6) ?: listOf("👍", "👎", "😂", "🔥", "❤️", "😮")
 
-    val homoglyphEncodingEnabled = homoglyphEncodingPrefs.getHomoglyphEncodingEnabledChangesFlow()
+    val homoglyphEncodingEnabled = homoglyphEncodingPrefs.homoglyphEncodingEnabled
 
     val firstUnreadMessageUuid: StateFlow<Long?> =
         contactKeyForPagedMessages
@@ -163,7 +163,7 @@ constructor(
         return pagedMessagesForContactKey
     }
 
-    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
+    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.setShowQuickChat(it) }
 
     fun toggleShowFiltered() {
         _showFiltered.update { !it }

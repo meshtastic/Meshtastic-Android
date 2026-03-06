@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -43,11 +44,10 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
-import org.meshtastic.core.prefs.ui.UiPrefs
-import org.meshtastic.core.repository.DatabaseManager
+import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 import java.io.BufferedWriter
@@ -126,10 +126,10 @@ constructor(
     }
 
     // MeshLog retention period (bounded by MeshLogPrefsImpl constants)
-    private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays)
+    private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)
     val meshLogRetentionDays: StateFlow<Int> = _meshLogRetentionDays.asStateFlow()
 
-    private val _meshLogLoggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled)
+    private val _meshLogLoggingEnabled = MutableStateFlow(meshLogPrefs.loggingEnabled.value)
     val meshLogLoggingEnabled: StateFlow<Boolean> = _meshLogLoggingEnabled.asStateFlow()
 
     fun setMeshLogRetentionDays(days: Int) {

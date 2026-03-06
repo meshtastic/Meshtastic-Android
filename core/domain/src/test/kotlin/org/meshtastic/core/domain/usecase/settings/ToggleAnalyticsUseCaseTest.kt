@@ -21,7 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
+import org.meshtastic.core.repository.AnalyticsPrefs
 
 class ToggleAnalyticsUseCaseTest {
 
@@ -37,24 +37,24 @@ class ToggleAnalyticsUseCaseTest {
     @Test
     fun `invoke toggles analytics from false to true`() {
         // Arrange
-        every { analyticsPrefs.analyticsAllowed } returns false
+        every { analyticsPrefs.analyticsAllowed.value } returns false
 
         // Act
         useCase()
 
         // Assert
-        verify { analyticsPrefs.analyticsAllowed = true }
+        verify { analyticsPrefs.setAnalyticsAllowed(true) }
     }
 
     @Test
     fun `invoke toggles analytics from true to false`() {
         // Arrange
-        every { analyticsPrefs.analyticsAllowed } returns true
+        every { analyticsPrefs.analyticsAllowed.value } returns true
 
         // Act
         useCase()
 
         // Assert
-        verify { analyticsPrefs.analyticsAllowed = false }
+        verify { analyticsPrefs.setAnalyticsAllowed(false) }
     }
 }

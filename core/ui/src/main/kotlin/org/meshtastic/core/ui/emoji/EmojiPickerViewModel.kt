@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.ui.emoji
 
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
+import org.meshtastic.core.repository.CustomEmojiPrefs
 import javax.inject.Inject
 
 @HiltViewModel
 class EmojiPickerViewModel @Inject constructor(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
 
     var customEmojiFrequency: String?
-        get() = customEmojiPrefs.customEmojiFrequency
+        get() = customEmojiPrefs.customEmojiFrequency.value
         set(value) {
-            customEmojiPrefs.customEmojiFrequency = value
+            customEmojiPrefs.setCustomEmojiFrequency(value)
         }
 }

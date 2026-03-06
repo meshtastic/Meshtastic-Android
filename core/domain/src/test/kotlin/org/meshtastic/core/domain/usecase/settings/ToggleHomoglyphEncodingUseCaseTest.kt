@@ -21,7 +21,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
+import org.meshtastic.core.repository.HomoglyphPrefs
 
 class ToggleHomoglyphEncodingUseCaseTest {
 
@@ -37,24 +37,24 @@ class ToggleHomoglyphEncodingUseCaseTest {
     @Test
     fun `invoke toggles homoglyph encoding from false to true`() {
         // Arrange
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns false
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns false
 
         // Act
         useCase()
 
         // Assert
-        verify { homoglyphEncodingPrefs.homoglyphEncodingEnabled = true }
+        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(true) }
     }
 
     @Test
     fun `invoke toggles homoglyph encoding from true to false`() {
         // Arrange
-        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns true
+        every { homoglyphEncodingPrefs.homoglyphEncodingEnabled.value } returns true
 
         // Act
         useCase()
 
         // Assert
-        verify { homoglyphEncodingPrefs.homoglyphEncodingEnabled = false }
+        verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
     }
 }

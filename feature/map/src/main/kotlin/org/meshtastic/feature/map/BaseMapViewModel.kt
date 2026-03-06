@@ -30,7 +30,7 @@ import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.resources.Res
@@ -90,47 +90,48 @@ abstract class BaseMapViewModel(
             }
             .stateInWhileSubscribed(initialValue = emptyMap())
 
-    private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites)
+    private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites.value)
     val showOnlyFavoritesOnMap = showOnlyFavorites
 
     fun toggleOnlyFavorites() {
         val newValue = !showOnlyFavorites.value
         showOnlyFavorites.value = newValue
-        mapPrefs.showOnlyFavorites = newValue
+        mapPrefs.setShowOnlyFavorites(newValue)
     }
 
-    private val showWaypoints = MutableStateFlow(mapPrefs.showWaypointsOnMap)
+    private val showWaypoints = MutableStateFlow(mapPrefs.showWaypointsOnMap.value)
     val showWaypointsOnMap = showWaypoints
 
     fun toggleShowWaypointsOnMap() {
         val newValue = !showWaypoints.value
         showWaypoints.value = newValue
-        mapPrefs.showWaypointsOnMap = newValue
+        mapPrefs.setShowWaypointsOnMap(newValue)
     }
 
-    private val showPrecisionCircle = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
+    private val showPrecisionCircle = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap.value)
     val showPrecisionCircleOnMap = showPrecisionCircle
 
     fun toggleShowPrecisionCircleOnMap() {
         val newValue = !showPrecisionCircle.value
         showPrecisionCircle.value = newValue
-        mapPrefs.showPrecisionCircleOnMap = newValue
+        mapPrefs.setShowPrecisionCircleOnMap(newValue)
     }
 
-    private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter))
+    private val lastHeardFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardFilter.value))
     val lastHeardFilter = lastHeardFilterValue
 
     fun setLastHeardFilter(filter: LastHeardFilter) {
         lastHeardFilterValue.value = filter
-        mapPrefs.lastHeardFilter = filter.seconds
+        mapPrefs.setLastHeardFilter(filter.seconds)
     }
 
-    private val lastHeardTrackFilterValue = MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter))
+    private val lastHeardTrackFilterValue =
+        MutableStateFlow(LastHeardFilter.fromSeconds(mapPrefs.lastHeardTrackFilter.value))
     val lastHeardTrackFilter = lastHeardTrackFilterValue
 
     fun setLastHeardTrackFilter(filter: LastHeardFilter) {
         lastHeardTrackFilterValue.value = filter
-        mapPrefs.lastHeardTrackFilter = filter.seconds
+        mapPrefs.setLastHeardTrackFilter(filter.seconds)
     }
 
     abstract fun getUser(userId: String?): org.meshtastic.proto.User

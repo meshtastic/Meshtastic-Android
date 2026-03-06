@@ -44,8 +44,8 @@ import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
-import org.meshtastic.core.prefs.mesh.MeshPrefs
-import org.meshtastic.core.prefs.meshlog.MeshLogPrefs
+import org.meshtastic.core.repository.MeshLogPrefs
+import org.meshtastic.core.repository.MeshPrefs
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
@@ -114,7 +114,7 @@ open class MeshUtilApplication :
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
         val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
-        applicationScope.launch { entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress) }
+        applicationScope.launch { entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress.value) }
     }
 
     override fun onTerminate() {

@@ -45,9 +45,9 @@ import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
 import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
 import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
-import org.meshtastic.core.prefs.homoglyph.HomoglyphPrefs
-import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository

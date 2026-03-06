@@ -18,8 +18,8 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import okio.ByteString.Companion.toByteString
-import org.meshtastic.core.prefs.mesh.MeshPrefs
 import org.meshtastic.core.repository.HistoryManager
+import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.MeshPacket
@@ -71,7 +71,7 @@ constructor(
     }
 
     private fun activeDeviceAddress(): String? =
-        meshPrefs.deviceAddress?.takeIf { !it.equals(NO_DEVICE_SELECTED, ignoreCase = true) && it.isNotBlank() }
+        meshPrefs.deviceAddress.value?.takeIf { !it.equals(NO_DEVICE_SELECTED, ignoreCase = true) && it.isNotBlank() }
 
     override fun requestHistoryReplay(
         trigger: String,
@@ -86,7 +86,7 @@ constructor(
             return
         }
 
-        val lastRequest = meshPrefs.getStoreForwardLastRequest(address)
+        val lastRequest = meshPrefs.getStoreForwardLastRequest(address).value
         val (window, max) =
             resolveHistoryRequestParameters(
                 storeForwardConfig?.history_return_window ?: 0,
@@ -116,7 +116,7 @@ constructor(
     override fun updateStoreForwardLastRequest(source: String, lastRequest: Int, transport: String) {
         if (lastRequest <= 0) return
         val address = activeDeviceAddress() ?: return
-        val current = meshPrefs.getStoreForwardLastRequest(address)
+        val current = meshPrefs.getStoreForwardLastRequest(address).value
         if (lastRequest != current) {
             meshPrefs.setStoreForwardLastRequest(address, lastRequest)
             historyLog(

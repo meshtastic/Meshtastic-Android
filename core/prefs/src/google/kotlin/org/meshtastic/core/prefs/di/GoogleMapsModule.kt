@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Meshtastic LLC
+ * Copyright (c) 2025-2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.prefs.di
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.SharedPreferencesMigration
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.prefs.map.GoogleMapsPrefs
 import org.meshtastic.core.prefs.map.GoogleMapsPrefsImpl
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-// Pref store qualifiers are internal to prevent prefs stores from being injected directly.
-// Consuming code should always inject one of the prefs repositories.
-
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-internal annotation class GoogleMapsSharedPreferences
+internal annotation class GoogleMapsDataStore
 
 @InstallIn(SingletonComponent::class)
 @Module
@@ -44,11 +47,16 @@ interface GoogleMapsModule {
     @Binds fun bindGoogleMapsPrefs(googleMapsPrefsImpl: GoogleMapsPrefsImpl): GoogleMapsPrefs
 
     companion object {
+        private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
         @Provides
         @Singleton
-        @GoogleMapsSharedPreferences
-        fun provideGoogleMapsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-            context.getSharedPreferences("google_maps_prefs", Context.MODE_PRIVATE)
+        @GoogleMapsDataStore
+        fun provideGoogleMapsDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "google_maps_prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("google_maps_ds") },
+            )
     }
 }

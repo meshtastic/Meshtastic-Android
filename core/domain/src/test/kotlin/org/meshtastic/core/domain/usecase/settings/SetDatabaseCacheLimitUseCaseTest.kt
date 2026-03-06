@@ -20,8 +20,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.database.DatabaseConstants
-import org.meshtastic.core.repository.DatabaseManager
 
 class SetDatabaseCacheLimitUseCaseTest {
 

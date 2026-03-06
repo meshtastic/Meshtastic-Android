@@ -31,6 +31,8 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.database)
     implementation(projects.core.datastore)
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.preferences)
     implementation(projects.core.di)
     implementation(projects.core.model)
     implementation(projects.core.network)

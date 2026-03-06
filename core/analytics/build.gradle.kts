@@ -27,6 +27,7 @@ plugins {
 
 dependencies {
     implementation(projects.core.prefs)
+    implementation(projects.core.repository)
 
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.lifecycle.process)

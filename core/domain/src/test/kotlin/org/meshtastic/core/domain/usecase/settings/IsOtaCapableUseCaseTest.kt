@@ -29,9 +29,9 @@ import org.junit.Test
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.prefs.radio.RadioPrefs
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.RadioPrefs
 
 class IsOtaCapableUseCaseTest {
 
@@ -82,7 +82,7 @@ class IsOtaCapableUseCaseTest {
         val node = mockk<Node>(relaxed = true)
         ourNodeInfoFlow.value = node
         connectionStateFlow.value = ConnectionState.Connected
-        every { radioPrefs.devAddr } returns "m123" // Mock
+        every { radioPrefs.devAddr } returns MutableStateFlow("m123") // Mock
 
         useCase().test {
             assertFalse(awaitItem())
@@ -95,7 +95,7 @@ class IsOtaCapableUseCaseTest {
         val node = mockk<Node>(relaxed = true)
         ourNodeInfoFlow.value = node
         connectionStateFlow.value = ConnectionState.Connected
-        every { radioPrefs.devAddr } returns "x123" // BLE
+        every { radioPrefs.devAddr } returns MutableStateFlow("x123") // BLE
 
         val hw = mockk<org.meshtastic.core.model.DeviceHardware> { every { requiresDfu } returns true }
         coEvery { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
@@ -111,7 +111,7 @@ class IsOtaCapableUseCaseTest {
         val node = mockk<Node>(relaxed = true)
         ourNodeInfoFlow.value = node
         connectionStateFlow.value = ConnectionState.Connected
-        every { radioPrefs.devAddr } returns "x123" // BLE
+        every { radioPrefs.devAddr } returns MutableStateFlow("x123") // BLE
 
         val hw = mockk<org.meshtastic.core.model.DeviceHardware> { every { requiresDfu } returns false }
         coEvery { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)

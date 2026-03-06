@@ -42,7 +42,6 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.meshtastic.core.analytics.platform.PlatformAnalytics
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
-import org.meshtastic.core.data.repository.MeshLogRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.MeshActivity
@@ -52,6 +51,7 @@ import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
