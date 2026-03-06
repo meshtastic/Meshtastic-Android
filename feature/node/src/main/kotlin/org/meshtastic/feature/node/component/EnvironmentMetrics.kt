@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.model.util.UnitConversions.milliToBase
 import org.meshtastic.core.model.util.UnitConversions.toTempString
 import org.meshtastic.core.model.util.toSmallDistanceString
 import org.meshtastic.core.model.util.toSpeedString
@@ -100,7 +101,7 @@ internal fun EnvironmentMetrics(
                         add(VectorMetricInfo(Res.string.voltage, "%.2fV".format(v), Icons.Rounded.Bolt))
                     }
                     current?.let { c ->
-                        add(VectorMetricInfo(Res.string.current, "%.1fmA".format(c), Icons.Rounded.Power))
+                        add(VectorMetricInfo(Res.string.current, "%.1fA".format(c.milliToBase), Icons.Rounded.Power))
                     }
                     iaq?.let { i -> add(VectorMetricInfo(Res.string.iaq, i.toString(), Icons.Rounded.Air)) }
                     distance?.let { d ->

@@ -20,7 +20,6 @@ import kotlin.math.ln
 import kotlin.math.roundToInt
 
 object UnitConversions {
-
     @Suppress("MagicNumber")
     fun celsiusToFahrenheit(celsius: Float): Float = (celsius * 1.8F) + 32
 
@@ -44,7 +43,7 @@ object UnitConversions {
     }
 
     /**
-     * Calculated the dew point based on the Magnus-Tetens approximation which is a widely used formula for calculating
+     * Calculates the dew point based on the Magnus-Tetens approximation which is a widely used formula for calculating
      * dew point temperature.
      */
     @Suppress("MagicNumber")
@@ -53,4 +52,13 @@ object UnitConversions {
         val alpha = (a * tempCelsius) / (b + tempCelsius) + ln(humidity / 100f)
         return (b * alpha) / (a - alpha)
     }
+
+    /**
+     * Converts numbers from milli to unit. examples:
+     * - 1000 milliamperes will be converted into 1 ampere,
+     * - 100 millimeters to 0.1 meters
+     */
+    @Suppress("MagicNumber")
+    val Float.milliToBase: Float
+        get() = this / 1000f
 }
