@@ -44,16 +44,10 @@ constructor(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val filterEnabled: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_FILTER_ENABLED_PREF] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data.map { it[KEY_FILTER_ENABLED_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setFilterEnabled(enabled: Boolean) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                prefs[KEY_FILTER_ENABLED_PREF] = enabled
-            }
-        }
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_FILTER_ENABLED_PREF] = enabled } }
     }
 
     override val filterWords: StateFlow<Set<String>> =
@@ -62,11 +56,7 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, emptySet())
 
     override fun setFilterWords(words: Set<String>) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                prefs[KEY_FILTER_WORDS_PREF] = words
-            }
-        }
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_FILTER_WORDS_PREF] = words } }
     }
 
     companion object {

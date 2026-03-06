@@ -53,22 +53,19 @@ constructor(
             .stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setAnalyticsAllowed(allowed: Boolean) {
-        scope.launch {
-            analyticsDataStore.edit { prefs ->
-                prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed
-            }
-        }
+        scope.launch { analyticsDataStore.edit { prefs -> prefs[KEY_ANALYTICS_ALLOWED_PREF] = allowed } }
     }
 
     private var _installId: String?
-        get() = runBlocking {
-            appDataStore.data.map { it[KEY_INSTALL_ID_PREF] }.stateIn(scope).value
-        }
+        get() = runBlocking { appDataStore.data.map { it[KEY_INSTALL_ID_PREF] }.stateIn(scope).value }
         set(value) {
             scope.launch {
                 appDataStore.edit { prefs ->
-                    if (value == null) prefs.remove(KEY_INSTALL_ID_PREF)
-                    else prefs[KEY_INSTALL_ID_PREF] = value
+                    if (value == null) {
+                        prefs.remove(KEY_INSTALL_ID_PREF)
+                    } else {
+                        prefs[KEY_INSTALL_ID_PREF] = value
+                    }
                 }
             }
         }

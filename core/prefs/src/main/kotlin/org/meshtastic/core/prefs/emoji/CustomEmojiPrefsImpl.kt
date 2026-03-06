@@ -43,15 +43,16 @@ constructor(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val customEmojiFrequency: StateFlow<String?> =
-        dataStore.data
-            .map { it[KEY_EMOJI_FREQ_PREF] }
-            .stateIn(scope, SharingStarted.Eagerly, null)
+        dataStore.data.map { it[KEY_EMOJI_FREQ_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
 
     override fun setCustomEmojiFrequency(frequency: String?) {
         scope.launch {
             dataStore.edit { prefs ->
-                if (frequency == null) prefs.remove(KEY_EMOJI_FREQ_PREF)
-                else prefs[KEY_EMOJI_FREQ_PREF] = frequency
+                if (frequency == null) {
+                    prefs.remove(KEY_EMOJI_FREQ_PREF)
+                } else {
+                    prefs[KEY_EMOJI_FREQ_PREF] = frequency
+                }
             }
         }
     }

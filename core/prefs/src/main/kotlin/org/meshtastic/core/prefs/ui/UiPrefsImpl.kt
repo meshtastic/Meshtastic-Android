@@ -56,9 +56,7 @@ constructor(
     }
 
     override val showQuickChat: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data.map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setShowQuickChat(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = value } }
@@ -67,9 +65,7 @@ constructor(
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
         provideNodeLocationFlows.getOrPut(nodeNum) {
             val key = booleanPreferencesKey(provideLocationKey(nodeNum))
-            dataStore.data
-                .map { it[key] ?: false }
-                .stateIn(scope, SharingStarted.Eagerly, false)
+            dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
         }
 
     override fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean) {

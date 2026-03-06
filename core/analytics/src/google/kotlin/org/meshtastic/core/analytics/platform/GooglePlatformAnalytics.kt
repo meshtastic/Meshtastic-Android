@@ -112,8 +112,7 @@ constructor(
         updateAnalyticsConsent(analyticsPrefs.analyticsAllowed.value)
 
         // Subscribe to analytics preference changes
-        analyticsPrefs
-            .analyticsAllowed
+        analyticsPrefs.analyticsAllowed
             .onEach { allowed -> updateAnalyticsConsent(allowed) }
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }

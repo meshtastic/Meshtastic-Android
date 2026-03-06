@@ -128,13 +128,18 @@ interface MapTileProviderPrefs {
 /** Reactive interface for radio settings. */
 interface RadioPrefs {
     val devAddr: StateFlow<String?>
+
     fun setDevAddr(address: String?)
 }
 
 fun RadioPrefs.isBle() = devAddr.value?.startsWith("x") == true
+
 fun RadioPrefs.isSerial() = devAddr.value?.startsWith("s") == true
+
 fun RadioPrefs.isMock() = devAddr.value?.startsWith("m") == true
+
 fun RadioPrefs.isTcp() = devAddr.value?.startsWith("t") == true
+
 fun RadioPrefs.isNoop() = devAddr.value?.startsWith("n") == true
 
 /** Reactive interface for mesh connection settings. */

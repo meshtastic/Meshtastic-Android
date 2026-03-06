@@ -43,16 +43,10 @@ constructor(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val homoglyphEncodingEnabled: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_ENABLED_PREF] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data.map { it[KEY_ENABLED_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setHomoglyphEncodingEnabled(enabled: Boolean) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                prefs[KEY_ENABLED_PREF] = enabled
-            }
-        }
+        scope.launch { dataStore.edit { prefs -> prefs[KEY_ENABLED_PREF] = enabled } }
     }
 
     companion object {

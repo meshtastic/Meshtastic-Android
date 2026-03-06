@@ -43,15 +43,16 @@ constructor(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val customTileProviders: StateFlow<String?> =
-        dataStore.data
-            .map { it[KEY_CUSTOM_PROVIDERS_PREF] }
-            .stateIn(scope, SharingStarted.Eagerly, null)
+        dataStore.data.map { it[KEY_CUSTOM_PROVIDERS_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
 
     override fun setCustomTileProviders(providers: String?) {
         scope.launch {
             dataStore.edit { prefs ->
-                if (providers == null) prefs.remove(KEY_CUSTOM_PROVIDERS_PREF)
-                else prefs[KEY_CUSTOM_PROVIDERS_PREF] = providers
+                if (providers == null) {
+                    prefs.remove(KEY_CUSTOM_PROVIDERS_PREF)
+                } else {
+                    prefs[KEY_CUSTOM_PROVIDERS_PREF] = providers
+                }
             }
         }
     }

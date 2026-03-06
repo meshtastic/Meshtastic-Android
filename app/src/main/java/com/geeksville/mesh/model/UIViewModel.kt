@@ -120,7 +120,8 @@ constructor(
         evaluateTracerouteMapAvailability(
             forwardRoute = forwardRoute,
             returnRoute = returnRoute,
-            positionedNodeNums = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet(),
+            positionedNodeNums =
+            nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }.map { it.num }.toSet(),
         )
 
     fun showAlert(

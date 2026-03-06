@@ -45,54 +45,42 @@ constructor(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val mapStyle: StateFlow<Int> =
-        dataStore.data
-            .map { it[KEY_MAP_STYLE_PREF] ?: 0 }
-            .stateIn(scope, SharingStarted.Eagerly, 0)
+        dataStore.data.map { it[KEY_MAP_STYLE_PREF] ?: 0 }.stateIn(scope, SharingStarted.Eagerly, 0)
 
     override fun setMapStyle(value: Int) {
         scope.launch { dataStore.edit { it[KEY_MAP_STYLE_PREF] = value } }
     }
 
     override val showOnlyFavorites: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_SHOW_ONLY_FAVORITES_PREF] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data.map { it[KEY_SHOW_ONLY_FAVORITES_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
     override fun setShowOnlyFavorites(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_SHOW_ONLY_FAVORITES_PREF] = value } }
     }
 
     override val showWaypointsOnMap: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_SHOW_WAYPOINTS_PREF] ?: true }
-            .stateIn(scope, SharingStarted.Eagerly, true)
+        dataStore.data.map { it[KEY_SHOW_WAYPOINTS_PREF] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 
     override fun setShowWaypointsOnMap(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_SHOW_WAYPOINTS_PREF] = value } }
     }
 
     override val showPrecisionCircleOnMap: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_SHOW_PRECISION_CIRCLE_PREF] ?: true }
-            .stateIn(scope, SharingStarted.Eagerly, true)
+        dataStore.data.map { it[KEY_SHOW_PRECISION_CIRCLE_PREF] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 
     override fun setShowPrecisionCircleOnMap(value: Boolean) {
         scope.launch { dataStore.edit { it[KEY_SHOW_PRECISION_CIRCLE_PREF] = value } }
     }
 
     override val lastHeardFilter: StateFlow<Long> =
-        dataStore.data
-            .map { it[KEY_LAST_HEARD_FILTER_PREF] ?: 0L }
-            .stateIn(scope, SharingStarted.Eagerly, 0L)
+        dataStore.data.map { it[KEY_LAST_HEARD_FILTER_PREF] ?: 0L }.stateIn(scope, SharingStarted.Eagerly, 0L)
 
     override fun setLastHeardFilter(value: Long) {
         scope.launch { dataStore.edit { it[KEY_LAST_HEARD_FILTER_PREF] = value } }
     }
 
     override val lastHeardTrackFilter: StateFlow<Long> =
-        dataStore.data
-            .map { it[KEY_LAST_HEARD_TRACK_FILTER_PREF] ?: 0L }
-            .stateIn(scope, SharingStarted.Eagerly, 0L)
+        dataStore.data.map { it[KEY_LAST_HEARD_TRACK_FILTER_PREF] ?: 0L }.stateIn(scope, SharingStarted.Eagerly, 0L)
 
     override fun setLastHeardTrackFilter(value: Long) {
         scope.launch { dataStore.edit { it[KEY_LAST_HEARD_TRACK_FILTER_PREF] = value } }

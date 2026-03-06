@@ -71,4 +71,3 @@ constructor(
         val KEY_LOGGING_ENABLED_PREF = booleanPreferencesKey(LOGGING_ENABLED_KEY)
     }
 }
-

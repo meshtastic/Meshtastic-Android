@@ -24,5 +24,4 @@ open class ToggleHomoglyphEncodingUseCase @Inject constructor(private val homogl
     operator fun invoke() {
         homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
     }
-
 }

@@ -110,15 +110,25 @@ internal annotation class FilterDataStore
 interface PrefsModule {
 
     @Binds fun bindAnalyticsPrefs(analyticsPrefsImpl: AnalyticsPrefsImpl): AnalyticsPrefs
+
     @Binds fun bindHomoglyphEncodingPrefs(homoglyphEncodingPrefsImpl: HomoglyphPrefsImpl): HomoglyphPrefs
+
     @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
+
     @Binds fun bindMapConsentPrefs(mapConsentPrefsImpl: MapConsentPrefsImpl): MapConsentPrefs
+
     @Binds fun bindMapPrefs(mapPrefsImpl: MapPrefsImpl): MapPrefs
+
     @Binds fun bindMapTileProviderPrefs(mapTileProviderPrefsImpl: MapTileProviderPrefsImpl): MapTileProviderPrefs
+
     @Binds fun bindMeshPrefs(meshPrefsImpl: MeshPrefsImpl): MeshPrefs
+
     @Binds fun bindMeshLogPrefs(meshLogPrefsImpl: MeshLogPrefsImpl): MeshLogPrefs
+
     @Binds fun bindRadioPrefs(radioPrefsImpl: RadioPrefsImpl): RadioPrefs
+
     @Binds fun bindUiPrefs(uiPrefsImpl: UiPrefsImpl): UiPrefs
+
     @Binds fun bindFilterPrefs(filterPrefsImpl: FilterPrefsImpl): FilterPrefs
 
     companion object {
@@ -131,7 +141,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "analytics-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("analytics_ds") }
+                produceFile = { context.preferencesDataStoreFile("analytics_ds") },
             )
 
         @Provides
@@ -141,7 +151,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "homoglyph-encoding-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("homoglyph_encoding_ds") }
+                produceFile = { context.preferencesDataStoreFile("homoglyph_encoding_ds") },
             )
 
         @Provides
@@ -151,7 +161,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("app_ds") }
+                produceFile = { context.preferencesDataStoreFile("app_ds") },
             )
 
         @Provides
@@ -161,7 +171,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "org.geeksville.emoji.prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("custom_emoji_ds") }
+                produceFile = { context.preferencesDataStoreFile("custom_emoji_ds") },
             )
 
         @Provides
@@ -171,7 +181,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "map_prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("map_ds") }
+                produceFile = { context.preferencesDataStoreFile("map_ds") },
             )
 
         @Provides
@@ -181,7 +191,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "map_consent_preferences")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("map_consent_ds") }
+                produceFile = { context.preferencesDataStoreFile("map_consent_ds") },
             )
 
         @Provides
@@ -191,7 +201,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "map_tile_provider_prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("map_tile_provider_ds") }
+                produceFile = { context.preferencesDataStoreFile("map_tile_provider_ds") },
             )
 
         @Provides
@@ -201,7 +211,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "mesh-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("mesh_ds") }
+                produceFile = { context.preferencesDataStoreFile("mesh_ds") },
             )
 
         @Provides
@@ -211,7 +221,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "radio-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("radio_ds") }
+                produceFile = { context.preferencesDataStoreFile("radio_ds") },
             )
 
         @Provides
@@ -221,7 +231,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "ui-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("ui_ds") }
+                produceFile = { context.preferencesDataStoreFile("ui_ds") },
             )
 
         @Provides
@@ -231,7 +241,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "meshlog-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("meshlog_ds") }
+                produceFile = { context.preferencesDataStoreFile("meshlog_ds") },
             )
 
         @Provides
@@ -241,7 +251,7 @@ interface PrefsModule {
             PreferenceDataStoreFactory.create(
                 migrations = listOf(SharedPreferencesMigration(context, "filter-prefs")),
                 scope = scope,
-                produceFile = { context.preferencesDataStoreFile("filter_ds") }
+                produceFile = { context.preferencesDataStoreFile("filter_ds") },
             )
     }
 }

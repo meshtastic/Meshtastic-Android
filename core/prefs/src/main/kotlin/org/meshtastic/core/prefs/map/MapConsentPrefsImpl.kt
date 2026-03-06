@@ -47,16 +47,10 @@ constructor(
 
     override fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean> = consentFlows.getOrPut(nodeNum) {
         val key = booleanPreferencesKey(nodeNum.toString())
-        dataStore.data
-            .map { it[key] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
     }
 
     override fun setShouldReportLocation(nodeNum: Int?, report: Boolean) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                prefs[booleanPreferencesKey(nodeNum.toString())] = report
-            }
-        }
+        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(nodeNum.toString())] = report } }
     }
 }

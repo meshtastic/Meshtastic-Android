@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -26,26 +27,30 @@ import org.meshtastic.core.repository.FilterPrefs
 
 class MessageFilterImplTest {
     private lateinit var filterPrefs: FilterPrefs
+    private lateinit var filterEnabledFlow: MutableStateFlow<Boolean>
+    private lateinit var filterWordsFlow: MutableStateFlow<Set<String>>
     private lateinit var filterService: MessageFilterImpl
 
     @Before
     fun setup() {
+        filterEnabledFlow = MutableStateFlow(true)
+        filterWordsFlow = MutableStateFlow(setOf("spam", "bad"))
         filterPrefs = mockk {
-            every { filterEnabled } returns true
-            every { filterWords } returns setOf("spam", "bad")
+            every { filterEnabled } returns filterEnabledFlow
+            every { filterWords } returns filterWordsFlow
         }
         filterService = MessageFilterImpl(filterPrefs)
     }
 
     @Test
     fun `shouldFilter returns false when filter is disabled`() {
-        every { filterPrefs.filterEnabled.value } returns false
+        filterEnabledFlow.value = false
         assertFalse(filterService.shouldFilter("spam message"))
     }
 
     @Test
     fun `shouldFilter returns false when filter words is empty`() {
-        every { filterPrefs.filterWords.value } returns emptySet()
+        filterWordsFlow.value = emptySet()
         filterService.rebuildPatterns()
         assertFalse(filterService.shouldFilter("any message"))
     }
@@ -70,7 +75,7 @@ class MessageFilterImplTest {
 
     @Test
     fun `shouldFilter supports regex patterns`() {
-        every { filterPrefs.filterWords.value } returns setOf("regex:test\\d+")
+        filterWordsFlow.value = setOf("regex:test\\d+")
         filterService.rebuildPatterns()
         assertTrue(filterService.shouldFilter("this is test123"))
         assertFalse(filterService.shouldFilter("this is test"))
@@ -78,7 +83,7 @@ class MessageFilterImplTest {
 
     @Test
     fun `shouldFilter handles invalid regex gracefully`() {
-        every { filterPrefs.filterWords.value } returns setOf("regex:[invalid")
+        filterWordsFlow.value = setOf("regex:[invalid")
         filterService.rebuildPatterns()
         assertFalse(filterService.shouldFilter("any message"))
     }

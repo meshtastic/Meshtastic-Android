@@ -57,32 +57,27 @@ constructor(
     override fun setDeviceAddress(address: String?) {
         scope.launch {
             dataStore.edit { prefs ->
-                if (address == null) prefs.remove(KEY_DEVICE_ADDRESS_PREF)
-                else prefs[KEY_DEVICE_ADDRESS_PREF] = address
+                if (address == null) {
+                    prefs.remove(KEY_DEVICE_ADDRESS_PREF)
+                } else {
+                    prefs[KEY_DEVICE_ADDRESS_PREF] = address
+                }
             }
         }
     }
 
     override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = locationFlows.getOrPut(nodeNum) {
         val key = booleanPreferencesKey(provideLocationKey(nodeNum))
-        dataStore.data
-            .map { it[key] ?: false }
-            .stateIn(scope, SharingStarted.Eagerly, false)
+        dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
     }
 
     override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
-        scope.launch {
-            dataStore.edit { prefs ->
-                prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = value
-            }
-        }
+        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = value } }
     }
 
     override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = storeForwardFlows.getOrPut(address) {
         val key = intPreferencesKey(storeForwardKey(address))
-        dataStore.data
-            .map { it[key] ?: 0 }
-            .stateIn(scope, SharingStarted.Eagerly, 0)
+        dataStore.data.map { it[key] ?: 0 }.stateIn(scope, SharingStarted.Eagerly, 0)
     }
 
     override fun setStoreForwardLastRequest(address: String?, value: Int) {
@@ -117,4 +112,3 @@ constructor(
 }
 
 private const val NO_DEVICE_SELECTED = "n"
-

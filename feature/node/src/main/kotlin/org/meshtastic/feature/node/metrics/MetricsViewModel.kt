@@ -134,7 +134,7 @@ constructor(
     val availableTimeFrames: StateFlow<List<TimeFrame>> =
         combine(state, environmentState) { currentState, envState ->
             val stateOldest = currentState.oldestTimestampSeconds()
-            val envOldest = envState.environmentMetrics.minOfOrNull { (it.time ?: 0).toLong() }?.takeIf { it > 0 }
+            val envOldest = envState.environmentMetrics.minOfOrNull { it.time.toLong() }?.takeIf { it > 0 }
             val oldest = listOfNotNull(stateOldest, envOldest).minOrNull() ?: nowSeconds
             TimeFrame.entries.filter { it.isAvailable(oldest) }
         }
@@ -148,7 +148,7 @@ constructor(
     val filteredEnvironmentMetrics: StateFlow<List<Telemetry>> =
         combine(environmentState, _timeFrame, state) { envState, timeFrame, currentState ->
             val threshold = timeFrame.timeThreshold()
-            val data = envState.environmentMetrics.filter { (it.time ?: 0).toLong() >= threshold }
+            val data = envState.environmentMetrics.filter { it.time.toLong() >= threshold }
             if (currentState.isFahrenheit) {
                 data.map { telemetry ->
                     val em = telemetry.environment_metrics ?: return@map telemetry
@@ -222,7 +222,8 @@ constructor(
 
     fun clearTracerouteResponse() = serviceRepository.clearTracerouteResponse()
 
-    fun positionedNodeNums(): Set<Int> = nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
+    fun positionedNodeNums(): Set<Int> =
+        nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }.numSet()
 
     private fun List<Node>.numSet(): Set<Int> = map { it.num }.toSet()
 

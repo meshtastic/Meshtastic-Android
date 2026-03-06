@@ -39,30 +39,39 @@ import javax.inject.Singleton
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
 interface GoogleMapsPrefs {
     val selectedGoogleMapType: StateFlow<String?>
+
     fun setSelectedGoogleMapType(value: String?)
 
     val selectedCustomTileUrl: StateFlow<String?>
+
     fun setSelectedCustomTileUrl(value: String?)
 
     val hiddenLayerUrls: StateFlow<Set<String>>
+
     fun setHiddenLayerUrls(value: Set<String>)
 
     val cameraTargetLat: StateFlow<Double>
+
     fun setCameraTargetLat(value: Double)
 
     val cameraTargetLng: StateFlow<Double>
+
     fun setCameraTargetLng(value: Double)
 
     val cameraZoom: StateFlow<Float>
+
     fun setCameraZoom(value: Float)
 
     val cameraTilt: StateFlow<Float>
+
     fun setCameraTilt(value: Float)
 
     val cameraBearing: StateFlow<Float>
+
     fun setCameraBearing(value: Float)
 
     val networkMapLayers: StateFlow<Set<String>>
+
     fun setNetworkMapLayers(value: Set<String>)
 }
 
@@ -83,22 +92,26 @@ constructor(
     override fun setSelectedGoogleMapType(value: String?) {
         scope.launch {
             dataStore.edit { prefs ->
-                if (value == null) prefs.remove(KEY_SELECTED_GOOGLE_MAP_TYPE_PREF)
-                else prefs[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] = value
+                if (value == null) {
+                    prefs.remove(KEY_SELECTED_GOOGLE_MAP_TYPE_PREF)
+                } else {
+                    prefs[KEY_SELECTED_GOOGLE_MAP_TYPE_PREF] = value
+                }
             }
         }
     }
 
     override val selectedCustomTileUrl: StateFlow<String?> =
-        dataStore.data
-            .map { it[KEY_SELECTED_CUSTOM_TILE_URL_PREF] }
-            .stateIn(scope, SharingStarted.Eagerly, null)
+        dataStore.data.map { it[KEY_SELECTED_CUSTOM_TILE_URL_PREF] }.stateIn(scope, SharingStarted.Eagerly, null)
 
     override fun setSelectedCustomTileUrl(value: String?) {
         scope.launch {
             dataStore.edit { prefs ->
-                if (value == null) prefs.remove(KEY_SELECTED_CUSTOM_TILE_URL_PREF)
-                else prefs[KEY_SELECTED_CUSTOM_TILE_URL_PREF] = value
+                if (value == null) {
+                    prefs.remove(KEY_SELECTED_CUSTOM_TILE_URL_PREF)
+                } else {
+                    prefs[KEY_SELECTED_CUSTOM_TILE_URL_PREF] = value
+                }
             }
         }
     }
@@ -113,45 +126,35 @@ constructor(
     }
 
     override val cameraTargetLat: StateFlow<Double> =
-        dataStore.data
-            .map { it[KEY_CAMERA_TARGET_LAT_PREF] ?: 0.0 }
-            .stateIn(scope, SharingStarted.Eagerly, 0.0)
+        dataStore.data.map { it[KEY_CAMERA_TARGET_LAT_PREF] ?: 0.0 }.stateIn(scope, SharingStarted.Eagerly, 0.0)
 
     override fun setCameraTargetLat(value: Double) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_TARGET_LAT_PREF] = value } }
     }
 
     override val cameraTargetLng: StateFlow<Double> =
-        dataStore.data
-            .map { it[KEY_CAMERA_TARGET_LNG_PREF] ?: 0.0 }
-            .stateIn(scope, SharingStarted.Eagerly, 0.0)
+        dataStore.data.map { it[KEY_CAMERA_TARGET_LNG_PREF] ?: 0.0 }.stateIn(scope, SharingStarted.Eagerly, 0.0)
 
     override fun setCameraTargetLng(value: Double) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_TARGET_LNG_PREF] = value } }
     }
 
     override val cameraZoom: StateFlow<Float> =
-        dataStore.data
-            .map { it[KEY_CAMERA_ZOOM_PREF] ?: 7f }
-            .stateIn(scope, SharingStarted.Eagerly, 7f)
+        dataStore.data.map { it[KEY_CAMERA_ZOOM_PREF] ?: 7f }.stateIn(scope, SharingStarted.Eagerly, 7f)
 
     override fun setCameraZoom(value: Float) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_ZOOM_PREF] = value } }
     }
 
     override val cameraTilt: StateFlow<Float> =
-        dataStore.data
-            .map { it[KEY_CAMERA_TILT_PREF] ?: 0f }
-            .stateIn(scope, SharingStarted.Eagerly, 0f)
+        dataStore.data.map { it[KEY_CAMERA_TILT_PREF] ?: 0f }.stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override fun setCameraTilt(value: Float) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_TILT_PREF] = value } }
     }
 
     override val cameraBearing: StateFlow<Float> =
-        dataStore.data
-            .map { it[KEY_CAMERA_BEARING_PREF] ?: 0f }
-            .stateIn(scope, SharingStarted.Eagerly, 0f)
+        dataStore.data.map { it[KEY_CAMERA_BEARING_PREF] ?: 0f }.stateIn(scope, SharingStarted.Eagerly, 0f)
 
     override fun setCameraBearing(value: Float) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_BEARING_PREF] = value } }

@@ -31,6 +31,7 @@ import org.meshtastic.proto.Telemetry
  *
  * This interface is shared across platforms via Kotlin Multiplatform (KMP).
  */
+@Suppress("TooManyFunctions")
 interface MeshLogRepository {
     /** Retrieves all [MeshLog]s in the database, up to [maxItem]. */
     fun getAllLogs(maxItem: Int = DEFAULT_MAX_LOGS): Flow<List<MeshLog>>

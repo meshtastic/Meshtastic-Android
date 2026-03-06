@@ -29,6 +29,6 @@ interface DatabaseModule {
     @Binds
     @Singleton
     fun bindDatabaseManager(
-        impl: org.meshtastic.core.database.DatabaseManager
+        impl: org.meshtastic.core.database.DatabaseManager,
     ): org.meshtastic.core.common.database.DatabaseManager
 }

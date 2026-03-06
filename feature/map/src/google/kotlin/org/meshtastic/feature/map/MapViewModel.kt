@@ -585,7 +585,7 @@ constructor(
             layerToRemove?.uri?.let { uri ->
                 if (layerToRemove.isNetwork) {
                     googleMapsPrefs.setNetworkMapLayers(
-                        googleMapsPrefs.networkMapLayers.value.filterNot { it.startsWith("$layerId|:|") }.toSet()
+                        googleMapsPrefs.networkMapLayers.value.filterNot { it.startsWith("$layerId|:|") }.toSet(),
                     )
                 } else {
                     deleteFileToInternalStorage(uri)

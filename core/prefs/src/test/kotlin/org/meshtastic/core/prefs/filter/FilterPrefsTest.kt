@@ -46,23 +46,20 @@ class FilterPrefsTest {
 
     @Before
     fun setup() {
-        dataStore = PreferenceDataStoreFactory.create(
-            scope = testScope,
-            produceFile = { tmpFolder.newFile("test.preferences_pb") }
-        )
+        dataStore =
+            PreferenceDataStoreFactory.create(
+                scope = testScope,
+                produceFile = { tmpFolder.newFile("test.preferences_pb") },
+            )
         dispatchers = mockk { every { default } returns testDispatcher }
         filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
     }
 
-    @Test
-    fun `filterEnabled defaults to false`() = testScope.runTest {
-        assertFalse(filterPrefs.filterEnabled.value)
-    }
+    @Test fun `filterEnabled defaults to false`() = testScope.runTest { assertFalse(filterPrefs.filterEnabled.value) }
 
     @Test
-    fun `filterWords defaults to empty set`() = testScope.runTest {
-        assertTrue(filterPrefs.filterWords.value.isEmpty())
-    }
+    fun `filterWords defaults to empty set`() =
+        testScope.runTest { assertTrue(filterPrefs.filterWords.value.isEmpty()) }
 
     @Test
     fun `setting filterEnabled updates preference`() = testScope.runTest {
@@ -77,4 +74,3 @@ class FilterPrefsTest {
         assertEquals(words, filterPrefs.filterWords.value)
     }
 }
-
