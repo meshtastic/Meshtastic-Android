@@ -18,8 +18,7 @@ Uses **Kotlin Serialization** to convert between Protobuf/JSON and the underlyin
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:datastore[datastore]:::android-library
-  :core:datastore -.-> :core:proto
+  :core:datastore[datastore]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

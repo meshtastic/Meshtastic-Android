@@ -19,7 +19,7 @@ Exposes the application's global process lifecycle as a Hilt binding, enabling c
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:di[di]:::android-library
+  :core:di[di]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

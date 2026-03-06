@@ -886,11 +886,14 @@
     <string name="local_stats_nodes">Възли: %1$d онлайн / %2$d общо</string>
     <string name="local_stats_uptime">Време на работа: %1$s</string>
     <string name="local_stats_traffic">Трафик: TX %1$d / RX %2$d (D: %3$d)</string>
+    <string name="local_stats_diagnostics_prefix">Диагностика: %1$s</string>
     <string name="local_stats_heap_value">%1$d / %2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
     <string name="refresh">Опресняване</string>
     <!-- Network Map Layers -->
     <string name="add_network_layer">Добавяне на мрежов слой</string>
     <string name="refresh_layer">Опресняване на слоя</string>
+    <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Конфигурация на TAK</string>
     <string name="tak_team">Цвят на екипа</string>
     <string name="tak_role">Роля на члена</string>

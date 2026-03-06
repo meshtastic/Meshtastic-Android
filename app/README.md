@@ -25,7 +25,6 @@ The module primarily serves as a "glue" layer, connecting:
 ```mermaid
 graph TB
   :app[app]:::android-application
-  :app -.-> :core:analytics
   :app -.-> :core:ble
   :app -.-> :core:common
   :app -.-> :core:data
