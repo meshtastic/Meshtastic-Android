@@ -39,7 +39,6 @@ import org.meshtastic.app.BuildConfig
 import org.meshtastic.app.repository.network.NetworkRepository
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.util.BinaryLogFile
-import org.meshtastic.core.common.util.BuildUtils
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.nowMillis
@@ -125,6 +124,15 @@ constructor(
             if (listenersInitialized) return
             listenersInitialized = true
 
+            radioPrefs.devAddr
+                .onEach { addr ->
+                    if (_currentDeviceAddressFlow.value != addr) {
+                        _currentDeviceAddressFlow.value = addr
+                        startInterface()
+                    }
+                }
+                .launchIn(processLifecycle.coroutineScope)
+
             bluetoothRepository.state
                 .onEach { state ->
                     if (state.enabled) {
@@ -176,31 +184,9 @@ constructor(
     override fun isMockInterface(): Boolean =
         BuildConfig.DEBUG || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
 
-    /**
-     * Determines whether to default to mock interface for device address. This keeps the decision logic separate and
-     * easy to extend.
-     */
-    private fun shouldDefaultToMockInterface(): Boolean = BuildUtils.isEmulator
-
-    /**
-     * Return the device we are configured to use, or null for none device address strings are of the form:
-     *
-     * at
-     *
-     * where a is either x for bluetooth or s for serial and t is an interface specific address (macaddr or a device
-     * path)
-     */
     override fun getDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
-        var address = radioPrefs.devAddr.value
-
-        // If we are running on the emulator we default to the mock interface, so we can have some data to show to the
-        // user
-        if (address == null && shouldDefaultToMockInterface()) {
-            address = mockInterfaceAddress
-        }
-
-        return address
+        return _currentDeviceAddressFlow.value
     }
 
     /**
