@@ -14,57 +14,76 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.compose)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.library.compose)
+    alias(libs.plugins.devtools.ksp)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.feature.messaging" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.feature.messaging"
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(projects.core.data)
+            implementation(projects.core.database)
+            implementation(projects.core.domain)
+            implementation(projects.core.model)
+            implementation(projects.core.navigation)
+            implementation(projects.core.prefs)
+            implementation(projects.core.proto)
+            implementation(projects.core.resources)
+            implementation(projects.core.service)
+            implementation(projects.core.ui)
+
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.kermit)
+            implementation(libs.javax.inject)
+        }
+
+        androidMain.dependencies {
+            implementation(project.dependencies.platform(libs.androidx.compose.bom))
+            implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+            implementation(libs.accompanist.permissions)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.compose.material3)
+            implementation(libs.androidx.compose.material3.adaptive)
+            implementation(libs.androidx.compose.material3.adaptive.layout)
+            implementation(libs.androidx.compose.material3.adaptive.navigation)
+            implementation(libs.androidx.compose.material.iconsExtended)
+            implementation(libs.androidx.compose.ui.text)
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.androidx.navigation.compose)
+            implementation(libs.androidx.paging.compose)
+            implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.androidx.hilt.work)
+            implementation(libs.hilt.android)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.mockk)
+            implementation(libs.androidx.work.testing)
+            implementation(libs.androidx.test.core)
+            implementation(libs.robolectric)
+        }
+    }
+}
 
 dependencies {
-    implementation(projects.core.common)
-    implementation(projects.core.data)
-    implementation(projects.core.database)
-    implementation(projects.core.domain)
-    implementation(projects.core.model)
-    implementation(projects.core.navigation)
-    implementation(projects.core.prefs)
-    implementation(projects.core.proto)
-    implementation(projects.core.service)
-    implementation(projects.core.resources)
-    implementation(projects.core.ui)
-
-    implementation(libs.accompanist.permissions)
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material3.adaptive)
-    implementation(libs.androidx.compose.material3.adaptive.layout)
-    implementation(libs.androidx.compose.material3.adaptive.navigation)
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.paging.compose)
-    implementation(libs.kermit)
-    implementation(libs.androidx.work.runtime.ktx)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
-
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.test.ext.junit)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.turbine)
-    testImplementation(libs.androidx.work.testing)
-    testImplementation(libs.androidx.test.core)
-    testImplementation(libs.robolectric)
+    add("kspAndroid", libs.androidx.hilt.compiler)
+    add("kspAndroid", libs.hilt.compiler)
 }

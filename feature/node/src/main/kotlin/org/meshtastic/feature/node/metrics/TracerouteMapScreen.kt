@@ -52,7 +52,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Route
 import org.meshtastic.core.ui.theme.TracerouteColors
-import org.meshtastic.feature.map.MapView
+import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.proto.Position
 
@@ -116,11 +116,13 @@ private fun TracerouteMapScaffold(
         },
     ) { paddingValues ->
         Box(modifier = modifier.fillMaxSize().padding(paddingValues)) {
-            MapView(
+            LocalMapViewProvider.current?.MapView(
+                modifier = Modifier,
+                viewModel = Unit,
                 navigateToNodeDetails = {},
                 tracerouteOverlay = overlay,
                 tracerouteNodePositions = snapshotPositions,
-                onTracerouteMappableCountChanged = { shown, total ->
+                onTracerouteMappableCountChanged = { shown: Int, total: Int ->
                     tracerouteNodesShown = shown
                     tracerouteNodesTotal = total
                 },

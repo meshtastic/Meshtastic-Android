@@ -39,8 +39,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.barcode.rememberBarcodeScanner
-import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.import_label
@@ -60,6 +58,8 @@ import org.meshtastic.core.resources.url
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
+import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.openNfcSettings
 import org.meshtastic.proto.SharedContact
 
@@ -98,17 +98,18 @@ fun MeshtasticImportFAB(
     var showNfcDisabledDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
-    val barcodeScanner = rememberBarcodeScanner(onResult = { contents -> contents?.toUri()?.let { onImport(it) } })
+    val barcodeScanner = LocalBarcodeScannerProvider.current { contents -> contents?.toUri()?.let { onImport(it) } }
+    val nfcScanner = LocalNfcScannerProvider.current
 
     if (isNfcScanning) {
-        NfcScannerEffect(
-            onResult = { contents ->
+        nfcScanner(
+            { contents ->
                 contents?.toUri()?.let {
                     onImport(it)
                     isNfcScanning = false
                 }
             },
-            onNfcDisabled = {
+            {
                 isNfcScanning = false
                 showNfcDisabledDialog = true
             },

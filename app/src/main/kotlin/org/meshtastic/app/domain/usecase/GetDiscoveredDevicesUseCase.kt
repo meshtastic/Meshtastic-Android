@@ -129,7 +129,7 @@ constructor(
                         val matchingNode =
                             if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
                                 db.values.find { node ->
-                                    val suffix = entry.peripheral.getMeshtasticShortName()?.lowercase(Locale.ROOT)
+                                    val suffix = entry.device.getMeshtasticShortName()?.lowercase(Locale.ROOT)
                                     suffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
                                 }
                             } else {

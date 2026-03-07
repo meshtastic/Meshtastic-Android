@@ -19,7 +19,6 @@ import com.android.build.api.dsl.LibraryExtension
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
-    alias(libs.plugins.meshtastic.android.library.flavors)
     alias(libs.plugins.meshtastic.hilt)
 }
 
@@ -27,8 +26,6 @@ configure<LibraryExtension> { namespace = "org.meshtastic.core.ui" }
 
 dependencies {
     implementation(projects.core.common)
-    implementation(projects.core.barcode)
-    implementation(projects.core.nfc)
     implementation(projects.core.data)
     implementation(projects.core.database)
     implementation(projects.core.model)
@@ -37,7 +34,6 @@ dependencies {
     implementation(projects.core.service)
     implementation(projects.core.resources)
 
-    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.compose.material3)

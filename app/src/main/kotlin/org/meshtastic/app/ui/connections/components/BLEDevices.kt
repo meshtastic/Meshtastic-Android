@@ -35,6 +35,7 @@ import no.nordicsemi.android.common.scanner.view.ScannerView
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.app.model.DeviceListEntry
 import org.meshtastic.app.ui.connections.ScannerViewModel
+import org.meshtastic.core.ble.AndroidBleDevice
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.model.ConnectionState
@@ -73,12 +74,14 @@ fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanMod
 
         ScannerView(
             state = filterState,
-            onScanResultSelected = { result -> scanModel.onSelected(DeviceListEntry.Ble(result.peripheral)) },
+            onScanResultSelected = { result ->
+                scanModel.onSelected(DeviceListEntry.Ble(AndroidBleDevice(result.peripheral)))
+            },
             deviceItem = { result ->
                 val device =
                     remember(result.peripheral.address, bleDevices) {
                         bleDevices.find { it.fullAddress == "x${result.peripheral.address}" }
-                            ?: DeviceListEntry.Ble(result.peripheral)
+                            ?: DeviceListEntry.Ble(AndroidBleDevice(result.peripheral))
                     }
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),

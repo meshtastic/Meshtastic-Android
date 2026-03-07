@@ -16,10 +16,12 @@
  */
 package org.meshtastic.app.navigation
 
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
+import org.meshtastic.app.map.AndroidSharedMapViewModel
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.navigation.NodesRoutes
@@ -27,7 +29,9 @@ import org.meshtastic.feature.map.MapScreen
 
 fun NavGraphBuilder.mapGraph(navController: NavHostController) {
     composable<MapRoutes.Map>(deepLinks = listOf(navDeepLink<MapRoutes.Map>(basePath = "$DEEP_LINK_BASE_URI/map"))) {
+        val viewModel = hiltViewModel<AndroidSharedMapViewModel>()
         MapScreen(
+            viewModel = viewModel,
             onClickNodeChip = {
                 navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
                     launchSingleTop = true

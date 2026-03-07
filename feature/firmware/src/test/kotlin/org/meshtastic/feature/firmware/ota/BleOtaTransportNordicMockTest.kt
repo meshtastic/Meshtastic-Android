@@ -144,7 +144,9 @@ class BleOtaTransportNordicMockTest {
 
         centralManager.simulatePeripherals(listOf(otaPeripheral))
 
-        val transport = BleOtaTransport(centralManager, address, testDispatcher)
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+        val transport = BleOtaTransport(scanner, connectionFactory, address, testDispatcher)
 
         // 1. Connect
         val connectResult = transport.connect()

@@ -66,6 +66,7 @@ import com.google.zxing.common.HybridBinarizer
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.ui.util.BarcodeScanner
 import java.nio.ByteBuffer
 import java.util.concurrent.Executors
 
