@@ -22,14 +22,7 @@ Defines Intent actions for starting, stopping, and interacting with the backgrou
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:service[service]:::android-library
-  :core:service --> :core:api
-  :core:service -.-> :core:common
-  :core:service -.-> :core:data
-  :core:service -.-> :core:database
-  :core:service -.-> :core:model
-  :core:service -.-> :core:prefs
-  :core:service -.-> :core:proto
+  :core:service[service]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

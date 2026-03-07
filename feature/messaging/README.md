@@ -26,17 +26,6 @@ A security-focused utility that detects and transforms homoglyphs (visually simi
 ```mermaid
 graph TB
   :feature:messaging[messaging]:::android-feature
-  :feature:messaging -.-> :core:common
-  :feature:messaging -.-> :core:data
-  :feature:messaging -.-> :core:database
-  :feature:messaging -.-> :core:domain
-  :feature:messaging -.-> :core:model
-  :feature:messaging -.-> :core:navigation
-  :feature:messaging -.-> :core:prefs
-  :feature:messaging -.-> :core:proto
-  :feature:messaging -.-> :core:service
-  :feature:messaging -.-> :core:resources
-  :feature:messaging -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
