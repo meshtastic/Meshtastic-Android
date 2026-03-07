@@ -306,6 +306,7 @@ dependencies {
     androidTestImplementation(libs.nordic.client.android.mock)
     androidTestImplementation(libs.nordic.core.mock)
 
+    testImplementation(libs.androidx.work.testing)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
