@@ -27,18 +27,6 @@ The base logic for managing map state, node markers, and camera positions.
 ```mermaid
 graph TB
   :feature:map[map]:::android-feature
-  :feature:map -.-> :core:common
-  :feature:map -.-> :core:data
-  :feature:map -.-> :core:database
-  :feature:map -.-> :core:datastore
-  :feature:map -.-> :core:model
-  :feature:map -.-> :core:navigation
-  :feature:map -.-> :core:prefs
-  :feature:map -.-> :core:proto
-  :feature:map -.-> :core:service
-  :feature:map -.-> :core:resources
-  :feature:map -.-> :core:ui
-  :feature:map -.-> :core:di
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

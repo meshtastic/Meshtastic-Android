@@ -51,8 +51,6 @@ MeshtasticResourceDialog(
 graph TB
   :core:ui[ui]:::android-library
   :core:ui -.-> :core:common
-  :core:ui -.-> :core:barcode
-  :core:ui -.-> :core:nfc
   :core:ui -.-> :core:data
   :core:ui -.-> :core:database
   :core:ui -.-> :core:model

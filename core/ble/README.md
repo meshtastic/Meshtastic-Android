@@ -5,10 +5,7 @@
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:ble[ble]:::android-library
-  :core:ble -.-> :core:common
-  :core:ble -.-> :core:di
-  :core:ble -.-> :core:model
+  :core:ble[ble]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;

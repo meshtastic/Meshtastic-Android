@@ -35,6 +35,7 @@ BarcodeScanner(
 graph TB
   :core:barcode[barcode]:::android-library
   :core:barcode -.-> :core:resources
+  :core:barcode -.-> :core:ui
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
