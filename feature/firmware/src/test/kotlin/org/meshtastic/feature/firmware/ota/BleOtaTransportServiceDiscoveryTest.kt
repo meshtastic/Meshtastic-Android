@@ -96,7 +96,9 @@ class BleOtaTransportServiceDiscoveryTest {
 
         centralManager.simulatePeripherals(listOf(otaPeripheral))
 
-        val transport = BleOtaTransport(centralManager, address, testDispatcher)
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+        val transport = BleOtaTransport(scanner, connectionFactory, address, testDispatcher)
         val result = transport.connect()
 
         assertTrue("Connect should fail when OTA service is missing", result.isFailure)
@@ -135,7 +137,9 @@ class BleOtaTransportServiceDiscoveryTest {
 
         centralManager.simulatePeripherals(listOf(otaPeripheral))
 
-        val transport = BleOtaTransport(centralManager, address, testDispatcher)
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+        val transport = BleOtaTransport(scanner, connectionFactory, address, testDispatcher)
         val result = transport.connect()
 
         assertTrue("Connect should fail when TX characteristic is missing", result.isFailure)
@@ -148,7 +152,9 @@ class BleOtaTransportServiceDiscoveryTest {
         val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
 
         // Don't simulate any peripherals — scan will find nothing
-        val transport = BleOtaTransport(centralManager, address, testDispatcher)
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+        val transport = BleOtaTransport(scanner, connectionFactory, address, testDispatcher)
         val result = transport.connect()
 
         assertTrue("Connect should fail when device is not found", result.isFailure)
@@ -200,7 +206,9 @@ class BleOtaTransportServiceDiscoveryTest {
 
         centralManager.simulatePeripherals(listOf(otaPeripheral))
 
-        val transport = BleOtaTransport(centralManager, address, testDispatcher)
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+        val transport = BleOtaTransport(scanner, connectionFactory, address, testDispatcher)
         val result = transport.connect()
 
         assertTrue("Connect should succeed: ${result.exceptionOrNull()}", result.isSuccess)

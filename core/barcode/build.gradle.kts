@@ -30,6 +30,7 @@ configure<LibraryExtension> {
 
 dependencies {
     implementation(project(":core:resources"))
+    implementation(projects.core.ui)
 
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)

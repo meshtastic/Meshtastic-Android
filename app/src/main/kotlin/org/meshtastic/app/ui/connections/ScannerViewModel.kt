@@ -117,15 +117,15 @@ constructor(
 
     /** Initiates the bonding process and connects to the device upon success. */
     private fun requestBonding(entry: DeviceListEntry.Ble) {
-        Logger.i { "Starting bonding for ${entry.peripheral.address.anonymize}" }
+        Logger.i { "Starting bonding for ${entry.device.address.anonymize}" }
         viewModelScope.launch {
             @Suppress("TooGenericExceptionCaught")
             try {
-                bluetoothRepository.bond(entry.peripheral)
-                Logger.i { "Bonding complete for ${entry.peripheral.address.anonymize}, selecting device..." }
+                bluetoothRepository.bond(entry.device)
+                Logger.i { "Bonding complete for ${entry.device.address.anonymize}, selecting device..." }
                 changeDeviceAddress(entry.fullAddress)
             } catch (ex: SecurityException) {
-                Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize} Permissions not granted" }
+                Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize} Permissions not granted" }
                 serviceRepository.setErrorMessage(
                     text = "Bonding failed: ${ex.message} Permissions not granted",
                     severity = Severity.Warn,
@@ -135,9 +135,9 @@ constructor(
                 val message = ex.message ?: ""
                 if (message.contains("Received bond state changed 11")) {
                     // This is a known issue where bonding is still in progress, ignore as error
-                    Logger.d { "Bonding still in progress for ${entry.peripheral.address.anonymize}" }
+                    Logger.d { "Bonding still in progress for ${entry.device.address.anonymize}" }
                 } else {
-                    Logger.w(ex) { "Bonding failed for ${entry.peripheral.address.anonymize}" }
+                    Logger.w(ex) { "Bonding failed for ${entry.device.address.anonymize}" }
                     serviceRepository.setErrorMessage(text = "Bonding failed: ${ex.message}", severity = Severity.Warn)
                 }
             }

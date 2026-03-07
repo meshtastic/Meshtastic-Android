@@ -15,37 +15,55 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.LibraryExtension
-
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.devtools.ksp)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.ble" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.ble"
+        androidResources.enable = false
+    }
 
-dependencies {
-    implementation(projects.core.common)
-    implementation(projects.core.di)
-    implementation(projects.core.model)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(projects.core.di)
+            implementation(projects.core.model)
 
-    api(libs.nordic.client.android)
-    api(libs.nordic.ble.env.android)
-    api(libs.nordic.ble.env.android.compose)
-    api(libs.nordic.common.scanner.ble)
-    api(libs.nordic.common.core)
+            implementation(libs.kermit)
+            implementation(libs.kotlinx.coroutines.core)
+            api(libs.javax.inject)
+        }
 
-    implementation(libs.androidx.lifecycle.process)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.javax.inject)
-    implementation(libs.kermit)
-    implementation(libs.kotlinx.coroutines.core)
+        androidMain.dependencies {
+            implementation(libs.hilt.android)
+            api(libs.nordic.client.android)
+            api(libs.nordic.ble.env.android)
+            api(libs.nordic.ble.env.android.compose)
+            api(libs.nordic.common.scanner.ble)
+            api(libs.nordic.common.core)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
-    testImplementation(libs.nordic.client.android.mock)
-    testImplementation(libs.nordic.client.core.mock)
-    testImplementation(libs.nordic.core.mock)
-    testImplementation(libs.androidx.lifecycle.testing)
+            implementation(libs.androidx.lifecycle.process)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mockk)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.nordic.client.android.mock)
+            implementation(libs.nordic.client.core.mock)
+            implementation(libs.nordic.core.mock)
+            implementation(libs.androidx.lifecycle.testing)
+        }
+    }
 }
+
+dependencies { add("kspAndroid", libs.hilt.compiler) }

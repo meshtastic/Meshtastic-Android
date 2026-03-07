@@ -141,10 +141,25 @@ class NordicBleInterfaceRetryTest {
         centralManager.simulatePeripherals(listOf(peripheralSpec))
         advanceUntilIdle()
 
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val bluetoothRepository: org.meshtastic.core.ble.BluetoothRepository = mockk {
+            io.mockk.every { state } returns
+                kotlinx.coroutines.flow.MutableStateFlow(
+                    org.meshtastic.core.ble.BluetoothState(
+                        hasPermissions = true,
+                        enabled = true,
+                        bondedDevices = emptyList(),
+                    ),
+                )
+        }
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+
         val nordicInterface =
             NordicBleInterface(
                 serviceScope = this,
-                centralManager = centralManager,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
                 service = service,
                 address = address,
             )
@@ -246,10 +261,25 @@ class NordicBleInterfaceRetryTest {
         centralManager.simulatePeripherals(listOf(peripheralSpec))
         advanceUntilIdle()
 
+        val scanner = org.meshtastic.core.ble.AndroidBleScanner(centralManager)
+        val bluetoothRepository: org.meshtastic.core.ble.BluetoothRepository = mockk {
+            io.mockk.every { state } returns
+                kotlinx.coroutines.flow.MutableStateFlow(
+                    org.meshtastic.core.ble.BluetoothState(
+                        hasPermissions = true,
+                        enabled = true,
+                        bondedDevices = emptyList(),
+                    ),
+                )
+        }
+        val connectionFactory = org.meshtastic.core.ble.AndroidBleConnectionFactory(centralManager)
+
         val nordicInterface =
             NordicBleInterface(
                 serviceScope = this,
-                centralManager = centralManager,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
                 service = service,
                 address = uniqueAddress,
             )

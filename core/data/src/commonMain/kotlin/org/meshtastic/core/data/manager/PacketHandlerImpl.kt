@@ -152,7 +152,6 @@ constructor(
         if (queueJob?.isActive == true) return
         queueJob =
             scope.handledLaunch {
-                Logger.d { "packet queueJob started" }
                 try {
                     while (serviceRepository.connectionState.value == ConnectionState.Connected) {
                         val packet = queueMutex.withLock { queuedPackets.removeFirstOrNull() } ?: break

@@ -66,6 +66,7 @@ import com.google.mlkit.vision.common.InputImage
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.close
+import org.meshtastic.core.ui.util.BarcodeScanner
 import java.util.concurrent.Executors
 
 @Composable

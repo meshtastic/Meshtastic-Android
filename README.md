@@ -59,15 +59,16 @@ You can generate the documentation locally to preview your changes.
 ## Architecture
 
 ### Modern Android Development (MAD)
-The app follows modern Android development practices:
-- **UI:** Jetpack Compose (Material 3).
+The app follows modern Android development practices, built on top of a shared Kotlin Multiplatform (KMP) Core:
+- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, enabling future support for Desktop and Web.
+- **UI:** Jetpack Compose (Material 3) using Compose Multiplatform resources.
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
-- **Dependency Injection:** Hilt.
+- **Dependency Injection:** Hilt (mapped to KMP `javax.inject` interfaces).
 - **Navigation:** Type-Safe Navigation (Jetpack Navigation).
-- **Data Layer:** Repository pattern with Room (local DB), DataStore (prefs), and Protobuf (device comms).
+- **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms).
 
 ### Bluetooth Low Energy (BLE)
-The BLE stack has been modernized to use **Nordic Semiconductor's Android Common Libraries** and **Kotlin BLE Library**. This provides a robust, Coroutine-based architecture for reliable device communication. See [core/ble/README.md](core/ble/README.md) for details.
+The BLE stack uses a hybrid interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, while the Android implementation utilizes **Nordic Semiconductor's Kotlin BLE Library**. This provides a robust, Coroutine-based architecture for reliable device communication while remaining KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
 
 ## Translations
 

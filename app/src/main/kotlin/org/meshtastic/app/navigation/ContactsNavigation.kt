@@ -26,6 +26,9 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.Flow
+import org.meshtastic.app.messaging.AndroidContactsViewModel
+import org.meshtastic.app.messaging.AndroidMessageViewModel
+import org.meshtastic.app.messaging.AndroidQuickChatViewModel
 import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -43,9 +46,13 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
             val uiViewModel: UIViewModel = hiltViewModel()
             val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
             val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+            val contactsViewModel = hiltViewModel<AndroidContactsViewModel>()
+            val messageViewModel = hiltViewModel<AndroidMessageViewModel>()
 
             AdaptiveContactsScreen(
                 navController = navController,
+                contactsViewModel = contactsViewModel,
+                messageViewModel = messageViewModel,
                 scrollToTopEvents = scrollToTopEvents,
                 sharedContactRequested = sharedContactRequested,
                 requestChannelSet = requestChannelSet,
@@ -67,9 +74,13 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
             val uiViewModel: UIViewModel = hiltViewModel()
             val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
             val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+            val contactsViewModel = hiltViewModel<AndroidContactsViewModel>()
+            val messageViewModel = hiltViewModel<AndroidMessageViewModel>()
 
             AdaptiveContactsScreen(
                 navController = navController,
+                contactsViewModel = contactsViewModel,
+                messageViewModel = messageViewModel,
                 scrollToTopEvents = scrollToTopEvents,
                 sharedContactRequested = sharedContactRequested,
                 requestChannelSet = requestChannelSet,
@@ -90,7 +101,9 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
         ),
     ) { backStackEntry ->
         val message = backStackEntry.toRoute<ContactsRoutes.Share>().message
+        val viewModel = hiltViewModel<AndroidContactsViewModel>()
         ShareScreen(
+            viewModel = viewModel,
             onConfirm = {
                 navController.navigate(ContactsRoutes.Messages(it, message)) {
                     popUpTo<ContactsRoutes.Share> { inclusive = true }
@@ -102,6 +115,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
     composable<ContactsRoutes.QuickChat>(
         deepLinks = listOf(navDeepLink<ContactsRoutes.QuickChat>(basePath = "$DEEP_LINK_BASE_URI/quick_chat")),
     ) {
-        QuickChatScreen(onNavigateUp = navController::navigateUp)
+        val viewModel = hiltViewModel<AndroidQuickChatViewModel>()
+        QuickChatScreen(viewModel = viewModel, onNavigateUp = navController::navigateUp)
     }
 }

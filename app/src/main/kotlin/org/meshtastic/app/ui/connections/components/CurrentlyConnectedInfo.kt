@@ -43,8 +43,6 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.common.ui.view.RssiIcon
-import no.nordicsemi.kotlin.ble.client.exception.OperationFailedException
-import no.nordicsemi.kotlin.ble.client.exception.PeripheralNotConnectedException
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.app.model.DeviceListEntry
 import org.meshtastic.core.model.Node
@@ -75,22 +73,13 @@ fun CurrentlyConnectedInfo(
     var rssi by remember { mutableIntStateOf(0) }
     LaunchedEffect(bleDevice) {
         if (bleDevice != null) {
-            while (bleDevice.peripheral.isConnected) {
+            while (bleDevice.device.isConnected) {
                 try {
-                    rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.peripheral.readRssi() }
+                    rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
                     delay(RSSI_DELAY.seconds)
-                } catch (e: PeripheralNotConnectedException) {
-                    Logger.w(e) { "Failed to read RSSI ${e.message}" }
-                    break
-                } catch (e: OperationFailedException) {
+                } catch (e: Exception) {
                     // RSSI reading failures are common when disconnecting; log as warning to avoid Crashlytics noise
                     Logger.w(e) { "Failed to read RSSI ${e.message}" }
-                    break
-                } catch (e: SecurityException) {
-                    Logger.w(e) { "Failed to read RSSI ${e.message}" }
-                    break
-                } catch (e: Exception) {
-                    Logger.w(e) { "Unexpected error reading RSSI: ${e.message}" }
                     break
                 }
             }

@@ -262,9 +262,11 @@ dependencies {
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     ksp(libs.androidx.hilt.compiler)
     implementation(libs.accompanist.permissions)
     implementation(libs.kermit)
+    implementation(libs.kotlinx.datetime)
 
     implementation(libs.nordic.client.android)
     implementation(libs.nordic.common.core)
@@ -278,6 +280,9 @@ dependencies {
 
     googleImplementation(libs.location.services)
     googleImplementation(libs.play.services.maps)
+    googleImplementation(libs.maps.compose)
+    googleImplementation(libs.maps.compose.utils)
+    googleImplementation(libs.maps.compose.widgets)
     googleImplementation(libs.dd.sdk.android.okhttp)
     googleImplementation(libs.dd.sdk.android.compose)
     googleImplementation(libs.dd.sdk.android.logs)
@@ -291,6 +296,7 @@ dependencies {
 
     fdroidImplementation(libs.osmdroid.android)
     fdroidImplementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    fdroidImplementation(libs.osmbonuspack)
 
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.androidx.test.ext.junit)
@@ -300,6 +306,7 @@ dependencies {
     androidTestImplementation(libs.nordic.client.android.mock)
     androidTestImplementation(libs.nordic.core.mock)
 
+    testImplementation(libs.androidx.work.testing)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)

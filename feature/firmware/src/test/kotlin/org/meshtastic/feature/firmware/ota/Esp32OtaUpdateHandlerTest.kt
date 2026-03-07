@@ -26,7 +26,6 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -45,12 +44,20 @@ class Esp32OtaUpdateHandlerTest {
     private val firmwareRetriever: FirmwareRetriever = mockk()
     private val radioController: RadioController = mockk()
     private val nodeRepository: NodeRepository = mockk()
-    private val centralManager: CentralManager = mockk()
+    private val bleScanner: org.meshtastic.core.ble.BleScanner = mockk()
+    private val bleConnectionFactory: org.meshtastic.core.ble.BleConnectionFactory = mockk()
     private val context: Context = mockk()
     private val contentResolver: ContentResolver = mockk()
 
     private val handler =
-        Esp32OtaUpdateHandler(firmwareRetriever, radioController, nodeRepository, centralManager, context)
+        Esp32OtaUpdateHandler(
+            firmwareRetriever,
+            radioController,
+            nodeRepository,
+            bleScanner,
+            bleConnectionFactory,
+            context,
+        )
 
     @Before
     fun setUp() {

@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.core.content.IntentCompat
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
@@ -47,14 +48,23 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import no.nordicsemi.kotlin.ble.environment.android.compose.LocalEnvironmentOwner
+import org.meshtastic.app.intro.AnalyticsIntro
+import org.meshtastic.app.intro.AndroidIntroViewModel
+import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.app.ui.MainScreen
+import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
+import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
+import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
+import org.meshtastic.core.ui.util.LocalMapViewProvider
+import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import javax.inject.Inject
@@ -108,7 +118,13 @@ class MainActivity : ComponentActivity() {
             }
 
             @Suppress("SpreadOperator")
-            CompositionLocalProvider(*(LocalEnvironmentOwner provides androidEnvironment)) {
+            CompositionLocalProvider(
+                *(LocalEnvironmentOwner provides androidEnvironment),
+                LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
+                LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
+                LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
+                LocalMapViewProvider provides getMapViewProvider(),
+            ) {
                 AppTheme(dynamicColor = dynamic, darkTheme = dark) {
                     val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
 
@@ -119,7 +135,8 @@ class MainActivity : ComponentActivity() {
                     if (appIntroCompleted) {
                         MainScreen(uIViewModel = model)
                     } else {
-                        AppIntroductionScreen(onDone = { model.onAppIntroCompleted() })
+                        val introViewModel = hiltViewModel<AndroidIntroViewModel>()
+                        AppIntroductionScreen(onDone = { model.onAppIntroCompleted() }, viewModel = introViewModel)
                     }
                 }
             }

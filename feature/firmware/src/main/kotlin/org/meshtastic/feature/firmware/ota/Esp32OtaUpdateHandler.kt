@@ -26,8 +26,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
@@ -73,7 +74,8 @@ constructor(
     private val firmwareRetriever: FirmwareRetriever,
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
-    private val centralManager: CentralManager,
+    private val bleScanner: BleScanner,
+    private val bleConnectionFactory: BleConnectionFactory,
     @ApplicationContext private val context: Context,
 ) : FirmwareUpdateHandler {
 
@@ -101,7 +103,7 @@ constructor(
         hardware = hardware,
         updateState = updateState,
         firmwareUri = firmwareUri,
-        transportFactory = { BleOtaTransport(centralManager, address) },
+        transportFactory = { BleOtaTransport(bleScanner, bleConnectionFactory, address) },
         rebootMode = 1,
         connectionAttempts = 5,
     )

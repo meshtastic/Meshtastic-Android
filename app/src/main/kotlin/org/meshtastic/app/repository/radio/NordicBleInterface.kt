@@ -33,12 +33,15 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.ConnectionState
-import no.nordicsemi.kotlin.ble.core.WriteType
+import org.meshtastic.core.ble.AndroidBleDevice
+import org.meshtastic.core.ble.AndroidBleService
 import org.meshtastic.core.ble.BleConnection
+import org.meshtastic.core.ble.BleConnectionFactory
+import org.meshtastic.core.ble.BleConnectionState
+import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
+import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.common.util.nowMillis
@@ -62,7 +65,9 @@ private val SCAN_TIMEOUT = 5.seconds
  * - Routing raw byte packets between the radio and [RadioInterfaceService].
  *
  * @param serviceScope The coroutine scope to use for launching coroutines.
- * @param centralManager The central manager provided by Nordic BLE Library.
+ * @param scanner The BLE scanner.
+ * @param bluetoothRepository The Bluetooth repository.
+ * @param connectionFactory The BLE connection factory.
  * @param service The [RadioInterfaceService] to use for handling radio events.
  * @param address The BLE address of the device to connect to.
  */
@@ -71,7 +76,9 @@ class NordicBleInterface
 @AssistedInject
 constructor(
     private val serviceScope: CoroutineScope,
-    private val centralManager: CentralManager,
+    private val scanner: BleScanner,
+    private val bluetoothRepository: BluetoothRepository,
+    private val connectionFactory: BleConnectionFactory,
     private val service: RadioInterfaceService,
     @Assisted val address: String,
 ) : IRadioInterface {
@@ -91,7 +98,7 @@ constructor(
 
     private val connectionScope: CoroutineScope =
         CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
-    private val bleConnection: BleConnection = BleConnection(centralManager, connectionScope, address)
+    private val bleConnection: BleConnection = connectionFactory.create(connectionScope, address)
     private val writeMutex: Mutex = Mutex()
 
     private var connectionStartTime: Long = 0
@@ -106,21 +113,19 @@ constructor(
 
     // --- Connection & Discovery Logic ---
 
-    /** Robustly finds the peripheral. First checks bonded devices, then performs a short scan if not found. */
-    private suspend fun findPeripheral(): Peripheral {
-        centralManager
-            .getBondedPeripherals()
+    /** Robustly finds the device. First checks bonded devices, then performs a short scan if not found. */
+    private suspend fun findDevice(): BleDevice {
+        bluetoothRepository.state.value.bondedDevices
             .firstOrNull { it.address == address }
             ?.let {
                 return it
             }
 
         Logger.i { "[$address] Device not found in bonded list, scanning..." }
-        val scanner = BleScanner(centralManager)
 
         repeat(SCAN_RETRY_COUNT) { attempt ->
-            val p = scanner.scan(SCAN_TIMEOUT).firstOrNull { it.address == address }
-            if (p != null) return p
+            val d = scanner.scan(SCAN_TIMEOUT).firstOrNull { it.address == address }
+            if (d != null) return d
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
                 delay(SCAN_RETRY_DELAY_MS)
@@ -138,7 +143,7 @@ constructor(
 
                 bleConnection.connectionState
                     .onEach { state ->
-                        if (state is ConnectionState.Disconnected) {
+                        if (state is BleConnectionState.Disconnected) {
                             onDisconnected(state)
                         }
                     }
@@ -148,9 +153,9 @@ constructor(
                     }
                     .launchIn(connectionScope)
 
-                val p = findPeripheral()
-                val state = bleConnection.connectAndAwait(p, CONNECTION_TIMEOUT_MS)
-                if (state !is ConnectionState.Connected) {
+                val device = findDevice()
+                val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                if (state !is BleConnectionState.Connected) {
                     throw RadioNotConnectedException("Failed to connect to device at address $address")
                 }
 
@@ -158,7 +163,7 @@ constructor(
                 discoverServicesAndSetupCharacteristics()
             } catch (e: Exception) {
                 val failureTime = nowMillis - connectionStartTime
-                Logger.w(e) { "[$address] Failed to connect to peripheral after ${failureTime}ms" }
+                Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
                 handleFailure(e)
             }
         }
@@ -166,8 +171,9 @@ constructor(
 
     private suspend fun onConnected() {
         try {
-            bleConnection.peripheralFlow.first()?.let { p ->
-                val rssi = retryBleOperation(tag = address) { p.readRssi() }
+            bleConnection.deviceFlow.first()?.let { device ->
+                val androidDevice = device as AndroidBleDevice
+                val rssi = retryBleOperation(tag = address) { androidDevice.peripheral.readRssi() }
                 Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
         } catch (e: Exception) {
@@ -175,7 +181,7 @@ constructor(
         }
     }
 
-    private fun onDisconnected(state: ConnectionState.Disconnected) {
+    private fun onDisconnected(@Suppress("UNUSED_PARAMETER") state: BleConnectionState.Disconnected) {
         radioService = null
 
         val uptime =
@@ -185,26 +191,22 @@ constructor(
                 0
             }
         Logger.w {
-            "[$address] BLE disconnected - Reason: ${state.reason}, " +
+            "[$address] BLE disconnected, " +
                 "Uptime: ${uptime}ms, " +
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        val (isPermanent, msg) =
-            when (val reason = state.reason) {
-                is ConnectionState.Disconnected.Reason.InsufficientAuthentication ->
-                    Pair(true, "Insufficient authentication: please unpair and repair the device")
-                is ConnectionState.Disconnected.Reason.RequiredServiceNotFound ->
-                    Pair(false, "Required characteristic missing")
-                else -> Pair(false, reason.toString())
-            }
-        service.onDisconnect(isPermanent, errorMessage = msg)
+
+        // Note: Disconnected state in commonMain doesn't currently carry a reason.
+        // We might want to add that later if needed.
+        service.onDisconnect(false, errorMessage = "Disconnected")
     }
 
     private suspend fun discoverServicesAndSetupCharacteristics() {
         try {
             bleConnection.profile(serviceUuid = SERVICE_UUID) { service ->
-                val radioService = MeshtasticRadioServiceImpl(service)
+                val androidService = (service as AndroidBleService).service
+                val radioService = MeshtasticRadioServiceImpl(androidService)
 
                 // Wire up notifications
                 radioService.fromRadio
@@ -235,7 +237,7 @@ constructor(
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
 
                 // Log negotiated MTU for diagnostics
-                val maxLen = bleConnection.maximumWriteValueLength(WriteType.WITHOUT_RESPONSE)
+                val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
                 this@NordicBleInterface.service.onConnect()

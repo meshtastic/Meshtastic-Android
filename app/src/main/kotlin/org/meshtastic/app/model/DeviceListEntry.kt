@@ -18,8 +18,7 @@ package org.meshtastic.app.model
 
 import android.hardware.usb.UsbManager
 import com.hoho.android.usbserial.driver.UsbSerialDriver
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.BondState
+import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.Node
@@ -50,15 +49,14 @@ sealed class DeviceListEntry(
     override fun toString(): String =
         "DeviceListEntry(name=${name.anonymize}, addr=${address.anonymize}, bonded=$bonded, hasNode=${node != null})"
 
-    @Suppress("MissingPermission")
-    data class Ble(val peripheral: Peripheral, override val node: Node? = null) :
+    data class Ble(val device: BleDevice, override val node: Node? = null) :
         DeviceListEntry(
-            name = peripheral.name ?: "unnamed-${peripheral.address}",
-            fullAddress = "x${peripheral.address}",
-            bonded = peripheral.bondState.value == BondState.BONDED,
+            name = device.name ?: "unnamed-${device.address}",
+            fullAddress = "x${device.address}",
+            bonded = device.isBonded,
             node = node,
         ) {
-        override fun copy(node: Node?): Ble = copy(peripheral = peripheral, node = node)
+        override fun copy(node: Node?): Ble = copy(device = device, node = node)
     }
 
     data class Usb(
@@ -95,4 +93,4 @@ private val bleNameRegex = Regex(BLE_NAME_PATTERN)
  *
  * @return The short name (e.g., 1234) or null.
  */
-fun Peripheral.getMeshtasticShortName(): String? = name?.let { bleNameRegex.find(it)?.groupValues?.get(1) }
+fun BleDevice.getMeshtasticShortName(): String? = name?.let { bleNameRegex.find(it)?.groupValues?.get(1) }

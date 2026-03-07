@@ -20,8 +20,8 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import org.meshtastic.app.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.core.repository.MeshWorkerManager
-import org.meshtastic.feature.messaging.domain.worker.SendMessageWorker
 import javax.inject.Inject
 import javax.inject.Singleton
 

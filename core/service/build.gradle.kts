@@ -14,34 +14,44 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.devtools.ksp)
 }
 
-configure<LibraryExtension> {
-    buildFeatures { aidl = true }
-    namespace = "org.meshtastic.core.service"
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.service"
+        androidResources.enable = false
+    }
 
-    testOptions { unitTests.isReturnDefaultValues = true }
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(projects.core.data)
+            implementation(projects.core.database)
+            implementation(projects.core.model)
+            implementation(projects.core.prefs)
+            implementation(projects.core.proto)
+            implementation(libs.javax.inject)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kermit)
+        }
+
+        androidMain.dependencies {
+            api(projects.core.api)
+            implementation(libs.hilt.android)
+        }
+
+        commonTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mockk)
+            implementation(libs.turbine)
+        }
+    }
 }
 
-dependencies {
-    api(projects.core.api)
-    implementation(projects.core.common)
-    implementation(projects.core.data)
-    implementation(projects.core.database)
-    implementation(projects.core.model)
-    implementation(projects.core.prefs)
-    implementation(projects.core.proto)
-    implementation(libs.javax.inject)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kermit)
-
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.mockk)
-    testImplementation(libs.turbine)
-}
+dependencies { add("kspAndroid", libs.hilt.compiler) }
