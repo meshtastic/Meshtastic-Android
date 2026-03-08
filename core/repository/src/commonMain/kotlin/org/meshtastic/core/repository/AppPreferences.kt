@@ -142,6 +142,13 @@ fun RadioPrefs.isTcp() = devAddr.value?.startsWith("t") == true
 
 fun RadioPrefs.isNoop() = devAddr.value?.startsWith("n") == true
 
+/** Reactive interface for local node display name overrides (display-only, not sent to device). */
+interface NodeDisplayNamePrefs {
+    val displayNames: StateFlow<Map<Int, String>>
+
+    fun setDisplayName(nodeNum: Int, name: String?)
+}
+
 /** Reactive interface for mesh connection settings. */
 interface MeshPrefs {
     val deviceAddress: StateFlow<String?>
@@ -169,5 +176,6 @@ interface AppPreferences {
     val mapConsent: MapConsentPrefs
     val mapTileProvider: MapTileProviderPrefs
     val radio: RadioPrefs
+    val nodeDisplayNames: NodeDisplayNamePrefs
     val mesh: MeshPrefs
 }

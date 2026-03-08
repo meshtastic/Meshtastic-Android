@@ -36,6 +36,7 @@ import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.repository.NodeDisplayNamePrefs
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -82,6 +83,7 @@ constructor(
     private val nodeRequestActions: NodeRequestActions,
     private val serviceRepository: ServiceRepository,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
+    private val nodeDisplayNamePrefs: NodeDisplayNamePrefs,
 ) : ViewModel() {
 
     private val nodeIdFromRoute: Int? =
@@ -144,6 +146,10 @@ constructor(
 
     fun setNodeNotes(nodeNum: Int, notes: String) {
         nodeManagementActions.setNodeNotes(viewModelScope, nodeNum, notes)
+    }
+
+    fun setNodeDisplayName(nodeNum: Int, name: String?) {
+        nodeDisplayNamePrefs.setDisplayName(nodeNum, name)
     }
 
     /** Returns the type-safe navigation route for a direct message to this node. */

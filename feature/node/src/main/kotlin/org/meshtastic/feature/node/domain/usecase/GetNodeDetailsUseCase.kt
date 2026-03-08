@@ -32,6 +32,7 @@ import org.meshtastic.core.model.util.hasValidEnvironmentMetrics
 import org.meshtastic.core.model.util.isDirectSignal
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.MeshLogRepository
+import org.meshtastic.core.repository.NodeDisplayNamePrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.resources.Res
@@ -60,6 +61,7 @@ constructor(
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val nodeRequestActions: NodeRequestActions,
+    private val nodeDisplayNamePrefs: NodeDisplayNamePrefs,
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,6 +75,7 @@ constructor(
     private fun buildFlow(nodeId: Int, effectiveNodeId: Int): Flow<NodeDetailUiState> {
         val nodeFlow =
             nodeRepository.nodeDBbyNum.map { it[nodeId] ?: Node.createFallback(nodeId, "") }.distinctUntilChanged()
+        val displayNamesFlow = nodeDisplayNamePrefs.displayNames
 
         // 1. Logs & Metrics Data
         val metricsLogsFlow =
@@ -138,13 +141,21 @@ constructor(
                 trReqs to niReqs
             }
 
-        // Assemble final UI state
-        return combine(nodeFlow, metricsLogsFlow, identityFlow, metadataFlow, requestsFlow) {
+        // Assemble final UI state (include displayNames for node name resolution)
+        return combine(
+            nodeFlow,
+            metricsLogsFlow,
+            identityFlow,
+            metadataFlow,
+            requestsFlow,
+            displayNamesFlow,
+        ) {
                 node,
                 logs,
                 identity,
                 metadata,
                 requests,
+                displayNames,
             ->
             val (trReqs, niReqs) = requests
             val isLocal = node.num == identity.ourNode?.num
@@ -200,7 +211,8 @@ constructor(
 
             @Suppress("MagicNumber")
             val nodeName =
-                node.user.long_name?.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
+                displayNames[node.num]?.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
+                    ?: node.user.long_name?.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
                     ?: UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
 
             NodeDetailUiState(

@@ -75,6 +75,7 @@ import org.meshtastic.feature.node.component.CompassSheetContent
 import org.meshtastic.feature.node.component.DeviceActions
 import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
+import org.meshtastic.feature.node.component.EditNodeDisplayNameSheet
 import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
 import org.meshtastic.feature.node.component.NotesSection
@@ -135,6 +136,7 @@ private fun NodeDetailScaffold(
     onNavigateUp: () -> Unit,
 ) {
     var activeOverlay by remember { mutableStateOf<NodeDetailOverlay?>(null) }
+    var showEditDisplayName by remember { mutableStateOf(false) }
     val inspectionMode = LocalInspectionMode.current
     val compassViewModel = if (inspectionMode) null else hiltViewModel<CompassViewModel>()
     val compassUiState by
@@ -163,6 +165,7 @@ private fun NodeDetailScaffold(
             uiState = uiState,
             viewModel = viewModel,
             listState = listState,
+            onOpenEditDisplayName = { showEditDisplayName = true },
             onAction = { action ->
                 when (action) {
                     is NodeDetailAction.ShareContact -> activeOverlay = NodeDetailOverlay.SharedContact
@@ -189,6 +192,18 @@ private fun NodeDetailScaffold(
     NodeDetailOverlays(activeOverlay, node, compassUiState, compassViewModel, { activeOverlay = null }) {
         viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
     }
+
+    if (showEditDisplayName && node != null) {
+        EditNodeDisplayNameSheet(
+            node = node,
+            currentDisplayName = uiState.nodeName.asString().takeIf { it.isNotBlank() },
+            onSave = { name ->
+                viewModel.setNodeDisplayName(node.num, name)
+                showEditDisplayName = false
+            },
+            onDismiss = { showEditDisplayName = false },
+        )
+    }
 }
 
 @Composable
@@ -196,6 +211,7 @@ private fun NodeDetailContent(
     uiState: NodeDetailUiState,
     viewModel: NodeDetailViewModel,
     listState: LazyListState,
+    onOpenEditDisplayName: () -> Unit = {},
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     modifier: Modifier = Modifier,
@@ -212,6 +228,7 @@ private fun NodeDetailContent(
                 ourNode = uiState.ourNode,
                 uiState = uiState,
                 listState = listState,
+                onOpenEditDisplayName = onOpenEditDisplayName,
                 onAction = onAction,
                 onFirmwareSelect = onFirmwareSelect,
                 onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },
@@ -287,6 +304,7 @@ private fun NodeDetailList(
     ourNode: Node?,
     uiState: NodeDetailUiState,
     listState: LazyListState,
+    onOpenEditDisplayName: () -> Unit = {},
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelect: (FirmwareRelease) -> Unit,
     onSaveNotes: (Int, String) -> Unit,
@@ -298,7 +316,13 @@ private fun NodeDetailList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        item { NodeDetailsSection(node) }
+        item {
+            NodeDetailsSection(
+                node = node,
+                displayNameValue = uiState.nodeName.asString(),
+                onDisplayNameClick = onOpenEditDisplayName,
+            )
+        }
         item {
             DeviceActions(
                 node = node,
@@ -365,6 +389,7 @@ private fun NodeDetailListPreview(@PreviewParameter(NodePreviewParameterProvider
             ourNode = node,
             uiState = uiState,
             listState = rememberLazyListState(),
+            onOpenEditDisplayName = {},
             onAction = {},
             onFirmwareSelect = {},
             onSaveNotes = { _, _ -> },

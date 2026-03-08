@@ -42,6 +42,7 @@ import org.meshtastic.core.prefs.di.MapDataStore
 import org.meshtastic.core.prefs.di.MapTileProviderDataStore
 import org.meshtastic.core.prefs.di.MeshDataStore
 import org.meshtastic.core.prefs.di.MeshLogDataStore
+import org.meshtastic.core.prefs.di.NodeDisplayNameDataStore
 import org.meshtastic.core.prefs.di.RadioDataStore
 import org.meshtastic.core.prefs.di.UiDataStore
 import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
@@ -52,6 +53,7 @@ import org.meshtastic.core.prefs.map.MapPrefsImpl
 import org.meshtastic.core.prefs.map.MapTileProviderPrefsImpl
 import org.meshtastic.core.prefs.mesh.MeshPrefsImpl
 import org.meshtastic.core.prefs.meshlog.MeshLogPrefsImpl
+import org.meshtastic.core.prefs.nodedisplay.NodeDisplayNamePrefsImpl
 import org.meshtastic.core.prefs.radio.RadioPrefsImpl
 import org.meshtastic.core.prefs.ui.UiPrefsImpl
 import org.meshtastic.core.repository.AnalyticsPrefs
@@ -62,6 +64,7 @@ import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MapTileProviderPrefs
 import org.meshtastic.core.repository.MeshLogPrefs
+import org.meshtastic.core.repository.NodeDisplayNamePrefs
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.UiPrefs
@@ -138,6 +141,8 @@ interface PrefsModule {
     @Binds fun bindMeshLogPrefs(meshLogPrefsImpl: MeshLogPrefsImpl): MeshLogPrefs
 
     @Binds fun bindRadioPrefs(radioPrefsImpl: RadioPrefsImpl): RadioPrefs
+
+    @Binds fun bindNodeDisplayNamePrefs(impl: NodeDisplayNamePrefsImpl): NodeDisplayNamePrefs
 
     @Binds fun bindUiPrefs(uiPrefsImpl: UiPrefsImpl): UiPrefs
 
@@ -264,6 +269,16 @@ interface PrefsModule {
                 migrations = listOf(SharedPreferencesMigration(context, "filter-prefs")),
                 scope = scope,
                 produceFile = { context.preferencesDataStoreFile("filter_ds") },
+            )
+
+        @Provides
+        @Singleton
+        @NodeDisplayNameDataStore
+        fun provideNodeDisplayNameDataStore(@ApplicationContext context: Context): DataStore<Preferences> =
+            PreferenceDataStoreFactory.create(
+                migrations = listOf(SharedPreferencesMigration(context, "node_display_names_prefs")),
+                scope = scope,
+                produceFile = { context.preferencesDataStoreFile("node_display_names_ds") },
             )
     }
 }

@@ -113,11 +113,14 @@ fun NodeItem(
     onLongClick: (() -> Unit)? = null,
     connectionState: ConnectionState,
     isActive: Boolean = false,
+    displayNameOverride: String? = null,
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val originalLongName = (thatNode.user.long_name ?: "").ifEmpty { stringResource(Res.string.unknown_username) }
+    val originalLongName =
+        displayNameOverride?.takeIf { it.isNotBlank() }
+            ?: (thatNode.user.long_name ?: "").ifEmpty { stringResource(Res.string.unknown_username) }
 
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system =

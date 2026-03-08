@@ -65,3 +65,7 @@ annotation class MeshLogDataStore
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class FilterDataStore
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class NodeDisplayNameDataStore

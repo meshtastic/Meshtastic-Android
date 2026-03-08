@@ -21,6 +21,7 @@ package org.meshtastic.feature.node.component
 import android.content.ClipData
 import android.util.Base64
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Numbers
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -68,6 +70,7 @@ import org.meshtastic.core.resources.hops_away
 import org.meshtastic.core.resources.node_id
 import org.meshtastic.core.resources.node_number
 import org.meshtastic.core.resources.node_sort_last_heard
+import org.meshtastic.core.resources.display_name
 import org.meshtastic.core.resources.public_key
 import org.meshtastic.core.resources.role
 import org.meshtastic.core.resources.rssi
@@ -94,14 +97,23 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.formatAgo
 
 @Composable
-fun NodeDetailsSection(node: Node, modifier: Modifier = Modifier) {
+fun NodeDetailsSection(
+    node: Node,
+    modifier: Modifier = Modifier,
+    displayNameValue: String? = null,
+    onDisplayNameClick: (() -> Unit)? = null,
+) {
     SectionCard(title = Res.string.details, modifier = modifier) {
         Column {
             if (node.mismatchKey) {
                 MismatchKeyWarning(Modifier.padding(horizontal = 16.dp))
                 Spacer(Modifier.height(16.dp))
             }
-            MainNodeDetails(node)
+            MainNodeDetails(
+                node = node,
+                displayNameValue = displayNameValue,
+                onDisplayNameClick = onDisplayNameClick,
+            )
         }
     }
 }
@@ -139,9 +151,20 @@ private fun MismatchKeyWarning(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun MainNodeDetails(node: Node) {
+private fun MainNodeDetails(
+    node: Node,
+    displayNameValue: String? = null,
+    onDisplayNameClick: (() -> Unit)? = null,
+) {
     Column {
         NameAndRoleRow(node)
+        if (onDisplayNameClick != null) {
+            SectionDivider()
+            DisplayNameRow(
+                value = displayNameValue?.takeIf { it.isNotBlank() } ?: "—",
+                onClick = onDisplayNameClick,
+            )
+        }
         node.nodeStatus?.let { status ->
             SectionDivider()
             StatusMessageRow(status)
@@ -165,6 +188,39 @@ private fun MainNodeDetails(node: Node) {
             SectionDivider()
             PublicKeyItem(publicKey.toByteArray())
         }
+    }
+}
+
+@Composable
+private fun DisplayNameRow(value: String, onClick: () -> Unit) {
+    Column(
+        modifier =
+        Modifier.fillMaxWidth()
+            .defaultMinSize(minHeight = 48.dp)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Outlined.Edit,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = stringResource(Res.string.display_name),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = MaterialTheme.colorScheme.onSurface,
+        )
     }
 }
 
