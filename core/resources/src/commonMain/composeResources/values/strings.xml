@@ -465,6 +465,10 @@
     <string name="favorite">Favorite</string>
     <string name="add_favorite">Add to favorites</string>
     <string name="remove_favorite">Remove from favorites</string>
+    <string name="set_display_name">Set display name</string>
+    <string name="display_name">Display name</string>
+    <string name="display_name_hint">Local name for this node</string>
+    <string name="clear_display_name">Clear display name</string>
     <string name="favorite_add">Add '%1$s' as a favorite node?</string>
     <string name="favorite_remove">Remove '%1$s' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics</string>

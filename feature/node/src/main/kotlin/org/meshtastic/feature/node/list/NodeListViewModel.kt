@@ -32,6 +32,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
+import org.meshtastic.core.repository.NodeDisplayNamePrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -56,6 +57,7 @@ constructor(
     val nodeManagementActions: NodeManagementActions,
     private val getFilteredNodesUseCase: GetFilteredNodesUseCase,
     val nodeFilterPreferences: NodeFilterPreferences,
+    val nodeDisplayNamePrefs: NodeDisplayNamePrefs,
 ) : ViewModel() {
 
     val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
@@ -123,6 +125,8 @@ constructor(
     val unfilteredNodeList: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())
 
+    val nodeDisplayNames: StateFlow<Map<Int, String>> = nodeDisplayNamePrefs.displayNames
+
     var nodeFilterText: String
         get() = _nodeFilterText.value
         set(value) {
@@ -165,6 +169,10 @@ constructor(
     fun muteNode(node: Node) = nodeManagementActions.requestMuteNode(viewModelScope, node)
 
     fun removeNode(node: Node) = nodeManagementActions.requestRemoveNode(viewModelScope, node)
+
+    fun setNodeDisplayName(nodeNum: Int, name: String?) {
+        nodeDisplayNamePrefs.setDisplayName(nodeNum, name)
+    }
 
     companion object {
         private const val KEY_FILTER_TEXT = "filter_text"

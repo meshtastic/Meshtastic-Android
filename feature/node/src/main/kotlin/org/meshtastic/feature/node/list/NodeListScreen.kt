@@ -36,6 +36,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.DoDisturbOn
 import androidx.compose.material.icons.outlined.DoDisturbOn
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarBorder
 import androidx.compose.material3.DropdownMenu
@@ -79,6 +80,7 @@ import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.remove
 import org.meshtastic.core.resources.remove_favorite
 import org.meshtastic.core.resources.remove_ignored
+import org.meshtastic.core.resources.set_display_name
 import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
@@ -87,6 +89,7 @@ import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.node.component.EditNodeDisplayNameSheet
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.proto.SharedContact
@@ -104,8 +107,10 @@ fun NodeListScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
+    var nodeForDisplayNameEdit by remember { mutableStateOf<Node?>(null) }
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val nodeDisplayNames by viewModel.nodeDisplayNames.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
@@ -206,6 +211,7 @@ fun NodeListScreen(
                             }
 
                         val isActive = remember(activeNodeId, node.num) { activeNodeId == node.num }
+                        val displayName = nodeDisplayNames[node.num]?.takeIf { it.isNotBlank() }
 
                         NodeItem(
                             modifier = Modifier.animateItem(),
@@ -217,6 +223,7 @@ fun NodeListScreen(
                             onLongClick = longClick,
                             connectionState = connectionState,
                             isActive = isActive,
+                            displayNameOverride = displayName,
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {
@@ -227,6 +234,10 @@ fun NodeListScreen(
                                 onIgnore = { viewModel.ignoreNode(node) },
                                 onMute = { viewModel.muteNode(node) },
                                 onRemove = { viewModel.removeNode(node) },
+                                onSetDisplayName = {
+                                    nodeForDisplayNameEdit = node
+                                    expanded = false
+                                },
                                 onDismiss = { expanded = false },
                             )
                         }
@@ -235,6 +246,15 @@ fun NodeListScreen(
                 item { Spacer(modifier = Modifier.height(88.dp)) }
             }
         }
+    }
+
+    nodeForDisplayNameEdit?.let { node ->
+        EditNodeDisplayNameSheet(
+            node = node,
+            currentDisplayName = nodeDisplayNames[node.num],
+            onSave = { name -> viewModel.setNodeDisplayName(node.num, name) },
+            onDismiss = { nodeForDisplayNameEdit = null },
+        )
     }
 }
 
@@ -246,9 +266,11 @@ private fun ContextMenu(
     onIgnore: () -> Unit,
     onMute: () -> Unit,
     onRemove: () -> Unit,
+    onSetDisplayName: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+        SetDisplayNameMenuItem(onSetDisplayName = onSetDisplayName, onDismiss = onDismiss)
         FavoriteMenuItem(node, onFavorite, onDismiss)
         IgnoreMenuItem(node, onIgnore, onDismiss)
         if (node.capabilities.canMuteNode) {
@@ -274,6 +296,20 @@ private fun FavoriteMenuItem(node: Node, onFavorite: () -> Unit, onDismiss: () -
             )
         },
         text = { Text(stringResource(if (isFavorite) Res.string.remove_favorite else Res.string.add_favorite)) },
+    )
+}
+
+@Composable
+private fun SetDisplayNameMenuItem(onSetDisplayName: () -> Unit, onDismiss: () -> Unit) {
+    DropdownMenuItem(
+        onClick = {
+            onSetDisplayName()
+            onDismiss()
+        },
+        leadingIcon = {
+            Icon(imageVector = Icons.Outlined.Edit, contentDescription = null)
+        },
+        text = { Text(stringResource(Res.string.set_display_name)) },
     )
 }
 
