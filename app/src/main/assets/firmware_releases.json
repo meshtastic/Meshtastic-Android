@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9857",
+      "title": "Add PiMesh-1W V1/V2 Portduino LoRa config files",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9857",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9827",
       "title": "Align 920–925 MHz limits as per NBTC regulations in Thailand (27 dBm, 10% duty cycle) ",
       "page_url": "https://github.com/meshtastic/firmware/pull/9827",
@@ -204,18 +210,6 @@
       "id": "9749",
       "title": "Add AEAD (AES-CCM) authenticated encryption for PSK channels",
       "page_url": "https://github.com/meshtastic/firmware/pull/9749",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9706",
-      "title": "Add VL53L0 distance sensor.",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9706",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9675",
-      "title": "add FromRadioSync BLE characteristic",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9675",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
