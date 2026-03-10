@@ -1198,7 +1198,7 @@
     <string name="tak_role_rto">Sidemees</string>
     <string name="tak_role_k9">Koer (K9)</string>
     <string name="traffic_management">Liikluskorraldus</string>
-    <string name="traffic_management_config">Läbilaskepunkt</string>
+    <string name="traffic_management_config">Liikluse haldamise sätted</string>
     <string name="traffic_management_enabled">Moodul lubatud</string>
     <string name="traffic_management_position_dedup">Positsioonide dubleerimine</string>
     <string name="traffic_management_position_precision">Positsiooni täpsus (bittides)</string>
