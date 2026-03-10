@@ -23,18 +23,6 @@ Provides a compass interface to show the relative direction and distance to othe
 ```mermaid
 graph TB
   :feature:node[node]:::android-feature
-  :feature:node -.-> :core:common
-  :feature:node -.-> :core:data
-  :feature:node -.-> :core:database
-  :feature:node -.-> :core:datastore
-  :feature:node -.-> :core:di
-  :feature:node -.-> :core:model
-  :feature:node -.-> :core:proto
-  :feature:node -.-> :core:service
-  :feature:node -.-> :core:resources
-  :feature:node -.-> :core:ui
-  :feature:node -.-> :core:navigation
-  :feature:node -.-> :feature:map
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
