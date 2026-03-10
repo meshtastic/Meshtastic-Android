@@ -46,11 +46,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.model.DeviceListEntry
 import org.meshtastic.app.ui.connections.components.BLEDevices
 import org.meshtastic.app.ui.connections.components.ConnectingDeviceInfo
@@ -92,9 +92,9 @@ import kotlin.uuid.ExperimentalUuidApi
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
-    connectionsViewModel: ConnectionsViewModel = hiltViewModel(),
-    scanModel: ScannerViewModel = hiltViewModel(),
-    radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
+    connectionsViewModel: ConnectionsViewModel = koinViewModel(),
+    scanModel: ScannerViewModel = koinViewModel(),
+    radioConfigViewModel: RadioConfigViewModel = koinViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,

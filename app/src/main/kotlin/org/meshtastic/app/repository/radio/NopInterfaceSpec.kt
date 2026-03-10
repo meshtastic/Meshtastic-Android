@@ -16,9 +16,11 @@
  */
 package org.meshtastic.app.repository.radio
 
-import javax.inject.Inject
+import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** No-op interface backend implementation. */
-class NopInterfaceSpec @Inject constructor(private val factory: NopInterfaceFactory) : InterfaceSpec<NopInterface> {
-    override fun createInterface(rest: String): NopInterface = factory.create(rest)
+@Single
+class NopInterfaceSpec(private val factory: NopInterfaceFactory) : InterfaceSpec<NopInterface> {
+    override fun createInterface(rest: String, service: RadioInterfaceService): NopInterface = factory.create(rest)
 }

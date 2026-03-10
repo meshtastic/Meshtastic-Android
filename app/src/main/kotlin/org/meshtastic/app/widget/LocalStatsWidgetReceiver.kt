@@ -18,9 +18,7 @@ package org.meshtastic.app.widget
 
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
 class LocalStatsWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = LocalStatsWidget()
 }

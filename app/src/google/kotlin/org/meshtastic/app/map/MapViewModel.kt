@@ -29,7 +29,6 @@ import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.MapType
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +42,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
@@ -62,7 +62,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.net.MalformedURLException
 import java.net.URL
-import javax.inject.Inject
 import kotlin.uuid.Uuid
 
 private const val TILE_SIZE = 256
@@ -77,10 +76,8 @@ data class MapCameraPosition(
 )
 
 @Suppress("TooManyFunctions", "LongParameterList")
-@HiltViewModel
-class MapViewModel
-@Inject
-constructor(
+@KoinViewModel
+class MapViewModel(
     private val application: Application,
     mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,

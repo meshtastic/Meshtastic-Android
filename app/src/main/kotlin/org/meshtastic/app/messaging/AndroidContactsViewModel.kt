@@ -16,18 +16,15 @@
  */
 package org.meshtastic.app.messaging
 
-import dagger.hilt.android.lifecycle.HiltViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class AndroidContactsViewModel
-@Inject
-constructor(
+@KoinViewModel
+class AndroidContactsViewModel(
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,

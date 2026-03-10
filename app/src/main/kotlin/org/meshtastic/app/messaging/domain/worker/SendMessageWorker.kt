@@ -17,22 +17,18 @@
 package org.meshtastic.app.messaging.domain.worker
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import org.koin.android.annotation.KoinWorker
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.PacketRepository
 
-@HiltWorker
-class SendMessageWorker
-@AssistedInject
-constructor(
-    @Assisted context: Context,
-    @Assisted params: WorkerParameters,
+@KoinWorker
+class SendMessageWorker(
+    context: Context,
+    params: WorkerParameters,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
 ) : CoroutineWorker(context, params) {

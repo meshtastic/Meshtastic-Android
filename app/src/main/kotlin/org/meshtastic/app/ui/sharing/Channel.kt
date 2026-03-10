@@ -64,11 +64,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
@@ -112,8 +112,8 @@ import org.meshtastic.proto.Config
 @Composable
 @Suppress("LongMethod")
 fun ChannelScreen(
-    viewModel: ChannelViewModel = hiltViewModel(),
-    radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
+    viewModel: ChannelViewModel = koinViewModel(),
+    radioConfigViewModel: RadioConfigViewModel = koinViewModel(),
     onNavigate: (Route) -> Unit,
     onNavigateUp: () -> Unit,
 ) {

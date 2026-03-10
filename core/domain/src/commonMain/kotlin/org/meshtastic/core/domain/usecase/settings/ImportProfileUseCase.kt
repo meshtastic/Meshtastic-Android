@@ -17,11 +17,12 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import okio.BufferedSource
+import org.koin.core.annotation.Single
 import org.meshtastic.proto.DeviceProfile
-import javax.inject.Inject
 
 /** Use case for importing a device profile from an input stream. */
-open class ImportProfileUseCase @Inject constructor() {
+@Single
+open class ImportProfileUseCase {
     /**
      * Imports a [DeviceProfile] from the provided [BufferedSource].
      *

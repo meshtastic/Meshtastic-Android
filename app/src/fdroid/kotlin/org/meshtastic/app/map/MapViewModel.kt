@@ -18,10 +18,10 @@ package org.meshtastic.app.map
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.toRoute
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
@@ -33,13 +33,10 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.feature.map.BaseMapViewModel
 import org.meshtastic.proto.LocalConfig
-import javax.inject.Inject
 
 @Suppress("LongParameterList")
-@HiltViewModel
-class MapViewModel
-@Inject
-constructor(
+@KoinViewModel
+class MapViewModel(
     mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
     override val nodeRepository: NodeRepository,

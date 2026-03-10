@@ -67,7 +67,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -79,10 +78,10 @@ import androidx.navigation.compose.rememberNavController
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.permissions.notification.RequestNotificationPermission
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.app.navigation.channelsGraph
@@ -159,7 +158,7 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerViewModel = hiltViewModel()) {
+fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerViewModel = koinViewModel()) {
     val navController = rememberNavController()
     LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) } }
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
@@ -168,10 +167,6 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: ScannerVie
     val unreadMessageCount by uIViewModel.unreadMessageCount.collectAsStateWithLifecycle()
 
     if (connectionState == ConnectionState.Connected) {
-        RequestNotificationPermission {
-            // Nordic handled the trigger for POST_NOTIFICATIONS when connected
-        }
-
         sharedContactRequested?.let {
             SharedContactDialog(sharedContact = it, onDismiss = { uIViewModel.clearSharedContactRequested() })
         }

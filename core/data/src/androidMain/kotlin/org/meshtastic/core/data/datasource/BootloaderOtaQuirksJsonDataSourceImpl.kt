@@ -22,11 +22,11 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.BootloaderOtaQuirk
-import javax.inject.Inject
 
-class BootloaderOtaQuirksJsonDataSourceImpl @Inject constructor(private val application: Application) :
-    BootloaderOtaQuirksJsonDataSource {
+@Single
+class BootloaderOtaQuirksJsonDataSourceImpl(private val application: Application) : BootloaderOtaQuirksJsonDataSource {
     @OptIn(ExperimentalSerializationApi::class)
     override fun loadBootloaderOtaQuirksFromJsonAsset(): List<BootloaderOtaQuirk> = runCatching {
         val inputStream = application.assets.open("device_bootloader_ota_quirks.json")

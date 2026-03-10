@@ -86,22 +86,6 @@ open class NOAAWmsTileSource(
         if (time != null) this.time = time
     }
 
-    //    fun createFrom(endpoint: WMSEndpoint, layer: WMSLayer): WMSTileSource? {
-    //        var srs: String? = "EPSG:900913"
-    //        if (layer.srs.isNotEmpty()) {
-    //            srs = layer.srs[0]
-    //        }
-    //        return if (layer.styles.isEmpty()) {
-    //            WMSTileSource(
-    //                layer.name, arrayOf(endpoint.baseurl), layer.name,
-    //                endpoint.wmsVersion, srs, null, layer.pixelSize
-    //            )
-    //        } else WMSTileSource(
-    //            layer.name, arrayOf(endpoint.baseurl), layer.name,
-    //            endpoint.wmsVersion, srs, layer.styles[0], layer.pixelSize
-    //        )
-    //    }
-
     private fun tile2lon(x: Int, z: Int): Double = x / 2.0.pow(z.toDouble()) * 360.0 - 180
 
     private fun tile2lat(y: Int, z: Int): Double {

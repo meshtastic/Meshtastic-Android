@@ -26,22 +26,17 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.MeshLocationManager
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import org.meshtastic.proto.Position as ProtoPosition
 
-@Singleton
-class AndroidMeshLocationManager
-@Inject
-constructor(
-    private val context: Application,
-    private val locationRepository: LocationRepository,
-) : MeshLocationManager {
+@Single
+class AndroidMeshLocationManager(private val context: Application, private val locationRepository: LocationRepository) :
+    MeshLocationManager {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var locationFlow: Job? = null
 

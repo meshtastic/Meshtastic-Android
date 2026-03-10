@@ -19,35 +19,24 @@ package org.meshtastic.app.di
 import android.content.Context
 import com.datadog.android.okhttp.DatadogEventListener
 import com.datadog.android.okhttp.DatadogInterceptor
-import dagger.Binds
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.network.service.ApiService
 import org.meshtastic.core.network.service.ApiServiceImpl
 import java.io.File
-import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
 @Module
-interface GoogleNetworkModule {
+class GoogleNetworkModule {
 
-    @Binds @Singleton
-    fun bindApiService(apiServiceImpl: ApiServiceImpl): ApiService
+    @Single fun bindApiService(apiServiceImpl: ApiServiceImpl): ApiService = apiServiceImpl
 
-    companion object {
-        @Provides
-        @Singleton
-        fun provideOkHttpClient(
-            @ApplicationContext context: Context,
-            buildConfigProvider: BuildConfigProvider,
-        ): OkHttpClient = OkHttpClient.Builder()
+    @Single
+    fun provideOkHttpClient(context: Context, buildConfigProvider: BuildConfigProvider): OkHttpClient =
+        OkHttpClient.Builder()
             .cache(
                 cache =
                 Cache(
@@ -63,10 +52,7 @@ interface GoogleNetworkModule {
                     }
                 },
             )
-            .addInterceptor(
-                interceptor = DatadogInterceptor.Builder(tracedHosts = listOf("meshtastic.org")).build(),
-            )
+            .addInterceptor(interceptor = DatadogInterceptor.Builder(tracedHosts = listOf("meshtastic.org")).build())
             .eventListenerFactory(eventListenerFactory = DatadogEventListener.Factory())
             .build()
-    }
 }

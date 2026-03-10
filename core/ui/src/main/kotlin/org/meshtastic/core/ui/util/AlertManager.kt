@@ -21,8 +21,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.jetbrains.compose.resources.StringResource
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Single
 
 fun interface ComposableContent {
     @Composable fun Content()
@@ -32,8 +31,8 @@ fun interface ComposableContent {
  * A global manager for displaying alerts across the application. This allows ViewModels to trigger alerts without
  * direct dependencies on UI components.
  */
-@Singleton
-class AlertManager @Inject constructor() {
+@Single
+class AlertManager {
     data class AlertData(
         val title: String? = null,
         val titleRes: StringResource? = null,

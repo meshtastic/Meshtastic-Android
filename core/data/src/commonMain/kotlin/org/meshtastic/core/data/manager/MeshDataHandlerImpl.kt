@@ -18,7 +18,6 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -29,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import okio.ByteString.Companion.toByteString
 import okio.IOException
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -76,8 +76,6 @@ import org.meshtastic.proto.StoreForwardPlusPlus
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
 import org.meshtastic.proto.Waypoint
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 
 /**
@@ -91,10 +89,8 @@ import kotlin.time.Duration.Companion.milliseconds
  * 5. Tracking received telemetry for node updates.
  */
 @Suppress("LongParameterList", "TooManyFunctions", "LargeClass", "CyclomaticComplexMethod")
-@Singleton
-class MeshDataHandlerImpl
-@Inject
-constructor(
+@Single
+class MeshDataHandlerImpl(
     private val nodeManager: NodeManager,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,
@@ -291,17 +287,15 @@ constructor(
                         "to=${sfpp.encapsulated_to} myNodeNum=${nodeManager.myNodeNum} status=$status"
                 }
                 scope.handledLaunch {
-                    packetRepository
-                        .get()
-                        .updateSFPPStatus(
-                            packetId = sfpp.encapsulated_id,
-                            from = sfpp.encapsulated_from,
-                            to = sfpp.encapsulated_to,
-                            hash = hash,
-                            status = status,
-                            rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
-                            myNodeNum = nodeManager.myNodeNum ?: 0,
-                        )
+                    packetRepository.value.updateSFPPStatus(
+                        packetId = sfpp.encapsulated_id,
+                        from = sfpp.encapsulated_from,
+                        to = sfpp.encapsulated_to,
+                        hash = hash,
+                        status = status,
+                        rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
+                        myNodeNum = nodeManager.myNodeNum ?: 0,
+                    )
                     serviceBroadcasts.broadcastMessageStatus(sfpp.encapsulated_id, status)
                 }
             }
@@ -309,13 +303,11 @@ constructor(
             StoreForwardPlusPlus.SFPP_message_type.CANON_ANNOUNCE -> {
                 scope.handledLaunch {
                     sfpp.message_hash.let {
-                        packetRepository
-                            .get()
-                            .updateSFPPStatusByHash(
-                                hash = it.toByteArray(),
-                                status = MessageStatus.SFPP_CONFIRMED,
-                                rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
-                            )
+                        packetRepository.value.updateSFPPStatusByHash(
+                            hash = it.toByteArray(),
+                            status = MessageStatus.SFPP_CONFIRMED,
+                            rxTime = sfpp.encapsulated_rxtime.toLong() and 0xFFFFFFFFL,
+                        )
                     }
                 }
             }
@@ -359,20 +351,20 @@ constructor(
         val fromNum = packet.from
         u.get_module_config_response?.let {
             if (fromNum == myNodeNum) {
-                configHandler.get().handleModuleConfig(it)
+                configHandler.value.handleModuleConfig(it)
             } else {
                 it.statusmessage?.node_status?.let { nodeManager.updateNodeStatus(fromNum, it) }
             }
         }
 
         if (fromNum == myNodeNum) {
-            u.get_config_response?.let { configHandler.get().handleDeviceConfig(it) }
-            u.get_channel_response?.let { configHandler.get().handleChannel(it) }
+            u.get_config_response?.let { configHandler.value.handleDeviceConfig(it) }
+            u.get_channel_response?.let { configHandler.value.handleChannel(it) }
         }
 
         u.get_device_metadata_response?.let {
             if (fromNum == myNodeNum) {
-                configFlowManager.get().handleLocalMetadata(it)
+                configFlowManager.value.handleLocalMetadata(it)
             } else {
                 nodeManager.insertMetadata(fromNum, it)
             }
@@ -414,7 +406,7 @@ constructor(
         val fromNum = packet.from
         val isRemote = (fromNum != myNodeNum)
         if (!isRemote) {
-            connectionManager.get().updateTelemetry(t)
+            connectionManager.value.updateTelemetry(t)
         }
 
         nodeManager.updateNode(fromNum) { node: Node ->
@@ -508,8 +500,8 @@ constructor(
     private fun handleAckNak(requestId: Int, fromId: String, routingError: Int, relayNode: Int?) {
         scope.handledLaunch {
             val isAck = routingError == Routing.Error.NONE.value
-            val p = packetRepository.get().getPacketByPacketId(requestId)
-            val reaction = packetRepository.get().getReactionByPacketId(requestId)
+            val p = packetRepository.value.getPacketByPacketId(requestId)
+            val reaction = packetRepository.value.getReactionByPacketId(requestId)
 
             @Suppress("MaxLineLength")
             Logger.d {
@@ -527,7 +519,7 @@ constructor(
             if (p != null && p.status != MessageStatus.RECEIVED) {
                 val updatedPacket =
                     p.copy(status = m, relays = if (isAck) p.relays + 1 else p.relays, relayNode = relayNode)
-                packetRepository.get().update(updatedPacket)
+                packetRepository.value.update(updatedPacket)
             }
 
             reaction?.let { r ->
@@ -536,7 +528,7 @@ constructor(
                     if (isAck) {
                         updated = updated.copy(relays = updated.relays + 1)
                     }
-                    packetRepository.get().updateReaction(updated)
+                    packetRepository.value.updateReaction(updated)
                 }
             }
 
@@ -601,7 +593,7 @@ constructor(
         val contactKey = "${dataPacket.channel}$contactId"
 
         scope.handledLaunch {
-            packetRepository.get().apply {
+            packetRepository.value.apply {
                 // Check for duplicates before inserting
                 val existingPackets = findPacketsWithId(dataPacket.id)
                 if (existingPackets.isNotEmpty()) {
@@ -646,7 +638,7 @@ constructor(
         contactKey: String,
         updateNotification: Boolean,
     ) {
-        val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+        val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
         val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
@@ -733,7 +725,7 @@ constructor(
             )
 
         // Check for duplicates before inserting
-        val existingReactions = packetRepository.get().findReactionsWithId(packet.id)
+        val existingReactions = packetRepository.value.findReactionsWithId(packet.id)
         if (existingReactions.isNotEmpty()) {
             Logger.d {
                 "Skipping duplicate reaction: packetId=${packet.id} replyId=${decoded.reply_id} " +
@@ -742,15 +734,15 @@ constructor(
             return@handledLaunch
         }
 
-        packetRepository.get().insertReaction(reaction, nodeManager.myNodeNum ?: 0)
+        packetRepository.value.insertReaction(reaction, nodeManager.myNodeNum ?: 0)
 
         // Find the original packet to get the contactKey
-        packetRepository.get().getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
+        packetRepository.value.getPacketByPacketId(decoded.reply_id)?.let { originalPacket ->
             // Skip notification if the original message was filtered
             val targetId =
                 if (originalPacket.from == DataPacket.ID_LOCAL) originalPacket.to else originalPacket.from
             val contactKey = "${originalPacket.channel}$targetId"
-            val conversationMuted = packetRepository.get().getContactSettings(contactKey).isMuted
+            val conversationMuted = packetRepository.value.getContactSettings(contactKey).isMuted
             val nodeMuted = nodeManager.nodeDBbyID[fromId]?.isMuted == true
             val isSilent = conversationMuted || nodeMuted
 

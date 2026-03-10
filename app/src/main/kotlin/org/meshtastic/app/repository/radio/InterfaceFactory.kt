@@ -16,9 +16,9 @@
  */
 package org.meshtastic.app.repository.radio
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.InterfaceId
-import javax.inject.Inject
-import javax.inject.Provider
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /**
  * Entry point for create radio backend instances given a specific address.
@@ -26,19 +26,31 @@ import javax.inject.Provider
  * This class is responsible for building and dissecting radio addresses based upon their interface type and the "rest"
  * of the address (which varies per implementation).
  */
-class InterfaceFactory
-@Inject
-constructor(
+@Single
+class InterfaceFactory(
     private val nopInterfaceFactory: NopInterfaceFactory,
-    private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>,
+    private val bluetoothSpec: Lazy<NordicBleInterfaceSpec>,
+    private val mockSpec: Lazy<MockInterfaceSpec>,
+    private val serialSpec: Lazy<SerialInterfaceSpec>,
+    private val tcpSpec: Lazy<TCPInterfaceSpec>,
 ) {
     internal val nopInterface by lazy { nopInterfaceFactory.create("") }
 
+    private val specMap: Map<InterfaceId, InterfaceSpec<*>>
+        get() =
+            mapOf(
+                InterfaceId.BLUETOOTH to bluetoothSpec.value,
+                InterfaceId.MOCK to mockSpec.value,
+                InterfaceId.NOP to NopInterfaceSpec(nopInterfaceFactory),
+                InterfaceId.SERIAL to serialSpec.value,
+                InterfaceId.TCP to tcpSpec.value,
+            )
+
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
-    fun createInterface(address: String): IRadioInterface {
+    fun createInterface(address: String, service: RadioInterfaceService): IRadioInterface {
         val (spec, rest) = splitAddress(address)
-        return spec?.createInterface(rest) ?: nopInterface
+        return spec?.createInterface(rest, service) ?: nopInterface
     }
 
     fun addressValid(address: String?): Boolean = address?.let {
@@ -47,7 +59,7 @@ constructor(
     } ?: false
 
     private fun splitAddress(address: String): Pair<InterfaceSpec<*>?, String> {
-        val c = address[0].let { InterfaceId.forIdChar(it) }?.let { specMap[it]?.get() }
+        val c = address[0].let { InterfaceId.forIdChar(it) }?.let { specMap[it] }
         val rest = address.substring(1)
         return Pair(c, rest)
     }

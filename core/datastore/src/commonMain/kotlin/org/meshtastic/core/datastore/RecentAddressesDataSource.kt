@@ -28,12 +28,12 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.model.RecentAddress
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class RecentAddressesDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
+@Single
+class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
     private object PreferencesKeys {
         val RECENT_IP_ADDRESSES = stringPreferencesKey("recent-ip-addresses")
     }

@@ -17,11 +17,12 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import okio.BufferedSink
+import org.koin.core.annotation.Single
 import org.meshtastic.proto.DeviceProfile
-import javax.inject.Inject
 
 /** Use case for exporting a device profile to an output stream. */
-open class ExportProfileUseCase @Inject constructor() {
+@Single
+open class ExportProfileUseCase {
     /**
      * Exports the provided [DeviceProfile] to the given [BufferedSink].
      *

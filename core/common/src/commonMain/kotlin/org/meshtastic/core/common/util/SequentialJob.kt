@@ -21,15 +21,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
+import org.koin.core.annotation.Factory
 import java.util.concurrent.atomic.AtomicReference
-import javax.inject.Inject
 
 /**
  * A helper class that manages a single [Job]. When a new job is launched, any previous job is cancelled. This is useful
  * for ensuring that only the latest operation of a certain type is running at a time (e.g. for search or settings
  * updates).
  */
-class SequentialJob @Inject constructor() {
+@Factory
+class SequentialJob {
     private val job = AtomicReference<Job?>()
 
     /**

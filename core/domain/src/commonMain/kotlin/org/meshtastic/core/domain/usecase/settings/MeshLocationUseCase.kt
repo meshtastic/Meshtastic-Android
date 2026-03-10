@@ -16,11 +16,12 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.RadioController
-import javax.inject.Inject
 
 /** Use case for controlling location sharing with the mesh. */
-open class MeshLocationUseCase @Inject constructor(private val radioController: RadioController) {
+@Single
+open class MeshLocationUseCase constructor(private val radioController: RadioController) {
     /** Starts providing the phone's location to the mesh. */
     fun startProvidingLocation() {
         radioController.startProvideLocation()

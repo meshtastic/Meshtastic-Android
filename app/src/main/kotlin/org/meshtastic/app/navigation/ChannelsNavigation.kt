@@ -17,12 +17,13 @@
 package org.meshtastic.app.navigation
 
 import androidx.compose.runtime.remember
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.ui.sharing.ChannelScreen
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -38,7 +39,7 @@ fun NavGraphBuilder.channelsGraph(navController: NavHostController) {
         ) { backStackEntry ->
             val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             ChannelScreen(
-                radioConfigViewModel = hiltViewModel(parentEntry),
+                radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
                 onNavigate = { route -> navController.navigate(route) },
                 onNavigateUp = { navController.navigateUp() },
             )

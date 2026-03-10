@@ -16,10 +16,7 @@
  */
 package org.meshtastic.app.repository.radio
 
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
-
-class NopInterface @AssistedInject constructor(@Assisted val address: String) : IRadioInterface {
+class NopInterface(val address: String) : IRadioInterface {
     override fun handleSendToRadio(p: ByteArray) {
         // No-op
     }

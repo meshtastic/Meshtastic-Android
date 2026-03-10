@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okio.ByteString
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -46,17 +47,13 @@ import org.meshtastic.proto.Neighbor
 import org.meshtastic.proto.NeighborInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.math.absoluteValue
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.hours
 
 @Suppress("TooManyFunctions", "CyclomaticComplexMethod")
-@Singleton
-class CommandSenderImpl
-@Inject
-constructor(
+@Single
+class CommandSenderImpl(
     private val packetHandler: PacketHandler,
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,

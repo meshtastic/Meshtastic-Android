@@ -16,9 +16,11 @@
  */
 package org.meshtastic.app.repository.radio
 
+import org.meshtastic.core.repository.RadioInterfaceService
+
 /** This interface defines the contract that all radio backend implementations must adhere to. */
 interface InterfaceSpec<T : IRadioInterface> {
-    fun createInterface(rest: String): T
+    fun createInterface(rest: String, service: RadioInterfaceService): T
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */
     fun addressValid(rest: String): Boolean = true

@@ -17,7 +17,6 @@
 package org.meshtastic.app.navigation
 
 import androidx.compose.runtime.getValue
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -26,6 +25,7 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.Flow
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.messaging.AndroidContactsViewModel
 import org.meshtastic.app.messaging.AndroidMessageViewModel
 import org.meshtastic.app.messaging.AndroidQuickChatViewModel
@@ -43,11 +43,11 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
         composable<ContactsRoutes.Contacts>(
             deepLinks = listOf(navDeepLink<ContactsRoutes.Contacts>(basePath = "$DEEP_LINK_BASE_URI/contacts")),
         ) {
-            val uiViewModel: UIViewModel = hiltViewModel()
+            val uiViewModel: UIViewModel = koinViewModel()
             val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
             val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-            val contactsViewModel = hiltViewModel<AndroidContactsViewModel>()
-            val messageViewModel = hiltViewModel<AndroidMessageViewModel>()
+            val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
+            val messageViewModel = koinViewModel<AndroidMessageViewModel>()
 
             AdaptiveContactsScreen(
                 navController = navController,
@@ -71,11 +71,11 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
             ),
         ) { backStackEntry ->
             val args = backStackEntry.toRoute<ContactsRoutes.Messages>()
-            val uiViewModel: UIViewModel = hiltViewModel()
+            val uiViewModel: UIViewModel = koinViewModel()
             val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
             val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-            val contactsViewModel = hiltViewModel<AndroidContactsViewModel>()
-            val messageViewModel = hiltViewModel<AndroidMessageViewModel>()
+            val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
+            val messageViewModel = koinViewModel<AndroidMessageViewModel>()
 
             AdaptiveContactsScreen(
                 navController = navController,
@@ -101,7 +101,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
         ),
     ) { backStackEntry ->
         val message = backStackEntry.toRoute<ContactsRoutes.Share>().message
-        val viewModel = hiltViewModel<AndroidContactsViewModel>()
+        val viewModel = koinViewModel<AndroidContactsViewModel>()
         ShareScreen(
             viewModel = viewModel,
             onConfirm = {
@@ -115,7 +115,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopE
     composable<ContactsRoutes.QuickChat>(
         deepLinks = listOf(navDeepLink<ContactsRoutes.QuickChat>(basePath = "$DEEP_LINK_BASE_URI/quick_chat")),
     ) {
-        val viewModel = hiltViewModel<AndroidQuickChatViewModel>()
+        val viewModel = koinViewModel<AndroidQuickChatViewModel>()
         QuickChatScreen(viewModel = viewModel, onNavigateUp = navController::navigateUp)
     }
 }

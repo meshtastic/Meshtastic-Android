@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NeighborInfoHandler
@@ -29,13 +30,9 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class NeighborInfoHandlerImpl
-@Inject
-constructor(
+@Single
+class NeighborInfoHandlerImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val commandSender: CommandSender,

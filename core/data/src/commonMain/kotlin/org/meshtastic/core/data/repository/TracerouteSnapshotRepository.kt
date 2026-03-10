@@ -23,15 +23,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.proto.Position
-import javax.inject.Inject
 
-class TracerouteSnapshotRepository
-@Inject
-constructor(
+@Single
+class TracerouteSnapshotRepository(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
 ) {

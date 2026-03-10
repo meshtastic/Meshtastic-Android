@@ -20,7 +20,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.app.domain.usecase.GetDiscoveredDevicesUseCase
 import org.meshtastic.app.model.DeviceListEntry
 import org.meshtastic.app.repository.usb.UsbRepository
@@ -42,13 +42,10 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import javax.inject.Inject
 
-@HiltViewModel
+@KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
-class ScannerViewModel
-@Inject
-constructor(
+class ScannerViewModel(
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val bluetoothRepository: BluetoothRepository,

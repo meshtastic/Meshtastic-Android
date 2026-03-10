@@ -32,31 +32,28 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.registerReceiverCompat
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.di.ProcessLifecycle
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Repository responsible for maintaining and updating the state of USB connectivity. */
 @OptIn(ExperimentalCoroutinesApi::class)
-@Singleton
-class UsbRepository
-@Inject
-constructor(
+@Single
+class UsbRepository(
     private val application: Application,
     private val dispatchers: CoroutineDispatchers,
-    @ProcessLifecycle private val processLifecycle: Lifecycle,
-    private val usbBroadcastReceiverLazy: dagger.Lazy<UsbBroadcastReceiver>,
-    private val usbManagerLazy: dagger.Lazy<UsbManager?>,
-    private val usbSerialProberLazy: dagger.Lazy<UsbSerialProber>,
+    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
+    private val usbBroadcastReceiverLazy: Lazy<UsbBroadcastReceiver>,
+    private val usbManagerLazy: Lazy<UsbManager?>,
+    private val usbSerialProberLazy: Lazy<UsbSerialProber>,
 ) {
     private val _serialDevices = MutableStateFlow(emptyMap<String, UsbDevice>())
 
     val serialDevices =
         _serialDevices
             .mapLatest { serialDevices ->
-                val serialProber = usbSerialProberLazy.get()
+                val serialProber = usbSerialProberLazy.value
                 buildMap {
                     serialDevices.forEach { (k, v) -> serialProber.probeDevice(v)?.let { driver -> put(k, driver) } }
                 }
@@ -66,7 +63,7 @@ constructor(
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             refreshStateInternal()
-            usbBroadcastReceiverLazy.get().let { receiver ->
+            usbBroadcastReceiverLazy.value.let { receiver ->
                 application.registerReceiverCompat(receiver, receiver.intentFilter)
             }
         }
@@ -80,12 +77,12 @@ constructor(
         SerialConnectionImpl(usbManagerLazy, device, listener)
 
     fun requestPermission(device: UsbDevice): Flow<Boolean> =
-        usbManagerLazy.get()?.requestPermission(application, device) ?: emptyFlow()
+        usbManagerLazy.value?.requestPermission(application, device) ?: emptyFlow()
 
     fun refreshState() {
         processLifecycle.coroutineScope.launch(dispatchers.default) { refreshStateInternal() }
     }
 
     private suspend fun refreshStateInternal() =
-        withContext(dispatchers.default) { _serialDevices.emit(usbManagerLazy.get()?.deviceList ?: emptyMap()) }
+        withContext(dispatchers.default) { _serialDevices.emit(usbManagerLazy.value?.deviceList ?: emptyMap()) }
 }

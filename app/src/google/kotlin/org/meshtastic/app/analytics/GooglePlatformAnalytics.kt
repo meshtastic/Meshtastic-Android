@@ -46,16 +46,15 @@ import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
-import dagger.hilt.android.qualifiers.ApplicationContext
 import io.opentelemetry.api.GlobalOpenTelemetry
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
-import javax.inject.Inject
 import co.touchlab.kermit.Logger as KermitLogger
 
 /**
@@ -65,12 +64,9 @@ import co.touchlab.kermit.Logger as KermitLogger
  * This implementation delays initialization of SDKs until user consent is granted to reduce tracking "noise" and
  * respect privacy-focused environments.
  */
-class GooglePlatformAnalytics
-@Inject
-constructor(
-    @ApplicationContext private val context: Context,
-    private val analyticsPrefs: AnalyticsPrefs,
-) : PlatformAnalytics {
+@Single
+class GooglePlatformAnalytics(private val context: Context, private val analyticsPrefs: AnalyticsPrefs) :
+    PlatformAnalytics {
 
     private val sampleRate = 100f.takeIf { BuildConfig.DEBUG } ?: 10f // For Datadog remote sample rate
 

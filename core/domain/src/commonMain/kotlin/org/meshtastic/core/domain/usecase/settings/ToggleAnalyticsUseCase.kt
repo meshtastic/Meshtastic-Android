@@ -16,11 +16,12 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.AnalyticsPrefs
-import javax.inject.Inject
 
 /** Use case for toggling the analytics preference. */
-open class ToggleAnalyticsUseCase @Inject constructor(private val analyticsPrefs: AnalyticsPrefs) {
+@Single
+open class ToggleAnalyticsUseCase constructor(private val analyticsPrefs: AnalyticsPrefs) {
     operator fun invoke() {
         analyticsPrefs.setAnalyticsAllowed(!analyticsPrefs.analyticsAllowed.value)
     }

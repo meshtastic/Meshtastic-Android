@@ -34,6 +34,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
 import org.meshtastic.core.database.entity.MeshLog
@@ -42,7 +44,6 @@ import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.datastore.LocalStatsDataSource
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
@@ -53,16 +54,12 @@ import org.meshtastic.proto.DeviceMetadata
 import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.User
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Repository for managing node-related data, including hardware info, node database, and identity. */
-@Singleton
+@Single
 @Suppress("TooManyFunctions")
-class NodeRepositoryImpl
-@Inject
-constructor(
-    @ProcessLifecycle private val processLifecycle: Lifecycle,
+class NodeRepositoryImpl(
+    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
     private val nodeInfoWriteDataSource: NodeInfoWriteDataSource,
     private val dispatchers: CoroutineDispatchers,

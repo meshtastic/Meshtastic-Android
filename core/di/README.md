@@ -1,7 +1,7 @@
 # `:core:di`
 
 ## Overview
-The `:core:di` module defines the core Dagger Hilt modules and provides standard dependencies that are shared across all other modules.
+The `:core:di` module defines the core Koin modules and provides standard dependencies that are shared across all other modules.
 
 ## Key Components
 
@@ -12,7 +12,7 @@ Defines bindings for application-wide singletons like `Application`, `Context`, 
 Provides a wrapper for standard Kotlin `CoroutineDispatchers` (`IO`, `Default`, `Main`), allowing for easy mocking in unit tests.
 
 ### 3. `ProcessLifecycle.kt`
-Exposes the application's global process lifecycle as a Hilt binding, enabling components to react to the app entering the foreground or background.
+Exposes the application's global process lifecycle as a Koin binding, enabling components to react to the app entering the foreground or background.
 
 ## Module dependency graph
 

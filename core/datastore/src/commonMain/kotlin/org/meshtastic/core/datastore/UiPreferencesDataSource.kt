@@ -29,8 +29,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 
 const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 const val KEY_THEME = "theme"
@@ -43,8 +43,8 @@ const val KEY_ONLY_ONLINE = "only-online"
 const val KEY_ONLY_DIRECT = "only-direct"
 const val KEY_SHOW_IGNORED = "show-ignored"
 
-@Singleton
-class UiPreferencesDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
+@Single
+class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 internal class SerialConnectionImpl(
-    private val usbManagerLazy: dagger.Lazy<UsbManager?>,
+    private val usbManagerLazy: Lazy<UsbManager?>,
     private val device: UsbSerialDriver,
     private val listener: SerialConnectionListener,
 ) : SerialConnection {
@@ -74,7 +74,7 @@ internal class SerialConnectionImpl(
 
     override fun connect() {
         // We shouldn't be able to get this far without a USB subsystem so explode if that isn't true
-        val usbManager = usbManagerLazy.get()!!
+        val usbManager = usbManagerLazy.value!!
 
         val usbDeviceConnection = usbManager.openDevice(device.device)
         if (usbDeviceConnection == null) {

@@ -63,11 +63,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import org.jetbrains.compose.resources.stringResource
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.util.formatUptime
@@ -94,22 +92,16 @@ import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.updated
 import org.meshtastic.core.resources.uptime
 
-class LocalStatsWidget : GlanceAppWidget() {
+class LocalStatsWidget :
+    GlanceAppWidget(),
+    KoinComponent {
 
     override val sizeMode: SizeMode = SizeMode.Responsive(RESPONSIVE_SIZES)
     override val previewSizeMode: androidx.glance.appwidget.PreviewSizeMode = SizeMode.Responsive(RESPONSIVE_SIZES)
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface LocalStatsWidgetEntryPoint {
-        fun widgetStateProvider(): LocalStatsWidgetStateProvider
-    }
+    private val stateProvider: LocalStatsWidgetStateProvider by inject()
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val entryPoint =
-            EntryPointAccessors.fromApplication(context.applicationContext, LocalStatsWidgetEntryPoint::class.java)
-        val stateProvider = entryPoint.widgetStateProvider()
-
         provideContent {
             val state by stateProvider.state.collectAsState()
             WidgetContent(state)
@@ -117,9 +109,6 @@ class LocalStatsWidget : GlanceAppWidget() {
     }
 
     override suspend fun providePreview(context: Context, widgetCategory: Int) {
-        val entryPoint =
-            EntryPointAccessors.fromApplication(context.applicationContext, LocalStatsWidgetEntryPoint::class.java)
-        val stateProvider = entryPoint.widgetStateProvider()
         val currentState = stateProvider.state.value
 
         val stateToRender =

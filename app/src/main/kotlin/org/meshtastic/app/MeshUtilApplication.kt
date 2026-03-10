@@ -21,17 +21,11 @@ import android.appwidget.AppWidgetProviderInfo
 import android.os.Build
 import androidx.collection.intSetOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.android.HiltAndroidApp
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
@@ -40,13 +34,17 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import org.koin.android.ext.android.get
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.context.startKoin
+import org.meshtastic.app.di.AppKoinModule
+import org.meshtastic.app.di.module
 import org.meshtastic.app.widget.LocalStatsWidgetReceiver
 import org.meshtastic.app.worker.MeshLogCleanupWorker
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
-import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshPrefs
-import javax.inject.Inject
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration
@@ -54,21 +52,23 @@ import kotlin.time.toJavaDuration
 /**
  * The main application class for Meshtastic.
  *
- * This class is annotated with [HiltAndroidApp] to enable Hilt for dependency injection. It initializes core
- * application components, including analytics and platform-specific helpers, and manages analytics consent based on
- * user preferences.
+ * This class initializes core application components using Koin for dependency injection.
  */
-@HiltAndroidApp
 open class MeshUtilApplication :
     Application(),
     Configuration.Provider {
-    @Inject lateinit var workerFactory: HiltWorkerFactory
 
     private val applicationScope = CoroutineScope(Dispatchers.Default)
 
     override fun onCreate() {
         super.onCreate()
         ContextServices.app = this
+
+        startKoin {
+            androidContext(this@MeshUtilApplication)
+            workManagerFactory()
+            modules(AppKoinModule().module())
+        }
 
         // Schedule periodic MeshLog cleanup
         scheduleMeshLogCleanup()
@@ -93,15 +93,11 @@ open class MeshUtilApplication :
 
                 pushPreview()
 
-                val entryPoint =
-                    EntryPointAccessors.fromApplication(
-                        this@MeshUtilApplication,
-                        org.meshtastic.app.widget.LocalStatsWidget.LocalStatsWidgetEntryPoint::class.java,
-                    )
+                val widgetStateProvider: org.meshtastic.app.widget.LocalStatsWidgetStateProvider = get()
                 try {
                     // Wait for real data for up to 30 seconds before pushing an updated preview
                     withTimeout(30.seconds) {
-                        entryPoint.widgetStateProvider().state.first { it.showContent && it.nodeShortName != null }
+                        widgetStateProvider.state.first { it.showContent && it.nodeShortName != null }
                     }
 
                     Logger.i { "Real node data acquired. Pushing updated widget preview." }
@@ -113,17 +109,20 @@ open class MeshUtilApplication :
         }
 
         // Initialize DatabaseManager asynchronously with current device address so DAO consumers have an active DB
-        val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
-        applicationScope.launch { entryPoint.databaseManager().init(entryPoint.meshPrefs().deviceAddress.value) }
+        applicationScope.launch {
+            val dbManager: DatabaseManager = get()
+            val meshPrefs: MeshPrefs = get()
+            dbManager.init(meshPrefs.deviceAddress.value)
+        }
     }
 
     override fun onTerminate() {
         // Shutdown managers (useful for Robolectric tests)
-        val entryPoint = EntryPointAccessors.fromApplication(this, AppEntryPoint::class.java)
-        entryPoint.databaseManager().close()
-        entryPoint.androidEnvironment().close()
+        get<DatabaseManager>().close()
+        get<AndroidEnvironment>().close()
         applicationScope.cancel()
         super.onTerminate()
+        org.koin.core.context.stopKoin()
     }
 
     private fun scheduleMeshLogCleanup() {
@@ -139,19 +138,7 @@ open class MeshUtilApplication :
     }
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
-}
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface AppEntryPoint {
-    fun databaseManager(): DatabaseManager
-
-    fun meshPrefs(): MeshPrefs
-
-    fun meshLogPrefs(): MeshLogPrefs
-
-    fun androidEnvironment(): AndroidEnvironment
+        get() = Configuration.Builder().setWorkerFactory(get()).build()
 }
 
 fun logAssert(executeReliableWrite: Boolean) {

@@ -17,7 +17,7 @@
 package org.meshtastic.app.messaging
 
 import androidx.lifecycle.SavedStateHandle
-import dagger.hilt.android.lifecycle.HiltViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -29,13 +29,10 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.feature.messaging.MessageViewModel
-import javax.inject.Inject
 
 @Suppress("LongParameterList")
-@HiltViewModel
-class AndroidMessageViewModel
-@Inject
-constructor(
+@KoinViewModel
+class AndroidMessageViewModel(
     savedStateHandle: SavedStateHandle,
     nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,

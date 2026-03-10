@@ -60,10 +60,10 @@ class PacketHandlerImplTest {
 
         handler =
             PacketHandlerImpl(
-                { packetRepository },
+                lazy { packetRepository },
                 serviceBroadcasts,
                 radioInterfaceService,
-                { meshLogRepository },
+                lazy { meshLogRepository },
                 serviceRepository,
             )
         handler.start(testScope)

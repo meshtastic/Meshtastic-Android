@@ -23,11 +23,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import org.koin.core.annotation.Single
 import org.meshtastic.app.map.model.CustomTileProviderConfig
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.MapTileProviderPrefs
-import javax.inject.Inject
-import javax.inject.Singleton
 
 interface CustomTileProviderRepository {
     fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
@@ -41,10 +40,8 @@ interface CustomTileProviderRepository {
     suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig?
 }
 
-@Singleton
-class CustomTileProviderRepositoryImpl
-@Inject
-constructor(
+@Single
+class CustomTileProviderRepositoryImpl(
     private val json: Json,
     private val dispatchers: CoroutineDispatchers,
     private val mapTileProviderPrefs: MapTileProviderPrefs,

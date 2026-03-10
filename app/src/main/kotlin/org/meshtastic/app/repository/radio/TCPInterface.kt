@@ -17,8 +17,6 @@
 package org.meshtastic.app.repository.radio
 
 import co.touchlab.kermit.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.meshtastic.app.repository.network.NetworkRepository
@@ -37,12 +35,10 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
 
-open class TCPInterface
-@AssistedInject
-constructor(
+open class TCPInterface(
     service: RadioInterfaceService,
     private val dispatchers: CoroutineDispatchers,
-    @Assisted private val address: String,
+    private val address: String,
 ) : StreamInterface(service) {
 
     companion object {

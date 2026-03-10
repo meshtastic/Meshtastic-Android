@@ -18,6 +18,7 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.PacketHandler
@@ -26,16 +27,9 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.StoreAndForward
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class HistoryManagerImpl
-@Inject
-constructor(
-    private val meshPrefs: MeshPrefs,
-    private val packetHandler: PacketHandler,
-) : HistoryManager {
+@Single
+class HistoryManagerImpl(private val meshPrefs: MeshPrefs, private val packetHandler: PacketHandler) : HistoryManager {
 
     companion object {
         private const val HISTORY_TAG = "HistoryReplay"

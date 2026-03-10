@@ -34,19 +34,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.Location
 import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.PlatformAnalytics
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class LocationRepositoryImpl
-@Inject
-constructor(
+@Single
+class LocationRepositoryImpl(
     private val context: Application,
-    private val locationManager: dagger.Lazy<LocationManager>,
+    private val locationManager: Lazy<LocationManager>,
     private val analytics: PlatformAnalytics,
     private val dispatchers: CoroutineDispatchers,
 ) : LocationRepository {
@@ -125,5 +122,5 @@ constructor(
 
     /** Observable flow for location updates */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
-    override fun getLocations(): Flow<Location> = locationManager.get().requestLocationUpdates()
+    override fun getLocations(): Flow<Location> = locationManager.value.requestLocationUpdates()
 }

@@ -24,12 +24,12 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.ServiceCompat
 import co.touchlab.kermit.Logger
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.android.ext.android.inject
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.app.ui.connections.NO_DEVICE_SELECTED
 import org.meshtastic.core.common.hasLocationPermission
@@ -50,42 +50,37 @@ import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
-import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.proto.PortNum
-import javax.inject.Inject
 
-@AndroidEntryPoint
 @Suppress("TooManyFunctions", "LargeClass")
 class MeshService : Service() {
 
-    @Inject lateinit var radioInterfaceService: RadioInterfaceService
+    private val radioInterfaceService: RadioInterfaceService by inject()
 
-    @Inject lateinit var serviceRepository: ServiceRepository
+    private val serviceRepository: ServiceRepository by inject()
 
-    @Inject lateinit var packetHandler: PacketHandler
+    private val packetHandler: PacketHandler by inject()
 
-    @Inject lateinit var serviceBroadcasts: ServiceBroadcasts
+    private val serviceBroadcasts: ServiceBroadcasts by inject()
 
-    @Inject lateinit var nodeManager: NodeManager
+    private val nodeManager: NodeManager by inject()
 
-    @Inject lateinit var messageProcessor: MeshMessageProcessor
+    private val messageProcessor: MeshMessageProcessor by inject()
 
-    @Inject lateinit var commandSender: CommandSender
+    private val commandSender: CommandSender by inject()
 
-    @Inject lateinit var locationManager: MeshLocationManager
+    private val locationManager: MeshLocationManager by inject()
 
-    @Inject lateinit var connectionManager: MeshConnectionManager
+    private val connectionManager: MeshConnectionManager by inject()
 
-    @Inject lateinit var serviceNotifications: MeshServiceNotifications
+    private val serviceNotifications: MeshServiceNotifications by inject()
 
-    @Inject lateinit var radioConfigRepository: RadioConfigRepository
-
-    @Inject lateinit var router: MeshRouter
+    private val router: MeshRouter by inject()
 
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)

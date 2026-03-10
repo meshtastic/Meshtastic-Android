@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
@@ -32,15 +33,13 @@ import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
-import javax.inject.Inject
 
 /**
  * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
  * [LocalModuleConfig].
  */
-open class RadioConfigRepositoryImpl
-@Inject
-constructor(
+@Single
+open class RadioConfigRepositoryImpl(
     private val nodeDB: NodeRepository,
     private val channelSetDataSource: ChannelSetDataSource,
     private val localConfigDataSource: LocalConfigDataSource,

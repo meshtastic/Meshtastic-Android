@@ -20,11 +20,11 @@ import android.app.Application
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.NetworkFirmwareReleases
-import javax.inject.Inject
 
-class FirmwareReleaseJsonDataSourceImpl @Inject constructor(private val application: Application) :
-    FirmwareReleaseJsonDataSource {
+@Single
+class FirmwareReleaseJsonDataSourceImpl(private val application: Application) : FirmwareReleaseJsonDataSource {
 
     // Match the network client behavior: be tolerant of unknown fields so that
     // older app versions can read newer snapshots of firmware_releases.json.

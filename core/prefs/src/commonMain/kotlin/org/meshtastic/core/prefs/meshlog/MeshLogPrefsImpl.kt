@@ -28,17 +28,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MeshLogDataStore
 import org.meshtastic.core.repository.MeshLogPrefs
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MeshLogPrefsImpl
-@Inject
-constructor(
-    @MeshLogDataStore private val dataStore: DataStore<Preferences>,
+@Single
+class MeshLogPrefsImpl(
+    @Named("MeshLogDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MeshLogPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

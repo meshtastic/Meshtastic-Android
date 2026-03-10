@@ -35,6 +35,8 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.app.repository.network.NetworkRepository
 import org.meshtastic.core.ble.BluetoothRepository
@@ -44,7 +46,6 @@ import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.di.ProcessLifecycle
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
@@ -54,8 +55,6 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Handles the bluetooth link with a mesh radio device. Does not cache any device state, just does bluetooth comms
@@ -67,17 +66,15 @@ import javax.inject.Singleton
  * can be stubbed out with a simulated version as needed.
  */
 @Suppress("LongParameterList", "TooManyFunctions")
-@Singleton
-class AndroidRadioInterfaceService
-@Inject
-constructor(
+@Single
+class AndroidRadioInterfaceService(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
-    @ProcessLifecycle private val processLifecycle: Lifecycle,
+    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
     private val radioPrefs: RadioPrefs,
-    private val interfaceFactory: InterfaceFactory,
+    private val interfaceFactory: Lazy<InterfaceFactory>,
     private val analytics: PlatformAnalytics,
 ) : RadioInterfaceService {
 
@@ -179,7 +176,7 @@ constructor(
 
     /** Constructs a full radio address for the specific interface type. */
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
-        interfaceFactory.toInterfaceAddress(interfaceId, rest)
+        interfaceFactory.value.toInterfaceAddress(interfaceId, rest)
 
     override fun isMockInterface(): Boolean =
         BuildConfig.DEBUG || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
@@ -200,7 +197,7 @@ constructor(
     fun getBondedDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
         val address = getDeviceAddress()
-        return if (interfaceFactory.addressValid(address)) {
+        return if (interfaceFactory.value.addressValid(address)) {
             address
         } else {
             null
@@ -259,24 +256,32 @@ constructor(
         if (radioIf !is NopInterface) {
             // Already running
             return
+        }
+
+        val isTestLab = Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
+        val address =
+            getBondedDeviceAddress()
+                ?: if (isTestLab) {
+                    mockInterfaceAddress
+                } else {
+                    null
+                }
+
+        if (address == null) {
+            Logger.w { "No bonded mesh radio, can't start interface" }
         } else {
-            val address = getBondedDeviceAddress()
-            if (address == null) {
-                Logger.w { "No bonded mesh radio, can't start interface" }
-            } else {
-                Logger.i { "Starting radio ${address.anonymize}" }
-                isStarted = true
+            Logger.i { "Starting radio ${address.anonymize}" }
+            isStarted = true
 
-                if (logSends) {
-                    sentPacketsLog = BinaryLogFile(context, "sent_log.pb")
-                }
-                if (logReceives) {
-                    receivedPacketsLog = BinaryLogFile(context, "receive_log.pb")
-                }
-
-                radioIf = interfaceFactory.createInterface(address)
-                startHeartbeat()
+            if (logSends) {
+                sentPacketsLog = BinaryLogFile(context, "sent_log.pb")
             }
+            if (logReceives) {
+                receivedPacketsLog = BinaryLogFile(context, "receive_log.pb")
+            }
+
+            radioIf = interfaceFactory.value.createInterface(address, this)
+            startHeartbeat()
         }
     }
 
@@ -297,7 +302,7 @@ constructor(
         val r = radioIf
         Logger.i { "stopping interface $r" }
         isStarted = false
-        radioIf = interfaceFactory.nopInterface
+        radioIf = interfaceFactory.value.nopInterface
         r.close()
 
         // cancel any old jobs and get ready for the new ones

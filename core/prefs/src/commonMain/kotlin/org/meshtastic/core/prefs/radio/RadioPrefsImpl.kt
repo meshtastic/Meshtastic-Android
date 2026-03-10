@@ -27,17 +27,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.RadioDataStore
 import org.meshtastic.core.repository.RadioPrefs
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class RadioPrefsImpl
-@Inject
-constructor(
-    @RadioDataStore private val dataStore: DataStore<Preferences>,
+@Single
+class RadioPrefsImpl(
+    @Named("RadioDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : RadioPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

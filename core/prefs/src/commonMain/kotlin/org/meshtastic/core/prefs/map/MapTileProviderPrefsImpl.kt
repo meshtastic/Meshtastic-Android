@@ -27,17 +27,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MapTileProviderDataStore
 import org.meshtastic.core.repository.MapTileProviderPrefs
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MapTileProviderPrefsImpl
-@Inject
-constructor(
-    @MapTileProviderDataStore private val dataStore: DataStore<Preferences>,
+@Single
+class MapTileProviderPrefsImpl(
+    @Named("MapTileProviderDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapTileProviderPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

@@ -25,19 +25,16 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Single
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MqttClientProxyMessage
 import org.meshtastic.proto.ToRadio
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MqttManagerImpl
-@Inject
-constructor(
+@Single
+class MqttManagerImpl(
     private val mqttRepository: MQTTRepository,
     private val packetHandler: PacketHandler,
     private val serviceRepository: ServiceRepository,

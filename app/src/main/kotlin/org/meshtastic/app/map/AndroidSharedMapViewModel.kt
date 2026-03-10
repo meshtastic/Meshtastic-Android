@@ -16,18 +16,15 @@
  */
 package org.meshtastic.app.map
 
-import dagger.hilt.android.lifecycle.HiltViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.feature.map.SharedMapViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class AndroidSharedMapViewModel
-@Inject
-constructor(
+@KoinViewModel
+class AndroidSharedMapViewModel(
     mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,

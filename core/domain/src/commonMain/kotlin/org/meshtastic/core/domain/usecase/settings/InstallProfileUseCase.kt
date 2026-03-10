@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.proto.Config
@@ -24,10 +25,10 @@ import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
-import javax.inject.Inject
 
 /** Use case for installing a device profile onto a radio. */
-open class InstallProfileUseCase @Inject constructor(private val radioController: RadioController) {
+@Single
+open class InstallProfileUseCase constructor(private val radioController: RadioController) {
     /**
      * Installs the provided [DeviceProfile] onto the radio at [destNum].
      *

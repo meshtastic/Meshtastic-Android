@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.data.manager
 
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshConfigFlowManager
 import org.meshtastic.core.repository.MeshConfigHandler
@@ -26,15 +26,11 @@ import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.TracerouteHandler
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Implementation of [MeshRouter] that orchestrates specialized mesh packet handlers. */
 @Suppress("LongParameterList")
-@Singleton
-class MeshRouterImpl
-@Inject
-constructor(
+@Single
+class MeshRouterImpl(
     private val dataHandlerLazy: Lazy<MeshDataHandler>,
     private val configHandlerLazy: Lazy<MeshConfigHandler>,
     private val tracerouteHandlerLazy: Lazy<TracerouteHandler>,
@@ -44,25 +40,25 @@ constructor(
     private val actionHandlerLazy: Lazy<MeshActionHandler>,
 ) : MeshRouter {
     override val dataHandler: MeshDataHandler
-        get() = dataHandlerLazy.get()
+        get() = dataHandlerLazy.value
 
     override val configHandler: MeshConfigHandler
-        get() = configHandlerLazy.get()
+        get() = configHandlerLazy.value
 
     override val tracerouteHandler: TracerouteHandler
-        get() = tracerouteHandlerLazy.get()
+        get() = tracerouteHandlerLazy.value
 
     override val neighborInfoHandler: NeighborInfoHandler
-        get() = neighborInfoHandlerLazy.get()
+        get() = neighborInfoHandlerLazy.value
 
     override val configFlowManager: MeshConfigFlowManager
-        get() = configFlowManagerLazy.get()
+        get() = configFlowManagerLazy.value
 
     override val mqttManager: MqttManager
-        get() = mqttManagerLazy.get()
+        get() = mqttManagerLazy.value
 
     override val actionHandler: MeshActionHandler
-        get() = actionHandlerLazy.get()
+        get() = actionHandlerLazy.value
 
     override fun start(scope: CoroutineScope) {
         dataHandler.start(scope)

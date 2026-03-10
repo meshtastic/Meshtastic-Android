@@ -22,9 +22,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.util.compareUsers
 import org.meshtastic.core.model.util.userFieldsToString
 import org.meshtastic.core.resources.Res
@@ -42,7 +42,7 @@ import org.meshtastic.proto.User
 fun SharedContactDialog(
     sharedContact: SharedContact,
     onDismiss: () -> Unit,
-    viewModel: SharedContactViewModel = hiltViewModel(),
+    viewModel: SharedContactViewModel = koinViewModel(),
 ) {
     val unfilteredNodes by viewModel.unfilteredNodes.collectAsStateWithLifecycle()
 

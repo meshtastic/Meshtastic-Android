@@ -59,7 +59,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -95,6 +94,7 @@ import com.google.maps.android.data.kml.KmlLayer
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.json.JSONObject
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.component.ClusterItemsListDialog
 import org.meshtastic.app.map.component.CustomMapLayersSheet
 import org.meshtastic.app.map.component.CustomTileProviderManagerSheet
@@ -149,7 +149,7 @@ private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
-    mapViewModel: MapViewModel = hiltViewModel(),
+    mapViewModel: MapViewModel = koinViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
     nodeTracks: List<Position>? = null,

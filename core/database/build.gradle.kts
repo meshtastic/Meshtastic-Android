@@ -20,6 +20,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
+    id("meshtastic.koin")
 }
 
 kotlin {

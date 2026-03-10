@@ -20,9 +20,11 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +48,10 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.node.AndroidCompassViewModel
+import org.meshtastic.app.node.AndroidNodeDetailViewModel
+import org.meshtastic.app.node.AndroidNodeListViewModel
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.resources.Res
@@ -65,6 +71,7 @@ fun AdaptiveNodeListScreen(
     initialNodeId: Int? = null,
     onNavigateToMessages: (String) -> Unit = {},
 ) {
+    val nodeListViewModel: AndroidNodeListViewModel = koinViewModel()
     val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
     val scope = rememberCoroutineScope()
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
@@ -118,6 +125,7 @@ fun AdaptiveNodeListScreen(
                 // Prevent TextFields from auto-focusing when pane animates in
                 LaunchedEffect(Unit) { focusManager.clearFocus() }
                 NodeListScreen(
+                    viewModel = nodeListViewModel,
                     navigateToNodeDetails = { nodeId ->
                         scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, nodeId) }
                     },
@@ -134,8 +142,12 @@ fun AdaptiveNodeListScreen(
                 navigator.currentDestination?.contentKey?.let { nodeId ->
                     key(nodeId) {
                         LaunchedEffect(nodeId) { focusManager.clearFocus() }
+                        val nodeDetailViewModel: AndroidNodeDetailViewModel = koinViewModel()
+                        val compassViewModel: AndroidCompassViewModel = koinViewModel()
                         NodeDetailScreen(
                             nodeId = nodeId,
+                            viewModel = nodeDetailViewModel,
+                            compassViewModel = compassViewModel,
                             navigateToMessages = onNavigateToMessages,
                             onNavigate = { route -> navController.navigate(route) },
                             onNavigateUp = handleBack,
@@ -145,6 +157,18 @@ fun AdaptiveNodeListScreen(
             }
         },
     )
+}
+
+@Composable
+fun NodeTabTitle() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(imageVector = MeshtasticIcons.Nodes, contentDescription = null, modifier = Modifier.padding(end = 8.dp))
+        Text(
+            text = stringResource(Res.string.nodes),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
 }
 
 @Composable

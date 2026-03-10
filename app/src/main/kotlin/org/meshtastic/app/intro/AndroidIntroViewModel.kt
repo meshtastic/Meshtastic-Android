@@ -16,9 +16,8 @@
  */
 package org.meshtastic.app.intro
 
-import dagger.hilt.android.lifecycle.HiltViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.feature.intro.IntroViewModel
-import javax.inject.Inject
 
-/** Android-specific Hilt wrapper for IntroViewModel. */
-@HiltViewModel class AndroidIntroViewModel @Inject constructor() : IntroViewModel()
+/** Android-specific Koin wrapper for IntroViewModel. */
+@KoinViewModel class AndroidIntroViewModel : IntroViewModel()

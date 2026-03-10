@@ -20,10 +20,10 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.util.toChannelSet
 import org.meshtastic.core.repository.DataPair
@@ -35,12 +35,9 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
-import javax.inject.Inject
 
-@HiltViewModel
-class ChannelViewModel
-@Inject
-constructor(
+@KoinViewModel
+class ChannelViewModel(
     private val radioController: RadioController,
     private val radioConfigRepository: RadioConfigRepository,
     private val analytics: PlatformAnalytics,

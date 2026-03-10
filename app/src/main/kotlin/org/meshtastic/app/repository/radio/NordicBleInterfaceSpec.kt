@@ -17,18 +17,19 @@
 package org.meshtastic.app.repository.radio
 
 import co.touchlab.kermit.Logger
+import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.model.util.anonymize
-import javax.inject.Inject
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Bluetooth backend implementation. */
-class NordicBleInterfaceSpec
-@Inject
-constructor(
+@Single
+class NordicBleInterfaceSpec(
     private val factory: NordicBleInterfaceFactory,
     private val bluetoothRepository: BluetoothRepository,
 ) : InterfaceSpec<NordicBleInterface> {
-    override fun createInterface(rest: String): NordicBleInterface = factory.create(rest)
+    override fun createInterface(rest: String, service: RadioInterfaceService): NordicBleInterface =
+        factory.create(rest, service)
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */
     override fun addressValid(rest: String): Boolean = if (!bluetoothRepository.isBonded(rest)) {

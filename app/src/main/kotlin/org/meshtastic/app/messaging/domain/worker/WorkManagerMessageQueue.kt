@@ -20,13 +20,12 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MessageQueue
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Android implementation of [MessageQueue] that uses [WorkManager] for reliable background transmission. */
-@Singleton
-class WorkManagerMessageQueue @Inject constructor(private val workManager: WorkManager) : MessageQueue {
+@Single
+class WorkManagerMessageQueue(private val workManager: WorkManager) : MessageQueue {
 
     override suspend fun enqueue(packetId: Int) {
         val workRequest =

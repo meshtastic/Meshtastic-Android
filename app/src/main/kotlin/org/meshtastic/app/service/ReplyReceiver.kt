@@ -20,16 +20,15 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.RemoteInput
-import dagger.hilt.android.AndroidEntryPoint
-import jakarta.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MeshServiceNotifications
-import org.meshtastic.core.repository.ServiceRepository
 
 /**
  * A [BroadcastReceiver] that handles inline replies from notifications.
@@ -38,11 +37,12 @@ import org.meshtastic.core.repository.ServiceRepository
  * and the contact key from the intent, sends the message using the [ServiceRepository], and then cancels the original
  * notification.
  */
-@AndroidEntryPoint
-class ReplyReceiver : BroadcastReceiver() {
-    @Inject lateinit var radioController: RadioController
+class ReplyReceiver :
+    BroadcastReceiver(),
+    KoinComponent {
+    private val radioController: RadioController by inject()
 
-    @Inject lateinit var meshServiceNotifications: MeshServiceNotifications
+    private val meshServiceNotifications: MeshServiceNotifications by inject()
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 

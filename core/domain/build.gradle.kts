@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.devtools.ksp)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -53,5 +54,3 @@ kotlin {
         }
     }
 }
-
-dependencies { add("kspAndroid", libs.hilt.compiler) }

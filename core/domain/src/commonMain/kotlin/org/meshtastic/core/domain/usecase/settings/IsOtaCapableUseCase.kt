@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
@@ -29,11 +30,10 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
-import javax.inject.Inject
 
 /** Use case to determine if the currently connected device is capable of over-the-air (OTA) updates. */
+@Single
 open class IsOtaCapableUseCase
-@Inject
 constructor(
     private val nodeRepository: NodeRepository,
     private val radioController: RadioController,

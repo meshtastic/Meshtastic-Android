@@ -47,9 +47,9 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.accept
@@ -66,7 +66,7 @@ import org.meshtastic.proto.ChannelSet
 fun ScannedQrCodeDialog(
     incoming: ChannelSet,
     onDismiss: () -> Unit,
-    viewModel: ScannedQrCodeViewModel = hiltViewModel(),
+    viewModel: ScannedQrCodeViewModel = koinViewModel(),
 ) {
     val channels by viewModel.channels.collectAsStateWithLifecycle()
 

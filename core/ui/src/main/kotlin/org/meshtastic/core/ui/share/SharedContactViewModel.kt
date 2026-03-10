@@ -18,24 +18,19 @@ package org.meshtastic.core.ui.share
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.SharedContact
-import javax.inject.Inject
 
-@HiltViewModel
-class SharedContactViewModel
-@Inject
-constructor(
-    nodeRepository: NodeRepository,
-    private val serviceRepository: ServiceRepository,
-) : ViewModel() {
+@KoinViewModel
+class SharedContactViewModel(nodeRepository: NodeRepository, private val serviceRepository: ServiceRepository) :
+    ViewModel() {
 
     val unfilteredNodes: StateFlow<List<Node>> =
         nodeRepository.getNodes().stateInWhileSubscribed(initialValue = emptyList())

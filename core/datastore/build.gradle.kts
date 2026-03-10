@@ -18,7 +18,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.devtools.ksp)
+    id("meshtastic.koin")
 }
 
 kotlin {
@@ -29,12 +29,8 @@ kotlin {
             implementation(projects.core.proto)
             api(libs.androidx.datastore)
             api(libs.androidx.datastore.preferences)
-            api(libs.javax.inject)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)
         }
-        androidMain.dependencies { implementation(libs.hilt.android) }
     }
 }
-
-dependencies { "kspAndroid"(libs.hilt.compiler) }

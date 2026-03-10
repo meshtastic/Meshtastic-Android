@@ -30,6 +30,7 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.ignoreException
 import org.meshtastic.core.model.util.subscribeList
 import org.meshtastic.core.repository.NodeRepository
@@ -37,14 +38,11 @@ import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.MqttClientProxyMessage
 import java.net.URI
 import java.security.SecureRandom
-import javax.inject.Inject
-import javax.inject.Singleton
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 
-@Singleton
+@Single
 class MQTTRepositoryImpl
-@Inject
 constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,

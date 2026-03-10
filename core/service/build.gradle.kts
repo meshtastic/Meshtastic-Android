@@ -17,7 +17,7 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.devtools.ksp)
+    id("meshtastic.koin")
 }
 
 kotlin {
@@ -35,15 +35,12 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
-            implementation(libs.javax.inject)
+
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
         }
 
-        androidMain.dependencies {
-            api(projects.core.api)
-            implementation(libs.hilt.android)
-        }
+        androidMain.dependencies { api(projects.core.api) }
 
         commonTest.dependencies {
             implementation(libs.junit)
@@ -53,5 +50,3 @@ kotlin {
         }
     }
 }
-
-dependencies { add("kspAndroid", libs.hilt.compiler) }

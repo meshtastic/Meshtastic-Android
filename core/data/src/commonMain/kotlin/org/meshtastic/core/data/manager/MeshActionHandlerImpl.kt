@@ -16,11 +16,11 @@
  */
 package org.meshtastic.core.data.manager
 
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
@@ -49,14 +49,10 @@ import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.OTAMode
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.User
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
-@Singleton
-class MeshActionHandlerImpl
-@Inject
-constructor(
+@Single
+class MeshActionHandlerImpl(
     private val nodeManager: NodeManager,
     private val commandSender: CommandSender,
     private val packetRepository: Lazy<PacketRepository>,
@@ -123,7 +119,7 @@ constructor(
             }
         }
         nodeManager.updateNode(node.num) { it.copy(isIgnored = newIgnoredStatus) }
-        scope.handledLaunch { packetRepository.get().updateFilteredBySender(node.user.id, newIgnoredStatus) }
+        scope.handledLaunch { packetRepository.value.updateFilteredBySender(node.user.id, newIgnoredStatus) }
     }
 
     private fun handleMute(action: ServiceAction.Mute, myNodeNum: Int) {
@@ -177,7 +173,7 @@ constructor(
                     to = action.contactKey.substring(1),
                     channel = action.contactKey[0].digitToInt(),
                 )
-            packetRepository.get().insertReaction(reaction, myNodeNum)
+            packetRepository.value.insertReaction(reaction, myNodeNum)
         }
     }
 
@@ -190,7 +186,7 @@ constructor(
     override fun handleSend(p: DataPacket, myNodeNum: Int) {
         commandSender.sendData(p)
         serviceBroadcasts.broadcastMessageStatus(p.id, p.status ?: MessageStatus.UNKNOWN)
-        dataHandler.get().rememberDataPacket(p, myNodeNum, false)
+        dataHandler.value.rememberDataPacket(p, myNodeNum, false)
         val bytes = p.bytes ?: okio.ByteString.EMPTY
         analytics.track("data_send", DataPair("num_bytes", bytes.size), DataPair("type", p.dataType))
     }
@@ -348,7 +344,7 @@ constructor(
             meshPrefs.setDeviceAddress(deviceAddr)
             scope.handledLaunch {
                 nodeManager.clear()
-                messageProcessor.get().clearEarlyPackets()
+                messageProcessor.value.clearEarlyPackets()
                 databaseManager.switchActiveDatabase(deviceAddr)
                 serviceNotifications.clearNotifications()
                 nodeManager.loadCachedNodeDB()

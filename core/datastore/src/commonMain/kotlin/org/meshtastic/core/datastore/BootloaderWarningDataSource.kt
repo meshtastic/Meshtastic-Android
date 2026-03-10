@@ -25,11 +25,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 
-@Singleton
-class BootloaderWarningDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
+@Single
+class BootloaderWarningDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
 
     private object PreferencesKeys {
         val DISMISSED_BOOTLOADER_ADDRESSES = stringPreferencesKey("dismissed-bootloader-addresses")

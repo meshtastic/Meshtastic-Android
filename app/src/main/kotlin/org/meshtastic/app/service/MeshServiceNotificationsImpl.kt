@@ -36,11 +36,10 @@ import androidx.core.content.getSystemService
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
-import dagger.Lazy
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
+import org.koin.core.annotation.Single
 import org.meshtastic.app.MainActivity
 import org.meshtastic.app.R.raw
 import org.meshtastic.app.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
@@ -92,8 +91,6 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
 import org.meshtastic.proto.Telemetry
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
 
 /**
@@ -103,11 +100,9 @@ import kotlin.time.Duration.Companion.minutes
  * notifications for various events like new messages, alerts, and service status changes.
  */
 @Suppress("TooManyFunctions", "LongParameterList")
-@Singleton
-class MeshServiceNotificationsImpl
-@Inject
-constructor(
-    @ApplicationContext private val context: Context,
+@Single
+class MeshServiceNotificationsImpl(
+    private val context: Context,
     private val packetRepository: Lazy<PacketRepository>,
     private val nodeRepository: Lazy<NodeRepository>,
 ) : MeshServiceNotifications {
@@ -304,7 +299,7 @@ constructor(
 
         // Seeding from database if caches are still null (e.g. on restart or reconnection)
         if (cachedLocalStats == null || cachedDeviceMetrics == null) {
-            val repo = nodeRepository.get()
+            val repo = nodeRepository.value
             val myNodeNum = repo.myNodeInfo.value?.myNodeNum
             if (myNodeNum != null) {
                 // We use runBlocking here because this is called from MeshConnectionManager's synchronous methods,
@@ -389,15 +384,14 @@ constructor(
         channelName: String?,
         isSilent: Boolean = false,
     ) {
-        val ourNode = nodeRepository.get().ourNodeInfo.value
+        val ourNode = nodeRepository.value.ourNodeInfo.value
         val history =
-            packetRepository
-                .get()
+            packetRepository.value
                 .getMessagesFrom(contactKey, includeFiltered = false) { nodeId ->
                     if (nodeId == DataPacket.ID_LOCAL) {
-                        ourNode ?: nodeRepository.get().getNode(nodeId)
+                        ourNode ?: nodeRepository.value.getNode(nodeId)
                     } else {
-                        nodeRepository.get().getNode(nodeId ?: "")
+                        nodeRepository.value.getNode(nodeId ?: "")
                     }
                 }
                 .first()
@@ -430,7 +424,7 @@ constructor(
                 it.id != SUMMARY_ID && it.notification.group == GROUP_KEY_MESSAGES
             }
 
-        val ourNode = nodeRepository.get().ourNodeInfo.value
+        val ourNode = nodeRepository.value.ourNodeInfo.value
         val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
         val me =
             Person.Builder()
@@ -542,7 +536,7 @@ constructor(
             builder.setSilent(true)
         }
 
-        val ourNode = nodeRepository.get().ourNodeInfo.value
+        val ourNode = nodeRepository.value.ourNodeInfo.value
         val meName = ourNode?.user?.long_name ?: getString(Res.string.you)
         val me =
             Person.Builder()
@@ -574,7 +568,7 @@ constructor(
 
             // Add reactions as separate "messages" in history if they exist
             msg.emojis.forEach { reaction ->
-                val reactorNode = nodeRepository.get().getNode(reaction.user.id)
+                val reactorNode = nodeRepository.value.getNode(reaction.user.id)
                 val reactor =
                     Person.Builder()
                         .setName(reaction.user.long_name)

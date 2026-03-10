@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -43,16 +43,12 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.LogRecord
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.uuid.Uuid
 
 /** Implementation of [MeshMessageProcessor] that handles raw radio messages and prepares mesh packets for routing. */
 @Suppress("TooManyFunctions")
-@Singleton
-class MeshMessageProcessorImpl
-@Inject
-constructor(
+@Single
+class MeshMessageProcessorImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val meshLogRepository: Lazy<MeshLogRepository>,
@@ -246,7 +242,7 @@ constructor(
             }
 
             try {
-                router.get().dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
+                router.value.dataHandler.handleReceivedData(packet, myNum, log.uuid, logJob)
             } finally {
                 scope.launch {
                     mapsMutex.withLock {
@@ -258,5 +254,5 @@ constructor(
         }
     }
 
-    private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.get().insert(log) }
+    private fun insertMeshLog(log: MeshLog): Job = scope.handledLaunch { meshLogRepository.value.insert(log) }
 }

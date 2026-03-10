@@ -16,11 +16,14 @@
  */
 package org.meshtastic.app.repository.radio
 
-import javax.inject.Inject
+import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Mock interface backend implementation. */
-class MockInterfaceSpec @Inject constructor(private val factory: MockInterfaceFactory) : InterfaceSpec<MockInterface> {
-    override fun createInterface(rest: String): MockInterface = factory.create(rest)
+@Single
+class MockInterfaceSpec(private val factory: MockInterfaceFactory) : InterfaceSpec<MockInterface> {
+    override fun createInterface(rest: String, service: RadioInterfaceService): MockInterface =
+        factory.create(rest, service)
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */
     override fun addressValid(rest: String): Boolean = true
