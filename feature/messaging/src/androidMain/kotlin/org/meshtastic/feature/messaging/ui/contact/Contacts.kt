@@ -53,6 +53,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -254,8 +255,10 @@ fun ContactsScreen(
             if (connectionState.isConnected()) {
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
-                    onImport = { uri ->
-                        onHandleScannedUri(uri) { scope.launch { context.showToast(Res.string.channel_invalid) } }
+                    onImport = { uriString ->
+                        onHandleScannedUri(uriString.toUri()) {
+                            scope.launch { context.showToast(Res.string.channel_invalid) }
+                        }
                     },
                     onShareChannels = onNavigateToShare,
                     onDismissSharedContact = { onClearSharedContactRequested() },

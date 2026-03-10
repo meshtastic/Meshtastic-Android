@@ -68,13 +68,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -150,8 +147,8 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
     ;
 
     companion object {
-        fun fromNavDestination(destination: NavDestination?): TopLevelDestination? =
-            entries.find { dest -> destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true }
+        fun fromNavKey(key: NavKey?): TopLevelDestination? =
+            entries.find { dest -> key?.let { it::class == dest.route::class } == true }
     }
 }
 
@@ -159,8 +156,9 @@ enum class TopLevelDestination(val label: StringResource, val icon: ImageVector,
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerViewModel = koinViewModel()) {
-    val navController = rememberNavController()
-    LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) } }
+    val backStack = rememberNavBackStack(NodesRoutes.NodesGraph as NavKey)
+    // LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) }
+    // }
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val sharedContactRequested by uIViewModel.sharedContactRequested.collectAsStateWithLifecycle()
@@ -230,7 +228,7 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                     val errorRes = availability.toMessageRes()
                     if (errorRes == null) {
                         dismissedTracerouteRequestId = response.requestId
-                        navController.navigate(
+                        backStack.add(
                             NodeDetailRoutes.TracerouteMap(
                                 destNum = response.destinationNodeNum,
                                 requestId = response.requestId,
@@ -250,8 +248,8 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
             )
         }
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
-    val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
+    val currentKey = backStack.lastOrNull()
+    val topLevelDestination = TopLevelDestination.fromNavKey(currentKey)
 
     // State for determining the connection type icon to display
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
@@ -405,52 +403,47 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                         if (isRepress) {
                             when (destination) {
                                 TopLevelDestination.Nodes -> {
-                                    val onNodesList = currentDestination?.hasRoute(NodesRoutes.Nodes::class) == true
+                                    val onNodesList = currentKey is NodesRoutes.Nodes
                                     if (!onNodesList) {
-                                        navController.navigate(destination.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                            launchSingleTop = true
-                                        }
+                                        backStack.clear()
+                                        backStack.add(destination.route)
                                     }
                                     uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                                 }
                                 TopLevelDestination.Conversations -> {
-                                    val onConversationsList =
-                                        currentDestination?.hasRoute(ContactsRoutes.Contacts::class) == true
+                                    val onConversationsList = currentKey is ContactsRoutes.Contacts
                                     if (!onConversationsList) {
-                                        navController.navigate(destination.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                            launchSingleTop = true
-                                        }
+                                        backStack.clear()
+                                        backStack.add(destination.route)
                                     }
                                     uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                                 }
                                 else -> Unit
                             }
                         } else {
-                            navController.navigate(destination.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                                launchSingleTop = true
-                            }
+                            backStack.clear()
+                            backStack.add(destination.route)
                         }
                     },
                 )
             }
         },
     ) {
-        NavHost(
-            navController = navController,
-            startDestination = NodesRoutes.NodesGraph,
+        val provider =
+            entryProvider<NavKey> {
+                contactsGraph(backStack, uIViewModel.scrollToTopEventFlow)
+                nodesGraph(backStack, uIViewModel.scrollToTopEventFlow)
+                mapGraph(backStack)
+                channelsGraph(backStack)
+                connectionsGraph(backStack)
+                settingsGraph(backStack)
+                firmwareGraph(backStack)
+            }
+        NavDisplay(
+            backStack = backStack,
+            entryProvider = provider,
             modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding(),
-        ) {
-            contactsGraph(navController, uIViewModel.scrollToTopEventFlow)
-            nodesGraph(navController, uIViewModel.scrollToTopEventFlow)
-            mapGraph(navController)
-            channelsGraph(navController)
-            connectionsGraph(navController)
-            settingsGraph(navController)
-            firmwareGraph(navController)
-        }
+        )
     }
 }
 

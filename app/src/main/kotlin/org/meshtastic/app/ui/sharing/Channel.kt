@@ -16,7 +16,6 @@
  */
 package org.meshtastic.app.ui.sharing
 
-import android.net.Uri
 import android.os.RemoteException
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -69,11 +68,9 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.util.getChannelUrl
-import org.meshtastic.core.model.util.qrCode
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
@@ -96,6 +93,7 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.util.generateQrCode
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.getNavRouteFrom
@@ -299,13 +297,17 @@ fun ChannelScreen(
     }
 }
 
+private const val QR_CODE_SIZE = 960
+
 @Composable
 private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
     val commonUri = channelSet.getChannelUrl(shouldAddChannel)
+    val uriString = commonUri.toString()
+    val qrCode = remember(uriString) { generateQrCode(uriString, QR_CODE_SIZE) }
     QrDialog(
         title = stringResource(Res.string.share_channels_qr),
-        uri = commonUri.toPlatformUri() as Uri,
-        qrCode = channelSet.qrCode(shouldAddChannel),
+        uriString = uriString,
+        qrCode = qrCode,
         onDismiss = onDismiss,
     )
 }

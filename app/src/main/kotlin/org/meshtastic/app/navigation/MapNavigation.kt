@@ -16,29 +16,22 @@
  */
 package org.meshtastic.app.navigation
 
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.AndroidSharedMapViewModel
-import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.feature.map.MapScreen
 
-fun NavGraphBuilder.mapGraph(navController: NavHostController) {
-    composable<MapRoutes.Map>(deepLinks = listOf(navDeepLink<MapRoutes.Map>(basePath = "$DEEP_LINK_BASE_URI/map"))) {
+fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
+    entry<MapRoutes.Map> {
         val viewModel = koinViewModel<AndroidSharedMapViewModel>()
         MapScreen(
             viewModel = viewModel,
-            onClickNodeChip = {
-                navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            },
-            navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
+            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
         )
     }
 }

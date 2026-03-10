@@ -45,4 +45,16 @@ actual object DateFormatter {
             DateFormat.getDateInstance(DateFormat.SHORT).format(timestampMillis)
         }
     }
+
+    actual fun formatTime(timestampMillis: Long): String =
+        DateFormat.getTimeInstance(DateFormat.SHORT).format(timestampMillis)
+
+    actual fun formatTimeWithSeconds(timestampMillis: Long): String =
+        DateFormat.getTimeInstance(DateFormat.MEDIUM).format(timestampMillis)
+
+    actual fun formatDate(timestampMillis: Long): String =
+        DateFormat.getDateInstance(DateFormat.SHORT).format(timestampMillis)
+
+    actual fun formatDateTimeShort(timestampMillis: Long): String =
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM).format(timestampMillis)
 }

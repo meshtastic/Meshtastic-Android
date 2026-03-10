@@ -21,21 +21,16 @@ package org.meshtastic.app.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import androidx.navigation.navigation
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.settings.AndroidCleanNodeDatabaseViewModel
 import org.meshtastic.app.settings.AndroidDebugViewModel
 import org.meshtastic.app.settings.AndroidFilterSettingsViewModel
 import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.settings.AndroidSettingsViewModel
-import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.navigation.Graph
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -77,185 +72,132 @@ import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigSc
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
-@Suppress("LongMethod")
-fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
-    navigation<SettingsRoutes.SettingsGraph>(startDestination = SettingsRoutes.Settings()) {
-        composable<SettingsRoutes.Settings>(
-            deepLinks = listOf(navDeepLink<SettingsRoutes.Settings>(basePath = "$DEEP_LINK_BASE_URI/settings")),
-        ) { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            SettingsScreen(
-                settingsViewModel = koinViewModel<AndroidSettingsViewModel>(viewModelStoreOwner = parentEntry),
-                viewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
-                onClickNodeChip = {
-                    navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-            ) {
-                navController.navigate(it)
-            }
-        }
-
-        composable<SettingsRoutes.DeviceConfiguration> { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            DeviceConfigurationScreen(
-                viewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
-                onBack = navController::popBackStack,
-                onNavigate = { route -> navController.navigate(route) },
-            )
-        }
-
-        composable<SettingsRoutes.ModuleConfiguration> { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            val settingsViewModel: AndroidSettingsViewModel = koinViewModel(viewModelStoreOwner = parentEntry)
-            val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
-            ModuleConfigurationScreen(
-                viewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
-                excludedModulesUnlocked = excludedModulesUnlocked,
-                onBack = navController::popBackStack,
-                onNavigate = { route -> navController.navigate(route) },
-            )
-        }
-
-        composable<SettingsRoutes.Administration> { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            AdministrationScreen(
-                viewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
-                onBack = navController::popBackStack,
-            )
-        }
-
-        composable<SettingsRoutes.CleanNodeDb>(
-            deepLinks =
-            listOf(
-                navDeepLink<SettingsRoutes.CleanNodeDb>(
-                    basePath = "$DEEP_LINK_BASE_URI/settings/radio/clean_node_db",
-                ),
-            ),
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
+    entry<SettingsRoutes.SettingsGraph> {
+        SettingsScreen(
+            settingsViewModel = koinViewModel<AndroidSettingsViewModel>(),
+            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
         ) {
-            val viewModel: AndroidCleanNodeDatabaseViewModel = koinViewModel()
-            CleanNodeDatabaseScreen(viewModel = viewModel)
+            backStack.add(it)
         }
+    }
 
-        ConfigRoute.entries.forEach { entry ->
-            navController.configComposable(
-                route = entry.route::class,
-                parentGraphRoute = SettingsRoutes.SettingsGraph::class,
-            ) { viewModel ->
-                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(entry) }
-                when (entry) {
-                    ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.CHANNELS -> ChannelConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.DEVICE -> DeviceConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.POSITION -> PositionConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.POWER -> PowerConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.NETWORK -> NetworkConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.DISPLAY -> DisplayConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.LORA -> LoRaConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.BLUETOOTH -> BluetoothConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ConfigRoute.SECURITY -> SecurityConfigScreen(viewModel, onBack = navController::popBackStack)
-                }
-            }
-        }
-
-        ModuleRoute.entries.forEach { entry ->
-            navController.configComposable(
-                route = entry.route::class,
-                parentGraphRoute = SettingsRoutes.SettingsGraph::class,
-            ) { viewModel ->
-                LaunchedEffect(Unit) { viewModel.setResponseStateLoading(entry) }
-                when (entry) {
-                    ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.SERIAL -> SerialConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.EXT_NOTIFICATION ->
-                        ExternalNotificationConfigScreen(viewModel = viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.STORE_FORWARD ->
-                        StoreForwardConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.RANGE_TEST -> RangeTestConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.TELEMETRY -> TelemetryConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.CANNED_MESSAGE ->
-                        CannedMessageConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.AUDIO -> AudioConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.REMOTE_HARDWARE ->
-                        RemoteHardwareConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.NEIGHBOR_INFO ->
-                        NeighborInfoConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.AMBIENT_LIGHTING ->
-                        AmbientLightingConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.DETECTION_SENSOR ->
-                        DetectionSensorConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.PAXCOUNTER -> PaxcounterConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.STATUS_MESSAGE ->
-                        StatusMessageConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.TRAFFIC_MANAGEMENT ->
-                        TrafficManagementConfigScreen(viewModel, onBack = navController::popBackStack)
-
-                    ModuleRoute.TAK -> TAKConfigScreen(viewModel, onBack = navController::popBackStack)
-                }
-            }
-        }
-
-        composable<SettingsRoutes.DebugPanel>(
-            deepLinks =
-            listOf(navDeepLink<SettingsRoutes.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/settings/debug_panel")),
+    entry<SettingsRoutes.Settings> {
+        SettingsScreen(
+            settingsViewModel = koinViewModel<AndroidSettingsViewModel>(),
+            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
         ) {
-            val viewModel: AndroidDebugViewModel = koinViewModel()
-            DebugScreen(viewModel = viewModel, onNavigateUp = navController::navigateUp)
+            backStack.add(it)
         }
+    }
 
-        composable<SettingsRoutes.About> { AboutScreen(onNavigateUp = navController::navigateUp) }
+    entry<SettingsRoutes.DeviceConfiguration> {
+        DeviceConfigurationScreen(
+            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onBack = { backStack.removeLastOrNull() },
+            onNavigate = { route -> backStack.add(route) },
+        )
+    }
 
-        composable<SettingsRoutes.FilterSettings> {
-            val viewModel: AndroidFilterSettingsViewModel = koinViewModel()
-            FilterSettingsScreen(viewModel = viewModel, onBack = navController::navigateUp)
+    entry<SettingsRoutes.ModuleConfiguration> {
+        val settingsViewModel: AndroidSettingsViewModel = koinViewModel()
+        val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+        ModuleConfigurationScreen(
+            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            excludedModulesUnlocked = excludedModulesUnlocked,
+            onBack = { backStack.removeLastOrNull() },
+            onNavigate = { route -> backStack.add(route) },
+        )
+    }
+
+    entry<SettingsRoutes.Administration> {
+        AdministrationScreen(
+            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onBack = { backStack.removeLastOrNull() },
+        )
+    }
+
+    entry<SettingsRoutes.CleanNodeDb> {
+        val viewModel: AndroidCleanNodeDatabaseViewModel = koinViewModel()
+        CleanNodeDatabaseScreen(viewModel = viewModel)
+    }
+
+    ConfigRoute.entries.forEach { routeInfo ->
+        configComposable(routeInfo.route::class) { viewModel ->
+            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+            when (routeInfo) {
+                ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.CHANNELS -> ChannelConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.DEVICE -> DeviceConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.POSITION -> PositionConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.POWER -> PowerConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.NETWORK -> NetworkConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.DISPLAY -> DisplayConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.LORA -> LoRaConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.BLUETOOTH -> BluetoothConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ConfigRoute.SECURITY -> SecurityConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+            }
         }
+    }
+
+    ModuleRoute.entries.forEach { routeInfo ->
+        configComposable(routeInfo.route::class) { viewModel ->
+            LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
+            when (routeInfo) {
+                ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.SERIAL -> SerialConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.EXT_NOTIFICATION ->
+                    ExternalNotificationConfigScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.STORE_FORWARD ->
+                    StoreForwardConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.RANGE_TEST -> RangeTestConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.TELEMETRY -> TelemetryConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.CANNED_MESSAGE ->
+                    CannedMessageConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.AUDIO -> AudioConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.REMOTE_HARDWARE ->
+                    RemoteHardwareConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.NEIGHBOR_INFO ->
+                    NeighborInfoConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.AMBIENT_LIGHTING ->
+                    AmbientLightingConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.DETECTION_SENSOR ->
+                    DetectionSensorConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.PAXCOUNTER -> PaxcounterConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.STATUS_MESSAGE ->
+                    StatusMessageConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.TRAFFIC_MANAGEMENT ->
+                    TrafficManagementConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                ModuleRoute.TAK -> TAKConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+            }
+        }
+    }
+
+    entry<SettingsRoutes.DebugPanel> {
+        val viewModel: AndroidDebugViewModel = koinViewModel()
+        DebugScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
+    }
+
+    entry<SettingsRoutes.About> { AboutScreen(onNavigateUp = { backStack.removeLastOrNull() }) }
+
+    entry<SettingsRoutes.FilterSettings> {
+        val viewModel: AndroidFilterSettingsViewModel = koinViewModel()
+        FilterSettingsScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
     }
 }
 
-context(_: NavGraphBuilder)
-inline fun <reified R : Route, reified G : Graph> NavHostController.configComposable(
-    noinline content: @Composable (AndroidRadioConfigViewModel) -> Unit,
-) {
-    configComposable(route = R::class, parentGraphRoute = G::class, content = content)
-}
-
-context(navGraphBuilder: NavGraphBuilder)
-fun <R : Route, G : Graph> NavHostController.configComposable(
+fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
-    parentGraphRoute: KClass<G>,
     content: @Composable (AndroidRadioConfigViewModel) -> Unit,
 ) {
-    navGraphBuilder.composable(route = route) { backStackEntry ->
-        val parentEntry = remember(backStackEntry) { getBackStackEntry(parentGraphRoute) }
-        content(koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry))
-    }
+    addEntryProvider(route) { content(koinViewModel<AndroidRadioConfigViewModel>()) }
+}
+
+inline fun <reified R : Route> EntryProviderScope<NavKey>.configComposable(
+    noinline content: @Composable (AndroidRadioConfigViewModel) -> Unit,
+) {
+    entry<R> { content(koinViewModel<AndroidRadioConfigViewModel>()) }
 }

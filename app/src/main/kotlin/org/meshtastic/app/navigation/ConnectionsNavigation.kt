@@ -16,47 +16,35 @@
  */
 package org.meshtastic.app.navigation
 
-import androidx.compose.runtime.remember
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import androidx.navigation.navigation
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.ui.connections.ConnectionsScreen
 import org.meshtastic.core.navigation.ConnectionsRoutes
-import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
-fun NavGraphBuilder.connectionsGraph(navController: NavHostController) {
-    @Suppress("ktlint:standard:max-line-length")
-    navigation<ConnectionsRoutes.ConnectionsGraph>(startDestination = ConnectionsRoutes.Connections) {
-        composable<ConnectionsRoutes.Connections>(
-            deepLinks = listOf(
-                navDeepLink<ConnectionsRoutes.Connections>(basePath = "$DEEP_LINK_BASE_URI/connections"),
-            ),
-        ) { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
-            ConnectionsScreen(
-                radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
-                onClickNodeChip = {
-                    navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
-                onConfigNavigate = { route -> navController.navigate(route) },
-            )
-        }
+fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {
+    entry<ConnectionsRoutes.ConnectionsGraph> {
+        ConnectionsScreen(
+            radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onClickNodeChip = {
+                // Navigation 3 ignores back stack behavior options; we handle this by popping if necessary.
+                backStack.add(NodesRoutes.NodeDetailGraph(it))
+            },
+            onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            onConfigNavigate = { route -> backStack.add(route) },
+        )
+    }
 
-        navController.configComposable<SettingsRoutes.LoRa, ConnectionsRoutes.ConnectionsGraph> {
-            LoRaConfigScreen(viewModel = it, onBack = navController::popBackStack)
-        }
+    entry<ConnectionsRoutes.Connections> {
+        ConnectionsScreen(
+            radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            onConfigNavigate = { route -> backStack.add(route) },
+        )
     }
 }

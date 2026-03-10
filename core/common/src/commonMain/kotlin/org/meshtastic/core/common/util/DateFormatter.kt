@@ -30,4 +30,16 @@ expect object DateFormatter {
      * Typically shows time if within the last 24 hours, otherwise the date.
      */
     fun formatShortDate(timestampMillis: Long): String
+
+    /** Formats a timestamp into a localized time string (HH:mm). */
+    fun formatTime(timestampMillis: Long): String
+
+    /** Formats a timestamp into a localized time string with seconds (HH:mm:ss). */
+    fun formatTimeWithSeconds(timestampMillis: Long): String
+
+    /** Formats a timestamp into a localized date string. */
+    fun formatDate(timestampMillis: Long): String
+
+    /** Formats a timestamp into a localized short date and medium time string. */
+    fun formatDateTimeShort(timestampMillis: Long): String
 }

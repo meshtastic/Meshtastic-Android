@@ -23,5 +23,10 @@ plugins {
 kotlin {
     android { namespace = "org.meshtastic.core.navigation" }
 
-    sourceSets { commonMain.dependencies { implementation(libs.kotlinx.serialization.core) } }
+    sourceSets {
+        commonMain.dependencies {
+            implementation(libs.kotlinx.serialization.core)
+            implementation(libs.androidx.navigation3.runtime)
+        }
+    }
 }

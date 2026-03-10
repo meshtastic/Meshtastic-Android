@@ -18,7 +18,6 @@ package org.meshtastic.app.map.node
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.toList
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.database.entity.MeshLog
-import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -46,7 +44,7 @@ class NodeMapViewModel(
     buildConfigProvider: BuildConfigProvider,
     private val mapPrefs: MapPrefs,
 ) : ViewModel() {
-    private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
+    private val destNum = savedStateHandle.get<Int>("destNum") ?: 0
 
     val node =
         nodeRepository.nodeDBbyNum

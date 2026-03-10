@@ -16,11 +16,12 @@
  */
 package org.meshtastic.core.navigation
 
+import androidx.navigation3.runtime.NavKey
 import kotlinx.serialization.Serializable
 
 const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
-interface Route
+interface Route : NavKey
 
 interface Graph : Route
 

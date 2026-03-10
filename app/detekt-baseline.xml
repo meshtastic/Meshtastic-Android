@@ -2,7 +2,6 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:SettingsNavigation.kt$@Suppress("LongMethod") fun NavGraphBuilder.settingsGraph(navController: NavHostController)</ID>
     <ID>LongMethod:TCPInterface.kt$TCPInterface$private suspend fun startConnect()</ID>
     <ID>LongParameterList:AndroidMetricsViewModel.kt$AndroidMetricsViewModel$( savedStateHandle: SavedStateHandle, private val app: Application, dispatchers: CoroutineDispatchers, meshLogRepository: MeshLogRepository, serviceRepository: ServiceRepository, nodeRepository: NodeRepository, tracerouteSnapshotRepository: TracerouteSnapshotRepository, nodeRequestActions: NodeRequestActions, alertManager: AlertManager, getNodeDetailsUseCase: GetNodeDetailsUseCase, )</ID>
     <ID>LongParameterList:AndroidNodeListViewModel.kt$AndroidNodeListViewModel$( savedStateHandle: SavedStateHandle, nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, serviceRepository: ServiceRepository, radioController: RadioController, nodeManagementActions: NodeManagementActions, getFilteredNodesUseCase: GetFilteredNodesUseCase, nodeFilterPreferences: NodeFilterPreferences, )</ID>
@@ -28,6 +27,5 @@
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
     <ID>TooManyFunctions:NordicBleInterface.kt$NordicBleInterface : IRadioInterface</ID>
-    <ID>UtilityClassWithPublicConstructor:NetworkRepositoryModule.kt$NetworkRepositoryModule</ID>
   </CurrentIssues>
 </SmellBaseline>

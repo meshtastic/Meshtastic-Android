@@ -16,41 +16,29 @@
  */
 package org.meshtastic.app.navigation
 
-import androidx.compose.runtime.remember
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import androidx.navigation.navigation
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.ui.sharing.ChannelScreen
 import org.meshtastic.core.navigation.ChannelsRoutes
-import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen
-import org.meshtastic.feature.settings.radio.component.LoRaConfigScreen
 
 /** Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels]. */
-fun NavGraphBuilder.channelsGraph(navController: NavHostController) {
-    navigation<ChannelsRoutes.ChannelsGraph>(startDestination = ChannelsRoutes.Channels) {
-        composable<ChannelsRoutes.Channels>(
-            deepLinks = listOf(navDeepLink<ChannelsRoutes.Channels>(basePath = "$DEEP_LINK_BASE_URI/channels")),
-        ) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
-            ChannelScreen(
-                radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
-                onNavigate = { route -> navController.navigate(route) },
-                onNavigateUp = { navController.navigateUp() },
-            )
-        }
+fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
+    entry<ChannelsRoutes.ChannelsGraph> {
+        ChannelScreen(
+            radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onNavigate = { route -> backStack.add(route) },
+            onNavigateUp = { backStack.removeLastOrNull() },
+        )
+    }
 
-        navController.configComposable<SettingsRoutes.ChannelConfig, ChannelsRoutes.ChannelsGraph> {
-            ChannelConfigScreen(viewModel = it, onBack = navController::popBackStack)
-        }
-
-        navController.configComposable<SettingsRoutes.LoRa, ChannelsRoutes.ChannelsGraph> {
-            LoRaConfigScreen(viewModel = it, onBack = navController::popBackStack)
-        }
+    entry<ChannelsRoutes.Channels> {
+        ChannelScreen(
+            radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            onNavigate = { route -> backStack.add(route) },
+            onNavigateUp = { backStack.removeLastOrNull() },
+        )
     }
 }

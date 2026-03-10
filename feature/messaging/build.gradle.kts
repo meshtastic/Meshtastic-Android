@@ -44,6 +44,7 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.androidx.navigation3.runtime)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
         }
@@ -60,7 +61,7 @@ kotlin {
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
             implementation(libs.androidx.lifecycle.runtime.compose)
-            implementation(libs.androidx.navigation.compose)
+
             implementation(libs.androidx.paging.compose)
             implementation(libs.androidx.work.runtime.ktx)
         }

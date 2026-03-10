@@ -32,7 +32,6 @@
     <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
     <ID>TooGenericExceptionCaught:DebugViewModel.kt$DebugViewModel$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:LanguageUtils.kt$LanguageUtils$e: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
     <ID>UnusedPrivateProperty:RadioConfigViewModel.kt$RadioConfigViewModel$private val locationRepository: LocationRepository</ID>
   </CurrentIssues>

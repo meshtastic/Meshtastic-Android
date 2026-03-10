@@ -41,8 +41,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavHostController
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -59,11 +59,11 @@ import org.meshtastic.feature.messaging.MessageScreen
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
 
-@Suppress("LongMethod", "LongParameterList")
+@Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun AdaptiveContactsScreen(
-    navController: NavHostController,
+    backStack: NavBackStack<NavKey>,
     contactsViewModel: org.meshtastic.feature.messaging.ui.contact.ContactsViewModel,
     messageViewModel: org.meshtastic.feature.messaging.MessageViewModel,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
@@ -80,18 +80,28 @@ fun AdaptiveContactsScreen(
     val backNavigationBehavior = BackNavigationBehavior.PopUntilScaffoldValueChange
 
     val handleBack: () -> Unit = {
-        val currentEntry = navController.currentBackStackEntry
-        val isContactsRoute = currentEntry?.destination?.hasRoute<ContactsRoutes.Contacts>() == true
+        val currentKey = backStack.lastOrNull()
 
-        // Check if we navigated here from another screen (e.g., from Nodes or Map)
-        val previousEntry = navController.previousBackStackEntry
-        val isFromDifferentGraph = previousEntry?.destination?.hasRoute<ContactsRoutes.ContactsGraph>() == false
+        if (
+            currentKey is ContactsRoutes.Messages ||
+            currentKey is ContactsRoutes.Contacts ||
+            currentKey is ContactsRoutes.ContactsGraph
+        ) {
+            // Check if we navigated here from another screen (e.g., from Nodes or Map)
+            val previousKey = if (backStack.size > 1) backStack[backStack.size - 2] else null
+            val isFromDifferentGraph =
+                previousKey !is ContactsRoutes.ContactsGraph &&
+                    previousKey !is ContactsRoutes.Contacts &&
+                    previousKey !is ContactsRoutes.Messages
 
-        if (isFromDifferentGraph && !isContactsRoute) {
-            // Navigate back via NavController to return to the previous screen (e.g. Node Details)
-            navController.navigateUp()
+            if (isFromDifferentGraph) {
+                // Navigate back via NavController to return to the previous screen (e.g. Node Details)
+                backStack.removeLastOrNull()
+            } else {
+                // Close the detail pane within the adaptive scaffold
+                scope.launch { navigator.navigateBack(backNavigationBehavior) }
+            }
         } else {
-            // Close the detail pane within the adaptive scaffold
             scope.launch { navigator.navigateBack(backNavigationBehavior) }
         }
     }
@@ -134,23 +144,18 @@ fun AdaptiveContactsScreen(
         listPane = {
             AnimatedPane {
                 ContactsScreen(
-                    onNavigateToShare = { navController.navigate(ChannelsRoutes.ChannelsGraph) },
+                    onNavigateToShare = { backStack.add(ChannelsRoutes.ChannelsGraph) },
                     sharedContactRequested = sharedContactRequested,
                     requestChannelSet = requestChannelSet,
                     onHandleScannedUri = onHandleScannedUri,
                     onClearSharedContactRequested = onClearSharedContactRequested,
                     onClearRequestChannelUrl = onClearRequestChannelUrl,
                     viewModel = contactsViewModel,
-                    onClickNodeChip = {
-                        navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
+                    onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
                     onNavigateToMessages = { contactKey ->
                         scope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, contactKey) }
                     },
-                    onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
+                    onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
                     scrollToTopEvents = scrollToTopEvents,
                     activeContactKey = navigator.currentDestination?.contentKey,
                 )
@@ -164,8 +169,8 @@ fun AdaptiveContactsScreen(
                             contactKey = contactKey,
                             message = if (contactKey == initialContactKey) initialMessage else "",
                             viewModel = messageViewModel,
-                            navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
-                            navigateToQuickChatOptions = { navController.navigate(ContactsRoutes.QuickChat) },
+                            navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+                            navigateToQuickChatOptions = { backStack.add(ContactsRoutes.QuickChat) },
                             onNavigateBack = handleBack,
                         )
                     }

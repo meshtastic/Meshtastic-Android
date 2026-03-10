@@ -19,7 +19,6 @@ package org.meshtastic.feature.node.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -34,7 +33,6 @@ import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
-import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.feature.node.component.NodeMenuAction
@@ -68,9 +66,7 @@ open class NodeDetailViewModel(
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
 ) : ViewModel() {
 
-    private val nodeIdFromRoute: Int? =
-        runCatching { savedStateHandle.toRoute<NodesRoutes.NodeDetail>().destNum }
-            .getOrElse { runCatching { savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum }.getOrNull() }
+    private val nodeIdFromRoute: Int? = savedStateHandle.get<Int>("destNum")
 
     private val manualNodeId = MutableStateFlow<Int?>(null)
     private val activeNodeId =

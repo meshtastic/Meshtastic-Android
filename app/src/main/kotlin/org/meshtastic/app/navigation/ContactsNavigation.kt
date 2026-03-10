@@ -18,12 +18,9 @@ package org.meshtastic.app.navigation
 
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
-import androidx.navigation.navDeepLink
-import androidx.navigation.navigation
-import androidx.navigation.toRoute
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.messaging.AndroidContactsViewModel
@@ -31,91 +28,94 @@ import org.meshtastic.app.messaging.AndroidMessageViewModel
 import org.meshtastic.app.messaging.AndroidQuickChatViewModel
 import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.QuickChatScreen
 import org.meshtastic.feature.messaging.ui.contact.AdaptiveContactsScreen
 import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 
 @Suppress("LongMethod")
-fun NavGraphBuilder.contactsGraph(navController: NavHostController, scrollToTopEvents: Flow<ScrollToTopEvent>) {
-    navigation<ContactsRoutes.ContactsGraph>(startDestination = ContactsRoutes.Contacts) {
-        composable<ContactsRoutes.Contacts>(
-            deepLinks = listOf(navDeepLink<ContactsRoutes.Contacts>(basePath = "$DEEP_LINK_BASE_URI/contacts")),
-        ) {
-            val uiViewModel: UIViewModel = koinViewModel()
-            val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-            val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-            val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
-            val messageViewModel = koinViewModel<AndroidMessageViewModel>()
+fun EntryProviderScope<NavKey>.contactsGraph(
+    backStack: NavBackStack<NavKey>,
+    scrollToTopEvents: Flow<ScrollToTopEvent>,
+) {
+    entry<ContactsRoutes.ContactsGraph> {
+        val uiViewModel: UIViewModel = koinViewModel()
+        val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+        val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+        val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
+        val messageViewModel = koinViewModel<AndroidMessageViewModel>()
 
-            AdaptiveContactsScreen(
-                navController = navController,
-                contactsViewModel = contactsViewModel,
-                messageViewModel = messageViewModel,
-                scrollToTopEvents = scrollToTopEvents,
-                sharedContactRequested = sharedContactRequested,
-                requestChannelSet = requestChannelSet,
-                onHandleScannedUri = uiViewModel::handleScannedUri,
-                onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
-                onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
-            )
-        }
-        composable<ContactsRoutes.Messages>(
-            deepLinks =
-            listOf(
-                navDeepLink<ContactsRoutes.Messages>(
-                    basePath =
-                    "$DEEP_LINK_BASE_URI/messages", // {contactKey} and ?message={message} are auto-appended
-                ),
-            ),
-        ) { backStackEntry ->
-            val args = backStackEntry.toRoute<ContactsRoutes.Messages>()
-            val uiViewModel: UIViewModel = koinViewModel()
-            val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-            val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-            val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
-            val messageViewModel = koinViewModel<AndroidMessageViewModel>()
-
-            AdaptiveContactsScreen(
-                navController = navController,
-                contactsViewModel = contactsViewModel,
-                messageViewModel = messageViewModel,
-                scrollToTopEvents = scrollToTopEvents,
-                sharedContactRequested = sharedContactRequested,
-                requestChannelSet = requestChannelSet,
-                onHandleScannedUri = uiViewModel::handleScannedUri,
-                onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
-                onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
-                initialContactKey = args.contactKey,
-                initialMessage = args.message,
-            )
-        }
+        AdaptiveContactsScreen(
+            backStack = backStack,
+            contactsViewModel = contactsViewModel,
+            messageViewModel = messageViewModel,
+            scrollToTopEvents = scrollToTopEvents,
+            sharedContactRequested = sharedContactRequested,
+            requestChannelSet = requestChannelSet,
+            onHandleScannedUri = uiViewModel::handleScannedUri,
+            onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+            onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
+        )
     }
-    composable<ContactsRoutes.Share>(
-        deepLinks =
-        listOf(
-            navDeepLink<ContactsRoutes.Share>(
-                basePath = "$DEEP_LINK_BASE_URI/share", // ?message={message} is auto-appended
-            ),
-        ),
-    ) { backStackEntry ->
-        val message = backStackEntry.toRoute<ContactsRoutes.Share>().message
+
+    entry<ContactsRoutes.Contacts> {
+        val uiViewModel: UIViewModel = koinViewModel()
+        val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+        val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+        val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
+        val messageViewModel = koinViewModel<AndroidMessageViewModel>()
+
+        AdaptiveContactsScreen(
+            backStack = backStack,
+            contactsViewModel = contactsViewModel,
+            messageViewModel = messageViewModel,
+            scrollToTopEvents = scrollToTopEvents,
+            sharedContactRequested = sharedContactRequested,
+            requestChannelSet = requestChannelSet,
+            onHandleScannedUri = uiViewModel::handleScannedUri,
+            onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+            onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
+        )
+    }
+
+    entry<ContactsRoutes.Messages> { args ->
+        val uiViewModel: UIViewModel = koinViewModel()
+        val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+        val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+        val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
+        val messageViewModel = koinViewModel<AndroidMessageViewModel>()
+
+        AdaptiveContactsScreen(
+            backStack = backStack,
+            contactsViewModel = contactsViewModel,
+            messageViewModel = messageViewModel,
+            scrollToTopEvents = scrollToTopEvents,
+            sharedContactRequested = sharedContactRequested,
+            requestChannelSet = requestChannelSet,
+            onHandleScannedUri = uiViewModel::handleScannedUri,
+            onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+            onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
+            initialContactKey = args.contactKey,
+            initialMessage = args.message,
+        )
+    }
+
+    entry<ContactsRoutes.Share> { args ->
+        val message = args.message
         val viewModel = koinViewModel<AndroidContactsViewModel>()
         ShareScreen(
             viewModel = viewModel,
             onConfirm = {
-                navController.navigate(ContactsRoutes.Messages(it, message)) {
-                    popUpTo<ContactsRoutes.Share> { inclusive = true }
-                }
+                // Navigation 3 - replace Top with Messages manually, but for now we just pop and add
+                backStack.removeLastOrNull()
+                backStack.add(ContactsRoutes.Messages(it, message))
             },
-            onNavigateUp = navController::navigateUp,
+            onNavigateUp = { backStack.removeLastOrNull() },
         )
     }
-    composable<ContactsRoutes.QuickChat>(
-        deepLinks = listOf(navDeepLink<ContactsRoutes.QuickChat>(basePath = "$DEEP_LINK_BASE_URI/quick_chat")),
-    ) {
+
+    entry<ContactsRoutes.QuickChat> {
         val viewModel = koinViewModel<AndroidQuickChatViewModel>()
-        QuickChatScreen(viewModel = viewModel, onNavigateUp = navController::navigateUp)
+        QuickChatScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
     }
 }

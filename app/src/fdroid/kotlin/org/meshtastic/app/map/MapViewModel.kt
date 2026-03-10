@@ -17,7 +17,6 @@
 package org.meshtastic.app.map
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,6 @@ import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -46,7 +44,7 @@ class MapViewModel(
     savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
 
-    private val _selectedWaypointId = MutableStateFlow(savedStateHandle.toRoute<MapRoutes.Map>().waypointId)
+    private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     var mapStyleId: Int

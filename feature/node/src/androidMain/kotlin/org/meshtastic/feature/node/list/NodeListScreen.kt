@@ -154,8 +154,8 @@ fun NodeListScreen(
                     visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
                     alignment = Alignment.BottomEnd,
                 ),
-                onImport = { uri ->
-                    viewModel.handleScannedUri(uri.toString()) {
+                onImport = { uriString ->
+                    viewModel.handleScannedUri(uriString) {
                         scope.launch { context.showToast(Res.string.channel_invalid) }
                     }
                 },

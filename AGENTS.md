@@ -2,6 +2,8 @@
 
 This file serves as a comprehensive guide for AI agents and developers working on the `Meshtastic-Android` codebase. Use this as your primary reference for understanding the architecture, conventions, and strict rules of this project.
 
+For execution-focused recipes, see `docs/agent-playbooks/README.md`.
+
 ## 1. Project Vision
 We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (KMP)** architecture. The goal is to decouple business logic from the Android framework, enabling future expansion to iOS and other platforms while maintaining a high-performance native Android experience.
 
@@ -20,9 +22,18 @@ We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (K
 | `core:data` | Core manager implementations and data orchestration. |
 | `core:network` | KMP networking layer using Ktor and MQTT abstractions. |
 | `core:di` | Common DI qualifiers and dispatchers. |
+| `core:navigation` | Shared navigation keys/routes for Navigation 3. |
+| `core:ui` | Shared Compose UI components and platform abstractions. |
+| `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
+| `core:api` | Public AIDL/API integration module for external clients. |
+| `core:prefs` | KMP preferences layer built on DataStore abstractions. |
+| `core:barcode` | Barcode abstractions with Android hardware implementation. |
+| `core:nfc` | NFC abstractions with Android hardware implementation. |
 | `core/ble/` | Bluetooth Low Energy stack using Nordic libraries. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`). |
+| `feature/firmware` | Firmware update flow (KMP module with Android DFU in `androidMain`). |
+| `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
 ## 3. Development Guidelines
 
@@ -39,8 +50,9 @@ We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (K
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Thread-Safety:** Use `atomicfu` and `kotlinx.collections.immutable` for shared state in `commonMain`. Avoid `synchronized` or JVM-specific atomics.
 -   **Dependency Injection:**
-    -   Use **Koin**.
-    -   **Restriction:** Move Koin modules to the `app` module if the library module is KMP with multiple flavors, as KSP/Koin generation often fails in these complex scenarios.
+    -   Use **Koin Annotations** with the K2 compiler plugin.
+    -   Keep root graph assembly in `app` (module inclusion in `AppKoinModule` and startup wiring in `MeshUtilApplication`).
+    -   Keep `commonMain` business logic framework-agnostic. Shared modules may contain Koin-annotated definitions where that pattern already exists, but they must be included by the app root module.
 
 ### C. Namespacing
 -   **Standard:** Use the `org.meshtastic.*` namespace for all code.
@@ -49,13 +61,15 @@ We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (K
 ## 4. Execution Protocol
 
 ### A. Build and Verify
-1.  **Format:** `./gradlew spotlessApply`
-2.  **Lint:** `./gradlew detekt`
-3.  **Test:** `./gradlew testAndroid` (or `testCommonMain` for pure logic)
+1.  **Clean:** `./gradlew clean`
+2.  **Format:** `./gradlew spotlessCheck` then `./gradlew spotlessApply`
+3.  **Lint:** `./gradlew detekt`
+4.  **Build + Unit Tests:** `./gradlew assembleDebug test` (CI also runs `testDebugUnitTest`)
+5.  **Flavor/CI Parity (when relevant):** `./gradlew lintFdroidDebug lintGoogleDebug testFdroidDebug testGoogleDebug`
 
 ### B. Expect/Actual Patterns
-Use `expect`/`actual` sparingly for platform-specific types (e.g., `Location`, `NavHostController`) to keep the core logic pure and platform-agnostic.
+Use `expect`/`actual` sparingly for platform-specific types (e.g., `Location`, platform utilities) to keep core logic pure. For navigation, prefer shared Navigation 3 backstack state (`List<NavKey>`) over platform controller types.
 
 ## 5. Troubleshooting
 -   **Build Failures:** Always check `gradle/libs.versions.toml` for dependency conflicts.
--   **Koin Generation:** If a component fails to inject in a KMP module, ensure the corresponding module is bound in the `app` layer's DI package.
+-   **Koin Injection Failures:** Verify the KMP component is included in `app` root module wiring (`AppKoinModule`) and that `startKoin` loads that module at app startup.

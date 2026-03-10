@@ -249,7 +249,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.paging.compose)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.ktor.client.content.negotiation)
@@ -307,6 +308,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.nordic.client.android.mock)
     androidTestImplementation(libs.nordic.core.mock)
+    androidTestImplementation(libs.koin.test)
 
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.koin.test)

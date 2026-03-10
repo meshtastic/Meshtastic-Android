@@ -2,6 +2,8 @@
 
 **CRITICAL AGENT DIRECTIVE:** This file contains validated, comprehensive instructions for interacting with the Meshtastic-Android repository. You MUST adhere strictly to these rules, build commands, and architectural constraints. Only deviate or explore alternatives if the documented commands fail with unexpected errors.
 
+If this file conflicts with `AGENTS.md`, follow `AGENTS.md`.
+
 ## 1. Project Overview & Architecture
 Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, decentralized mesh networks.
 
@@ -14,8 +16,8 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 - **Core Architecture:** Modern Android Development (MAD) with KMP core.
   - **KMP Modules:** `core:model`, `core:proto`, `core:common`, `core:resources`, `core:database`, `core:datastore`, `core:repository`, `core:domain`, `core:prefs`, `core:network`, `core:di`, and `core:data`.
   - **UI:** Jetpack Compose (Material 3).
-  - **DI:** Koin (centralized in `app` module for KMP modules).
-  - **Navigation:** Type-Safe Jetpack Navigation.
+  - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` (`AppKoinModule` + `startKoin`), while shared modules can expose annotated definitions that are included by the app root module.
+  - **Navigation:** AndroidX Navigation 3 with shared backstack state (`List<NavKey>`).
   - **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
 
 ## 2. Environment Setup (Mandatory First Steps)
@@ -33,9 +35,20 @@ Before attempting any builds or tests, ensure the environment is configured:
 ## 3. Strict Execution Commands
 Always run commands in the following order to ensure reliability. Do not attempt to bypass `clean` if you are facing build issues.
 
+**Baseline (recommended order):**
+```bash
+./gradlew clean
+./gradlew spotlessCheck
+./gradlew spotlessApply
+./gradlew detekt
+./gradlew assembleDebug
+./gradlew test
+```
+
 **Formatting & Linting (Run BEFORE committing):**
 ```bash
-./gradlew spotlessApply  # Always run to auto-fix formatting
+./gradlew spotlessCheck  # Check formatting first
+./gradlew spotlessApply  # Auto-fix formatting
 ./gradlew detekt         # Run static analysis
 ```
 
@@ -47,9 +60,11 @@ Always run commands in the following order to ensure reliability. Do not attempt
 
 **Testing:**
 ```bash
-./gradlew testAndroid        # Run Android unit tests (Robolectric)
-./gradlew testCommonMain     # Run KMP common tests (if applicable)
+./gradlew test                # Run local unit tests
+./gradlew testDebugUnitTest   # CI-aligned Android unit tests
 ./gradlew connectedAndroidTest # Run instrumented tests
+./gradlew testFdroidDebug testGoogleDebug # Flavor-specific unit tests
+./gradlew lintFdroidDebug lintGoogleDebug # Flavor-specific lint checks
 ```
 *Note: If testing Compose UI on the JVM (Robolectric) with Java 17, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
@@ -66,7 +81,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
 
 ## 5. Module Map
 When locating code to modify, use this map:
-- **`app/`**: Main application wiring and Koin modules. Package: `org.meshtastic.app`.
+- **`app/`**: Main application wiring and Koin DI modules/wrappers (`@KoinViewModel`, `@Module`, `@KoinWorker`). Package: `org.meshtastic.app`.
 - **`:core:data`**: Core business logic and managers. Package: `org.meshtastic.core.data`.
 - **`:core:repository`**: Domain interfaces and common models. Package: `org.meshtastic.core.repository`.
 - **`:core:ble`**: Coroutine-based Bluetooth logic.
