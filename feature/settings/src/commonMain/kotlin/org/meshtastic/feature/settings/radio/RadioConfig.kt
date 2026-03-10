@@ -38,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -63,8 +62,6 @@ import org.meshtastic.core.resources.radio_configuration
 import org.meshtastic.core.resources.reboot
 import org.meshtastic.core.resources.shutdown
 import org.meshtastic.core.ui.component.ListItem
-import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 
@@ -221,31 +218,11 @@ enum class AdminRoute(val icon: ImageVector, val title: StringResource) {
     NODEDB_RESET(Icons.Rounded.Storage, Res.string.nodedb_reset),
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun RadioSettingsScreenPreview() = AppTheme {
-    RadioConfigItemList(
-        state = RadioConfigState(isLocal = true, connected = true),
-        isManaged = false,
-        onNavigate = { _ -> },
-    )
-}
-
 @Composable
 private fun ManagedMessage() {
     Text(
         text = stringResource(Res.string.message_device_managed),
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        color = MaterialTheme.colorScheme.StatusRed,
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun RadioSettingsScreenManagedPreview() = AppTheme {
-    RadioConfigItemList(
-        state = RadioConfigState(isLocal = true, connected = true),
-        isManaged = true,
-        onNavigate = { _ -> },
+        color = MaterialTheme.colorScheme.error,
     )
 }

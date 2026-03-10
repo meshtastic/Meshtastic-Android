@@ -16,20 +16,17 @@
  */
 package org.meshtastic.app.navigation
 
-import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
+import androidx.navigation3.runtime.EntryProviderScope
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.firmware.AndroidFirmwareUpdateViewModel
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.feature.firmware.FirmwareUpdateScreen
 
-fun NavGraphBuilder.firmwareGraph(navController: NavController) {
-    navigation<FirmwareRoutes.FirmwareGraph>(startDestination = FirmwareRoutes.FirmwareUpdate) {
-        composable<FirmwareRoutes.FirmwareUpdate> {
-            val viewModel = koinViewModel<AndroidFirmwareUpdateViewModel>()
-            FirmwareUpdateScreen(onNavigateUp = { navController.navigateUp() }, viewModel = viewModel)
-        }
+fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
+    entry<FirmwareRoutes.FirmwareUpdate> {
+        val viewModel = koinViewModel<AndroidFirmwareUpdateViewModel>()
+        FirmwareUpdateScreen(onNavigateUp = { backStack.removeLastOrNull() }, viewModel = viewModel)
     }
 }

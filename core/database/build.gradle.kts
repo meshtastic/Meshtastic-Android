@@ -64,7 +64,6 @@ kotlin {
                 implementation(libs.androidx.test.ext.junit)
                 implementation(libs.androidx.test.runner)
             }
-            resources.srcDir("$projectDir/schemas")
         }
     }
 }

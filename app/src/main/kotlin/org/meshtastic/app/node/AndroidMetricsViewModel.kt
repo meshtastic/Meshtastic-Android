@@ -20,7 +20,6 @@ import android.app.Application
 import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,7 +28,6 @@ import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -56,7 +54,7 @@ class AndroidMetricsViewModel(
     alertManager: AlertManager,
     getNodeDetailsUseCase: GetNodeDetailsUseCase,
 ) : MetricsViewModel(
-    savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum ?: 0,
+    savedStateHandle.get<Int>("destNum") ?: 0,
     dispatchers,
     meshLogRepository,
     serviceRepository,

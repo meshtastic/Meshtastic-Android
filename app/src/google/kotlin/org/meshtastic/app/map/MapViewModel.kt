@@ -21,7 +21,6 @@ import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -48,7 +47,6 @@ import org.meshtastic.app.map.prefs.map.GoogleMapsPrefs
 import org.meshtastic.app.map.repository.CustomTileProviderRepository
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -90,7 +88,7 @@ class MapViewModel(
     savedStateHandle: SavedStateHandle,
 ) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioController) {
 
-    private val _selectedWaypointId = MutableStateFlow(savedStateHandle.toRoute<MapRoutes.Map>().waypointId)
+    private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     private val targetLatLng =

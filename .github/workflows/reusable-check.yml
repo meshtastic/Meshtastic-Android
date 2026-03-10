@@ -104,7 +104,7 @@ jobs:
 
       - name: Shared Unit Tests
         if: steps.tasks.outputs.is_first_api == 'true' && inputs.run_unit_tests == true
-        run: ./gradlew testDebugUnitTest koverXmlReportDebug -Pci=true --continue
+        run: ./gradlew testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug -Pci=true --continue
 
       - name: Enable KVM group perms
         if: inputs.run_instrumented_tests == true

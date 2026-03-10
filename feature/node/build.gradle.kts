@@ -48,6 +48,7 @@ kotlin {
             implementation(projects.feature.map)
 
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.androidx.navigation3.runtime)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
             implementation(libs.kotlinx.collections.immutable)
@@ -62,7 +63,7 @@ kotlin {
             implementation(libs.androidx.compose.material3)
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.navigation.common)
+
             implementation(libs.coil)
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)

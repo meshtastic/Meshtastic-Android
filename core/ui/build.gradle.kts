@@ -14,42 +14,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.koin)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.ui" }
+kotlin {
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.ui"
+        androidResources.enable = false
+    }
 
-dependencies {
-    implementation(projects.core.common)
-    implementation(projects.core.data)
-    implementation(projects.core.database)
-    implementation(projects.core.model)
-    implementation(projects.core.prefs)
-    implementation(projects.core.proto)
-    implementation(projects.core.service)
-    implementation(projects.core.resources)
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(projects.core.data)
+            implementation(projects.core.database)
+            implementation(projects.core.model)
+            implementation(projects.core.prefs)
+            implementation(projects.core.proto)
+            implementation(projects.core.resources)
+            implementation(projects.core.service)
 
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.material.iconsExtended)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.ui.text)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.emoji2.emojipicker)
-    implementation(libs.guava)
-    implementation(libs.zxing.core)
-    implementation(libs.kermit)
-    implementation(libs.nordic.common.core)
-    implementation(libs.koin.compose.viewmodel)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.ui)
+            implementation(compose.foundation)
+            implementation(compose.runtime)
+            implementation(compose.components.resources)
 
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
+            implementation(libs.androidx.compose.ui.tooling.preview)
+            implementation(libs.kermit)
+            implementation(libs.koin.compose.viewmodel)
+        }
 
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.androidx.test.runner)
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.emoji2.emojipicker)
+            implementation(libs.guava)
+            implementation(libs.zxing.core)
+            implementation(libs.nordic.common.core)
+        }
 
-    testImplementation(libs.junit)
+        commonTest.dependencies {
+            implementation(libs.junit)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.turbine)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.mockk)
+            implementation(libs.androidx.test.runner)
+        }
+    }
 }

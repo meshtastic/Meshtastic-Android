@@ -19,7 +19,6 @@ package org.meshtastic.feature.settings.radio
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,7 +44,6 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
-import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.repository.AnalyticsPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
@@ -126,9 +124,7 @@ open class RadioConfigViewModel(
         toggleHomoglyphEncodingUseCase()
     }
 
-    private val destNum =
-        savedStateHandle.get<Int>("destNum")
-            ?: runCatching { savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum }.getOrNull()
+    private val destNum = savedStateHandle.get<Int>("destNum")
 
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>

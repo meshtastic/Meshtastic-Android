@@ -10,5 +10,7 @@
     <ID>MagicNumber:EditListPreference.kt$67890</ID>
     <ID>MagicNumber:LazyColumnDragAndDropDemo.kt$50</ID>
     <ID>MatchingDeclarationName:LocalTracerouteMapOverlayInsetsProvider.kt$TracerouteMapOverlayInsets</ID>
+    <ID>Wrapping:PlatformUtils.kt${ lat, lon, label -> val encodedLabel = URLEncoder.encode(label, "utf-8") val uri = "geo:0,0?q=$lat,$lon&amp;z=17&amp;label=$encodedLabel".toUri() val intent = Intent(Intent.ACTION_VIEW, uri).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) } try { if (intent.resolveActivity(context.packageManager) != null) { context.startActivity(intent) } } catch (ex: ActivityNotFoundException) { Logger.d { "Failed to open geo intent: $ex" } } }</ID>
+    <ID>Wrapping:PlatformUtils.kt${ url -> try { val intent = Intent(Intent.ACTION_VIEW, url.toUri()).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) } context.startActivity(intent) } catch (ex: ActivityNotFoundException) { Logger.d { "Failed to open URL intent: $ex" } } }</ID>
   </CurrentIssues>
 </SmellBaseline>
