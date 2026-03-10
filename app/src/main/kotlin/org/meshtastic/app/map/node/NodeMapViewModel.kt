@@ -19,7 +19,6 @@ package org.meshtastic.app.map.node
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.toList
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.navigation.NodesRoutes
@@ -37,12 +37,9 @@ import org.meshtastic.core.ui.util.toPosition
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Position
-import javax.inject.Inject
 
-@HiltViewModel
-class NodeMapViewModel
-@Inject
-constructor(
+@KoinViewModel
+class NodeMapViewModel(
     savedStateHandle: SavedStateHandle,
     nodeRepository: NodeRepository,
     meshLogRepository: MeshLogRepository,

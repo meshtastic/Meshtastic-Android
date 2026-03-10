@@ -63,7 +63,7 @@ The app follows modern Android development practices, built on top of a shared K
 - **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, enabling future support for Desktop and Web.
 - **UI:** Jetpack Compose (Material 3) using Compose Multiplatform resources.
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
-- **Dependency Injection:** Hilt (mapped to KMP `javax.inject` interfaces).
+- **Dependency Injection:** Koin with Koin Annotations (Compiler Plugin).
 - **Navigation:** Type-Safe Navigation (Jetpack Navigation).
 - **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms).
 

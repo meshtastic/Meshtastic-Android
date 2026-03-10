@@ -19,7 +19,7 @@ import com.android.build.api.dsl.LibraryExtension
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.android.library.compose)
-    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 configure<LibraryExtension> { namespace = "org.meshtastic.core.ui" }
@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.zxing.core)
     implementation(libs.kermit)
     implementation(libs.nordic.common.core)
+    implementation(libs.koin.compose.viewmodel)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

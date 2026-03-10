@@ -17,23 +17,19 @@
 package org.meshtastic.core.service
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.StateFlow
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.ClientNotification
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
+@Single
 @Suppress("TooManyFunctions")
-class AndroidRadioControllerImpl
-@Inject
-constructor(
-    @ApplicationContext private val context: Context,
+class AndroidRadioControllerImpl(
+    private val context: Context,
     private val serviceRepository: AndroidServiceRepository,
     private val nodeRepository: NodeRepository,
 ) : RadioController {

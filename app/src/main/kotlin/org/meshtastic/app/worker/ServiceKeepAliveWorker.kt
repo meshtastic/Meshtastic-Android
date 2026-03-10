@@ -21,13 +21,11 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import org.koin.android.annotation.KoinWorker
 import org.meshtastic.app.R
 import org.meshtastic.app.service.MeshService
 import org.meshtastic.app.service.startService
@@ -39,12 +37,10 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
  * `startForegroundService` is blocked by Android 14+ restrictions. It runs as an Expedited worker to gain temporary
  * foreground start privileges.
  */
-@HiltWorker
-class ServiceKeepAliveWorker
-@AssistedInject
-constructor(
-    @Assisted appContext: Context,
-    @Assisted workerParams: WorkerParameters,
+@KoinWorker
+class ServiceKeepAliveWorker(
+    appContext: Context,
+    workerParams: WorkerParameters,
     private val serviceNotifications: MeshServiceNotifications,
 ) : CoroutineWorker(appContext, workerParams) {
 

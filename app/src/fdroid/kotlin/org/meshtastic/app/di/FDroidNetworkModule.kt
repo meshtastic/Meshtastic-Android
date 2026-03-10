@@ -16,24 +16,19 @@
  */
 package org.meshtastic.app.di
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.model.NetworkFirmwareReleases
 import org.meshtastic.core.network.service.ApiService
-import javax.inject.Singleton
 
-@InstallIn(SingletonComponent::class)
 @Module
 class FDroidNetworkModule {
 
-    @Provides
-    @Singleton
+    @Single
     fun provideOkHttpClient(buildConfigProvider: BuildConfigProvider): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(
             interceptor =
@@ -45,8 +40,7 @@ class FDroidNetworkModule {
         )
         .build()
 
-    @Provides
-    @Singleton
+    @Single
     fun provideApiService(): ApiService = object : ApiService {
         override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
             throw NotImplementedError("API calls to getDeviceHardware are not supported on Fdroid builds.")

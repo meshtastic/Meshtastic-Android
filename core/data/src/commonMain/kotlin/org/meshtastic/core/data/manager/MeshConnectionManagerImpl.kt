@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -63,17 +64,13 @@ import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.ToRadio
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
 
 @Suppress("LongParameterList", "TooManyFunctions")
-@Singleton
-class MeshConnectionManagerImpl
-@Inject
-constructor(
+@Single
+class MeshConnectionManagerImpl(
     private val radioInterfaceService: RadioInterfaceService,
     private val serviceRepository: ServiceRepository,
     private val serviceBroadcasts: ServiceBroadcasts,

@@ -11,8 +11,8 @@ The single Activity of the application. It hosts the `NavHost` and manages the r
 ### 2. `MeshService`
 The core background service that manages long-running communication with the mesh radio. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
 
-### 3. Hilt Application
-`MeshUtilApplication` is the Hilt entry point, providing the global dependency injection container.
+### 3. Koin Application
+`MeshUtilApplication` is the Koin entry point, providing the global dependency injection container.
 
 ## Architecture
 The module primarily serves as a "glue" layer, connecting:

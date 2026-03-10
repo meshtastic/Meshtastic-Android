@@ -16,10 +16,13 @@
  */
 package org.meshtastic.app.repository.radio
 
-import dagger.assisted.AssistedFactory
+import org.koin.core.annotation.Single
+import org.meshtastic.app.repository.usb.UsbRepository
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Factory for creating `SerialInterface` instances. */
-@AssistedFactory
-interface SerialInterfaceFactory {
-    fun create(rest: String): SerialInterface
+@Single
+class SerialInterfaceFactory(private val usbRepository: UsbRepository) {
+    fun create(rest: String, service: RadioInterfaceService): SerialInterface =
+        SerialInterface(service, usbRepository, rest)
 }

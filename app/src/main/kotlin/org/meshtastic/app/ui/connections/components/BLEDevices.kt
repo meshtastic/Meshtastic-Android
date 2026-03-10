@@ -19,6 +19,8 @@ package org.meshtastic.app.ui.connections.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -26,25 +28,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.common.scanner.rememberFilterState
-import no.nordicsemi.android.common.scanner.view.ScannerView
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.app.model.DeviceListEntry
 import org.meshtastic.app.ui.connections.ScannerViewModel
-import org.meshtastic.core.ble.AndroidBleDevice
-import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
-import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.bluetooth_available_devices
 
 /**
- * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
- * permissions and hardware state using Nordic Common Libraries' ScannerView.
+ * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning.
  *
  * @param connectionState The current connection state of the MeshService.
  * @param selectedDevice The full address of the currently selected device.
@@ -53,15 +47,6 @@ import org.meshtastic.core.resources.bluetooth_available_devices
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanModel: ScannerViewModel) {
-    val filterState =
-        rememberFilterState(
-            filter = {
-                Any {
-                    ServiceUuid(SERVICE_UUID)
-                    Name(Regex(BLE_NAME_PATTERN))
-                }
-            },
-        )
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
 
     Column {
@@ -72,17 +57,8 @@ fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanMod
             color = MaterialTheme.colorScheme.primary,
         )
 
-        ScannerView(
-            state = filterState,
-            onScanResultSelected = { result ->
-                scanModel.onSelected(DeviceListEntry.Ble(AndroidBleDevice(result.peripheral)))
-            },
-            deviceItem = { result ->
-                val device =
-                    remember(result.peripheral.address, bleDevices) {
-                        bleDevices.find { it.fullAddress == "x${result.peripheral.address}" }
-                            ?: DeviceListEntry.Ble(AndroidBleDevice(result.peripheral))
-                    }
+        LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
+            items(bleDevices, key = { it.fullAddress }) { device ->
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                     shape = MaterialTheme.shapes.large,
@@ -94,10 +70,10 @@ fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanMod
                             ?: ConnectionState.Disconnected,
                         device = device,
                         onSelect = { scanModel.onSelected(device) },
-                        rssi = result.rssi,
+                        rssi = null,
                     )
                 }
-            },
-        )
+            }
+        }
     }
 }

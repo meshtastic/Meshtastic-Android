@@ -17,14 +17,13 @@
 package org.meshtastic.core.network
 
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.NetworkDeviceHardware
 import org.meshtastic.core.network.service.ApiService
-import javax.inject.Inject
 
-class DeviceHardwareRemoteDataSource
-@Inject
-constructor(
+@Single
+class DeviceHardwareRemoteDataSource(
     private val apiService: ApiService,
     private val dispatchers: CoroutineDispatchers,
 ) {

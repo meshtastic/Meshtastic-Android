@@ -18,7 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.devtools.ksp)
+    id("meshtastic.koin")
 }
 
 kotlin {
@@ -41,7 +41,6 @@ kotlin {
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
 
-            api(libs.javax.inject)
             implementation(libs.androidx.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
             implementation(libs.kotlinx.serialization.json)
@@ -51,7 +50,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.hilt.android)
             implementation(libs.androidx.core.ktx)
             implementation(libs.androidx.core.location.altitude)
 
@@ -68,5 +66,3 @@ kotlin {
         }
     }
 }
-
-dependencies { add("kspAndroid", libs.hilt.compiler) }

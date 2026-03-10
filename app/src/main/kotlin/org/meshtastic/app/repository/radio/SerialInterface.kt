@@ -17,8 +17,6 @@
 package org.meshtastic.app.repository.radio
 
 import co.touchlab.kermit.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import org.meshtastic.app.repository.usb.SerialConnection
 import org.meshtastic.app.repository.usb.SerialConnectionListener
 import org.meshtastic.app.repository.usb.UsbRepository
@@ -27,13 +25,10 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import java.util.concurrent.atomic.AtomicReference
 
 /** An interface that assumes we are talking to a meshtastic device via USB serial */
-class SerialInterface
-@AssistedInject
-constructor(
+class SerialInterface(
     service: RadioInterfaceService,
-    private val serialInterfaceSpec: SerialInterfaceSpec,
     private val usbRepository: UsbRepository,
-    @Assisted private val address: String,
+    private val address: String,
 ) : StreamInterface(service) {
     private var connRef = AtomicReference<SerialConnection?>()
 
@@ -47,7 +42,13 @@ constructor(
     }
 
     override fun connect() {
-        val device = serialInterfaceSpec.findSerial(address)
+        val deviceMap = usbRepository.serialDevices.value
+        val device =
+            if (deviceMap.containsKey(address)) {
+                deviceMap[address]!!
+            } else {
+                deviceMap.map { (_, driver) -> driver }.firstOrNull()
+            }
         if (device == null) {
             Logger.e { "[$address] Serial device not found at address" }
         } else {

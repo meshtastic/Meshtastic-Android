@@ -47,8 +47,6 @@ fun Project.configureKover() {
 
                     // Exclude declarations
                     annotatedBy(
-                        "*.HiltAndroidApp",
-                        "*.AndroidEntryPoint",
                         "*.Module",
                         "*.Provides",
                         "*.Binds",
@@ -56,7 +54,7 @@ fun Project.configureKover() {
                     )
 
                     // Suppress generated code
-                    packages("hilt_aggregated_deps")
+                    packages("koin_aggregated_deps")
                     packages("org.meshtastic.core.resources")
                 }
             }

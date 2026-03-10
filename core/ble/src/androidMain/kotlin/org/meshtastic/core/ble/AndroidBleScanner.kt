@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
-import javax.inject.Inject
+import org.koin.core.annotation.Single
 import kotlin.time.Duration
 
 /**
@@ -28,7 +28,8 @@ import kotlin.time.Duration
  *
  * @param centralManager The Nordic [CentralManager] to use for scanning.
  */
-class AndroidBleScanner @Inject constructor(private val centralManager: CentralManager) : BleScanner {
+@Single
+class AndroidBleScanner(private val centralManager: CentralManager) : BleScanner {
 
     override fun scan(timeout: Duration): Flow<BleDevice> =
         centralManager.scan(timeout).distinctByPeripheral().map { AndroidBleDevice(it.peripheral) }

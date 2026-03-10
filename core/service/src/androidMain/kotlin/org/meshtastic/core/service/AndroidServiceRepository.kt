@@ -25,19 +25,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.MeshPacket
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Repository class for managing the [IMeshService] instance and connection state */
 @Suppress("TooManyFunctions")
-@Singleton
-open class AndroidServiceRepository @Inject constructor() : ServiceRepository {
+@Single(binds = [ServiceRepository::class, AndroidServiceRepository::class])
+open class AndroidServiceRepository : ServiceRepository {
     var meshService: IMeshService? = null
         private set
 

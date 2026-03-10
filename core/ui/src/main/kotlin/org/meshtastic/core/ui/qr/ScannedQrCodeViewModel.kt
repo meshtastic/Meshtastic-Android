@@ -18,8 +18,8 @@ package org.meshtastic.core.ui.qr
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.ui.util.getChannelList
@@ -28,12 +28,9 @@ import org.meshtastic.proto.Channel
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.LocalConfig
-import javax.inject.Inject
 
-@HiltViewModel
-class ScannedQrCodeViewModel
-@Inject
-constructor(
+@KoinViewModel
+class ScannedQrCodeViewModel(
     private val radioConfigRepository: RadioConfigRepository,
     private val radioController: RadioController,
 ) : ViewModel() {

@@ -28,20 +28,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.AnalyticsDataStore
-import org.meshtastic.core.prefs.di.AppDataStore
 import org.meshtastic.core.repository.AnalyticsPrefs
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.uuid.Uuid
 
-@Singleton
-class AnalyticsPrefsImpl
-@Inject
-constructor(
-    @AnalyticsDataStore private val analyticsDataStore: DataStore<Preferences>,
-    @AppDataStore private val appDataStore: DataStore<Preferences>,
+@Single
+class AnalyticsPrefsImpl(
+    @Named("AnalyticsDataStore") private val analyticsDataStore: DataStore<Preferences>,
+    @Named("AppDataStore") private val appDataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : AnalyticsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

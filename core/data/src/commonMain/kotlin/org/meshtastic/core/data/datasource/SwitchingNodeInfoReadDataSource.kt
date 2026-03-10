@@ -18,16 +18,14 @@ package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
+import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.entity.NodeWithRelations
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SwitchingNodeInfoReadDataSource @Inject constructor(private val dbManager: DatabaseManager) :
-    NodeInfoReadDataSource {
+@Single
+class SwitchingNodeInfoReadDataSource(private val dbManager: DatabaseManager) : NodeInfoReadDataSource {
 
     override fun myNodeInfoFlow(): Flow<MyNodeEntity?> =
         dbManager.currentDb.flatMapLatest { db -> db.nodeInfoDao().getMyNodeInfo() }

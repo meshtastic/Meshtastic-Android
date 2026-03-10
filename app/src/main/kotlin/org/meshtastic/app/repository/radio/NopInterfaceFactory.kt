@@ -16,10 +16,10 @@
  */
 package org.meshtastic.app.repository.radio
 
-import dagger.assisted.AssistedFactory
+import org.koin.core.annotation.Single
 
 /** Factory for creating `NopInterface` instances. */
-@AssistedFactory
-interface NopInterfaceFactory {
-    fun create(rest: String): NopInterface
+@Single
+class NopInterfaceFactory {
+    fun create(rest: String): NopInterface = NopInterface(rest)
 }

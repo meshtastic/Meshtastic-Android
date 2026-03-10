@@ -17,7 +17,6 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import dagger.Lazy
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +28,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.coroutines.withTimeoutOrNull
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.entity.MeshLog
@@ -48,17 +48,13 @@ import org.meshtastic.proto.FromRadio
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
 @Suppress("TooManyFunctions")
-@Singleton
-class PacketHandlerImpl
-@Inject
-constructor(
+@Single
+class PacketHandlerImpl(
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val radioInterfaceService: RadioInterfaceService,
@@ -182,7 +178,7 @@ constructor(
         if (packetId != 0) {
             getDataPacketById(packetId)?.let { p ->
                 if (p.status == m) return@handledLaunch
-                packetRepository.get().updateMessageStatus(p, m)
+                packetRepository.value.updateMessageStatus(p, m)
                 serviceBroadcasts.broadcastMessageStatus(packetId, m)
             }
         }
@@ -191,7 +187,7 @@ constructor(
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1.seconds) {
         var dataPacket: DataPacket? = null
         while (dataPacket == null) {
-            dataPacket = packetRepository.get().getPacketById(packetId)
+            dataPacket = packetRepository.value.getPacketById(packetId)
             if (dataPacket == null) delay(100.milliseconds)
         }
         dataPacket
@@ -222,7 +218,7 @@ constructor(
                 "insert: ${packetToSave.message_type} = " +
                     "${packetToSave.raw_message.toOneLineString()} from=${packetToSave.fromNum}"
             }
-            meshLogRepository.get().insert(packetToSave)
+            meshLogRepository.value.insert(packetToSave)
         }
     }
 }

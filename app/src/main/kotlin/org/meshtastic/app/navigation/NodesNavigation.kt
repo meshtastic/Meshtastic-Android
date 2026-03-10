@@ -29,7 +29,6 @@ import androidx.compose.material.icons.rounded.Router
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
@@ -40,8 +39,10 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.StringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.node.NodeMapScreen
 import org.meshtastic.app.map.node.NodeMapViewModel
+import org.meshtastic.app.node.AndroidMetricsViewModel
 import org.meshtastic.app.ui.node.AdaptiveNodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -120,7 +121,7 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
         ) { backStackEntry ->
             val parentGraphBackStackEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
-            val vm = hiltViewModel<NodeMapViewModel>(parentGraphBackStackEntry)
+            val vm = koinViewModel<NodeMapViewModel>(viewModelStoreOwner = parentGraphBackStackEntry)
             NodeMapScreen(vm, onNavigateUp = navController::navigateUp)
         }
 
@@ -135,7 +136,8 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
         ) { backStackEntry ->
             val parentGraphBackStackEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
-            val metricsViewModel = hiltViewModel<MetricsViewModel>(parentGraphBackStackEntry)
+            val metricsViewModel =
+                koinViewModel<AndroidMetricsViewModel>(viewModelStoreOwner = parentGraphBackStackEntry)
 
             val args = backStackEntry.toRoute<NodeDetailRoutes.TracerouteLog>()
             metricsViewModel.setNodeId(args.destNum)
@@ -166,7 +168,8 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, scrollToTo
         ) { backStackEntry ->
             val parentGraphBackStackEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
-            val metricsViewModel = hiltViewModel<MetricsViewModel>(parentGraphBackStackEntry)
+            val metricsViewModel =
+                koinViewModel<AndroidMetricsViewModel>(viewModelStoreOwner = parentGraphBackStackEntry)
 
             val args = backStackEntry.toRoute<NodeDetailRoutes.TracerouteMap>()
             metricsViewModel.setNodeId(args.destNum)
@@ -277,7 +280,7 @@ private inline fun <reified R : Route> NavGraphBuilder.addNodeDetailScreenCompos
     ) { backStackEntry ->
         val parentGraphBackStackEntry =
             remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
-        val metricsViewModel = hiltViewModel<MetricsViewModel>(parentGraphBackStackEntry)
+        val metricsViewModel = koinViewModel<AndroidMetricsViewModel>(viewModelStoreOwner = parentGraphBackStackEntry)
 
         val args = backStackEntry.toRoute<R>()
         val destNum = getDestNum(args)

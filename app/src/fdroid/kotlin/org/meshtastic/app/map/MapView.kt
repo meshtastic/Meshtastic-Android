@@ -74,7 +74,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import co.touchlab.kermit.Logger
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -83,6 +82,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.R
 import org.meshtastic.app.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.app.map.component.CacheLayout
@@ -235,7 +235,7 @@ private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int)
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
-    mapViewModel: MapViewModel = hiltViewModel(),
+    mapViewModel: MapViewModel = koinViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
     nodeTracks: List<Position>? = null,

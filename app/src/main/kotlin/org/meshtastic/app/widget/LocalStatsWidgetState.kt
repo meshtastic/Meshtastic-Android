@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
@@ -36,8 +37,6 @@ import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.LocalStats
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class LocalStatsWidgetUiState(
     val connectionState: ConnectionState = ConnectionState.Disconnected,
@@ -79,10 +78,8 @@ data class LocalStatsWidgetUiState(
     val updateTimeMillis: Long = 0,
 )
 
-@Singleton
-class LocalStatsWidgetStateProvider
-@Inject
-constructor(
+@Single
+class LocalStatsWidgetStateProvider(
     nodeRepository: NodeRepository,
     serviceRepository: ServiceRepository,
     appWidgetUpdater: AppWidgetUpdater,

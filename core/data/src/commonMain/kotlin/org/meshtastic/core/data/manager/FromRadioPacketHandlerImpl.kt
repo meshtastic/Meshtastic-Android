@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.data.manager
 
-import dagger.Lazy
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -24,14 +24,10 @@ import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.FromRadio
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
-@Singleton
-class FromRadioPacketHandlerImpl
-@Inject
-constructor(
+@Single
+class FromRadioPacketHandlerImpl(
     private val serviceRepository: ServiceRepository,
     private val router: Lazy<MeshRouter>,
     private val mqttManager: MqttManager,
@@ -52,18 +48,18 @@ constructor(
         val clientNotification = proto.clientNotification
 
         when {
-            myInfo != null -> router.get().configFlowManager.handleMyInfo(myInfo)
-            metadata != null -> router.get().configFlowManager.handleLocalMetadata(metadata)
+            myInfo != null -> router.value.configFlowManager.handleMyInfo(myInfo)
+            metadata != null -> router.value.configFlowManager.handleLocalMetadata(metadata)
             nodeInfo != null -> {
-                router.get().configFlowManager.handleNodeInfo(nodeInfo)
-                serviceRepository.setConnectionProgress("Nodes (${router.get().configFlowManager.newNodeCount})")
+                router.value.configFlowManager.handleNodeInfo(nodeInfo)
+                serviceRepository.setConnectionProgress("Nodes (${router.value.configFlowManager.newNodeCount})")
             }
-            configCompleteId != null -> router.get().configFlowManager.handleConfigComplete(configCompleteId)
+            configCompleteId != null -> router.value.configFlowManager.handleConfigComplete(configCompleteId)
             mqttProxyMessage != null -> mqttManager.handleMqttProxyMessage(mqttProxyMessage)
             queueStatus != null -> packetHandler.handleQueueStatus(queueStatus)
-            config != null -> router.get().configHandler.handleDeviceConfig(config)
-            moduleConfig != null -> router.get().configHandler.handleModuleConfig(moduleConfig)
-            channel != null -> router.get().configHandler.handleChannel(channel)
+            config != null -> router.value.configHandler.handleDeviceConfig(config)
+            moduleConfig != null -> router.value.configHandler.handleModuleConfig(moduleConfig)
+            channel != null -> router.value.configHandler.handleChannel(channel)
             clientNotification != null -> {
                 serviceRepository.setClientNotification(clientNotification)
                 serviceNotifications.showClientNotification(clientNotification)

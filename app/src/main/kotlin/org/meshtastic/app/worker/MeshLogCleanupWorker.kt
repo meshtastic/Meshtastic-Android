@@ -17,39 +17,20 @@
 package org.meshtastic.app.worker
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
+import org.koin.android.annotation.KoinWorker
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 
-@HiltWorker
-class MeshLogCleanupWorker
-@AssistedInject
-constructor(
-    @Assisted appContext: Context,
-    @Assisted workerParams: WorkerParameters,
+@KoinWorker
+class MeshLogCleanupWorker(
+    appContext: Context,
+    workerParams: WorkerParameters,
     private val meshLogRepository: MeshLogRepository,
     private val meshLogPrefs: MeshLogPrefs,
 ) : CoroutineWorker(appContext, workerParams) {
-
-    // Fallback constructor for cases where HiltWorkerFactory is not used (e.g., some WorkManager initializations)
-    constructor(
-        appContext: Context,
-        workerParams: WorkerParameters,
-    ) : this(
-        appContext,
-        workerParams,
-        entryPoint(appContext).meshLogRepository(),
-        entryPoint(appContext).meshLogPrefs(),
-    )
 
     @Suppress("TooGenericExceptionCaught")
     override suspend fun doWork(): Result = try {
@@ -77,18 +58,7 @@ constructor(
 
     companion object {
         const val WORK_NAME = "meshlog_cleanup_worker"
-
-        private fun entryPoint(context: Context): WorkerEntryPoint =
-            EntryPointAccessors.fromApplication(context.applicationContext, WorkerEntryPoint::class.java)
     }
 
     private val logger = Logger.withTag(WORK_NAME)
-}
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface WorkerEntryPoint {
-    fun meshLogRepository(): MeshLogRepository
-
-    fun meshLogPrefs(): MeshLogPrefs
 }

@@ -17,18 +17,15 @@
 package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.database.entity.MetadataEntity
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class SwitchingNodeInfoWriteDataSource
-@Inject
-constructor(
+@Single
+class SwitchingNodeInfoWriteDataSource(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
 ) : NodeInfoWriteDataSource {

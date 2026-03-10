@@ -31,10 +31,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.meshtastic.app.map.prefs.di.GoogleMapsDataStore
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
 interface GoogleMapsPrefs {
@@ -75,11 +74,9 @@ interface GoogleMapsPrefs {
     fun setNetworkMapLayers(value: Set<String>)
 }
 
-@Singleton
-class GoogleMapsPrefsImpl
-@Inject
-constructor(
-    @GoogleMapsDataStore private val dataStore: DataStore<Preferences>,
+@Single
+class GoogleMapsPrefsImpl(
+    @Named("GoogleMapsDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : GoogleMapsPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

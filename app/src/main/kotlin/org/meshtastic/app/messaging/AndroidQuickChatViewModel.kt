@@ -16,11 +16,10 @@
  */
 package org.meshtastic.app.messaging
 
-import dagger.hilt.android.lifecycle.HiltViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.feature.messaging.QuickChatViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class AndroidQuickChatViewModel @Inject constructor(quickChatActionRepository: QuickChatActionRepository) :
+@KoinViewModel
+class AndroidQuickChatViewModel(quickChatActionRepository: QuickChatActionRepository) :
     QuickChatViewModel(quickChatActionRepository)

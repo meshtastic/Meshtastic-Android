@@ -17,32 +17,21 @@
 package org.meshtastic.app.filter
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.test.KoinTest
+import org.koin.test.inject
 import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
-import javax.inject.Inject
 
-@HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
-class MessageFilterIntegrationTest {
+class MessageFilterIntegrationTest : KoinTest {
 
-    @get:Rule var hiltRule = HiltAndroidRule(this)
+    private val filterPrefs: FilterPrefs by inject()
 
-    @Inject lateinit var filterPrefs: FilterPrefs
-
-    @Inject lateinit var filterService: MessageFilter
-
-    @Before
-    fun setup() {
-        hiltRule.inject()
-    }
+    private val filterService: MessageFilter by inject()
 
     @Test
     fun filterPrefsIntegration() = runTest {

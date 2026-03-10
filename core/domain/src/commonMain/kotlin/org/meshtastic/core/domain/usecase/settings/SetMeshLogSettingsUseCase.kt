@@ -16,13 +16,13 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
-import javax.inject.Inject
 
 /** Use case for managing mesh log settings. */
+@Single
 open class SetMeshLogSettingsUseCase
-@Inject
 constructor(
     private val meshLogRepository: MeshLogRepository,
     private val meshLogPrefs: MeshLogPrefs,

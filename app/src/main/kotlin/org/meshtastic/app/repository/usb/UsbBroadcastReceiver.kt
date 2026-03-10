@@ -23,12 +23,13 @@ import android.content.IntentFilter
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import co.touchlab.kermit.Logger
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.exceptionReporter
 import org.meshtastic.core.common.util.getParcelableExtraCompat
-import javax.inject.Inject
 
 /** A helper class to call onChanged when bluetooth is enabled or disabled or when permissions are changed. */
-class UsbBroadcastReceiver @Inject constructor(private val usbRepository: UsbRepository) : BroadcastReceiver() {
+@Single
+class UsbBroadcastReceiver(private val usbRepository: UsbRepository) : BroadcastReceiver() {
     // Can be used for registering
     internal val intentFilter
         get() =

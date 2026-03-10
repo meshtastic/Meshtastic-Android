@@ -17,12 +17,11 @@
 package org.meshtastic.core.ui.emoji
 
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.repository.CustomEmojiPrefs
-import javax.inject.Inject
 
-@HiltViewModel
-class EmojiPickerViewModel @Inject constructor(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
+@KoinViewModel
+class EmojiPickerViewModel(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
 
     var customEmojiFrequency: String?
         get() = customEmojiPrefs.customEmojiFrequency.value

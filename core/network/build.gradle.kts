@@ -18,7 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.devtools.ksp)
+    id("meshtastic.koin")
 }
 
 kotlin {
@@ -35,7 +35,6 @@ kotlin {
             implementation(projects.core.model)
             implementation(projects.core.proto)
 
-            api(libs.javax.inject)
             implementation(libs.okio)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.core)
@@ -43,8 +42,8 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kermit)
         }
+
         androidMain.dependencies {
-            implementation(libs.hilt.android)
             implementation(libs.org.eclipse.paho.client.mqttv3)
             implementation(libs.coil.network.okhttp)
             implementation(libs.coil.svg)
@@ -61,5 +60,3 @@ configurations.all {
         attributes.attribute(marketplaceAttr, "fdroid")
     }
 }
-
-dependencies { add("kspAndroid", libs.hilt.compiler) }

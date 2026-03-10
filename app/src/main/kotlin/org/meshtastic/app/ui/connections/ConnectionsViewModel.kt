@@ -17,10 +17,10 @@
 package org.meshtastic.app.ui.connections
 
 import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
@@ -29,12 +29,9 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
-import javax.inject.Inject
 
-@HiltViewModel
-class ConnectionsViewModel
-@Inject
-constructor(
+@KoinViewModel
+class ConnectionsViewModel(
     radioConfigRepository: RadioConfigRepository,
     serviceRepository: ServiceRepository,
     nodeRepository: NodeRepository,

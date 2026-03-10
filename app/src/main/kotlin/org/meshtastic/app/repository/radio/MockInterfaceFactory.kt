@@ -16,10 +16,11 @@
  */
 package org.meshtastic.app.repository.radio
 
-import dagger.assisted.AssistedFactory
+import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Factory for creating `MockInterface` instances. */
-@AssistedFactory
-interface MockInterfaceFactory {
-    fun create(rest: String): MockInterface
+@Single
+class MockInterfaceFactory {
+    fun create(rest: String, service: RadioInterfaceService): MockInterface = MockInterface(service, rest)
 }

@@ -26,12 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.ui.component.BottomSheetDialog
 
 @Composable
 fun EmojiPicker(
-    viewModel: EmojiPickerViewModel = hiltViewModel(),
+    viewModel: EmojiPickerViewModel = koinViewModel(),
     onDismiss: () -> Unit = {},
     onConfirm: (String) -> Unit,
 ) {

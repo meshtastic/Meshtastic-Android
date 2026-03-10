@@ -34,24 +34,19 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 import org.meshtastic.core.di.CoroutineDispatchers
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
-@Singleton
+@Single
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
-open class DatabaseManager
-@Inject
-constructor(
-    private val app: Application,
-    private val dispatchers: CoroutineDispatchers,
-) : SharedDatabaseManager {
+open class DatabaseManager(private val app: Application, private val dispatchers: CoroutineDispatchers) :
+    SharedDatabaseManager {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 

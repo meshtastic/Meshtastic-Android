@@ -19,23 +19,24 @@ package org.meshtastic.app.service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.PacketRepository
-import javax.inject.Inject
 
 /** A [BroadcastReceiver] that handles "Mark as read" actions from notifications. */
-@AndroidEntryPoint
-class MarkAsReadReceiver : BroadcastReceiver() {
+class MarkAsReadReceiver :
+    BroadcastReceiver(),
+    KoinComponent {
 
-    @Inject lateinit var packetRepository: PacketRepository
+    private val packetRepository: PacketRepository by inject()
 
-    @Inject lateinit var serviceNotifications: MeshServiceNotifications
+    private val serviceNotifications: MeshServiceNotifications by inject()
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 

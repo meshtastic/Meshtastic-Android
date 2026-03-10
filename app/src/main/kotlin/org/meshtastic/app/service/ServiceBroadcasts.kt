@@ -20,7 +20,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import co.touchlab.kermit.Logger
-import dagger.hilt.android.qualifiers.ApplicationContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
@@ -29,17 +29,11 @@ import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.util.toPIIString
 import org.meshtastic.core.repository.ServiceRepository
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 import org.meshtastic.core.repository.ServiceBroadcasts as SharedServiceBroadcasts
 
-@Singleton
-class ServiceBroadcasts
-@Inject
-constructor(
-    @ApplicationContext private val context: Context,
-    private val serviceRepository: ServiceRepository,
-) : SharedServiceBroadcasts {
+@Single
+class ServiceBroadcasts(private val context: Context, private val serviceRepository: ServiceRepository) :
+    SharedServiceBroadcasts {
     // A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
 

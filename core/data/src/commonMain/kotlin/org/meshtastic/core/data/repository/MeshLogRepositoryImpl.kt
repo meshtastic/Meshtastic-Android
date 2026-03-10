@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
 import org.meshtastic.core.database.DatabaseManager
@@ -37,8 +38,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Repository implementation for managing and retrieving logs from the local database.
@@ -47,10 +46,8 @@ import javax.inject.Singleton
  * telemetry and traceroute data.
  */
 @Suppress("TooManyFunctions")
-@Singleton
-class MeshLogRepositoryImpl
-@Inject
-constructor(
+@Single
+class MeshLogRepositoryImpl(
     private val dbManager: DatabaseManager,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogPrefs: MeshLogPrefs,

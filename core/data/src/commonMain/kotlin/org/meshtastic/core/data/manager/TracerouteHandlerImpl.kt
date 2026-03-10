@@ -20,6 +20,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
@@ -34,13 +35,9 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.MeshPacket
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class TracerouteHandlerImpl
-@Inject
-constructor(
+@Single
+class TracerouteHandlerImpl(
     private val nodeManager: NodeManager,
     private val serviceRepository: ServiceRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,

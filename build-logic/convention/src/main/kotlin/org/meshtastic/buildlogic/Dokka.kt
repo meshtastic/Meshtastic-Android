@@ -29,7 +29,7 @@ fun Project.configureDokka() {
 
         dokkaSourceSets.configureEach {
             perPackageOption {
-                matchingRegex.set("hilt_aggregated_deps")
+                matchingRegex.set("koin_aggregated_deps")
                 suppress.set(true)
             }
             perPackageOption {

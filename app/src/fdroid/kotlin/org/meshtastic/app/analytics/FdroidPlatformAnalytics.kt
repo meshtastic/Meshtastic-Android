@@ -18,16 +18,17 @@ package org.meshtastic.app.analytics
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
 import org.meshtastic.core.repository.DataPair
 import org.meshtastic.core.repository.PlatformAnalytics
-import javax.inject.Inject
 
 /**
  * F-Droid specific implementation of [PlatformAnalytics]. This provides no-op implementations for analytics and other
  * platform services.
  */
-class FdroidPlatformAnalytics @Inject constructor() : PlatformAnalytics {
+@Single
+class FdroidPlatformAnalytics : PlatformAnalytics {
     init {
         // For F-Droid builds we don't initialize external analytics services.
         // In debug builds we attach a DebugTree for convenient local logging, but

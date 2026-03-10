@@ -16,11 +16,9 @@
  */
 package org.meshtastic.app.ui.connections.components
 
-import androidx.compose.foundation.Indication
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -50,7 +48,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import no.nordicsemi.android.common.ui.view.RssiIcon
@@ -66,7 +63,7 @@ import org.meshtastic.core.ui.component.NodeChip
 
 private const val RSSI_UPDATE_RATE_MS = 2000L
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun DeviceListItem(
@@ -115,17 +112,11 @@ fun DeviceListItem(
             is DeviceListEntry.Mock -> stringResource(Res.string.add)
         }
 
-    val useSelectable = modifier == Modifier
-    val interactionSource = remember { MutableInteractionSource() }
-    val indication: Indication = LocalIndication.current
-
     val clickableModifier =
-        if (useSelectable) {
-            Modifier.indication(interactionSource, indication).pointerInput(device.fullAddress, onDelete) {
-                detectTapGestures(onTap = { onSelect() }, onLongPress = onDelete?.let { { it() } })
-            }
+        if (onDelete != null) {
+            Modifier.combinedClickable(onClick = onSelect, onLongClick = onDelete)
         } else {
-            Modifier
+            Modifier.clickable(onClick = onSelect)
         }
 
     ListItem(

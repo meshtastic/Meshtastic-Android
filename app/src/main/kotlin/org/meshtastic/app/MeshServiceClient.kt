@@ -23,9 +23,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
-import dagger.hilt.android.qualifiers.ActivityContext
-import dagger.hilt.android.scopes.ActivityScoped
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Factory
 import org.meshtastic.app.service.MeshService
 import org.meshtastic.app.service.startService
 import org.meshtastic.core.common.util.SequentialJob
@@ -33,14 +32,11 @@ import org.meshtastic.core.service.AndroidServiceRepository
 import org.meshtastic.core.service.BindFailedException
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.core.service.ServiceClient
-import javax.inject.Inject
 
 /** A Activity-lifecycle-aware [ServiceClient] that binds [MeshService] once the Activity is started. */
-@ActivityScoped
-class MeshServiceClient
-@Inject
-constructor(
-    @ActivityContext private val context: Context,
+@Factory
+class MeshServiceClient(
+    private val context: Context,
     private val serviceRepository: AndroidServiceRepository,
     private val serviceSetupJob: SequentialJob,
 ) : ServiceClient<IMeshService>(IMeshService.Stub::asInterface),

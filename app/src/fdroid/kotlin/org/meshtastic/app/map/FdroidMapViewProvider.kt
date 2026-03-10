@@ -18,9 +18,11 @@ package org.meshtastic.app.map
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.Single
 import org.meshtastic.core.ui.util.MapViewProvider
 
+@Single
 class FdroidMapViewProvider : MapViewProvider {
     @Composable
     override fun MapView(
@@ -33,7 +35,7 @@ class FdroidMapViewProvider : MapViewProvider {
         tracerouteNodePositions: Map<Int, Any>,
         onTracerouteMappableCountChanged: (Int, Int) -> Unit,
     ) {
-        val mapViewModel: MapViewModel = hiltViewModel()
+        val mapViewModel: MapViewModel = koinViewModel()
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,

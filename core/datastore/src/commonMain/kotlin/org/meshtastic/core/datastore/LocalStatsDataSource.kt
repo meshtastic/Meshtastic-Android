@@ -21,13 +21,13 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import okio.IOException
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.proto.LocalStats
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Class that handles saving and retrieving [LocalStats] data. */
-@Singleton
-class LocalStatsDataSource @Inject constructor(private val localStatsStore: DataStore<LocalStats>) {
+@Single
+class LocalStatsDataSource(@Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>) {
     val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->
             if (exception is IOException) {

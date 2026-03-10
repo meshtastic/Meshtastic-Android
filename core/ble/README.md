@@ -75,7 +75,7 @@ The module follows a clean architecture approach:
 
 - **Repository Pattern:** `BluetoothRepository` mediates data access.
 - **Coroutines & Flow:** All asynchronous operations use Kotlin Coroutines and Flows.
-- **Dependency Injection:** Hilt is used for dependency injection.
+- **Dependency Injection:** Koin is used for dependency injection.
 
 ## Testing
 

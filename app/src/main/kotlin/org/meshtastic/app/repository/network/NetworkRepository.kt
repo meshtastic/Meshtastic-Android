@@ -27,24 +27,20 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.shareIn
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.di.ProcessLifecycle
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class NetworkRepository
-@Inject
-constructor(
-    private val nsdManagerLazy: dagger.Lazy<NsdManager>,
-    private val connectivityManager: dagger.Lazy<ConnectivityManager>,
+@Single
+class NetworkRepository(
+    private val nsdManager: NsdManager,
+    private val connectivityManager: ConnectivityManager,
     private val dispatchers: CoroutineDispatchers,
-    @ProcessLifecycle private val processLifecycle: Lifecycle,
+    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
 ) {
 
     val networkAvailable: Flow<Boolean> by lazy {
         connectivityManager
-            .get()
             .networkAvailable()
             .flowOn(dispatchers.io)
             .conflate()
@@ -57,8 +53,7 @@ constructor(
     }
 
     val resolvedList: Flow<List<NsdServiceInfo>> by lazy {
-        nsdManagerLazy
-            .get()
+        nsdManager
             .serviceList(SERVICE_TYPE)
             .flowOn(dispatchers.io)
             .conflate()

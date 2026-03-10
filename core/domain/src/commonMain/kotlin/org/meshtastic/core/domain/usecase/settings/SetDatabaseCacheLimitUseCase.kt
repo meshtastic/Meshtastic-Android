@@ -16,12 +16,13 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.database.DatabaseConstants
-import javax.inject.Inject
 
 /** Use case for setting the database cache limit. */
-open class SetDatabaseCacheLimitUseCase @Inject constructor(private val databaseManager: DatabaseManager) {
+@Single
+open class SetDatabaseCacheLimitUseCase constructor(private val databaseManager: DatabaseManager) {
     operator fun invoke(limit: Int) {
         val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
         databaseManager.setCacheLimit(clamped)

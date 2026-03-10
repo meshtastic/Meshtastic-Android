@@ -46,7 +46,13 @@ class FromRadioPacketHandlerImplTest {
     @Before
     fun setup() {
         handler =
-            FromRadioPacketHandlerImpl(serviceRepository, { router }, mqttManager, packetHandler, serviceNotifications)
+            FromRadioPacketHandlerImpl(
+                serviceRepository,
+                lazy { router },
+                mqttManager,
+                packetHandler,
+                serviceNotifications,
+            )
     }
 
     @Test

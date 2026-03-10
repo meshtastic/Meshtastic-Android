@@ -18,6 +18,7 @@ package org.meshtastic.core.data.repository
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
 import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
@@ -30,14 +31,10 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.util.TimeConstants
 import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import org.meshtastic.core.repository.DeviceHardwareRepository
-import javax.inject.Inject
-import javax.inject.Singleton
 
 // Annotating with Singleton to ensure a single instance manages the cache
-@Singleton
-class DeviceHardwareRepositoryImpl
-@Inject
-constructor(
+@Single
+class DeviceHardwareRepositoryImpl(
     private val remoteDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,

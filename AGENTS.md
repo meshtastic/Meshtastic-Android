@@ -9,7 +9,7 @@ We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (K
 
 | Directory | Description |
 | :--- | :--- |
-| `app/` | Main application module. Contains `MainActivity`, Hilt DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
+| `app/` | Main application module. Contains `MainActivity`, Koin DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
 | `core/model` | Domain models and common data structures. |
 | `core:proto` | Protobuf definitions (Git submodule). |
 | `core:common` | Low-level utilities, I/O abstractions (Okio), and common types. |
@@ -39,8 +39,8 @@ We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (K
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Thread-Safety:** Use `atomicfu` and `kotlinx.collections.immutable` for shared state in `commonMain`. Avoid `synchronized` or JVM-specific atomics.
 -   **Dependency Injection:**
-    -   Use **Hilt**.
-    -   **Restriction:** Move Hilt modules to the `app` module if the library module is KMP with multiple flavors, as KSP/Hilt generation often fails in these complex scenarios.
+    -   Use **Koin**.
+    -   **Restriction:** Move Koin modules to the `app` module if the library module is KMP with multiple flavors, as KSP/Koin generation often fails in these complex scenarios.
 
 ### C. Namespacing
 -   **Standard:** Use the `org.meshtastic.*` namespace for all code.
@@ -58,4 +58,4 @@ Use `expect`/`actual` sparingly for platform-specific types (e.g., `Location`, `
 
 ## 5. Troubleshooting
 -   **Build Failures:** Always check `gradle/libs.versions.toml` for dependency conflicts.
--   **Hilt Generation:** If `@Inject` fails in a KMP module, ensure the corresponding module is bound in the `app` layer's DI package.
+-   **Koin Generation:** If a component fails to inject in a KMP module, ensure the corresponding module is bound in the `app` layer's DI package.

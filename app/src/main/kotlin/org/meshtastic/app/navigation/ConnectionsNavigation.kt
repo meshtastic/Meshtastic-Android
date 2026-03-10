@@ -17,12 +17,13 @@
 package org.meshtastic.app.navigation
 
 import androidx.compose.runtime.remember
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.ui.connections.ConnectionsScreen
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
@@ -42,7 +43,7 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController) {
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
             ConnectionsScreen(
-                radioConfigViewModel = hiltViewModel(parentEntry),
+                radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(viewModelStoreOwner = parentEntry),
                 onClickNodeChip = {
                     navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
                         launchSingleTop = true

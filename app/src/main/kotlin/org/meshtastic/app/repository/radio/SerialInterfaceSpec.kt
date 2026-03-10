@@ -18,23 +18,24 @@ package org.meshtastic.app.repository.radio
 
 import android.hardware.usb.UsbManager
 import com.hoho.android.usbserial.driver.UsbSerialDriver
+import org.koin.core.annotation.Single
 import org.meshtastic.app.repository.usb.UsbRepository
-import javax.inject.Inject
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Serial/USB interface backend implementation. */
-class SerialInterfaceSpec
-@Inject
-constructor(
+@Single
+class SerialInterfaceSpec(
     private val factory: SerialInterfaceFactory,
-    private val usbManager: dagger.Lazy<UsbManager>,
+    private val usbManager: UsbManager,
     private val usbRepository: UsbRepository,
 ) : InterfaceSpec<SerialInterface> {
-    override fun createInterface(rest: String): SerialInterface = factory.create(rest)
+    override fun createInterface(rest: String, service: RadioInterfaceService): SerialInterface =
+        factory.create(rest, service)
 
     override fun addressValid(rest: String): Boolean {
-        usbRepository.serialDevices.value.filterValues { usbManager.get().hasPermission(it.device) }
+        usbRepository.serialDevices.value.filterValues { usbManager.hasPermission(it.device) }
         findSerial(rest)?.let { d ->
-            return usbManager.get().hasPermission(d.device)
+            return usbManager.hasPermission(d.device)
         }
         return false
     }

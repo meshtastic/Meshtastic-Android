@@ -29,19 +29,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MeshDataStore
 import org.meshtastic.core.repository.MeshPrefs
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MeshPrefsImpl
-@Inject
-constructor(
-    @MeshDataStore private val dataStore: DataStore<Preferences>,
+@Single
+class MeshPrefsImpl(
+    @Named("MeshDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)

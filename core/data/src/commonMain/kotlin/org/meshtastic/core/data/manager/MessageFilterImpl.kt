@@ -17,14 +17,13 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
+import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.FilterPrefs
 import org.meshtastic.core.repository.MessageFilter
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Implementation of [MessageFilter] that uses regex and plain text matching. */
-@Singleton
-class MessageFilterImpl @Inject constructor(private val filterPrefs: FilterPrefs) : MessageFilter {
+@Single
+class MessageFilterImpl(private val filterPrefs: FilterPrefs) : MessageFilter {
     private var compiledPatterns: List<Regex> = emptyList()
 
     init {

@@ -18,14 +18,12 @@ package org.meshtastic.app.service
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
-import dagger.hilt.android.qualifiers.ApplicationContext
+import org.koin.core.annotation.Single
 import org.meshtastic.app.widget.LocalStatsWidget
 import org.meshtastic.core.repository.AppWidgetUpdater
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class AndroidAppWidgetUpdater @Inject constructor(@ApplicationContext private val context: Context) : AppWidgetUpdater {
+@Single
+class AndroidAppWidgetUpdater(private val context: Context) : AppWidgetUpdater {
     override suspend fun updateAll() {
         // Kickstart the widget composition.
         // The widget internally uses collectAsState() and its own sampled StateFlow

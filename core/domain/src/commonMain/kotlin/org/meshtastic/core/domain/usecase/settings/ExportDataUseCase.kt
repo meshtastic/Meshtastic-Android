@@ -21,18 +21,18 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.BufferedSink
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.util.positionToMeter
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.PortNum
-import javax.inject.Inject
 import kotlin.math.roundToInt
 import org.meshtastic.proto.Position as ProtoPosition
 
 /** Use case for exporting persisted packet data to a CSV format. */
+@Single
 open class ExportDataUseCase
-@Inject
 constructor(
     private val nodeRepository: NodeRepository,
     private val meshLogRepository: MeshLogRepository,

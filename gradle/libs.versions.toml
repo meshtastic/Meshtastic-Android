@@ -6,7 +6,6 @@ accompanist = "0.37.3"
 
 # androidx
 androidxComposeMaterial3Adaptive = "1.2.0"
-androidxHilt = "1.3.0"
 androidxTracing = "1.10.4"
 datastore = "1.2.0"
 glance = "1.2.0-rc01"
@@ -16,6 +15,9 @@ navigation3 = "1.0.1"
 paging = "3.4.1"
 room = "2.8.4"
 savedstate = "1.4.0"
+koin = "4.2.0-RC1"
+koin-annotations = "2.1.0"
+koin-plugin = "0.3.0"
 
 # Kotlin
 kotlin = "2.3.10"
@@ -32,7 +34,6 @@ turbine = "1.2.1"
 compose-multiplatform = "1.11.0-alpha03"
 
 # Google
-hilt = "2.59.2"
 maps-compose = "8.2.0"
 
 # ML Kit
@@ -83,10 +84,6 @@ androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", versi
 androidx-glance-appwidget-preview = { module = "androidx.glance:glance-appwidget-preview", version.ref = "glance" }
 androidx-glance-preview = { module = "androidx.glance:glance-preview", version.ref = "glance" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
-androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "androidxHilt" }
-androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidxHilt" }
-androidx-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "androidxHilt" }
-androidx-hilt-common = { module = "androidx.hilt:hilt-common", version.ref = "androidxHilt" }
 androidx-lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycle" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
 androidx-lifecycle-runtime = { module = "androidx.lifecycle:lifecycle-runtime", version.ref = "lifecycle" }
@@ -139,11 +136,14 @@ firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.10.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 guava = { module = "com.google.guava:guava", version = "33.5.0-jre" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
-hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hilt" }
-hilt-core = { module = "com.google.dagger:hilt-core", version.ref = "hilt" }
 location-services = { module = "com.google.android.gms:play-services-location", version = "21.3.0" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koin-androidx-workmanager = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
+koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-test = { module = "io.insert-koin:koin-test", version.ref = "koin" }
+koin-annotations = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "maps-compose" }
 maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "maps-compose" }
 maps-compose-widgets = { module = "com.google.maps.android:maps-compose-widgets", version.ref = "maps-compose" }
@@ -243,7 +243,7 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }
 google-services-gradlePlugin = { module = "com.google.gms.google-services:com.google.gms.google-services.gradle.plugin", version = "4.4.4" }
-hilt-gradlePlugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
+koin-gradlePlugin = { module = "io.insert-koin.compiler.plugin:io.insert-koin.compiler.plugin.gradle.plugin", version.ref = "koin-plugin" }
 kover-gradlePlugin = { module = "org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin", version.ref = "kover" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
 secrets-gradlePlugin = {module = "com.google.android.secrets-gradle-plugin:com.google.android.secrets-gradle-plugin.gradle.plugin", version = "1.1.0"}
@@ -259,6 +259,7 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 # Jetbrains
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+koin-compiler = { id = "io.insert-koin.compiler.plugin", version.ref = "koin-plugin" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -269,7 +270,6 @@ kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 # Google
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
 google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
-hilt = { id = "com.google.dagger.hilt.android" , version.ref = "hilt" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1" }
 
 # Firebase
@@ -300,7 +300,7 @@ meshtastic-android-lint = { id = "meshtastic.android.lint" }
 meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
-meshtastic-hilt = { id = "meshtastic.hilt" }
+meshtastic-koin = { id = "meshtastic.koin" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }

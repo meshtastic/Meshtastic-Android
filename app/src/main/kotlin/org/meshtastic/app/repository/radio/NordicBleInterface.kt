@@ -18,8 +18,6 @@ package org.meshtastic.app.repository.radio
 
 import android.annotation.SuppressLint
 import co.touchlab.kermit.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -72,15 +70,13 @@ private val SCAN_TIMEOUT = 5.seconds
  * @param address The BLE address of the device to connect to.
  */
 @SuppressLint("MissingPermission")
-class NordicBleInterface
-@AssistedInject
-constructor(
+class NordicBleInterface(
     private val serviceScope: CoroutineScope,
     private val scanner: BleScanner,
     private val bluetoothRepository: BluetoothRepository,
     private val connectionFactory: BleConnectionFactory,
     private val service: RadioInterfaceService,
-    @Assisted val address: String,
+    val address: String,
 ) : IRadioInterface {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->

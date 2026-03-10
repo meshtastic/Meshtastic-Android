@@ -17,12 +17,12 @@
 package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
-import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import okio.IOException
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.repository.CommandSender
@@ -40,16 +40,12 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.ToRadio
-import javax.inject.Inject
-import javax.inject.Singleton
 import org.meshtastic.core.model.MyNodeInfo as SharedMyNodeInfo
 import org.meshtastic.proto.MyNodeInfo as ProtoMyNodeInfo
 
 @Suppress("LongParameterList", "TooManyFunctions")
-@Singleton
-class MeshConfigFlowManagerImpl
-@Inject
-constructor(
+@Single
+class MeshConfigFlowManagerImpl(
     private val nodeManager: NodeManager,
     private val connectionManager: Lazy<MeshConnectionManager>,
     private val nodeRepository: NodeRepository,
@@ -101,7 +97,7 @@ constructor(
         } else {
             myNodeInfo = finalizedInfo
             Logger.i { "myNodeInfo committed successfully (nodeNum=${finalizedInfo.myNodeNum})" }
-            connectionManager.get().onRadioConfigLoaded()
+            connectionManager.value.onRadioConfigLoaded()
         }
 
         scope.handledLaunch {
@@ -109,7 +105,7 @@ constructor(
             sendHeartbeat()
             delay(wantConfigDelay)
             Logger.i { "Requesting NodeInfo (Stage 2)" }
-            connectionManager.get().startNodeInfoOnly()
+            connectionManager.value.startNodeInfoOnly()
         }
     }
 
@@ -140,7 +136,7 @@ constructor(
             nodeManager.setAllowNodeDbWrites(true)
             serviceRepository.setConnectionState(ConnectionState.Connected)
             serviceBroadcasts.broadcastConnection()
-            connectionManager.get().onNodeDbReady()
+            connectionManager.value.onNodeDbReady()
         }
     }
 
@@ -172,7 +168,7 @@ constructor(
     }
 
     override fun triggerWantConfig() {
-        connectionManager.get().startConfigOnly()
+        connectionManager.value.startConfigOnly()
     }
 
     private fun regenMyNodeInfo(metadata: DeviceMetadata? = null) {

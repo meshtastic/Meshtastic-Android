@@ -17,8 +17,6 @@
 package org.meshtastic.app.repository.radio
 
 import co.touchlab.kermit.Logger
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import okio.ByteString.Companion.encodeUtf8
 import okio.ByteString.Companion.toByteString
@@ -58,12 +56,7 @@ private val defaultChannel = ProtoChannel(settings = Channel.default.settings, r
 
 /** A simulated interface that is used for testing in the simulator */
 @Suppress("detekt:TooManyFunctions", "detekt:MagicNumber")
-class MockInterface
-@AssistedInject
-constructor(
-    private val service: RadioInterfaceService,
-    @Assisted val address: String,
-) : IRadioInterface {
+class MockInterface(private val service: RadioInterfaceService, val address: String) : IRadioInterface {
 
     companion object {
         private const val MY_NODE = 0x42424242

@@ -16,9 +16,12 @@
  */
 package org.meshtastic.app.repository.radio
 
-import javax.inject.Inject
+import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** TCP interface backend implementation. */
-class TCPInterfaceSpec @Inject constructor(private val factory: TCPInterfaceFactory) : InterfaceSpec<TCPInterface> {
-    override fun createInterface(rest: String): TCPInterface = factory.create(rest)
+@Single
+class TCPInterfaceSpec(private val factory: TCPInterfaceFactory) : InterfaceSpec<TCPInterface> {
+    override fun createInterface(rest: String, service: RadioInterfaceService): TCPInterface =
+        factory.create(rest, service)
 }

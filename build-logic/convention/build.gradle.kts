@@ -52,7 +52,7 @@ dependencies {
     compileOnly(libs.dokka.gradlePlugin)
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.google.services.gradlePlugin)
-    compileOnly(libs.hilt.gradlePlugin)
+    compileOnly(libs.koin.gradlePlugin)
     implementation(libs.kover.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
@@ -144,9 +144,9 @@ gradlePlugin {
             id = "meshtastic.analytics"
             implementationClass = "AnalyticsConventionPlugin"
         }
-        register("meshtasticHilt") {
-            id = "meshtastic.hilt"
-            implementationClass = "HiltConventionPlugin"
+        register("meshtasticKoin") {
+            id = "meshtastic.koin"
+            implementationClass = "KoinConventionPlugin"
         }
         register("meshtasticDetekt") {
             id = "meshtastic.detekt"

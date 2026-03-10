@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.getString
+import org.koin.core.annotation.Single
 import org.meshtastic.app.model.DeviceListEntry
 import org.meshtastic.app.model.getMeshtasticShortName
 import org.meshtastic.app.repository.network.NetworkRepository
@@ -37,7 +38,6 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.meshtastic
 import java.util.Locale
-import javax.inject.Inject
 
 data class DiscoveredDevices(
     val bleDevices: List<DeviceListEntry>,
@@ -47,9 +47,8 @@ data class DiscoveredDevices(
 )
 
 @Suppress("LongParameterList")
-class GetDiscoveredDevicesUseCase
-@Inject
-constructor(
+@Single
+class GetDiscoveredDevicesUseCase(
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
     private val recentAddressesDataSource: RecentAddressesDataSource,
@@ -57,7 +56,7 @@ constructor(
     private val databaseManager: DatabaseManager,
     private val usbRepository: UsbRepository,
     private val radioInterfaceService: RadioInterfaceService,
-    private val usbManagerLazy: dagger.Lazy<UsbManager>,
+    private val usbManagerLazy: Lazy<UsbManager>,
 ) {
     private val suffixLength = 4
 
@@ -94,7 +93,7 @@ constructor(
 
         val usbDevicesFlow =
             usbRepository.serialDevices.map { usb ->
-                usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.get(), d) }
+                usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.value, d) }
             }
 
         return combine(

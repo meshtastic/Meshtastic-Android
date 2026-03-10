@@ -18,7 +18,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.devtools.ksp)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -45,12 +45,11 @@ kotlin {
             implementation(projects.core.di)
 
             implementation(libs.androidx.lifecycle.viewmodel.compose)
-            implementation(libs.javax.inject)
+            implementation(libs.koin.compose.viewmodel)
         }
 
         androidMain.dependencies {
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
-            implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
             implementation(libs.androidx.datastore)
             implementation(libs.androidx.datastore.preferences)
             implementation(libs.accompanist.permissions)
@@ -68,7 +67,6 @@ kotlin {
             implementation(libs.androidx.savedstate.ktx)
             implementation(libs.material)
             implementation(libs.kermit)
-            implementation(libs.hilt.android)
         }
 
         androidUnitTest.dependencies {
@@ -80,9 +78,4 @@ kotlin {
             implementation(libs.androidx.test.core)
         }
     }
-}
-
-dependencies {
-    add("kspAndroid", libs.androidx.hilt.compiler)
-    add("kspAndroid", libs.hilt.compiler)
 }

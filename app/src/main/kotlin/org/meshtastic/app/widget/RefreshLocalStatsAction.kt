@@ -20,30 +20,20 @@ import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.action.ActionParameters
 import androidx.glance.appwidget.action.ActionCallback
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
 
-class RefreshLocalStatsAction : ActionCallback {
+class RefreshLocalStatsAction :
+    ActionCallback,
+    KoinComponent {
 
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface RefreshLocalStatsEntryPoint {
-        fun commandSender(): CommandSender
-
-        fun nodeManager(): NodeManager
-    }
+    private val commandSender: CommandSender by inject()
+    private val nodeManager: NodeManager by inject()
 
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
-        val entryPoint =
-            EntryPointAccessors.fromApplication(context.applicationContext, RefreshLocalStatsEntryPoint::class.java)
-        val commandSender = entryPoint.commandSender()
-        val nodeManager = entryPoint.nodeManager()
-
         val myNodeNum = nodeManager.myNodeNum ?: return
 
         commandSender.requestTelemetry(commandSender.generatePacketId(), myNodeNum, TelemetryType.LOCAL_STATS.ordinal)

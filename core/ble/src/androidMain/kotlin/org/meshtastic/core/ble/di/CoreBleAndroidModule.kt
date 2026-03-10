@@ -1,0 +1,49 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.core.ble.di
+
+import android.app.Application
+import android.location.LocationManager
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import no.nordicsemi.kotlin.ble.client.android.CentralManager
+import no.nordicsemi.kotlin.ble.client.android.native
+import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import no.nordicsemi.kotlin.ble.environment.android.NativeAndroidEnvironment
+import org.koin.core.annotation.ComponentScan
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
+
+@Module
+@ComponentScan("org.meshtastic.core.ble")
+class CoreBleAndroidModule {
+    @Single
+    fun provideAndroidEnvironment(app: Application): AndroidEnvironment =
+        NativeAndroidEnvironment.getInstance(app, isNeverForLocationFlagSet = true)
+
+    @Single
+    fun provideCentralManager(environment: AndroidEnvironment): CentralManager = CentralManager.native(
+        environment as NativeAndroidEnvironment,
+        CoroutineScope(SupervisorJob() + Dispatchers.Default),
+    )
+
+    @Single
+    fun provideLocationManager(app: Application): LocationManager =
+        ContextCompat.getSystemService(app, LocationManager::class.java)!!
+}

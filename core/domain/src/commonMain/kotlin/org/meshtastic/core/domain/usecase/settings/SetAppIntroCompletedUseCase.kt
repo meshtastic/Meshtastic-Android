@@ -16,15 +16,12 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.UiPreferencesDataSource
-import javax.inject.Inject
 
 /** Use case for setting whether the application intro has been completed. */
-open class SetAppIntroCompletedUseCase
-@Inject
-constructor(
-    private val uiPreferencesDataSource: UiPreferencesDataSource,
-) {
+@Single
+open class SetAppIntroCompletedUseCase constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
     operator fun invoke(completed: Boolean) {
         uiPreferencesDataSource.setAppIntroCompleted(completed)
     }

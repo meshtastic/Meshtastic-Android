@@ -20,11 +20,11 @@ import android.app.Application
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.NetworkDeviceHardware
-import javax.inject.Inject
 
-class DeviceHardwareJsonDataSourceImpl @Inject constructor(private val application: Application) :
-    DeviceHardwareJsonDataSource {
+@Single
+class DeviceHardwareJsonDataSourceImpl(private val application: Application) : DeviceHardwareJsonDataSource {
 
     // Use a tolerant JSON parser so that additional fields in the bundled asset
     // (e.g., "key") do not break deserialization on older app versions.

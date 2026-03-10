@@ -16,10 +16,12 @@
  */
 package org.meshtastic.app.repository.radio
 
-import dagger.assisted.AssistedFactory
+import org.koin.core.annotation.Single
+import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Factory for creating `TCPInterface` instances. */
-@AssistedFactory
-interface TCPInterfaceFactory {
-    fun create(rest: String): TCPInterface
+@Single
+class TCPInterfaceFactory(private val dispatchers: CoroutineDispatchers) {
+    fun create(rest: String, service: RadioInterfaceService): TCPInterface = TCPInterface(service, dispatchers, rest)
 }

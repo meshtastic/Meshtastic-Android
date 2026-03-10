@@ -19,12 +19,13 @@ package org.meshtastic.core.domain.usecase.settings
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import okio.BufferedSink
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.proto.Config
-import javax.inject.Inject
 
 /** Use case for exporting security configuration to a JSON format. */
-open class ExportSecurityConfigUseCase @Inject constructor() {
+@Single
+open class ExportSecurityConfigUseCase {
     /**
      * Exports the provided [Config.SecurityConfig] as a JSON string to the given [BufferedSink].
      *

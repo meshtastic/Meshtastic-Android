@@ -26,6 +26,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import okio.ByteString
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceMetrics
@@ -35,6 +36,7 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.model.Position
+import org.meshtastic.core.model.util.NodeIdLookup
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
@@ -45,17 +47,13 @@ import org.meshtastic.proto.Paxcount
 import org.meshtastic.proto.StatusMessage
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.User
-import javax.inject.Inject
-import javax.inject.Singleton
 import org.meshtastic.proto.NodeInfo as ProtoNodeInfo
 import org.meshtastic.proto.Position as ProtoPosition
 
 /** Implementation of [NodeManager] that maintains an in-memory database of the mesh. */
 @Suppress("LongParameterList", "TooManyFunctions", "CyclomaticComplexMethod")
-@Singleton
-class NodeManagerImpl
-@Inject
-constructor(
+@Single(binds = [NodeManager::class, NodeIdLookup::class])
+class NodeManagerImpl(
     private val nodeRepository: NodeRepository,
     private val serviceBroadcasts: ServiceBroadcasts,
     private val serviceNotifications: MeshServiceNotifications,

@@ -18,13 +18,11 @@ package org.meshtastic.core.ble
 
 import kotlinx.coroutines.CoroutineScope
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import javax.inject.Inject
-import javax.inject.Singleton
+import org.koin.core.annotation.Single
 
 /** An Android implementation of [BleConnectionFactory]. */
-@Singleton
-class AndroidBleConnectionFactory @Inject constructor(private val centralManager: CentralManager) :
-    BleConnectionFactory {
+@Single
+class AndroidBleConnectionFactory(private val centralManager: CentralManager) : BleConnectionFactory {
     override fun create(scope: CoroutineScope, tag: String): BleConnection =
         AndroidBleConnection(centralManager, scope, tag)
 }

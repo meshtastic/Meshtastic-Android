@@ -20,13 +20,12 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import org.koin.core.annotation.Single
 import org.meshtastic.app.messaging.domain.worker.SendMessageWorker
 import org.meshtastic.core.repository.MeshWorkerManager
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class AndroidMeshWorkerManager @Inject constructor(private val workManager: WorkManager) : MeshWorkerManager {
+@Single
+class AndroidMeshWorkerManager(private val workManager: WorkManager) : MeshWorkerManager {
     override fun enqueueSendMessage(packetId: Int) {
         val workRequest =
             OneTimeWorkRequestBuilder<SendMessageWorker>()

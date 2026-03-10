@@ -18,7 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
-    alias(libs.plugins.devtools.ksp)
+    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -44,13 +44,12 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
-            implementation(libs.javax.inject)
         }
 
         androidMain.dependencies {
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
-            implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
             implementation(libs.accompanist.permissions)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.compose.material3)
@@ -64,8 +63,6 @@ kotlin {
             implementation(libs.androidx.navigation.compose)
             implementation(libs.androidx.paging.compose)
             implementation(libs.androidx.work.runtime.ktx)
-            implementation(libs.androidx.hilt.work)
-            implementation(libs.hilt.android)
         }
 
         commonTest.dependencies {
@@ -81,9 +78,4 @@ kotlin {
             implementation(libs.robolectric)
         }
     }
-}
-
-dependencies {
-    add("kspAndroid", libs.androidx.hilt.compiler)
-    add("kspAndroid", libs.hilt.compiler)
 }

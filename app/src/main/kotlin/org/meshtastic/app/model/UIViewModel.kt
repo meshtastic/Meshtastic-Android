@@ -20,7 +20,6 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -35,6 +34,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
@@ -62,13 +62,10 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.SharedContact
-import javax.inject.Inject
 
-@HiltViewModel
+@KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
-class UIViewModel
-@Inject
-constructor(
+class UIViewModel(
     private val nodeDB: NodeRepository,
     private val serviceRepository: AndroidServiceRepository,
     private val radioController: RadioController,

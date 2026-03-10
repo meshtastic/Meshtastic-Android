@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.data.manager
 
-import dagger.Lazy
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
@@ -58,19 +57,19 @@ class MeshDataHandlerTest {
     private val packetHandler: PacketHandler = mockk(relaxed = true)
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val packetRepository: PacketRepository = mockk(relaxed = true)
-    private val packetRepositoryLazy: Lazy<PacketRepository> = mockk { every { get() } returns packetRepository }
+    private val packetRepositoryLazy: Lazy<PacketRepository> = lazy { packetRepository }
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val dataMapper: MeshDataMapper = mockk(relaxed = true)
     private val configHandler: MeshConfigHandler = mockk(relaxed = true)
-    private val configHandlerLazy: Lazy<MeshConfigHandler> = mockk { every { get() } returns configHandler }
+    private val configHandlerLazy: Lazy<MeshConfigHandler> = lazy { configHandler }
     private val configFlowManager: MeshConfigFlowManager = mockk(relaxed = true)
-    private val configFlowManagerLazy: Lazy<MeshConfigFlowManager> = mockk { every { get() } returns configFlowManager }
+    private val configFlowManagerLazy: Lazy<MeshConfigFlowManager> = lazy { configFlowManager }
     private val commandSender: CommandSender = mockk(relaxed = true)
     private val historyManager: HistoryManager = mockk(relaxed = true)
     private val connectionManager: MeshConnectionManager = mockk(relaxed = true)
-    private val connectionManagerLazy: Lazy<MeshConnectionManager> = mockk { every { get() } returns connectionManager }
+    private val connectionManagerLazy: Lazy<MeshConnectionManager> = lazy { connectionManager }
     private val tracerouteHandler: TracerouteHandler = mockk(relaxed = true)
     private val neighborInfoHandler: NeighborInfoHandler = mockk(relaxed = true)
     private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)

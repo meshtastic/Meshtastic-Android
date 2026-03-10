@@ -16,16 +16,17 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
-import javax.inject.Inject
 
 /** Use case for interacting with radio configuration components. */
 @Suppress("TooManyFunctions")
-open class RadioConfigUseCase @Inject constructor(private val radioController: RadioController) {
+@Single
+open class RadioConfigUseCase constructor(private val radioController: RadioController) {
     /**
      * Updates the owner information on the radio.
      *

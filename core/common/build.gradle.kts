@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.kotlin.parcelize)
+    id("meshtastic.koin")
 }
 
 kotlin {

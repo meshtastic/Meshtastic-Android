@@ -29,20 +29,17 @@ import no.nordicsemi.kotlin.ble.client.RemoteServices
 import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.android.Peripheral
 import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.di.ProcessLifecycle
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Android implementation of [BluetoothRepository]. */
-@Singleton
-class AndroidBluetoothRepository
-@Inject
-constructor(
+@Single
+class AndroidBluetoothRepository(
     private val dispatchers: CoroutineDispatchers,
-    @ProcessLifecycle private val processLifecycle: Lifecycle,
+    @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
     private val centralManager: CentralManager,
     private val androidEnvironment: AndroidEnvironment,
 ) : BluetoothRepository {

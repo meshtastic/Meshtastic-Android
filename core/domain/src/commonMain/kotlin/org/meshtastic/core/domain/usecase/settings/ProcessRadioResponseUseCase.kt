@@ -17,6 +17,7 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import co.touchlab.kermit.Logger
+import org.koin.core.annotation.Single
 import org.meshtastic.core.model.getStringResFrom
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.proto.AdminMessage
@@ -28,7 +29,6 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Routing
 import org.meshtastic.proto.User
-import javax.inject.Inject
 
 /** Sealed class representing the result of processing a radio response packet. */
 sealed class RadioResponseResult {
@@ -54,7 +54,8 @@ sealed class RadioResponseResult {
 }
 
 /** Use case for processing incoming [MeshPacket]s that are responses to admin requests. */
-open class ProcessRadioResponseUseCase @Inject constructor() {
+@Single
+open class ProcessRadioResponseUseCase {
     /**
      * Decodes and processes the provided [packet].
      *

@@ -21,14 +21,16 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import okio.IOException
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.ModuleConfig
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Class that handles saving and retrieving [LocalModuleConfig] data. */
-@Singleton
-class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: DataStore<LocalModuleConfig>) {
+@Single
+class ModuleConfigDataSource(
+    @Named("CoreModuleConfigDataStore") private val moduleConfigStore: DataStore<LocalModuleConfig>,
+) {
     val moduleConfigFlow: Flow<LocalModuleConfig> =
         moduleConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

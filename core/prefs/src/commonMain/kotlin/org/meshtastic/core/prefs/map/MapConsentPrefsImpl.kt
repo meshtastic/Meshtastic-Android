@@ -27,18 +27,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.prefs.di.MapConsentDataStore
 import org.meshtastic.core.repository.MapConsentPrefs
 import java.util.concurrent.ConcurrentHashMap
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class MapConsentPrefsImpl
-@Inject
-constructor(
-    @MapConsentDataStore private val dataStore: DataStore<Preferences>,
+@Single
+class MapConsentPrefsImpl(
+    @Named("MapConsentDataStore") private val dataStore: DataStore<Preferences>,
     dispatchers: CoroutineDispatchers,
 ) : MapConsentPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
