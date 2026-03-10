@@ -31,6 +31,7 @@ graph TB
   :app -.-> :core:database
   :app -.-> :core:datastore
   :app -.-> :core:di
+  :app -.-> :core:domain
   :app -.-> :core:model
   :app -.-> :core:navigation
   :app -.-> :core:network

@@ -26,7 +26,7 @@ navController.navigate(MessagingRoutes.Chat(nodeId = 12345))
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:navigation[navigation]:::android-library
+  :core:navigation[navigation]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
