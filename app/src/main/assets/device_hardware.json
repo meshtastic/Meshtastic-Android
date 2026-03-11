@@ -1273,7 +1273,7 @@
     "hwModelSlug": "WISMESH_TAP_V2",
     "platformioTarget": "rak_wismesh_tap_v2",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "RAK WisMesh Tap V2",
     "tags": [
