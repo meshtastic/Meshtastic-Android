@@ -49,15 +49,7 @@ MeshtasticResourceDialog(
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:ui[ui]:::android-library
-  :core:ui -.-> :core:common
-  :core:ui -.-> :core:data
-  :core:ui -.-> :core:database
-  :core:ui -.-> :core:model
-  :core:ui -.-> :core:prefs
-  :core:ui -.-> :core:proto
-  :core:ui -.-> :core:service
-  :core:ui -.-> :core:resources
+  :core:ui[ui]:::kmp-library
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
