@@ -16,9 +16,7 @@
  */
 package org.meshtastic.feature.map
 
-import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
@@ -49,7 +47,7 @@ class BaseMapViewModelTest {
         radioController = FakeRadioController()
 
         mapPrefs = mockk(relaxed = true)
-        packetRepository = mockk(relaxed = true) { every { packetsFlow(any()) } returns emptyFlow() }
+        packetRepository = mockk(relaxed = true)
 
         viewModel =
             BaseMapViewModel(

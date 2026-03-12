@@ -19,7 +19,6 @@ package org.meshtastic.feature.firmware
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -45,6 +44,9 @@ class FirmwareUpdateViewModelTest {
     private lateinit var firmwareReleaseRepository: FirmwareReleaseRepository
     private lateinit var deviceHardwareRepository: DeviceHardwareRepository
     private lateinit var bootloaderWarningDataSource: BootloaderWarningDataSource
+    private lateinit var firmwareUpdateManager: FirmwareUpdateManager
+    private lateinit var usbManager: FirmwareUsbManager
+    private lateinit var fileHandler: FirmwareFileHandler
 
     @BeforeTest
     fun setUp() {
@@ -56,9 +58,12 @@ class FirmwareUpdateViewModelTest {
             }
 
         radioPrefs = mockk(relaxed = true)
-        firmwareReleaseRepository = mockk(relaxed = true) { every { firmwareReleasesFlow } returns emptyFlow() }
+        firmwareReleaseRepository = mockk(relaxed = true)
         deviceHardwareRepository = mockk(relaxed = true)
         bootloaderWarningDataSource = mockk(relaxed = true)
+        firmwareUpdateManager = mockk(relaxed = true)
+        usbManager = mockk(relaxed = true)
+        fileHandler = mockk(relaxed = true)
 
         viewModel =
             FirmwareUpdateViewModel(
@@ -68,6 +73,9 @@ class FirmwareUpdateViewModelTest {
                 firmwareReleaseRepository = firmwareReleaseRepository,
                 deviceHardwareRepository = deviceHardwareRepository,
                 bootloaderWarningDataSource = bootloaderWarningDataSource,
+                firmwareUpdateManager = firmwareUpdateManager,
+                usbManager = usbManager,
+                fileHandler = fileHandler,
             )
     }
 
@@ -80,14 +88,14 @@ class FirmwareUpdateViewModelTest {
     @Test
     fun testMyNodeInfoAccessible() = runTest {
         setUp()
-        val myNodeInfo = viewModel.myNodeInfo.value
+        val myNodeInfo = nodeRepository.myNodeInfo.value
         assertTrue(myNodeInfo == null, "myNodeInfo starts as null before connection")
     }
 
     @Test
     fun testUpdateStateInitialValue() = runTest {
         setUp()
-        val updateState = viewModel.updateState.value
+        val updateState = viewModel.state.value
         assertTrue(true, "Update state is accessible")
     }
 

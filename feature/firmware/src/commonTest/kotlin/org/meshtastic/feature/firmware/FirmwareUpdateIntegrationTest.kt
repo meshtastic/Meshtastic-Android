@@ -19,7 +19,6 @@ package org.meshtastic.feature.firmware
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.datastore.BootloaderWarningDataSource
@@ -46,6 +45,9 @@ class FirmwareUpdateIntegrationTest {
     private lateinit var firmwareReleaseRepository: FirmwareReleaseRepository
     private lateinit var deviceHardwareRepository: DeviceHardwareRepository
     private lateinit var bootloaderWarningDataSource: BootloaderWarningDataSource
+    private lateinit var firmwareUpdateManager: FirmwareUpdateManager
+    private lateinit var usbManager: FirmwareUsbManager
+    private lateinit var fileHandler: FirmwareFileHandler
 
     @BeforeTest
     fun setUp() {
@@ -57,9 +59,12 @@ class FirmwareUpdateIntegrationTest {
             }
 
         radioPrefs = mockk(relaxed = true)
-        firmwareReleaseRepository = mockk(relaxed = true) { every { firmwareReleasesFlow } returns emptyFlow() }
+        firmwareReleaseRepository = mockk(relaxed = true)
         deviceHardwareRepository = mockk(relaxed = true)
         bootloaderWarningDataSource = mockk(relaxed = true)
+        firmwareUpdateManager = mockk(relaxed = true)
+        usbManager = mockk(relaxed = true)
+        fileHandler = mockk(relaxed = true)
 
         viewModel =
             FirmwareUpdateViewModel(
@@ -69,6 +74,9 @@ class FirmwareUpdateIntegrationTest {
                 firmwareReleaseRepository = firmwareReleaseRepository,
                 deviceHardwareRepository = deviceHardwareRepository,
                 bootloaderWarningDataSource = bootloaderWarningDataSource,
+                firmwareUpdateManager = firmwareUpdateManager,
+                usbManager = usbManager,
+                fileHandler = fileHandler,
             )
     }
 
@@ -120,7 +128,7 @@ class FirmwareUpdateIntegrationTest {
 
     @Test
     fun testUpdateStateAccess() = runTest {
-        val updateState = viewModel.updateState.value
+        val updateState = viewModel.state.value
 
         // Should be accessible
         assertTrue(true, "Update state is accessible")
@@ -128,7 +136,7 @@ class FirmwareUpdateIntegrationTest {
 
     @Test
     fun testMyNodeInfoAccess() = runTest {
-        val myNodeInfo = viewModel.myNodeInfo.value
+        val myNodeInfo = nodeRepository.myNodeInfo.value
 
         // Should be accessible (may be null)
         assertTrue(true, "myNodeInfo accessible")
@@ -148,7 +156,7 @@ class FirmwareUpdateIntegrationTest {
         radioController.setConnectionState(org.meshtastic.core.model.ConnectionState.Connected)
 
         // Update state should be accessible throughout
-        val initialState = viewModel.updateState.value
+        val initialState = viewModel.state.value
         assertTrue(true, "Update state maintained throughout flow")
     }
 
