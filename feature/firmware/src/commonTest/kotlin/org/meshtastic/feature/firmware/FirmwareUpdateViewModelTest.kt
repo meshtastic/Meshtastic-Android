@@ -59,36 +59,32 @@ class FirmwareUpdateViewModelTest {
     fun setUp() {
         radioController = FakeRadioController()
 
-        val fakeNodeInfo = mockk<Node>(relaxed = true) {
-            every { user } returns User(hw_model = HardwareModel.TBEAM)
-        }
-        val fakeMyNodeInfo = mockk<MyNodeInfo>(relaxed = true) {
-            every { myNodeNum } returns 1
-            every { pioEnv } returns "tbeam"
-            every { firmwareVersion } returns "2.5.0"
-        }
+        val fakeNodeInfo = mockk<Node>(relaxed = true) { every { user } returns User(hw_model = HardwareModel.TBEAM) }
+        val fakeMyNodeInfo =
+            mockk<MyNodeInfo>(relaxed = true) {
+                every { myNodeNum } returns 1
+                every { pioEnv } returns "tbeam"
+                every { firmwareVersion } returns "2.5.0"
+            }
         nodeRepository =
             mockk(relaxed = true) {
                 every { myNodeInfo } returns MutableStateFlow(fakeMyNodeInfo)
                 every { ourNodeInfo } returns MutableStateFlow(fakeNodeInfo)
             }
 
-        radioPrefs = mockk(relaxed = true) {
-            every { devAddr } returns MutableStateFlow("!1234abcd")
-        }
-        firmwareReleaseRepository = mockk(relaxed = true) {
-            every { stableRelease } returns emptyFlow()
-            every { alphaRelease } returns emptyFlow()
-        }
-        deviceHardwareRepository = mockk(relaxed = true) {
-            coEvery { getDeviceHardwareByModel(any(), any()) } returns Result.success(mockk<DeviceHardware>(relaxed = true))
-        }
-        bootloaderWarningDataSource = mockk(relaxed = true) {
-            coEvery { isDismissed(any()) } returns true
-        }
-        firmwareUpdateManager = mockk(relaxed = true) {
-            every { dfuProgressFlow() } returns emptyFlow()
-        }
+        radioPrefs = mockk(relaxed = true) { every { devAddr } returns MutableStateFlow("!1234abcd") }
+        firmwareReleaseRepository =
+            mockk(relaxed = true) {
+                every { stableRelease } returns emptyFlow()
+                every { alphaRelease } returns emptyFlow()
+            }
+        deviceHardwareRepository =
+            mockk(relaxed = true) {
+                coEvery { getDeviceHardwareByModel(any(), any()) } returns
+                    Result.success(mockk<DeviceHardware>(relaxed = true))
+            }
+        bootloaderWarningDataSource = mockk(relaxed = true) { coEvery { isDismissed(any()) } returns true }
+        firmwareUpdateManager = mockk(relaxed = true) { every { dfuProgressFlow() } returns emptyFlow() }
         usbManager = mockk(relaxed = true)
         fileHandler = mockk(relaxed = true)
 

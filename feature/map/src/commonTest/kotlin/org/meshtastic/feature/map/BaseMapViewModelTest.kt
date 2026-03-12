@@ -49,16 +49,15 @@ class BaseMapViewModelTest {
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
 
-        mapPrefs = mockk(relaxed = true) {
-            every { showOnlyFavorites } returns MutableStateFlow(false)
-            every { showWaypointsOnMap } returns MutableStateFlow(false)
-            every { showPrecisionCircleOnMap } returns MutableStateFlow(false)
-            every { lastHeardFilter } returns MutableStateFlow(0L)
-            every { lastHeardTrackFilter } returns MutableStateFlow(0L)
-        }
-        packetRepository = mockk(relaxed = true) {
-            every { getWaypoints() } returns emptyFlow()
-        }
+        mapPrefs =
+            mockk(relaxed = true) {
+                every { showOnlyFavorites } returns MutableStateFlow(false)
+                every { showWaypointsOnMap } returns MutableStateFlow(false)
+                every { showPrecisionCircleOnMap } returns MutableStateFlow(false)
+                every { lastHeardFilter } returns MutableStateFlow(0L)
+                every { lastHeardTrackFilter } returns MutableStateFlow(0L)
+            }
+        packetRepository = mockk(relaxed = true) { every { getWaypoints() } returns emptyFlow() }
 
         viewModel =
             BaseMapViewModel(
