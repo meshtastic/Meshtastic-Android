@@ -58,8 +58,7 @@ fun <T : Enum<T>> DropDownPreference(
 ) {
     val enumConstants =
         remember(selectedItem) {
-            selectedItem.declaringJavaClass.enumConstants?.filter { it.name != "UNRECOGNIZED" && !it.isDeprecated() }
-                ?: emptyList()
+            enumEntriesOf(selectedItem).filter { it.name != "UNRECOGNIZED" && !it.isDeprecatedEnumEntry() }
         }
 
     val items =
@@ -201,12 +200,9 @@ fun <T> DropDownPreference(
     }
 }
 
-private fun Enum<*>.isDeprecated(): Boolean = try {
-    val field = this::class.java.getField(this.name)
-    field.isAnnotationPresent(Deprecated::class.java) || field.isAnnotationPresent(java.lang.Deprecated::class.java)
-} catch (@Suppress("SwallowedException", "TooGenericExceptionCaught") e: Exception) {
-    false
-}
+internal expect fun <T : Enum<T>> enumEntriesOf(selectedItem: T): List<T>
+
+internal expect fun Enum<*>.isDeprecatedEnumEntry(): Boolean
 
 @Preview(showBackground = true)
 @Composable

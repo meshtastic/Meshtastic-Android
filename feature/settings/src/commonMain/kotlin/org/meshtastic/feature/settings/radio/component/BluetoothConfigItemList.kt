@@ -74,14 +74,14 @@ fun BluetoothConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         .filter { it.name != "UNRECOGNIZED" }
                         .map { it to it.name },
                     selectedItem =
-                    formState.value.mode?.takeUnless { it.name == "UNRECOGNIZED" }
+                    formState.value.mode.takeUnless { it.name == "UNRECOGNIZED" }
                         ?: Config.BluetoothConfig.PairingMode.RANDOM_PIN,
                     onItemSelected = { formState.value = formState.value.copy(mode = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.fixed_pin),
-                    value = formState.value.fixed_pin ?: 0,
+                    value = formState.value.fixed_pin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {

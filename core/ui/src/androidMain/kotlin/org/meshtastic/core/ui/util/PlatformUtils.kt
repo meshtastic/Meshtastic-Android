@@ -53,7 +53,7 @@ actual fun rememberShowToastResource(): suspend (StringResource) -> Unit {
 }
 
 @Composable
-actual fun rememberOpenMap(): (Double, Double, String) -> Unit {
+actual fun rememberOpenMap(): (latitude: Double, longitude: Double, label: String) -> Unit {
     val context = LocalContext.current
     return remember(context) {
         { lat, lon, label ->
@@ -73,7 +73,7 @@ actual fun rememberOpenMap(): (Double, Double, String) -> Unit {
 }
 
 @Composable
-actual fun rememberOpenUrl(): (String) -> Unit {
+actual fun rememberOpenUrl(): (url: String) -> Unit {
     val context = LocalContext.current
     return remember(context) {
         { url ->

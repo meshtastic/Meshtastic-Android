@@ -16,9 +16,13 @@
  */
 package org.meshtastic.core.common.util
 
-/** Platform-agnostic Base64 utility. */
-expect object Base64Factory {
-    fun encode(data: ByteArray): String
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 
-    fun decode(data: String): ByteArray
+/** Pure Kotlin Base64 utility — no expect/actual needed. */
+@OptIn(ExperimentalEncodingApi::class)
+object Base64Factory {
+    fun encode(data: ByteArray): String = Base64.Default.encode(data)
+
+    fun decode(data: String): ByteArray = Base64.Default.decode(data)
 }

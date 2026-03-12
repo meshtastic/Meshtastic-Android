@@ -19,8 +19,8 @@ package org.meshtastic.app.repository.radio
 import android.hardware.usb.UsbManager
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import org.koin.core.annotation.Single
-import org.meshtastic.app.repository.usb.UsbRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.feature.connections.repository.UsbRepository
 
 /** Serial/USB interface backend implementation. */
 @Single

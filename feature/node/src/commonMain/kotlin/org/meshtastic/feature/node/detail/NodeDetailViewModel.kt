@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
@@ -58,7 +59,8 @@ data class NodeDetailUiState(
  * ViewModel for the Node Details screen, coordinating data from the node database, mesh logs, and radio configuration.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-open class NodeDetailViewModel(
+@KoinViewModel
+class NodeDetailViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeManagementActions: NodeManagementActions,
     private val nodeRequestActions: NodeRequestActions,
@@ -98,24 +100,20 @@ open class NodeDetailViewModel(
             is NodeMenuAction.Mute -> nodeManagementActions.requestMuteNode(viewModelScope, action.node)
             is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
             is NodeMenuAction.RequestUserInfo ->
-                nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name ?: "")
+                nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name)
             is NodeMenuAction.RequestNeighborInfo ->
-                nodeRequestActions.requestNeighborInfo(
-                    viewModelScope,
-                    action.node.num,
-                    action.node.user.long_name ?: "",
-                )
+                nodeRequestActions.requestNeighborInfo(viewModelScope, action.node.num, action.node.user.long_name)
             is NodeMenuAction.RequestPosition ->
-                nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.long_name ?: "")
+                nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.long_name)
             is NodeMenuAction.RequestTelemetry ->
                 nodeRequestActions.requestTelemetry(
                     viewModelScope,
                     action.node.num,
-                    action.node.user.long_name ?: "",
+                    action.node.user.long_name,
                     action.type,
                 )
             is NodeMenuAction.TraceRoute ->
-                nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.long_name ?: "")
+                nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.long_name)
             else -> {}
         }
     }

@@ -26,6 +26,6 @@
     <ID>TooGenericExceptionCaught:AndroidRadioConfigViewModel.kt$AndroidRadioConfigViewModel$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
     <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
-    <ID>TooManyFunctions:NordicBleInterface.kt$NordicBleInterface : IRadioInterface</ID>
+    <ID>TooManyFunctions:NordicBleInterface.kt$NordicBleInterface : RadioTransport</ID>
   </CurrentIssues>
 </SmellBaseline>

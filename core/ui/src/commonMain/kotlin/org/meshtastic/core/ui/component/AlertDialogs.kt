@@ -32,11 +32,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -45,6 +43,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.cancel
 import org.meshtastic.core.resources.okay
+import org.meshtastic.core.ui.util.annotatedStringFromHtml
 
 /**
  * A comprehensive and flexible dialog component for the Meshtastic application.
@@ -93,7 +92,7 @@ fun MeshtasticDialog(
 
     val htmlAnnotated =
         html?.let {
-            AnnotatedString.fromHtml(
+            annotatedStringFromHtml(
                 it,
                 linkStyles =
                 TextLinkStyles(

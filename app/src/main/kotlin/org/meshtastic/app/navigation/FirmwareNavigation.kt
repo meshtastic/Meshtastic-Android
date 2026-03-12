@@ -20,13 +20,13 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.firmware.AndroidFirmwareUpdateViewModel
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.feature.firmware.FirmwareUpdateScreen
+import org.meshtastic.feature.firmware.FirmwareUpdateViewModel
 
 fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
     entry<FirmwareRoutes.FirmwareUpdate> {
-        val viewModel = koinViewModel<AndroidFirmwareUpdateViewModel>()
+        val viewModel = koinViewModel<FirmwareUpdateViewModel>()
         FirmwareUpdateScreen(onNavigateUp = { backStack.removeLastOrNull() }, viewModel = viewModel)
     }
 }

@@ -25,9 +25,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +49,6 @@ import org.meshtastic.feature.settings.radio.ResponseState
 
 private const val AUTO_DISMISS_DELAY_MS = 1500L
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun <T> PacketResponseStateDialog(
     state: ResponseState<T>,
@@ -105,18 +103,18 @@ fun <T> PacketResponseStateDialog(
     )
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
+@Suppress("MagicNumber")
 private fun LoadingContent(state: ResponseState.Loading, onComplete: () -> Unit) {
-    val progress by
-        animateFloatAsState(targetValue = state.completed.toFloat() / state.total.toFloat(), label = "progress")
+    val clampedProgress = (state.completed.toFloat() / state.total.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
+    val progress by animateFloatAsState(targetValue = clampedProgress, label = "progress")
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
-            text = "%.0f%%".format(progress * 100),
+            text = "%.0f%%".format(progress * 100f),
             style = MaterialTheme.typography.displaySmall,
             color = MaterialTheme.colorScheme.secondary,
         )
-        LinearWavyProgressIndicator(
+        LinearProgressIndicator(
             progress = { progress },
             modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
             trackColor = MaterialTheme.colorScheme.surfaceVariant,

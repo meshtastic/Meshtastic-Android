@@ -27,7 +27,6 @@ import com.hoho.android.usbserial.driver.UsbSerialProber
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.app.repository.usb.ProbeTableProvider
 import org.meshtastic.core.ble.di.CoreBleAndroidModule
 import org.meshtastic.core.ble.di.CoreBleModule
 import org.meshtastic.core.common.BuildConfigProvider
@@ -45,6 +44,8 @@ import org.meshtastic.core.prefs.di.CorePrefsModule
 import org.meshtastic.core.service.di.CoreServiceAndroidModule
 import org.meshtastic.core.service.di.CoreServiceModule
 import org.meshtastic.core.ui.di.CoreUiModule
+import org.meshtastic.feature.connections.di.FeatureConnectionsModule
+import org.meshtastic.feature.connections.repository.ProbeTableProvider
 import org.meshtastic.feature.firmware.di.FeatureFirmwareModule
 import org.meshtastic.feature.intro.di.FeatureIntroModule
 import org.meshtastic.feature.map.di.FeatureMapModule
@@ -76,6 +77,7 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
         CoreUiModule::class,
         FeatureNodeModule::class,
         FeatureMessagingModule::class,
+        FeatureConnectionsModule::class,
         FeatureMapModule::class,
         FeatureSettingsModule::class,
         FeatureFirmwareModule::class,

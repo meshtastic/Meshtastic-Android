@@ -86,7 +86,7 @@ data class Node(
         get() = user.hw_model == HardwareModel.UNSET
 
     val hasPKC
-        get() = (publicKey ?: user.public_key)?.size?.let { it > 0 } == true
+        get() = (publicKey ?: user.public_key).size > 0
 
     val mismatchKey
         get() = (publicKey ?: user.public_key) == ERROR_BYTE_STRING
@@ -184,8 +184,7 @@ data class Node(
         )
     }
 
-    private fun Paxcount.getDisplayString() =
-        "PAX: ${(ble ?: 0) + (wifi ?: 0)} (B:${ble ?: 0}/W:${wifi ?: 0})".takeIf { (ble ?: 0) != 0 || (wifi ?: 0) != 0 }
+    private fun Paxcount.getDisplayString() = "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 || wifi != 0 }
 
     fun getTelemetryStrings(isFahrenheit: Boolean = false): List<String> =
         environmentMetrics.getDisplayStrings(isFahrenheit)

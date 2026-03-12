@@ -126,9 +126,8 @@ inline fun <reified T> EditListPreference(
                         enabled = enabled,
                         keyboardActions = keyboardActions,
                         onValueChanged = { newValue ->
-                            val it = newValue as Int
-                            if (it in 0..255) {
-                                listState[index] = value.copy(gpio_pin = it) as T
+                            if (newValue in 0..255) {
+                                listState[index] = value.copy(gpio_pin = newValue) as T
                                 onValuesChanged(listState)
                             }
                         },
@@ -143,8 +142,7 @@ inline fun <reified T> EditListPreference(
                         KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                         keyboardActions = keyboardActions,
                         onValueChanged = { newValue ->
-                            val it = newValue as String
-                            listState[index] = value.copy(name = it) as T
+                            listState[index] = value.copy(name = newValue) as T
                             onValuesChanged(listState)
                         },
                         trailingIcon = trailingIcon,

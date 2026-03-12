@@ -50,6 +50,7 @@ jobs:
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
       DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
       MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      GITHUB_TOKEN: ${{ github.token }}
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
       GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
@@ -100,11 +101,15 @@ jobs:
 
       - name: Code Style & Static Analysis
         if: steps.tasks.outputs.is_first_api == 'true'
-        run: ./gradlew spotlessCheck detekt -Pci=true
+        run: ./gradlew spotlessCheck detekt -Pci=true --scan
 
       - name: Shared Unit Tests
         if: steps.tasks.outputs.is_first_api == 'true' && inputs.run_unit_tests == true
-        run: ./gradlew testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug -Pci=true --continue
+        run: ./gradlew testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug -Pci=true --continue --scan
+
+      - name: KMP JVM Smoke Compile
+        if: steps.tasks.outputs.is_first_api == 'true'
+        run: ./gradlew :core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm :desktop:test -Pci=true --continue --scan
 
       - name: Enable KVM group perms
         if: inputs.run_instrumented_tests == true

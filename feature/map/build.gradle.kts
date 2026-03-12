@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.map"
@@ -68,6 +70,8 @@ kotlin {
             implementation(libs.material)
             implementation(libs.kermit)
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

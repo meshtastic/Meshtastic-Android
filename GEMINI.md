@@ -14,10 +14,12 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - `fdroid`: Open source only, no tracking/analytics.
   - `google`: Includes Google Play Services (Maps) and DataDog analytics.
 - **Core Architecture:** Modern Android Development (MAD) with KMP core.
-  - **KMP Modules:** `core:model`, `core:proto`, `core:common`, `core:resources`, `core:database`, `core:datastore`, `core:repository`, `core:domain`, `core:prefs`, `core:network`, `core:di`, and `core:data`.
+  - **KMP Modules:** `core:model`, `core:proto`, `core:common`, `core:resources`, `core:database`, `core:datastore`, `core:repository`, `core:domain`, `core:prefs`, `core:network`, `core:di`, `core:data`, `core:ble`, `core:nfc`, `core:service`, `core:ui`, `core:navigation`, `core:testing`. All declare `jvm()` target and compile clean on JVM.
+  - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` (`AppKoinModule` + `startKoin`), while shared modules can expose annotated definitions that are included by the app root module.
-  - **Navigation:** AndroidX Navigation 3 with shared backstack state (`List<NavKey>`).
+  - **Navigation:** AndroidX Navigation 3 (JetBrains multiplatform fork: `org.jetbrains.androidx.navigation3`) with shared backstack state (`List<NavKey>`).
+  - **Lifecycle (multiplatform):** JetBrains forks `org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
 
 ## 2. Environment Setup (Mandatory First Steps)
@@ -75,16 +77,29 @@ Always run commands in the following order to ensure reliability. Do not attempt
   - **Rule:** You MUST use the Compose Multiplatform Resource library.
   - **Location:** `core/resources/src/commonMain/composeResources/values/strings.xml`.
   - **Usage:** `stringResource(Res.string.your_key)`
+- **Platform purity:** Never import `java.*` or `android.*` in `commonMain`. Use KMP alternatives:
+  - `java.util.Locale` → Kotlin `uppercase()` / `lowercase()` (locale-independent for ASCII) or `expect`/`actual`.
+  - `java.util.concurrent.ConcurrentHashMap` → `atomicfu` or `Mutex`-guarded `mutableMapOf()`.
+  - `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
+  - `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
 - **Bluetooth/BLE:** Do not use legacy Android Bluetooth callbacks. All BLE communication MUST route through `:core:ble`, utilizing Nordic Semiconductor's Android Common Libraries and Kotlin Coroutines/Flows.
 - **Dependencies:** Never assume a library is available. Check `gradle/libs.versions.toml` first. If adding a new dependency, it MUST be added to the version catalog, not directly to a `build.gradle.kts` file.
 - **Namespacing:** Prefer the `org.meshtastic` namespace for all new code. The legacy `com.geeksville.mesh` ApplicationId is maintained for compatibility.
+- **Testing:** Write ViewModel and business logic tests in `commonTest` (not `test/` Robolectric) so every target runs them. Use `core:testing` shared fakes when available.
+- **Documentation Sync:** Update documentation continuously as part of the same change. If you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs (`AGENTS.md`, `.github/copilot-instructions.md`, `GEMINI.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md`) in the same slice.
 
 ## 5. Module Map
 When locating code to modify, use this map:
 - **`app/`**: Main application wiring and Koin DI modules/wrappers (`@KoinViewModel`, `@Module`, `@KoinWorker`). Package: `org.meshtastic.app`.
 - **`:core:data`**: Core business logic and managers. Package: `org.meshtastic.core.data`.
 - **`:core:repository`**: Domain interfaces and common models. Package: `org.meshtastic.core.repository`.
-- **`:core:ble`**: Coroutine-based Bluetooth logic.
+- **`:core:ble`**: Coroutine-based Bluetooth logic (Nordic Semiconductor). Package: `org.meshtastic.core.ble`.
+- **`:core:nfc`**: NFC abstractions (KMP). Android NFC hardware in `androidMain`; shared contract via `LocalNfcScannerProvider` in `core:ui`.
+- **`:core:barcode`**: Barcode scanning (Android-only). Shared UI in `main/`; only the decoder (`createBarcodeAnalyzer`) differs per flavor (ML Kit / ZXing). Shared contract in `core:ui`.
 - **`:core:api`**: AIDL service interface (`IMeshService.aidl`) for third-party integrations (like ATAK).
-- **`:core:ui`**: Shared Compose UI elements and theming.
-- **`:feature:*`**: Isolated feature screens (e.g., `:feature:messaging` for chat, `:feature:map` for mapping).
+- **`:core:ui`**: Shared Compose UI elements, platform abstractions, and theming.
+- **`:core:navigation`**: Shared Navigation 3 routes/keys.
+- **`:core:network`**: KMP networking (Ktor, `StreamFrameCodec`, `TcpTransport`).
+- **`:core:testing`**: Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.
+- **`:desktop`**: Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI, TCP transport with `want_config` handshake, adaptive list-detail screens for nodes/messaging, ~35 real settings screens, connections UI. See `docs/kmp-status.md`.
+- **`:feature:*`**: Isolated feature screens (e.g., `:feature:messaging` for chat, `:feature:map` for mapping, `:feature:connections` for device discovery, `:feature:firmware` for updates).

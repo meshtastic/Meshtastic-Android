@@ -55,9 +55,7 @@ fun SharedContactDialog(
             Column {
                 if (node != null) {
                     Text(text = stringResource(Res.string.import_known_shared_contact_text))
-                    if (
-                        (node.user.public_key?.size ?: 0) > 0 && node.user.public_key != sharedContact.user?.public_key
-                    ) {
+                    if ((node.user.public_key.size) > 0 && node.user.public_key != sharedContact.user?.public_key) {
                         Text(
                             text = stringResource(Res.string.public_key_changed),
                             color = MaterialTheme.colorScheme.error,

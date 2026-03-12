@@ -59,14 +59,14 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val formState = rememberConfigState(initialValue = mqttConfig)
 
     val currentMapReportSettings = formState.value.map_report_settings ?: ModuleConfig.MapReportSettings()
-    if (!(currentMapReportSettings.should_report_location ?: false)) {
+    if (!currentMapReportSettings.should_report_location) {
         val settings =
             currentMapReportSettings.copy(should_report_location = viewModel.shouldReportLocation(destNum).value)
         formState.value = formState.value.copy(map_report_settings = settings)
     }
 
     val consentValid =
-        if (formState.value.map_reporting_enabled ?: false) {
+        if (formState.value.map_reporting_enabled) {
             (formState.value.map_report_settings?.should_report_location ?: false) &&
                 (formState.value.map_report_settings?.publish_interval_secs ?: 0) >= MIN_INTERVAL_SECS
         } else {
@@ -90,7 +90,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.mqtt_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.mqtt_enabled),
-                    checked = formState.value.enabled ?: false,
+                    checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -98,7 +98,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.address),
-                    value = formState.value.address ?: "",
+                    value = formState.value.address,
                     maxSize = 63, // address max_size:64
                     enabled = state.connected,
                     isError = false,
@@ -110,7 +110,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.username),
-                    value = formState.value.username ?: "",
+                    value = formState.value.username,
                     maxSize = 63, // username max_size:64
                     enabled = state.connected,
                     isError = false,
@@ -122,7 +122,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditPasswordPreference(
                     title = stringResource(Res.string.password),
-                    value = formState.value.password ?: "",
+                    value = formState.value.password,
                     maxSize = 63, // password max_size:64
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -131,7 +131,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.encryption_enabled),
-                    checked = formState.value.encryption_enabled ?: false,
+                    checked = formState.value.encryption_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(encryption_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -139,20 +139,18 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.json_output_enabled),
-                    checked = formState.value.json_enabled ?: false,
+                    checked = formState.value.json_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(json_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
                 HorizontalDivider()
                 val defaultAddress = stringResource(Res.string.default_mqtt_address)
-                val isDefault =
-                    (formState.value.address ?: "").isEmpty() ||
-                        (formState.value.address ?: "").contains(defaultAddress)
-                val enforceTls = isDefault && (formState.value.proxy_to_client_enabled ?: false)
+                val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
+                val enforceTls = isDefault && formState.value.proxy_to_client_enabled
                 SwitchPreference(
                     title = stringResource(Res.string.tls_enabled),
-                    checked = (formState.value.tls_enabled ?: false) || enforceTls,
+                    checked = formState.value.tls_enabled || enforceTls,
                     enabled = state.connected && !enforceTls,
                     onCheckedChange = { formState.value = formState.value.copy(tls_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -160,7 +158,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.root_topic),
-                    value = formState.value.root ?: "",
+                    value = formState.value.root,
                     maxSize = 31, // root max_size:32
                     enabled = state.connected,
                     isError = false,
@@ -172,7 +170,7 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.proxy_to_client_enabled),
-                    checked = formState.value.proxy_to_client_enabled ?: false,
+                    checked = formState.value.proxy_to_client_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(proxy_to_client_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -184,22 +182,22 @@ fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.map_reporting)) {
                 val mapReportSettings = formState.value.map_report_settings ?: ModuleConfig.MapReportSettings()
                 MapReportingPreference(
-                    mapReportingEnabled = formState.value.map_reporting_enabled ?: false,
+                    mapReportingEnabled = formState.value.map_reporting_enabled,
                     onMapReportingEnabledChanged = {
                         formState.value = formState.value.copy(map_reporting_enabled = it)
                     },
-                    shouldReportLocation = mapReportSettings.should_report_location ?: false,
+                    shouldReportLocation = mapReportSettings.should_report_location,
                     onShouldReportLocationChanged = {
                         viewModel.setShouldReportLocation(destNum, it)
                         val settings = mapReportSettings.copy(should_report_location = it)
                         formState.value = formState.value.copy(map_report_settings = settings)
                     },
-                    positionPrecision = mapReportSettings.position_precision ?: 0,
+                    positionPrecision = mapReportSettings.position_precision,
                     onPositionPrecisionChanged = {
                         val settings = mapReportSettings.copy(position_precision = it)
                         formState.value = formState.value.copy(map_report_settings = settings)
                     },
-                    publishIntervalSecs = mapReportSettings.publish_interval_secs ?: 0,
+                    publishIntervalSecs = mapReportSettings.publish_interval_secs,
                     onPublishIntervalSecsChanged = {
                         val settings = mapReportSettings.copy(publish_interval_secs = it)
                         formState.value = formState.value.copy(map_report_settings = settings)

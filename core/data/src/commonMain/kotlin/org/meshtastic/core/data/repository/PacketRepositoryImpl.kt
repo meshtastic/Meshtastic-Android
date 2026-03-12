@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
-import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.toReaction
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.ContactSettings
@@ -45,7 +45,7 @@ import org.meshtastic.core.repository.PacketRepository as SharedPacketRepository
 
 @Suppress("TooManyFunctions", "LongParameterList")
 @Single
-class PacketRepositoryImpl(private val dbManager: DatabaseManager, private val dispatchers: CoroutineDispatchers) :
+class PacketRepositoryImpl(private val dbManager: DatabaseProvider, private val dispatchers: CoroutineDispatchers) :
     SharedPacketRepository {
 
     override fun getWaypoints(): Flow<List<DataPacket>> = dbManager.currentDb

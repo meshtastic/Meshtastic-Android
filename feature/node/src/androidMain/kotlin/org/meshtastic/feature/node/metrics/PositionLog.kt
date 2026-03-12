@@ -23,17 +23,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,90 +47,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.model.util.metersIn
-import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.alt
 import org.meshtastic.core.resources.clear
-import org.meshtastic.core.resources.heading
-import org.meshtastic.core.resources.latitude
-import org.meshtastic.core.resources.longitude
-import org.meshtastic.core.resources.sats
 import org.meshtastic.core.resources.save
-import org.meshtastic.core.resources.speed
-import org.meshtastic.core.resources.timestamp
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.icon.Delete
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Refresh
 import org.meshtastic.core.ui.icon.Save
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.util.formatPositionTime
 import org.meshtastic.feature.node.detail.NodeRequestEffect
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Position
-
-@Composable
-private fun RowScope.PositionText(text: String, weight: Float) {
-    Text(
-        text = text,
-        modifier = Modifier.weight(weight),
-        textAlign = TextAlign.Center,
-        overflow = TextOverflow.Ellipsis,
-        maxLines = 1,
-    )
-}
-
-private const val WEIGHT_10 = .10f
-private const val WEIGHT_15 = .15f
-private const val WEIGHT_20 = .20f
-private const val WEIGHT_40 = .40f
-
-@Composable
-private fun HeaderItem(compactWidth: Boolean) {
-    Row(modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        PositionText(stringResource(Res.string.latitude), WEIGHT_20)
-        PositionText(stringResource(Res.string.longitude), WEIGHT_20)
-        PositionText(stringResource(Res.string.sats), WEIGHT_10)
-        PositionText(stringResource(Res.string.alt), WEIGHT_15)
-        if (!compactWidth) {
-            PositionText(stringResource(Res.string.speed), WEIGHT_15)
-            PositionText(stringResource(Res.string.heading), WEIGHT_15)
-        }
-        PositionText(stringResource(Res.string.timestamp), WEIGHT_40)
-    }
-}
-
-const val DEG_D = 1e-7
-const val HEADING_DEG = 1e-5
-
-@Composable
-fun PositionItem(compactWidth: Boolean, position: Position, system: Config.DisplayConfig.DisplayUnits) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        PositionText("%.5f".format((position.latitude_i ?: 0) * DEG_D), WEIGHT_20)
-        PositionText("%.5f".format((position.longitude_i ?: 0) * DEG_D), WEIGHT_20)
-        PositionText(position.sats_in_view.toString(), WEIGHT_10)
-        PositionText((position.altitude ?: 0).metersIn(system).toString(system), WEIGHT_15)
-        if (!compactWidth) {
-            PositionText("${position.ground_speed ?: 0} Km/h", WEIGHT_15)
-            PositionText("%.0f°".format((position.ground_track ?: 0) * HEADING_DEG), WEIGHT_15)
-        }
-        PositionText(position.formatPositionTime(), WEIGHT_40)
-    }
-}
 
 @Composable
 private fun ActionButtons(
@@ -225,7 +155,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                         LocalTextStyle.current
                     }
                 CompositionLocalProvider(LocalTextStyle provides textStyle) {
-                    HeaderItem(compactWidth)
+                    PositionLogHeader(compactWidth)
                     PositionList(compactWidth, state.positionLogs, state.displayUnits)
                 }
 
@@ -248,17 +178,6 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun ColumnScope.PositionList(
-    compactWidth: Boolean,
-    positions: List<Position>,
-    displayUnits: Config.DisplayConfig.DisplayUnits,
-) {
-    LazyColumn(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-        items(positions) { position -> PositionItem(compactWidth, position, displayUnits) }
     }
 }
 

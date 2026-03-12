@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
@@ -42,7 +43,8 @@ import org.meshtastic.proto.Config
 import org.meshtastic.proto.SharedContact
 
 @Suppress("LongParameterList")
-open class NodeListViewModel(
+@KoinViewModel
+class NodeListViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,

@@ -17,7 +17,6 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import okio.BufferedSink
@@ -28,6 +27,7 @@ import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.proto.PortNum
 import kotlin.math.roundToInt
+import kotlin.time.Instant
 import org.meshtastic.proto.Position as ProtoPosition
 
 /** Use case for exporting persisted packet data to a CSV format. */

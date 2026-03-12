@@ -21,6 +21,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.service"
@@ -43,6 +45,7 @@ kotlin {
         androidMain.dependencies { api(projects.core.api) }
 
         commonTest.dependencies {
+            implementation(kotlin("test"))
             implementation(libs.junit)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.mockk)

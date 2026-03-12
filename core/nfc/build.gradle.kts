@@ -14,22 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.android.build.api.dsl.LibraryExtension
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.library.compose)
+    alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.library.compose)
 }
 
-configure<LibraryExtension> { namespace = "org.meshtastic.core.nfc" }
+kotlin {
+    jvm()
 
-dependencies {
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.compose.runtime)
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.kermit)
+    @Suppress("UnstableApiUsage")
+    android {
+        namespace = "org.meshtastic.core.nfc"
+        androidResources.enable = false
+    }
 
-    testImplementation(libs.junit)
-    testImplementation(libs.mockk)
-    testImplementation(libs.robolectric)
+    sourceSets {
+        commonMain.dependencies { implementation(libs.kermit) }
+
+        androidMain.dependencies {
+            implementation(libs.androidx.activity.compose)
+            implementation(compose.runtime)
+            implementation(compose.ui)
+        }
+
+        commonTest.dependencies { implementation(kotlin("test")) }
+    }
 }

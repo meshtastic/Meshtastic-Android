@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.android.ext.android.inject
 import org.meshtastic.app.BuildConfig
-import org.meshtastic.app.ui.connections.NO_DEVICE_SELECTED
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.toRemoteExceptions
@@ -55,6 +54,7 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.IMeshService
+import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
 import org.meshtastic.proto.PortNum
 
 @Suppress("TooManyFunctions", "LargeClass")

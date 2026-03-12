@@ -70,7 +70,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.enable_power_saving_mode),
                     summary = stringResource(Res.string.config_power_is_power_saving_summary),
-                    checked = formState.value.is_power_saving ?: false,
+                    checked = formState.value.is_power_saving,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(is_power_saving = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -79,7 +79,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val items = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.shutdown_on_power_loss),
-                    selectedItem = (formState.value.on_battery_shutdown_after_secs ?: 0).toLong(),
+                    selectedItem = formState.value.on_battery_shutdown_after_secs.toLong(),
                     enabled = state.connected,
                     items = items.map { it.value to it.toDisplayString() },
                     onItemSelected = {
@@ -89,18 +89,18 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.adc_multiplier_override),
-                    checked = (formState.value.adc_multiplier_override ?: 0f) > 0f,
+                    checked = formState.value.adc_multiplier_override > 0f,
                     enabled = state.connected,
                     onCheckedChange = {
                         formState.value = formState.value.copy(adc_multiplier_override = if (it) 1.0f else 0.0f)
                     },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
-                if ((formState.value.adc_multiplier_override ?: 0f) > 0f) {
+                if (formState.value.adc_multiplier_override > 0f) {
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.adc_multiplier_override_ratio),
-                        value = formState.value.adc_multiplier_override ?: 0f,
+                        value = formState.value.adc_multiplier_override,
                         enabled = state.connected,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = { formState.value = formState.value.copy(adc_multiplier_override = it) },
@@ -110,7 +110,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val waitBluetoothItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.wait_for_bluetooth_duration_seconds),
-                    selectedItem = (formState.value.wait_bluetooth_secs ?: 0).toLong(),
+                    selectedItem = formState.value.wait_bluetooth_secs.toLong(),
                     enabled = state.connected,
                     items = waitBluetoothItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(wait_bluetooth_secs = it.toInt()) },
@@ -119,7 +119,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val sdsSecsItems = remember { IntervalConfiguration.ALL.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.super_deep_sleep_duration_seconds),
-                    selectedItem = (formState.value.sds_secs ?: 0).toLong(),
+                    selectedItem = formState.value.sds_secs.toLong(),
                     onItemSelected = { formState.value = formState.value.copy(sds_secs = it.toInt()) },
                     enabled = state.connected,
                     items = sdsSecsItems.map { it.value to it.toDisplayString() },
@@ -128,7 +128,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val minWakeItems = remember { IntervalConfiguration.NAG_TIMEOUT.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.minimum_wake_time_seconds),
-                    selectedItem = (formState.value.min_wake_secs ?: 0).toLong(),
+                    selectedItem = formState.value.min_wake_secs.toLong(),
                     enabled = state.connected,
                     items = minWakeItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(min_wake_secs = it.toInt()) },
@@ -136,7 +136,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.battery_ina_2xx_i2c_address),
-                    value = formState.value.device_battery_ina_address ?: 0,
+                    value = formState.value.device_battery_ina_address,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(device_battery_ina_address = it) },

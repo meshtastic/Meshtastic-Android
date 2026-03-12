@@ -45,6 +45,7 @@ import org.meshtastic.core.ble.retryBleOperation
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransport
 import kotlin.time.Duration.Companion.seconds
 
 private const val SCAN_RETRY_COUNT = 3
@@ -53,7 +54,7 @@ private const val CONNECTION_TIMEOUT_MS = 15_000L
 private val SCAN_TIMEOUT = 5.seconds
 
 /**
- * A [IRadioInterface] implementation for BLE devices using Nordic Kotlin BLE Library.
+ * A [RadioTransport] implementation for BLE devices using Nordic Kotlin BLE Library.
  * https://github.com/NordicSemiconductor/Kotlin-BLE-Library.
  *
  * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
@@ -77,7 +78,7 @@ class NordicBleInterface(
     private val connectionFactory: BleConnectionFactory,
     private val service: RadioInterfaceService,
     val address: String,
-) : IRadioInterface {
+) : RadioTransport {
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         Logger.w(throwable) { "[$address] Uncaught exception in connectionScope" }
@@ -247,7 +248,7 @@ class NordicBleInterface(
 
     private var radioService: MeshtasticRadioProfile.State? = null
 
-    // --- IRadioInterface Implementation ---
+    // --- RadioTransport Implementation ---
 
     /**
      * Sends a packet to the radio with retry support.

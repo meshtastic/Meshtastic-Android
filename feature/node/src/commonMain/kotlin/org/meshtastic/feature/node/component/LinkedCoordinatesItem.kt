@@ -83,7 +83,7 @@ fun LinkedCoordinatesItem(
         leadingIcon = Icons.Rounded.LocationOn,
         supportingText = "$ago • $coordinates$elevationText",
         trailingContent = Icons.AutoMirrored.Rounded.KeyboardArrowRight.icon(),
-        onClick = { openMap(node.latitude, node.longitude, node.user.long_name ?: "") },
+        onClick = { openMap(node.latitude, node.longitude, node.user.long_name) },
         onLongClick = { coroutineScope.launch { clipboard.setClipEntry(createClipEntry(coordinates, copyLabel)) } },
     )
 }

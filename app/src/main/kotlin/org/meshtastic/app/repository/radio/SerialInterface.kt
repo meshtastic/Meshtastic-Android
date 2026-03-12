@@ -17,11 +17,11 @@
 package org.meshtastic.app.repository.radio
 
 import co.touchlab.kermit.Logger
-import org.meshtastic.app.repository.usb.SerialConnection
-import org.meshtastic.app.repository.usb.SerialConnectionListener
-import org.meshtastic.app.repository.usb.UsbRepository
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.feature.connections.repository.SerialConnection
+import org.meshtastic.feature.connections.repository.SerialConnectionListener
+import org.meshtastic.feature.connections.repository.UsbRepository
 import java.util.concurrent.atomic.AtomicReference
 
 /** An interface that assumes we are talking to a meshtastic device via USB serial */

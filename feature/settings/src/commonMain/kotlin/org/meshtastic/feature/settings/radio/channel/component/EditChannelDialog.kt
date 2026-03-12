@@ -75,9 +75,9 @@ fun EditChannelDialog(
                     title = stringResource(Res.string.channel_name),
                     value =
                     if (isFocused) {
-                        (channelInput.name ?: "")
+                        channelInput.name
                     } else {
-                        (channelInput.name ?: "").ifEmpty { modemPresetName }
+                        channelInput.name.ifEmpty { modemPresetName }
                     },
                     maxSize = 11, // name max_size:12
                     enabled = true,
@@ -91,7 +91,7 @@ fun EditChannelDialog(
                             if (channelInput.psk == defaultPsk) {
                                 Channel.getRandomKey()
                             } else {
-                                (channelInput.psk ?: okio.ByteString.EMPTY)
+                                channelInput.psk
                             }
                         channelInput = channelInput.copy(name = it.trim(), psk = newPsk)
                     },
@@ -100,7 +100,7 @@ fun EditChannelDialog(
 
                 EditBase64Preference(
                     title = "PSK",
-                    value = channelInput.psk ?: okio.ByteString.EMPTY,
+                    value = channelInput.psk,
                     enabled = true,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChange = {
@@ -114,7 +114,7 @@ fun EditChannelDialog(
 
                 SwitchPreference(
                     title = stringResource(Res.string.uplink_enabled),
-                    checked = channelInput.uplink_enabled ?: false,
+                    checked = channelInput.uplink_enabled,
                     enabled = true,
                     onCheckedChange = { channelInput = channelInput.copy(uplink_enabled = it) },
                     padding = PaddingValues(0.dp),
@@ -122,7 +122,7 @@ fun EditChannelDialog(
 
                 SwitchPreference(
                     title = stringResource(Res.string.downlink_enabled),
-                    checked = channelInput.downlink_enabled ?: false,
+                    checked = channelInput.downlink_enabled,
                     enabled = true,
                     onCheckedChange = { channelInput = channelInput.copy(downlink_enabled = it) },
                     padding = PaddingValues(0.dp),
@@ -131,7 +131,7 @@ fun EditChannelDialog(
                 val moduleSettings = channelInput.module_settings ?: ModuleSettings()
                 PositionPrecisionPreference(
                     enabled = true,
-                    value = moduleSettings.position_precision ?: 0,
+                    value = moduleSettings.position_precision,
                     onValueChanged = {
                         val updatedModule = moduleSettings.copy(position_precision = it)
                         channelInput = channelInput.copy(module_settings = updatedModule)

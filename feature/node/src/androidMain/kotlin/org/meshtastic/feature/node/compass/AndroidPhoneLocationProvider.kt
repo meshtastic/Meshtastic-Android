@@ -17,6 +17,7 @@
 package org.meshtastic.feature.node.compass
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.location.Location
 import android.location.LocationManager
@@ -36,6 +37,7 @@ import org.meshtastic.core.di.CoroutineDispatchers
 class AndroidPhoneLocationProvider(private val context: Context, private val dispatchers: CoroutineDispatchers) :
     PhoneLocationProvider {
 
+    @SuppressLint("MissingPermission")
     override fun locationUpdates(): Flow<PhoneLocationState> = callbackFlow {
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
         if (locationManager == null) {
@@ -91,7 +93,7 @@ class AndroidPhoneLocationProvider(private val context: Context, private val dis
             sendUpdate()
 
             providers.forEach { provider ->
-                if (locationManager.getProvider(provider) != null) {
+                if (provider in locationManager.allProviders) {
                     LocationManagerCompat.requestLocationUpdates(
                         locationManager,
                         provider,

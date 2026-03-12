@@ -26,11 +26,10 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.settings.AndroidCleanNodeDatabaseViewModel
 import org.meshtastic.app.settings.AndroidDebugViewModel
-import org.meshtastic.app.settings.AndroidFilterSettingsViewModel
 import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.settings.AndroidSettingsViewModel
+import org.meshtastic.app.util.AboutLibrariesJsonProvider
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -41,9 +40,11 @@ import org.meshtastic.feature.settings.ModuleConfigurationScreen
 import org.meshtastic.feature.settings.SettingsScreen
 import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
+import org.meshtastic.feature.settings.filter.FilterSettingsViewModel
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
+import org.meshtastic.feature.settings.radio.CleanNodeDatabaseViewModel
 import org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen
 import org.meshtastic.feature.settings.radio.component.AmbientLightingConfigScreen
 import org.meshtastic.feature.settings.radio.component.AudioConfigScreen
@@ -121,7 +122,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     entry<SettingsRoutes.CleanNodeDb> {
-        val viewModel: AndroidCleanNodeDatabaseViewModel = koinViewModel()
+        val viewModel: CleanNodeDatabaseViewModel = koinViewModel()
         CleanNodeDatabaseScreen(viewModel = viewModel)
     }
 
@@ -181,10 +182,18 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         DebugScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
     }
 
-    entry<SettingsRoutes.About> { AboutScreen(onNavigateUp = { backStack.removeLastOrNull() }) }
+    entry<SettingsRoutes.About> {
+        AboutScreen(
+            onNavigateUp = { backStack.removeLastOrNull() },
+            jsonProvider = {
+                // Load from AboutLibraries asset/classpath resource
+                AboutLibrariesJsonProvider.getJson()
+            },
+        )
+    }
 
     entry<SettingsRoutes.FilterSettings> {
-        val viewModel: AndroidFilterSettingsViewModel = koinViewModel()
+        val viewModel: FilterSettingsViewModel = koinViewModel()
         FilterSettingsScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
     }
 }

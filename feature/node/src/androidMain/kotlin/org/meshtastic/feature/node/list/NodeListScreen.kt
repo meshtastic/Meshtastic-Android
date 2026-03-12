@@ -30,22 +30,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.VolumeOff
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.DoDisturbOn
-import androidx.compose.material.icons.outlined.DoDisturbOn
-import androidx.compose.material.icons.rounded.DeleteOutline
-import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.rounded.StarBorder
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,7 +44,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -67,25 +53,17 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.add_favorite
 import org.meshtastic.core.resources.channel_invalid
-import org.meshtastic.core.resources.ignore
-import org.meshtastic.core.resources.mute_always
 import org.meshtastic.core.resources.node_count_template
 import org.meshtastic.core.resources.nodes
-import org.meshtastic.core.resources.remove
-import org.meshtastic.core.resources.remove_favorite
-import org.meshtastic.core.resources.remove_ignored
-import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.component.smartScrollToTop
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.proto.SharedContact
@@ -221,7 +199,7 @@ fun NodeListScreen(
                         )
                         val isThisNode = remember(node) { ourNode?.num == node.num }
                         if (!isThisNode) {
-                            ContextMenu(
+                            NodeContextMenu(
                                 expanded = expanded,
                                 node = node,
                                 onFavorite = { viewModel.favoriteNode(node) },
@@ -237,109 +215,4 @@ fun NodeListScreen(
             }
         }
     }
-}
-
-@Composable
-private fun ContextMenu(
-    expanded: Boolean,
-    node: Node,
-    onFavorite: () -> Unit,
-    onIgnore: () -> Unit,
-    onMute: () -> Unit,
-    onRemove: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        FavoriteMenuItem(node, onFavorite, onDismiss)
-        IgnoreMenuItem(node, onIgnore, onDismiss)
-        if (node.capabilities.canMuteNode) {
-            MuteMenuItem(node, onMute, onDismiss)
-        }
-        RemoveMenuItem(node, onRemove, onDismiss)
-    }
-}
-
-@Composable
-private fun FavoriteMenuItem(node: Node, onFavorite: () -> Unit, onDismiss: () -> Unit) {
-    val isFavorite = node.isFavorite
-    DropdownMenuItem(
-        onClick = {
-            onFavorite()
-            onDismiss()
-        },
-        enabled = !node.isIgnored,
-        leadingIcon = {
-            Icon(
-                imageVector = if (isFavorite) Icons.Rounded.Star else Icons.Rounded.StarBorder,
-                contentDescription = null,
-            )
-        },
-        text = { Text(stringResource(if (isFavorite) Res.string.remove_favorite else Res.string.add_favorite)) },
-    )
-}
-
-@Composable
-private fun IgnoreMenuItem(node: Node, onIgnore: () -> Unit, onDismiss: () -> Unit) {
-    val isIgnored = node.isIgnored
-    DropdownMenuItem(
-        onClick = {
-            onIgnore()
-            onDismiss()
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = if (isIgnored) Icons.Filled.DoDisturbOn else Icons.Outlined.DoDisturbOn,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.StatusRed,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(if (isIgnored) Res.string.remove_ignored else Res.string.ignore),
-                color = MaterialTheme.colorScheme.StatusRed,
-            )
-        },
-    )
-}
-
-@Composable
-private fun MuteMenuItem(node: Node, onMute: () -> Unit, onDismiss: () -> Unit) {
-    val isMuted = node.isMuted
-    DropdownMenuItem(
-        onClick = {
-            onMute()
-            onDismiss()
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = if (isMuted) Icons.AutoMirrored.Filled.VolumeOff else Icons.AutoMirrored.Filled.VolumeUp,
-                contentDescription = null,
-            )
-        },
-        text = { Text(text = stringResource(if (isMuted) Res.string.unmute else Res.string.mute_always)) },
-    )
-}
-
-@Composable
-private fun RemoveMenuItem(node: Node, onRemove: () -> Unit, onDismiss: () -> Unit) {
-    DropdownMenuItem(
-        onClick = {
-            onRemove()
-            onDismiss()
-        },
-        enabled = !node.isIgnored,
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Rounded.DeleteOutline,
-                contentDescription = null,
-                tint = if (node.isIgnored) LocalContentColor.current else MaterialTheme.colorScheme.StatusRed,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(Res.string.remove),
-                color = if (node.isIgnored) Color.Unspecified else MaterialTheme.colorScheme.StatusRed,
-            )
-        },
-    )
 }

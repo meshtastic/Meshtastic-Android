@@ -68,7 +68,7 @@ class MqttManagerImpl(
     }
 
     override fun handleMqttProxyMessage(message: MqttClientProxyMessage) {
-        val topic = message.topic ?: ""
+        val topic = message.topic
         Logger.d { "[mqttClientProxyMessage] $topic" }
         val retained = message.retained == true
         when {

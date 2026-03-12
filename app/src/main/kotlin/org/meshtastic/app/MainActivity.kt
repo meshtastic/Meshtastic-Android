@@ -50,7 +50,6 @@ import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
-import org.meshtastic.app.intro.AndroidIntroViewModel
 import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.app.node.component.InlineMap
@@ -72,6 +71,7 @@ import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.intro.AppIntroductionScreen
+import org.meshtastic.feature.intro.IntroViewModel
 
 class MainActivity : ComponentActivity() {
     private val model: UIViewModel by viewModel()
@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
                     if (appIntroCompleted) {
                         MainScreen(uIViewModel = model)
                     } else {
-                        val introViewModel = koinViewModel<AndroidIntroViewModel>()
+                        val introViewModel = koinViewModel<IntroViewModel>()
                         AppIntroductionScreen(onDone = { model.onAppIntroCompleted() }, viewModel = introViewModel)
                     }
                 }

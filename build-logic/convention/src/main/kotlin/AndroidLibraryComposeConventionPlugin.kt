@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -24,12 +24,19 @@ import org.meshtastic.buildlogic.configureAndroidCompose
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
 
+/**
+ * Compose configuration for Android libraries.
+ * 
+ * Note: This has identical implementation to AndroidApplicationComposeConventionPlugin.
+ * Both use the same configureAndroidCompose() function which works with CommonExtension.
+ * Kept separate to maintain explicit intent in build.gradle.kts configuration despite duplication.
+ */
 class AndroidLibraryComposeConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = libs.plugin("compose-compiler").get().pluginId)
             apply(plugin = libs.plugin("compose-multiplatform").get().pluginId)
-            extensions.configure<CommonExtension> {
+            extensions.configure<LibraryExtension> {
                 configureAndroidCompose(this)
             }
         }

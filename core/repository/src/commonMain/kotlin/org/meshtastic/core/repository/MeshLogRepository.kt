@@ -17,7 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.PortNum

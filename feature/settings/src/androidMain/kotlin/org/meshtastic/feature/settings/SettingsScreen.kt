@@ -211,37 +211,40 @@ fun SettingsScreen(
                 onNavigate = onNavigate,
             )
 
-            PrivacySection(
-                analyticsAvailable = state.analyticsAvailable,
-                analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false).value,
-                onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
-                provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
-                onToggleLocation = { settingsViewModel.setProvideLocation(it) },
-                homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
-                onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
-                startProvideLocation = { settingsViewModel.startProvidingLocation() },
-                stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
-            )
+            // App-local settings are only relevant when configuring the local node
+            if (state.isLocal) {
+                PrivacySection(
+                    analyticsAvailable = state.analyticsAvailable,
+                    analyticsEnabled = viewModel.analyticsAllowedFlow.collectAsStateWithLifecycle(false).value,
+                    onToggleAnalytics = { viewModel.toggleAnalyticsAllowed() },
+                    provideLocation = settingsViewModel.provideLocation.collectAsStateWithLifecycle().value,
+                    onToggleLocation = { settingsViewModel.setProvideLocation(it) },
+                    homoglyphEnabled = viewModel.homoglyphEncodingEnabledFlow.collectAsStateWithLifecycle(false).value,
+                    onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
+                    startProvideLocation = { settingsViewModel.startProvidingLocation() },
+                    stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+                )
 
-            AppearanceSection(
-                onShowLanguagePicker = { showLanguagePickerDialog = true },
-                onShowThemePicker = { showThemePickerDialog = true },
-            )
+                AppearanceSection(
+                    onShowLanguagePicker = { showLanguagePickerDialog = true },
+                    onShowThemePicker = { showThemePickerDialog = true },
+                )
 
-            PersistenceSection(
-                cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
-                onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
-                nodeShortName = ourNode?.user?.short_name ?: "",
-                onExportData = { settingsViewModel.saveDataCsv(it) },
-            )
+                PersistenceSection(
+                    cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
+                    onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
+                    nodeShortName = ourNode?.user?.short_name ?: "",
+                    onExportData = { settingsViewModel.saveDataCsv(it) },
+                )
 
-            AppInfoSection(
-                appVersionName = settingsViewModel.appVersionName,
-                excludedModulesUnlocked = excludedModulesUnlocked,
-                onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
-                onShowAppIntro = { settingsViewModel.showAppIntro() },
-                onNavigateToAbout = { onNavigate(SettingsRoutes.About) },
-            )
+                AppInfoSection(
+                    appVersionName = settingsViewModel.appVersionName,
+                    excludedModulesUnlocked = excludedModulesUnlocked,
+                    onUnlockExcludedModules = { settingsViewModel.unlockExcludedModules() },
+                    onShowAppIntro = { settingsViewModel.showAppIntro() },
+                    onNavigateToAbout = { onNavigate(SettingsRoutes.About) },
+                )
+            }
         }
     }
 }

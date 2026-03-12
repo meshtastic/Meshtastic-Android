@@ -83,7 +83,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 }
                 DropDownPreference(
                     title = stringResource(Res.string.minimum_broadcast_seconds),
-                    selectedItem = (formState.value.minimum_broadcast_secs ?: 0).toLong(),
+                    selectedItem = formState.value.minimum_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = minimumBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(minimum_broadcast_secs = it.toInt()) },
@@ -92,7 +92,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 val stateBroadcastIntervals = remember { IntervalConfiguration.DETECTION_SENSOR_STATE.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.state_broadcast_seconds),
-                    selectedItem = (formState.value.state_broadcast_secs ?: 0).toLong(),
+                    selectedItem = formState.value.state_broadcast_secs.toLong(),
                     enabled = state.connected,
                     items = stateBroadcastIntervals.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(state_broadcast_secs = it.toInt()) },
@@ -108,7 +108,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.friendly_name),
-                    value = formState.value.name ?: "",
+                    value = formState.value.name,
                     maxSize = 19, // name max_size:20
                     enabled = state.connected,
                     isError = false,
@@ -122,7 +122,7 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 DropDownPreference(
                     title = stringResource(Res.string.gpio_pin_to_monitor),
                     items = pins,
-                    selectedItem = formState.value.monitor_pin ?: 0,
+                    selectedItem = formState.value.monitor_pin,
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy(monitor_pin = it) },
                 )
@@ -131,15 +131,13 @@ fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                     title = stringResource(Res.string.detection_trigger_type),
                     enabled = state.connected,
                     items = ModuleConfig.DetectionSensorConfig.TriggerType.entries.map { it to it.name },
-                    selectedItem =
-                    formState.value.detection_trigger_type
-                        ?: ModuleConfig.DetectionSensorConfig.TriggerType.LOGIC_LOW,
+                    selectedItem = formState.value.detection_trigger_type,
                     onItemSelected = { formState.value = formState.value.copy(detection_trigger_type = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.use_input_pullup_mode),
-                    checked = formState.value.use_pullup ?: false,
+                    checked = formState.value.use_pullup,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(use_pullup = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

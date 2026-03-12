@@ -20,11 +20,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 
 /** Interface for the low-level radio interface that handles raw byte communication. */
 interface RadioInterfaceService {
+    /** The device types supported by this platform's radio interface. */
+    val supportedDeviceTypes: List<DeviceType>
+
     /** Reactive connection state of the radio. */
     val connectionState: StateFlow<ConnectionState>
 

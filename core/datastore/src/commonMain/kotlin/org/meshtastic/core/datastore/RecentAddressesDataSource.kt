@@ -26,8 +26,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
-import org.json.JSONArray
-import org.json.JSONObject
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonPrimitive
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.model.RecentAddress
@@ -59,23 +63,35 @@ class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val d
         }
 
     private fun parseLegacyRecentAddresses(jsonAddresses: String): List<RecentAddress> {
-        val jsonArray = JSONArray(jsonAddresses)
-        return (0 until jsonArray.length()).mapNotNull { i ->
-            when (val item = jsonArray.get(i)) {
-                is JSONObject -> {
-                    // Modern format: JSONObject with address and name
-                    RecentAddress(address = item.getString("address"), name = item.getString("name"))
-                }
-                is String -> {
-                    // Old format: just the address string
-                    RecentAddress(address = item, name = "Meshtastic")
-                }
-                else -> {
-                    // Unknown format, log or handle as an error if necessary
-                    Logger.w { "Unknown item type in recent IP addresses: $item" }
-                    null
-                }
+        val jsonArray = Json.parseToJsonElement(jsonAddresses).jsonArray
+        return jsonArray.mapNotNull(::parseLegacyRecentAddress)
+    }
+
+    private fun parseLegacyRecentAddress(item: kotlinx.serialization.json.JsonElement): RecentAddress? = when (item) {
+        is JsonObject -> {
+            val address = item["address"]?.jsonPrimitive?.contentOrNull
+            val name = item["name"]?.jsonPrimitive?.contentOrNull
+            if (address != null && name != null) {
+                RecentAddress(address = address, name = name)
+            } else {
+                Logger.w { "Skipping malformed recent address object: $item" }
+                null
             }
+        }
+
+        is JsonPrimitive -> {
+            val address = item.contentOrNull
+            if (address != null) {
+                RecentAddress(address = address, name = "Meshtastic")
+            } else {
+                Logger.w { "Skipping malformed recent address primitive: $item" }
+                null
+            }
+        }
+
+        is JsonArray -> {
+            Logger.w { "Skipping nested array in recent IP addresses: $item" }
+            null
         }
     }
 

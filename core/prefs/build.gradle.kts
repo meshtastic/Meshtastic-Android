@@ -21,7 +21,8 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
+    jvm()
+
     android {
         namespace = "org.meshtastic.core.prefs"
         androidResources.enable = false
@@ -35,6 +36,8 @@ kotlin {
             implementation(projects.core.di)
 
             implementation(libs.androidx.datastore.preferences)
+            implementation(libs.kotlinx.atomicfu)
+            implementation(libs.kotlinx.collections.immutable)
             implementation(libs.kotlinx.coroutines.core)
         }
 

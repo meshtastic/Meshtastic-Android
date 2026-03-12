@@ -21,6 +21,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android { androidResources.enable = false }
 
@@ -29,11 +31,14 @@ kotlin {
             api(projects.core.model)
             api(projects.core.proto)
             implementation(projects.core.common)
-            implementation(projects.core.database)
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
             implementation(libs.androidx.paging.common)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

@@ -75,7 +75,7 @@ internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
 }
 
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
-    if ((override_frequency ?: 0f) != 0f) return (override_frequency ?: 0f) + (frequency_offset ?: 0f)
+    if (override_frequency != 0f) return override_frequency + frequency_offset
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
         (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)

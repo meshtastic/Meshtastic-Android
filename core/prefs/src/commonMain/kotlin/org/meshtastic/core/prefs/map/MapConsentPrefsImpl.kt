@@ -20,6 +20,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import kotlinx.atomicfu.atomic
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,8 +32,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.MapConsentPrefs
-import java.util.concurrent.ConcurrentHashMap
 
 @Single
 class MapConsentPrefsImpl(
@@ -40,9 +42,9 @@ class MapConsentPrefsImpl(
 ) : MapConsentPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    private val consentFlows = ConcurrentHashMap<Int?, StateFlow<Boolean>>()
+    private val consentFlows = atomic(persistentMapOf<Int?, StateFlow<Boolean>>())
 
-    override fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean> = consentFlows.getOrPut(nodeNum) {
+    override fun shouldReportLocation(nodeNum: Int?): StateFlow<Boolean> = cachedFlow(consentFlows, nodeNum) {
         val key = booleanPreferencesKey(nodeNum.toString())
         dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
     }

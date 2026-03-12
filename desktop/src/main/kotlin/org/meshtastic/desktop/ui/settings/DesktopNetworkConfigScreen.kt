@@ -1,0 +1,260 @@
+/*
+ * Copyright (c) 2025-2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+package org.meshtastic.desktop.ui.settings
+
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.advanced
+import org.meshtastic.core.resources.config_network_eth_enabled_summary
+import org.meshtastic.core.resources.config_network_udp_enabled_summary
+import org.meshtastic.core.resources.config_network_wifi_enabled_summary
+import org.meshtastic.core.resources.connection_status
+import org.meshtastic.core.resources.ethernet_config
+import org.meshtastic.core.resources.ethernet_enabled
+import org.meshtastic.core.resources.ethernet_ip
+import org.meshtastic.core.resources.gateway
+import org.meshtastic.core.resources.ip
+import org.meshtastic.core.resources.ipv4_mode
+import org.meshtastic.core.resources.network
+import org.meshtastic.core.resources.ntp_server
+import org.meshtastic.core.resources.password
+import org.meshtastic.core.resources.rsyslog_server
+import org.meshtastic.core.resources.ssid
+import org.meshtastic.core.resources.subnet
+import org.meshtastic.core.resources.udp_enabled
+import org.meshtastic.core.resources.wifi_config
+import org.meshtastic.core.resources.wifi_enabled
+import org.meshtastic.core.resources.wifi_ip
+import org.meshtastic.core.ui.component.DropDownPreference
+import org.meshtastic.core.ui.component.EditIPv4Preference
+import org.meshtastic.core.ui.component.EditPasswordPreference
+import org.meshtastic.core.ui.component.EditTextPreference
+import org.meshtastic.core.ui.component.ListItem
+import org.meshtastic.core.ui.component.SwitchPreference
+import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
+import org.meshtastic.feature.settings.radio.component.RadioConfigScreenList
+import org.meshtastic.feature.settings.radio.component.rememberConfigState
+import org.meshtastic.proto.Config
+
+@Composable
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+fun DesktopNetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val networkConfig = state.radioConfig.network ?: Config.NetworkConfig()
+    val formState = rememberConfigState(initialValue = networkConfig)
+
+    val focusManager = LocalFocusManager.current
+
+    RadioConfigScreenList(
+        title = stringResource(Res.string.network),
+        onBack = onBack,
+        configState = formState,
+        enabled = state.connected,
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = Config(network = it)
+            viewModel.setConfig(config)
+        },
+    ) {
+        // Display device connection status
+        state.deviceConnectionStatus?.let { connectionStatus ->
+            val ws = connectionStatus.wifi?.status
+            val es = connectionStatus.ethernet?.status
+            if (ws?.is_connected == true || es?.is_connected == true) {
+                item {
+                    TitledCard(title = stringResource(Res.string.connection_status)) {
+                        ws?.let { wifiStatus ->
+                            if (wifiStatus.is_connected) {
+                                ListItem(
+                                    text = stringResource(Res.string.wifi_ip),
+                                    supportingText = formatIpAddress(wifiStatus.ip_address ?: 0),
+                                    trailingIcon = null,
+                                )
+                            }
+                        }
+                        es?.let { ethernetStatus ->
+                            if (ethernetStatus.is_connected) {
+                                ListItem(
+                                    text = stringResource(Res.string.ethernet_ip),
+                                    supportingText = formatIpAddress(ethernetStatus.ip_address ?: 0),
+                                    trailingIcon = null,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (state.metadata?.hasWifi == true) {
+            item {
+                TitledCard(title = stringResource(Res.string.wifi_config)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.wifi_enabled),
+                        summary = stringResource(Res.string.config_network_wifi_enabled_summary),
+                        checked = formState.value.wifi_enabled ?: false,
+                        enabled = state.connected,
+                        onCheckedChange = { formState.value = formState.value.copy(wifi_enabled = it) },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                    HorizontalDivider()
+                    EditTextPreference(
+                        title = stringResource(Res.string.ssid),
+                        value = formState.value.wifi_ssid ?: "",
+                        maxSize = 32, // wifi_ssid max_size:33
+                        enabled = state.connected,
+                        isError = false,
+                        keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { formState.value = formState.value.copy(wifi_ssid = it) },
+                    )
+                    HorizontalDivider()
+                    EditPasswordPreference(
+                        title = stringResource(Res.string.password),
+                        value = formState.value.wifi_psk ?: "",
+                        maxSize = 64, // wifi_psk max_size:65
+                        enabled = state.connected,
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        onValueChanged = { formState.value = formState.value.copy(wifi_psk = it) },
+                    )
+                }
+            }
+        }
+        if (state.metadata?.hasEthernet == true) {
+            item {
+                TitledCard(title = stringResource(Res.string.ethernet_config)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.ethernet_enabled),
+                        summary = stringResource(Res.string.config_network_eth_enabled_summary),
+                        checked = formState.value.eth_enabled ?: false,
+                        enabled = state.connected,
+                        onCheckedChange = { formState.value = formState.value.copy(eth_enabled = it) },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                }
+            }
+        }
+
+        if (state.metadata?.hasEthernet == true || state.metadata?.hasWifi == true) {
+            item {
+                TitledCard(title = stringResource(Res.string.network)) {
+                    SwitchPreference(
+                        title = stringResource(Res.string.udp_enabled),
+                        summary = stringResource(Res.string.config_network_udp_enabled_summary),
+                        checked = (formState.value.enabled_protocols ?: 0) == 1,
+                        enabled = state.connected,
+                        onCheckedChange = {
+                            formState.value = formState.value.copy(enabled_protocols = if (it) 1 else 0)
+                        },
+                        containerColor = CardDefaults.cardColors().containerColor,
+                    )
+                }
+            }
+        }
+
+        item {
+            TitledCard(title = stringResource(Res.string.advanced)) {
+                EditTextPreference(
+                    title = stringResource(Res.string.ntp_server),
+                    value = formState.value.ntp_server ?: "",
+                    maxSize = 32, // ntp_server max_size:33
+                    enabled = state.connected,
+                    isError = formState.value.ntp_server?.isEmpty() ?: true,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy(ntp_server = it) },
+                )
+                HorizontalDivider()
+                EditTextPreference(
+                    title = stringResource(Res.string.rsyslog_server),
+                    value = formState.value.rsyslog_server ?: "",
+                    maxSize = 32, // rsyslog_server max_size:33
+                    enabled = state.connected,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy(rsyslog_server = it) },
+                )
+                HorizontalDivider()
+                DropDownPreference(
+                    title = stringResource(Res.string.ipv4_mode),
+                    enabled = state.connected,
+                    items = Config.NetworkConfig.AddressMode.entries.map { it to it.name },
+                    selectedItem = formState.value.address_mode ?: Config.NetworkConfig.AddressMode.DHCP,
+                    onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
+                )
+                HorizontalDivider()
+                val ipv4 = formState.value.ipv4_config ?: Config.NetworkConfig.IpV4Config()
+                EditIPv4Preference(
+                    title = stringResource(Res.string.ip),
+                    value = ipv4.ip,
+                    enabled =
+                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(ip = it)) },
+                )
+                HorizontalDivider()
+                EditIPv4Preference(
+                    title = stringResource(Res.string.gateway),
+                    value = ipv4.gateway,
+                    enabled =
+                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(gateway = it)) },
+                )
+                HorizontalDivider()
+                EditIPv4Preference(
+                    title = stringResource(Res.string.subnet),
+                    value = ipv4.subnet,
+                    enabled =
+                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(subnet = it)) },
+                )
+                HorizontalDivider()
+                EditIPv4Preference(
+                    title = "DNS",
+                    value = ipv4.dns,
+                    enabled =
+                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(dns = it)) },
+                )
+            }
+        }
+    }
+}
+
+@Suppress("detekt:MagicNumber")
+private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}." +
+    "${(ipAddress shr 8) and 0xFF}." +
+    "${(ipAddress shr 16) and 0xFF}." +
+    "${(ipAddress shr 24) and 0xFF}"

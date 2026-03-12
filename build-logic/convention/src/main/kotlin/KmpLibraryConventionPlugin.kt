@@ -18,6 +18,8 @@
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.meshtastic.buildlogic.configureAndroidMarketplaceFallback
+import org.meshtastic.buildlogic.configureKmpTestDependencies
 import org.meshtastic.buildlogic.configureKotlinMultiplatform
 import org.meshtastic.buildlogic.libs
 import org.meshtastic.buildlogic.plugin
@@ -34,6 +36,8 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.kover")
 
             configureKotlinMultiplatform()
+            configureKmpTestDependencies()
+            configureAndroidMarketplaceFallback()
         }
     }
 }

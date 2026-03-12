@@ -34,6 +34,7 @@ import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
 import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
+import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
@@ -47,6 +48,7 @@ import java.io.FileNotFoundException
 import java.io.FileOutputStream
 
 @KoinViewModel
+@Suppress("LongParameterList")
 class AndroidSettingsViewModel(
     private val app: Application,
     radioConfigRepository: RadioConfigRepository,
@@ -57,6 +59,7 @@ class AndroidSettingsViewModel(
     databaseManager: DatabaseManager,
     meshLogPrefs: MeshLogPrefs,
     setThemeUseCase: SetThemeUseCase,
+    setLocaleUseCase: SetLocaleUseCase,
     setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
     setProvideLocationUseCase: SetProvideLocationUseCase,
     setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase,
@@ -73,6 +76,7 @@ class AndroidSettingsViewModel(
     databaseManager,
     meshLogPrefs,
     setThemeUseCase,
+    setLocaleUseCase,
     setAppIntroCompletedUseCase,
     setProvideLocationUseCase,
     setDatabaseCacheLimitUseCase,

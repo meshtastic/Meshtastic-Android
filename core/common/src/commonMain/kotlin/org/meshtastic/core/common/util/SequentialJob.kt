@@ -17,12 +17,12 @@
 package org.meshtastic.core.common.util
 
 import co.touchlab.kermit.Logger
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withTimeout
 import org.koin.core.annotation.Factory
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * A helper class that manages a single [Job]. When a new job is launched, any previous job is cancelled. This is useful
@@ -31,7 +31,7 @@ import java.util.concurrent.atomic.AtomicReference
  */
 @Factory
 class SequentialJob {
-    private val job = AtomicReference<Job?>()
+    private val job = atomic<Job?>(null)
 
     /**
      * Cancels the previous job (if any) and launches a new one in the given [scope]. The new job uses [handledLaunch]
@@ -56,7 +56,7 @@ class SequentialJob {
                     block()
                 }
             }
-        job.set(newJob)
+        job.value = newJob
 
         newJob.invokeOnCompletion { job.compareAndSet(newJob, null) }
     }

@@ -20,14 +20,14 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.map.AndroidSharedMapViewModel
 import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.feature.map.MapScreen
+import org.meshtastic.feature.map.SharedMapViewModel
 
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
     entry<MapRoutes.Map> {
-        val viewModel = koinViewModel<AndroidSharedMapViewModel>()
+        val viewModel = koinViewModel<SharedMapViewModel>()
         MapScreen(
             viewModel = viewModel,
             onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },

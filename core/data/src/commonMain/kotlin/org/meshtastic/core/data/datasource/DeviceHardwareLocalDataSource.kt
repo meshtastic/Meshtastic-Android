@@ -18,7 +18,7 @@ package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
-import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 import org.meshtastic.core.database.entity.asEntity
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -26,7 +26,7 @@ import org.meshtastic.core.model.NetworkDeviceHardware
 
 @Single
 class DeviceHardwareLocalDataSource(
-    private val dbManager: DatabaseManager,
+    private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
 ) {
     private val deviceHardwareDao

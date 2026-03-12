@@ -20,11 +20,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 
-open class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionRepository) : ViewModel() {
+@KoinViewModel
+class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionRepository) : ViewModel() {
     val quickChatActions
         get() = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 

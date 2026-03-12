@@ -167,6 +167,11 @@ gradlePlugin {
             implementationClass = "KmpLibraryConventionPlugin"
         }
 
+        register("kmpJvmAndroid") {
+            id = "meshtastic.kmp.jvm.android"
+            implementationClass = "KmpJvmAndroidConventionPlugin"
+        }
+
         register("kmpLibraryCompose") {
             id = "meshtastic.kmp.library.compose"
             implementationClass = "KmpLibraryComposeConventionPlugin"

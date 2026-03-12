@@ -18,10 +18,13 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.kotlin.parcelize)
+    id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
@@ -31,6 +34,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.javax.inject)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
             api(libs.okio)
@@ -40,9 +44,6 @@ kotlin {
             api(libs.androidx.core.ktx)
             api(libs.nordic.common.core)
         }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

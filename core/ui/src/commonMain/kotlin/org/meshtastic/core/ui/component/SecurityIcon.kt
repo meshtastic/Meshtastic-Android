@@ -287,7 +287,7 @@ val Channel.isPreciseLocation: Boolean
 
 /** Extension property to check if MQTT is enabled for the channel. */
 val Channel.isMqttEnabled: Boolean
-    get() = settings.uplink_enabled ?: false
+    get() = settings.uplink_enabled
 
 /**
  * Overload for [SecurityIcon] that takes a [Channel] object to determine its security state.

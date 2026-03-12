@@ -24,6 +24,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     android {
         namespace = "org.meshtastic.core.database"
         withHostTest { isIncludeAndroidResources = true }
@@ -44,6 +46,7 @@ kotlin {
             implementation(libs.kermit)
         }
         commonTest.dependencies {
+            implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
         }
@@ -69,6 +72,7 @@ kotlin {
 }
 
 dependencies {
+    "kspJvm"(libs.androidx.room.compiler)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
 }

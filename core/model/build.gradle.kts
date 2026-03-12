@@ -19,12 +19,15 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
+    id("meshtastic.kmp.jvm.android")
     `maven-publish`
 }
 
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
@@ -38,6 +41,7 @@ kotlin {
             api(projects.core.common)
             api(projects.core.resources)
 
+            api(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.serialization.json)
             api(libs.kotlinx.datetime)
             implementation(libs.kermit)
@@ -49,14 +53,12 @@ kotlin {
             api(libs.androidx.core.ktx)
             implementation(libs.zxing.core)
         }
-        commonTest.dependencies { implementation(kotlin("test")) }
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.junit)
                 implementation(libs.robolectric)
                 implementation(libs.mockk)
                 implementation(libs.androidx.test.ext.junit)
-                implementation(kotlin("test"))
             }
         }
         val androidDeviceTest by getting {

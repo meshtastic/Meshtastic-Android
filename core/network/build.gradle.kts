@@ -18,10 +18,13 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.network"
@@ -31,6 +34,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.repository)
+            implementation(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.proto)
@@ -43,6 +47,8 @@ kotlin {
             implementation(libs.kermit)
         }
 
+        val jvmMain by getting { dependencies { implementation(libs.ktor.client.java) } }
+
         androidMain.dependencies {
             implementation(libs.org.eclipse.paho.client.mqttv3)
             implementation(libs.coil.network.okhttp)
@@ -50,6 +56,8 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
             implementation(libs.okhttp3.logging.interceptor)
         }
+
+        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }
 

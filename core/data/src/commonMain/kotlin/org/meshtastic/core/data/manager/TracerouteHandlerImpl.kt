@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
@@ -34,7 +35,6 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.MeshPacket
-import java.util.Locale
 
 @Single
 class TracerouteHandlerImpl(
@@ -83,7 +83,7 @@ class TracerouteHandlerImpl(
                 val elapsedMs = nowMillis - start
                 val seconds = elapsedMs / MILLIS_PER_SECOND
                 Logger.i { "Traceroute $requestId complete in $seconds s" }
-                val durationText = "Duration: %.1f s".format(Locale.US, seconds)
+                val durationText = "Duration: ${NumberFormatter.format(seconds, 1)} s"
                 "$full\n\n$durationText"
             } else {
                 full

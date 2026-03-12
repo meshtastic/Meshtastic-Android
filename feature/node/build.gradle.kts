@@ -23,6 +23,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.node"
@@ -32,6 +34,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(libs.coil)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -52,10 +57,21 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
             implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.markdown.renderer)
+            implementation(libs.markdown.renderer.m3)
+            implementation(libs.vico.compose)
+            implementation(libs.vico.compose.m2)
+            implementation(libs.vico.compose.m3)
+
+            // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
+            implementation(libs.jetbrains.compose.material3.adaptive)
+            implementation(libs.jetbrains.compose.material3.adaptive.layout)
+            implementation(libs.jetbrains.compose.material3.adaptive.navigation)
         }
 
         androidMain.dependencies {
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
+
             implementation(libs.accompanist.permissions)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.appcompat)
@@ -68,20 +84,11 @@ kotlin {
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
-            implementation(libs.vico.compose)
-            implementation(libs.vico.compose.m2)
-            implementation(libs.vico.compose.m3)
             implementation(libs.nordic.common.core)
             implementation(libs.nordic.common.permissions.ble)
-
-            // These were in googleImplementation, but KMP with android-kotlin-multiplatform-library
-            // handles flavors differently. For now, we put them in androidMain if they are needed.
-            // In a real KMP flavored module, we'd use different source sets.
-            // But Priority 4b suggests Option A: extract flavored stuff to app module.
-            // So InlineMap will move to app module soon.
-            implementation(libs.location.services)
-            implementation(libs.maps.compose)
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

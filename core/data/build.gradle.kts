@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.data"
@@ -54,6 +56,13 @@ kotlin {
             implementation(libs.androidx.core.location.altitude)
 
             // Needed because core:data references MeshtasticDatabase (supertype RoomDatabase)
+            implementation(libs.androidx.room.runtime)
+            implementation(libs.androidx.room.paging)
+            implementation(libs.androidx.sqlite.bundled)
+        }
+
+        jvmMain.dependencies {
+            // Room / SQLite runtime for JVM target
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.room.paging)
             implementation(libs.androidx.sqlite.bundled)

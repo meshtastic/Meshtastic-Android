@@ -80,7 +80,6 @@ data class Channel(val settings: ChannelSettings = default.settings, val loraCon
                         ModemPreset.LONG_MODERATE -> "LongMod"
                         ModemPreset.VERY_LONG_SLOW -> "VLongSlow"
                         ModemPreset.LONG_TURBO -> "LongTurbo"
-                        else -> "Invalid"
                     }
                 } else {
                     "Custom"

@@ -16,6 +16,7 @@
  */
 package org.meshtastic.app.navigation
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.EntryProviderScope
@@ -23,14 +24,14 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.messaging.AndroidContactsViewModel
-import org.meshtastic.app.messaging.AndroidMessageViewModel
-import org.meshtastic.app.messaging.AndroidQuickChatViewModel
 import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.ui.component.ScrollToTopEvent
+import org.meshtastic.feature.messaging.MessageViewModel
 import org.meshtastic.feature.messaging.QuickChatScreen
+import org.meshtastic.feature.messaging.QuickChatViewModel
 import org.meshtastic.feature.messaging.ui.contact.AdaptiveContactsScreen
+import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 
 @Suppress("LongMethod")
@@ -39,62 +40,17 @@ fun EntryProviderScope<NavKey>.contactsGraph(
     scrollToTopEvents: Flow<ScrollToTopEvent>,
 ) {
     entry<ContactsRoutes.ContactsGraph> {
-        val uiViewModel: UIViewModel = koinViewModel()
-        val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-        val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-        val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
-        val messageViewModel = koinViewModel<AndroidMessageViewModel>()
-
-        AdaptiveContactsScreen(
-            backStack = backStack,
-            contactsViewModel = contactsViewModel,
-            messageViewModel = messageViewModel,
-            scrollToTopEvents = scrollToTopEvents,
-            sharedContactRequested = sharedContactRequested,
-            requestChannelSet = requestChannelSet,
-            onHandleScannedUri = uiViewModel::handleScannedUri,
-            onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
-            onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
-        )
+        ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }
 
     entry<ContactsRoutes.Contacts> {
-        val uiViewModel: UIViewModel = koinViewModel()
-        val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-        val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-        val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
-        val messageViewModel = koinViewModel<AndroidMessageViewModel>()
-
-        AdaptiveContactsScreen(
-            backStack = backStack,
-            contactsViewModel = contactsViewModel,
-            messageViewModel = messageViewModel,
-            scrollToTopEvents = scrollToTopEvents,
-            sharedContactRequested = sharedContactRequested,
-            requestChannelSet = requestChannelSet,
-            onHandleScannedUri = uiViewModel::handleScannedUri,
-            onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
-            onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
-        )
+        ContactsEntryContent(backStack = backStack, scrollToTopEvents = scrollToTopEvents)
     }
 
     entry<ContactsRoutes.Messages> { args ->
-        val uiViewModel: UIViewModel = koinViewModel()
-        val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
-        val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
-        val contactsViewModel = koinViewModel<AndroidContactsViewModel>()
-        val messageViewModel = koinViewModel<AndroidMessageViewModel>()
-
-        AdaptiveContactsScreen(
+        ContactsEntryContent(
             backStack = backStack,
-            contactsViewModel = contactsViewModel,
-            messageViewModel = messageViewModel,
             scrollToTopEvents = scrollToTopEvents,
-            sharedContactRequested = sharedContactRequested,
-            requestChannelSet = requestChannelSet,
-            onHandleScannedUri = uiViewModel::handleScannedUri,
-            onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
-            onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
             initialContactKey = args.contactKey,
             initialMessage = args.message,
         )
@@ -102,7 +58,7 @@ fun EntryProviderScope<NavKey>.contactsGraph(
 
     entry<ContactsRoutes.Share> { args ->
         val message = args.message
-        val viewModel = koinViewModel<AndroidContactsViewModel>()
+        val viewModel = koinViewModel<ContactsViewModel>()
         ShareScreen(
             viewModel = viewModel,
             onConfirm = {
@@ -115,7 +71,35 @@ fun EntryProviderScope<NavKey>.contactsGraph(
     }
 
     entry<ContactsRoutes.QuickChat> {
-        val viewModel = koinViewModel<AndroidQuickChatViewModel>()
+        val viewModel = koinViewModel<QuickChatViewModel>()
         QuickChatScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
     }
+}
+
+@Composable
+private fun ContactsEntryContent(
+    backStack: NavBackStack<NavKey>,
+    scrollToTopEvents: Flow<ScrollToTopEvent>,
+    initialContactKey: String? = null,
+    initialMessage: String = "",
+) {
+    val uiViewModel: UIViewModel = koinViewModel()
+    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+    val contactsViewModel = koinViewModel<ContactsViewModel>()
+    val messageViewModel = koinViewModel<MessageViewModel>()
+
+    AdaptiveContactsScreen(
+        backStack = backStack,
+        contactsViewModel = contactsViewModel,
+        messageViewModel = messageViewModel,
+        scrollToTopEvents = scrollToTopEvents,
+        sharedContactRequested = sharedContactRequested,
+        requestChannelSet = requestChannelSet,
+        onHandleScannedUri = uiViewModel::handleScannedUri,
+        onClearSharedContactRequested = uiViewModel::clearSharedContactRequested,
+        onClearRequestChannelUrl = uiViewModel::clearRequestChannelUrl,
+        initialContactKey = initialContactKey,
+        initialMessage = initialMessage,
+    )
 }

@@ -27,10 +27,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
@@ -50,7 +53,8 @@ import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.ChannelSet
 
 @Suppress("LongParameterList", "TooManyFunctions")
-open class MessageViewModel(
+@KoinViewModel
+class MessageViewModel(
     savedStateHandle: SavedStateHandle,
     private val nodeRepository: NodeRepository,
     radioConfigRepository: RadioConfigRepository,
@@ -156,6 +160,20 @@ open class MessageViewModel(
             contactKeyForPagedMessages.value = contactKey
         }
         return pagedMessagesForContactKey
+    }
+
+    /**
+     * Returns a non-paged reactive [Flow] of messages for a conversation. Used by desktop targets that don't use
+     * paging-compose.
+     *
+     * @param contactKey The unique contact key identifying the conversation.
+     * @param limit Optional maximum number of messages to return (null = all).
+     */
+    fun getMessagesFlow(contactKey: String, limit: Int? = null): Flow<List<Message>> {
+        if (contactKeyForPagedMessages.value != contactKey) {
+            contactKeyForPagedMessages.value = contactKey
+        }
+        return flow { emitAll(packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)) }
     }
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.setShowQuickChat(it) }

@@ -16,11 +16,9 @@
  */
 package org.meshtastic.feature.messaging
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -28,9 +26,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -60,15 +55,14 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Reaction
-import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.new_messages_below
 import org.meshtastic.feature.messaging.component.MessageItem
+import org.meshtastic.feature.messaging.component.MessageStatusDialog
 import org.meshtastic.feature.messaging.component.ReactionDialog
+import org.meshtastic.feature.messaging.component.UnreadMessagesDivider
 
 internal data class MessageListHandlers(
     val onUnreadChanged: (Long, Long) -> Unit,
@@ -511,50 +505,4 @@ private fun UpdateUnreadCountPaged(
                 }
             }
     }
-}
-
-@Composable
-internal fun UnreadMessagesDivider(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        HorizontalDivider(modifier = Modifier.weight(1f))
-        Text(
-            text = stringResource(Res.string.new_messages_below),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-        HorizontalDivider(modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun MessageStatusDialog(
-    message: Message,
-    nodes: List<Node>,
-    ourNode: Node?,
-    resendOption: Boolean,
-    onResend: () -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val (title, text) = message.getStatusStringRes()
-    val relayNodeName by
-        remember(message.relayNode, nodes, ourNode) {
-            derivedStateOf {
-                message.relayNode?.let { relayNodeId ->
-                    Node.getRelayNode(relayNodeId, nodes, ourNode?.num)?.user?.long_name
-                }
-            }
-        }
-    DeliveryInfo(
-        title = title,
-        resendOption = resendOption,
-        text = text,
-        relayNodeName = relayNodeName,
-        relays = message.relays,
-        onConfirm = onResend,
-        onDismiss = onDismiss,
-    )
 }

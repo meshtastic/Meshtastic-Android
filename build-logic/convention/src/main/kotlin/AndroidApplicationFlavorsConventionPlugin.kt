@@ -21,6 +21,14 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureFlavors
 
+/**
+ * Flavor configuration for Android applications.
+ *
+ * Optimization note: This is nearly identical to AndroidLibraryFlavorsConventionPlugin.
+ * The underlying configureFlavors() function already handles both ApplicationExtension and LibraryExtension.
+ * Could be consolidated into a single plugin accepting CommonExtension, but kept separate for now
+ * to maintain explicit intent in build.gradle.kts declarations.
+ */
 class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {

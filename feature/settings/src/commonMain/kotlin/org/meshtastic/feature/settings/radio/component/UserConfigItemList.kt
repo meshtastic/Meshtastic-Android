@@ -55,8 +55,8 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val firmwareVersion = state.metadata?.firmware_version
     val capabilities = remember(firmwareVersion) { Capabilities(firmwareVersion) }
 
-    val validLongName = (formState.value.long_name ?: "").isNotBlank()
-    val validShortName = (formState.value.short_name ?: "").isNotBlank()
+    val validLongName = formState.value.long_name.isNotBlank()
+    val validShortName = formState.value.short_name.isNotBlank()
     val validNames = validLongName && validShortName
     val focusManager = LocalFocusManager.current
 
@@ -73,13 +73,13 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.user_config)) {
                 RegularPreference(
                     title = stringResource(Res.string.node_id),
-                    subtitle = formState.value.id ?: "",
+                    subtitle = formState.value.id,
                     onClick = {},
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.long_name),
-                    value = formState.value.long_name ?: "",
+                    value = formState.value.long_name,
                     maxSize = 39, // long_name max_size:40
                     enabled = state.connected,
                     isError = !validLongName,
@@ -91,7 +91,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.short_name),
-                    value = formState.value.short_name ?: "",
+                    value = formState.value.short_name,
                     maxSize = 4, // short_name max_size:5
                     enabled = state.connected,
                     isError = !validShortName,
@@ -103,7 +103,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 RegularPreference(
                     title = stringResource(Res.string.hardware_model),
-                    subtitle = formState.value.hw_model?.name ?: "",
+                    subtitle = formState.value.hw_model.name,
                     onClick = {},
                 )
                 HorizontalDivider()
@@ -121,7 +121,7 @@ fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.licensed_amateur_radio),
                     summary = stringResource(Res.string.licensed_amateur_radio_text),
-                    checked = formState.value.is_licensed ?: false,
+                    checked = formState.value.is_licensed,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(is_licensed = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

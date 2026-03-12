@@ -32,10 +32,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowInstant
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
@@ -211,6 +212,7 @@ class LogFilterManager {
     }
 }
 
+@KoinViewModel
 @Suppress("TooManyFunctions")
 open class DebugViewModel(
     private val meshLogRepository: MeshLogRepository,
@@ -335,7 +337,7 @@ open class DebugViewModel(
                 baseText
             }
 
-        val relayNode = packet.relay_node ?: 0
+        val relayNode = packet.relay_node
         var relayNodeAnnotation: String? = null
         val placeholder = "___RELAY_NODE___"
 
@@ -509,13 +511,13 @@ open class DebugViewModel(
         val info = NeighborInfo.ADAPTER.decode(payload)
         return buildString {
             appendLine("NeighborInfo:")
-            appendLine("  node_id: ${formatNodeWithShortName(info.node_id ?: 0)}")
-            appendLine("  last_sent_by_id: ${formatNodeWithShortName(info.last_sent_by_id ?: 0)}")
+            appendLine("  node_id: ${formatNodeWithShortName(info.node_id)}")
+            appendLine("  last_sent_by_id: ${formatNodeWithShortName(info.last_sent_by_id)}")
             appendLine("  node_broadcast_interval_secs: ${info.node_broadcast_interval_secs}")
             if (info.neighbors.isNotEmpty()) {
                 appendLine("  neighbors:")
                 info.neighbors.forEach {
-                    appendLine("    - node_id: ${formatNodeWithShortName(it.node_id ?: 0)} snr: ${it.snr}")
+                    appendLine("    - node_id: ${formatNodeWithShortName(it.node_id)} snr: ${it.snr}")
                 }
             }
         }

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
@@ -52,7 +53,8 @@ private const val HUNDRED = 100f
 private const val MILLIMETERS_PER_METER = 1000f
 
 @Suppress("TooManyFunctions")
-open class CompassViewModel(
+@KoinViewModel
+class CompassViewModel(
     private val headingProvider: CompassHeadingProvider,
     private val phoneLocationProvider: PhoneLocationProvider,
     private val magneticFieldProvider: MagneticFieldProvider,
@@ -72,10 +74,9 @@ open class CompassViewModel(
         targetPosition = targetPos
         targetPositionProto = node.position
         val targetColor = Color(node.colors.second)
-        val targetName =
-            (node.user.long_name ?: "").ifBlank { (node.user.short_name ?: "").ifBlank { node.num.toString() } }
+        val targetName = node.user.long_name.ifBlank { node.user.short_name.ifBlank { node.num.toString() } }
         targetPositionTimeSec =
-            node.position.timestamp?.takeIf { it > 0 }?.toLong() ?: node.position.time?.takeIf { it > 0 }?.toLong()
+            node.position.timestamp.takeIf { it > 0 }?.toLong() ?: node.position.time.takeIf { it > 0 }?.toLong()
 
         _uiState.update {
             it.copy(
@@ -207,10 +208,10 @@ open class CompassViewModel(
         val positionTime = targetPositionTimeSec
         if (positionTime == null || positionTime <= 0) return null
 
-        val gpsAccuracyMm = (position.gps_accuracy ?: 0).toFloat()
-        val pdop = position.PDOP ?: 0
-        val hdop = position.HDOP ?: 0
-        val vdop = position.VDOP ?: 0
+        val gpsAccuracyMm = position.gps_accuracy.toFloat()
+        val pdop = position.PDOP
+        val hdop = position.HDOP
+        val vdop = position.VDOP
         val dop: Float? =
             when {
                 pdop > 0 -> pdop / HUNDRED
@@ -225,7 +226,7 @@ open class CompassViewModel(
         }
 
         // Fallback: infer radius from precision bits if provided
-        val precisionBits = position.precision_bits ?: 0
+        val precisionBits = position.precision_bits
         if (precisionBits > 0) {
             return precisionBitsToMeters(precisionBits).toFloat()
         }

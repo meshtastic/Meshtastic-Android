@@ -17,8 +17,8 @@
 package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.FirmwareEdition
@@ -68,13 +68,13 @@ data class MetricsState(
     /** Finds the oldest timestamp (in seconds) among all collected metric types. */
     @Suppress("MagicNumber")
     fun oldestTimestampSeconds(): Long? {
-        val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics).mapNotNull { it.time?.toLong() }
-        val signalTimes = signalMetrics.mapNotNull { it.rx_time?.toLong() }
+        val telemetryTimes = (deviceMetrics + powerMetrics + hostMetrics).map { it.time.toLong() }
+        val signalTimes = signalMetrics.map { it.rx_time.toLong() }
         val logTimes =
             (tracerouteRequests + tracerouteResults + neighborInfoRequests + neighborInfoResults + paxMetrics).map {
                 it.received_date / 1000L
             }
-        val positionTimes = positionLogs.mapNotNull { it.time?.toLong() }
+        val positionTimes = positionLogs.map { it.time.toLong() }
 
         val allTimes = telemetryTimes + signalTimes + logTimes + positionTimes
         return allTimes.minOrNull()

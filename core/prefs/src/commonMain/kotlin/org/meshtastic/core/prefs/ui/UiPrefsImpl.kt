@@ -20,6 +20,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import kotlinx.atomicfu.atomic
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,8 +32,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.UiPrefs
-import java.util.concurrent.ConcurrentHashMap
 
 @Single
 class UiPrefsImpl(
@@ -41,32 +43,32 @@ class UiPrefsImpl(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
-    private val provideNodeLocationFlows = ConcurrentHashMap<Int, StateFlow<Boolean>>()
+    private val provideNodeLocationFlows = atomic(persistentMapOf<Int, StateFlow<Boolean>>())
 
     override val hasShownNotPairedWarning: StateFlow<Boolean> =
         dataStore.data
             .map { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] ?: false }
             .stateIn(scope, SharingStarted.Eagerly, false)
 
-    override fun setHasShownNotPairedWarning(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] = value } }
+    override fun setHasShownNotPairedWarning(shown: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_HAS_SHOWN_NOT_PAIRED_WARNING_PREF] = shown } }
     }
 
     override val showQuickChat: StateFlow<Boolean> =
         dataStore.data.map { it[KEY_SHOW_QUICK_CHAT_PREF] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
 
-    override fun setShowQuickChat(value: Boolean) {
-        scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = value } }
+    override fun setShowQuickChat(show: Boolean) {
+        scope.launch { dataStore.edit { it[KEY_SHOW_QUICK_CHAT_PREF] = show } }
     }
 
     override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
-        provideNodeLocationFlows.getOrPut(nodeNum) {
+        cachedFlow(provideNodeLocationFlows, nodeNum) {
             val key = booleanPreferencesKey(provideLocationKey(nodeNum))
             dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
         }
 
-    override fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean) {
-        scope.launch { dataStore.edit { it[booleanPreferencesKey(provideLocationKey(nodeNum))] = value } }
+    override fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean) {
+        scope.launch { dataStore.edit { it[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
     private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"

@@ -19,6 +19,7 @@ package org.meshtastic.app.repository.radio
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransport
 
 /**
  * Entry point for create radio backend instances given a specific address.
@@ -48,7 +49,7 @@ class InterfaceFactory(
 
     fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
-    fun createInterface(address: String, service: RadioInterfaceService): IRadioInterface {
+    fun createInterface(address: String, service: RadioInterfaceService): RadioTransport {
         val (spec, rest) = splitAddress(address)
         return spec?.createInterface(rest, service) ?: nopInterface
     }

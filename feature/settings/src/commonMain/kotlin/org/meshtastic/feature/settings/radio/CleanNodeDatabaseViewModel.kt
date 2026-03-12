@@ -22,6 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.domain.usecase.settings.CleanNodeDatabaseUseCase
 import org.meshtastic.core.model.Node
@@ -37,7 +38,8 @@ private const val MIN_DAYS_THRESHOLD = 7f
  * ViewModel for [CleanNodeDatabaseScreen]. Manages the state and logic for cleaning the node database based on
  * specified criteria. The "older than X days" filter is always active.
  */
-open class CleanNodeDatabaseViewModel(
+@KoinViewModel
+class CleanNodeDatabaseViewModel(
     private val cleanNodeDatabaseUseCase: CleanNodeDatabaseUseCase,
     private val alertManager: AlertManager,
 ) : ViewModel() {
