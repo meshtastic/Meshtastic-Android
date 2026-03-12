@@ -56,6 +56,7 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 
+@Suppress("DEPRECATION")
 @Composable
 fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -79,7 +80,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.always_point_north),
                     summary = stringResource(Res.string.config_display_compass_north_top_summary),
-                    checked = formState.value.compass_north_top ?: false,
+                    checked = formState.value.compass_north_top,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(compass_north_top = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -89,7 +90,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.use_12h_format),
                     summary = stringResource(Res.string.display_time_in_12h_format),
                     enabled = state.connected,
-                    checked = formState.value.use_12h_clock ?: false,
+                    checked = formState.value.use_12h_clock,
                     onCheckedChange = { formState.value = formState.value.copy(use_12h_clock = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
                 )
@@ -97,7 +98,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.bold_heading),
                     summary = stringResource(Res.string.config_display_heading_bold_summary),
-                    checked = formState.value.heading_bold ?: false,
+                    checked = formState.value.heading_bold,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(heading_bold = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -108,7 +109,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_display_units_summary),
                     enabled = state.connected,
                     items = Config.DisplayConfig.DisplayUnits.entries.map { it to it.name },
-                    selectedItem = formState.value.units ?: Config.DisplayConfig.DisplayUnits.METRIC,
+                    selectedItem = formState.value.units,
                     onItemSelected = { formState.value = formState.value.copy(units = it) },
                 )
             }
@@ -123,7 +124,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     items = screenOnIntervals.map { it to it.toDisplayString() },
                     selectedItem =
-                    screenOnIntervals.find { it.value == (formState.value.screen_on_secs ?: 0).toLong() }
+                    screenOnIntervals.find { it.value == formState.value.screen_on_secs.toLong() }
                         ?: screenOnIntervals.first(),
                     onItemSelected = { formState.value = formState.value.copy(screen_on_secs = it.value.toInt()) },
                 )
@@ -134,7 +135,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     enabled = state.connected,
                     items = carouselIntervals.map { it to it.toDisplayString() },
                     selectedItem =
-                    carouselIntervals.find { it.value == (formState.value.auto_screen_carousel_secs ?: 0).toLong() }
+                    carouselIntervals.find { it.value == formState.value.auto_screen_carousel_secs.toLong() }
                         ?: carouselIntervals.first(),
                     onItemSelected = {
                         formState.value = formState.value.copy(auto_screen_carousel_secs = it.value.toInt())
@@ -144,7 +145,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.wake_on_tap_or_motion),
                     summary = stringResource(Res.string.config_display_wake_on_tap_or_motion_summary),
-                    checked = formState.value.wake_on_tap_or_motion ?: false,
+                    checked = formState.value.wake_on_tap_or_motion,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(wake_on_tap_or_motion = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -153,7 +154,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 SwitchPreference(
                     title = stringResource(Res.string.flip_screen),
                     summary = stringResource(Res.string.config_display_flip_screen_summary),
-                    checked = formState.value.flip_screen ?: false,
+                    checked = formState.value.flip_screen,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(flip_screen = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -164,7 +165,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_display_displaymode_summary),
                     enabled = state.connected,
                     items = Config.DisplayConfig.DisplayMode.entries.map { it to it.name },
-                    selectedItem = formState.value.displaymode ?: Config.DisplayConfig.DisplayMode.DEFAULT,
+                    selectedItem = formState.value.displaymode,
                     onItemSelected = { formState.value = formState.value.copy(displaymode = it) },
                 )
                 HorizontalDivider()
@@ -173,7 +174,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     summary = stringResource(Res.string.config_display_oled_summary),
                     enabled = state.connected,
                     items = Config.DisplayConfig.OledType.entries.map { it to it.name },
-                    selectedItem = formState.value.oled ?: Config.DisplayConfig.OledType.OLED_AUTO,
+                    selectedItem = formState.value.oled,
                     onItemSelected = { formState.value = formState.value.copy(oled = it) },
                 )
                 HorizontalDivider()
@@ -181,8 +182,7 @@ fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.compass_orientation),
                     enabled = state.connected,
                     items = Config.DisplayConfig.CompassOrientation.entries.map { it to it.name },
-                    selectedItem =
-                    formState.value.compass_orientation ?: Config.DisplayConfig.CompassOrientation.DEGREES_0,
+                    selectedItem = formState.value.compass_orientation,
                     onItemSelected = { formState.value = formState.value.copy(compass_orientation = it) },
                 )
             }

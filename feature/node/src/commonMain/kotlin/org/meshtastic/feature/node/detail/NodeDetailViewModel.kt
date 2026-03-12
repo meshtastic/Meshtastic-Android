@@ -100,24 +100,20 @@ class NodeDetailViewModel(
             is NodeMenuAction.Mute -> nodeManagementActions.requestMuteNode(viewModelScope, action.node)
             is NodeMenuAction.Favorite -> nodeManagementActions.requestFavoriteNode(viewModelScope, action.node)
             is NodeMenuAction.RequestUserInfo ->
-                nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name ?: "")
+                nodeRequestActions.requestUserInfo(viewModelScope, action.node.num, action.node.user.long_name)
             is NodeMenuAction.RequestNeighborInfo ->
-                nodeRequestActions.requestNeighborInfo(
-                    viewModelScope,
-                    action.node.num,
-                    action.node.user.long_name ?: "",
-                )
+                nodeRequestActions.requestNeighborInfo(viewModelScope, action.node.num, action.node.user.long_name)
             is NodeMenuAction.RequestPosition ->
-                nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.long_name ?: "")
+                nodeRequestActions.requestPosition(viewModelScope, action.node.num, action.node.user.long_name)
             is NodeMenuAction.RequestTelemetry ->
                 nodeRequestActions.requestTelemetry(
                     viewModelScope,
                     action.node.num,
-                    action.node.user.long_name ?: "",
+                    action.node.user.long_name,
                     action.type,
                 )
             is NodeMenuAction.TraceRoute ->
-                nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.long_name ?: "")
+                nodeRequestActions.requestTraceroute(viewModelScope, action.node.num, action.node.user.long_name)
             else -> {}
         }
     }

@@ -124,7 +124,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
-    val data = state.deviceMetrics.filter { (it.time ?: 0).toLong() >= timeFrame.timeThreshold() }
+    val data = state.deviceMetrics.filter { it.time.toLong() >= timeFrame.timeThreshold() }
     val snackbarHostState = remember { SnackbarHostState() }
 
     val hasBattery = remember(data) { data.any { it.device_metrics?.battery_level != null } }
@@ -186,7 +186,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         titleRes = Res.string.device_metrics_log,
         nodeName = state.node?.user?.long_name ?: "",
         data = data,
-        timeProvider = { (it.time ?: 0).toDouble() },
+        timeProvider = { it.time.toDouble() },
         infoData = infoItems,
         snackbarHostState = snackbarHostState,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.DEVICE) },
@@ -213,8 +213,8 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 itemsIndexed(data) { _, telemetry ->
                     DeviceMetricsCard(
                         telemetry = telemetry,
-                        isSelected = (telemetry.time ?: 0).toDouble() == selectedX,
-                        onClick = { onCardClick((telemetry.time ?: 0).toDouble()) },
+                        isSelected = telemetry.time.toDouble() == selectedX,
+                        onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
                 }
             }
@@ -288,19 +288,19 @@ private fun DeviceMetricsChart(
                     lineSeries {
                         if (batteryData.isNotEmpty()) {
                             series(
-                                x = batteryData.map { it.time ?: 0 },
+                                x = batteryData.map { it.time },
                                 y = batteryData.map { (it.device_metrics?.battery_level ?: 0).toFloat() },
                             )
                         }
                         if (chUtilData.isNotEmpty()) {
                             series(
-                                x = chUtilData.map { it.time ?: 0 },
+                                x = chUtilData.map { it.time },
                                 y = chUtilData.map { it.device_metrics?.channel_utilization ?: 0f },
                             )
                         }
                         if (airUtilData.isNotEmpty()) {
                             series(
-                                x = airUtilData.map { it.time ?: 0 },
+                                x = airUtilData.map { it.time },
                                 y = airUtilData.map { it.device_metrics?.air_util_tx ?: 0f },
                             )
                         }
@@ -310,7 +310,7 @@ private fun DeviceMetricsChart(
                 if (voltageData.isNotEmpty()) {
                     lineSeries {
                         series(
-                            x = voltageData.map { it.time ?: 0 },
+                            x = voltageData.map { it.time },
                             y = voltageData.map { it.device_metrics?.voltage ?: 0f },
                         )
                     }
@@ -421,7 +421,7 @@ private fun DeviceMetricsChartPreview() {
 @Suppress("LongMethod")
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.device_metrics
-    val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
+    val time = telemetry.time.toLong() * MS_PER_SEC
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,

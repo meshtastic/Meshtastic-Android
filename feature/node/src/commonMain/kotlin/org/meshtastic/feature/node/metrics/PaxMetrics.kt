@@ -195,7 +195,7 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel, onNavigateUp: () -> Uni
             paxMetrics
                 .map {
                     val t = (it.first.received_date / CommonCharts.MS_PER_SEC).toInt()
-                    Triple(t, it.second.ble ?: 0, it.second.wifi ?: 0)
+                    Triple(t, it.second.ble, it.second.wifi)
                 }
                 .sortedBy { it.first }
         }
@@ -305,19 +305,19 @@ fun PaxMetricsItem(log: MeshLog, pax: ProtoPaxcount, isSelected: Boolean, onClic
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
                     MetricIndicator(PaxSeries.PAX.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(text = "PAX: ${(pax.ble ?: 0) + (pax.wifi ?: 0)}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "PAX: ${pax.ble + pax.wifi}", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.width(8.dp))
                     MetricIndicator(PaxSeries.BLE.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(text = "B:${pax.ble ?: 0}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "B:${pax.ble}", style = MaterialTheme.typography.bodyLarge)
                     Spacer(Modifier.width(8.dp))
                     MetricIndicator(PaxSeries.WIFI.color)
                     Spacer(Modifier.width(4.dp))
-                    Text(text = "W:${pax.wifi ?: 0}", style = MaterialTheme.typography.bodyLarge)
+                    Text(text = "W:${pax.wifi}", style = MaterialTheme.typography.bodyLarge)
                 }
 
                 Text(
-                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime ?: 0),
+                    text = stringResource(Res.string.uptime) + ": " + formatUptime(pax.uptime),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.End,
                 )

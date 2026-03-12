@@ -97,8 +97,7 @@ fun TracerouteLogScreen(
         }
     }
 
-    fun getUsername(nodeNum: Int): String =
-        with(viewModel.getUser(nodeNum)) { "${long_name ?: ""} (${short_name ?: ""})" }
+    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$long_name ($short_name)" }
 
     val statusGreen = MaterialTheme.colorScheme.StatusGreen
     val statusYellow = MaterialTheme.colorScheme.StatusYellow

@@ -200,7 +200,7 @@ constructor(
 
             @Suppress("MagicNumber")
             val nodeName =
-                node.user.long_name?.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
+                node.user.long_name.takeIf { it.isNotBlank() }?.let { UiText.DynamicString(it) }
                     ?: UiText.Resource(Res.string.fallback_node_name, node.user.id.takeLast(4))
 
             NodeDetailUiState(

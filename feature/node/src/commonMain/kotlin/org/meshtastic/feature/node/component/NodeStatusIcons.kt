@@ -181,7 +181,7 @@ private fun StatusBadge(
     tint: Color = LocalContentColor.current,
 ) {
     TooltipBox(
-        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(TooltipAnchorPosition.Above),
         tooltip = { PlainTooltip { Text(stringResource(tooltipText)) } },
         state = rememberTooltipState(),
     ) {

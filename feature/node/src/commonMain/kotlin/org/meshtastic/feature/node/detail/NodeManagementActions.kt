@@ -70,10 +70,7 @@ constructor(
     fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(
-                    if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add,
-                    node.user.long_name ?: "",
-                )
+                getString(if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add, node.user.long_name)
             alertManager.showAlert(
                 titleRes = Res.string.ignore,
                 message = message,
@@ -89,7 +86,7 @@ constructor(
     fun requestMuteNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
-                getString(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.user.long_name ?: "")
+                getString(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.user.long_name)
             alertManager.showAlert(
                 titleRes = if (node.isMuted) Res.string.unmute else Res.string.mute_notifications,
                 message = message,
@@ -107,7 +104,7 @@ constructor(
             val message =
                 getString(
                     if (node.isFavorite) Res.string.favorite_remove else Res.string.favorite_add,
-                    node.user.long_name ?: "",
+                    node.user.long_name,
                 )
             alertManager.showAlert(
                 titleRes = Res.string.favorite,

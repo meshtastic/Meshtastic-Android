@@ -59,7 +59,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
             TitledCard(title = stringResource(Res.string.remote_hardware_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.remote_hardware_enabled),
-                    checked = formState.value.enabled ?: false,
+                    checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -67,7 +67,7 @@ fun RemoteHardwareConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Un
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.allow_undefined_pin_access),
-                    checked = formState.value.allow_undefined_pin_access ?: false,
+                    checked = formState.value.allow_undefined_pin_access,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(allow_undefined_pin_access = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

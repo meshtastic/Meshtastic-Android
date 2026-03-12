@@ -167,7 +167,7 @@ internal fun EnvironmentMetrics(
                         add(
                             VectorMetricInfo(
                                 label = Res.string.wind,
-                                value = ws.toFloat().toSpeedString(displayUnits),
+                                value = ws.toSpeedString(displayUnits),
                                 icon = Icons.Outlined.Navigation,
                                 rotateIcon = normalizedBearing.toFloat(),
                             ),

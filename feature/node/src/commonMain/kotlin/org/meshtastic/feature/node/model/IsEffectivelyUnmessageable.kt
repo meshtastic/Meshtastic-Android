@@ -20,4 +20,4 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
 
 val Node.isEffectivelyUnmessageable: Boolean
-    get() = user.is_unmessagable ?: (user.role?.isUnmessageableRole() == true)
+    get() = user.is_unmessagable ?: user.role.isUnmessageableRole()

@@ -50,7 +50,7 @@ data class MeshUser(
     /** Create our model object from a protobuf. */
     constructor(
         p: org.meshtastic.proto.User,
-    ) : this(p.id, p.long_name ?: "", p.short_name ?: "", p.hw_model, p.is_licensed, p.role.value)
+    ) : this(p.id, p.long_name, p.short_name, p.hw_model, p.is_licensed, p.role.value)
 
     /**
      * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null
@@ -100,10 +100,10 @@ data class Position(
         degD(position.longitude_i ?: 0),
         position.altitude ?: 0,
         if (position.time != 0) position.time else defaultTime,
-        position.sats_in_view ?: 0,
+        position.sats_in_view,
         position.ground_speed ?: 0,
         position.ground_track ?: 0,
-        position.precision_bits ?: 0,
+        position.precision_bits,
     )
 
     // / @return distance in meters to some other node (or null if unknown)

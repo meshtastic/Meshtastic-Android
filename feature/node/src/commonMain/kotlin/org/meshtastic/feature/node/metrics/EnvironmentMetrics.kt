@@ -97,7 +97,7 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
         titleRes = Res.string.env_metrics_log,
         nodeName = state.node?.user?.long_name ?: "",
         data = filteredTelemetries,
-        timeProvider = { (it.time ?: 0).toDouble() },
+        timeProvider = { it.time.toDouble() },
         infoData = listOf(InfoDialogData(Res.string.iaq, Res.string.iaq_definition, Environment.IAQ.color)),
         snackbarHostState = snackbarHostState,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.ENVIRONMENT) },
@@ -125,8 +125,8 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Un
                     EnvironmentMetricsCard(
                         telemetry = telemetry,
                         environmentDisplayFahrenheit = state.isFahrenheit,
-                        isSelected = (telemetry.time ?: 0).toDouble() == selectedX,
-                        onClick = { onCardClick((telemetry.time ?: 0).toDouble()) },
+                        isSelected = telemetry.time.toDouble() == selectedX,
+                        onClick = { onCardClick(telemetry.time.toDouble()) },
                     )
                 }
             }
@@ -386,7 +386,7 @@ private fun EnvironmentMetricsCard(
 @Composable
 private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environment_metrics ?: org.meshtastic.proto.EnvironmentMetrics()
-    val time = (telemetry.time ?: 0).toLong() * MS_PER_SEC
+    val time = telemetry.time.toLong() * MS_PER_SEC
     Column(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
         /* Time and Temperature */
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {

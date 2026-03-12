@@ -52,6 +52,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfig
 
+@Suppress("DEPRECATION")
 @Composable
 fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
@@ -100,21 +101,21 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_a_port),
-                    value = formState.value.inputbroker_pin_a ?: 0,
+                    value = formState.value.inputbroker_pin_a,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(inputbroker_pin_a = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_b_port),
-                    value = formState.value.inputbroker_pin_b ?: 0,
+                    value = formState.value.inputbroker_pin_b,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(inputbroker_pin_b = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.gpio_pin_for_rotary_encoder_press_port),
-                    value = formState.value.inputbroker_pin_press ?: 0,
+                    value = formState.value.inputbroker_pin_press,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(inputbroker_pin_press = it) },
@@ -123,8 +124,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     title = stringResource(Res.string.generate_input_event_on_press),
                     enabled = state.connected,
                     items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
-                    selectedItem =
-                    formState.value.inputbroker_event_press ?: ModuleConfig.CannedMessageConfig.InputEventChar.NONE,
+                    selectedItem = formState.value.inputbroker_event_press,
                     onItemSelected = { formState.value = formState.value.copy(inputbroker_event_press = it) },
                 )
                 HorizontalDivider()
@@ -132,8 +132,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     title = stringResource(Res.string.generate_input_event_on_cw),
                     enabled = state.connected,
                     items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
-                    selectedItem =
-                    formState.value.inputbroker_event_cw ?: ModuleConfig.CannedMessageConfig.InputEventChar.NONE,
+                    selectedItem = formState.value.inputbroker_event_cw,
                     onItemSelected = { formState.value = formState.value.copy(inputbroker_event_cw = it) },
                 )
                 HorizontalDivider()
@@ -141,14 +140,13 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                     title = stringResource(Res.string.generate_input_event_on_ccw),
                     enabled = state.connected,
                     items = ModuleConfig.CannedMessageConfig.InputEventChar.entries.map { it to it.name },
-                    selectedItem =
-                    formState.value.inputbroker_event_ccw ?: ModuleConfig.CannedMessageConfig.InputEventChar.NONE,
+                    selectedItem = formState.value.inputbroker_event_ccw,
                     onItemSelected = { formState.value = formState.value.copy(inputbroker_event_ccw = it) },
                 )
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.up_down_select_input_enabled),
-                    checked = formState.value.updown1_enabled ?: false,
+                    checked = formState.value.updown1_enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(updown1_enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -156,7 +154,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.allow_input_source),
-                    value = formState.value.allow_input_source ?: "",
+                    value = formState.value.allow_input_source,
                     maxSize = 63, // allow_input_source max_size:16
                     enabled = state.connected,
                     isError = false,
@@ -167,7 +165,7 @@ fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Uni
                 )
                 SwitchPreference(
                     title = stringResource(Res.string.send_bell),
-                    checked = formState.value.send_bell ?: false,
+                    checked = formState.value.send_bell,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(send_bell = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

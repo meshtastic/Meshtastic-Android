@@ -60,7 +60,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
             TitledCard(title = stringResource(Res.string.neighbor_info_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.neighbor_info_enabled),
-                    checked = formState.value.enabled ?: false,
+                    checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -68,7 +68,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.update_interval_seconds),
-                    value = formState.value.update_interval ?: 0,
+                    value = formState.value.update_interval,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(update_interval = it) },
@@ -77,7 +77,7 @@ fun NeighborInfoConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit
                 SwitchPreference(
                     title = stringResource(Res.string.transmit_over_lora),
                     summary = stringResource(Res.string.config_device_transmitOverLora_summary),
-                    checked = formState.value.transmit_over_lora ?: false,
+                    checked = formState.value.transmit_over_lora,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(transmit_over_lora = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

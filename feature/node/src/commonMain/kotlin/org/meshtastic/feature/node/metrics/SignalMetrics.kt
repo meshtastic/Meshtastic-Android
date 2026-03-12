@@ -87,7 +87,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val timeFrame by viewModel.timeFrame.collectAsStateWithLifecycle()
     val availableTimeFrames by viewModel.availableTimeFrames.collectAsStateWithLifecycle()
-    val data = state.signalMetrics.filter { (it.rx_time ?: 0).toLong() >= timeFrame.timeThreshold() }
+    val data = state.signalMetrics.filter { it.rx_time.toLong() >= timeFrame.timeThreshold() }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
@@ -107,7 +107,7 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
         titleRes = Res.string.signal_quality,
         nodeName = state.node?.user?.long_name ?: "",
         data = data,
-        timeProvider = { (it.rx_time ?: 0).toDouble() },
+        timeProvider = { it.rx_time.toDouble() },
         snackbarHostState = snackbarHostState,
         onRequestTelemetry = { viewModel.requestTelemetry(TelemetryType.LOCAL_STATS) },
         infoData =
@@ -137,8 +137,8 @@ fun SignalMetricsScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
                 itemsIndexed(data) { _, meshPacket ->
                     SignalMetricsCard(
                         meshPacket = meshPacket,
-                        isSelected = (meshPacket.rx_time ?: 0).toDouble() == selectedX,
-                        onClick = { onCardClick((meshPacket.rx_time ?: 0).toDouble()) },
+                        isSelected = meshPacket.rx_time.toDouble() == selectedX,
+                        onClick = { onCardClick(meshPacket.rx_time.toDouble()) },
                     )
                 }
             }
@@ -162,17 +162,17 @@ private fun SignalMetricsChart(
         val rssiColor = SignalMetric.RSSI.color
         val snrColor = SignalMetric.SNR.color
 
-        val rssiData = remember(meshPackets) { meshPackets.filter { (it.rx_rssi ?: 0) != 0 } }
-        val snrData = remember(meshPackets) { meshPackets.filter { !((it.rx_snr ?: Float.NaN).isNaN()) } }
+        val rssiData = remember(meshPackets) { meshPackets.filter { it.rx_rssi != 0 } }
+        val snrData = remember(meshPackets) { meshPackets.filter { !it.rx_snr.isNaN() } }
 
         LaunchedEffect(rssiData, snrData) {
             modelProducer.runTransaction {
                 if (rssiData.isNotEmpty()) {
                     /* Use separate lineSeries calls to associate them with different vertical axes */
-                    lineSeries { series(x = rssiData.map { it.rx_time ?: 0 }, y = rssiData.map { it.rx_rssi ?: 0 }) }
+                    lineSeries { series(x = rssiData.map { it.rx_time }, y = rssiData.map { it.rx_rssi }) }
                 }
                 if (snrData.isNotEmpty()) {
-                    lineSeries { series(x = snrData.map { it.rx_time ?: 0 }, y = snrData.map { it.rx_snr ?: 0f }) }
+                    lineSeries { series(x = snrData.map { it.rx_time }, y = snrData.map { it.rx_snr }) }
                 }
             }
         }
@@ -260,7 +260,7 @@ private fun SignalMetricsChart(
 
 @Composable
 private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onClick: () -> Unit) {
-    val time = (meshPacket.rx_time ?: 0).toLong() * MS_PER_SEC
+    val time = meshPacket.rx_time.toLong() * MS_PER_SEC
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -296,14 +296,14 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                                 MetricIndicator(SignalMetric.RSSI.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "%.0f dBm".format((meshPacket.rx_rssi ?: 0).toFloat()),
+                                    text = "%.0f dBm".format(meshPacket.rx_rssi.toFloat()),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 MetricIndicator(SignalMetric.SNR.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "%.1f dB".format(meshPacket.rx_snr ?: 0f),
+                                    text = "%.1f dB".format(meshPacket.rx_snr),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }
@@ -312,7 +312,7 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
 
                     /* Signal Indicator */
                     Box(modifier = Modifier.weight(weight = 3f).height(IntrinsicSize.Max)) {
-                        LoraSignalIndicator(meshPacket.rx_snr ?: 0f, meshPacket.rx_rssi ?: 0)
+                        LoraSignalIndicator(meshPacket.rx_snr, meshPacket.rx_rssi)
                     }
                 }
             }

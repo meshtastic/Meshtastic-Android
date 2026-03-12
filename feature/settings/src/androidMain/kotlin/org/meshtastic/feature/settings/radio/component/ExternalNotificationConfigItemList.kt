@@ -143,7 +143,7 @@ fun ExternalNotificationConfigScreen(
             TitledCard(title = stringResource(Res.string.external_notification_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.external_notification_enabled),
-                    checked = formState.value.enabled ?: false,
+                    checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -155,7 +155,7 @@ fun ExternalNotificationConfigScreen(
             TitledCard(title = stringResource(Res.string.notifications_on_message_receipt)) {
                 SwitchPreference(
                     title = stringResource(Res.string.alert_message_led),
-                    checked = formState.value.alert_message ?: false,
+                    checked = formState.value.alert_message,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(alert_message = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -163,7 +163,7 @@ fun ExternalNotificationConfigScreen(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.alert_message_buzzer),
-                    checked = formState.value.alert_message_buzzer ?: false,
+                    checked = formState.value.alert_message_buzzer,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(alert_message_buzzer = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -171,7 +171,7 @@ fun ExternalNotificationConfigScreen(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.alert_message_vibra),
-                    checked = formState.value.alert_message_vibra ?: false,
+                    checked = formState.value.alert_message_vibra,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(alert_message_vibra = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -183,7 +183,7 @@ fun ExternalNotificationConfigScreen(
             TitledCard(title = stringResource(Res.string.notifications_on_alert_bell_receipt)) {
                 SwitchPreference(
                     title = stringResource(Res.string.alert_bell_led),
-                    checked = formState.value.alert_bell ?: false,
+                    checked = formState.value.alert_bell,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(alert_bell = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -191,7 +191,7 @@ fun ExternalNotificationConfigScreen(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.alert_bell_buzzer),
-                    checked = formState.value.alert_bell_buzzer ?: false,
+                    checked = formState.value.alert_bell_buzzer,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(alert_bell_buzzer = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -199,7 +199,7 @@ fun ExternalNotificationConfigScreen(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.alert_bell_vibra),
-                    checked = formState.value.alert_bell_vibra ?: false,
+                    checked = formState.value.alert_bell_vibra,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(alert_bell_vibra = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -213,15 +213,15 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.output_led_gpio),
                     items = gpio,
-                    selectedItem = (formState.value.output ?: 0).toLong(),
+                    selectedItem = formState.value.output.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy(output = it.toInt()) },
                 )
-                if (formState.value.output ?: 0 != 0) {
+                if (formState.value.output != 0) {
                     HorizontalDivider()
                     SwitchPreference(
                         title = stringResource(Res.string.output_led_active_high),
-                        checked = formState.value.active ?: false,
+                        checked = formState.value.active,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy(active = it) },
                         containerColor = CardDefaults.cardColors().containerColor,
@@ -231,15 +231,15 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.output_buzzer_gpio),
                     items = gpio,
-                    selectedItem = (formState.value.output_buzzer ?: 0).toLong(),
+                    selectedItem = formState.value.output_buzzer.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy(output_buzzer = it.toInt()) },
                 )
-                if (formState.value.output_buzzer ?: 0 != 0) {
+                if (formState.value.output_buzzer != 0) {
                     HorizontalDivider()
                     SwitchPreference(
                         title = stringResource(Res.string.use_pwm_buzzer),
-                        checked = formState.value.use_pwm ?: false,
+                        checked = formState.value.use_pwm,
                         enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy(use_pwm = it) },
                         containerColor = CardDefaults.cardColors().containerColor,
@@ -249,7 +249,7 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.output_vibra_gpio),
                     items = gpio,
-                    selectedItem = (formState.value.output_vibra ?: 0).toLong(),
+                    selectedItem = formState.value.output_vibra.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy(output_vibra = it.toInt()) },
                 )
@@ -258,7 +258,7 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.output_duration_milliseconds),
                     items = outputItems.map { it.value to it.toDisplayString() },
-                    selectedItem = (formState.value.output_ms ?: 0).toLong(),
+                    selectedItem = formState.value.output_ms.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy(output_ms = it.toInt()) },
                 )
@@ -267,7 +267,7 @@ fun ExternalNotificationConfigScreen(
                 DropDownPreference(
                     title = stringResource(Res.string.nag_timeout_seconds),
                     items = nagItems.map { it.value to it.toDisplayString() },
-                    selectedItem = (formState.value.nag_timeout ?: 0).toLong(),
+                    selectedItem = formState.value.nag_timeout.toLong(),
                     enabled = state.connected,
                     onItemSelected = { formState.value = formState.value.copy(nag_timeout = it.toInt()) },
                 )
@@ -318,7 +318,7 @@ fun ExternalNotificationConfigScreen(
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.use_i2s_as_buzzer),
-                    checked = formState.value.use_i2s_as_buzzer ?: false,
+                    checked = formState.value.use_i2s_as_buzzer,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(use_i2s_as_buzzer = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

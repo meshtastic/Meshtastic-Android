@@ -311,8 +311,8 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     val env = node.environmentMetrics
     val pax = node.paxcounter
 
-    if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0) {
-        items.add { PaxcountInfo(pax = "B:${pax.ble ?: 0} W:${pax.wifi ?: 0}", contentColor = contentColor) }
+    if (pax.ble != 0 || pax.wifi != 0) {
+        items.add { PaxcountInfo(pax = "B:${pax.ble} W:${pax.wifi}", contentColor = contentColor) }
     }
 
     if ((env.temperature ?: 0f) != 0f) {

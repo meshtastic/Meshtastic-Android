@@ -109,7 +109,7 @@ interface NodeInfoDao {
         val incomingKey = incomingNode.publicKey
 
         val incomingHasKey = (incomingKey?.size ?: 0) == KEY_SIZE
-        val existingHasKey = (existingKey?.size ?: 0) == KEY_SIZE && existingKey != NodeEntity.ERROR_BYTE_STRING
+        val existingHasKey = existingKey.size == KEY_SIZE && existingKey != NodeEntity.ERROR_BYTE_STRING
 
         return when {
             incomingHasKey -> {
@@ -143,7 +143,7 @@ interface NodeInfoDao {
 
         val isPlaceholder = incomingNode.user.hw_model == HardwareModel.UNSET
         val hasExistingUser = existingNode.user.hw_model != HardwareModel.UNSET
-        val isDefaultName = incomingNode.user.long_name?.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$")) == true
+        val isDefaultName = incomingNode.user.long_name.matches(Regex("^Meshtastic [0-9a-fA-F]{4}$"))
 
         if (hasExistingUser && isPlaceholder && isDefaultName) {
             return incomingNode.copy(

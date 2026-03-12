@@ -58,7 +58,7 @@ class NodeMapViewModel(
 
     val positionLogs: StateFlow<List<Position>> =
         ourNodeNumFlow
-            .map { if (destNum == it) MeshLog.NODE_NUM_LOCAL else destNum!! }
+            .map { if (destNum == it) MeshLog.NODE_NUM_LOCAL else destNum }
             .distinctUntilChanged()
             .flatMapLatest { logId ->
                 meshLogRepository.getMeshPacketsFrom(logId, PortNum.POSITION_APP.value).map { packets ->

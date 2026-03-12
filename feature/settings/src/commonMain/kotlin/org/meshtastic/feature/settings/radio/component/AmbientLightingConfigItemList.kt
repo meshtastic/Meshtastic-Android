@@ -61,7 +61,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
             TitledCard(title = stringResource(Res.string.ambient_lighting_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.led_state),
-                    checked = formState.value.led_state ?: false,
+                    checked = formState.value.led_state,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(led_state = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -69,21 +69,21 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.current),
-                    value = formState.value.current ?: 0,
+                    value = formState.value.current,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(current = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.red),
-                    value = formState.value.red ?: 0,
+                    value = formState.value.red,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(red = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.green),
-                    value = formState.value.green ?: 0,
+                    value = formState.value.green,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(green = it) },
@@ -91,7 +91,7 @@ fun AmbientLightingConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> U
 
                 EditTextPreference(
                     title = stringResource(Res.string.blue),
-                    value = formState.value.blue ?: 0,
+                    value = formState.value.blue,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(blue = it) },

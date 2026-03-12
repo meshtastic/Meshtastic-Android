@@ -104,7 +104,7 @@ fun CurrentlyConnectedInfo(
             }
 
             Column(modifier = Modifier.weight(1f, fill = true)) {
-                Text(text = node.user.long_name ?: "", style = MaterialTheme.typography.titleMedium)
+                Text(text = node.user.long_name, style = MaterialTheme.typography.titleMedium)
 
                 node.metadata
                     ?.firmware_version

@@ -72,7 +72,7 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.ptt_pin),
-                    value = formState.value.ptt_pin ?: 0,
+                    value = formState.value.ptt_pin,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(ptt_pin = it) },
@@ -81,34 +81,34 @@ fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                     title = stringResource(Res.string.codec2_sample_rate),
                     enabled = state.connected,
                     items = ModuleConfig.AudioConfig.Audio_Baud.entries.map { it to it.name },
-                    selectedItem = formState.value.bitrate ?: ModuleConfig.AudioConfig.Audio_Baud.CODEC2_DEFAULT,
+                    selectedItem = formState.value.bitrate,
                     onItemSelected = { formState.value = formState.value.copy(bitrate = it) },
                 )
                 HorizontalDivider()
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_word_select),
-                    value = formState.value.i2s_ws ?: 0,
+                    value = formState.value.i2s_ws,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(i2s_ws = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_data_in),
-                    value = formState.value.i2s_sd ?: 0,
+                    value = formState.value.i2s_sd,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(i2s_sd = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_data_out),
-                    value = formState.value.i2s_din ?: 0,
+                    value = formState.value.i2s_din,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(i2s_din = it) },
                 )
                 EditTextPreference(
                     title = stringResource(Res.string.i2s_clock),
-                    value = formState.value.i2s_sck ?: 0,
+                    value = formState.value.i2s_sck,
                     enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { formState.value = formState.value.copy(i2s_sck = it) },

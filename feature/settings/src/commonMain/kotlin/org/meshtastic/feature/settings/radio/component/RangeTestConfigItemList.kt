@@ -59,7 +59,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
             TitledCard(title = stringResource(Res.string.range_test_config)) {
                 SwitchPreference(
                     title = stringResource(Res.string.range_test_enabled),
-                    checked = formState.value.enabled ?: false,
+                    checked = formState.value.enabled,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(enabled = it) },
                     containerColor = CardDefaults.cardColors().containerColor,
@@ -68,7 +68,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 val rangeItems = remember { IntervalConfiguration.RANGE_TEST_SENDER.allowedIntervals }
                 DropDownPreference(
                     title = stringResource(Res.string.sender_message_interval_seconds),
-                    selectedItem = (formState.value.sender ?: 0).toLong(),
+                    selectedItem = (formState.value.sender).toLong(),
                     enabled = state.connected,
                     items = rangeItems.map { it.value to it.toDisplayString() },
                     onItemSelected = { formState.value = formState.value.copy(sender = it.toInt()) },
@@ -76,7 +76,7 @@ fun RangeTestConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
                 SwitchPreference(
                     title = stringResource(Res.string.save_csv_in_storage_esp32_only),
-                    checked = formState.value.save ?: false,
+                    checked = formState.value.save,
                     enabled = state.connected,
                     onCheckedChange = { formState.value = formState.value.copy(save = it) },
                     containerColor = CardDefaults.cardColors().containerColor,

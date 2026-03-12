@@ -34,12 +34,12 @@ private const val SECONDS_TO_MILLIS = 1000L
 fun Position.formatPositionTime(): String {
     val currentTime = nowMillis
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
-    val isOlderThanSixMonths = (time ?: 0) * SECONDS_TO_MILLIS < sixMonthsAgo
+    val isOlderThanSixMonths = time * SECONDS_TO_MILLIS < sixMonthsAgo
     val timeText =
         if (isOlderThanSixMonths) {
             stringResource(Res.string.unknown_age)
         } else {
-            DateFormatter.formatDateTime((time ?: 0) * SECONDS_TO_MILLIS)
+            DateFormatter.formatDateTime(time * SECONDS_TO_MILLIS)
         }
     return timeText
 }
