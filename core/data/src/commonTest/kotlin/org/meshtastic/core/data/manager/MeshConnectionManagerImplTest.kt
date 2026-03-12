@@ -91,7 +91,7 @@ class MeshConnectionManagerImplTest {
 
     @Before
     fun setUp() {
-        mockkStatic("org.meshtastic.core.resources.ContextExtKt")
+        mockkStatic("org.meshtastic.core.resources.GetStringKt")
         every { getString(any()) } returns "Mocked String"
         every { getString(any(), *anyVararg()) } returns "Mocked String"
 
@@ -128,7 +128,7 @@ class MeshConnectionManagerImplTest {
 
     @After
     fun tearDown() {
-        unmockkStatic("org.meshtastic.core.resources.ContextExtKt")
+        unmockkStatic("org.meshtastic.core.resources.GetStringKt")
     }
 
     @Test
