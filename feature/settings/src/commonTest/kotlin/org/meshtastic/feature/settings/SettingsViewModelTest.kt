@@ -72,6 +72,7 @@ class SettingsViewModelTest {
                 databaseManager = databaseManager,
                 meshLogPrefs = meshLogPrefs,
                 setThemeUseCase = mockk(relaxed = true),
+                setLocaleUseCase = mockk(relaxed = true),
                 setAppIntroCompletedUseCase = mockk(relaxed = true),
                 setProvideLocationUseCase = mockk(relaxed = true),
                 setDatabaseCacheLimitUseCase = mockk(relaxed = true),

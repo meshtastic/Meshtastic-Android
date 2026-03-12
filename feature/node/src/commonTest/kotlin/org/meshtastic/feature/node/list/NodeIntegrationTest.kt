@@ -120,7 +120,8 @@ class NodeIntegrationTest {
     @Test
     fun testNodeConnectionStateTracking() = runTest {
         // Create nodes with different last heard times
-        val onlineNode = TestDataFactory.createTestNode(num = 1, lastHeard = System.currentTimeMillis() / 1000).toInt()
+        val onlineNode =
+            TestDataFactory.createTestNode(num = 1, lastHeard = (System.currentTimeMillis() / 1000).toInt())
         val offlineNode =
             TestDataFactory.createTestNode(
                 num = 2,

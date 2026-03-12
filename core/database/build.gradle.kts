@@ -46,6 +46,7 @@ kotlin {
             implementation(libs.kermit)
         }
         commonTest.dependencies {
+            implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
         }

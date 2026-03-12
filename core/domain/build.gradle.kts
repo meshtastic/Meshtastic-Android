@@ -48,7 +48,10 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
         }
-        commonTest.dependencies { implementation(projects.core.testing) }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(kotlin("test"))
+        }
         val androidHostTest by getting { dependencies { implementation(kotlin("test")) } }
     }
 }

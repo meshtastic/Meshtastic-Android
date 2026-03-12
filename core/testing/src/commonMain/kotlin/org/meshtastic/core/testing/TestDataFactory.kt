@@ -35,6 +35,7 @@ object TestDataFactory {
      * @param userId User ID in hex format (default: "!test0001")
      * @param longName User long name (default: "Test User")
      * @param shortName User short name (default: "T")
+     * @param lastHeard Last heard timestamp in seconds (default: 0)
      * @return A Node instance with provided or default values
      */
     fun createTestNode(
@@ -42,9 +43,10 @@ object TestDataFactory {
         userId: String = "!test0001",
         longName: String = "Test User",
         shortName: String = "T",
+        lastHeard: Int = 0,
     ): Node {
         val user = User(id = userId, long_name = longName, short_name = shortName)
-        return Node(num = num, user = user, lastHeard = 0, snr = 0f, rssi = 0, channel = 0)
+        return Node(num = num, user = user, lastHeard = lastHeard, snr = 0f, rssi = 0, channel = 0)
     }
 
     /**

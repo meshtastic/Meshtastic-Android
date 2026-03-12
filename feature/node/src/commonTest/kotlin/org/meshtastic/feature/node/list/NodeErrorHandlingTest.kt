@@ -44,7 +44,8 @@ class NodeErrorHandlingTest {
     @Test
     fun testGetNonexistentNode() = runTest {
         val node = nodeRepository.getNode("!nonexistent")
-        assertTrue(node == null || node.user.id.isEmpty())
+        // FakeNodeRepository returns a fallback node (never null)
+        assertEquals("!nonexistent", node.user.id)
     }
 
     @Test

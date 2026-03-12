@@ -17,13 +17,13 @@
 package org.meshtastic.feature.messaging
 
 import androidx.lifecycle.SavedStateHandle
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.data.repository.QuickChatActionRepository
+import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshServiceNotifications
@@ -33,6 +33,10 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.TestDataFactory
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -65,18 +69,24 @@ class MessageViewModelTest {
         // Use real fake implementation
         nodeRepository = FakeNodeRepository()
 
-        // Mock other dependencies
+        // Mock other dependencies with proper type hints
         radioConfigRepository =
-            mockk(relaxed = true) { every { loRaConfigFlow } returns MutableStateFlow(mockk(relaxed = true)) }
+            mockk(relaxed = true) {
+                every { channelSetFlow } returns MutableStateFlow<ChannelSet>(mockk(relaxed = true))
+                every { localConfigFlow } returns MutableStateFlow<LocalConfig>(mockk(relaxed = true))
+                every { moduleConfigFlow } returns MutableStateFlow<LocalModuleConfig>(mockk(relaxed = true))
+                every { deviceProfileFlow } returns MutableStateFlow<DeviceProfile>(mockk(relaxed = true))
+            }
         quickChatActionRepository = mockk(relaxed = true)
         packetRepository = mockk(relaxed = true)
-        serviceRepository = mockk(relaxed = true) { coEvery { getServiceActions() } returns emptyFlow() }
+        serviceRepository = mockk(relaxed = true) { every { serviceAction } returns emptyFlow<ServiceAction>() }
         sendMessageUseCase = mockk(relaxed = true)
-        customEmojiPrefs = mockk(relaxed = true) { every { customEmojiFlow } returns MutableStateFlow(null) }
-        homoglyphPrefs = mockk(relaxed = true) { every { homoglyphDecodingFlow } returns MutableStateFlow(false) }
-        uiPrefs = mockk(relaxed = true) { every { logMessagesFlow } returns MutableStateFlow(false) }
-        meshServiceNotifications =
-            mockk(relaxed = true) { every { contactSettingsNotification } returns MutableStateFlow(null) }
+        customEmojiPrefs =
+            mockk(relaxed = true) { every { customEmojiFrequency } returns MutableStateFlow<String?>(null) }
+        homoglyphPrefs =
+            mockk(relaxed = true) { every { homoglyphEncodingEnabled } returns MutableStateFlow<Boolean>(false) }
+        uiPrefs = mockk(relaxed = true) { every { showQuickChat } returns MutableStateFlow<Boolean>(false) }
+        meshServiceNotifications = mockk(relaxed = true)
 
         // Create ViewModel with mocked dependencies
         viewModel =
@@ -89,7 +99,7 @@ class MessageViewModelTest {
                 serviceRepository = serviceRepository,
                 sendMessageUseCase = sendMessageUseCase,
                 customEmojiPrefs = customEmojiPrefs,
-                homoglyphPrefs = homoglyphPrefs,
+                homoglyphEncodingPrefs = homoglyphPrefs,
                 uiPrefs = uiPrefs,
                 meshServiceNotifications = meshServiceNotifications,
             )

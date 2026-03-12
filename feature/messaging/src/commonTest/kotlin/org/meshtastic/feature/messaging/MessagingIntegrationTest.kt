@@ -145,7 +145,7 @@ class MessagingIntegrationTest {
         assertEquals(3, contactRepository.getContactCount())
 
         // Clear all
-        nodeRepository.clear()
+        nodeRepository.clearNodeDB()
         contactRepository.clear()
 
         // Verify cleared

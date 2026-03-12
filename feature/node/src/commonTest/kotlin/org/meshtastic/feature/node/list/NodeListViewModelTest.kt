@@ -20,7 +20,6 @@ import androidx.lifecycle.SavedStateHandle
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -56,11 +55,9 @@ class NodeListViewModelTest {
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
 
-        // Mock remaining dependencies
-        radioConfigRepository =
-            mockk(relaxed = true) { every { loRaConfigFlow } returns MutableStateFlow(mockk(relaxed = true)) }
-        serviceRepository =
-            mockk(relaxed = true) { every { connectionState } returns MutableStateFlow(mockk(relaxed = true)) }
+        // Mock remaining dependencies with explicit types
+        radioConfigRepository = mockk(relaxed = true)
+        serviceRepository = mockk(relaxed = true)
         nodeFilterPreferences =
             mockk(relaxed = true) {
                 every { nodeSortOption } returns MutableStateFlow(org.meshtastic.core.model.NodeSortOption.LAST_HEARD)
@@ -69,8 +66,8 @@ class NodeListViewModelTest {
                 every { onlyOnline } returns MutableStateFlow(false)
             }
         nodeManagementActions = mockk(relaxed = true)
-        getFilteredNodesUseCase =
-            mockk(relaxed = true) { every { invoke(any(), any(), any(), any(), any()) } returns emptyFlow() }
+        @Suppress("UNCHECKED_CAST")
+        getFilteredNodesUseCase = mockk<GetFilteredNodesUseCase>(relaxed = true)
 
         viewModel =
             NodeListViewModel(

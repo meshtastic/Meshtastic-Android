@@ -45,6 +45,7 @@ kotlin {
         androidMain.dependencies { api(projects.core.api) }
 
         commonTest.dependencies {
+            implementation(kotlin("test"))
             implementation(libs.junit)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.mockk)

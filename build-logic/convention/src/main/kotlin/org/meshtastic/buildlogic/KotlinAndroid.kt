@@ -82,6 +82,26 @@ internal fun Project.configureKotlinMultiplatform() {
 }
 
 /**
+ * Configure common test dependencies for KMP modules
+ */
+internal fun Project.configureKmpTestDependencies() {
+    extensions.configure<KotlinMultiplatformExtension> {
+        sourceSets.apply {
+            val commonTest = findByName("commonTest") ?: return@apply
+            commonTest.dependencies {
+                implementation(kotlin("test"))
+            }
+            
+            // Configure androidHostTest if it exists
+            val androidHostTest = findByName("androidHostTest")
+            androidHostTest?.dependencies {
+                implementation(kotlin("test"))
+            }
+        }
+    }
+}
+
+/**
  * Configure base Kotlin options for JVM (non-Android)
  */
 internal fun Project.configureKotlinJvm() {
