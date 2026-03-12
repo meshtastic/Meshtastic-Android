@@ -52,7 +52,7 @@ import org.meshtastic.core.ui.component.TitledCard
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.ModuleConfig
 
-@Suppress("DEPRECATION")
+@Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()

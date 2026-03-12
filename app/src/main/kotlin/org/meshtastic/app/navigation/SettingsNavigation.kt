@@ -29,6 +29,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.settings.AndroidDebugViewModel
 import org.meshtastic.app.settings.AndroidRadioConfigViewModel
 import org.meshtastic.app.settings.AndroidSettingsViewModel
+import org.meshtastic.app.util.AboutLibrariesJsonProvider
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
@@ -182,11 +183,11 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     entry<SettingsRoutes.About> {
-        val context = androidx.compose.ui.platform.LocalContext.current
         AboutScreen(
             onNavigateUp = { backStack.removeLastOrNull() },
             jsonProvider = {
-                context.resources.openRawResource(org.meshtastic.app.R.raw.aboutlibraries).bufferedReader().readText()
+                // Load from AboutLibraries asset/classpath resource
+                AboutLibrariesJsonProvider.getJson()
             },
         )
     }

@@ -56,7 +56,7 @@ import org.meshtastic.feature.settings.util.IntervalConfiguration
 import org.meshtastic.feature.settings.util.toDisplayString
 import org.meshtastic.proto.Config
 
-@Suppress("DEPRECATION")
+@Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()

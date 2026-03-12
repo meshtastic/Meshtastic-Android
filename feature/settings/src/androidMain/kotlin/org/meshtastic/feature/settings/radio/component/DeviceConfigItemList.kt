@@ -151,7 +151,7 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
         }
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("DEPRECATION")
+@Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
