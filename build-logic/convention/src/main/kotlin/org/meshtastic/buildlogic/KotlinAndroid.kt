@@ -25,11 +25,13 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinBaseExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.KotlinHierarchyTemplate
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
@@ -79,6 +81,28 @@ internal fun Project.configureKotlinMultiplatform() {
     }
 
     configureKotlin<KotlinMultiplatformExtension>()
+}
+
+/**
+ * Configure a shared `jvmAndroidMain` source set using Kotlin's hierarchy template DSL.
+ *
+ * This is for modules that intentionally share JVM-only implementations between the desktop
+ * `jvm()` target and the Android target without hand-written `dependsOn` edges.
+ */
+@OptIn(ExperimentalKotlinGradlePluginApi::class)
+internal fun Project.configureJvmAndroidMainHierarchy() {
+    extensions.configure<KotlinMultiplatformExtension> {
+        applyHierarchyTemplate(KotlinHierarchyTemplate.default) {
+            common {
+                group("jvmAndroid") {
+                    withCompilations { compilation ->
+                        compilation.target.targetName == "android" ||
+                            compilation.target.targetName == "jvm"
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**

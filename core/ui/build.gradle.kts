@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kmp.library.compose)
+    id("meshtastic.kmp.jvm.android")
     alias(libs.plugins.meshtastic.koin)
 }
 
@@ -30,10 +31,6 @@ kotlin {
     }
 
     sourceSets {
-        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
-        androidMain.get().dependsOn(jvmAndroidMain)
-        jvmMain.get().dependsOn(jvmAndroidMain)
-
         commonMain.dependencies {
             implementation(projects.core.common)
             implementation(projects.core.data)
@@ -66,7 +63,6 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(kotlin("test"))
             implementation(libs.junit)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.turbine)

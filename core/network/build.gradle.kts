@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
@@ -46,12 +47,7 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
-        androidMain.get().dependsOn(jvmAndroidMain)
-        val jvmMain by getting {
-            dependsOn(jvmAndroidMain)
-            dependencies { implementation(libs.ktor.client.java) }
-        }
+        val jvmMain by getting { dependencies { implementation(libs.ktor.client.java) } }
 
         androidMain.dependencies {
             implementation(libs.org.eclipse.paho.client.mqttv3)
@@ -61,10 +57,7 @@ kotlin {
             implementation(libs.okhttp3.logging.interceptor)
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }
 

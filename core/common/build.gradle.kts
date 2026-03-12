@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.kotlin.parcelize)
+    id("meshtastic.kmp.jvm.android")
     id("meshtastic.koin")
 }
 
@@ -31,13 +32,6 @@ kotlin {
     }
 
     sourceSets {
-        // Intermediate source set for code shared between Android and JVM targets
-        // (both are JVM-based). Use this for implementations that need java.* APIs
-        // but are identical across both targets.
-        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
-        androidMain.get().dependsOn(jvmAndroidMain)
-        jvmMain.get().dependsOn(jvmAndroidMain)
-
         commonMain.dependencies {
             implementation(libs.javax.inject)
             implementation(libs.kotlinx.atomicfu)
@@ -50,9 +44,6 @@ kotlin {
             api(libs.androidx.core.ktx)
             api(libs.nordic.common.core)
         }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-        }
+        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

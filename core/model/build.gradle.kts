@@ -19,6 +19,7 @@ plugins {
     alias(libs.plugins.meshtastic.kmp.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
+    id("meshtastic.kmp.jvm.android")
     `maven-publish`
 }
 
@@ -35,13 +36,6 @@ kotlin {
     }
 
     sourceSets {
-        // Intermediate source set for code shared between Android and JVM targets
-        // (both are JVM-based). Use this for implementations that need java.* APIs
-        // but are identical across both targets.
-        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
-        androidMain.get().dependsOn(jvmAndroidMain)
-        jvmMain.get().dependsOn(jvmAndroidMain)
-
         commonMain.dependencies {
             api(projects.core.proto)
             api(projects.core.common)
@@ -59,14 +53,12 @@ kotlin {
             api(libs.androidx.core.ktx)
             implementation(libs.zxing.core)
         }
-        commonTest.dependencies { implementation(kotlin("test")) }
         val androidHostTest by getting {
             dependencies {
                 implementation(libs.junit)
                 implementation(libs.robolectric)
                 implementation(libs.mockk)
                 implementation(libs.androidx.test.ext.junit)
-                implementation(kotlin("test"))
             }
         }
         val androidDeviceTest by getting {
