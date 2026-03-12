@@ -16,7 +16,10 @@
  */
 package org.meshtastic.feature.map
 
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.PacketRepository
@@ -46,8 +49,16 @@ class BaseMapViewModelTest {
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
 
-        mapPrefs = mockk(relaxed = true)
-        packetRepository = mockk(relaxed = true)
+        mapPrefs = mockk(relaxed = true) {
+            every { showOnlyFavorites } returns MutableStateFlow(false)
+            every { showWaypointsOnMap } returns MutableStateFlow(false)
+            every { showPrecisionCircleOnMap } returns MutableStateFlow(false)
+            every { lastHeardFilter } returns MutableStateFlow(0L)
+            every { lastHeardTrackFilter } returns MutableStateFlow(0L)
+        }
+        packetRepository = mockk(relaxed = true) {
+            every { getWaypoints() } returns emptyFlow()
+        }
 
         viewModel =
             BaseMapViewModel(
