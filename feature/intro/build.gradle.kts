@@ -23,6 +23,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.intro"
@@ -53,6 +55,8 @@ kotlin {
             implementation(libs.androidx.compose.ui.tooling.preview)
             implementation(libs.androidx.navigation3.ui)
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

@@ -30,6 +30,7 @@ import org.meshtastic.app.map.addPositionMarkers
 import org.meshtastic.app.map.addScaleBarOverlay
 import org.meshtastic.app.map.model.CustomTileSource
 import org.meshtastic.app.map.rememberMapViewWithLifecycle
+import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 

@@ -36,10 +36,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
@@ -67,9 +69,10 @@ import org.meshtastic.proto.Paxcount as ProtoPaxcount
 /**
  * ViewModel responsible for managing and graphing metrics (telemetry, signal strength, paxcount) for a specific node.
  */
+@KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
 open class MetricsViewModel(
-    val destNum: Int,
+    @InjectedParam val destNum: Int,
     protected val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val serviceRepository: ServiceRepository,

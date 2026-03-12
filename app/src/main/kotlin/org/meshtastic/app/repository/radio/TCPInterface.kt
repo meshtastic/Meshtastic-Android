@@ -17,24 +17,19 @@
 package org.meshtastic.app.repository.radio
 
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
-import org.meshtastic.app.repository.network.NetworkRepository
-import org.meshtastic.core.common.util.Exceptions
 import org.meshtastic.core.common.util.handledLaunch
-import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.network.transport.StreamFrameCodec
+import org.meshtastic.core.network.transport.TcpTransport
 import org.meshtastic.core.repository.RadioInterfaceService
-import org.meshtastic.proto.Heartbeat
-import org.meshtastic.proto.ToRadio
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.IOException
-import java.io.OutputStream
-import java.net.InetAddress
-import java.net.Socket
-import java.net.SocketTimeoutException
+import org.meshtastic.core.repository.RadioTransport
 
+/**
+ * Android TCP radio interface — thin adapter over the shared [TcpTransport] from `core:network`.
+ *
+ * Manages the mapping between the Android-specific [StreamInterface]/[RadioTransport] contract and the shared transport
+ * layer.
+ */
 open class TCPInterface(
     service: RadioInterfaceService,
     private val dispatchers: CoroutineDispatchers,
@@ -42,207 +37,55 @@ open class TCPInterface(
 ) : StreamInterface(service) {
 
     companion object {
-        const val MAX_RETRIES_ALLOWED = Int.MAX_VALUE
-        const val MIN_BACKOFF_MILLIS = 1 * 1000L // 1 second
-        const val MAX_BACKOFF_MILLIS = 5 * 60 * 1000L // 5 minutes
-        const val SOCKET_TIMEOUT = 5000
-        const val SOCKET_RETRIES = 18
-        const val SERVICE_PORT = NetworkRepository.SERVICE_PORT
-        const val TIMEOUT_LOG_INTERVAL = 5 // Log every Nth timeout
+        const val SERVICE_PORT = StreamFrameCodec.DEFAULT_TCP_PORT
     }
 
-    private var retryCount = 1
-    private var backoffDelay = MIN_BACKOFF_MILLIS
+    private val transport =
+        TcpTransport(
+            dispatchers = dispatchers,
+            scope = service.serviceScope,
+            listener =
+            object : TcpTransport.Listener {
+                override fun onConnected() {
+                    super@TCPInterface.connect()
+                }
 
-    private var socket: Socket? = null
-    private var outStream: OutputStream? = null
+                override fun onDisconnected() {
+                    // Transport already performed teardown; only propagate lifecycle to StreamInterface.
+                    super@TCPInterface.onDeviceDisconnect(false)
+                }
 
-    private var connectionStartTime: Long = 0
-    private var packetsReceived: Int = 0
-    private var packetsSent: Int = 0
-    private var bytesReceived: Long = 0
-    private var bytesSent: Long = 0
-    private var timeoutEvents: Int = 0
+                override fun onPacketReceived(bytes: ByteArray) {
+                    service.handleFromRadio(bytes)
+                }
+            },
+            logTag = "TCPInterface[$address]",
+        )
 
     init {
         connect()
     }
 
     override fun sendBytes(p: ByteArray) {
-        val stream = outStream
-        if (stream == null) {
-            Logger.w { "[$address] TCP cannot send ${p.size} bytes: outStream is null (connection not established)" }
-            return
-        }
-
-        packetsSent++
-        bytesSent += p.size
-        Logger.d { "[$address] TCP sending packet #$packetsSent - ${p.size} bytes (Total TX: $bytesSent bytes)" }
-        try {
-            stream.write(p)
-        } catch (ex: IOException) {
-            // TCP write errors are common when the connection is lost; log as warning to avoid Crashlytics noise
-            Logger.w(ex) { "[$address] TCP write error: ${ex.message}" }
-            onDeviceDisconnect(false)
-        }
-    }
-
-    override fun flushBytes() {
-        val stream = outStream ?: return
-        Logger.d { "[$address] TCP flushing output stream" }
-        try {
-            stream.flush()
-        } catch (ex: IOException) {
-            // TCP flush errors are common when the connection is lost; log as warning to avoid Crashlytics noise
-            Logger.w(ex) { "[$address] TCP flush error: ${ex.message}" }
-            onDeviceDisconnect(false)
-        }
+        // Direct byte sending is handled by the transport; this is used by StreamInterface for serial compat
+        Logger.d { "[$address] TCPInterface.sendBytes delegated to transport" }
     }
 
     override fun onDeviceDisconnect(waitForStopped: Boolean) {
-        val s = socket
-        if (s != null) {
-            val uptime =
-                if (connectionStartTime > 0) {
-                    nowMillis - connectionStartTime
-                } else {
-                    0
-                }
-            Logger.w {
-                "[$address] TCP disconnecting - " +
-                    "Uptime: ${uptime}ms, " +
-                    "Packets RX: $packetsReceived ($bytesReceived bytes), " +
-                    "Packets TX: $packetsSent ($bytesSent bytes), " +
-                    "Timeout events: $timeoutEvents"
-            }
-            s.close()
-            socket = null
-            outStream = null
-        }
+        transport.stop()
         super.onDeviceDisconnect(waitForStopped)
     }
 
     override fun connect() {
-        service.serviceScope.handledLaunch {
-            while (true) {
-                try {
-                    startConnect()
-                } catch (ex: IOException) {
-                    val uptime =
-                        if (connectionStartTime > 0) {
-                            nowMillis - connectionStartTime
-                        } else {
-                            0
-                        }
-                    // Connection failures are common when the radio is offline or out of range
-                    Logger.w(ex) { "[$address] TCP connection error after ${uptime}ms - ${ex.message}" }
-                    onDeviceDisconnect(false)
-                } catch (ex: Throwable) {
-                    val uptime =
-                        if (connectionStartTime > 0) {
-                            nowMillis - connectionStartTime
-                        } else {
-                            0
-                        }
-                    Logger.e(ex) { "[$address] TCP exception after ${uptime}ms - ${ex.message}" }
-                    Exceptions.report(ex, "Exception in TCP reader")
-                    onDeviceDisconnect(false)
-                }
-
-                if (retryCount > MAX_RETRIES_ALLOWED) {
-                    Logger.e { "[$address] TCP max retries ($MAX_RETRIES_ALLOWED) exceeded, giving up" }
-                    break
-                }
-
-                Logger.i {
-                    "[$address] TCP reconnect attempt #$retryCount in ${backoffDelay / 1000}s " +
-                        "(backoff: ${backoffDelay}ms)"
-                }
-                delay(backoffDelay)
-
-                retryCount++
-                backoffDelay = minOf(backoffDelay * 2, MAX_BACKOFF_MILLIS)
-            }
-            Logger.i { "[$address] TCP reader exiting" }
-        }
+        transport.start(address)
     }
 
     override fun keepAlive() {
         Logger.d { "[$address] TCP keepAlive" }
-        val heartbeat = ToRadio(heartbeat = Heartbeat())
-        handleSendToRadio(heartbeat.encode())
+        service.serviceScope.handledLaunch { transport.sendHeartbeat() }
     }
 
-    // Create a socket to make the connection with the server
-    private suspend fun startConnect() = withContext(dispatchers.io) {
-        val attemptStart = nowMillis
-        Logger.i { "[$address] TCP connection attempt starting..." }
-
-        val parts = address.split(":", limit = 2)
-        val host = parts[0]
-        val port = parts.getOrNull(1)?.toIntOrNull() ?: SERVICE_PORT
-
-        Logger.d { "[$address] Resolving host '$host' and connecting to port $port..." }
-
-        Socket(InetAddress.getByName(host), port).use { socket ->
-            socket.tcpNoDelay = true
-            socket.keepAlive = true
-            socket.soTimeout = SOCKET_TIMEOUT
-            this@TCPInterface.socket = socket
-
-            val connectTime = nowMillis - attemptStart
-            connectionStartTime = nowMillis
-            Logger.i {
-                "[$address] TCP socket connected in ${connectTime}ms - " +
-                    "Local: ${socket.localSocketAddress}, Remote: ${socket.remoteSocketAddress}"
-            }
-
-            BufferedOutputStream(socket.getOutputStream()).use { outputStream ->
-                outStream = outputStream
-
-                BufferedInputStream(socket.getInputStream()).use { inputStream ->
-                    super.connect()
-
-                    retryCount = 1
-                    backoffDelay = MIN_BACKOFF_MILLIS
-
-                    var timeoutCount = 0
-                    while (timeoutCount < SOCKET_RETRIES) {
-                        try { // close after 90s of inactivity
-                            val c = inputStream.read()
-                            if (c == -1) {
-                                Logger.w {
-                                    "[$address] TCP got EOF on stream after $packetsReceived packets received"
-                                }
-                                break
-                            } else {
-                                timeoutCount = 0
-                                packetsReceived++
-                                bytesReceived++
-                                readChar(c.toByte())
-                            }
-                        } catch (ex: SocketTimeoutException) {
-                            timeoutCount++
-                            timeoutEvents++
-                            if (timeoutCount % TIMEOUT_LOG_INTERVAL == 0) {
-                                Logger.d {
-                                    "[$address] TCP socket timeout count: $timeoutCount/$SOCKET_RETRIES " +
-                                        "(total timeouts: $timeoutEvents)"
-                                }
-                            }
-                            // Ignore and start another read
-                        }
-                    }
-                    if (timeoutCount >= SOCKET_RETRIES) {
-                        val inactivityMs = SOCKET_RETRIES * SOCKET_TIMEOUT
-                        Logger.w {
-                            "[$address] TCP closing connection due to $SOCKET_RETRIES consecutive timeouts " +
-                                "(${inactivityMs}ms of inactivity)"
-                        }
-                    }
-                }
-            }
-            onDeviceDisconnect(false)
-        }
+    override fun handleSendToRadio(p: ByteArray) {
+        service.serviceScope.handledLaunch { transport.sendPacket(p) }
     }
 }

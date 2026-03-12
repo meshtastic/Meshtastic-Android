@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.domain"
@@ -46,11 +48,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.serialization.json)
         }
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.turbine)
-            implementation(libs.mockk)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
+        val androidHostTest by getting { dependencies { implementation(kotlin("test")) } }
     }
 }

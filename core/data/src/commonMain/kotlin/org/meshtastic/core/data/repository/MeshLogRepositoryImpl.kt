@@ -28,9 +28,11 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
-import org.meshtastic.core.database.DatabaseManager
-import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.database.DatabaseProvider
+import org.meshtastic.core.database.entity.asEntity
+import org.meshtastic.core.database.entity.asExternalModel
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshLogRepository.Companion.DEFAULT_MAX_LOGS
@@ -48,19 +50,23 @@ import org.meshtastic.proto.Telemetry
 @Suppress("TooManyFunctions")
 @Single
 class MeshLogRepositoryImpl(
-    private val dbManager: DatabaseManager,
+    private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogPrefs: MeshLogPrefs,
     private val nodeInfoReadDataSource: NodeInfoReadDataSource,
 ) : MeshLogRepository {
 
     /** Retrieves all [MeshLog]s in the database, up to [maxItem]. */
-    override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> =
-        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogs(maxItem) }.flowOn(dispatchers.io)
+    override fun getAllLogs(maxItem: Int): Flow<List<MeshLog>> = dbManager.currentDb
+        .flatMapLatest { it.meshLogDao().getAllLogs(maxItem) }
+        .map { list -> list.map { it.asExternalModel() } }
+        .flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s in the database in the order they were received. */
-    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> =
-        dbManager.currentDb.flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItem) }.flowOn(dispatchers.io)
+    override fun getAllLogsInReceiveOrder(maxItem: Int): Flow<List<MeshLog>> = dbManager.currentDb
+        .flatMapLatest { it.meshLogDao().getAllLogsInReceiveOrder(maxItem) }
+        .map { list -> list.map { it.asExternalModel() } }
+        .flowOn(dispatchers.io)
 
     /** Retrieves all [MeshLog]s in the database without any limit. */
     override fun getAllLogsUnbounded(): Flow<List<MeshLog>> = getAllLogs(Int.MAX_VALUE)
@@ -68,6 +74,7 @@ class MeshLogRepositoryImpl(
     /** Retrieves all [MeshLog]s associated with a specific [nodeNum] and [portNum]. */
     override fun getLogsFrom(nodeNum: Int, portNum: Int): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getLogsFrom(nodeNum, portNum, DEFAULT_MAX_LOGS) }
+        .map { list -> list.map { it.asExternalModel() } }
         .distinctUntilChanged()
         .flowOn(dispatchers.io)
 
@@ -81,7 +88,7 @@ class MeshLogRepositoryImpl(
             dbManager.currentDb
                 .flatMapLatest { it.meshLogDao().getLogsFrom(logId, PortNum.TELEMETRY_APP.value, DEFAULT_MAX_LOGS) }
                 .distinctUntilChanged()
-                .mapLatest { list -> list.mapNotNull(::parseTelemetryLog) }
+                .mapLatest { list -> list.map { it.asExternalModel() }.mapNotNull(::parseTelemetryLog) }
         }
         .flowOn(dispatchers.io)
 
@@ -93,12 +100,14 @@ class MeshLogRepositoryImpl(
     override fun getRequestLogs(targetNodeNum: Int, portNum: PortNum): Flow<List<MeshLog>> = dbManager.currentDb
         .flatMapLatest { it.meshLogDao().getLogsFrom(MeshLog.NODE_NUM_LOCAL, portNum.value, DEFAULT_MAX_LOGS) }
         .map { list ->
-            list.filter { log ->
-                val packet = log.fromRadio.packet ?: return@filter false
-                log.fromNum == MeshLog.NODE_NUM_LOCAL &&
-                    packet.to == targetNodeNum &&
-                    packet.decoded?.want_response == true
-            }
+            list
+                .map { it.asExternalModel() }
+                .filter { log ->
+                    val packet = log.fromRadio.packet ?: return@filter false
+                    log.fromNum == MeshLog.NODE_NUM_LOCAL &&
+                        packet.to == targetNodeNum &&
+                        packet.decoded?.want_response == true
+                }
         }
         .distinctUntilChanged()
         .conflate()
@@ -141,13 +150,13 @@ class MeshLogRepositoryImpl(
     /** Returns the cached [MyNodeInfo] from the system logs. */
     override fun getMyNodeInfo(): Flow<MyNodeInfo?> = dbManager.currentDb
         .flatMapLatest { db -> db.meshLogDao().getLogsFrom(MeshLog.NODE_NUM_LOCAL, 0, DEFAULT_MAX_LOGS) }
-        .mapLatest { list -> list.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
+        .mapLatest { list -> list.map { it.asExternalModel() }.firstOrNull { it.myNodeInfo != null }?.myNodeInfo }
         .flowOn(dispatchers.io)
 
     /** Persists a new log entry to the database if logging is enabled in preferences. */
     override suspend fun insert(log: MeshLog) = withContext(dispatchers.io) {
         if (!meshLogPrefs.loggingEnabled.value) return@withContext
-        dbManager.currentDb.value.meshLogDao().insert(log)
+        dbManager.currentDb.value.meshLogDao().insert(log.asEntity())
     }
 
     /** Clears all logs from the database. */

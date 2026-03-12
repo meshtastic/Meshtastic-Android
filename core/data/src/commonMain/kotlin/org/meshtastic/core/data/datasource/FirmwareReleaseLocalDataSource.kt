@@ -18,7 +18,7 @@ package org.meshtastic.core.data.datasource
 
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
-import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.FirmwareReleaseEntity
 import org.meshtastic.core.database.entity.FirmwareReleaseType
 import org.meshtastic.core.database.entity.asDeviceVersion
@@ -28,7 +28,7 @@ import org.meshtastic.core.model.NetworkFirmwareRelease
 
 @Single
 class FirmwareReleaseLocalDataSource(
-    private val dbManager: DatabaseManager,
+    private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
 ) {
     private val firmwareReleaseDao

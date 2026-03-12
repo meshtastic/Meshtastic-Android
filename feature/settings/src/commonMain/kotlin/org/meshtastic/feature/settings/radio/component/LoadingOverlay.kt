@@ -29,8 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularWavyProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +44,6 @@ import org.meshtastic.feature.settings.radio.ResponseState
 private const val LOADING_OVERLAY_ALPHA = 0.8f
 private const val PERCENTAGE_FACTOR = 100
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
     AnimatedVisibility(visible = state is ResponseState.Loading, enter = fadeIn(), exit = fadeOut()) {
@@ -63,14 +61,12 @@ fun LoadingOverlay(state: ResponseState<*>, modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
                 if (state is ResponseState.Loading) {
-                    val progress by
-                        animateFloatAsState(
-                            targetValue = state.completed.toFloat() / state.total.toFloat(),
-                            label = "loading_progress",
-                        )
+                    val clampedProgress =
+                        (state.completed.toFloat() / state.total.coerceAtLeast(1).toFloat()).coerceIn(0f, 1f)
+                    val progress by animateFloatAsState(targetValue = clampedProgress, label = "loadingProgress")
 
                     Box(contentAlignment = Alignment.Center) {
-                        CircularWavyProgressIndicator(
+                        CircularProgressIndicator(
                             progress = { progress },
                             modifier = Modifier.size(80.dp),
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,

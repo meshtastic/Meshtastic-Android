@@ -32,10 +32,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.DateFormatter
 import org.meshtastic.core.common.util.nowInstant
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.Packet
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.getTracerouteResponse
 import org.meshtastic.core.model.util.decodeOrNull
 import org.meshtastic.core.model.util.toReadableString
@@ -211,6 +212,7 @@ class LogFilterManager {
     }
 }
 
+@KoinViewModel
 @Suppress("TooManyFunctions")
 open class DebugViewModel(
     private val meshLogRepository: MeshLogRepository,

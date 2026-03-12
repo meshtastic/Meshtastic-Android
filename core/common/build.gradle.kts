@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = false
@@ -29,8 +31,16 @@ kotlin {
     }
 
     sourceSets {
+        // Intermediate source set for code shared between Android and JVM targets
+        // (both are JVM-based). Use this for implementations that need java.* APIs
+        // but are identical across both targets.
+        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
+        androidMain.get().dependsOn(jvmAndroidMain)
+        jvmMain.get().dependsOn(jvmAndroidMain)
+
         commonMain.dependencies {
             implementation(libs.javax.inject)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
             api(libs.kotlinx.datetime)
             api(libs.okio)

@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.barcode.extractWifiCredentials
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.common.util.extractWifiCredentials
 import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.model.util.toCommonUri
 import org.meshtastic.core.nfc.NfcScannerEffect

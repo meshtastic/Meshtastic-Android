@@ -16,7 +16,9 @@
  */
 package org.meshtastic.app.repository.radio
 
-class NopInterface(val address: String) : IRadioInterface {
+import org.meshtastic.core.repository.RadioTransport
+
+class NopInterface(val address: String) : RadioTransport {
     override fun handleSendToRadio(p: ByteArray) {
         // No-op
     }

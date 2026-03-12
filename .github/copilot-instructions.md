@@ -7,9 +7,9 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 **Key Repository Details:**
 - **Language:** Kotlin (primary), with some Java and AIDL files
 - **Build System:** Gradle with Kotlin DSL
-- **Size:** ~3MB source code across 3 modules 
+- **Architecture shape:** Android app shell plus a broad `core:*` / `feature:*` KMP module graph
 - **Target Platform:** Android API 26+ (Android 8.0+), targeting API 36
-- **Architecture:** Modern Android with Jetpack Compose, Hilt DI, Room database
+- **Architecture:** Android-first Kotlin Multiplatform with Jetpack Compose, Koin DI, Room KMP, DataStore, and Navigation 3 shared backstack state
 - **Product Flavors:** `fdroid` (F-Droid) and `google` (Google Play Store)
 - **Build Types:** `debug` and `release`
 
@@ -62,9 +62,10 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 
 # 10. Run lint checks for both flavors
 ./gradlew lintFdroidDebug lintGoogleDebug
-```
 
-### Time Requirements
+# 11. Run the desktop module
+./gradlew :desktop:run
+./gradlew :desktop:test
 - Clean build: 3-5 minutes
 - Unit tests: 2-3 minutes  
 - Instrumented tests: 5-10 minutes
@@ -91,8 +92,15 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 │   ├── src/fdroid/              # F-Droid specific code
 │   └── src/google/              # Google Play specific code
 ├── core/                         # Core library modules
-├── network/                      # HTTP API networking library
-├── mesh_service_example/         # AIDL service usage example
+├── desktop/                      # Compose Desktop application (first non-Android KMP target)
+├── feature/                      # Feature modules (all KMP with JVM targets)
+│   ├── connections/              # Device connections UI (BLE, TCP, USB scanning)
+│   ├── firmware/                 # Firmware update flow
+│   ├── intro/                    # Onboarding flow
+│   ├── map/                      # Map UI
+│   ├── messaging/                # Messaging/contacts UI
+│   ├── node/                     # Node list and detail UI
+│   └── settings/                 # Settings screens
 ├── build-logic/                  # Build configuration convention plugins
 └── config/                       # Linting and formatting configs
     ├── detekt/                   # Detekt static analysis rules
@@ -110,33 +118,36 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 ### Architecture Components
 - **UI Framework:** Jetpack Compose with Material 3
 - **State Management:** Unidirectional Data Flow with ViewModels
-- **Dependency Injection:** Hilt
-- **Navigation:** Jetpack Navigation Compose
+- **Dependency Injection:** Koin Annotations with K2 compiler plugin
+- **Navigation:** AndroidX Navigation 3 (JetBrains multiplatform fork) with shared navigation keys/routes in `core:navigation`
+- **Lifecycle:** JetBrains multiplatform forks for `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`
 - **Local Data:** Room database + DataStore preferences
-- **Remote Data:** Custom Bluetooth/WiFi protocol + HTTP API (network module)
+- **Remote Data:** Shared BLE/network/service layers across `core:ble`, `core:network`, and `core:service`
 - **Background Work:** WorkManager
 - **Communication:** AIDL service interface (`IMeshService.aidl`)
+- **Desktop:** First non-Android KMP target. Nav 3 shell, full Koin DI, TCP transport with `want_config` handshake, adaptive list-detail screens for nodes/messaging, ~35 settings screens, connections UI. See `docs/kmp-status.md`.
 
 ## Continuous Integration
 
 ### GitHub Workflows (.github/workflows/)
-- **pull-request.yml** - Runs on every PR: build, detekt, tests
-- **reusable-android-build.yml** - Shared build logic: spotless, detekt, lint, assemble, test
-- **reusable-android-test.yml** - Instrumented tests on Android emulators (API 26, 35)
+- **pull-request.yml** - PR entry workflow
+- **reusable-check.yml** - Shared Android/JVM verification: spotless, detekt, unit tests, Kover, JVM smoke compile, assemble/lint, optional instrumented tests
 
 ### CI Commands (Must Pass)
 ```bash
-# Exact commands run in CI that must pass:
-./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
-./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest --configuration-cache --scan
+# Reusable CI workflow runs these core checks on the first matrix leg:
+./gradlew spotlessCheck detekt -Pci=true
+./gradlew testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug -Pci=true --continue
+./gradlew :core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm :desktop:test -Pci=true --continue
 ```
 
 ### Validation Steps
 1. **Code Style:** Spotless check (auto-fixable with `spotlessApply`)
 2. **Static Analysis:** Detekt with custom rules in `config/detekt/detekt.yml`
-3. **Lint Checks:** Android lint for both flavors
-4. **Unit Tests:** JUnit tests in `app/src/test/`
-5. **UI Tests:** Compose UI tests in `app/src/androidTest/`
+3. **Shared smoke compile:** JVM compile checks for all `core:*` and `feature:*` KMP modules plus `:desktop:test`
+4. **Lint Checks:** Android lint on debug variants
+5. **Unit Tests:** Android/unit/shared tests plus Kover reports
+6. **UI Tests:** Compose/instrumented tests when emulator runs are enabled
 
 ## Common Issues & Solutions
 
@@ -145,6 +156,9 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 - **Missing secrets:** Copy `secrets.defaults.properties` → `local.properties`
 - **Configuration cache:** Add `--no-configuration-cache` flag if issues persist
 - **Clean state:** Always run `./gradlew clean` before debugging build issues
+
+### Desktop Issues
+- **`Dispatchers.Main` missing:** JVM/Desktop requires `kotlinx-coroutines-swing` for `Dispatchers.Main`. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` will crash at runtime. The desktop module already includes this dependency.
 
 ### Testing Issues
 - **Instrumented tests:** Require Android device/emulator with API 26+
@@ -159,12 +173,12 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 ## File Organization
 
 ### Source Code Locations
-- **Main Activity:** `app/src/main/java/com/geeksville/mesh/MainActivity.kt`
+- **Main Activity:** `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt`
 - **Service Interface:** `core/api/src/main/aidl/org/meshtastic/core/service/IMeshService.aidl`
-- **UI Screens:** `feature/*/src/main/kotlin/org/meshtastic/feature/*/`
-- **Data Layer:** `core/data/src/main/kotlin/org/meshtastic/core/data/`
-- **Database:** `core/database/src/main/kotlin/org/meshtastic/core/database/`
-- **Models:** `core/model/src/main/kotlin/org/meshtastic/core/model/`
+- **Shared feature/UI code:** `feature/*/src/commonMain/kotlin/org/meshtastic/feature/*/`
+- **Data Layer:** `core/data/src/commonMain/kotlin/org/meshtastic/core/data/`
+- **Database:** `core/database/src/commonMain/kotlin/org/meshtastic/core/database/`
+- **Models:** `core/model/src/commonMain/kotlin/org/meshtastic/core/model/`
 
 ### Dependencies
 - **Non-obvious deps:** Protobuf for device communication, DataDog for analytics (Google flavor)
@@ -172,6 +186,12 @@ Meshtastic-Android is a native Android client application for the Meshtastic mes
 - **Version catalog:** Dependencies defined in `gradle/libs.versions.toml`
 
 ## Agent Instructions
+
+- Keep documentation continuously in sync with the code. If you change architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs in the same change.
+- Treat `AGENTS.md` as the primary source of truth for project architecture and process; update mirrored guidance here when that source changes.
+- Architecture review and gap analysis: `docs/decisions/architecture-review-2026-03.md`.
+- **Platform purity:** Never import `java.*` or `android.*` in `commonMain`. Use KMP alternatives (see AGENTS.md §3B for the full list).
+- **Testing:** Write ViewModel and business logic tests in `commonTest` (not `test/` Robolectric) so every target runs them.
 
 **TRUST THESE INSTRUCTIONS** - they are validated and comprehensive. Only search for additional information if:
 1. Commands fail with unexpected errors

@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.bearing
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
@@ -52,7 +53,8 @@ private const val HUNDRED = 100f
 private const val MILLIMETERS_PER_METER = 1000f
 
 @Suppress("TooManyFunctions")
-open class CompassViewModel(
+@KoinViewModel
+class CompassViewModel(
     private val headingProvider: CompassHeadingProvider,
     private val phoneLocationProvider: PhoneLocationProvider,
     private val magneticFieldProvider: MagneticFieldProvider,

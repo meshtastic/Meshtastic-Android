@@ -223,12 +223,20 @@
     <string name="connecting">Connecting</string>
     <string name="not_connected">Not connected</string>
     <string name="no_device_selected">No device selected</string>
+    <string name="unknown_device">Unknown Device</string>
+    <string name="no_network_devices_found">No network devices found</string>
+    <string name="no_usb_devices_found">No USB devices found</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">Demo Mode</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
     <string name="app_too_old">Application update required</string>
     <string name="must_update">You must update this application on the app store (or Github). It is too old to talk to this radio firmware.  Please read our <a href="https://meshtastic.org/docs/software/android/installation">docs</a> on this topic.</string>
     <string name="none">None (disable)</string>
     <string name="meshtastic_service_notifications">Service notifications</string>
     <string name="acknowledgements">Acknowledgements</string>
+    <string name="open_source_libraries">Open Source Libraries</string>
+    <string name="open_source_description">Meshtastic is built with the following open source libraries. Tap any library to view its license.</string>
+    <string name="library_count">%1$d libraries</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="contact_invalid">This contact is invalid and can not be added</string>
     <string name="debug_panel">Debug Panel</string>
@@ -1272,4 +1280,15 @@
     <string name="traffic_management_exhaust_hop_telemetry">Local-only Telemetry (Relays)</string>
     <string name="traffic_management_exhaust_hop_position">Local-only Position (Relays)</string>
     <string name="traffic_management_router_preserve_hops">Preserve Router Hops</string>
+    <string name="no_messages_yet">No messages yet</string>
+    <string name="unread_count">%1$d unread</string>
+    <string name="map_coming_soon">Map support is coming soon to Desktop</string>
+    <string name="no_device_connected">No device connected</string>
+    <string name="update_status">Update Status</string>
+    <string name="ready_for_firmware_update">Ready for firmware update</string>
+    <string name="check_for_updates">Check for Updates</string>
+    <string name="download_firmware">Download Firmware</string>
+    <string name="update_device">Update Device</string>
+    <string name="note">Note</string>
+    <string name="firmware_charge_warning">Ensure your device is fully charged before starting a firmware update. Do not disconnect or power off the device during the update process.</string>
 </resources>

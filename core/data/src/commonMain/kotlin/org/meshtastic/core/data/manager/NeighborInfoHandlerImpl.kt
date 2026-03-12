@@ -21,6 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NeighborInfoHandler
@@ -29,7 +30,6 @@ import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.NeighborInfo
-import java.util.Locale
 
 @Single
 class NeighborInfoHandlerImpl(
@@ -49,7 +49,7 @@ class NeighborInfoHandlerImpl(
         val ni = NeighborInfo.ADAPTER.decode(payload)
 
         // Store the last neighbor info from our connected radio
-        val from = packet.from ?: 0
+        val from = packet.from
         if (from == nodeManager.myNodeNum) {
             commandSender.lastNeighborInfo = ni
             Logger.d { "Stored last neighbor info from connected radio" }
@@ -76,7 +76,7 @@ class NeighborInfoHandlerImpl(
                 val elapsedMs = nowMillis - start
                 val seconds = elapsedMs / MILLIS_PER_SECOND
                 Logger.i { "Neighbor info $requestId complete in $seconds s" }
-                String.format(Locale.US, "%s\n\nDuration: %.1f s", formatted, seconds)
+                "$formatted\n\nDuration: ${NumberFormatter.format(seconds, 1)} s"
             } else {
                 formatted
             }

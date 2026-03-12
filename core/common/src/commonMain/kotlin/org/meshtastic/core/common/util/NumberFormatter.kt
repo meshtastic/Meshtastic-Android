@@ -16,11 +16,31 @@
  */
 package org.meshtastic.core.common.util
 
-/** Platform-agnostic number formatting utility. */
-expect object NumberFormatter {
+import kotlin.math.pow
+import kotlin.math.roundToLong
+
+/** Pure Kotlin number formatting utility — no expect/actual needed. */
+object NumberFormatter {
     /** Formats a double value with the specified number of decimal places. */
-    fun format(value: Double, decimalPlaces: Int): String
+    fun format(value: Double, decimalPlaces: Int): String {
+        val factor = 10.0.pow(decimalPlaces)
+        val rounded = (value * factor).roundToLong()
+        return formatFixedPoint(rounded, decimalPlaces)
+    }
 
     /** Formats a float value with the specified number of decimal places. */
-    fun format(value: Float, decimalPlaces: Int): String
+    fun format(value: Float, decimalPlaces: Int): String = format(value.toDouble(), decimalPlaces)
+
+    private fun formatFixedPoint(scaledValue: Long, decimalPlaces: Int): String {
+        if (decimalPlaces == 0) return scaledValue.toString()
+
+        val isNegative = scaledValue < 0
+        val abs = if (isNegative) -scaledValue else scaledValue
+        val factor = 10.0.pow(decimalPlaces).toLong()
+        val intPart = abs / factor
+        val fracPart = abs % factor
+
+        val sign = if (isNegative) "-" else ""
+        return "$sign$intPart.${fracPart.toString().padStart(decimalPlaces, '0')}"
+    }
 }

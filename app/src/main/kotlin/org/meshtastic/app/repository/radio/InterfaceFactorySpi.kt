@@ -16,6 +16,8 @@
  */
 package org.meshtastic.app.repository.radio
 
+import org.meshtastic.core.repository.RadioTransport
+
 /**
  * Radio interface factory service provider interface. Each radio backend implementation needs to have a factory to
  * create new instances. These instances are specific to a particular address. This interface defines a common API
@@ -23,6 +25,6 @@ package org.meshtastic.app.repository.radio
  *
  * This is primarily used in conjunction with Dagger assisted injection for each backend interface type.
  */
-interface InterfaceFactorySpi<T : IRadioInterface> {
+interface InterfaceFactorySpi<T : RadioTransport> {
     fun create(rest: String): T
 }

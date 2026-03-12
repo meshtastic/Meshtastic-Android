@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.onStart
 import org.koin.core.annotation.Single
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.MeshLog
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.hasValidEnvironmentMetrics

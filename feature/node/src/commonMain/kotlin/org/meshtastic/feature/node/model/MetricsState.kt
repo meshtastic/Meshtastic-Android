@@ -17,8 +17,8 @@
 package org.meshtastic.feature.node.model
 
 import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.FirmwareEdition

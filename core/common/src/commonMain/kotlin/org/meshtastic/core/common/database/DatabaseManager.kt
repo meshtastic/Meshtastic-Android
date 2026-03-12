@@ -31,4 +31,7 @@ interface DatabaseManager {
 
     /** Switches the active database to the one associated with the given [address]. */
     suspend fun switchActiveDatabase(address: String?)
+
+    /** Returns true if a database exists for the given device address. */
+    fun hasDatabaseFor(address: String?): Boolean
 }

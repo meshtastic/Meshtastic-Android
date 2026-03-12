@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.BufferedSink
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
@@ -34,6 +35,7 @@ import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
 import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
+import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
@@ -47,6 +49,7 @@ import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 import org.meshtastic.proto.LocalConfig
 
+@KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
 open class SettingsViewModel(
     radioConfigRepository: RadioConfigRepository,
@@ -57,6 +60,7 @@ open class SettingsViewModel(
     private val databaseManager: DatabaseManager,
     private val meshLogPrefs: MeshLogPrefs,
     private val setThemeUseCase: SetThemeUseCase,
+    private val setLocaleUseCase: SetLocaleUseCase,
     private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
     private val setProvideLocationUseCase: SetProvideLocationUseCase,
     private val setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase,
@@ -136,6 +140,11 @@ open class SettingsViewModel(
 
     fun setTheme(theme: Int) {
         setThemeUseCase(theme)
+    }
+
+    /** Set the application locale. Empty string means system default. */
+    fun setLocale(languageTag: String) {
+        setLocaleUseCase(languageTag)
     }
 
     fun showAppIntro() {

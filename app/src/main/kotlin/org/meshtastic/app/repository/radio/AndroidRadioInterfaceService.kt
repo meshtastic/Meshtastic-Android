@@ -38,7 +38,6 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.app.BuildConfig
-import org.meshtastic.app.repository.network.NetworkRepository
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.common.util.BinaryLogFile
 import org.meshtastic.core.common.util.handledLaunch
@@ -53,6 +52,8 @@ import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
+import org.meshtastic.core.repository.RadioTransport
+import org.meshtastic.feature.connections.repository.NetworkRepository
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 
@@ -81,6 +82,13 @@ class AndroidRadioInterfaceService(
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
+    override val supportedDeviceTypes: List<org.meshtastic.core.model.DeviceType> =
+        listOf(
+            org.meshtastic.core.model.DeviceType.BLE,
+            org.meshtastic.core.model.DeviceType.TCP,
+            org.meshtastic.core.model.DeviceType.USB,
+        )
+
     private val _receivedData = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
     override val receivedData: SharedFlow<ByteArray> = _receivedData
 
@@ -104,7 +112,7 @@ class AndroidRadioInterfaceService(
     /** We recreate this scope each time we stop an interface */
     private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
 
-    private var radioIf: IRadioInterface = NopInterface("")
+    private var radioIf: RadioTransport = NopInterface("")
 
     /**
      * true if we have started our interface

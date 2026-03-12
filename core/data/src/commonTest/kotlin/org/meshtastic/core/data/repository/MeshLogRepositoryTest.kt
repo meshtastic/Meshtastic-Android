@@ -30,12 +30,12 @@ import org.junit.Assert.assertNotNull
 import org.junit.Test
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
-import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.MeshtasticDatabase
 import org.meshtastic.core.database.dao.MeshLogDao
-import org.meshtastic.core.database.entity.MeshLog
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.proto.Data
 import org.meshtastic.proto.EnvironmentMetrics
@@ -44,10 +44,11 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import kotlin.uuid.Uuid
+import org.meshtastic.core.database.entity.MeshLog as MeshLogEntity
 
 class MeshLogRepositoryTest {
 
-    private val dbManager: DatabaseManager = mockk()
+    private val dbManager: DatabaseProvider = mockk()
     private val appDatabase: MeshtasticDatabase = mockk()
     private val meshLogDao: MeshLogDao = mockk()
     private val meshLogPrefs: MeshLogPrefs = mockk()
@@ -127,7 +128,7 @@ class MeshLogRepositoryTest {
         val logs =
             listOf(
                 // Valid request
-                MeshLog(
+                MeshLogEntity(
                     uuid = "1",
                     message_type = "Packet",
                     received_date = nowMillis,
@@ -141,7 +142,7 @@ class MeshLogRepositoryTest {
                     ),
                 ),
                 // Wrong target
-                MeshLog(
+                MeshLogEntity(
                     uuid = "2",
                     message_type = "Packet",
                     received_date = nowMillis,
@@ -155,7 +156,7 @@ class MeshLogRepositoryTest {
                     ),
                 ),
                 // Not a request (want_response = false)
-                MeshLog(
+                MeshLogEntity(
                     uuid = "3",
                     message_type = "Packet",
                     received_date = nowMillis,
@@ -169,7 +170,7 @@ class MeshLogRepositoryTest {
                     ),
                 ),
                 // Wrong fromNum
-                MeshLog(
+                MeshLogEntity(
                     uuid = "4",
                     message_type = "Packet",
                     received_date = nowMillis,

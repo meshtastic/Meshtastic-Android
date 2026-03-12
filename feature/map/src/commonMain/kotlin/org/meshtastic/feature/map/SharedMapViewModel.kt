@@ -23,7 +23,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 
 @KoinViewModel
-open class SharedMapViewModel(
+class SharedMapViewModel(
     mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,

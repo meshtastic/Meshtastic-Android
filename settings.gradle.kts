@@ -35,14 +35,17 @@ include(
     ":core:repository",
     ":core:service",
     ":core:resources",
+    ":core:testing",
     ":core:ui",
     ":feature:intro",
     ":feature:messaging",
+    ":feature:connections",
     ":feature:map",
     ":feature:node",
     ":feature:settings",
     ":feature:firmware",
     ":mesh_service_example",
+    ":desktop",
 )
 rootProject.name = "MeshtasticAndroid"
 

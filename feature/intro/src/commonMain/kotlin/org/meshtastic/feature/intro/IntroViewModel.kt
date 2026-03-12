@@ -18,9 +18,11 @@ package org.meshtastic.feature.intro
 
 import androidx.lifecycle.ViewModel
 import androidx.navigation3.runtime.NavKey
+import org.koin.core.annotation.KoinViewModel
 
 /** ViewModel for the app introduction flow. */
-open class IntroViewModel : ViewModel() {
+@KoinViewModel
+class IntroViewModel : ViewModel() {
 
     /**
      * Determines the next navigation key based on the current key and the state of permissions. The flow hierarchy is:

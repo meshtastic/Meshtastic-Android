@@ -26,6 +26,7 @@ import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.util.getInitials
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.Data
@@ -56,7 +57,7 @@ private val defaultChannel = ProtoChannel(settings = Channel.default.settings, r
 
 /** A simulated interface that is used for testing in the simulator */
 @Suppress("detekt:TooManyFunctions", "detekt:MagicNumber")
-class MockInterface(private val service: RadioInterfaceService, val address: String) : IRadioInterface {
+class MockInterface(private val service: RadioInterfaceService, val address: String) : RadioTransport {
 
     companion object {
         private const val MY_NODE = 0x42424242

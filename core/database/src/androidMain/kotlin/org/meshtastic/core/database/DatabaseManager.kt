@@ -42,10 +42,11 @@ import java.io.File
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
-@Single
+@Single(binds = [DatabaseProvider::class, SharedDatabaseManager::class])
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
 open class DatabaseManager(private val app: Application, private val dispatchers: CoroutineDispatchers) :
+    DatabaseProvider,
     SharedDatabaseManager {
     val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -69,7 +70,7 @@ open class DatabaseManager(private val app: Application, private val dispatchers
     }
 
     private val _currentDb = MutableStateFlow<MeshtasticDatabase?>(null)
-    val currentDb: StateFlow<MeshtasticDatabase> =
+    override val currentDb: StateFlow<MeshtasticDatabase> =
         _currentDb.filterNotNull().stateIn(managerScope, SharingStarted.Eagerly, buildRoomDb(app, defaultDbName()))
 
     private val _currentAddress = MutableStateFlow<String?>(null)
@@ -119,7 +120,7 @@ open class DatabaseManager(private val app: Application, private val dispatchers
     private val limitedIo = dispatchers.io.limitedParallelism(4)
 
     /** Execute [block] with the current DB instance. */
-    suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
+    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = withContext(limitedIo) {
         val db = _currentDb.value ?: return@withContext null
         val active = buildDbName(_currentAddress.value)
         markLastUsed(active)
@@ -127,7 +128,7 @@ open class DatabaseManager(private val app: Application, private val dispatchers
     }
 
     /** Returns true if a database exists for the given device address. */
-    fun hasDatabaseFor(address: String?): Boolean {
+    override fun hasDatabaseFor(address: String?): Boolean {
         if (address.isNullOrBlank() || address == "n") return false
         val dbName = buildDbName(address)
         return getDbFile(app, dbName) != null

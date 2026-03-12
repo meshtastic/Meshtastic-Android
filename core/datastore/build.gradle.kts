@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     android { namespace = "org.meshtastic.core.datastore" }
 
     sourceSets {

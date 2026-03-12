@@ -16,39 +16,37 @@
  */
 package org.meshtastic.app.repository.radio
 
-import io.mockk.every
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.meshtastic.app.service.Fakes
-import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.network.transport.StreamFrameCodec
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 
 class TCPInterfaceTest {
 
     @Test
-    fun testKeepAlive() {
-        val fakes = Fakes()
-        val testDispatcher = UnconfinedTestDispatcher()
-        val testScope = CoroutineScope(testDispatcher + Job())
-        every { fakes.service.serviceScope } returns testScope
+    fun testHeartbeatFraming() = runTest {
+        val sentBytes = mutableListOf<ByteArray>()
 
-        val dispatchers = CoroutineDispatchers(io = testDispatcher, main = testDispatcher, default = testDispatcher)
-        val tcpIf =
-            object : TCPInterface(fakes.service, dispatchers, "127.0.0.1") {
-                var lastSent: ByteArray? = null
+        val codec = StreamFrameCodec(onPacketReceived = {}, logTag = "Test")
 
-                override fun handleSendToRadio(p: ByteArray) {
-                    lastSent = p
-                }
-            }
+        val heartbeat = ToRadio(heartbeat = Heartbeat()).encode()
+        codec.frameAndSend(heartbeat, { sentBytes.add(it) })
 
-        tcpIf.keepAlive()
+        // First sent bytes are the 4-byte header, second is the payload
+        assertEquals(2, sentBytes.size)
+        val header = sentBytes[0]
+        assertEquals(4, header.size)
+        assertEquals(0x94.toByte(), header[0])
+        assertEquals(0xc3.toByte(), header[1])
 
-        val expected = ToRadio(heartbeat = Heartbeat()).encode()
-        assertEquals(expected.toList(), tcpIf.lastSent?.toList())
+        val payload = sentBytes[1]
+        assertEquals(heartbeat.toList(), payload.toList())
+    }
+
+    @Test
+    fun testServicePort() {
+        assertEquals(4403, TCPInterface.SERVICE_PORT)
     }
 }

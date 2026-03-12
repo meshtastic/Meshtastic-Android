@@ -33,7 +33,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -95,7 +94,6 @@ private const val ACTIVE_ALPHA = 0.5f
 private const val INACTIVE_ALPHA = 0.2f
 private const val GRID_COLUMNS = 3
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
 fun NodeItem(
@@ -109,10 +107,10 @@ fun NodeItem(
     connectionState: ConnectionState,
     isActive: Boolean = false,
 ) {
-    val isFavorite = remember(thatNode) { thatNode.isFavorite }
+    val originalLongName = thatNode.user.long_name.ifEmpty { stringResource(Res.string.unknown_username) }
     val isMuted = remember(thatNode) { thatNode.isMuted }
     val isIgnored = thatNode.isIgnored
-    val originalLongName = (thatNode.user.long_name ?: "").ifEmpty { stringResource(Res.string.unknown_username) }
+    val isFavorite = thatNode.isFavorite
 
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system =
@@ -316,6 +314,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((pax.ble ?: 0) != 0 || (pax.wifi ?: 0) != 0) {
         items.add { PaxcountInfo(pax = "B:${pax.ble ?: 0} W:${pax.wifi ?: 0}", contentColor = contentColor) }
     }
+
     if ((env.temperature ?: 0f) != 0f) {
         val temp =
             if (tempInFahrenheit) {
@@ -387,7 +386,6 @@ private fun MetricsGrid(items: List<@Composable () -> Unit>) {
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NodeItemHeader(
     thatNode: Node,
@@ -415,15 +413,19 @@ private fun NodeItemHeader(
             modifier = Modifier.size(24.dp),
         )
 
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 Text(
                     text = longName,
-                    style = MaterialTheme.typography.titleMediumEmphasized.copy(fontStyle = style),
+                    style = MaterialTheme.typography.titleMedium.copy(fontStyle = style),
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f, fill = false),
+                    modifier = Modifier.weight(1f),
                 )
                 TransportIcon(
                     transport = thatNode.lastTransport,

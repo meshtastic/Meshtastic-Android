@@ -20,22 +20,14 @@ package org.meshtastic.feature.messaging
 
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -45,29 +37,7 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.rounded.SpeakerNotes
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.rounded.ArrowDownward
-import androidx.compose.material.icons.rounded.ChatBubbleOutline
-import androidx.compose.material.icons.rounded.ContentCopy
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.FilterList
-import androidx.compose.material.icons.rounded.FilterListOff
-import androidx.compose.material.icons.rounded.MoreVert
-import androidx.compose.material.icons.rounded.SelectAll
-import androidx.compose.material.icons.rounded.SpeakerNotesOff
-import androidx.compose.material.icons.rounded.Visibility
-import androidx.compose.material.icons.rounded.VisibilityOff
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +45,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -85,66 +54,42 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.HomoglyphCharacterStringTransformer
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getChannel
 import org.meshtastic.core.resources.Res
-import org.meshtastic.core.resources.alert_bell_text
-import org.meshtastic.core.resources.cancel_reply
-import org.meshtastic.core.resources.clear_selection
-import org.meshtastic.core.resources.copy
-import org.meshtastic.core.resources.delete
-import org.meshtastic.core.resources.delete_messages
-import org.meshtastic.core.resources.delete_messages_title
-import org.meshtastic.core.resources.filter_disable_for_contact
-import org.meshtastic.core.resources.filter_enable_for_contact
-import org.meshtastic.core.resources.filter_hide_count
-import org.meshtastic.core.resources.filter_show_count
 import org.meshtastic.core.resources.message_input_label
-import org.meshtastic.core.resources.navigate_back
-import org.meshtastic.core.resources.overflow_menu
-import org.meshtastic.core.resources.quick_chat
-import org.meshtastic.core.resources.quick_chat_hide
-import org.meshtastic.core.resources.quick_chat_show
-import org.meshtastic.core.resources.reply
-import org.meshtastic.core.resources.replying_to
-import org.meshtastic.core.resources.scroll_to_bottom
-import org.meshtastic.core.resources.select_all
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.resources.type_a_message
-import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.resources.unknown_channel
-import org.meshtastic.core.ui.component.MeshtasticTextDialog
-import org.meshtastic.core.ui.component.NodeKeyStatusIcon
-import org.meshtastic.core.ui.component.SecurityIcon
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.smartScrollToIndex
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.proto.ChannelSet
+import org.meshtastic.feature.messaging.component.ActionModeTopBar
+import org.meshtastic.feature.messaging.component.DeleteMessageDialog
+import org.meshtastic.feature.messaging.component.MESSAGE_CHARACTER_LIMIT_BYTES
+import org.meshtastic.feature.messaging.component.MessageMenuAction
+import org.meshtastic.feature.messaging.component.MessageTopBar
+import org.meshtastic.feature.messaging.component.QuickChatRow
+import org.meshtastic.feature.messaging.component.ReplySnippet
+import org.meshtastic.feature.messaging.component.ScrollToBottomFab
 import java.nio.charset.StandardCharsets
 
-private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
-private const val SNIPPET_CHARACTER_LIMIT = 50
 private const val ROUNDED_CORNER_PERCENT = 100
+private const val MAX_LINES = 3
 
 /**
  * The main screen for displaying and sending messages to a contact or channel.
@@ -455,101 +400,6 @@ fun MessageScreen(
 }
 
 /**
- * A FloatingActionButton that scrolls the message list to the bottom (most recent messages).
- *
- * @param coroutineScope The coroutine scope for launching the scroll animation.
- * @param listState The [LazyListState] of the message list.
- * @param unreadCount The number of unread messages to display as a badge.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyListState, unreadCount: Int) {
-    FloatingActionButton(
-        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
-        onClick = {
-            coroutineScope.launch {
-                // Assuming messages are ordered with the newest at index 0
-                listState.animateScrollToItem(0)
-            }
-        },
-    ) {
-        if (unreadCount > 0) {
-            BadgedBox(badge = { Badge { Text(unreadCount.toString()) } }) {
-                Icon(
-                    imageVector = Icons.Rounded.ArrowDownward,
-                    contentDescription = stringResource(Res.string.scroll_to_bottom),
-                )
-            }
-        } else {
-            Icon(
-                imageVector = Icons.Rounded.ArrowDownward,
-                contentDescription = stringResource(Res.string.scroll_to_bottom),
-            )
-        }
-    }
-}
-
-/**
- * Displays a snippet of the message being replied to.
- *
- * @param originalMessage The message being replied to, or null if not replying.
- * @param onClearReply Callback to clear the reply state.
- * @param ourNode The current user's node information, to display "You" if replying to self.
- */
-@Composable
-private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: Node?) {
-    AnimatedVisibility(visible = originalMessage != null) {
-        originalMessage?.let { message ->
-            val isFromLocalUser = message.fromLocal
-            val replyingToNodeUser = if (isFromLocalUser) ourNode?.user else message.node.user
-            val unknownUserText = stringResource(Res.string.unknown)
-
-            Row(
-                modifier =
-                Modifier.fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Reply,
-                    contentDescription = stringResource(Res.string.reply), // Decorative
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = stringResource(Res.string.replying_to, replyingToNodeUser?.short_name ?: unknownUserText),
-                    style = MaterialTheme.typography.labelMedium,
-                )
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = message.text.ellipsize(SNIPPET_CHARACTER_LIMIT),
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                IconButton(onClick = onClearReply) {
-                    Icon(
-                        Icons.Filled.Close,
-                        contentDescription = stringResource(Res.string.cancel_reply), // Specific action
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Ellipsizes a string if its length exceeds [maxLength].
- *
- * @param maxLength The maximum number of characters to display before adding "…".
- * @return The ellipsized string.
- * @receiver The string to ellipsize.
- */
-private fun String.ellipsize(maxLength: Int): String = if (length > maxLength) "${take(maxLength)}…" else this
-
-/**
  * Handles a quick chat action, either appending its message to the input field or sending it directly.
  *
  * @param action The [QuickChatAction] to handle.
@@ -561,352 +411,13 @@ private fun handleQuickChatAction(
     messageInputState: TextFieldState,
     onSendMessage: (String) -> Unit,
 ) {
-    when (action.mode) {
-        QuickChatAction.Mode.Append -> {
-            val originalText = messageInputState.text.toString()
-            // Avoid appending if the exact message is already present (simple check)
-            if (!originalText.contains(action.message)) {
-                val newText =
-                    buildString {
-                        append(originalText)
-                        if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
-                            append(' ')
-                        }
-                        append(action.message)
-                    }
-                        .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
-                messageInputState.setTextAndPlaceCursorAtEnd(newText)
-            }
-        }
-
-        QuickChatAction.Mode.Instant -> {
-            // Byte limit for 'Send' mode messages is handled by the backend/transport layer.
-            onSendMessage(action.message)
-        }
-    }
-}
-
-/**
- * Truncates a string to ensure its UTF-8 byte representation does not exceed [maxBytes].
- *
- * This implementation iterates by characters and checks byte length to avoid splitting multi-byte characters.
- *
- * @param maxBytes The maximum allowed byte length.
- * @return The truncated string, or the original string if it's within the byte limit.
- * @receiver The string to limit.
- */
-private fun String.limitBytes(maxBytes: Int): String {
-    val bytes = this.toByteArray(StandardCharsets.UTF_8)
-    if (bytes.size <= maxBytes) {
-        return this
-    }
-
-    var currentBytesSum = 0
-    var validCharCount = 0
-    for (charIndex in this.indices) {
-        val charToTest = this[charIndex]
-        val charBytes = charToTest.toString().toByteArray(StandardCharsets.UTF_8).size
-        if (currentBytesSum + charBytes > maxBytes) {
-            break
-        }
-        currentBytesSum += charBytes
-        validCharCount++
-    }
-    return this.substring(0, validCharCount)
-}
-
-/**
- * A dialog confirming the deletion of messages.
- *
- * @param count The number of messages to be deleted.
- * @param onConfirm Callback invoked when the user confirms the deletion.
- * @param onDismiss Callback invoked when the dialog is dismissed.
- */
-@Composable
-private fun DeleteMessageDialog(count: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    val deleteMessagesString = pluralStringResource(Res.plurals.delete_messages, count, count)
-
-    MeshtasticTextDialog(
-        titleRes = Res.string.delete_messages_title,
-        message = deleteMessagesString,
-        confirmTextRes = Res.string.delete,
-        onConfirm = onConfirm,
-        onDismiss = onDismiss,
+    org.meshtastic.feature.messaging.component.handleQuickChatAction(
+        action = action,
+        currentText = messageInputState.text.toString(),
+        onUpdateText = { newText -> messageInputState.setTextAndPlaceCursorAtEnd(newText) },
+        onSendMessage = onSendMessage,
     )
 }
-
-/** Actions available in the message selection mode's top bar. */
-internal sealed class MessageMenuAction {
-    data object ClipboardCopy : MessageMenuAction()
-
-    data object Delete : MessageMenuAction()
-
-    data object Dismiss : MessageMenuAction()
-
-    data object SelectAll : MessageMenuAction()
-}
-
-/**
- * The top app bar displayed when in message selection mode.
- *
- * @param selectedCount The number of currently selected messages.
- * @param onAction Callback for when a menu action is triggered.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -> Unit) = TopAppBar(
-    title = { Text(text = selectedCount.toString()) },
-    navigationIcon = {
-        IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(Res.string.clear_selection),
-            )
-        }
-    },
-    actions = {
-        IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(imageVector = Icons.Rounded.ContentCopy, contentDescription = stringResource(Res.string.copy))
-        }
-        IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.delete))
-        }
-        IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(imageVector = Icons.Rounded.SelectAll, contentDescription = stringResource(Res.string.select_all))
-        }
-    },
-)
-
-/**
- * The default top app bar for the message screen.
- *
- * @param title The title to display (contact or channel name).
- * @param channelIndex The index of the current channel, if applicable.
- * @param mismatchKey True if there's a key mismatch for the current PKC.
- * @param onNavigateBack Callback for the navigation icon.
- * @param channels The set of all channels, used for the [SecurityIcon].
- * @param channelIndexParam The specific channel index for the [SecurityIcon].
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MessageTopBar(
-    title: String,
-    channelIndex: Int?,
-    mismatchKey: Boolean,
-    onNavigateBack: () -> Unit,
-    channels: ChannelSet?,
-    channelIndexParam: Int?,
-    showQuickChat: Boolean,
-    onToggleQuickChat: () -> Unit,
-    onNavigateToQuickChatOptions: () -> Unit = {},
-    filteringDisabled: Boolean = false,
-    onToggleFilteringDisabled: () -> Unit = {},
-    filteredCount: Int = 0,
-    showFiltered: Boolean = false,
-    onToggleShowFiltered: () -> Unit = {},
-) = TopAppBar(
-    title = {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(modifier = Modifier.width(10.dp))
-
-            if (channels != null && channelIndexParam != null) {
-                SecurityIcon(channels, channelIndexParam)
-            }
-        }
-    },
-    navigationIcon = {
-        IconButton(onClick = onNavigateBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(Res.string.navigate_back),
-            )
-        }
-    },
-    actions = {
-        MessageTopBarActions(
-            showQuickChat = showQuickChat,
-            onToggleQuickChat = onToggleQuickChat,
-            onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
-            channelIndex = channelIndex,
-            mismatchKey = mismatchKey,
-            filteringDisabled = filteringDisabled,
-            onToggleFilteringDisabled = onToggleFilteringDisabled,
-            filteredCount = filteredCount,
-            showFiltered = showFiltered,
-            onToggleShowFiltered = onToggleShowFiltered,
-        )
-    },
-)
-
-@Composable
-private fun MessageTopBarActions(
-    showQuickChat: Boolean,
-    onToggleQuickChat: () -> Unit,
-    onNavigateToQuickChatOptions: () -> Unit,
-    channelIndex: Int?,
-    mismatchKey: Boolean,
-    filteringDisabled: Boolean,
-    onToggleFilteringDisabled: () -> Unit,
-    filteredCount: Int,
-    showFiltered: Boolean,
-    onToggleShowFiltered: () -> Unit,
-) {
-    if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
-        NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
-    }
-    var expanded by remember { mutableStateOf(false) }
-    Box {
-        IconButton(onClick = { expanded = true }, enabled = true) {
-            Icon(imageVector = Icons.Rounded.MoreVert, contentDescription = stringResource(Res.string.overflow_menu))
-        }
-        OverFlowMenu(
-            expanded = expanded,
-            onDismiss = { expanded = false },
-            showQuickChat = showQuickChat,
-            onToggleQuickChat = onToggleQuickChat,
-            onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
-            filteringDisabled = filteringDisabled,
-            onToggleFilteringDisabled = onToggleFilteringDisabled,
-            filteredCount = filteredCount,
-            showFiltered = showFiltered,
-            onToggleShowFiltered = onToggleShowFiltered,
-        )
-    }
-}
-
-@Composable
-private fun OverFlowMenu(
-    expanded: Boolean,
-    onDismiss: () -> Unit,
-    showQuickChat: Boolean,
-    onToggleQuickChat: () -> Unit,
-    onNavigateToQuickChatOptions: () -> Unit,
-    filteringDisabled: Boolean,
-    onToggleFilteringDisabled: () -> Unit,
-    filteredCount: Int,
-    showFiltered: Boolean,
-    onToggleShowFiltered: () -> Unit,
-) {
-    if (expanded) {
-        DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-            QuickChatToggleMenuItem(showQuickChat, onDismiss, onToggleQuickChat)
-            QuickChatOptionsMenuItem(onDismiss, onNavigateToQuickChatOptions)
-            if (filteredCount > 0 && !filteringDisabled) {
-                FilteredMessagesMenuItem(showFiltered, filteredCount, onDismiss, onToggleShowFiltered)
-            }
-            FilterToggleMenuItem(filteringDisabled, onDismiss, onToggleFilteringDisabled)
-        }
-    }
-}
-
-@Composable
-private fun QuickChatToggleMenuItem(showQuickChat: Boolean, onDismiss: () -> Unit, onToggle: () -> Unit) {
-    val title = stringResource(if (showQuickChat) Res.string.quick_chat_hide else Res.string.quick_chat_show)
-    DropdownMenuItem(
-        text = { Text(title) },
-        onClick = {
-            onDismiss()
-            onToggle()
-        },
-        leadingIcon = {
-            Icon(
-                imageVector =
-                if (showQuickChat) Icons.Rounded.SpeakerNotesOff else Icons.AutoMirrored.Rounded.SpeakerNotes,
-                contentDescription = title,
-            )
-        },
-    )
-}
-
-@Composable
-private fun QuickChatOptionsMenuItem(onDismiss: () -> Unit, onNavigate: () -> Unit) {
-    val title = stringResource(Res.string.quick_chat)
-    DropdownMenuItem(
-        text = { Text(title) },
-        onClick = {
-            onDismiss()
-            onNavigate()
-        },
-        leadingIcon = { Icon(imageVector = Icons.Rounded.ChatBubbleOutline, contentDescription = title) },
-    )
-}
-
-@Composable
-private fun FilteredMessagesMenuItem(showFiltered: Boolean, count: Int, onDismiss: () -> Unit, onToggle: () -> Unit) {
-    val title = stringResource(if (showFiltered) Res.string.filter_hide_count else Res.string.filter_show_count, count)
-    DropdownMenuItem(
-        text = { Text(title) },
-        onClick = {
-            onDismiss()
-            onToggle()
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = if (showFiltered) Icons.Rounded.VisibilityOff else Icons.Rounded.Visibility,
-                contentDescription = title,
-            )
-        },
-    )
-}
-
-@Composable
-private fun FilterToggleMenuItem(filteringDisabled: Boolean, onDismiss: () -> Unit, onToggle: () -> Unit) {
-    val title =
-        stringResource(
-            if (filteringDisabled) Res.string.filter_enable_for_contact else Res.string.filter_disable_for_contact,
-        )
-    DropdownMenuItem(
-        text = { Text(title) },
-        onClick = {
-            onDismiss()
-            onToggle()
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = if (filteringDisabled) Icons.Rounded.FilterList else Icons.Rounded.FilterListOff,
-                contentDescription = title,
-            )
-        },
-    )
-}
-
-/**
- * A row of quick chat action buttons.
- *
- * @param enabled Whether the buttons should be enabled.
- * @param actions The list of [QuickChatAction]s to display.
- * @param onClick Callback when a quick chat button is clicked.
- */
-@Composable
-private fun QuickChatRow(
-    modifier: Modifier = Modifier,
-    enabled: Boolean,
-    actions: List<QuickChatAction>,
-    onClick: (QuickChatAction) -> Unit,
-) {
-    val alertActionMessage = stringResource(Res.string.alert_bell_text)
-    val alertAction =
-        remember(alertActionMessage) {
-            // Memoize if content is static
-            QuickChatAction(
-                name = "🔔",
-                message = "🔔 $alertActionMessage \u0007", // Bell character added to message
-                mode = QuickChatAction.Mode.Append,
-                position = -1, // Assuming -1 means it's a special prepended action
-            )
-        }
-
-    val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
-
-    LazyRow(modifier = modifier.padding(vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        items(allActions, key = { it.uuid }) { action ->
-            Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
-        }
-    }
-}
-
-private const val MAX_LINES = 3
 
 /**
  * The text input field for composing messages.

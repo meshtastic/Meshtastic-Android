@@ -229,6 +229,7 @@ dependencies {
     implementation(projects.core.barcode)
     implementation(projects.feature.intro)
     implementation(projects.feature.messaging)
+    implementation(projects.feature.connections)
     implementation(projects.feature.map)
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
@@ -326,6 +327,16 @@ dependencies {
 }
 
 aboutLibraries {
+    // Fetch full license text + funding info from GitHub API when on CI with a token
+    val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
+    val ghToken = providers.environmentVariable("GITHUB_TOKEN")
+    collect {
+        fetchRemoteLicense = isCi && ghToken.isPresent
+        fetchRemoteFunding = isCi && ghToken.isPresent
+        if (ghToken.isPresent) {
+            gitHubApiToken = ghToken.get()
+        }
+    }
     export { excludeFields = listOf("generated") }
     library {
         duplicationMode = DuplicateMode.MERGE

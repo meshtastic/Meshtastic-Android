@@ -46,6 +46,16 @@ class KoinConventionPlugin : Plugin<Project> {
                     }
                 }
             }
+
+            pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+                // If this is *only* a JVM module (no KMP plugin)
+                if (!pluginManager.hasPlugin("org.jetbrains.kotlin.multiplatform")) {
+                    dependencies {
+                        add("implementation", koinCore)
+                        add("implementation", koinAnnotations)
+                    }
+                }
+            }
         }
     }
 }

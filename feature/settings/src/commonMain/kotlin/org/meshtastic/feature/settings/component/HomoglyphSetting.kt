@@ -19,8 +19,6 @@ package org.meshtastic.feature.settings.component
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Abc
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.core.os.ConfigurationCompat
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.use_homoglyph_characters_encoding
@@ -28,14 +26,10 @@ import org.meshtastic.core.ui.component.SwitchListItem
 
 @Composable
 fun HomoglyphSetting(homoglyphEncodingEnabled: Boolean, onToggle: () -> Unit) {
-    val currentLocale = ConfigurationCompat.getLocales(LocalConfiguration.current).get(0)
-    val supportedLanguages = listOf("ru", "uk", "be", "bg", "sr", "mk", "kk", "ky", "tg", "mn")
-    if (currentLocale?.language in supportedLanguages) {
-        SwitchListItem(
-            text = stringResource(Res.string.use_homoglyph_characters_encoding),
-            checked = homoglyphEncodingEnabled,
-            leadingIcon = Icons.Default.Abc,
-            onClick = onToggle,
-        )
-    }
+    SwitchListItem(
+        text = stringResource(Res.string.use_homoglyph_characters_encoding),
+        checked = homoglyphEncodingEnabled,
+        leadingIcon = Icons.Default.Abc,
+        onClick = onToggle,
+    )
 }

@@ -27,6 +27,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.MyNodeInfo
 import org.meshtastic.proto.NodeInfo
 import org.meshtastic.proto.Position
+import org.meshtastic.core.model.MeshLog as ExternalMeshLog
 
 /**
  * Represents a log entry in the database.
@@ -83,3 +84,23 @@ data class MeshLog(
         const val NODE_NUM_LOCAL = 0
     }
 }
+
+fun MeshLog.asExternalModel() = ExternalMeshLog(
+    uuid = uuid,
+    message_type = message_type,
+    received_date = received_date,
+    raw_message = raw_message,
+    fromNum = fromNum,
+    portNum = portNum,
+    fromRadio = fromRadio,
+)
+
+fun ExternalMeshLog.asEntity() = MeshLog(
+    uuid = uuid,
+    message_type = message_type,
+    received_date = received_date,
+    raw_message = raw_message,
+    fromNum = fromNum,
+    portNum = portNum,
+    fromRadio = fromRadio,
+)

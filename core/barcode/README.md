@@ -1,31 +1,40 @@
 # `:core:barcode`
 
 ## Overview
-The `:core:barcode` module provides barcode and QR code scanning capabilities using Google ML Kit and CameraX. It is used for scanning node configuration, pairing, and contact sharing.
+The `:core:barcode` module provides barcode and QR code scanning capabilities using CameraX and flavor-specific decoding engines. It is used for scanning node configuration, pairing, and contact sharing.
+
+The shared contract (`BarcodeScanner` interface + `LocalBarcodeScannerProvider`) lives in `core:ui/commonMain`, keeping this module Android-only.
 
 ## Key Components
 
-### 1. `BarcodeScanner`
-A Composable component that provides a live camera preview and detects barcodes/QR codes in real-time.
+### 1. `rememberBarcodeScanner`
+A Composable function (in `main/`) that provides camera permission handling, a full-screen scanner dialog with live preview and reticule overlay, and returns a `BarcodeScanner` instance.
 
-- **Technology:** Uses **CameraX** for camera lifecycle management and **ML Kit Barcode Scanning** for detection.
-- **Flavors:** Uses the bundled ML Kit library to ensure consistent performance across both `google` and `fdroid` flavors without depending on Google Play Services.
+- **Technology:** Uses **CameraX** for camera lifecycle management.
+- **Flavors:** Barcode decoding is the only flavor-specific code:
+  - `google/` — **ML Kit** (`BarcodeScanning` + `InputImage`) via `createBarcodeAnalyzer()`
+  - `fdroid/` — **ZXing** (`MultiFormatReader` + `PlanarYUVLuminanceSource`) via `createBarcodeAnalyzer()`
+- All shared UI (dialog, reticule, permissions, camera lifecycle) lives in `main/`.
 
-### 2. `BarcodeUtil`
-Utility functions for generating and parsing Meshtastic-specific QR codes (e.g., node URLs).
+## Source Layout
+
+```
+src/
+├── main/     BarcodeScannerProvider.kt (shared UI)
+├── google/   BarcodeAnalyzerFactory.kt (ML Kit decoder)
+├── fdroid/   BarcodeAnalyzerFactory.kt (ZXing decoder)
+├── test/     Unit tests
+└── androidTest/ Instrumented tests
+```
 
 ## Usage
-The module exposes a scanner that can be integrated into any Compose screen.
 
 ```kotlin
-BarcodeScanner(
-    onBarcodeDetected = { barcode ->
-        // Handle scanned barcode
-    },
-    onDismiss = {
-        // Handle dismiss
-    }
-)
+// In a Composable (typically wired via LocalBarcodeScannerProvider in app/)
+val scanner = rememberBarcodeScanner { result ->
+    // Handle scanned QR code string (or null on dismiss)
+}
+scanner.startScan()
 ```
 
 ## Module dependency graph

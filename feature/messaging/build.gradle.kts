@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.messaging"
@@ -31,6 +33,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.foundation)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -47,6 +52,12 @@ kotlin {
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
+            implementation(libs.androidx.paging.common)
+
+            // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
+            implementation(libs.jetbrains.compose.material3.adaptive)
+            implementation(libs.jetbrains.compose.material3.adaptive.layout)
+            implementation(libs.jetbrains.compose.material3.adaptive.navigation)
         }
 
         androidMain.dependencies {
@@ -54,9 +65,6 @@ kotlin {
             implementation(libs.accompanist.permissions)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.compose.material3)
-            implementation(libs.androidx.compose.material3.adaptive)
-            implementation(libs.androidx.compose.material3.adaptive.layout)
-            implementation(libs.androidx.compose.material3.adaptive.navigation)
             implementation(libs.androidx.compose.material.iconsExtended)
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
@@ -66,11 +74,7 @@ kotlin {
             implementation(libs.androidx.work.runtime.ktx)
         }
 
-        commonTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.turbine)
-        }
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         androidUnitTest.dependencies {
             implementation(libs.mockk)

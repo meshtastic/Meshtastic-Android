@@ -20,14 +20,10 @@ package org.meshtastic.app.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -58,14 +54,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
@@ -73,9 +63,6 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import co.touchlab.kermit.Logger
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -89,33 +76,22 @@ import org.meshtastic.app.navigation.mapGraph
 import org.meshtastic.app.navigation.nodesGraph
 import org.meshtastic.app.navigation.settingsGraph
 import org.meshtastic.app.service.MeshService
-import org.meshtastic.app.ui.connections.DeviceType
-import org.meshtastic.app.ui.connections.ScannerViewModel
-import org.meshtastic.app.ui.connections.components.ConnectionsNavIcon
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.DeviceVersion
-import org.meshtastic.core.model.MeshActivity
-import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
-import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.app_too_old
-import org.meshtastic.core.resources.bottom_nav_settings
 import org.meshtastic.core.resources.connected
 import org.meshtastic.core.resources.connecting
-import org.meshtastic.core.resources.connections
-import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.resources.device_sleeping
 import org.meshtastic.core.resources.disconnected
 import org.meshtastic.core.resources.firmware_old
 import org.meshtastic.core.resources.firmware_too_old
-import org.meshtastic.core.resources.map
 import org.meshtastic.core.resources.must_update
-import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.should_update
 import org.meshtastic.core.resources.should_update_firmware
@@ -123,34 +99,15 @@ import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.core.ui.icon.Conversations
-import org.meshtastic.core.ui.icon.Map
-import org.meshtastic.core.ui.icon.MeshtasticIcons
-import org.meshtastic.core.ui.icon.Nodes
-import org.meshtastic.core.ui.icon.Settings
-import org.meshtastic.core.ui.icon.Wifi
+import org.meshtastic.core.ui.navigation.icon
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.share.SharedContactDialog
-import org.meshtastic.core.ui.theme.StatusColors.StatusBlue
 import org.meshtastic.core.ui.theme.StatusColors.StatusGreen
 import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.core.ui.util.toMessageRes
-
-enum class TopLevelDestination(val label: StringResource, val icon: ImageVector, val route: Route) {
-    Conversations(Res.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
-    Nodes(Res.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
-    Map(Res.string.map, MeshtasticIcons.Map, MapRoutes.Map()),
-    Settings(Res.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
-    Connections(Res.string.connections, MeshtasticIcons.Wifi, ConnectionsRoutes.ConnectionsGraph),
-    ;
-
-    companion object {
-        fun fromNavKey(key: NavKey?): TopLevelDestination? =
-            entries.find { dest -> key?.let { it::class == dest.route::class } == true }
-    }
-}
+import org.meshtastic.feature.connections.ScannerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -254,37 +211,6 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
     // State for determining the connection type icon to display
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
 
-    // State for managing the glow animation around the Connections icon
-    var currentGlowColor by remember { mutableStateOf(Color.Transparent) }
-    val animatedGlowAlpha = remember { Animatable(0f) }
-    val coroutineScope = rememberCoroutineScope()
-    val capturedColorScheme = colorScheme // Capture current colorScheme instance for LaunchedEffect
-
-    val sendColor = capturedColorScheme.StatusGreen
-    val receiveColor = capturedColorScheme.StatusBlue
-    LaunchedEffect(uIViewModel.meshActivity, capturedColorScheme) {
-        uIViewModel.meshActivity.collectLatest { activity ->
-            Logger.d { "MeshActivity received in UI: $activity" }
-            val newTargetColor =
-                when (activity) {
-                    is MeshActivity.Send -> sendColor
-                    is MeshActivity.Receive -> receiveColor
-                }
-
-            currentGlowColor = newTargetColor
-            // Stop any existing animation and launch a new one.
-            // Launching in a new coroutine ensures the collect block is not suspended.
-            coroutineScope.launch {
-                animatedGlowAlpha.stop() // Stop before snapping/animating
-                animatedGlowAlpha.snapTo(1.0f) // Show glow instantly
-                animatedGlowAlpha.animateTo(
-                    targetValue = 0.0f, // Fade out
-                    animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
-                )
-            }
-        }
-    }
-
     NavigationSuiteScaffold(
         modifier = Modifier.fillMaxSize(),
         navigationSuiteItems = {
@@ -316,44 +242,12 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                             state = rememberTooltipState(),
                         ) {
                             if (isConnectionsRoute) {
-                                Box(
-                                    modifier =
-                                    Modifier.drawWithCache {
-                                        val glowRadius = size.minDimension
-                                        val glowBrush =
-                                            Brush.radialGradient(
-                                                colors =
-                                                listOf(
-                                                    currentGlowColor.copy(alpha = 0.8f),
-                                                    currentGlowColor.copy(alpha = 0.4f),
-                                                    Color.Transparent,
-                                                ),
-                                                center =
-                                                androidx.compose.ui.geometry.Offset(
-                                                    size.width / 2,
-                                                    size.height / 2,
-                                                ),
-                                                radius = glowRadius,
-                                            )
-                                        onDrawWithContent {
-                                            drawContent()
-                                            val alpha = animatedGlowAlpha.value
-                                            if (alpha > 0f) {
-                                                drawCircle(
-                                                    brush = glowBrush,
-                                                    radius = glowRadius,
-                                                    alpha = alpha,
-                                                    blendMode = BlendMode.Screen,
-                                                )
-                                            }
-                                        }
-                                    },
-                                ) {
-                                    ConnectionsNavIcon(
-                                        connectionState = connectionState,
-                                        deviceType = DeviceType.fromAddress(selectedDevice),
-                                    )
-                                }
+                                org.meshtastic.feature.connections.ui.components.AnimatedConnectionsNavIcon(
+                                    connectionState = connectionState,
+                                    deviceType = DeviceType.fromAddress(selectedDevice),
+                                    meshActivityFlow = uIViewModel.meshActivity,
+                                    colorScheme = colorScheme,
+                                )
                             } else {
                                 BadgedBox(
                                     badge = {

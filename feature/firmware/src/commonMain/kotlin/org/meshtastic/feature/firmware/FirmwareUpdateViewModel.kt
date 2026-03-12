@@ -35,7 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.database.entity.FirmwareReleaseType
@@ -85,7 +87,8 @@ private const val MILLIS_PER_SECOND = 1000L
 private val BLUETOOTH_ADDRESS_REGEX = Regex("([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
 
 @Suppress("LongParameterList", "TooManyFunctions")
-open class FirmwareUpdateViewModel(
+@KoinViewModel
+class FirmwareUpdateViewModel(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val nodeRepository: NodeRepository,
@@ -407,7 +410,7 @@ open class FirmwareUpdateViewModel(
 
         val metrics =
             if (dfuState.speed > 0) {
-                String.format(java.util.Locale.US, "%.1f KiB/s%s%s", speedKib, etaText, partInfo)
+                "${NumberFormatter.format(speedKib, 1)} KiB/s$etaText$partInfo"
             } else {
                 partInfo
             }

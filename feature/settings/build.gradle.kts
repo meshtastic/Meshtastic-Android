@@ -23,6 +23,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     android {
         namespace = "org.meshtastic.feature.settings"
         androidResources.enable = false
@@ -31,6 +33,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -46,10 +50,11 @@ kotlin {
             implementation(projects.core.di)
 
             implementation(libs.androidx.lifecycle.viewmodel.compose)
-            implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
             implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.aboutlibraries.compose.m3)
         }
 
         androidMain.dependencies {
@@ -68,14 +73,11 @@ kotlin {
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
-            implementation(libs.aboutlibraries.compose.m3)
             implementation(libs.nordic.common.core)
             implementation(libs.nordic.common.permissions.ble)
-
-            // These were in googleImplementation
-            implementation(libs.location.services)
-            implementation(libs.maps.compose)
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

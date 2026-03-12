@@ -21,6 +21,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         androidResources.enable = true

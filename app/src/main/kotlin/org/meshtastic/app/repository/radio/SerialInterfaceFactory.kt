@@ -17,8 +17,8 @@
 package org.meshtastic.app.repository.radio
 
 import org.koin.core.annotation.Single
-import org.meshtastic.app.repository.usb.UsbRepository
 import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.feature.connections.repository.UsbRepository
 
 /** Factory for creating `SerialInterface` instances. */
 @Single

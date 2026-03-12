@@ -24,7 +24,6 @@ import io.mockk.slot
 import io.mockk.unmockkAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.domain.FakeRadioController
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -33,6 +32,7 @@ import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
 import kotlin.test.AfterTest

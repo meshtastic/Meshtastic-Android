@@ -16,7 +16,33 @@
  */
 package org.meshtastic.core.common.util
 
-/** Platform-agnostic URL encoding utility. */
-expect object UrlUtils {
-    fun encode(value: String): String
+/** Pure Kotlin URL encoding utility — no expect/actual needed. */
+object UrlUtils {
+    /**
+     * Percent-encodes a string for use in a URL query parameter (RFC 3986). Unreserved characters (A-Z, a-z, 0-9, `-`,
+     * `_`, `.`, `~`) are not encoded. Spaces are encoded as `%20` (not `+`).
+     */
+    @Suppress("MagicNumber")
+    fun encode(value: String): String = buildString {
+        for (byte in value.encodeToByteArray()) {
+            val char = byte.toInt().toChar()
+            if (char.isUnreserved()) {
+                append(char)
+            } else {
+                append('%')
+                append(HEX_DIGITS[(byte.toInt() shr 4) and 0x0F])
+                append(HEX_DIGITS[byte.toInt() and 0x0F])
+            }
+        }
+    }
+
+    private fun Char.isUnreserved(): Boolean = this in 'A'..'Z' ||
+        this in 'a'..'z' ||
+        this in '0'..'9' ||
+        this == '-' ||
+        this == '_' ||
+        this == '.' ||
+        this == '~'
+
+    private val HEX_DIGITS = "0123456789ABCDEF".toCharArray()
 }

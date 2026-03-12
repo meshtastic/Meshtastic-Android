@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
@@ -56,7 +55,6 @@ import org.meshtastic.core.resources.request_telemetry
 import org.meshtastic.core.resources.telemetry
 import org.meshtastic.core.resources.userinfo
 import org.meshtastic.core.ui.icon.AirQuality
-import org.meshtastic.core.ui.icon.LineAxis
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Person
 import org.meshtastic.core.ui.icon.Refresh
@@ -190,7 +188,7 @@ private fun rememberTelemetricFeatures(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 @Composable
 private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean, onAction: (NodeDetailAction) -> Unit) {
@@ -223,7 +221,6 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                             state = rememberTooltipState(),
                         ) {
                             FilledTonalIconButton(
-                                shapes = IconButtonDefaults.shapes(),
                                 colors = IconButtonDefaults.filledTonalIconButtonColors(),
                                 onClick = {
                                     feature.logsType?.let {
@@ -232,9 +229,9 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
                                 },
                             ) {
                                 Icon(
-                                    MeshtasticIcons.LineAxis,
+                                    imageVector = feature.logsType?.icon ?: feature.icon,
+                                    modifier = Modifier.size(24.dp),
                                     contentDescription = logsDescription,
-                                    modifier = Modifier.size(IconButtonDefaults.mediumIconSize),
                                     tint = MaterialTheme.colorScheme.primary,
                                 )
                             }
@@ -271,7 +268,7 @@ private fun FeatureRow(node: Node, feature: TelemetricFeature, hasLogs: Boolean,
 
         if (showContent) {
             Column(modifier = Modifier.padding(start = 56.dp, end = 20.dp, bottom = 12.dp)) {
-                feature.content?.invoke(node)
+                feature.content.invoke(node)
             }
         }
     }

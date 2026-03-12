@@ -20,9 +20,9 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.domain.FakeRadioController
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.testing.FakeRadioController
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

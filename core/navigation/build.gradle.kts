@@ -17,16 +17,22 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
+    alias(libs.plugins.meshtastic.kmp.library.compose)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 kotlin {
+    jvm()
+
     android { namespace = "org.meshtastic.core.navigation" }
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.resources)
             implementation(libs.kotlinx.serialization.core)
             implementation(libs.androidx.navigation3.runtime)
         }
+
+        commonTest.dependencies { implementation(kotlin("test")) }
     }
 }

@@ -22,6 +22,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.atomicfu.atomic
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
@@ -32,9 +34,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.prefs.cachedFlow
 import org.meshtastic.core.repository.MeshPrefs
-import java.util.Locale
-import java.util.concurrent.ConcurrentHashMap
 
 @Single
 class MeshPrefsImpl(
@@ -43,8 +44,8 @@ class MeshPrefsImpl(
 ) : MeshPrefs {
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
-    private val locationFlows = ConcurrentHashMap<Int?, StateFlow<Boolean>>()
-    private val storeForwardFlows = ConcurrentHashMap<String?, StateFlow<Int>>()
+    private val locationFlows = atomic(persistentMapOf<Int?, StateFlow<Boolean>>())
+    private val storeForwardFlows = atomic(persistentMapOf<String?, StateFlow<Int>>())
 
     override val deviceAddress: StateFlow<String?> =
         dataStore.data
@@ -63,28 +64,28 @@ class MeshPrefsImpl(
         }
     }
 
-    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = locationFlows.getOrPut(nodeNum) {
+    override fun shouldProvideNodeLocation(nodeNum: Int?): StateFlow<Boolean> = cachedFlow(locationFlows, nodeNum) {
         val key = booleanPreferencesKey(provideLocationKey(nodeNum))
         dataStore.data.map { it[key] ?: false }.stateIn(scope, SharingStarted.Eagerly, false)
     }
 
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
-        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = value } }
+    override fun setShouldProvideNodeLocation(nodeNum: Int?, provide: Boolean) {
+        scope.launch { dataStore.edit { prefs -> prefs[booleanPreferencesKey(provideLocationKey(nodeNum))] = provide } }
     }
 
-    override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = storeForwardFlows.getOrPut(address) {
+    override fun getStoreForwardLastRequest(address: String?): StateFlow<Int> = cachedFlow(storeForwardFlows, address) {
         val key = intPreferencesKey(storeForwardKey(address))
         dataStore.data.map { it[key] ?: 0 }.stateIn(scope, SharingStarted.Eagerly, 0)
     }
 
-    override fun setStoreForwardLastRequest(address: String?, value: Int) {
+    override fun setStoreForwardLastRequest(address: String?, timestamp: Int) {
         scope.launch {
             dataStore.edit { prefs ->
                 val key = intPreferencesKey(storeForwardKey(address))
-                if (value <= 0) {
+                if (timestamp <= 0) {
                     prefs.remove(key)
                 } else {
-                    prefs[key] = value
+                    prefs[key] = timestamp
                 }
             }
         }
@@ -99,7 +100,7 @@ class MeshPrefsImpl(
         return when {
             raw == null -> "DEFAULT"
             raw.equals(NO_DEVICE_SELECTED, ignoreCase = true) -> "DEFAULT"
-            else -> raw.uppercase(Locale.US).replace(":", "")
+            else -> raw.uppercase().replace(":", "")
         }
     }
 

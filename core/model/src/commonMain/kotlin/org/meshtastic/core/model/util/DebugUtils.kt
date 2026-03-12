@@ -16,4 +16,11 @@
  */
 package org.meshtastic.core.model.util
 
-expect val isDebug: Boolean
+/**
+ * Whether the app is running in debug mode.
+ *
+ * This is a compile-time constant for the shared module. For runtime debug detection, use
+ * [org.meshtastic.core.common.BuildConfigProvider.isDebug] from DI instead.
+ */
+@Suppress("ktlint:standard:property-naming", "TopLevelPropertyNaming")
+const val isDebug: Boolean = false

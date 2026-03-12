@@ -23,6 +23,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.feature.firmware"
@@ -73,6 +75,8 @@ kotlin {
             implementation(libs.nordic.client.android)
             implementation(libs.nordic.dfu)
         }
+
+        commonTest.dependencies { implementation(projects.core.testing) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

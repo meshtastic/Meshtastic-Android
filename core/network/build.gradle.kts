@@ -22,6 +22,8 @@ plugins {
 }
 
 kotlin {
+    jvm()
+
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.network"
@@ -31,6 +33,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(projects.core.repository)
+            implementation(projects.core.common)
             implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.proto)
@@ -43,12 +46,24 @@ kotlin {
             implementation(libs.kermit)
         }
 
+        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
+        androidMain.get().dependsOn(jvmAndroidMain)
+        val jvmMain by getting {
+            dependsOn(jvmAndroidMain)
+            dependencies { implementation(libs.ktor.client.java) }
+        }
+
         androidMain.dependencies {
             implementation(libs.org.eclipse.paho.client.mqttv3)
             implementation(libs.coil.network.okhttp)
             implementation(libs.coil.svg)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.okhttp3.logging.interceptor)
+        }
+
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
     }
 }

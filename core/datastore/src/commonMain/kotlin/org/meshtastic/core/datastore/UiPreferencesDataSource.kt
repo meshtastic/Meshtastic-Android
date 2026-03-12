@@ -21,6 +21,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,6 +35,7 @@ import org.koin.core.annotation.Single
 
 const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 const val KEY_THEME = "theme"
+const val KEY_LOCALE = "locale"
 
 // Node list filters/sort
 const val KEY_NODE_SORT = "node-sort-option"
@@ -44,6 +46,7 @@ const val KEY_ONLY_DIRECT = "only-direct"
 const val KEY_SHOW_IGNORED = "show-ignored"
 
 @Single
+@Suppress("TooManyFunctions") // One setter per preference field — inherently grows with preferences.
 class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -54,6 +57,14 @@ class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dat
 
     // Default value for AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     val theme: StateFlow<Int> = dataStore.prefStateFlow(key = THEME, default = -1)
+
+    /** Persisted language tag (e.g. "de", "pt-BR"). Empty string means system default. */
+    val locale: StateFlow<String> =
+        dataStore.prefStateFlow(key = LOCALE, default = "", started = SharingStarted.Eagerly)
+
+    fun setLocale(languageTag: String) {
+        dataStore.setPref(key = LOCALE, value = languageTag)
+    }
 
     val nodeSort: StateFlow<Int> = dataStore.prefStateFlow(key = NODE_SORT, default = -1)
     val includeUnknown: StateFlow<Boolean> = dataStore.prefStateFlow(key = INCLUDE_UNKNOWN, default = false)
@@ -108,6 +119,7 @@ class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dat
     private companion object {
         val APP_INTRO_COMPLETED = booleanPreferencesKey(KEY_APP_INTRO_COMPLETED)
         val THEME = intPreferencesKey(KEY_THEME)
+        val LOCALE = stringPreferencesKey(KEY_LOCALE)
         val NODE_SORT = intPreferencesKey(KEY_NODE_SORT)
         val INCLUDE_UNKNOWN = booleanPreferencesKey(KEY_INCLUDE_UNKNOWN)
         val EXCLUDE_INFRASTRUCTURE = booleanPreferencesKey(KEY_EXCLUDE_INFRASTRUCTURE)

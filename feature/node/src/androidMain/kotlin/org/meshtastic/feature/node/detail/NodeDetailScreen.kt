@@ -21,16 +21,8 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.Crossfade
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
@@ -44,11 +36,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -60,22 +49,15 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.details
-import org.meshtastic.core.resources.loading
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.feature.node.compass.CompassUiState
 import org.meshtastic.feature.node.compass.CompassViewModel
-import org.meshtastic.feature.node.component.AdministrationSection
 import org.meshtastic.feature.node.component.CompassSheetContent
-import org.meshtastic.feature.node.component.DeviceActions
-import org.meshtastic.feature.node.component.DeviceDetailsSection
 import org.meshtastic.feature.node.component.FirmwareReleaseSheetContent
-import org.meshtastic.feature.node.component.NodeDetailsSection
 import org.meshtastic.feature.node.component.NodeMenuAction
-import org.meshtastic.feature.node.component.NotesSection
-import org.meshtastic.feature.node.component.PositionSection
 import org.meshtastic.feature.node.model.MetricsState
 import org.meshtastic.feature.node.model.NodeDetailAction
 
@@ -161,7 +143,6 @@ private fun NodeDetailScaffold(
     ) { paddingValues ->
         NodeDetailContent(
             uiState = uiState,
-            viewModel = viewModel,
             listState = listState,
             onAction = { action ->
                 when (action) {
@@ -182,41 +163,13 @@ private fun NodeDetailScaffold(
                 }
             },
             onFirmwareSelect = { activeOverlay = NodeDetailOverlay.FirmwareReleaseInfo(it) },
+            onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },
             modifier = Modifier.padding(paddingValues),
         )
     }
 
     NodeDetailOverlays(activeOverlay, node, compassUiState, actualCompassViewModel, { activeOverlay = null }) {
         viewModel.handleNodeMenuAction(NodeMenuAction.RequestPosition(it))
-    }
-}
-
-@Composable
-private fun NodeDetailContent(
-    uiState: NodeDetailUiState,
-    viewModel: NodeDetailViewModel,
-    listState: LazyListState,
-    onAction: (NodeDetailAction) -> Unit,
-    onFirmwareSelect: (FirmwareRelease) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Crossfade(targetState = uiState.node != null, label = "NodeDetailContent", modifier = modifier) { isNodePresent ->
-        if (isNodePresent && uiState.node != null) {
-            NodeDetailList(
-                node = uiState.node,
-                ourNode = uiState.ourNode,
-                uiState = uiState,
-                listState = listState,
-                onAction = onAction,
-                onFirmwareSelect = onFirmwareSelect,
-                onSaveNotes = { num, notes -> viewModel.setNodeNotes(num, notes) },
-            )
-        } else {
-            val loadingDescription = stringResource(Res.string.loading)
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(modifier = Modifier.semantics { contentDescription = loadingDescription })
-            }
-        }
     }
 }
 
@@ -274,46 +227,6 @@ private fun NodeDetailOverlays(
 private fun NodeDetailBottomSheet(onDismiss: () -> Unit, content: @Composable () -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) { content() }
-}
-
-@Composable
-private fun NodeDetailList(
-    node: Node,
-    ourNode: Node?,
-    uiState: NodeDetailUiState,
-    listState: LazyListState,
-    onAction: (NodeDetailAction) -> Unit,
-    onFirmwareSelect: (FirmwareRelease) -> Unit,
-    onSaveNotes: (Int, String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        state = listState,
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        item { NodeDetailsSection(node) }
-        item {
-            DeviceActions(
-                node = node,
-                lastTracerouteTime = uiState.lastTracerouteTime,
-                lastRequestNeighborsTime = uiState.lastRequestNeighborsTime,
-                availableLogs = uiState.availableLogs,
-                onAction = onAction,
-                metricsState = uiState.metricsState,
-                isLocal = uiState.metricsState.isLocal,
-            )
-        }
-        item { PositionSection(node, ourNode, uiState.metricsState, uiState.availableLogs, onAction) }
-        if (uiState.metricsState.deviceHardware != null) {
-            item { DeviceDetailsSection(uiState.metricsState) }
-        }
-        item { NotesSection(node = node, onSaveNotes = onSaveNotes) }
-        if (!uiState.metricsState.isManaged) {
-            item { AdministrationSection(node, uiState.metricsState, onAction, onFirmwareSelect) }
-        }
-    }
 }
 
 private fun handleNodeAction(

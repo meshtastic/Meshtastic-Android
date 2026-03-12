@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.meshtastic.app.map.MapView
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.feature.map.node.NodeMapViewModel
 
 @Composable
 fun NodeMapScreen(nodeMapViewModel: NodeMapViewModel, onNavigateUp: () -> Unit) {

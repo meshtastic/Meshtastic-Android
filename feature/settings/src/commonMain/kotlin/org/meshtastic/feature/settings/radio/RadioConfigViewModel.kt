@@ -30,6 +30,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -91,9 +93,10 @@ data class RadioConfigState(
     val nodeDbResetPreserveFavorites: Boolean = false,
 )
 
+@KoinViewModel
 @Suppress("LongParameterList")
 open class RadioConfigViewModel(
-    savedStateHandle: SavedStateHandle,
+    @InjectedParam savedStateHandle: SavedStateHandle,
     private val radioConfigRepository: RadioConfigRepository,
     private val packetRepository: PacketRepository,
     private val serviceRepository: ServiceRepository,

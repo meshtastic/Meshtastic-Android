@@ -22,20 +22,28 @@ plugins {
 }
 
 kotlin {
-    @Suppress("UnstableApiUsage")
+    jvm()
+
     android {
         namespace = "org.meshtastic.core.ui"
         androidResources.enable = false
     }
 
     sourceSets {
+        val jvmAndroidMain by creating { dependsOn(commonMain.get()) }
+        androidMain.get().dependsOn(jvmAndroidMain)
+        jvmMain.get().dependsOn(jvmAndroidMain)
+
         commonMain.dependencies {
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
+            implementation(projects.core.datastore)
             implementation(projects.core.model)
+            implementation(projects.core.navigation)
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
+            implementation(projects.core.repository)
             implementation(projects.core.resources)
             implementation(projects.core.service)
 
@@ -45,16 +53,14 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.runtime)
             implementation(compose.components.resources)
+            implementation(compose.uiTooling)
 
-            implementation(libs.androidx.compose.ui.tooling.preview)
             implementation(libs.kermit)
             implementation(libs.koin.compose.viewmodel)
         }
 
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.emoji2.emojipicker)
-            implementation(libs.guava)
             implementation(libs.zxing.core)
             implementation(libs.nordic.common.core)
         }

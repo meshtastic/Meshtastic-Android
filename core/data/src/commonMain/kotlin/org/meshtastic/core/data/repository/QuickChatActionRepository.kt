@@ -20,12 +20,15 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
-import org.meshtastic.core.database.DatabaseManager
+import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.di.CoroutineDispatchers
 
 @Single
-class QuickChatActionRepository(private val dbManager: DatabaseManager, private val dispatchers: CoroutineDispatchers) {
+class QuickChatActionRepository(
+    private val dbManager: DatabaseProvider,
+    private val dispatchers: CoroutineDispatchers,
+) {
     fun getAllActions() = dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
     suspend fun upsert(action: QuickChatAction) =
