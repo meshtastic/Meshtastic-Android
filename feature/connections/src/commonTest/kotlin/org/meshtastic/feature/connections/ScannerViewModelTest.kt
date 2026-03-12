@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
@@ -44,14 +44,14 @@ import kotlin.test.assertTrue
 class ScannerViewModelTest {
 
     private lateinit var viewModel: ScannerViewModel
-    private lateinit var radioController: FakeRadioController
+    private lateinit var radioController: RadioController
     private lateinit var serviceRepository: ServiceRepository
     private lateinit var radioInterfaceService: RadioInterfaceService
     private lateinit var recentAddressesDataSource: RecentAddressesDataSource
     private lateinit var getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase
 
     private fun setUp() {
-        radioController = FakeRadioController()
+        radioController = mockk(relaxed = true)
         serviceRepository = mockk(relaxed = true) { every { connectionProgress } returns MutableStateFlow(null) }
         radioInterfaceService =
             mockk(relaxed = true) {
@@ -61,7 +61,9 @@ class ScannerViewModelTest {
             }
         recentAddressesDataSource = mockk(relaxed = true)
         getDiscoveredDevicesUseCase =
-            mockk(relaxed = true) { every { invoke(any<Boolean>()) } returns flowOf(DiscoveredDevices()) }
+            object : GetDiscoveredDevicesUseCase {
+                override fun invoke(showMock: Boolean) = flowOf(DiscoveredDevices())
+            }
 
         viewModel =
             ScannerViewModel(

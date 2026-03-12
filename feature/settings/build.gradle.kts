@@ -90,13 +90,3 @@ kotlin {
         }
     }
 }
-
-val marketplaceAttr = Attribute.of("com.android.build.api.attributes.ProductFlavor:marketplace", String::class.java)
-
-configurations.all {
-    if (isCanBeResolved && !isCanBeConsumed) {
-        if (name.contains("android", ignoreCase = true)) {
-            attributes.attribute(marketplaceAttr, "google")
-        }
-    }
-}

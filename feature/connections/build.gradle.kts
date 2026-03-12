@@ -70,7 +70,10 @@ kotlin {
             implementation(libs.usb.serial.android)
         }
 
-        commonTest.dependencies { implementation(projects.core.testing) }
+        commonTest.dependencies {
+            implementation(projects.core.testing)
+            implementation(kotlin("test"))
+        }
 
         androidUnitTest.dependencies {
             implementation(libs.mockk)
