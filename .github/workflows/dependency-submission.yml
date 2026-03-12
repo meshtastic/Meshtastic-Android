@@ -24,5 +24,5 @@ jobs:
         uses: gradle/actions/dependency-submission@v5
         with:
           build-scan-publish: true
-          build-scan-terms-of-use-url: "https://gradle.com/help/legal-terms-of-use"
+          build-scan-terms-of-use-url: "https://gradle.com/terms-of-service"
           build-scan-terms-of-use-agree: "yes"
