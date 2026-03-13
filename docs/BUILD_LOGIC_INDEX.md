@@ -105,6 +105,7 @@ Build Verification:
 - **Removed:** Manual `dependsOn(...)` wiring from `core:common`, `core:model`, `core:network`, and `core:ui`
 - **Analyzed:** Composition opportunities for other duplicate plugins
 - **Documented:** Future optimization paths and consolidation criteria
+- **Migrated:** JetBrains Compose Multiplatform dependencies from hard-coded/legacy `compose.xyz` references to proper version catalog entries.
 
 ---
 
@@ -136,6 +137,7 @@ Build Verification:
 ### Short Term
 - [ ] Consider plugin validation test suite
 - [ ] Review other configuration functions for consolidation opportunities
+- [ ] Investigate factoring out JetBrains CMP dependencies into `meshtastic.kmp.library.compose` convention.
 
 ### Long Term
 - [ ] Monitor if Android Application/Library handling diverges

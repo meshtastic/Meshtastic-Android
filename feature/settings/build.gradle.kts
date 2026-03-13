@@ -33,8 +33,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
+            implementation(libs.compose.multiplatform.material3)
+            implementation(libs.compose.multiplatform.materialIconsExtended)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)

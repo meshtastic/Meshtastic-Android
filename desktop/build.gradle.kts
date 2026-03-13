@@ -107,11 +107,11 @@ dependencies {
 
     // Compose Desktop
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
-    implementation(compose.materialIconsExtended)
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.components.resources)
+    implementation(libs.compose.multiplatform.material3)
+    implementation(libs.compose.multiplatform.materialIconsExtended)
+    implementation(libs.compose.multiplatform.runtime)
+    implementation(libs.compose.multiplatform.foundation)
+    implementation(libs.compose.multiplatform.resources)
 
     // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
     implementation(libs.jetbrains.compose.material3.adaptive)

@@ -34,8 +34,8 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
-            implementation(compose.runtime)
-            implementation(compose.ui)
+            implementation(libs.compose.multiplatform.runtime)
+            implementation(libs.compose.multiplatform.ui)
         }
 
         commonTest.dependencies { implementation(kotlin("test")) }
