@@ -119,10 +119,10 @@ dependencies {
     implementation(libs.jetbrains.compose.material3.adaptive.navigation)
 
     // Navigation 3 (JetBrains fork — multiplatform)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.jetbrains.navigation3.ui)
+    implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+    implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
+    implementation(libs.jetbrains.lifecycle.runtime.compose)
 
     // Koin DI
     implementation(libs.koin.core)

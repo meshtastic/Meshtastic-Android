@@ -40,9 +40,9 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.resources)
 
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
             implementation(libs.koin.compose.viewmodel)
-            implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.runtime)
         }
 
         androidMain.dependencies {
@@ -53,7 +53,7 @@ kotlin {
             implementation(libs.androidx.compose.material.iconsExtended)
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.navigation3.ui)
+            implementation(libs.jetbrains.navigation3.ui)
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }

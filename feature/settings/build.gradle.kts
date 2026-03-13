@@ -49,8 +49,8 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.di)
 
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
-            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
             implementation(libs.kotlinx.collections.immutable)
