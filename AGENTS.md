@@ -74,6 +74,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
 -   **BLE:** All Bluetooth communication must route through `core:ble` using Nordic Semiconductor's Android Common Libraries.
 -   **Dependencies:** Check `gradle/libs.versions.toml` before assuming a library is available.
+-   **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`.
 -   **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
 -   **Testing:** Write ViewModel and business logic tests in `commonTest`. Use `core:testing` shared fakes.
 
@@ -108,7 +109,7 @@ Always run commands in the following order to ensure reliability. Do not attempt
 **Testing:**
 ```bash
 ./gradlew test                # Run local unit tests
-./gradlew testDebugUnitTest   # CI-aligned Android unit tests
+./gradlew testFdroidDebugUnitTest testGoogleDebugUnitTest # CI-aligned Android unit tests (flavor-explicit)
 ./gradlew connectedAndroidTest # Run instrumented tests
 ./gradlew testFdroidDebug testGoogleDebug # Flavor-specific unit tests
 ./gradlew lintFdroidDebug lintGoogleDebug # Flavor-specific lint checks

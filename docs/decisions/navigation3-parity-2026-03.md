@@ -43,7 +43,7 @@ Source reviewed: Compose Multiplatform `v1.11.0-alpha04` release notes.
    - Release notes include component version bumps for Navigation 3 (`1.1.0-alpha04`) but no `NavBackStack`, `NavDisplay`, or `entryProvider` API migration requirements.
    - Existing shell patterns in `app` and `desktop` remain valid.
 2. **Primary risk is dependency wiring drift, not runtime behavior.**
-   - JetBrains Navigation 3 currently publishes `navigation3-ui` coordinates (no separate `navigation3-runtime` artifact in Maven Central). Our `androidx-navigation3-runtime` alias intentionally points to `navigation3-ui` and is now explicitly documented in the version catalog.
+   - JetBrains Navigation 3 currently publishes `navigation3-ui` coordinates (no separate `navigation3-runtime` artifact in Maven Central). The `jetbrains-navigation3-runtime` alias intentionally points to `navigation3-ui` and is documented in the version catalog.
 3. **Saved-state and typed-route parity risk remains unchanged.**
    - Desktop still uses manual serializer registration; this is an existing risk and not introduced by alpha04.
 4. **Compose-wide migration notes do not currently impact navigation codepaths.**
@@ -51,7 +51,11 @@ Source reviewed: Compose Multiplatform `v1.11.0-alpha04` release notes.
 
 ### Actions Taken
 
-- Documented in the version catalog that `androidx-navigation3-runtime` intentionally maps to `navigation3-ui` until a separate runtime artifact is published.
+- Renamed all JetBrains-forked lifecycle/nav3 version catalog aliases from `androidx-*` to `jetbrains-*` prefix to make fork provenance unambiguous:
+  - `jetbrains-lifecycle-runtime`, `jetbrains-lifecycle-runtime-compose`, `jetbrains-lifecycle-viewmodel-compose`, `jetbrains-lifecycle-viewmodel-navigation3`
+  - `jetbrains-navigation3-runtime`, `jetbrains-navigation3-ui`
+- Documented in the version catalog that `jetbrains-navigation3-runtime` intentionally maps to `navigation3-ui` until a separate runtime artifact is published.
+- Migrated `core:data` `commonMain` from `androidx.lifecycle:lifecycle-runtime` (Google) to `org.jetbrains.androidx.lifecycle:lifecycle-runtime` (JetBrains fork) for full consistency.
 - Updated active docs to reflect the current dependency baseline (`1.11.0-alpha04`, `1.1.0-alpha04`, `1.3.0-alpha06`, `2.10.0-beta01`).
 - Consolidated `app` adaptive dependencies to JetBrains Material 3 Adaptive coordinates (`org.jetbrains.compose.material3.adaptive:*`) so Android and Desktop consume the same adaptive artifact family. The Android-only navigation suite remains on `androidx.compose.material3:material3-adaptive-navigation-suite`.
 
