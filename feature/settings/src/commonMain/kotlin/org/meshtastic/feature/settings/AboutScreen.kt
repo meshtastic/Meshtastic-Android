@@ -52,6 +52,7 @@ import org.meshtastic.core.ui.component.MainAppBar
  * - **license dialog**: built-in license dialog on library tap (default behavior)
  *
  * Each platform provides a [jsonProvider] lambda that loads the library definitions JSON
+ *
  * @see <a href="https://github.com/mikepenz/AboutLibraries">AboutLibraries KMP</a>
  */
 @Composable
