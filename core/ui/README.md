@@ -49,10 +49,11 @@ MeshtasticResourceDialog(
 <!--region graph-->
 ```mermaid
 graph TB
-  :core:ui[ui]:::kmp-library
+  :core:ui[ui]:::compose-desktop-application
 
 classDef android-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-application-compose fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
+classDef compose-desktop-application fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-feature fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000;
 classDef android-library fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
 classDef android-library-compose fill:#9BF6FF,stroke:#000,stroke-width:2px,color:#000;
