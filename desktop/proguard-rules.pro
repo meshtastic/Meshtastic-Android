@@ -1,0 +1,4 @@
+-dontwarn android.os.Parcel**
+-dontwarn android.os.Parcelable**
+-dontwarn com.squareup.wire.AndroidMessage**
+-dontwarn io.ktor.**
