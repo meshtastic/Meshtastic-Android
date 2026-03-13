@@ -37,6 +37,9 @@ keystore.properties
 /fastlane/play-store-credentials.json
 **/google-services.json
 
+# Generated library definitions
+**/src/main/resources/aboutlibraries.json
+
 /fastlane/report.xml
 
 /build-logic/convention/build/*

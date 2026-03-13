@@ -337,7 +337,10 @@ aboutLibraries {
             gitHubApiToken = ghToken.get()
         }
     }
-    export { excludeFields = listOf("generated") }
+    export {
+        excludeFields = listOf("generated")
+        outputFile = file("src/main/resources/aboutlibraries.json")
+    }
     library {
         duplicationMode = DuplicateMode.MERGE
         duplicationRule = DuplicateRule.SIMPLE

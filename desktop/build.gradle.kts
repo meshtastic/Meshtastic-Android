@@ -28,7 +28,7 @@ plugins {
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
-    alias(libs.plugins.aboutlibraries.base)
+    alias(libs.plugins.aboutlibraries)
 }
 
 kotlin {
@@ -60,6 +60,9 @@ compose.desktop {
 }
 
 dependencies {
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
+
     // Core KMP modules (JVM variants)
     implementation(projects.core.common)
     implementation(projects.core.di)

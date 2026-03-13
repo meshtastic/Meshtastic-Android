@@ -33,6 +33,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(libs.aboutlibraries.core)
+            implementation(libs.aboutlibraries.compose.m3)
             implementation(libs.javax.inject)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
