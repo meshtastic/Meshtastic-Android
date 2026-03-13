@@ -27,5 +27,5 @@ interface BleScanner {
      * @param timeout The duration of the scan.
      * @return A [Flow] of discovered [BleDevice]s.
      */
-    fun scan(timeout: Duration): Flow<BleDevice>
+    fun scan(timeout: Duration, serviceUuid: kotlin.uuid.Uuid? = null): Flow<BleDevice>
 }

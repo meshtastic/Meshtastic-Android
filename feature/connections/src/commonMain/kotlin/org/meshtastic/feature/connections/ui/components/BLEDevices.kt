@@ -23,9 +23,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -46,14 +48,24 @@ import org.meshtastic.feature.connections.ScannerViewModel
 @Composable
 fun BLEDevices(connectionState: ConnectionState, selectedDevice: String, scanModel: ScannerViewModel) {
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
+    val isScanning by scanModel.isBleScanning.collectAsStateWithLifecycle()
 
-    Column {
+    DisposableEffect(Unit) {
+        scanModel.startBleScan()
+        onDispose { scanModel.stopBleScan() }
+    }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(Res.string.bluetooth_available_devices),
             modifier = Modifier.padding(horizontal = 8.dp).padding(bottom = 16.dp).fillMaxWidth(),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
         )
+
+        if (isScanning) {
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp))
+        }
 
         LazyColumn(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)) {
             items(bleDevices, key = { it.fullAddress }) { device ->

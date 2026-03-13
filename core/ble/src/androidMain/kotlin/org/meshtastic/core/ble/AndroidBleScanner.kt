@@ -22,15 +22,24 @@ import no.nordicsemi.kotlin.ble.client.android.CentralManager
 import no.nordicsemi.kotlin.ble.client.distinctByPeripheral
 import org.koin.core.annotation.Single
 import kotlin.time.Duration
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 /**
  * An Android implementation of [BleScanner] using Nordic's [CentralManager].
  *
  * @param centralManager The Nordic [CentralManager] to use for scanning.
  */
+@OptIn(ExperimentalUuidApi::class)
 @Single
 class AndroidBleScanner(private val centralManager: CentralManager) : BleScanner {
 
-    override fun scan(timeout: Duration): Flow<BleDevice> =
-        centralManager.scan(timeout).distinctByPeripheral().map { AndroidBleDevice(it.peripheral) }
+    override fun scan(timeout: Duration, serviceUuid: Uuid?): Flow<BleDevice> = centralManager
+        .scan(timeout = timeout) {
+            if (serviceUuid != null) {
+                ServiceUuid(serviceUuid)
+            }
+        }
+        .distinctByPeripheral()
+        .map { AndroidBleDevice(it.peripheral) }
 }
