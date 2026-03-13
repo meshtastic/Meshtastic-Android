@@ -816,4 +816,5 @@
     <string name="tak_team_blue">Niebieski</string>
     <string name="tak_team_green">Zielony</string>
     <string name="traffic_management_enabled">Moduł Włączony</string>
+    <string name="no_device_connected">Brak podłączonych urządzeń</string>
 </resources>

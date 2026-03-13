@@ -965,4 +965,5 @@
     <string name="tak_team_red">Červená</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
+    <string name="no_device_connected">Není připojeno žádné zařízení</string>
 </resources>

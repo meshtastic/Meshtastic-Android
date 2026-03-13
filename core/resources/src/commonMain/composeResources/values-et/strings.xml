@@ -1213,4 +1213,5 @@
     <string name="traffic_management_exhaust_hop_telemetry">Ainult kohalik telemeetria (vahendajad)</string>
     <string name="traffic_management_exhaust_hop_position">Ainult kohalik asukoht (vahendajad)</string>
     <string name="traffic_management_router_preserve_hops">Säilita ruuteri hüpped</string>
+    <string name="no_device_connected">Ühtegi seadet pole ühendatud</string>
 </resources>

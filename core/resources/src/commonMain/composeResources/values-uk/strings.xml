@@ -798,4 +798,5 @@
     <string name="tak_team_red">Червоний</string>
     <string name="tak_team_blue">Синій</string>
     <string name="tak_team_green">Зелений</string>
+    <string name="no_device_connected">Немає під'єднаних пристроїв</string>
 </resources>

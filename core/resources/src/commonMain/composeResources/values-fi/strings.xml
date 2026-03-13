@@ -198,12 +198,20 @@
     <string name="connecting">Yhdistetään</string>
     <string name="not_connected">Ei yhdistetty</string>
     <string name="no_device_selected">Ei laitetta valittuna</string>
+    <string name="unknown_device">Tuntematon laite</string>
+    <string name="no_network_devices_found">Verkkolaitteita ei löytynyt</string>
+    <string name="no_usb_devices_found">USB-laitteita ei löytynyt</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">Esittelytila</string>
     <string name="connected_sleeping">Yhdistetty radioon, mutta se on lepotilassa</string>
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <string name="none">Ei mitään (ei käytössä)</string>
     <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
     <string name="acknowledgements">Kiitokset</string>
+    <string name="open_source_libraries">Avoimen lähteen kirjastot</string>
+    <string name="open_source_description">Meshtastic on rakennettu seuraavilla avoimen lähdekoodin kirjastoilla. Napauta mitä tahansa kirjastoa nähdäksesi sen lisenssin.</string>
+    <string name="library_count">%1$d kirjastot</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="contact_invalid">Tämä yhteystieto on virheellinen eikä sitä voi lisätä</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
@@ -1214,4 +1222,15 @@
     <string name="traffic_management_exhaust_hop_telemetry">Telemetria vain paikallisesti (välittäjät)</string>
     <string name="traffic_management_exhaust_hop_position">Sijainti vain paikallisesti (välittäjät)</string>
     <string name="traffic_management_router_preserve_hops">Säilytä välittäjien hypyt</string>
+    <string name="no_messages_yet">Ei vielä viestejä</string>
+    <string name="unread_count">%1$d lukematonta</string>
+    <string name="map_coming_soon">Karttatuki on tulossa pian työpöytäversioon</string>
+    <string name="no_device_connected">Ei laitetta kytkettynä</string>
+    <string name="update_status">Päivityksen Tila</string>
+    <string name="ready_for_firmware_update">Valmis laiteohjelmiston päivitykseen</string>
+    <string name="check_for_updates">Tarkista päivitykset</string>
+    <string name="download_firmware">Lataa Laiteohjelmisto</string>
+    <string name="update_device">Päivitä laite</string>
+    <string name="note">Merkintä</string>
+    <string name="firmware_charge_warning">Varmista ennen firmware-päivityksen aloittamista, että laite on täysin ladattu. Älä irrota laitetta tai katkaise virtaa päivityksen aikana.</string>
 </resources>

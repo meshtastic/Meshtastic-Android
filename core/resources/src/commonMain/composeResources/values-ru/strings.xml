@@ -1229,4 +1229,5 @@
     <string name="traffic_management_exhaust_hop_telemetry">Телеметрия только для локальной сети (ретрансл.)</string>
     <string name="traffic_management_exhaust_hop_position">Только локальная позиция (ретрансл.)</string>
     <string name="traffic_management_router_preserve_hops">Сохраняить хопы маршрутизатора</string>
+    <string name="no_device_connected">Нет подключенных устройств</string>
 </resources>

@@ -1212,4 +1212,5 @@
     <string name="traffic_management_exhaust_hop_telemetry">仅本地远程远程(中继)</string>
     <string name="traffic_management_exhaust_hop_position">本地位置(中继)</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳数</string>
+    <string name="no_device_connected">设备未连接</string>
 </resources>

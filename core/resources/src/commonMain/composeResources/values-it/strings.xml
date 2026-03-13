@@ -946,4 +946,7 @@
     <string name="tak_team_blue">Blu</string>
     <string name="tak_team_green">Verde</string>
     <string name="traffic_management_enabled">Modulo abilitato</string>
+    <string name="no_device_connected">Nessun dispositivo connesso</string>
+    <string name="download_firmware">Scarica Firmware</string>
+    <string name="note">Note</string>
 </resources>

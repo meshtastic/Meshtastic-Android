@@ -1206,4 +1206,7 @@
     <string name="traffic_management_exhaust_hop_telemetry">僅本地遙測資訊（中繼）</string>
     <string name="traffic_management_exhaust_hop_position">僅本地定位資訊（中繼）</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳數</string>
+    <string name="no_device_connected">尚未連線裝置</string>
+    <string name="download_firmware">下載 Firmware</string>
+    <string name="note">注意</string>
 </resources>
