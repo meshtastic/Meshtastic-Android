@@ -10,14 +10,14 @@
     - [x] Review `docs/` directory contents.
 - [x] Task: Conductor - User Manual Verification 'Context Gathering and Codebase Investigation' (Protocol in workflow.md) [b644b50]
 
-## Phase 2: Synthesis and Condensation
-- [~] Task: Synthesize documentation
-    - [ ] Consolidate related guides into single sources of truth.
-    - [ ] Update documentation to reflect recent KMP migration findings.
-- [ ] Task: Archive legacy documentation
-    - [ ] Identify outdated or redundant documents.
-    - [ ] Move identified documents into an `archive/` directory.
-- [ ] Task: Formulate next steps proposal
-    - [ ] Draft a proposed plan for remaining KMP migrations based on investigation.
-    - [ ] Document the proposal in the relevant file (e.g., `kmp-status.md`).
-- [ ] Task: Conductor - User Manual Verification 'Synthesis and Condensation' (Protocol in workflow.md)
+## Phase 2: Synthesis and Condensation [checkpoint: 40e7c58]
+- [x] Task: Synthesize documentation [8c57f14]
+    - [x] Consolidate related guides into single sources of truth.
+    - [x] Update documentation to reflect recent KMP migration findings.
+- [x] Task: Archive legacy documentation [14b19c5]
+    - [x] Identify outdated or redundant documents.
+    - [x] Move identified documents into an `archive/` directory.
+- [x] Task: Formulate next steps proposal [2bd7655]
+    - [x] Draft a proposed plan for remaining KMP migrations based on investigation.
+    - [x] Document the proposal in the relevant file (e.g., `kmp-status.md`).
+- [x] Task: Conductor - User Manual Verification 'Synthesis and Condensation' (Protocol in workflow.md) [40e7c58]
