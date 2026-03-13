@@ -76,7 +76,7 @@ When contributing to `core` modules, adhere to the following KMP standards:
 *   **Resources:** Use Compose Multiplatform Resources (`core:resources`) for all strings and drawables. Never use Android `strings.xml` in `commonMain`.
 *   **Coroutines & Flows:** Use `StateFlow` and `SharedFlow` for all asynchronous state management across the domain layer.
 *   **Persistence:** Use `androidx.datastore` for preferences and Room KMP for complex relational data.
-*   **Dependency Injection:** We use **Koin Annotations + KSP**. Per 2026 KMP industry standards, it is recommended to push Koin `@Module`, `@ComponentScan`, and `@KoinViewModel` annotations into `commonMain`. This encapsulates dependency graphs per feature, providing a Hilt-like experience (compile-time validation) while remaining fully multiplatform-compatible.
+*   **Dependency Injection:** We use **Koin Annotations + K2 Compiler Plugin**. Per 2026 KMP industry standards, it is recommended to push Koin `@Module`, `@ComponentScan`, and `@KoinViewModel` annotations into `commonMain`. This encapsulates dependency graphs per feature, providing a Hilt-like experience (compile-time validation) while remaining fully multiplatform-compatible.
 
 ---
 *Document refreshed on 2026-03-10 as a historical companion to `docs/kmp-progress-review-2026.md`.*

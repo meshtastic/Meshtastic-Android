@@ -14,8 +14,8 @@ These items address structural gaps identified in the March 2026 architecture re
 | Replace `ConcurrentHashMap` in `commonMain` (3 files) | High | Low | ✅ |
 | Create `core:testing` shared test fixtures | Medium | Low | ✅ |
 | Add feature module `commonTest` (settings, node, messaging) | Medium | Medium | ✅ |
-| Desktop Koin `checkModules()` integration test | Medium | Low | ❌ |
-| Auto-wire Desktop ViewModels via KSP (eliminate manual wiring) | Medium | Low | ❌ |
+| Desktop Koin `checkModules()` integration test | Medium | Low | ✅ |
+| Auto-wire Desktop ViewModels via K2 Compiler (eliminate manual wiring) | Medium | Low | ✅ |
 
 ## Active Work
 
@@ -86,7 +86,7 @@ These items address structural gaps identified in the March 2026 architecture re
 1. **App module thinning** — 63 files remaining (down from 90). Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules. Remaining: extract service/worker/radio files from `app` to `core:service/androidMain` and `core:network/androidMain`
 2. **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
 3. **MQTT transport** — cloud relay operation (KMP, benefits all targets)
-4. **Desktop ViewModel auto-wiring** — ensure Koin KSP generates ViewModel modules for JVM target; eliminate manual wiring in `DesktopKoinModule`
+4. **Desktop ViewModel auto-wiring** — ✅ Done: ensured Koin K2 Compiler Plugin generates ViewModel modules for JVM target; eliminated manual wiring in `DesktopKoinModule`
 5. **KMP charting** — ✅ Done: Vico charts migrated to `feature:node/commonMain` using KMP artifacts; desktop wires them directly
 6. **Navigation contract extraction** — ✅ Done: shared `TopLevelDestination` enum in `core:navigation`; icon mapping in `core:ui`; parity tests in place. Both shells derive from the same source of truth.
 7. **Dependency stabilization** — track stable releases for CMP, Koin, Lifecycle, Nav3

@@ -52,7 +52,7 @@ import org.meshtastic.proto.Position as ProtoPosition
  *
  * These stubs exist ONLY for interfaces that have no `commonMain` implementation and require Android-specific APIs
  * (BLE/USB transport, notifications, WorkManager, location services, broadcasts, widgets). All other interfaces use
- * real `commonMain` implementations wired through the generated KSP Koin modules.
+ * real `commonMain` implementations wired through the generated Koin K2 modules.
  *
  * As real desktop implementations become available (e.g., serial transport, TCP transport), they replace individual
  * stubs in [desktopModule].
