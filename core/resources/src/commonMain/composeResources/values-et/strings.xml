@@ -132,7 +132,7 @@
     <string name="label_short_fast">Lühike ulatus - kiire</string>
     <string name="label_short_slow">Lühike ulatus - aeglane</string>
     <string name="config_network_wifi_enabled_summary">WiFi lubamine keelab rakenduses Bluetooth-ühenduse.</string>
-    <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab Bluetooth-ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
+    <string name="config_network_eth_enabled_summary">Etherneti lubamine keelab sinihamba ühenduse rakendusega. TCP-sõlmede ühendused pole Apple'i seadmetes saadaval.</string>
     <string name="config_network_udp_enabled_summary">Luba kohalikus võrgus pakettide edastamine UDP kaudu.</string>
     <string name="config_position_broadcast_secs_summary">Maksimaalne intervall, mille jooksul sõlm ei edasta oma asukohta.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Asukohavärskendused saadetakse kiiremini, kui minimaalne vahemaa on saavutatud.</string>
@@ -145,7 +145,7 @@
     <string name="config_security_admin_key">Avalik võti, millel on õigus sellele sõlmele administraatori sõnumeid saata.</string>
     <string name="config_security_is_managed">Seadet haldab võrgusilma administraator, kasutajal pole juurdepääsu seadme sätetele.</string>
     <string name="config_security_serial_enabled">Jadapordi konsool voog API kaudu.</string>
-    <string name="config_security_debug_log_api_enabled">Väljenda reaalajas silumislogi jadapordi kaudu, vaata ja ekspordi asukoha redigeerimisega seadmelogisid Bluetoothi ​​kaudu.</string>
+    <string name="config_security_debug_log_api_enabled">Väljenda reaalajas silumislogi jadapordi kaudu, vaata ja ekspordi asukoha redigeerimisega seadmelogisid sinihamba ​​kaudu.</string>
     <!-- Position Config -->
     <string name="position_packet">Asukoha pakett</string>
     <string name="broadcast_interval">Saateintervall</string>
@@ -198,12 +198,20 @@
     <string name="connecting">Ühendan</string>
     <string name="not_connected">Ei ole ühendatud</string>
     <string name="no_device_selected">Seadet pole valitud</string>
+    <string name="unknown_device">Tundmatu seade</string>
+    <string name="no_network_devices_found">Võrguseadmeid ei leitud</string>
+    <string name="no_usb_devices_found">USB seadmeid ei leitud</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">Demo režiim</string>
     <string name="connected_sleeping">Ühendatud raadioga, aga see on unerežiimis</string>
     <string name="app_too_old">Vajalik on rakenduse värskendus</string>
     <string name="must_update">Pead seda rakendust rakenduste poes (või Github) värskendama. See on liiga vana selle raadio püsivara jaoks. Loe selle kohta lisateavet meie <a href="https://meshtastic.org/docs/software/android/installation"> dokumentatsioonist </a>.</string>
     <string name="none">Puudub (pole kasutatud)</string>
     <string name="meshtastic_service_notifications">Teenuse teavitused</string>
     <string name="acknowledgements">Tänusõnad</string>
+    <string name="open_source_libraries">Avatud lähtekoodiga teegid</string>
+    <string name="open_source_description">Meshtastic on loodud avatud lähtekoodiga teekidest. Litsentsi vaatamiseks valige teek.</string>
+    <string name="library_count">%1$d teek</string>
     <string name="channel_invalid">Kanali URL on kehtetu ja seda ei saa kasutada</string>
     <string name="contact_invalid">See kontakt on sobimatu ja seda ei saa lisada</string>
     <string name="debug_panel">Arendaja paneel</string>
@@ -1213,5 +1221,15 @@
     <string name="traffic_management_exhaust_hop_telemetry">Ainult kohalik telemeetria (vahendajad)</string>
     <string name="traffic_management_exhaust_hop_position">Ainult kohalik asukoht (vahendajad)</string>
     <string name="traffic_management_router_preserve_hops">Säilita ruuteri hüpped</string>
+    <string name="no_messages_yet">Sõnumeid veel ei ole</string>
+    <string name="unread_count">%1$d lugemata</string>
+    <string name="map_coming_soon">Kaardi tugi lisandub peagi ka lauaarvutile</string>
     <string name="no_device_connected">Ühtegi seadet pole ühendatud</string>
+    <string name="update_status">Oleku värskendamine</string>
+    <string name="ready_for_firmware_update">Valmis püsivara värskendamiseks</string>
+    <string name="check_for_updates">Kontrolli värskendusi</string>
+    <string name="download_firmware">Lae püsivara</string>
+    <string name="update_device">Uuenda seade</string>
+    <string name="note">Märkus</string>
+    <string name="firmware_charge_warning">Enne püsivara värskendamist veendu, et seade on täielikult laetud. Ära värskendamise ajal seadet lahti ühenda ega välja lülita.</string>
 </resources>
