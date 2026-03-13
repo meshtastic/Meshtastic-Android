@@ -198,12 +198,20 @@
     <string name="connecting">Подключение</string>
     <string name="not_connected">Нет соединения</string>
     <string name="no_device_selected">Устройство не выбрано</string>
+    <string name="unknown_device">Неизвестное устройство</string>
+    <string name="no_network_devices_found">Сетевые устройства не найдены</string>
+    <string name="no_usb_devices_found">Устройства USB не найдены</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">Демо-режим</string>
     <string name="connected_sleeping">Подключен к радиостанции, но она спит</string>
     <string name="app_too_old">Требуется обновление приложения</string>
     <string name="must_update">Вам необходимо обновить данное приложение в магазине приложений (или с Github). Оно слишком старо для взаимодействия с прошивкой радиостанции. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <string name="none">Нет (выключить)</string>
     <string name="meshtastic_service_notifications">Служебные уведомления</string>
     <string name="acknowledgements">Подтверждения</string>
+    <string name="open_source_libraries">Библиотеки с открытым исходным кодом</string>
+    <string name="open_source_description">Meshtastic создан с использованием следующих библиотек с открытым исходным кодом. Нажмите на любую библиотеку, чтобы просмотреть ее лицензию.</string>
+    <string name="library_count">%1$d библиотек</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="contact_invalid">Контакт неверный и не может быть добавлен</string>
     <string name="debug_panel">Панель отладки</string>
@@ -1229,5 +1237,15 @@
     <string name="traffic_management_exhaust_hop_telemetry">Телеметрия только для локальной сети (ретрансл.)</string>
     <string name="traffic_management_exhaust_hop_position">Только локальная позиция (ретрансл.)</string>
     <string name="traffic_management_router_preserve_hops">Сохраняить хопы маршрутизатора</string>
+    <string name="no_messages_yet">Пока нет сообщений</string>
+    <string name="unread_count"> %1$d непрочитанное</string>
+    <string name="map_coming_soon">Поддержка карт скоро появится на компьютере</string>
     <string name="no_device_connected">Нет подключенных устройств</string>
+    <string name="update_status">Состояние обновления</string>
+    <string name="ready_for_firmware_update">Готово к обновлению прошивки</string>
+    <string name="check_for_updates">Проверка обновлений</string>
+    <string name="download_firmware">Загрузить прошивку</string>
+    <string name="update_device">Обновление устройства</string>
+    <string name="note">Примечание</string>
+    <string name="firmware_charge_warning">Убедитесь, что ваше устройство полностью заряжено перед началом обновления прошивки. Не отключайте и не выключайте устройство во время процесса обновления.</string>
 </resources>
