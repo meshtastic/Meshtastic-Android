@@ -11,7 +11,7 @@
 [![Fiscal Contributors](https://opencollective.com/meshtastic/tiers/badge.svg?label=Fiscal%20Contributors&color=deeppink)](https://opencollective.com/meshtastic/)
 [![Vercel](https://img.shields.io/static/v1?label=Powered%20by&message=Vercel&style=flat&logo=vercel&color=000000)](https://vercel.com?utm_source=meshtastic&utm_campaign=oss)
 
-This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the device side code, see [here](https://github.com/meshtastic/firmware).
+This is a tool for using Android (and Compose Desktop) with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the device side code, see [here](https://github.com/meshtastic/firmware).
 
 This project is currently beta testing across various providers. If you have questions or feedback please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic) . We would love to hear from you!
 
@@ -60,11 +60,11 @@ You can generate the documentation locally to preview your changes.
 
 ### Modern Android Development (MAD)
 The app follows modern Android development practices, built on top of a shared Kotlin Multiplatform (KMP) Core:
-- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, enabling future support for Desktop and Web.
-- **UI:** Jetpack Compose (Material 3) using Compose Multiplatform resources.
+- **KMP Modules:** Business logic (`core:domain`), data sources (`core:data`, `core:database`, `core:datastore`), and communications (`core:network`, `core:ble`) are entirely platform-agnostic, targeting Android and Compose Desktop.
+- **UI:** JetBrains Compose Multiplatform (Material 3) using Compose Multiplatform resources.
 - **State Management:** Unidirectional Data Flow (UDF) with ViewModels, Coroutines, and Flow.
-- **Dependency Injection:** Koin with Koin Annotations (Compiler Plugin).
-- **Navigation:** Type-Safe Navigation (Jetpack Navigation).
+- **Dependency Injection:** Koin with Koin Annotations (K2 Compiler Plugin).
+- **Navigation:** JetBrains Navigation 3 (Multiplatform routing).
 - **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms).
 
 ### Bluetooth Low Energy (BLE)

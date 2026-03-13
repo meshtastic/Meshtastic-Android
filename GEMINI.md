@@ -16,9 +16,9 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 - **Core Architecture:** Modern Android Development (MAD) with KMP core.
   - **KMP Modules:** Most `core:*` modules. All declare `jvm()` target and compile clean on JVM.
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
-  - **UI:** Jetpack Compose (Material 3).
-  - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app`.
-  - **Navigation:** AndroidX Navigation 3 (JetBrains multiplatform fork) with shared backstack state.
+  - **UI:** Jetpack Compose Multiplatform (Material 3).
+  - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
+  - **Navigation:** JetBrains Navigation 3 (Multiplatform fork) with shared backstack state.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Database:** Room KMP.
 
@@ -75,6 +75,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **BLE:** All Bluetooth communication must route through `core:ble` using Nordic Semiconductor's Android Common Libraries.
 -   **Dependencies:** Check `gradle/libs.versions.toml` before assuming a library is available.
 -   **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`.
+-   **Compose Multiplatform:** Version catalog aliases for Compose Multiplatform artifacts use the `compose-multiplatform-*` prefix (e.g., `compose-multiplatform-material3`, `compose-multiplatform-foundation`). Never use plain `androidx.compose` dependencies in common Main.
 -   **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
 -   **Testing:** Write ViewModel and business logic tests in `commonTest`. Use `core:testing` shared fakes.
 
