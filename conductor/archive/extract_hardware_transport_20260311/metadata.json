@@ -1,0 +1,8 @@
+{
+  "track_id": "extract_hardware_transport_20260311",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-03-11T00:00:00Z",
+  "updated_at": "2026-03-11T00:00:00Z",
+  "description": "extract hardware/transport layers out of :app into dedicated :core modules"
+}
