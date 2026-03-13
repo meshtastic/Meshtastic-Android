@@ -107,11 +107,11 @@ dependencies {
 
     // Compose Desktop
     implementation(compose.desktop.currentOs)
-    implementation(compose.material3)
-    implementation(compose.materialIconsExtended)
-    implementation(compose.runtime)
-    implementation(compose.foundation)
-    implementation(compose.components.resources)
+    implementation(libs.compose.multiplatform.material3)
+    implementation(libs.compose.multiplatform.materialIconsExtended)
+    implementation(libs.compose.multiplatform.runtime)
+    implementation(libs.compose.multiplatform.foundation)
+    implementation(libs.compose.multiplatform.resources)
 
     // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
     implementation(libs.jetbrains.compose.material3.adaptive)
@@ -119,10 +119,10 @@ dependencies {
     implementation(libs.jetbrains.compose.material3.adaptive.navigation)
 
     // Navigation 3 (JetBrains fork — multiplatform)
-    implementation(libs.androidx.navigation3.ui)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
-    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.jetbrains.navigation3.ui)
+    implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+    implementation(libs.jetbrains.lifecycle.viewmodel.navigation3)
+    implementation(libs.jetbrains.lifecycle.runtime.compose)
 
     // Koin DI
     implementation(libs.koin.core)

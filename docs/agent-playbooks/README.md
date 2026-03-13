@@ -9,15 +9,32 @@ Use `AGENTS.md` as the source of truth for architecture boundaries and required 
 When checking upstream docs/examples, match these repository-pinned versions from `gradle/libs.versions.toml`:
 
 - Kotlin: `2.3.10`
-- Koin: `4.2.0-RC1` (`koin-annotations` `2.1.0`, compiler plugin `0.3.0`)
-- AndroidX Navigation 3 (JetBrains fork): `1.1.0-alpha03` (`org.jetbrains.androidx.navigation3`)
-- JetBrains Lifecycle (multiplatform): `2.10.0-alpha08` (`org.jetbrains.androidx.lifecycle`)
-- AndroidX Lifecycle (Android-only): `2.10.0`
+- Koin: `4.2.0-RC2` (`koin-annotations` `2.1.0`, compiler plugin `0.4.0`)
+- JetBrains Navigation 3: `1.1.0-alpha04` (`org.jetbrains.androidx.navigation3`)
+- JetBrains Lifecycle (multiplatform): `2.10.0-beta01` (`org.jetbrains.androidx.lifecycle`)
+- AndroidX Lifecycle (Android-only): `2.10.0` (`androidx.lifecycle`)
 - Kotlin Coroutines: `1.10.2`
-- Compose Multiplatform: `1.11.0-alpha03`
-- JetBrains Material 3 Adaptive: `1.3.0-alpha05` (`org.jetbrains.compose.material3.adaptive`)
+- Compose Multiplatform: `1.11.0-alpha04`
+- JetBrains Material 3 Adaptive: `1.3.0-alpha06` (`org.jetbrains.compose.material3.adaptive`)
 
 Prefer versioned docs pages that match those versions (for example, Koin `4.2` docs rather than older `4.0/4.1` pages).
+
+## Dependency alias quick-reference
+
+Version catalog aliases split cleanly by fork provenance. **Use the right prefix for the right source set.**
+
+| Alias prefix | Coordinates | Use in |
+|---|---|---|
+| `jetbrains-lifecycle-*` | `org.jetbrains.androidx.lifecycle:*` | `commonMain`, `androidMain` |
+| `jetbrains-navigation3-*` | `org.jetbrains.androidx.navigation3:*` | `commonMain`, `androidMain` |
+| `jetbrains-compose-material3-adaptive-*` | `org.jetbrains.compose.material3.adaptive:*` | `commonMain`, `androidMain` |
+| `androidx-lifecycle-process` | `androidx.lifecycle:lifecycle-process` | `androidMain` only — `ProcessLifecycleOwner` |
+| `androidx-lifecycle-runtime-ktx` | `androidx.lifecycle:lifecycle-runtime-ktx` | `androidMain` only |
+| `androidx-lifecycle-viewmodel-ktx` | `androidx.lifecycle:lifecycle-viewmodel-ktx` | `androidMain` only |
+| `androidx-lifecycle-testing` | `androidx.lifecycle:lifecycle-runtime-testing` | `androidUnitTest` only |
+| `androidx-navigation-common` | `androidx.navigation:navigation-common` | `androidMain` only |
+
+> `jetbrains-navigation3-runtime` and `jetbrains-navigation3-ui` resolve to the same `navigation3-ui` artifact — JetBrains does not publish a separate runtime artifact yet.
 
 Quick references:
 
@@ -34,8 +51,6 @@ Quick references:
 - `docs/agent-playbooks/task-playbooks.md` - step-by-step recipes for common implementation tasks.
 - `docs/agent-playbooks/testing-and-ci-playbook.md` - which Gradle tasks to run based on change type, plus CI parity.
 - `docs/agent-playbooks/testing-quick-ref.md` - Quick reference for using the new testing infrastructure.
-
-
 
 
 

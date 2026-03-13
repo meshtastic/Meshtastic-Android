@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.rounded.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -140,12 +139,7 @@ private const val TRACEROUTE_OFFSET_METERS = 100.0
 private const val TRACEROUTE_BOUNDS_PADDING_PX = 120
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
-@OptIn(
-    MapsComposeExperimentalApi::class,
-    ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3ExpressiveApi::class,
-    ExperimentalPermissionsApi::class,
-)
+@OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
@@ -803,7 +797,6 @@ fun Uri.getFileName(context: android.content.Context): String {
     return name
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
 private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayUnits = DisplayUnits.METRIC) {
@@ -812,7 +805,7 @@ private fun PositionInfoWindowContent(position: Position, displayUnits: DisplayU
         Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(label, style = MaterialTheme.typography.labelMedium)
             Spacer(modifier = Modifier.width(16.dp))
-            Text(value, style = MaterialTheme.typography.labelMediumEmphasized)
+            Text(value, style = MaterialTheme.typography.labelMedium)
         }
     }
 

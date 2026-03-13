@@ -33,9 +33,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.foundation)
+            implementation(libs.compose.multiplatform.material3)
+            implementation(libs.compose.multiplatform.materialIconsExtended)
+            implementation(libs.compose.multiplatform.foundation)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
@@ -52,8 +52,8 @@ kotlin {
             implementation(projects.core.ble)
             implementation(projects.feature.settings)
 
-            implementation(libs.androidx.lifecycle.viewmodel.compose)
-            implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
+            implementation(libs.jetbrains.navigation3.runtime)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
         }
@@ -66,7 +66,7 @@ kotlin {
             implementation(libs.androidx.compose.material.iconsExtended)
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.jetbrains.lifecycle.runtime.compose)
             implementation(libs.usb.serial.android)
         }
 

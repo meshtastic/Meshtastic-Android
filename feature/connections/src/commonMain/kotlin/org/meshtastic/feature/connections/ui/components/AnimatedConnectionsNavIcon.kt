@@ -26,7 +26,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -35,8 +34,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.conflate
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.MeshActivity
@@ -56,13 +54,12 @@ fun AnimatedConnectionsNavIcon(
 ) {
     var currentGlowColor by remember { mutableStateOf(Color.Transparent) }
     val animatedGlowAlpha = remember { Animatable(0f) }
-    val coroutineScope = rememberCoroutineScope()
 
     val sendColor = colorScheme.StatusGreen
     val receiveColor = colorScheme.StatusBlue
 
     LaunchedEffect(meshActivityFlow, colorScheme) {
-        meshActivityFlow.collectLatest { activity ->
+        meshActivityFlow.conflate().collect { activity ->
             val newTargetColor =
                 when (activity) {
                     is MeshActivity.Send -> sendColor
@@ -70,15 +67,15 @@ fun AnimatedConnectionsNavIcon(
                 }
 
             currentGlowColor = newTargetColor
-            // Launching in a new coroutine ensures the collect block is not suspended.
-            coroutineScope.launch {
-                animatedGlowAlpha.stop()
-                animatedGlowAlpha.snapTo(1.0f)
-                animatedGlowAlpha.animateTo(
-                    targetValue = 0.0f,
-                    animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
-                )
-            }
+
+            // Suspend the collection until the animation finishes.
+            // conflate() will drop any fast events that arrive during this 1-second animation.
+            animatedGlowAlpha.stop()
+            animatedGlowAlpha.snapTo(1.0f)
+            animatedGlowAlpha.animateTo(
+                targetValue = 0.0f,
+                animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+            )
         }
     }
 

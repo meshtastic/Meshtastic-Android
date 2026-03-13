@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,10 +30,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ButtonDefaults.MediumContainerHeight
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -150,7 +147,6 @@ private val Config.DeviceConfig.RebroadcastMode.description: StringResource
                 Res.string.rebroadcast_mode_core_portnums_only_desc
         }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("DEPRECATION", "LongMethod")
 @Composable
 fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -283,7 +279,7 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                 HorizontalDivider()
 
                 TextButton(
-                    modifier = Modifier.height(MediumContainerHeight).fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     enabled = state.connected,
                     shape = RectangleShape,
                     onClick = { formState.value = formState.value.copy(tzdef = appTzPosixString) },

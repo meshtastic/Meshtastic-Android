@@ -16,6 +16,7 @@ These items address structural gaps identified in the March 2026 architecture re
 | Add feature module `commonTest` (settings, node, messaging) | Medium | Medium | ✅ |
 | Desktop Koin `checkModules()` integration test | Medium | Low | ✅ |
 | Auto-wire Desktop ViewModels via K2 Compiler (eliminate manual wiring) | Medium | Low | ✅ |
+| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low | ✅ |
 
 ## Active Work
 
@@ -80,6 +81,7 @@ These items address structural gaps identified in the March 2026 architecture re
 4. **`feature:connections` module** — ✅ Done: Extracted connections UI into KMP feature module with dynamic transport availability detection
 5. **Navigation 3 parity baseline** — ✅ Done: shared `TopLevelDestination` in `core:navigation`; both shells use same enum; parity tests in `core:navigation/commonTest` and `desktop/test`
 6. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations)
+7. **Build-logic consolidation** — **Planned:** Consolidate expansive build-logic convention plugins. There is currently some duplication in Compose dependencies that should be factored into common conventions (`meshtastic.kmp.library.compose` vs manually specifying JetBrains CMP deps in feature modules).
 
 ## Medium-Term Priorities (60 days)
 

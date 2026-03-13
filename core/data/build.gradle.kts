@@ -43,7 +43,7 @@ kotlin {
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
 
-            implementation(libs.androidx.lifecycle.runtime)
+            implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.androidx.paging.common)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kermit)

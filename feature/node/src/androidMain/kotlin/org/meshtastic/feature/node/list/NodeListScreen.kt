@@ -30,10 +30,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -42,7 +40,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
@@ -68,7 +65,6 @@ import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
 import org.meshtastic.proto.SharedContact
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeListScreen(
@@ -125,21 +121,18 @@ fun NodeListScreen(
         floatingActionButton = {
             val shareCapable = ourNode?.capabilities?.supportsQrCodeSharing ?: false
             val sharedContact: SharedContact? by viewModel.sharedContactRequested.collectAsStateWithLifecycle(null)
-            MeshtasticImportFAB(
-                sharedContact = sharedContact,
-                modifier =
-                Modifier.animateFloatingActionButton(
-                    visible = !isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable,
-                    alignment = Alignment.BottomEnd,
-                ),
-                onImport = { uriString ->
-                    viewModel.handleScannedUri(uriString) {
-                        scope.launch { context.showToast(Res.string.channel_invalid) }
-                    }
-                },
-                onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
-                isContactContext = true,
-            )
+            if (!isScrollInProgress && connectionState == ConnectionState.Connected && shareCapable) {
+                MeshtasticImportFAB(
+                    sharedContact = sharedContact,
+                    onImport = { uriString ->
+                        viewModel.handleScannedUri(uriString) {
+                            scope.launch { context.showToast(Res.string.channel_invalid) }
+                        }
+                    },
+                    onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
+                    isContactContext = true,
+                )
+            }
         },
     ) { contentPadding ->
         Box(modifier = Modifier.fillMaxSize().padding(contentPadding).focusable()) {

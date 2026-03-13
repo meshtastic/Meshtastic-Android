@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-03-12
+> Last updated: 2026-03-13
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -105,7 +105,8 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | Both shells use shared enum + parity tests. See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
 | Hilt → Koin | ✅ Done | See [`decisions/koin-migration.md`](./decisions/koin-migration.md) |
 | BLE abstraction (Nordic Hybrid) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
-| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha05` aligned with CMP `1.11.0-alpha03` |
+| Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-alpha04` |
+| JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
 | Transport deduplication | ✅ Done | `StreamFrameCodec` + `TcpTransport` shared in `core:network` |
 | **Transport UI Unification** | ✅ Done | `RadioInterfaceService` provides dynamic transport capability to shared UI |
@@ -140,10 +141,10 @@ Extracted to shared `commonMain` (no longer app-only):
 
 | Dependency | Version | Why |
 |---|---|---|
-| Compose Multiplatform | `1.11.0-alpha03` | Required for JetBrains Adaptive `1.3.0-alpha05` |
-| Koin | `4.2.0-RC1` | Nav3 + K2 compiler plugin support |
-| JetBrains Lifecycle | `2.10.0-alpha08` | Multiplatform ViewModel/lifecycle |
-| JetBrains Navigation 3 | `1.1.0-alpha03` | Multiplatform navigation |
+| Compose Multiplatform | `1.11.0-alpha04` | Required for JetBrains Adaptive `1.3.0-alpha06` |
+| Koin | `4.2.0-RC2` | Nav3 + K2 compiler plugin support |
+| JetBrains Lifecycle | `2.10.0-beta01` | Multiplatform ViewModel/lifecycle |
+| JetBrains Navigation 3 | `1.1.0-alpha04` | Multiplatform navigation |
 | Nordic BLE | `2.0.0-alpha16` | Behind abstraction boundary |
 
 **Policy:** Stable by default. RC when it unlocks KMP functionality. Alpha only behind hard abstraction seams. Do not downgrade CMP or Koin — they enable critical KMP features.

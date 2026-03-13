@@ -30,7 +30,7 @@ kotlin {
         commonMain.dependencies {
             implementation(projects.core.resources)
             implementation(libs.kotlinx.serialization.core)
-            implementation(libs.androidx.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.runtime)
         }
 
         commonTest.dependencies { implementation(kotlin("test")) }
