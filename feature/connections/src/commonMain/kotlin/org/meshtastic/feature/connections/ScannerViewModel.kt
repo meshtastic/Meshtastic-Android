@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.datastore.RecentAddressesDataSource
@@ -48,21 +49,70 @@ open class ScannerViewModel(
     private val radioInterfaceService: RadioInterfaceService,
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
+    private val bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ViewModel() {
     val showMockInterface: StateFlow<Boolean> = MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
 
     private val _errorText = MutableStateFlow<String?>(null)
     val errorText: StateFlow<String?> = _errorText.asStateFlow()
 
+    private val isBleScanningState = MutableStateFlow(false)
+    val isBleScanning: StateFlow<Boolean> = isBleScanningState.asStateFlow()
+
+    private val scannedBleDevices = MutableStateFlow<Map<String, org.meshtastic.core.ble.BleDevice>>(emptyMap())
+
+    private var scanJob: kotlinx.coroutines.Job? = null
+
+    fun startBleScan() {
+        if (isBleScanningState.value || bleScanner == null) return
+
+        isBleScanningState.value = true
+        scannedBleDevices.value = emptyMap()
+
+        scanJob =
+            viewModelScope.launch {
+                try {
+                    bleScanner
+                        .scan(
+                            timeout = kotlin.time.Duration.INFINITE,
+                            serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
+                        )
+                        .collect { device ->
+                            scannedBleDevices.update { current -> current + (device.address to device) }
+                        }
+                } catch (e: Exception) {
+                    co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
+                } finally {
+                    isBleScanningState.value = false
+                }
+            }
+    }
+
+    fun stopBleScan() {
+        scanJob?.cancel()
+        scanJob = null
+        isBleScanningState.value = false
+    }
+
     private val discoveredDevicesFlow =
         showMockInterface
             .flatMapLatest { showMock -> getDiscoveredDevicesUseCase.invoke(showMock) }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    /** A combined list of bonded BLE devices for the UI. */
+    /** A combined list of bonded and scanned BLE devices for the UI. */
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        discoveredDevicesFlow
-            .map { it?.bleDevices ?: emptyList() }
+        kotlinx.coroutines.flow
+            .combine(discoveredDevicesFlow, scannedBleDevices) { discovered, scannedMap ->
+                val bonded = discovered?.bleDevices?.filterIsInstance<DeviceListEntry.Ble>() ?: emptyList()
+                val bondedAddresses = bonded.map { it.address }.toSet()
+
+                // Add scanned devices that aren't already in the bonded list
+                val unbondedScanned =
+                    scannedMap.values.filter { it.address !in bondedAddresses }.map { DeviceListEntry.Ble(it) }
+
+                // Sort by name
+                (bonded + unbondedScanned).sortedBy { it.name }
+            }
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /** UI StateFlow for USB devices. */

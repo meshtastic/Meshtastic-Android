@@ -45,7 +45,7 @@ class BleScannerTest {
     fun `scan returns peripherals`() = runTest(testDispatcher) {
         val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
-        val scanner = BleScanner(centralManager)
+        val scanner = AndroidBleScanner(centralManager)
 
         val peripheral =
             PeripheralSpec.simulatePeripheral(
@@ -70,7 +70,7 @@ class BleScannerTest {
     fun `scan with filter returns only matching peripherals`() = runTest(testDispatcher) {
         val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
         val centralManager = CentralManager.mock(mockEnvironment, backgroundScope)
-        val scanner = BleScanner(centralManager)
+        val scanner = AndroidBleScanner(centralManager)
 
         val targetUuid = Uuid.parse("4FAFC201-1FB5-459E-8FCC-C5C9C331914B")
 
@@ -92,7 +92,7 @@ class BleScannerTest {
         centralManager.simulatePeripherals(listOf(matchingPeripheral, nonMatchingPeripheral))
 
         val scannedDevices = mutableListOf<no.nordicsemi.kotlin.ble.client.android.Peripheral>()
-        val job = launch { scanner.scan(5.seconds) { ServiceUuid(targetUuid) }.toList(scannedDevices) }
+        val job = launch { scanner.scan(5.seconds, targetUuid).toList(scannedDevices) }
 
         // Needs time to scan in mock environment
         advanceUntilIdle()
