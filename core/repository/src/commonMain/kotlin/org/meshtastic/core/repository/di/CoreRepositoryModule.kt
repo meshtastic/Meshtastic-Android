@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.repository.di
 
-import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Provided
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -27,15 +27,14 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
 
 @Module
-@ComponentScan("org.meshtastic.core.repository")
 class CoreRepositoryModule {
     @Single
     fun provideSendMessageUseCase(
-        nodeRepository: NodeRepository,
-        packetRepository: PacketRepository,
-        radioController: RadioController,
-        homoglyphEncodingPrefs: HomoglyphPrefs,
-        messageQueue: MessageQueue,
+        @Provided nodeRepository: NodeRepository,
+        @Provided packetRepository: PacketRepository,
+        @Provided radioController: RadioController,
+        @Provided homoglyphEncodingPrefs: HomoglyphPrefs,
+        @Provided messageQueue: MessageQueue,
     ): SendMessageUseCase =
         SendMessageUseCase(nodeRepository, packetRepository, radioController, homoglyphEncodingPrefs, messageQueue)
 }

@@ -10,34 +10,34 @@ This appendix records the concrete repo evidence behind [`docs/kmp-progress-revi
 |---|---|---|---|
 | `core:api` | Android library | **Android-only** | [`core/api/build.gradle.kts`](../core/api/build.gradle.kts) |
 | `core:barcode` | Android library + compose + flavors | **Android-only** | [`core/barcode/build.gradle.kts`](../core/barcode/build.gradle.kts) |
-| `core:ble` | KMP library | **KMP, Android target only** | [`core/ble/build.gradle.kts`](../core/ble/build.gradle.kts) |
-| `core:common` | KMP library | **KMP, Android target only** | [`core/common/build.gradle.kts`](../core/common/build.gradle.kts) |
-| `core:data` | KMP library | **KMP, Android target only** | [`core/data/build.gradle.kts`](../core/data/build.gradle.kts) |
-| `core:database` | KMP library | **KMP, Android target only** | [`core/database/build.gradle.kts`](../core/database/build.gradle.kts) |
-| `core:datastore` | KMP library | **KMP, Android target only** | [`core/datastore/build.gradle.kts`](../core/datastore/build.gradle.kts) |
-| `core:di` | KMP library | **KMP, Android target only** | [`core/di/build.gradle.kts`](../core/di/build.gradle.kts) |
-| `core:domain` | KMP library | **KMP, Android target only** | [`core/domain/build.gradle.kts`](../core/domain/build.gradle.kts) |
-| `core:model` | KMP library | **KMP, Android target only, published** | [`core/model/build.gradle.kts`](../core/model/build.gradle.kts) |
-| `core:navigation` | KMP library | **KMP, Android target only** | [`core/navigation/build.gradle.kts`](../core/navigation/build.gradle.kts) |
-| `core:network` | KMP library | **KMP, Android target only** | [`core/network/build.gradle.kts`](../core/network/build.gradle.kts) |
+| `core:ble` | KMP library | **KMP with explicit `jvm()`** | [`core/ble/build.gradle.kts`](../core/ble/build.gradle.kts) |
+| `core:common` | KMP library | **KMP with explicit `jvm()`, `jvmAndroidMain` source set** | [`core/common/build.gradle.kts`](../core/common/build.gradle.kts) |
+| `core:data` | KMP library | **KMP with explicit `jvm()`** | [`core/data/build.gradle.kts`](../core/data/build.gradle.kts) |
+| `core:database` | KMP library | **KMP with explicit `jvm()`** | [`core/database/build.gradle.kts`](../core/database/build.gradle.kts) |
+| `core:datastore` | KMP library | **KMP with explicit `jvm()`** | [`core/datastore/build.gradle.kts`](../core/datastore/build.gradle.kts) |
+| `core:di` | KMP library | **KMP with explicit `jvm()`** | [`core/di/build.gradle.kts`](../core/di/build.gradle.kts) |
+| `core:domain` | KMP library | **KMP with explicit `jvm()`** | [`core/domain/build.gradle.kts`](../core/domain/build.gradle.kts) |
+| `core:model` | KMP library | **KMP with explicit `jvm()`, `jvmAndroidMain` source set, published** | [`core/model/build.gradle.kts`](../core/model/build.gradle.kts) |
+| `core:navigation` | KMP library | **KMP with explicit `jvm()`** | [`core/navigation/build.gradle.kts`](../core/navigation/build.gradle.kts) |
+| `core:network` | KMP library | **KMP with explicit `jvm()`** | [`core/network/build.gradle.kts`](../core/network/build.gradle.kts) |
 | `core:nfc` | Android library + compose | **Android-only** | [`core/nfc/build.gradle.kts`](../core/nfc/build.gradle.kts) |
-| `core:prefs` | KMP library | **KMP, Android target only** | [`core/prefs/build.gradle.kts`](../core/prefs/build.gradle.kts) |
+| `core:prefs` | KMP library | **KMP with explicit `jvm()`** | [`core/prefs/build.gradle.kts`](../core/prefs/build.gradle.kts) |
 | `core:proto` | KMP library | **KMP with explicit `jvm()`** | [`core/proto/build.gradle.kts`](../core/proto/build.gradle.kts) |
-| `core:repository` | KMP library | **KMP, Android target only** | [`core/repository/build.gradle.kts`](../core/repository/build.gradle.kts) |
-| `core:resources` | KMP library + compose | **KMP, Android target only** | [`core/resources/build.gradle.kts`](../core/resources/build.gradle.kts) |
-| `core:service` | KMP library | **KMP, Android target only** | [`core/service/build.gradle.kts`](../core/service/build.gradle.kts) |
-| `core:ui` | KMP library + compose | **KMP, Android target only** | [`core/ui/build.gradle.kts`](../core/ui/build.gradle.kts) |
+| `core:repository` | KMP library | **KMP with explicit `jvm()`** | [`core/repository/build.gradle.kts`](../core/repository/build.gradle.kts) |
+| `core:resources` | KMP library + compose | **KMP with explicit `jvm()`** | [`core/resources/build.gradle.kts`](../core/resources/build.gradle.kts) |
+| `core:service` | KMP library | **KMP with explicit `jvm()`** | [`core/service/build.gradle.kts`](../core/service/build.gradle.kts) |
+| `core:ui` | KMP library + compose | **KMP with explicit `jvm()`, `jvmMain` actuals** | [`core/ui/build.gradle.kts`](../core/ui/build.gradle.kts) |
 
 ### Feature modules
 
 | Module | Build plugin state | Current reality | Key evidence |
 |---|---|---|---|
-| `feature:intro` | KMP library + compose | **KMP, Android target only** | [`feature/intro/build.gradle.kts`](../feature/intro/build.gradle.kts) |
-| `feature:messaging` | KMP library + compose | **KMP, Android target only** | [`feature/messaging/build.gradle.kts`](../feature/messaging/build.gradle.kts) |
-| `feature:map` | KMP library + compose | **KMP, Android target only** | [`feature/map/build.gradle.kts`](../feature/map/build.gradle.kts) |
-| `feature:node` | KMP library + compose | **KMP, Android target only** | [`feature/node/build.gradle.kts`](../feature/node/build.gradle.kts) |
-| `feature:settings` | KMP library + compose | **KMP, Android target only** | [`feature/settings/build.gradle.kts`](../feature/settings/build.gradle.kts) |
-| `feature:firmware` | KMP library + compose | **KMP, Android target only** | [`feature/firmware/build.gradle.kts`](../feature/firmware/build.gradle.kts) |
+| `feature:intro` | KMP library + compose | **KMP with explicit `jvm()`** | [`feature/intro/build.gradle.kts`](../feature/intro/build.gradle.kts) |
+| `feature:messaging` | KMP library + compose | **KMP with explicit `jvm()`** | [`feature/messaging/build.gradle.kts`](../feature/messaging/build.gradle.kts) |
+| `feature:map` | KMP library + compose | **KMP with explicit `jvm()`** | [`feature/map/build.gradle.kts`](../feature/map/build.gradle.kts) |
+| `feature:node` | KMP library + compose | **KMP with explicit `jvm()`, UI in `commonMain`** | [`feature/node/build.gradle.kts`](../feature/node/build.gradle.kts) |
+| `feature:settings` | KMP library + compose | **KMP with explicit `jvm()`, UI in `commonMain`, wired on Desktop** | [`feature/settings/build.gradle.kts`](../feature/settings/build.gradle.kts) |
+| `feature:firmware` | KMP library + compose | **KMP with explicit `jvm()`** | [`feature/firmware/build.gradle.kts`](../feature/firmware/build.gradle.kts) |
 
 ### Inventory totals
 
@@ -45,7 +45,8 @@ This appendix records the concrete repo evidence behind [`docs/kmp-progress-revi
 - Feature modules: **6**
 - KMP modules across core + feature: **22 / 25**
 - Android-only modules across core + feature: **3 / 25**
-- Modules with explicit non-Android target declarations: **1 / 25** (`core:proto`)
+- Modules with explicit non-Android target declarations: **22 / 25** (all KMP modules declare `jvm()`)
+- Modules with `jvmMain` source sets (hand-written actuals): `core:common` (4 files), `core:model` (via `jvmAndroidMain`, 3 files), `core:repository` (1 file — `Location.kt`), `core:ui` (6 files — QR, clipboard, HTML, platform utils, time tick, dynamic color)
 
 ---
 
@@ -71,7 +72,7 @@ The repo has standardized on the **Android KMP library path** for shared modules
 |---|---|---|---|
 | `core:api` | earlier migration wording grouped `core:service` and `core:api` together as KMP | `core:service` is KMP, `core:api` is still Android-only | [`docs/kmp-migration.md`](./kmp-migration.md), [`core/api/build.gradle.kts`](../core/api/build.gradle.kts), [`core/service/build.gradle.kts`](../core/service/build.gradle.kts) |
 | DI centralization | original plan kept DI-dependent components in `app` | several `commonMain` modules contain Koin `@Module`, `@ComponentScan`, and `@KoinViewModel` | [`feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/SharedMapViewModel.kt`](../feature/map/src/commonMain/kotlin/org/meshtastic/feature/map/SharedMapViewModel.kt), [`core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/di/CoreDomainModule.kt`](../core/domain/src/commonMain/kotlin/org/meshtastic/core/domain/di/CoreDomainModule.kt) |
-| Cross-platform readiness impression | early migration narrative emphasized Desktop/iOS end goals more than active target verification | only `core:proto` explicitly declares a second target today | [`core/proto/build.gradle.kts`](../core/proto/build.gradle.kts), broad scan of module `build.gradle.kts` files |
+| Cross-platform readiness impression | early migration narrative emphasized Desktop/iOS end goals more than active target verification | the repo now has a small JVM pilot (`core:proto`, `core:common`, `core:model`, `core:repository`, `core:di`, `core:navigation`, `core:resources`, `core:datastore`) rather than only a single explicitly validated second target | broad scan of module `build.gradle.kts` files |
 
 ---
 
@@ -128,6 +129,7 @@ These were extracted from local git history on 2026-03-10.
 | 2026-03-09 | `4320c6bd4` | navigation | Navigation 3 split | Cemented shared backstack/state direction |
 | 2026-03-09 | `fb0a9a180` | explicit KMP | `core:ui` KMP follow-up | Stabilization after migration |
 | 2026-03-10 | `5ff6b1ff8` | docs | docs mark `feature:node` UI migration completed | Documentation catch-up after the migration burst |
+| 2026-03-10 | `6f2b1a781` | desktop | Navigation 3 shell for Desktop with shared routes and `feature:settings` wired | First real feature wired on desktop — ~30 composable screens |
 
 ---
 
@@ -152,7 +154,7 @@ These were extracted from local git history on 2026-03-10.
 
 ### Conclusion
 
-The codebase has functionally adopted **shared-module Koin annotations** even though the old guide still describes an `app`-centralized DI policy.
+The codebase has functionally adopted **shared-module Koin annotations** even though the old guide still describes an `app`-centralized DI policy. Additionally, 11 passthrough Android ViewModel wrappers have been eliminated — shared ViewModels are now resolved directly via `koinViewModel()` in both the Android app navigation and the desktop nav graph.
 
 ---
 
@@ -179,6 +181,9 @@ What it verifies today:
 
 - `spotlessCheck`
 - `detekt`
+- JVM smoke compile: all 16 core KMP modules + all 6 feature modules:
+  `:core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:service:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm`
+- `:desktop:test`
 - Android assemble
 - Android unit tests
 - Android instrumented tests
@@ -186,38 +191,8 @@ What it verifies today:
 
 What it does **not** verify:
 
-- JVM target compilation for shared modules
 - iOS target compilation
-- desktop target compilation
-- non-Android publication smoke tests
-
----
-
-## Publication evidence
-
-[`publish-core.yml`](../.github/workflows/publish-core.yml) currently publishes:
-
-- `:core:api`
-- `:core:model`
-- `:core:proto`
-
-Interpretation:
-
-- the public integration surface is still centered on Android API + shared model/proto artifacts
-- the broader KMP core is not yet treated as a published reusable platform SDK set
-
----
-
-## Prerelease dependency watchlist
-
-From [`gradle/libs.versions.toml`](../gradle/libs.versions.toml):
-
-| Dependency | Version in repo | Channel |
-|---|---|---|
-| Compose Multiplatform | `1.11.0-alpha03` | alpha |
-| Koin | `4.2.0-RC1` | RC |
-| Glance | `1.2.0-rc01` | RC |
-| Dokka | `2.2.0-Beta` | beta |
+- Desktop application startup or navigation integration tests
 | Wire | `6.0.0-alpha03` | alpha |
 | Nordic BLE | `2.0.0-alpha16` | alpha |
 | AndroidX core location altitude | `1.0.0-beta01` | beta |

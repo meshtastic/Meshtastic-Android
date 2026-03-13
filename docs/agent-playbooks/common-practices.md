@@ -6,7 +6,8 @@ This document captures discoverable patterns that are already used in the reposi
 
 - Keep domain logic in KMP modules (`commonMain`) and keep Android framework wiring in `app` or `androidMain`.
 - Use `core:*` for shared logic, `feature:*` for user-facing flows, and `app` for Android entrypoints and integration wiring.
-- Example: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt` contains shared ViewModel logic, while `app/src/main/kotlin/org/meshtastic/app/messaging/AndroidMessageViewModel.kt` provides the Android/Koin wrapper.
+- Example: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt` contains shared ViewModel logic, while `app/src/main/kotlin/org/meshtastic/app/node/AndroidMetricsViewModel.kt` provides an Android/Koin wrapper for platform-specific functionality (CSV export via `android.net.Uri`).
+- Note: Many former passthrough wrappers have been eliminated. Only ViewModels with genuine Android-specific logic (file I/O, permissions, `Locale`-aware formatting) retain wrappers in `app/`.
 
 ## 2) Dependency injection conventions (Koin)
 
