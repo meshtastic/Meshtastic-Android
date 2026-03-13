@@ -128,27 +128,15 @@ Vico chart screens (DeviceMetrics, EnvironmentMetrics, SignalMetrics, PowerMetri
 
 ## C. DI Improvements
 
-### C1. Desktop manual ViewModel wiring
+### C1. ~~Desktop manual ViewModel wiring~~ *(resolved 2026-03-13)*
 
-`DesktopKoinModule.kt` has ~120 lines of hand-written `viewModel { Constructor(get(), get(), ...) }` with 8–17 parameters each. These will drift from the annotation-generated Android wiring.
+`DesktopKoinModule.kt` originally had ~120 lines of hand-written `viewModel { ... }` blocks. These have been successfully replaced by including Koin modules from `commonMain` generated via the Koin K2 Compiler Plugin for automatic wiring.
 
-**Fix:** Ensure `@KoinViewModel` annotations on shared ViewModels in `feature/*/commonMain` generate KSP modules for the JVM target. Desktop's `desktopModule()` should then `includes()` generated modules — zero manual ViewModel wiring.
+### C2. ~~Desktop stubs lack compile-time validation~~ *(resolved 2026-03-13)*
 
-**Validation:** If KSP already processes JVM targets (check `meshtastic.koin` convention plugin), this may only need import wiring. If not, configure `ksp(libs.koin.annotations)` for the JVM source set.
+`desktopPlatformStubsModule()` previously had stubs that were only validated at runtime.
 
-### C2. Desktop stubs lack compile-time validation
-
-`desktopPlatformStubsModule()` has 12 `single<Interface> { Noop() }` bindings. Adding a new interface to `core:repository` won't cause a build failure — it fails at runtime.
-
-**Fix:** Add `checkModules()` test:
-```kotlin
-@Test fun `all Koin bindings resolve`() {
-    koinApplication {
-        modules(desktopModule(), desktopPlatformModule())
-        checkModules()
-    }
-}
-```
+**Outcome:** Added `DesktopKoinTest.kt` using Koin's `verify()` API. This test validates the entire Desktop DI graph (including platform stubs and DataStores) during the build. Discovered and fixed missing stubs for `CompassHeadingProvider`, `PhoneLocationProvider`, and `MagneticFieldProvider`.
 
 ### C3. DI module naming convention
 
@@ -187,10 +175,9 @@ Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModul
 - `core:ble` (connection state machine)
 - `core:ui` (utility functions)
 
-### D4. Desktop has 5 tests
+### D4. Desktop has 6 tests
 
-`desktop/src/test/` contains `DemoScenarioTest.kt` with 5 test cases. Still needs:
-- Koin module validation (`checkModules()`)
+`desktop/src/test/` contains `DemoScenarioTest.kt` and `DesktopKoinTest.kt`. Still needs:
 - `DesktopRadioInterfaceService` connection state tests
 - Navigation graph coverage
 
@@ -208,7 +195,7 @@ Ordered by impact × effort:
 | 4 | Feature `commonTest` (D1) | Medium | Medium | KMP test coverage |
 | 5 | `feature:connections` (A3) | High | Medium | ~~Desktop connections~~ ✅ Done |
 | 6 | Service/worker extraction from `app` (A1) | Medium | Medium | Thin app module |
-| 7 | Desktop Koin auto-wiring (C1) | Medium | Low | DI parity |
+| 7 | ~~Desktop Koin auto-wiring (C1, C2)~~ | Medium | Low | ✅ Resolved 2026-03-13 |
 | 8 | MQTT KMP (B3) | Medium | High | Desktop/iOS MQTT |
 | 9 | KMP charts (B4) | Medium | High | Desktop metrics |
 | 10 | iOS target declaration | High | Low | CI purity gate |

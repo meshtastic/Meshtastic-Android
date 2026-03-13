@@ -44,11 +44,14 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.desktop.radio.DesktopMeshServiceController
 import org.meshtastic.desktop.radio.DesktopRadioInterfaceService
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
+import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
 import org.meshtastic.desktop.stub.NoopLocationRepository
 import org.meshtastic.desktop.stub.NoopMQTTRepository
+import org.meshtastic.desktop.stub.NoopMagneticFieldProvider
 import org.meshtastic.desktop.stub.NoopMeshLocationManager
 import org.meshtastic.desktop.stub.NoopMeshServiceNotifications
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
+import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.desktop.stub.NoopServiceBroadcasts
 import org.meshtastic.core.common.di.module as coreCommonModule
@@ -71,7 +74,7 @@ import org.meshtastic.feature.settings.di.module as featureSettingsModule
 /**
  * Koin module for the Desktop target.
  *
- * Includes the generated KSP modules from core KMP libraries (which provide real implementations of prefs, data
+ * Includes the generated Koin K2 modules from core KMP libraries (which provide real implementations of prefs, data
  * repositories, managers, datastore data sources, use cases, and ViewModels from `commonMain`).
  *
  * Only truly platform-specific interfaces are stubbed here — things that require Android APIs (BLE/USB transport,
@@ -80,7 +83,7 @@ import org.meshtastic.feature.settings.di.module as featureSettingsModule
  * Platform infrastructure (DataStores, Room database, Lifecycle) is provided by [desktopPlatformModule].
  */
 fun desktopModule() = module {
-    // Include generated KSP modules from core KMP libraries (commonMain implementations)
+    // Include generated Koin K2 modules from core KMP libraries (commonMain implementations)
     includes(
         org.meshtastic.core.di.di.CoreDiModule().coreDiModule(),
         org.meshtastic.core.common.di.CoreCommonModule().coreCommonModule(),
@@ -131,6 +134,9 @@ private fun desktopPlatformStubsModule() = module {
     single<MeshLocationManager> { NoopMeshLocationManager() }
     single<LocationRepository> { NoopLocationRepository() }
     single<MQTTRepository> { NoopMQTTRepository() }
+    single<org.meshtastic.feature.node.compass.CompassHeadingProvider> { NoopCompassHeadingProvider() }
+    single<org.meshtastic.feature.node.compass.PhoneLocationProvider> { NoopPhoneLocationProvider() }
+    single<org.meshtastic.feature.node.compass.MagneticFieldProvider> { NoopMagneticFieldProvider() }
 
     // Desktop mesh service controller — replaces Android's MeshService lifecycle
     single {
