@@ -9,13 +9,13 @@ Use `AGENTS.md` as the source of truth for architecture boundaries and required 
 When checking upstream docs/examples, match these repository-pinned versions from `gradle/libs.versions.toml`:
 
 - Kotlin: `2.3.10`
-- Koin: `4.2.0-RC1` (`koin-annotations` `2.1.0`, compiler plugin `0.3.0`)
-- AndroidX Navigation 3 (JetBrains fork): `1.1.0-alpha03` (`org.jetbrains.androidx.navigation3`)
-- JetBrains Lifecycle (multiplatform): `2.10.0-alpha08` (`org.jetbrains.androidx.lifecycle`)
+- Koin: `4.2.0-RC2` (`koin-annotations` `2.1.0`, compiler plugin `0.4.0`)
+- AndroidX Navigation 3 (JetBrains fork): `1.1.0-alpha04` (`org.jetbrains.androidx.navigation3`)
+- JetBrains Lifecycle (multiplatform): `2.10.0-beta01` (`org.jetbrains.androidx.lifecycle`)
 - AndroidX Lifecycle (Android-only): `2.10.0`
 - Kotlin Coroutines: `1.10.2`
-- Compose Multiplatform: `1.11.0-alpha03`
-- JetBrains Material 3 Adaptive: `1.3.0-alpha05` (`org.jetbrains.compose.material3.adaptive`)
+- Compose Multiplatform: `1.11.0-alpha04`
+- JetBrains Material 3 Adaptive: `1.3.0-alpha06` (`org.jetbrains.compose.material3.adaptive`)
 
 Prefer versioned docs pages that match those versions (for example, Koin `4.2` docs rather than older `4.0/4.1` pages).
 

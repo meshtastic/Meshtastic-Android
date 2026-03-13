@@ -52,6 +52,7 @@ kotlin {
             implementation(projects.core.di)
             implementation(projects.feature.map)
 
+            implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.koin.compose.viewmodel)

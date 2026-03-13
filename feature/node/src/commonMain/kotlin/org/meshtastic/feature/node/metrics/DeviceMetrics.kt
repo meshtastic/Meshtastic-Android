@@ -70,7 +70,11 @@ import org.meshtastic.core.resources.air_utilization
 import org.meshtastic.core.resources.battery
 import org.meshtastic.core.resources.ch_util_definition
 import org.meshtastic.core.resources.channel_utilization
+import org.meshtastic.core.resources.device_metrics_label_value
 import org.meshtastic.core.resources.device_metrics_log
+import org.meshtastic.core.resources.device_metrics_numeric_value
+import org.meshtastic.core.resources.device_metrics_percent_value
+import org.meshtastic.core.resources.device_metrics_voltage_value
 import org.meshtastic.core.resources.uptime
 import org.meshtastic.core.resources.voltage
 import org.meshtastic.core.ui.component.MaterialBatteryInfo
@@ -240,16 +244,23 @@ private fun DeviceMetricsChart(
         val voltageColor = Device.VOLTAGE.color
         val chUtilColor = Device.CH_UTIL.color
         val airUtilColor = Device.AIR_UTIL.color
+        val batteryLabel = stringResource(Res.string.battery)
+        val voltageLabel = stringResource(Res.string.voltage)
+        val channelUtilizationLabel = stringResource(Res.string.channel_utilization)
+        val airUtilizationLabel = stringResource(Res.string.air_utilization)
+        val percentValueTemplate = stringResource(Res.string.device_metrics_percent_value)
+        val voltageValueTemplate = stringResource(Res.string.device_metrics_voltage_value)
+        val numericValueTemplate = stringResource(Res.string.device_metrics_numeric_value)
         val marker =
             ChartStyling.rememberMarker(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color.copy(alpha = 1f)) {
-                        batteryColor -> "Battery: %.1f%%".format(value)
-                        voltageColor -> "Voltage: %.1f V".format(value)
-                        chUtilColor -> "ChUtil: %.1f%%".format(value)
-                        airUtilColor -> "AirUtil: %.1f%%".format(value)
-                        else -> "%.1f".format(value)
+                        batteryColor -> percentValueTemplate.format(batteryLabel, value)
+                        voltageColor -> voltageValueTemplate.format(voltageLabel, value)
+                        chUtilColor -> percentValueTemplate.format(channelUtilizationLabel, value)
+                        airUtilColor -> percentValueTemplate.format(airUtilizationLabel, value)
+                        else -> numericValueTemplate.format(value)
                     }
                 },
             )
@@ -422,6 +433,11 @@ private fun DeviceMetricsChartPreview() {
 private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick: () -> Unit) {
     val deviceMetrics = telemetry.device_metrics
     val time = telemetry.time.toLong() * MS_PER_SEC
+    val channelUtilizationLabel = stringResource(Res.string.channel_utilization)
+    val airUtilizationLabel = stringResource(Res.string.air_utilization)
+    val uptimeLabel = stringResource(Res.string.uptime)
+    val percentValueTemplate = stringResource(Res.string.device_metrics_percent_value)
+    val labelValueTemplate = stringResource(Res.string.device_metrics_label_value)
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).clickable { onClick() },
         border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
@@ -471,7 +487,11 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                                 MetricIndicator(Device.CH_UTIL.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "Ch: %.1f%%".format(deviceMetrics.channel_utilization ?: 0f),
+                                    text =
+                                    percentValueTemplate.format(
+                                        channelUtilizationLabel,
+                                        deviceMetrics.channel_utilization ?: 0f,
+                                    ),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 )
@@ -481,7 +501,11 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                                 MetricIndicator(Device.AIR_UTIL.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "Air: %.1f%%".format(deviceMetrics.air_util_tx ?: 0f),
+                                    text =
+                                    percentValueTemplate.format(
+                                        airUtilizationLabel,
+                                        deviceMetrics.air_util_tx ?: 0f,
+                                    ),
                                     color = MaterialTheme.colorScheme.onSurface,
                                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 )
@@ -489,9 +513,10 @@ private fun DeviceMetricsCard(telemetry: Telemetry, isSelected: Boolean, onClick
                         }
                         Text(
                             text =
-                            stringResource(Res.string.uptime) +
-                                ": " +
+                            labelValueTemplate.format(
+                                uptimeLabel,
                                 formatUptime(deviceMetrics?.uptime_seconds ?: 0),
+                            ),
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )

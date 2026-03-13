@@ -35,6 +35,30 @@ Both modules still define separate graph-builder files (`app/navigation/*.kt`, `
 4. **Route keys are shared; graph registration is per-platform.**
    - This is the expected state — platform shells wire entries differently while consuming the same route types.
 
+## Alpha04 Changelog Impact Check (2026-03-13)
+
+Source reviewed: Compose Multiplatform `v1.11.0-alpha04` release notes.
+
+1. **No direct Navigation 3 API breakage called out.**
+   - Release notes include component version bumps for Navigation 3 (`1.1.0-alpha04`) but no `NavBackStack`, `NavDisplay`, or `entryProvider` API migration requirements.
+   - Existing shell patterns in `app` and `desktop` remain valid.
+2. **Primary risk is dependency wiring drift, not runtime behavior.**
+   - JetBrains Navigation 3 currently publishes `navigation3-ui` coordinates (no separate `navigation3-runtime` artifact in Maven Central). Our `androidx-navigation3-runtime` alias intentionally points to `navigation3-ui` and is now explicitly documented in the version catalog.
+3. **Saved-state and typed-route parity risk remains unchanged.**
+   - Desktop still uses manual serializer registration; this is an existing risk and not introduced by alpha04.
+4. **Compose-wide migration notes do not currently impact navigation codepaths.**
+   - `Shader` wrapper changes and `Canvas.nativeCanvas` deprecations are not used in the Navigation 3 shell files.
+
+### Actions Taken
+
+- Documented in the version catalog that `androidx-navigation3-runtime` intentionally maps to `navigation3-ui` until a separate runtime artifact is published.
+- Updated active docs to reflect the current dependency baseline (`1.11.0-alpha04`, `1.1.0-alpha04`, `1.3.0-alpha06`, `2.10.0-beta01`).
+- Consolidated `app` adaptive dependencies to JetBrains Material 3 Adaptive coordinates (`org.jetbrains.compose.material3.adaptive:*`) so Android and Desktop consume the same adaptive artifact family. The Android-only navigation suite remains on `androidx.compose.material3:material3-adaptive-navigation-suite`.
+
+### Deferred Follow-ups
+
+- Add automated validation that desktop serializer registrations stay in sync with shared route keys.
+
 ## Options Evaluated
 
 ### Option A: Reuse `:app` navigation implementation directly in desktop

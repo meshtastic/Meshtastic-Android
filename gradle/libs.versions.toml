@@ -5,14 +5,13 @@ appcompat = "1.7.1"
 accompanist = "0.37.3"
 
 # androidx
-androidxComposeMaterial3Adaptive = "1.2.0"
 androidxTracing = "1.10.5"
 datastore = "1.2.1"
 glance = "1.2.0-rc01"
 lifecycle = "2.10.0"
 jetbrains-lifecycle = "2.10.0-beta01"
 navigation = "2.9.7"
-navigation3 = "1.1.0-alpha03"
+navigation3 = "1.1.0-alpha04"
 paging = "3.4.2"
 room = "2.8.4"
 savedstate = "1.4.0"
@@ -98,6 +97,7 @@ androidx-lifecycle-viewmodel-navigation3 = { module = "org.jetbrains.androidx.li
 androidx-navigation-common = { module = "androidx.navigation:navigation-common", version.ref = "navigation" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }
 androidx-navigation-runtime = { module = "androidx.navigation:navigation-runtime", version.ref = "navigation" }
+# JetBrains Navigation 3 currently publishes `navigation3-ui` (no separate `navigation3-runtime` artifact).
 androidx-navigation3-runtime = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
@@ -117,9 +117,6 @@ androidx-compose-bom = { module = "androidx.compose:compose-bom", version = "202
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
 androidx-compose-material3-navigationSuite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
-androidx-compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "androidxComposeMaterial3Adaptive" }
-androidx-compose-material3-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "androidxComposeMaterial3Adaptive" }
-androidx-compose-material3-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "androidxComposeMaterial3Adaptive" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
 androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version.ref = "androidxTracing" }
