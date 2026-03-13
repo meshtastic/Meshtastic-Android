@@ -150,8 +150,6 @@ jobs:
           bundler-cache: true
 
       - name: Export Full Library Licenses
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: ./gradlew exportLibraryDefinitions -Pci=true
 
       - name: Build and Deploy Google Play to Internal Track with Fastlane
@@ -180,13 +178,13 @@ jobs:
           retention-days: 1
 
       - name: Attest Google AAB provenance
-        if: always()
+        if: success()
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: app/build/outputs/bundle/googleRelease/app-google-release.aab
 
       - name: Attest Google APK provenance
-        if: always()
+        if: success()
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: app/build/outputs/apk/google/release/*.apk
@@ -235,8 +233,6 @@ jobs:
           bundler-cache: true
 
       - name: Export Full Library Licenses
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: ./gradlew exportLibraryDefinitions -Pci=true
 
       - name: Build F-Droid with Fastlane
@@ -257,7 +253,7 @@ jobs:
           retention-days: 1
 
       - name: Attest F-Droid APK provenance
-        if: always()
+        if: success()
         uses: actions/attest-build-provenance@v4
         with:
           subject-path: app/build/outputs/apk/fdroid/release/*.apk
@@ -296,8 +292,6 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
 
       - name: Export Full Library Licenses
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: ./gradlew exportLibraryDefinitions -Pci=true
 
       - name: Package Native Distributions

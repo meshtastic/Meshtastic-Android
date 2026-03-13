@@ -55,7 +55,6 @@ class AndroidRoomConventionPlugin : Plugin<Project> {
                     }
                 }
                 dependencies {
-                    "kspCommonMainMetadata"(roomCompiler)
                     "kspAndroid"(roomCompiler)
                 }
             }
