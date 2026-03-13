@@ -1,203 +1,126 @@
-# Copilot Instructions for Meshtastic-Android
+# Meshtastic Android - Agent Guide
 
-## Repository Summary
+This file serves as a comprehensive guide for AI agents and developers working on the `Meshtastic-Android` codebase. Use this as your primary reference for understanding the architecture, conventions, and strict rules of this project.
 
-Meshtastic-Android is a native Android client application for the Meshtastic mesh networking project. It enables users to communicate via off-grid, decentralized mesh networks using LoRa radios. The app is written in Kotlin and follows modern Android development practices.
+For execution-focused recipes, see `docs/agent-playbooks/README.md`.
 
-**Key Repository Details:**
-- **Language:** Kotlin (primary), with some Java and AIDL files
-- **Build System:** Gradle with Kotlin DSL
-- **Architecture shape:** Android app shell plus a broad `core:*` / `feature:*` KMP module graph
-- **Target Platform:** Android API 26+ (Android 8.0+), targeting API 36
-- **Architecture:** Android-first Kotlin Multiplatform with Jetpack Compose, Koin DI, Room KMP, DataStore, and Navigation 3 shared backstack state
-- **Product Flavors:** `fdroid` (F-Droid) and `google` (Google Play Store)
-- **Build Types:** `debug` and `release`
+## 1. Project Vision & Architecture
+Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, decentralized mesh networks. The goal is to decouple business logic from the Android framework, enabling future expansion to iOS and other platforms while maintaining a high-performance native Android experience.
 
-## Essential Build & Test Commands
+- **Language:** Kotlin (primary), AIDL.
+- **Build System:** Gradle (Kotlin DSL). JDK 17 is REQUIRED.
+- **Target SDK:** API 36. Min SDK: API 26 (Android 8.0).
+- **Flavors:**
+  - `fdroid`: Open source only, no tracking/analytics.
+  - `google`: Includes Google Play Services (Maps) and DataDog analytics.
+- **Core Architecture:** Modern Android Development (MAD) with KMP core.
+  - **KMP Modules:** Most `core:*` modules. All declare `jvm()` target and compile clean on JVM.
+  - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
+  - **UI:** Jetpack Compose (Material 3).
+  - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app`.
+  - **Navigation:** AndroidX Navigation 3 (JetBrains multiplatform fork) with shared backstack state.
+  - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
+  - **Database:** Room KMP.
 
-**ALWAYS run these commands in the exact order specified to avoid build failures:**
+## 2. Codebase Map
 
-### Prerequisites Setup
-1. **JDK Requirement:** JDK 17 is required (compatible with most developer environments)
-2. **Secrets Configuration:** Copy `secrets.defaults.properties` to `local.properties` and update:
+| Directory | Description |
+| :--- | :--- |
+| `app/` | Main application module. Contains `MainActivity`, Koin DI modules, and app-level logic. Uses package `org.meshtastic.app`. |
+| `build-logic/` | Convention plugins for shared build configuration (e.g., `meshtastic.kmp.library`, `meshtastic.koin`). |
+| `config/` | Detekt static analysis rules (`config/detekt/detekt.yml`) and Spotless formatting config (`config/spotless/.editorconfig`). |
+| `docs/` | Architecture docs and agent playbooks. See `docs/agent-playbooks/README.md` for version baseline and task recipes. |
+| `core/model` | Domain models and common data structures. |
+| `core:proto` | Protobuf definitions (Git submodule). |
+| `core:common` | Low-level utilities, I/O abstractions (Okio), and common types. |
+| `core:database` | Room KMP database implementation. |
+| `core:datastore` | Multiplatform DataStore for preferences. |
+| `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
+| `core:domain` | Pure KMP business logic and UseCases. |
+| `core:data` | Core manager implementations and data orchestration. |
+| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec` in commonMain, `TcpTransport` in jvmAndroidMain). |
+| `core:di` | Common DI qualifiers and dispatchers. |
+| `core:navigation` | Shared navigation keys/routes for Navigation 3. |
+| `core:ui` | Shared Compose UI components (`EmptyDetailPlaceholder`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
+| `core:service` | KMP service layer; Android bindings stay in `androidMain`. |
+| `core:api` | Public AIDL/API integration module for external clients. |
+| `core:prefs` | KMP preferences layer built on DataStore abstractions. |
+| `core:barcode` | Barcode scanning (Android-only). |
+| `core:nfc` | NFC abstractions (KMP). Android NFC hardware implementation in `androidMain`. |
+| `core/ble/` | Bluetooth Low Energy stack using Nordic libraries. |
+| `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
+| `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
+| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`). All are KMP with `jvm()` target. |
+| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP transport with `want_config` handshake. |
+| `mesh_service_example/` | Sample app showing `core:api` service integration. |
+
+## 3. Development Guidelines & Coding Standards
+
+### A. UI Development (Jetpack Compose)
+-   **Material 3:** The app uses Material 3.
+-   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). NEVER use hardcoded strings.
+-   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
+-   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
+
+### B. Logic & Data Layer
+-   **KMP Focus:** All business logic must reside in `commonMain` of the respective `core` module.
+-   **Platform purity:** Never import `java.*` or `android.*` in `commonMain`. Use KMP alternatives:
+    -   `java.util.Locale` → Kotlin `uppercase()` / `lowercase()` or `expect`/`actual`.
+    -   `java.util.concurrent.ConcurrentHashMap` → `atomicfu` or `Mutex`-guarded `mutableMapOf()`.
+    -   `java.util.concurrent.locks.*` → `kotlinx.coroutines.sync.Mutex`.
+    -   `java.io.*` → Okio (`BufferedSource`/`BufferedSink`).
+-   **Concurrency:** Use Kotlin Coroutines and Flow.
+-   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (0.4.0+). Keep root graph assembly in `app`.
+-   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
+-   **BLE:** All Bluetooth communication must route through `core:ble` using Nordic Semiconductor's Android Common Libraries.
+-   **Dependencies:** Check `gradle/libs.versions.toml` before assuming a library is available.
+-   **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
+-   **Testing:** Write ViewModel and business logic tests in `commonTest`. Use `core:testing` shared fakes.
+
+### C. Namespacing
+-   **Standard:** Use the `org.meshtastic.*` namespace for all code.
+-   **Legacy:** Maintain the `com.geeksville.mesh` Application ID.
+
+## 4. Execution Protocol
+
+### A. Environment Setup
+1. **JDK 17 MUST be used** to prevent Gradle sync/build failures.
+2. **Secrets:** You must copy `secrets.defaults.properties` to `local.properties`:
    ```properties
-   MAPS_API_KEY=your_google_maps_api_key_here
-   datadogApplicationId=your_datadog_app_id
-   datadogClientToken=your_datadog_client_token
+   MAPS_API_KEY=dummy_key
+   datadogApplicationId=dummy_id
+   datadogClientToken=dummy_token
    ```
-3. **Clean Environment:** Always start with `./gradlew clean` for fresh builds
 
-### Build Commands (Validated Working Order)
+### B. Strict Execution Commands
+Always run commands in the following order to ensure reliability. Do not attempt to bypass `clean` if you are facing build issues.
+
+**Baseline (recommended order):**
 ```bash
-# 1. ALWAYS clean first for reliable builds
 ./gradlew clean
-
-# 2. Check code formatting (run before making changes)
 ./gradlew spotlessCheck
-
-# 3. Apply automatic code formatting fixes
 ./gradlew spotlessApply
-
-# 4. Run static code analysis/linting
 ./gradlew detekt
-
-# 5. Build debug APKs for both flavors (takes 3-5 minutes)
 ./gradlew assembleDebug
-
-# 6. Build specific flavor variants
-./gradlew assembleFdroidDebug    # F-Droid debug build
-./gradlew assembleGoogleDebug    # Google debug build
-./gradlew assembleFdroidRelease  # F-Droid release build
-./gradlew assembleGoogleRelease  # Google release build
-
-# 7. Run local unit tests (takes 2-3 minutes)
 ./gradlew test
-
-# 8. Run specific flavor unit tests
-./gradlew testFdroidDebug
-./gradlew testGoogleDebug
-
-# 9. Run instrumented tests (requires Android device/emulator, takes 5-10 minutes)
-./gradlew connectedAndroidTest
-
-# 10. Run lint checks for both flavors
-./gradlew lintFdroidDebug lintGoogleDebug
-
-# 11. Run the desktop module
-./gradlew :desktop:run
-./gradlew :desktop:test
-- Clean build: 3-5 minutes
-- Unit tests: 2-3 minutes  
-- Instrumented tests: 5-10 minutes
-- Detekt analysis: 1-2 minutes
-- Spotless formatting: 30 seconds
-
-### Environment Setup
-**Required Tools:**
-- Android SDK API 36 (compile target)
-- JDK 17 (Preferred for consistency across project and plugins)
-- Gradle 9.0+ (downloaded automatically by wrapper)
-
-**Optional but Recommended:**
-- Install pre-push Git hook: `./gradlew spotlessInstallGitPrePushHook --no-configuration-cache`
-
-## Project Architecture & Layout
-
-### Module Structure
-```
-├── app/                          # Main Android application
-│   ├── src/main/                 # Main source code
-│   ├── src/test/                 # Unit tests
-│   ├── src/androidTest/          # Instrumented tests
-│   ├── src/fdroid/              # F-Droid specific code
-│   └── src/google/              # Google Play specific code
-├── core/                         # Core library modules
-├── desktop/                      # Compose Desktop application (first non-Android KMP target)
-├── feature/                      # Feature modules (all KMP with JVM targets)
-│   ├── connections/              # Device connections UI (BLE, TCP, USB scanning)
-│   ├── firmware/                 # Firmware update flow
-│   ├── intro/                    # Onboarding flow
-│   ├── map/                      # Map UI
-│   ├── messaging/                # Messaging/contacts UI
-│   ├── node/                     # Node list and detail UI
-│   └── settings/                 # Settings screens
-├── build-logic/                  # Build configuration convention plugins
-└── config/                       # Linting and formatting configs
-    ├── detekt/                   # Detekt static analysis rules
-    └── spotless/                 # Code formatting configuration
 ```
 
-### Key Configuration Files
-- `config.properties` - Version constants and build config
-- `app/build.gradle.kts` - Main app build configuration
-- `config/detekt/detekt.yml` - Static analysis rules
-- `config/spotless/.editorconfig` - Code formatting rules
-- `gradle.properties` - Gradle build settings
-- `secrets.defaults.properties` - Template for secrets (copy to `local.properties`)
-
-### Architecture Components
-- **UI Framework:** Jetpack Compose with Material 3
-- **State Management:** Unidirectional Data Flow with ViewModels
-- **Dependency Injection:** Koin Annotations with K2 compiler plugin
-- **Navigation:** AndroidX Navigation 3 (JetBrains multiplatform fork) with shared navigation keys/routes in `core:navigation`
-- **Lifecycle:** JetBrains multiplatform forks for `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`
-- **Local Data:** Room database + DataStore preferences
-- **Remote Data:** Shared BLE/network/service layers across `core:ble`, `core:network`, and `core:service`
-- **Background Work:** WorkManager
-- **Communication:** AIDL service interface (`IMeshService.aidl`)
-- **Desktop:** First non-Android KMP target. Nav 3 shell, full Koin DI, TCP transport with `want_config` handshake, adaptive list-detail screens for nodes/messaging, ~35 settings screens, connections UI. See `docs/kmp-status.md`.
-
-## Continuous Integration
-
-### GitHub Workflows (.github/workflows/)
-- **pull-request.yml** - PR entry workflow
-- **reusable-check.yml** - Shared Android/JVM verification: spotless, detekt, unit tests, Kover, JVM smoke compile, assemble/lint, optional instrumented tests
-
-### CI Commands (Must Pass)
+**Testing:**
 ```bash
-# Reusable CI workflow runs these core checks on the first matrix leg:
-./gradlew spotlessCheck detekt -Pci=true
-./gradlew testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug -Pci=true --continue
-./gradlew :core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm :desktop:test -Pci=true --continue
+./gradlew test                # Run local unit tests
+./gradlew testDebugUnitTest   # CI-aligned Android unit tests
+./gradlew connectedAndroidTest # Run instrumented tests
+./gradlew testFdroidDebug testGoogleDebug # Flavor-specific unit tests
+./gradlew lintFdroidDebug lintGoogleDebug # Flavor-specific lint checks
 ```
+*Note: If testing Compose UI on the JVM (Robolectric) with Java 17, pin your tests to `@Config(sdk = [34])` to avoid SDK 35 compatibility crashes.*
 
-### Validation Steps
-1. **Code Style:** Spotless check (auto-fixable with `spotlessApply`)
-2. **Static Analysis:** Detekt with custom rules in `config/detekt/detekt.yml`
-3. **Shared smoke compile:** JVM compile checks for all `core:*` and `feature:*` KMP modules plus `:desktop:test`
-4. **Lint Checks:** Android lint on debug variants
-5. **Unit Tests:** Android/unit/shared tests plus Kover reports
-6. **UI Tests:** Compose/instrumented tests when emulator runs are enabled
+### C. Documentation Sync
+Update documentation continuously as part of the same change. If you modify architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs (`AGENTS.md`, `.github/copilot-instructions.md`, `GEMINI.md`, `docs/agent-playbooks/*`, `docs/kmp-status.md`, and `docs/decisions/architecture-review-2026-03.md`).
 
-## Common Issues & Solutions
-
-### Build Failures
-- **Gradle version error:** Ensure JDK 17 (Compatible version)
-- **Missing secrets:** Copy `secrets.defaults.properties` → `local.properties`
-- **Configuration cache:** Add `--no-configuration-cache` flag if issues persist
-- **Clean state:** Always run `./gradlew clean` before debugging build issues
-
-### Desktop Issues
-- **`Dispatchers.Main` missing:** JVM/Desktop requires `kotlinx-coroutines-swing` for `Dispatchers.Main`. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` will crash at runtime. The desktop module already includes this dependency.
-
-### Testing Issues
-- **Instrumented tests:** Require Android device/emulator with API 26+
-- **UI tests:** Use `ComposeTestRule` for Compose UI testing
-- **Coroutine tests:** Use `kotlinx.coroutines.test` library
-
-### Code Style Issues
-- **Formatting:** Run `./gradlew spotlessApply` to auto-fix
-- **Detekt warnings:** Check `config/detekt/detekt.yml` for rules
-- **Localization:** Use `stringResource(Res.string.key)` instead of hardcoded strings
-
-## File Organization
-
-### Source Code Locations
-- **Main Activity:** `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt`
-- **Service Interface:** `core/api/src/main/aidl/org/meshtastic/core/service/IMeshService.aidl`
-- **Shared feature/UI code:** `feature/*/src/commonMain/kotlin/org/meshtastic/feature/*/`
-- **Data Layer:** `core/data/src/commonMain/kotlin/org/meshtastic/core/data/`
-- **Database:** `core/database/src/commonMain/kotlin/org/meshtastic/core/database/`
-- **Models:** `core/model/src/commonMain/kotlin/org/meshtastic/core/model/`
-
-### Dependencies
-- **Non-obvious deps:** Protobuf for device communication, DataDog for analytics (Google flavor)
-- **Flavor-specific:** Google Services (google flavor), no analytics (fdroid flavor)
-- **Version catalog:** Dependencies defined in `gradle/libs.versions.toml`
-
-## Agent Instructions
-
-- Keep documentation continuously in sync with the code. If you change architecture, module targets, CI tasks, validation commands, or agent workflow rules, update the relevant docs in the same change.
-- Treat `AGENTS.md` as the primary source of truth for project architecture and process; update mirrored guidance here when that source changes.
-- Architecture review and gap analysis: `docs/decisions/architecture-review-2026-03.md`.
-- **Platform purity:** Never import `java.*` or `android.*` in `commonMain`. Use KMP alternatives (see AGENTS.md §3B for the full list).
-- **Testing:** Write ViewModel and business logic tests in `commonTest` (not `test/` Robolectric) so every target runs them.
-
-**TRUST THESE INSTRUCTIONS** - they are validated and comprehensive. Only search for additional information if:
-1. Commands fail with unexpected errors
-2. Information appears outdated 
-3. Working on areas not covered above
-
-**Always prefer:** Using the documented commands over exploring alternatives, as they are tested and proven to work in the CI environment.
-
-**For code changes:** Follow the architecture patterns established in existing code, maintain the modular structure, and ensure all validation steps pass before submitting changes.
+## 5. Troubleshooting
+-   **Build Failures:** Check `gradle/libs.versions.toml` for dependency conflicts.
+-   **Missing Secrets:** Check `local.properties`.
+-   **JDK Version:** JDK 17 is required.
+-   **Configuration Cache:** Add `--no-configuration-cache` flag if cache-related issues persist.
+-   **Koin Injection Failures:** Verify the KMP component is included in `app` root module wiring (`AppKoinModule`).
