@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -77,8 +79,11 @@ open class ScannerViewModel(
                             timeout = kotlin.time.Duration.INFINITE,
                             serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
                         )
+                        .flowOn(kotlinx.coroutines.Dispatchers.IO)
                         .collect { device ->
-                            scannedBleDevices.update { current -> current + (device.address to device) }
+                            if (!scannedBleDevices.value.containsKey(device.address)) {
+                                scannedBleDevices.update { current -> current + (device.address to device) }
+                            }
                         }
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     co.touchlab.kermit.Logger.w(e) { "BLE scan failed" }
@@ -113,22 +118,29 @@ open class ScannerViewModel(
                 // Sort by name
                 (bonded + unbondedScanned).sortedBy { it.name }
             }
+            .flowOn(kotlinx.coroutines.Dispatchers.Default)
+            .distinctUntilChanged()
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /** UI StateFlow for USB devices. */
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        discoveredDevicesFlow.map { it?.usbDevices ?: emptyList() }.stateInWhileSubscribed(initialValue = emptyList())
+        discoveredDevicesFlow
+            .map { it?.usbDevices ?: emptyList() }
+            .distinctUntilChanged()
+            .stateInWhileSubscribed(initialValue = emptyList())
 
-    /** UI StateFlow for discovered TCP devices. */
+    /** UI StateFlow for discovered TCP devices (NSD). */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow
             .map { it?.discoveredTcpDevices ?: emptyList() }
+            .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = emptyList())
 
-    /** UI StateFlow for recently connected TCP devices that are not currently discovered. */
+    /** UI StateFlow for recent TCP devices. */
     val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         discoveredDevicesFlow
             .map { it?.recentTcpDevices ?: emptyList() }
+            .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = emptyList())
 
     val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow

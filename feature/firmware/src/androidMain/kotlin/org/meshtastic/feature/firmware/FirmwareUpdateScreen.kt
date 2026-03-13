@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 @file:Suppress("TooManyFunctions")
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 
 package org.meshtastic.feature.firmware
 
@@ -46,13 +45,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearWavyProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -228,6 +226,7 @@ fun FirmwareUpdateScreen(onNavigateUp: () -> Unit, viewModel: FirmwareUpdateView
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FirmwareUpdateScaffold(
     onNavigateUp: () -> Unit,
@@ -342,7 +341,7 @@ private fun FirmwareUpdateContent(
 
 @Composable
 private fun VerifyingState() {
-    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_verifying), style = MaterialTheme.typography.titleMedium)
     Spacer(Modifier.height(8.dp))
@@ -357,7 +356,7 @@ private fun VerifyingState() {
 
 @Composable
 private fun CheckingState() {
-    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(stringResource(Res.string.firmware_update_checking), style = MaterialTheme.typography.bodyLarge)
 }
@@ -706,7 +705,7 @@ private fun ProgressContent(
                 tint = MaterialTheme.colorScheme.primary,
             )
         } else {
-            CircularWavyProgressIndicator(
+            CircularProgressIndicator(
                 progress = { if (isUpdating) progressState.progress else 1f },
                 modifier = Modifier.size(64.dp),
             )
@@ -730,7 +729,7 @@ private fun ProgressContent(
         Spacer(Modifier.height(12.dp))
 
         if (isDownloading || isUpdating) {
-            LinearWavyProgressIndicator(
+            LinearProgressIndicator(
                 progress = { progressState.progress },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             )
@@ -761,7 +760,7 @@ private fun AwaitingFileSaveState(state: FirmwareUpdateState.AwaitingFileSave, o
         )
     }
 
-    CircularWavyProgressIndicator(modifier = Modifier.size(64.dp))
+    CircularProgressIndicator(modifier = Modifier.size(64.dp))
     Spacer(Modifier.height(24.dp))
     Text(
         stringResource(Res.string.firmware_update_save_dfu_file),

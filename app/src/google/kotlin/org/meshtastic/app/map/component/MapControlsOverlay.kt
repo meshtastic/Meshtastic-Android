@@ -17,6 +17,7 @@
 package org.meshtastic.app.map.component
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -29,8 +30,6 @@ import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.rounded.LocationDisabled
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -47,7 +46,6 @@ import org.meshtastic.core.resources.refresh
 import org.meshtastic.core.resources.toggle_my_position
 import org.meshtastic.core.ui.theme.StatusColors.StatusRed
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MapControlsOverlay(
     modifier: Modifier = Modifier,
@@ -71,86 +69,80 @@ fun MapControlsOverlay(
     isRefreshing: Boolean = false,
     onRefresh: () -> Unit = {},
 ) {
-    HorizontalFloatingToolbar(
-        modifier = modifier,
-        expanded = true,
-        leadingContent = {},
-        trailingContent = {},
-        content = {
-            CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
-            if (isNodeMap) {
+    Row(modifier = modifier) {
+        CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
+        if (isNodeMap) {
+            MapButton(
+                icon = Icons.Outlined.Tune,
+                contentDescription = stringResource(Res.string.map_filter),
+                onClick = onToggleMapFilterMenu,
+            )
+            NodeMapFilterDropdown(
+                expanded = mapFilterMenuExpanded,
+                onDismissRequest = onMapFilterMenuDismissRequest,
+                mapViewModel = mapViewModel,
+            )
+        } else {
+            Box {
                 MapButton(
                     icon = Icons.Outlined.Tune,
                     contentDescription = stringResource(Res.string.map_filter),
                     onClick = onToggleMapFilterMenu,
                 )
-                NodeMapFilterDropdown(
+                MapFilterDropdown(
                     expanded = mapFilterMenuExpanded,
                     onDismissRequest = onMapFilterMenuDismissRequest,
                     mapViewModel = mapViewModel,
                 )
+            }
+        }
+
+        Box {
+            MapButton(
+                icon = Icons.Outlined.Map,
+                contentDescription = stringResource(Res.string.map_tile_source),
+                onClick = onToggleMapTypeMenu,
+            )
+            MapTypeDropdown(
+                expanded = mapTypeMenuExpanded,
+                onDismissRequest = onMapTypeMenuDismissRequest,
+                mapViewModel = mapViewModel, // Pass mapViewModel
+                onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked, // Pass new callback
+            )
+        }
+
+        MapButton(
+            icon = Icons.Outlined.Layers,
+            contentDescription = stringResource(Res.string.manage_map_layers),
+            onClick = onManageLayersClicked,
+        )
+
+        if (showRefresh) {
+            if (isRefreshing) {
+                Box(modifier = Modifier.padding(8.dp)) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
+                }
             } else {
-                Box {
-                    MapButton(
-                        icon = Icons.Outlined.Tune,
-                        contentDescription = stringResource(Res.string.map_filter),
-                        onClick = onToggleMapFilterMenu,
-                    )
-                    MapFilterDropdown(
-                        expanded = mapFilterMenuExpanded,
-                        onDismissRequest = onMapFilterMenuDismissRequest,
-                        mapViewModel = mapViewModel,
-                    )
-                }
-            }
-
-            Box {
                 MapButton(
-                    icon = Icons.Outlined.Map,
-                    contentDescription = stringResource(Res.string.map_tile_source),
-                    onClick = onToggleMapTypeMenu,
-                )
-                MapTypeDropdown(
-                    expanded = mapTypeMenuExpanded,
-                    onDismissRequest = onMapTypeMenuDismissRequest,
-                    mapViewModel = mapViewModel, // Pass mapViewModel
-                    onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked, // Pass new callback
+                    icon = Icons.Filled.Refresh,
+                    contentDescription = stringResource(Res.string.refresh),
+                    onClick = onRefresh,
                 )
             }
+        }
 
-            MapButton(
-                icon = Icons.Outlined.Layers,
-                contentDescription = stringResource(Res.string.manage_map_layers),
-                onClick = onManageLayersClicked,
-            )
-
-            if (showRefresh) {
-                if (isRefreshing) {
-                    Box(modifier = Modifier.padding(8.dp)) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                    }
-                } else {
-                    MapButton(
-                        icon = Icons.Filled.Refresh,
-                        contentDescription = stringResource(Res.string.refresh),
-                        onClick = onRefresh,
-                    )
-                }
-            }
-
-            // Location tracking button
-            MapButton(
-                icon =
-                if (isLocationTrackingEnabled) {
-                    Icons.Rounded.LocationDisabled
-                } else {
-                    Icons.Outlined.MyLocation
-                },
-                contentDescription = stringResource(Res.string.toggle_my_position),
-                onClick = onToggleLocationTracking,
-            )
-        },
-    )
+        // Location tracking button
+        MapButton(
+            icon =
+            if (isLocationTrackingEnabled) {
+                Icons.Rounded.LocationDisabled
+            } else {
+                Icons.Outlined.MyLocation
+            },
+            contentDescription = stringResource(Res.string.toggle_my_position),
+            onClick = onToggleLocationTracking,
+        )
+    }
 }
 
 @Composable

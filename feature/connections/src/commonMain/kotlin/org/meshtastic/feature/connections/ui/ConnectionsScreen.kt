@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -104,7 +105,20 @@ fun ConnectionsScreen(
     val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
     val scanStatusText by scanModel.errorText.collectAsStateWithLifecycle()
     val connectionState by connectionsViewModel.connectionState.collectAsStateWithLifecycle()
-    val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+
+    // Prevent continuous recomposition from lastHeard and snr updates on the node
+    val ourNode by
+        remember(connectionsViewModel.ourNodeInfo) {
+            connectionsViewModel.ourNodeInfo.distinctUntilChanged { old, new ->
+                old?.num == new?.num &&
+                    old?.user == new?.user &&
+                    old?.batteryLevel == new?.batteryLevel &&
+                    old?.voltage == new?.voltage &&
+                    old?.metadata?.firmware_version == new?.metadata?.firmware_version
+            }
+        }
+            .collectAsStateWithLifecycle(initialValue = connectionsViewModel.ourNodeInfo.value)
+
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val regionUnset = config.lora?.region == Config.LoRaConfig.RegionCode.UNSET
 
