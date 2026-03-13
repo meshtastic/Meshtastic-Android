@@ -89,6 +89,15 @@ Working Compose Desktop application with:
 | True multi-target readiness | ~75% |
 | "Add iOS without surprises" | ~65% |
 
+## Proposed Next Steps for KMP Migration
+
+Based on the latest codebase investigation, the following steps are proposed to complete the multi-target and iOS-readiness migrations:
+
+1. **Extract remaining App-Only ViewModels:** Migrate the 5 remaining `Android*ViewModel`s by isolating their Android-specific dependencies (e.g., `android.net.Uri` for file I/O, Location permissions) behind expect/actual or injected interface abstractions.
+2. **Wire Desktop Features:** Complete desktop UI wiring for `feature:intro` and implement a shared fallback for `feature:map` (which is currently a placeholder on desktop).
+3. **Decouple Firmware DFU:** `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it into a separate plugin to allow the core `feature:firmware` module to be fully utilized on desktop/iOS.
+4. **Prepare for iOS Target:** Set up an initial skeleton Xcode project to start validating `commonMain` compilation on Kotlin/Native (iOS).
+
 ## Key Architecture Decisions
 
 | Decision | Status | Details |
