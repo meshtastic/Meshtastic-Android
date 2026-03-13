@@ -23,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -85,6 +86,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication,
         title = "Meshtastic Desktop",
+        icon = painterResource("icon.png"),
         state = rememberWindowState(width = 1024.dp, height = 768.dp),
     ) {
         // Providing localePref via a staticCompositionLocalOf forces the entire subtree to
