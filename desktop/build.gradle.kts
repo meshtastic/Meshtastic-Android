@@ -55,7 +55,7 @@ compose.desktop {
                 TargetFormat.Exe,
                 TargetFormat.Msi,
                 TargetFormat.Deb,
-                TargetFormat.Rpm
+                TargetFormat.Rpm,
             )
             packageName = "Meshtastic"
 
