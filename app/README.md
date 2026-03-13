@@ -44,6 +44,7 @@ graph TB
   :app -.-> :core:barcode
   :app -.-> :feature:intro
   :app -.-> :feature:messaging
+  :app -.-> :feature:connections
   :app -.-> :feature:map
   :app -.-> :feature:node
   :app -.-> :feature:settings

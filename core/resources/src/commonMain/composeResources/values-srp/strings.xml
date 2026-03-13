@@ -456,4 +456,5 @@
     <string name="bluetooth_permission">Блутут</string>
     <string name="powered">Напајано</string>
     <!-- Network Map Layers -->
+    <string name="no_device_connected">Нема повезаних уређаја</string>
 </resources>

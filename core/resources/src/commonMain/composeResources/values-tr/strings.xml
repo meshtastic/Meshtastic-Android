@@ -104,6 +104,7 @@
     <string name="connected_to">(%1$s) telsizine bağlandı </string>
     <string name="connecting">Bağlanıyor</string>
     <string name="not_connected">Bağlı değil</string>
+    <string name="unknown_device">Bilinmeyen Cihaz</string>
     <string name="connected_sleeping">Cihaza bağlandı, ancak uyku durumunda</string>
     <string name="app_too_old">Uygulama güncellemesi gerekli</string>
     <string name="must_update">Uygulamayı Google Play store (ya da GitHub)'dan güncelleyin. Bu cihaz ile haberleşmek için uygulama çok eski. İlgili <a href="https://meshtastic.org/docs/software/android/installation"> Dokümantasyon</a>.</string>
