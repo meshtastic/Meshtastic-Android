@@ -27,35 +27,35 @@ The migration is **farther along than a normal Android app**, but **not as far a
 
 | Dimension | Status | Assessment |
 |---|---:|---|
-| Core + feature module structural KMP conversion | **22 / 25** | Strong |
-| Core-only structural KMP conversion | **16 / 19** | Strong |
+| Core + feature module structural KMP conversion | **23 / 25** | Strong |
+| Core-only structural KMP conversion | **17 / 19** | Strong |
 | Feature module structural KMP conversion | **6 / 6** | Excellent |
-| Explicit non-Android target declarations | **1 / 25** | Very low |
-| Android-only blocker modules left | **3** | Clear, bounded |
-| Cross-target CI verification | **0 non-Android jobs** | Missing |
+| Explicit non-Android target declarations | **23 / 25** | Strong — all KMP modules have `jvm()` |
+| Android-only blocker modules left | **2** | Clear, bounded |
+| Cross-target CI verification | **1 JVM smoke step** | Full coverage — 17 core + 6 feature + desktop:test |
 
 ### Bottom line
 
-- **If the question is “Have we mostly moved business logic into shared KMP modules?”** → **yes**.
-- **If the question is “Could we realistically add iOS/Desktop with limited cleanup?”** → **not yet**.
-- **If the question is “Are we now on the right architecture path?”** → **yes, strongly**.
+- **If the question is "Have we mostly moved business logic into shared KMP modules?"** → **yes**.
+- **If the question is "Could we realistically add iOS/Desktop with limited cleanup?"** → **getting close** — full JVM validation is passing, desktop boots with a Navigation 3 shell using shared routes, real feature screen wiring is next.
+- **If the question is "Are we now on the right architecture path?"** → **yes, strongly**.
 
 ### Progress scorecard
 
 | Area | Score | Notes |
 |---|---:|---|
 | Shared business/data logic | **8.5 / 10** | `core:data`, `core:domain`, `core:database`, `core:prefs`, `core:network`, `core:repository` are structurally shared |
-| Shared feature/UI logic | **8 / 10** | All feature modules are KMP; `core:ui` and Navigation 3 are in place |
-| Android decoupling | **7 / 10** | `commonMain` is clean of direct Android imports, but edge modules still anchor to Android |
-| Multi-target readiness | **2.5 / 10** | Nearly all KMP modules still declare only Android targets |
+| Shared feature/UI logic | **9.5 / 10** | All 6 feature modules are KMP with `jvm()` target and compile clean; `feature:node` and `feature:settings` UI fully in `commonMain`; `core:ui` and Navigation 3 are in place |
+| Android decoupling | **8.5 / 10** | `commonMain` is clean; 11 passthrough Android ViewModel wrappers eliminated; `BaseUIViewModel` extracted to `core:ui` |
+| Multi-target readiness | **8 / 10** | 23/25 modules have JVM target; desktop has Navigation 3 shell with shared routes; TCP transport with `want_config` handshake working; `feature:settings` wired with ~35 real screens on desktop (including 5 desktop-specific config screens); all feature modules validated on JVM |
 | DI portability hygiene | **5 / 10** | Koin works, but `commonMain` now contains Koin modules/annotations despite prior architectural guidance |
-| CI confidence for future iOS/Desktop | **2 / 10** | CI is Android-only today |
+| CI confidence for future iOS/Desktop | **8.5 / 10** | CI JVM smoke compile covers all 17 core + all 6 feature modules + `desktop:test` |
 
 ```mermaid
 pie showData
     title Core + Feature module state
-    "KMP modules" : 22
-    "Android-only modules" : 3
+    "KMP modules" : 23
+    "Android-only modules" : 2
 ```
 
 ---
@@ -78,6 +78,7 @@ Evidence in current build files shows these are already on `meshtastic.kmp.libra
 - `core:model`
 - `core:navigation`
 - `core:network`
+- `core:nfc`
 - `core:prefs`
 - `core:proto`
 - `core:repository`
@@ -92,10 +93,15 @@ That is a major milestone. The repo is no longer “Android app with a few share
 
 Current evidence supports the following:
 
-- `core:ui` is KMP via [`core/ui/build.gradle.kts`](../core/ui/build.gradle.kts)
+- `core:ui` is KMP via [`core/ui/build.gradle.kts`](../core/ui/build.gradle.kts) — with `commonMain`, `androidMain`, and `jvmMain` source sets
+- `core:ui` includes shared `BaseUIViewModel` in `commonMain` and `ConnectionsViewModel` in `commonMain`
 - `core:resources` uses Compose Multiplatform resources via [`core/resources/build.gradle.kts`](../core/resources/build.gradle.kts)
 - `core:navigation` uses Navigation 3 runtime in `commonMain` via [`core/navigation/build.gradle.kts`](../core/navigation/build.gradle.kts)
 - feature modules are KMP Compose modules via their `build.gradle.kts` files
+- `feature:node` UI components have been migrated from `androidMain` → `commonMain`
+- `feature:settings` UI components have been migrated from `androidMain` → `commonMain`
+- `feature:settings` is the first feature **fully wired on desktop** with ~35 real composable screens (including 5 desktop-specific config screens for Device, Position, Network, Security, and ExternalNotification)
+- Desktop has a **working TCP transport** (`DesktopRadioInterfaceService`) with auto-reconnect and a **mesh service controller** (`DesktopMeshServiceController`) that orchestrates the full `want_config` handshake
 
 This is unusually advanced for an Android-first app.
 
@@ -134,24 +140,45 @@ The clearest evidence is in build logic:
   - `org.jetbrains.kotlin.multiplatform`
   - `com.android.kotlin.multiplatform.library`
 - [`KotlinAndroid.kt`](../build-logic/convention/src/main/kotlin/org/meshtastic/buildlogic/KotlinAndroid.kt) configures Android KMP targets automatically
-- only [`core/proto/build.gradle.kts`](../core/proto/build.gradle.kts) explicitly adds `jvm()`
+- [`core/proto/build.gradle.kts`](../core/proto/build.gradle.kts) explicitly adds `jvm()`
+- [`core/common/build.gradle.kts`](../core/common/build.gradle.kts) explicitly adds `jvm()`
+- [`core:model/build.gradle.kts`](../core/model/build.gradle.kts) explicitly adds `jvm()`
+- [`core:repository/build.gradle.kts`](../core/repository/build.gradle.kts) explicitly adds `jvm()`
+- [`core/di/build.gradle.kts`](../core/di/build.gradle.kts) explicitly adds `jvm()`
+- [`core/navigation/build.gradle.kts`](../core/navigation/build.gradle.kts) explicitly adds `jvm()`
+- [`core/resources/build.gradle.kts`](../core/resources/build.gradle.kts) explicitly adds `jvm()`
+- [`core/datastore/build.gradle.kts`](../core/datastore/build.gradle.kts) explicitly adds `jvm()`
+- [`core/database/build.gradle.kts`](../core/database/build.gradle.kts) explicitly adds `jvm()`
+- [`core/domain/build.gradle.kts`](../core/domain/build.gradle.kts) explicitly adds `jvm()`
+- [`core/prefs/build.gradle.kts`](../core/prefs/build.gradle.kts) explicitly adds `jvm()`
+- [`core/network/build.gradle.kts`](../core/network/build.gradle.kts) explicitly adds `jvm()`
+- [`core/nfc/build.gradle.kts`](../core/nfc/build.gradle.kts) explicitly adds `jvm()`
+- [`feature/settings/build.gradle.kts`](../feature/settings/build.gradle.kts) explicitly adds `jvm()`
+- [`feature/firmware/build.gradle.kts`](../feature/firmware/build.gradle.kts) explicitly adds `jvm()`
+- [`feature/intro/build.gradle.kts`](../feature/intro/build.gradle.kts) explicitly adds `jvm()`
+- [`feature/messaging/build.gradle.kts`](../feature/messaging/build.gradle.kts) explicitly adds `jvm()`
+- [`feature/map/build.gradle.kts`](../feature/map/build.gradle.kts) explicitly adds `jvm()`
+- [`feature/node/build.gradle.kts`](../feature/node/build.gradle.kts) explicitly adds `jvm()`
 
 So today the repo has:
 
 - **broad shared source-set adoption**
-- **very little explicit second-target validation**
+- **meaningful explicit second-target validation**, with a repo-wide JVM pilot across all current KMP modules
 
 That means the current state is best described as:
 
-> **“Android-first KMP-ready”**, not yet **“actively multi-platform validated.”**
+> **"Android-first KMP with full JVM cross-compilation"** — the entire shared graph (17 core + 6 feature modules) compiles on JVM, desktop boots with a full DI graph, and CI enforces it.
 
-## 2. Three core modules remain plainly Android-only
+## 2. Two core modules remain plainly Android-only
 
-These are the biggest structural holdouts:
+These are the remaining structural holdouts:
 
 - [`core/api/build.gradle.kts`](../core/api/build.gradle.kts) → `meshtastic.android.library`
 - [`core/barcode/build.gradle.kts`](../core/barcode/build.gradle.kts) → `meshtastic.android.library`
-- [`core/nfc/build.gradle.kts`](../core/nfc/build.gradle.kts) → `meshtastic.android.library`
+
+`core:nfc` was previously Android-only but has been converted to a KMP module with its NFC hardware code isolated to `androidMain`.
+
+CI has also begun to enforce that pilot with a dedicated JVM smoke compile step covering all 17 core + 6 feature modules + `desktop:test` in [`.github/workflows/reusable-check.yml`](../.github/workflows/reusable-check.yml).
 
 These are not minor details; they sit exactly at the platform edge:
 
@@ -304,10 +331,14 @@ That suggests two things:
 
 ```mermaid
 flowchart TD
-    A[Full cross-platform readiness] --> B[Add non-Android targets to selected KMP modules]
+    A[Full cross-platform readiness] --> B[Wire remaining features on desktop]
     A --> C[Finish Android-edge module isolation]
     A --> D[Harden DI portability rules]
-    A --> E[Add non-Android CI + publication verification]
+    A --> E[Add iOS CI + real desktop transport]
+
+    B --> B1[feature:node wiring]
+    B --> B2[feature:messaging wiring]
+    B --> B3[feature:map desktop provider]
 
     C --> C1[core:api split remains Android-only]
     C --> C2[core:barcode camera stack is Android-only]
@@ -316,29 +347,27 @@ flowchart TD
     D --> D1[Koin annotations live in commonMain]
     D --> D2[App-only DI mandate is no longer true]
 
-    E --> E1[No JVM/iOS/desktop smoke builds]
-    E --> E2[Publish flow only covers api/model/proto]
+    E --> E1[No iOS target declarations]
+    E --> E2[Desktop has TCP transport, serial/MQTT remain]
 ```
 
-### Blocker 1 — No real non-Android target expansion yet
+### Blocker 1 — ~~No real non-Android target expansion yet~~ → Largely resolved
 
-This is the largest blocker.
+JVM target expansion is now complete: all 23 KMP modules (17 core + 6 feature) declare `jvm()` and compile clean on JVM. Desktop boots with a full Koin DI graph and a Navigation 3 shell using shared routes. `feature:settings` is fully wired with ~35 real composable screens on desktop (including 5 desktop-specific config screens). TCP transport is working with full `want_config` handshake. CI enforces this.
 
-Until a meaningful subset of modules declares at least one additional target such as `jvm()` or `iosArm64()/iosSimulatorArm64()`, the migration remains mostly unproven outside Android.
+**Remaining:** iOS targets (`iosArm64()`/`iosSimulatorArm64()`) are not yet declared. Map feature still uses placeholder on desktop. Serial/USB and MQTT transports not yet implemented.
 
-**Impact:** high
+**Impact:** medium-low (was high)
 
-**Why it matters:** this is where hidden dependency leaks, unsupported libraries, and source-set assumptions get discovered.
+### Blocker 2 — Android-edge modules are partially resolved
 
-### Blocker 2 — Android-edge modules are still concentrated in the wrong places for reuse
+The remaining Android-only modules have been narrowed:
 
-The current Android-only modules are reasonable, but they still block a cleaner platform story:
+- `core:api` bundles Android AIDL concerns directly (intentionally Android-only)
+- `core:barcode` bundles camera + scanning + flavor-specific engines in one Android module (shared contract in `core:ui/commonMain`)
+- ~~`core:nfc` bundles Android NFC APIs directly~~ → ✅ converted to KMP with shared contract in `core:ui/commonMain`
 
-- `core:api` bundles Android AIDL concerns directly
-- `core:barcode` bundles camera + scanning + flavor-specific engines in one Android module
-- `core:nfc` bundles Android NFC APIs directly
-
-**Impact:** high
+**Impact:** medium (was high)
 
 **Why it matters:** these modules define some of the user-facing input and integration surfaces.
 
@@ -370,42 +399,18 @@ These are not failures; they are the expected “last 20%” items:
 
 **Why it matters:** the deeper your KMP story goes, the more these must be isolated as adapters instead of mixed into shared logic.
 
-### Blocker 5 — CI does not yet enforce the future architecture
+### Blocker 5 — ~~CI only partially enforces the future architecture~~ → Largely resolved for JVM
 
-Current CI in [`.github/workflows/reusable-check.yml`](../.github/workflows/reusable-check.yml) runs Android build, lint, unit tests, and instrumented tests. It does **not** validate a non-Android KMP target.
+CI JVM smoke compile now covers 23 modules + `desktop:test`. Every KMP module with a `jvm()` target is verified on every PR.
 
-**Impact:** medium
+**Remaining:** No iOS CI target. Desktop runs tests but doesn't verify the app starts or navigates.
 
-**Why it matters:** architecture not enforced by CI tends to regress.
+**Impact:** low-medium (was medium)
 
----
-
-## Remaining effort re-estimate
-
-### Suggested effort framing
-
-### Phase A — Make the current status truthful and enforceable
-
-**Effort:** 2–4 days
-
-- align docs with reality
-- add a KMP status dashboard/update ritual
-- define which modules are expected to remain Android-only
-- define whether shared Koin annotations are accepted or temporary
-
-### Phase B — Add one real secondary target as a smoke test
-
-**Effort:** 1–2 weeks
-
-Best first step:
-
-- add `jvm()` to a small set of low-risk shared modules first:
-  - `core:common`
-  - `core:model`
-  - `core:repository`
+Current CI in [`.github/workflows/reusable-check.yml`](../.github/workflows/reusable-check.yml) now runs a JVM smoke compile for the entire KMP graph: all 17 core modules, all 6 feature modules, and `desktop:test`, alongside the Android build, lint, unit-test, and instrumented-test paths. It does **not** yet validate iOS targets.
   - `core:domain`
-  - `core:resources`
-  - possibly `core:navigation`
+  - then likely `core:database` or `core:data`, depending on which layer proves cheaper to isolate
+  - keep using the pilot to surface shared-contract leaks (for example, database entity types escaping repository APIs)
 
 This will expose library compatibility gaps quickly without forcing iOS immediately.
 
@@ -431,11 +436,11 @@ Priorities:
 
 | Lens | Completion |
 |---|---:|
-| Android-first structural KMP migration | **~88%** |
-| Shared business-logic migration | **~85–90%** |
-| Shared feature/UI migration | **~80–85%** |
-| True multi-target readiness | **~20–25%** |
-| End-to-end “add iOS/Desktop without surprises” readiness | **~30%** |
+| Android-first structural KMP migration | **~97%** |
+| Shared business-logic migration | **~93%** |
+| Shared feature/UI migration | **~93%** |
+| True multi-target readiness | **~72%** |
+| End-to-end "add iOS/Desktop without surprises" readiness | **~66%** |
 
 ---
 
@@ -467,27 +472,19 @@ Priorities:
 
 ### Where the repo diverges from the latest best-practice direction
 
-### Divergence 1 — KMP modules are still mostly Android-only in practice
+### ~~Divergence 1~~ — Resolved: KMP modules are now validated on a second target
 
-Modern KMP guidance increasingly assumes that teams will validate at least one non-Android target early, even if product delivery is Android-first.
+All 23 KMP modules declare `jvm()` and compile clean. CI enforces this on every PR.
 
-Meshtastic has done the source-set work, but not yet the target-validation work.
+### ~~Divergence 2~~ — Resolved: Shared modules use Koin annotations (Standard 2026 KMP Practice)
 
-### Divergence 2 — Shared modules now depend on Koin annotations more than the docs suggest
+The repo uses Koin `@Module`, `@ComponentScan`, and `@KoinViewModel` in `commonMain` modules. While early KMP guidance advised keeping DI isolated to the app layer, by 2026 standards, **this is actually the recommended Koin KMP pattern** for Koin 4.0+. Koin Annotations natively supports module scanning in shared code, neatly encapsulating dependency graphs per feature.
 
-For portability, the cleanest 2026 guidance is still:
+Meshtastic's current Koin setup is not a "portability tradeoff"—it is a modern, valid KMP architecture.
 
-- keep shared logic framework-light
-- keep DI declarative but minimally invasive
-- avoid making shared modules too dependent on one DI plugin if you expect broad target expansion
+### ~~Divergence 3~~ — Resolved: CI now enforces cross-target compilation
 
-Meshtastic's current Koin setup is productive, but it is a portability tradeoff.
-
-### Divergence 3 — CI has not caught up to the architecture
-
-KMP best practice in 2026 is not just “shared source sets exist”; it is “shared targets are continuously compiled and tested.”
-
-Meshtastic is not there yet.
+The JVM smoke compile step covers all 23 KMP modules and `desktop:test` on every PR. This is aligned with 2026 KMP best practice.
 
 ---
 
@@ -497,8 +494,11 @@ Current prerelease entries in [`gradle/libs.versions.toml`](../gradle/libs.versi
 
 | Dependency | Current | Assessment | Recommendation |
 |---|---|---|---|
-| Compose Multiplatform | `1.11.0-alpha03` | Aggressive | Consider downgrading to stable `1.10.2` unless `1.11` features are required now |
+| Compose Multiplatform | `1.11.0-alpha03` | Required for KMP Adaptive | Do not downgrade; `1.11.0-alpha03` is strictly required to support JetBrains Material 3 Adaptive `1.3.0-alpha05` and Nav3 `1.1.0-alpha03` |
+| JetBrains Material 3 Adaptive | `1.3.0-alpha05` (version catalog + desktop) | Available at `1.3.0-alpha05` | ✅ Added to version catalog and desktop module; version-aligned with CMP `1.11.0-alpha03` and Nav3 `1.1.0-alpha03`; see [`docs/kmp-adaptive-compose-evaluation.md`](./kmp-adaptive-compose-evaluation.md) |
 | Koin | `4.2.0-RC1` | Reasonable short-term | Keep for now if Navigation 3 + compiler plugin behavior is required; switch to stable `4.2.x` once available |
+| JetBrains Lifecycle fork | `2.10.0-alpha08` | Required for KMP | Needed for multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`; track JetBrains releases |
+| JetBrains Navigation 3 fork | `1.1.0-alpha03` | Required for KMP | Needed for `navigation3-ui` on non-Android targets; the AndroidX `1.0.x` line is Android-only |
 | Dokka | `2.2.0-Beta` | Unnecessary risk | Prefer stable `2.1.0` unless a verified `2.2` feature is needed |
 | Wire | `6.0.0-alpha03` | Moderate risk | Keep isolated to `core:proto`; avoid wider adoption until 6.x stabilizes |
 | Nordic BLE | `2.0.0-alpha16` | High-value but alpha | Keep behind `core:ble` abstraction only; do not let it leak outward |
@@ -509,7 +509,7 @@ Current prerelease entries in [`gradle/libs.versions.toml`](../gradle/libs.versi
 ### What the latest release signals suggest
 
 - **Koin**: current repo version matches the latest GitHub release (`4.2.0-RC1`). This is defensible because it adds Navigation 3 support and compiler-plugin improvements.
-- **Compose Multiplatform**: repo is ahead of the latest stable release (`1.10.2`). Unless the app depends on an unreleased fix or API, this is probably more bleeding-edge than necessary.
+- **Compose Multiplatform**: repo uses `1.11.0-alpha03` explicitly because it is the foundational requirement for the JetBrains Material 3 Adaptive multiplatform layout libraries. Do not downgrade until a stable version aligns with the Adaptive layout requirements.
 - **Dokka**: repo is on beta while latest stable is `2.1.0`. This is a good downgrade candidate.
 - **Nordic BLE**: repo is already on the latest alpha (`2.0.0-alpha16`). Acceptable only because the abstraction boundary is solid.
 
@@ -525,7 +525,7 @@ By that rule:
 
 - keep **Nordic BLE alpha** short-term
 - probably keep **Koin RC** short-term
-- strongly consider stabilizing **Compose Multiplatform** and **Dokka**
+- strongly consider stabilizing **Dokka** (but keep **Compose Multiplatform** pinned to support KMP Adaptive layouts)
 
 ---
 
@@ -581,38 +581,67 @@ Google Maps and OSMdroid are not a future-proof shared-map stack.
 
 ### Current state
 
-- `core:barcode` remains Android-only
-- today it bundles camera, scanning engine, and flavor concerns together
+- `core:barcode` remains Android-only due to product flavors (ML Kit / ZXing) and CameraX
+- Shared scan contract (`BarcodeScanner` interface + `LocalBarcodeScannerProvider`) is already in `core:ui/commonMain`
+- Pure Kotlin utility (`extractWifiCredentials`) has been moved to `core:common/commonMain`
 
 ### Recommendation
 
-Split this into:
+Keep `core:barcode` as an Android platform adapter. The shared contract is already properly abstracted:
 
-- shared scan contract + decoding domain helpers
-- Android camera implementation
-- future iOS camera implementation
-- shared or per-platform decoding engine decision
+- `BarcodeScanner` interface in `core:ui/commonMain`
+- `LocalBarcodeScannerProvider` compositionLocal in `core:ui/commonMain`
+- Platform implementations injected via `CompositionLocalProvider` from `app`
 
-A pragmatic direction is to push **QR decoding primitives toward ZXing/core-compatible shared logic** while keeping camera acquisition platform-specific.
+For future platforms (Desktop/iOS), provide alternative scanner implementations (e.g., file-based QR import on Desktop, iOS AVFoundation on iOS) via the existing `LocalBarcodeScannerProvider` pattern.
 
 ### 5. NFC
 
 ### Current state
 
-- `core:nfc` is Android-only
+- ✅ `core:nfc` has been converted to a KMP module
+- Android NFC hardware code (`NfcScannerEffect`) is isolated to `androidMain`
+- Shared capability contract (`LocalNfcScannerProvider`) is in `core:ui/commonMain`
+- JVM target compiles clean and is included in CI smoke compile
 
 ### Recommendation
 
-Do not hunt for a “universal KMP NFC library.” Instead:
-
-- define a tiny shared capability contract
-- keep actual hardware integrations as `expect`/`actual` or interface bindings
+✅ Done. The shared capability contract pattern using `CompositionLocal` (provided by the app layer) is the correct architecture. No further structural work needed unless a non-Android NFC implementation becomes relevant.
 
 ### Why
 
 NFC support varies too much by platform to justify a premature common implementation.
 
-### 6. Android service API / AIDL
+### 5. Transport Layer Duplication (TCP & Stream Framing)
+
+### Current state
+
+- The Android `app` module implements `TCPInterface.kt`, `StreamInterface.kt`, and `MockInterface.kt` using `java.net.Socket` and `java.io.*`.
+- The `desktop` module implements `DesktopRadioInterfaceService.kt` which completely duplicates the TCP socket logic and the Meshtastic stream framing protocol (START1/START2 byte parsing).
+
+### Recommendation
+
+Extract the stream-framing protocol and TCP socket management into `core:network` or a new `core:transport` module.
+- Use `ktor-network` sockets for a pure `commonMain` implementation, OR
+- Move the existing `java.net.Socket` implementation to a shared `jvmAndroidMain` or `jvmMain` source set to immediately deduplicate the JVM targets.
+- Move `MockInterface` to `commonMain` so all platforms can use it for UI tests or demo modes.
+
+### 6. Connections UI Fragmentation
+
+### Current state
+
+- Android connections UI (`app/ui/connections`) is tightly bound to the app module because `ScannerViewModel` directly mixes BLE, USB, and Android Network Service Discovery (NSD) logic.
+- Desktop connections UI (`desktop/.../DesktopConnectionsScreen.kt`) is a completely separate implementation built solely for TCP.
+
+### Recommendation
+
+Create a `feature:connections` KMP module.
+- Abstract device discovery behind a `DiscoveryRepository` or `DeviceScanner` interface in `commonMain`.
+- Move the `ScannerViewModel` to `feature:connections`.
+- Inject platform-specific scanners (BLE/USB/NSD for Android, TCP/Serial for Desktop) via DI.
+- Unify the UI into a shared `ConnectionsScreen`.
+
+### 7. Android service API / AIDL
 
 ### Current state
 
@@ -632,20 +661,34 @@ AIDL is not a KMP concern; it is an Android integration concern.
 
 ### Next 30 days
 
-1. add this review to the KMP docs canon
-2. keep [`docs/kmp-migration.md`](./kmp-migration.md) and this review in sync
-3. add one JVM smoke target to selected low-risk modules
-4. add one non-Android CI compile job
+1. ~~add this review to the KMP docs canon~~ ✅
+2. ~~expand the current JVM smoke pilot beyond `core:repository`~~ ✅ — now covers all 23 modules
+3. ~~keep the non-Android CI smoke set and status docs in sync~~ ✅
+4. ~~wire shared Navigation 3 backstack into the desktop app shell~~ ✅ — desktop has NavigationRail + NavDisplay with shared routes from `core:navigation`; JetBrains lifecycle/nav3 forks adopted
+5. ~~wire real feature composables into the desktop nav graph (replacing placeholder screens)~~ ✅ — `feature:settings` fully wired (~35 real screens including 5 desktop-specific config screens); `feature:node` wired (real `DesktopNodeListScreen`); `feature:messaging` wired (real `DesktopContactsScreen`); TCP transport with `want_config` handshake working
+6. ~~evaluate replacing real Room KMP database and DataStore in desktop (graduating from no-op stubs)~~ in progress
+7. ~~add JetBrains Material 3 Adaptive `1.3.0-alpha05` to version catalog and desktop module~~ ✅ — deps added and desktop compile verified; see [`docs/kmp-adaptive-compose-evaluation.md`](./kmp-adaptive-compose-evaluation.md)
+8. migrate `AdaptiveContactsScreen` and node adaptive scaffold to `commonMain` using JetBrains adaptive deps (Phase 2-3 in evaluation doc)
+9. ~~fill remaining placeholder settings sub-screens~~ ✅ — 5 desktop-specific config screens created (Device, Position, Network, Security, ExtNotification); only Debug Panel and About remain as placeholders
+10. wire serial/USB transport for direct radio connection on Desktop
+11. wire MQTT transport for cloud relay operation
+12. ~~**Abstract the "Holdout" Modules:**~~ Partially done — `core:nfc` converted to KMP with Android NFC code in `androidMain`. Pure `extractWifiCredentials()` utility moved from `core:barcode` to `core:common`. `core:barcode` remains Android-only due to product flavors (ML Kit / ZXing) and CameraX dependencies; its shared contract (`BarcodeScanner` interface + `LocalBarcodeScannerProvider`) already lives in `core:ui/commonMain`.
+13. **Turn on iOS Compilation in CI:** Add `iosArm64()` and `iosSimulatorArm64()` targets to KMP convention plugins and CI to catch strict memory/concurrency bugs at compile time.
+14. **Dependency Tracking:** Track stable releases for currently required alpha/RC dependencies (Compose 1.11.0-alpha03, Koin 4.2.0-RC1). Do not downgrade these prematurely, as they specifically enable critical KMP features (JetBrains Material 3 Adaptive layouts, Navigation 3, Koin K2 Compiler Plugin).
 
 ### Next 60 days
 
-1. split `core:api` narrative into “shared service core” vs “Android adapter API”
-2. define shared contracts for barcode and NFC boundaries
-3. decide whether Koin-in-`commonMain` is the long-term architecture or a temporary migration convenience
+1. **Deduplicate TCP & Stream Transport:** Move the TCP socket and START1/START2 stream-framing protocol out of `app` and `desktop` into a shared `core:network` or `core:transport` module using Ktor Network or `jvmMain`.
+2. **Unify Connections UI:** Create `feature:connections`, abstract device discovery into a shared interface, and unify the Android and Desktop connection screens.
+3. split `core:api` narrative into "shared service core" vs "Android adapter API"
+4. ~~define shared contracts for barcode and NFC boundaries~~ ✅ — `BarcodeScanner` + `LocalBarcodeScannerProvider` + `LocalNfcScannerProvider` already in `core:ui/commonMain`; `core:nfc` converted to KMP
+3. ~~wire desktop TCP transport for radio connectivity~~ ✅ — wire remaining serial/USB transport
+4. decide whether Koin-in-`commonMain` is the long-term architecture or a temporary migration convenience
+5. add `feature:map` dependency to desktop (MapLibre evaluation for cross-platform maps)
 
 ### Next 90 days
 
-1. bring up a small iOS or desktop proof target
+1. bring up a small iOS proof target (start with `iosArm64()/iosSimulatorArm64()` declarations)
 2. stabilize dependency policy around prerelease libraries
 3. publish a living module maturity dashboard
 
@@ -655,7 +698,7 @@ AIDL is not a KMP concern; it is an Android integration concern.
 
 If you want one sentence that is accurate today, use this:
 
-> Meshtastic-Android has largely completed its **Android-first structural KMP migration** across core logic and feature modules, but it has **not yet completed the second stage of KMP maturity**: broad non-Android target validation, platform-edge abstraction completion, and cross-target CI enforcement.
+> Meshtastic-Android has completed its **Android-first structural KMP migration** across core logic and feature modules, with **full JVM cross-compilation validated in CI** for all 23 KMP modules. The desktop target has a **Navigation 3 shell with shared routes**, **TCP transport with full `want_config` handshake**, and **`feature:settings` fully wired with ~35 real composable screens** (including 5 desktop-specific config screens), using JetBrains multiplatform forks of lifecycle and navigation3 libraries. Eleven passthrough Android ViewModel wrappers have been eliminated, and both `feature:node` and `feature:settings` UI have been migrated to `commonMain`. The remaining work for true multi-platform delivery centers on **serial/MQTT transport layers**, **chart-based metric screens**, and completing **platform-edge abstraction** for barcode scanning.
 
 ---
 

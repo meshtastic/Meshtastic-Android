@@ -1,0 +1,238 @@
+# Architecture Review — March 2026
+
+> Status: **Active**
+> Last updated: 2026-03-12
+
+Re-evaluation of project modularity and architecture against modern KMP and Android best practices. Identifies gaps and actionable improvements across modularity, reusability, clean abstractions, DI, and testing.
+
+## Executive Summary
+
+The codebase is **~98% structurally KMP** — 18/20 core modules and 7/7 feature modules declare `jvm()` targets and cross-compile in CI. Shared `commonMain` code accounts for ~52K LOC vs ~18K platform-specific LOC (a 74/26 split). This is strong.
+
+Of the five structural gaps originally identified, four are resolved and one remains in progress:
+
+1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(In progress — connections extracted, ChannelViewModel/NodeMapViewModel/NodeContextMenu/EmptyDetailPlaceholder moved to shared modules, currently 63 files)*
+2. ~~**Radio transport layer is app-locked**~~ — ✅ Resolved: `RadioTransport` interface in `core:repository/commonMain`; shared `StreamFrameCodec` + `TcpTransport` in `core:network`.
+3. ~~**`java.*` APIs leak into `commonMain`**~~ — ✅ Resolved: `Locale`, `ConcurrentHashMap`, `ReentrantLock` purged.
+4. ~~**Zero feature-level `commonTest`**~~ — ✅ Resolved: 131 shared tests across all 7 features; `core:testing` module established.
+5. ~~**No `feature:connections` module**~~ — ✅ Resolved: KMP module with shared UI and dynamic transport detection.
+
+## Source Code Distribution
+
+| Source set | Files | ~LOC | Purpose |
+|---|---:|---:|---|
+| `core/*/commonMain` | 337 | 32,700 | Shared business/data logic |
+| `feature/*/commonMain` | 146 | 19,700 | Shared feature UI + ViewModels |
+| `feature/*/androidMain` | 62 | 14,700 | Platform UI (charts, previews, permissions) |
+| `app/src/main` | 63 | ~9,500 | Android app shell (target: ~20 files) |
+| `desktop/src` | 26 | 4,800 | Desktop app shell |
+| `core/*/androidMain` | 49 | 3,500 | Platform implementations |
+| `core/*/jvmMain` | 11 | ~500 | JVM actuals |
+| `core/*/jvmAndroidMain` | 4 | ~200 | Shared JVM+Android code |
+
+**Key ratio:** 74% of production code is in `commonMain` (shared). Goal: 85%+.
+
+---
+
+## A. Critical Modularity Gaps
+
+### A1. `app` module is a God module
+
+The `app` module should be a thin shell (~20 files): `MainActivity`, DI assembly, nav host. Originally it held **90 files / ~11K LOC**, now reduced to **63 files / ~9.5K LOC**:
+
+| Area | Files | LOC | Where it should live |
+|---|---:|---:|---|
+| `repository/radio/` | 22 | ~2,000 | `core:service` / `core:network` |
+| `service/` | 12 | ~1,500 | `core:service/androidMain` |
+| `navigation/` | 7 | ~720 | Stay in `app` (Nav 3 host wiring) |
+| `settings/` ViewModels | 3 | ~350 | Thin Android wrappers (genuine platform deps) |
+| `widget/` | 4 | ~300 | Stay in `app` (Glance is Android-only) |
+| `worker/` | 4 | ~350 | `core:service/androidMain` |
+| DI + Application + MainActivity | 5 | ~500 | Stay in `app` ✓ |
+| UI screens + ViewModels | 5 | ~1,200 | Stay in `app` (Android-specific deps) |
+
+**Progress:** Extracted `ChannelViewModel` → `feature:settings/commonMain`, `NodeMapViewModel` → `feature:map/commonMain`, `NodeContextMenu` → `feature:node/commonMain`, `EmptyDetailPlaceholder` → `core:ui/commonMain`. Remaining extractions require radio/service layer refactoring (bigger scope).
+
+### A2. Radio interface layer is app-locked and non-KMP
+
+The core transport abstraction was previously locked in `app/repository/radio/` via `IRadioInterface`. This has been successfully refactored:
+
+1. Defined `RadioTransport` interface in `core:repository/commonMain` (replacing `IRadioInterface`)
+2. Moved `StreamFrameCodec`-based framing to `core:network/commonMain`
+3. Moved TCP transport to `core:network/jvmAndroidMain`
+4. The remaining `app/repository/radio/` implementations (BLE, Serial, Mock) now implement `RadioTransport`.
+
+**Recommended next steps:**
+1. Move BLE transport to `core:ble/androidMain`
+2. Move Serial/USB transport to `core:service/androidMain`
+3. Retire Desktop's parallel `DesktopRadioInterfaceService` — use the shared `RadioTransport` + `TcpTransport`
+
+### A3. No `feature:connections` module *(resolved 2026-03-12)*
+
+Device discovery UI was duplicated:
+- Android: `app/ui/connections/` (13 files: `ConnectionsScreen`, `ScannerViewModel`, 10 components)
+- Desktop: `desktop/ui/connections/DesktopConnectionsScreen.kt` (separate implementation)
+
+**Outcome:** Created `feature:connections` KMP module with:
+- `commonMain`: `ScannerViewModel`, `ConnectionsScreen`, 11 shared UI components, `DeviceListEntry` sealed class, `GetDiscoveredDevicesUseCase` interface, `CommonGetDiscoveredDevicesUseCase` (TCP/recent devices)
+- `androidMain`: `AndroidScannerViewModel` (BLE bonding, USB permissions), `AndroidGetDiscoveredDevicesUseCase` (BLE/NSD/USB discovery), `NetworkRepository`, `UsbRepository`, `SerialConnection`
+- Desktop uses the shared `ConnectionsScreen` + `CommonGetDiscoveredDevicesUseCase` directly
+- Dynamic transport detection via `RadioInterfaceService.supportedDeviceTypes`
+- Module registered in both `AppKoinModule` and `DesktopKoinModule`
+
+### A4. `core:api` AIDL coupling
+
+`core:api` is Android-only (AIDL IPC). `ServiceClient` in `core:service/androidMain` wraps it. Desktop doesn't use it — it has `DirectRadioControllerImpl` in `core:service/commonMain`.
+
+**Recommendation:** The `DirectRadioControllerImpl` pattern is correct. Ensure `RadioController` (already in `core:model/commonMain`) is the canonical interface; deprecate the AIDL-based path for in-process usage.
+
+---
+
+## B. KMP Platform Purity
+
+### B1. `java.util.Locale` leaks in `commonMain` *(resolved 2026-03-11)*
+
+| File | Usage |
+|---|---|
+| `core:data/.../TracerouteHandlerImpl.kt` | Replaced with `NumberFormatter.format(seconds, 1)` |
+| `core:data/.../NeighborInfoHandlerImpl.kt` | Replaced with `NumberFormatter.format(seconds, 1)` |
+| `core:prefs/.../MeshPrefsImpl.kt` | Replaced with locale-free `uppercase()` |
+
+**Outcome:** The three `Locale` usages identified in March were removed from `commonMain`. Follow-up cleanup in the same sprint also moved `ReentrantLock`-based `SyncContinuation` to `jvmAndroidMain`, replaced prefs `ConcurrentHashMap` caches with atomic persistent maps, and pushed enum reflection behind `expect`/`actual` so no known `java.*` runtime calls remain in `commonMain`.
+
+### B2. `ConcurrentHashMap` leaks in `commonMain` *(resolved 2026-03-11)*
+
+Formerly found in 3 prefs files:
+- `core:prefs/.../MeshPrefsImpl.kt`
+- `core:prefs/.../UiPrefsImpl.kt`
+- `core:prefs/.../MapConsentPrefsImpl.kt`
+
+**Outcome:** These caches now use `AtomicRef<PersistentMap<...>>` helpers in `commonMain`, eliminating the last `ConcurrentHashMap` usage from shared prefs code.
+
+### B3. MQTT is Android-only
+
+`MQTTRepositoryImpl` in `core:network/androidMain` uses Eclipse Paho (Java-only). Desktop and future iOS stub it.
+
+**Fix:** Evaluate KMP MQTT options:
+- `mqtt-kmp` library
+- Ktor WebSocket-based MQTT
+- `hivemq-mqtt-client` (JVM-only, acceptable for `jvmAndroidMain`)
+
+Short-term: Move to `jvmAndroidMain` if using a JVM-compatible lib. Long-term: Full KMP MQTT in `commonMain`.
+
+### B4. Vico charts *(resolved)*
+
+Vico chart screens (DeviceMetrics, EnvironmentMetrics, SignalMetrics, PowerMetrics, PaxMetrics) have been migrated to `feature:node/commonMain` using Vico's KMP artifacts (`vico-compose`, `vico-compose-m3`). Desktop wires them via shared composables. No Android-only chart code remains.
+
+---
+
+## C. DI Improvements
+
+### C1. Desktop manual ViewModel wiring
+
+`DesktopKoinModule.kt` has ~120 lines of hand-written `viewModel { Constructor(get(), get(), ...) }` with 8–17 parameters each. These will drift from the annotation-generated Android wiring.
+
+**Fix:** Ensure `@KoinViewModel` annotations on shared ViewModels in `feature/*/commonMain` generate KSP modules for the JVM target. Desktop's `desktopModule()` should then `includes()` generated modules — zero manual ViewModel wiring.
+
+**Validation:** If KSP already processes JVM targets (check `meshtastic.koin` convention plugin), this may only need import wiring. If not, configure `ksp(libs.koin.annotations)` for the JVM source set.
+
+### C2. Desktop stubs lack compile-time validation
+
+`desktopPlatformStubsModule()` has 12 `single<Interface> { Noop() }` bindings. Adding a new interface to `core:repository` won't cause a build failure — it fails at runtime.
+
+**Fix:** Add `checkModules()` test:
+```kotlin
+@Test fun `all Koin bindings resolve`() {
+    koinApplication {
+        modules(desktopModule(), desktopPlatformModule())
+        checkModules()
+    }
+}
+```
+
+### C3. DI module naming convention
+
+Android uses `@Module`-annotated classes (`CoreDataModule`, `CoreBleAndroidModule`). Desktop imports them as `CoreDataModule().coreDataModule()`. This works but the double-invocation pattern is non-obvious.
+
+**Recommendation:** Document the pattern in AGENTS.md. Consider if Koin Annotations 2.x supports a simpler import syntax.
+
+---
+
+## D. Test Architecture
+
+### D1. Zero `commonTest` in feature modules *(resolved 2026-03-12)*
+
+| Module | `commonTest` | `test`/`androidUnitTest` | `androidTest` |
+|---|---:|---:|---:|
+| `feature:settings` | 22 | 20 | 15 |
+| `feature:node` | 24 | 9 | 0 |
+| `feature:messaging` | 18 | 5 | 3 |
+| `feature:connections` | 27 | 0 | 0 |
+| `feature:firmware` | 15 | 25 | 0 |
+| `feature:intro` | 14 | 7 | 0 |
+| `feature:map` | 11 | 4 | 0 |
+
+**Outcome:** All 7 feature modules now have `commonTest` coverage (131 shared tests). Combined with 70 platform unit tests and 18 instrumented tests, feature modules have 219 tests total.
+
+### D2. No shared test fixtures *(resolved 2026-03-12)*
+
+`core:testing` module established with shared fakes (`FakeNodeRepository`, `FakeServiceRepository`, `FakeRadioController`, `FakeRadioConfigRepository`, `FakePacketRepository`) and `TestDataFactory` builders. Used by all feature `commonTest` suites.
+
+### D3. Core module test gaps
+
+36 `commonTest` files exist but are concentrated in `core:domain` (22 files) and `core:data` (10 files). Limited or zero tests in:
+- `core:service` (has `ServiceRepositoryImpl`, `DirectRadioControllerImpl`, `MeshServiceOrchestrator`)
+- `core:network` (has `StreamFrameCodecTest` — 10 tests; `TcpTransport` untested)
+- `core:prefs` (preference flows, default values)
+- `core:ble` (connection state machine)
+- `core:ui` (utility functions)
+
+### D4. Desktop has 5 tests
+
+`desktop/src/test/` contains `DemoScenarioTest.kt` with 5 test cases. Still needs:
+- Koin module validation (`checkModules()`)
+- `DesktopRadioInterfaceService` connection state tests
+- Navigation graph coverage
+
+---
+
+## E. Module Extraction Priority
+
+Ordered by impact × effort:
+
+| Priority | Extraction | Impact | Effort | Enables |
+|---:|---|---|---|---|
+| 1 | `java.*` purge from `commonMain` (B1, B2) | High | Low | iOS target declaration |
+| 2 | Radio transport interfaces to `core:repository` (A2) | High | Medium | Transport unification |
+| 3 | `core:testing` shared fixtures (D2) | Medium | Low | Feature commonTest |
+| 4 | Feature `commonTest` (D1) | Medium | Medium | KMP test coverage |
+| 5 | `feature:connections` (A3) | High | Medium | ~~Desktop connections~~ ✅ Done |
+| 6 | Service/worker extraction from `app` (A1) | Medium | Medium | Thin app module |
+| 7 | Desktop Koin auto-wiring (C1) | Medium | Low | DI parity |
+| 8 | MQTT KMP (B3) | Medium | High | Desktop/iOS MQTT |
+| 9 | KMP charts (B4) | Medium | High | Desktop metrics |
+| 10 | iOS target declaration | High | Low | CI purity gate |
+
+---
+
+## Scorecard Update
+
+| Area | Previous | Current | Notes |
+|---|---:|---:|---|
+| Shared business/data logic | 8.5/10 | **9/10** | RadioTransport interface unified; all core layers shared |
+| Shared feature/UI logic | 9.5/10 | **8.5/10** | All 7 KMP features; connections unified; Vico charts in commonMain |
+| Android decoupling | 8.5/10 | **8/10** | Connections extracted; GMS purged; ChannelViewModel/NodeMapViewModel/NodeContextMenu extracted; app 63→target 20 files |
+| Multi-target readiness | 8/10 | **8/10** | Full JVM; release-ready desktop; iOS not declared |
+| CI confidence | 8.5/10 | **9/10** | 25 modules validated; feature:connections + desktop in CI; native release installers |
+| DI portability | 7/10 | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
+| Test maturity | — | **8/10** | 131 commonTest + 89 platform-specific = 219 tests across all 7 features; core:testing established |
+
+---
+
+## References
+
+- Current migration status: [`kmp-status.md`](./kmp-status.md)
+- Roadmap: [`roadmap.md`](./roadmap.md)
+- Agent guide: [`../AGENTS.md`](../AGENTS.md)
+- Decision records: [`decisions/`](./decisions/)
+

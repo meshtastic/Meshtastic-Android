@@ -62,9 +62,10 @@ We are incrementally migrating Meshtastic-Android to a **Kotlin Multiplatform (K
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Thread-Safety:** Use `atomicfu` and `kotlinx.collections.immutable` for shared state in `commonMain`. Avoid `synchronized` or JVM-specific atomics.
 -   **Dependency Injection:**
-    -   Use **Koin Annotations** with the K2 compiler plugin.
+    -   Use **Koin Annotations** with the K2 compiler plugin (0.4.0+).
     -   Keep root graph assembly in `app` (module inclusion in `AppKoinModule` and startup wiring in `MeshUtilApplication`).
-    -   It is the recommended best practice to use `@Module`, `@ComponentScan`, and `@KoinViewModel` annotations directly in `commonMain` shared modules. This provides compile-time safety and encapsulates dependency graphs per feature.
+    -   Use `@Module`, `@ComponentScan`, and `@KoinViewModel` annotations directly in `commonMain` shared modules.
+    -   **Note on Koin 0.4.0 compile safety:** Koin's A1 (per-module) validation is globally disabled in `build-logic`. Because Meshtastic employs Clean Architecture dependency inversion (interfaces in `core:repository`, implementations in `core:data`), enforcing A1 resolution per-module fails. Validation occurs at the full-graph (A3) level instead.
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain` to maintain a single source of truth for UI state, relying heavily on `StateFlow`.
 -   **BLE:** All Bluetooth communication must route through `core:ble` using Nordic Semiconductor's Android Common Libraries and Kotlin Coroutines/Flows. Never use legacy Android Bluetooth callbacks directly.
 -   **Dependencies:** Check `gradle/libs.versions.toml` before assuming a library is available. New dependencies MUST be added to the version catalog, not directly to a `build.gradle.kts` file.

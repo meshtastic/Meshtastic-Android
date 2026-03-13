@@ -24,8 +24,10 @@ Reference examples:
 
 Reference examples:
 - Shared base: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt`
-- Android wrapper: `app/src/main/kotlin/org/meshtastic/app/messaging/AndroidMessageViewModel.kt`
+- Android wrapper (remaining): `app/src/main/kotlin/org/meshtastic/app/node/AndroidMetricsViewModel.kt`
+- Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/BaseUIViewModel.kt`
 - Navigation usage: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`
+- Desktop navigation usage: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
 
 ## Playbook C: Add a new dependency or service binding
 
@@ -50,6 +52,9 @@ Reference examples:
 Reference examples:
 - App graph wiring: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`
 - Feature intro graph pattern: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt`
+- Desktop nav shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
+- Desktop nav graph entries: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
+- Desktop feature wiring: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
 
 ## Playbook E: Add flavor/platform-specific UI implementation
 
@@ -62,5 +67,25 @@ Reference examples:
 - Contract: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/util/MapViewProvider.kt`
 - Provider wiring: `app/src/main/kotlin/org/meshtastic/app/MainActivity.kt`
 - Consumer side: `feature/map/src/androidMain/kotlin/org/meshtastic/feature/map/MapScreen.kt`
+
+## Playbook F: Onboard a new platform target
+
+1. Create a platform application module (e.g., `desktop/`, `ios/`).
+2. Copy `desktop/src/main/kotlin/org/meshtastic/desktop/stub/NoopStubs.kt` as the starting stub set. All repository interfaces have no-op implementations there.
+3. Create a `<Platform>KoinModule` that mirrors `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt` — use stubs for unimplemented interfaces, real implementations where available.
+4. Add `kotlinx-coroutines-swing` (JVM/Desktop) or the equivalent platform coroutines dispatcher module. Without it, `Dispatchers.Main` is unavailable and any code using `lifecycle.coroutineScope` will crash at runtime.
+5. Progressively replace stubs with real implementations (e.g., serial transport for desktop, CoreBluetooth for iOS).
+6. Add `<platform>()` target to feature modules as needed (all `core:*` modules already declare `jvm()`).
+7. Update CI JVM smoke compile step in `.github/workflows/reusable-check.yml` to include new modules.
+8. If `commonMain` code fails to compile for the new target, it's a KMP migration debt — fix the shared code, not the target.
+
+Reference examples:
+- Desktop stubs: `desktop/src/main/kotlin/org/meshtastic/desktop/stub/NoopStubs.kt`
+- Desktop DI: `desktop/src/main/kotlin/org/meshtastic/desktop/di/DesktopKoinModule.kt`
+- Desktop Navigation 3 shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
+- Desktop nav graph entries: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
+- Desktop real feature wiring: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
+- Desktop-specific screen: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/settings/DesktopSettingsScreen.kt`
+- Roadmap: `docs/roadmap.md`
 
 
