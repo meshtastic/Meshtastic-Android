@@ -288,10 +288,8 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.
 firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
-aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
-aboutlibraries-base = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
+aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.23.0" }
-# Removed dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.5.1" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }

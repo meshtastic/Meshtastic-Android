@@ -49,6 +49,11 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
         ref = "android-application-compose",
         style = "fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000",
     ),
+    ComposeDesktopApplication(
+        id = "org.jetbrains.compose",
+        ref = "compose-desktop-application",
+        style = "fill:#CAFFBF,stroke:#000,stroke-width:2px,color:#000",
+    ),
     AndroidFeature(
         id = "meshtastic.android.feature",
         ref = "android-feature",
@@ -117,6 +122,7 @@ internal fun Project.configureGraphTasks() {
             val projectPlugins = mutableMapOf<String, PluginType>()
             val type = when {
                 pluginManager.hasPlugin("meshtastic.android.application") || pluginManager.hasPlugin("meshtastic.android.application.compose") -> PluginType.AndroidApplication
+                targetProjectPath.startsWith(":desktop") -> PluginType.ComposeDesktopApplication
                 targetProjectPath.startsWith(":feature:") -> PluginType.AndroidFeature
                 else -> PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
             }

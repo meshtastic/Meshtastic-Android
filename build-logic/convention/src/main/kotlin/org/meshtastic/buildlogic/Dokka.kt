@@ -42,6 +42,8 @@ fun Project.configureDokka() {
                 "main",
                 "commonMain",
                 "androidMain",
+                "jvmMain",
+                "jvmAndroidMain",
                 "fdroid",
                 "google",
                 "release"

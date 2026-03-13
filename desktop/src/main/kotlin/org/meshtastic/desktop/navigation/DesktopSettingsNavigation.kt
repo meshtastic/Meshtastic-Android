@@ -196,9 +196,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
     entry<SettingsRoutes.About> {
         AboutScreen(
             onNavigateUp = { backStack.removeLastOrNull() },
-            jsonProvider = {
-                object {}.javaClass.getResourceAsStream("/aboutlibraries.json")?.bufferedReader()?.readText() ?: ""
-            },
+            jsonProvider = { SettingsRoutes::class.java.getResource("/aboutlibraries.json")?.readText() ?: "" },
         )
     }
 
