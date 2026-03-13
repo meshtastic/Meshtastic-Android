@@ -43,7 +43,10 @@ compose.desktop {
     application {
         mainClass = "org.meshtastic.desktop.MainKt"
 
-        buildTypes.release.proguard { configurationFiles.from(project.file("proguard-rules.pro")) }
+        buildTypes.release.proguard {
+            isEnabled.set(false)
+            configurationFiles.from(project.file("proguard-rules.pro"))
+        }
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
