@@ -52,6 +52,17 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "Meshtastic"
 
+            // App Icon
+            macOS {
+                iconFile.set(project.file("src/main/resources/icon.png"))
+            }
+            windows {
+                iconFile.set(project.file("src/main/resources/icon.png"))
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/icon.png"))
+            }
+
             // Read version from project properties (passed by CI) or default to 0.1.0
             // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes
             val rawVersion = project.findProperty("appVersionName")?.toString() ?: "0.1.0"
