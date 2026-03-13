@@ -301,7 +301,9 @@ jobs:
         run: ./gradlew exportLibraryDefinitions -Pci=true
 
       - name: Package Native Distributions
-        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS -PappVersionName=${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }} --no-daemon
+        env:
+          ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS --no-daemon
 
       - name: Upload Desktop Artifacts
         if: always()
@@ -309,9 +311,9 @@ jobs:
         with:
           name: desktop-${{ runner.os }}
           path: |
-            desktop/build/compose/binaries/main/app/*/*.dmg
-            desktop/build/compose/binaries/main/app/*/*.msi
-            desktop/build/compose/binaries/main/app/*/*.deb
+            desktop/build/compose/binaries/main-release/*/*.dmg
+            desktop/build/compose/binaries/main-release/*/*.msi
+            desktop/build/compose/binaries/main-release/*/*.deb
           retention-days: 1
           if-no-files-found: ignore
 
