@@ -34,14 +34,12 @@ import kotlin.uuid.Uuid
 @Single
 class AndroidBleScanner(private val centralManager: CentralManager) : BleScanner {
 
-    override fun scan(timeout: Duration, serviceUuid: Uuid?): Flow<BleDevice> {
-        return centralManager
-            .scan(timeout = timeout) {
-                if (serviceUuid != null) {
-                    ServiceUuid(serviceUuid)
-                }
+    override fun scan(timeout: Duration, serviceUuid: Uuid?): Flow<BleDevice> = centralManager
+        .scan(timeout = timeout) {
+            if (serviceUuid != null) {
+                ServiceUuid(serviceUuid)
             }
-            .distinctByPeripheral()
-            .map { AndroidBleDevice(it.peripheral) }
-    }
+        }
+        .distinctByPeripheral()
+        .map { AndroidBleDevice(it.peripheral) }
 }
