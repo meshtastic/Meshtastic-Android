@@ -28,7 +28,7 @@
 ## Phase 4: Integration and Final Testing
 - [x] Task: Integrate Kable backend into Desktop app DI graph 28afcad
     - [ ] Wire up the Kable implementation in `desktop` module DI
-- [~] Task: End-to-end verification
+- [x] Task: End-to-end verification 84aae75
     - [ ] Verify Android app still compiles and connects using Nordic
     - [ ] Verify Desktop app compiles and connects using Kable
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration and Final Testing' (Protocol in workflow.md)
