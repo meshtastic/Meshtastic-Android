@@ -47,6 +47,7 @@ private const val PERCENT_MAX = 100
 private const val PREPARE_DATA_DELAY = 400L
 
 /** Handles Over-the-Air (OTA) firmware updates for nRF52-based devices using the Nordic DFU library. */
+@Deprecated("Use KableNordicDfuHandler instead")
 @Single
 class NordicDfuHandler(
     private val firmwareRetriever: FirmwareRetriever,
