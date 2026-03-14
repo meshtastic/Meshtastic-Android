@@ -118,8 +118,15 @@ class DesktopBleInterface(
         Logger.i { "[$address] Device not found in bonded list, scanning..." }
 
         repeat(SCAN_RETRY_COUNT) { attempt ->
-            val d = scanner.scan(SCAN_TIMEOUT).firstOrNull { it.address == address }
-            if (d != null) return d
+            try {
+                val d =
+                    kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
+                        scanner.scan(SCAN_TIMEOUT).first { it.address == address }
+                    }
+                if (d != null) return d
+            } catch (e: Exception) {
+                // Ignore timeout exceptions
+            }
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
                 delay(SCAN_RETRY_DELAY_MS)
