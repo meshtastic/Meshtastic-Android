@@ -1,7 +1,7 @@
 # Implementation Plan: Desktop BLE Enablement via Kable
 
 ## Phase 1: Define `MeshtasticRadioProfile` Abstraction
-- [ ] Task: Define `MeshtasticRadioProfile` interface in `core:ble/commonMain`
+- [x] Task: Define `MeshtasticRadioProfile` interface in `core:ble/commonMain` eaa623a
     - [ ] Write tests for expected profile behavior (e.g., state flow emission) using a simple fake
     - [ ] Implement `MeshtasticRadioProfile` interface, data classes for states, and configuration
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Define `MeshtasticRadioProfile` Abstraction' (Protocol in workflow.md)
