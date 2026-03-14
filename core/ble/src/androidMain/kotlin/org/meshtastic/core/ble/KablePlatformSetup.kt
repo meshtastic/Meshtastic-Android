@@ -18,14 +18,6 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 
-private const val MAX_MTU = 512
-
-@Suppress("TooGenericExceptionCaught", "SwallowedException")
 internal actual suspend fun Peripheral.platformConnectSetup() {
-    try {
-        // Request max MTU on Android
-        requestMtu(MAX_MTU)
-    } catch (e: Exception) {
-        // Ignore MTU request failures
-    }
+    // Simplified: No specific platform setup required initially.
 }
