@@ -6,14 +6,14 @@
     - [ ] Implement `MeshtasticRadioProfile` interface, data classes for states, and configuration
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Define `MeshtasticRadioProfile` Abstraction' (Protocol in workflow.md) 1206e87
 
-## Phase 2: Refactor Nordic Implementation to use Abstraction
+## Phase 2: Refactor Nordic Implementation to use Abstraction [checkpoint: dc700a5]
 - [x] Task: Implement `MeshtasticRadioProfile` in the existing Nordic implementation (`androidMain`) 83a8a9b
     - [ ] Write/adapt existing Android tests to verify `MeshtasticRadioProfile` adherence
     - [ ] Implement wrapper/adapter for Nordic classes to fulfill `MeshtasticRadioProfile`
 - [x] Task: Decouple app-level BLE transport from Nordic types 2dfedde
     - [ ] Write tests to ensure BLE transport only relies on `MeshtasticRadioProfile`
     - [ ] Refactor transport layer (e.g., `NordicBleInterface` usages) to use the new profile interface
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Refactor Nordic Implementation to use Abstraction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Refactor Nordic Implementation to use Abstraction' (Protocol in workflow.md) dc700a5
 
 ## Phase 3: Implement Kable Backend for Desktop
 - [ ] Task: Setup Kable dependencies for `jvmMain` in `core:ble`
