@@ -67,6 +67,20 @@ import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigSc
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
+@Composable
+private fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): RadioConfigViewModel {
+    val viewModel = koinViewModel<RadioConfigViewModel>()
+    LaunchedEffect(backStack) {
+        val destNum =
+            backStack.lastOrNull { it is SettingsRoutes.Settings }?.let { (it as SettingsRoutes.Settings).destNum }
+                ?: backStack
+                    .lastOrNull { it is SettingsRoutes.SettingsGraph }
+                    ?.let { (it as SettingsRoutes.SettingsGraph).destNum }
+        viewModel.initDestNum(destNum)
+    }
+    return viewModel
+}
+
 /**
  * Registers real settings feature composables into the desktop navigation graph.
  *
@@ -79,7 +93,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
     // Top-level settings — desktop-specific screen (Android version uses Activity, permissions, etc.)
     entry<SettingsRoutes.SettingsGraph> {
         DesktopSettingsScreen(
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
+            radioConfigViewModel = getRadioConfigViewModel(backStack),
             settingsViewModel = koinViewModel<SettingsViewModel>(),
             onNavigate = { route -> backStack.add(route) },
         )
@@ -87,7 +101,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
 
     entry<SettingsRoutes.Settings> {
         DesktopSettingsScreen(
-            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
+            radioConfigViewModel = getRadioConfigViewModel(backStack),
             settingsViewModel = koinViewModel<SettingsViewModel>(),
             onNavigate = { route -> backStack.add(route) },
         )
@@ -96,7 +110,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
     // Device configuration — shared commonMain composable
     entry<SettingsRoutes.DeviceConfiguration> {
         DeviceConfigurationScreen(
-            viewModel = koinViewModel<RadioConfigViewModel>(),
+            viewModel = getRadioConfigViewModel(backStack),
             onBack = { backStack.removeLastOrNull() },
             onNavigate = { route -> backStack.add(route) },
         )
@@ -107,7 +121,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
         val settingsViewModel: SettingsViewModel = koinViewModel()
         val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
         ModuleConfigurationScreen(
-            viewModel = koinViewModel<RadioConfigViewModel>(),
+            viewModel = getRadioConfigViewModel(backStack),
             excludedModulesUnlocked = excludedModulesUnlocked,
             onBack = { backStack.removeLastOrNull() },
             onNavigate = { route -> backStack.add(route) },
@@ -116,10 +130,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
 
     // Administration — shared commonMain composable
     entry<SettingsRoutes.Administration> {
-        AdministrationScreen(
-            viewModel = koinViewModel<RadioConfigViewModel>(),
-            onBack = { backStack.removeLastOrNull() },
-        )
+        AdministrationScreen(viewModel = getRadioConfigViewModel(backStack), onBack = { backStack.removeLastOrNull() })
     }
 
     // Clean node database — shared commonMain composable
@@ -139,7 +150,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
 
     // Config routes — all from commonMain composables
     ConfigRoute.entries.forEach { routeInfo ->
-        desktopConfigComposable(routeInfo.route::class) { viewModel ->
+        desktopConfigComposable(routeInfo.route::class, backStack) { viewModel ->
             LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
             when (routeInfo) {
                 ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
@@ -160,7 +171,7 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
 
     // Module routes — all from commonMain composables
     ModuleRoute.entries.forEach { routeInfo ->
-        desktopConfigComposable(routeInfo.route::class) { viewModel ->
+        desktopConfigComposable(routeInfo.route::class, backStack) { viewModel ->
             LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
             when (routeInfo) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
@@ -210,7 +221,8 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
 /** Helper to register a config/module route entry with a [RadioConfigViewModel] scoped to that entry. */
 fun <R : Route> EntryProviderScope<NavKey>.desktopConfigComposable(
     route: KClass<R>,
+    backStack: NavBackStack<NavKey>,
     content: @Composable (RadioConfigViewModel) -> Unit,
 ) {
-    addEntryProvider(route) { content(koinViewModel<RadioConfigViewModel>()) }
+    addEntryProvider(route) { content(getRadioConfigViewModel(backStack)) }
 }

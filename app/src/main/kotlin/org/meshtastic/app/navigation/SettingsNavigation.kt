@@ -72,12 +72,27 @@ import org.meshtastic.feature.settings.radio.component.TrafficManagementConfigSc
 import org.meshtastic.feature.settings.radio.component.UserConfigScreen
 import kotlin.reflect.KClass
 
+@PublishedApi
+@Composable
+internal fun getRadioConfigViewModel(backStack: NavBackStack<NavKey>): AndroidRadioConfigViewModel {
+    val viewModel = koinViewModel<AndroidRadioConfigViewModel>()
+    LaunchedEffect(backStack) {
+        val destNum =
+            backStack.lastOrNull { it is SettingsRoutes.Settings }?.let { (it as SettingsRoutes.Settings).destNum }
+                ?: backStack
+                    .lastOrNull { it is SettingsRoutes.SettingsGraph }
+                    ?.let { (it as SettingsRoutes.SettingsGraph).destNum }
+        viewModel.initDestNum(destNum)
+    }
+    return viewModel
+}
+
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoutes.SettingsGraph> {
         SettingsScreen(
             settingsViewModel = koinViewModel<AndroidSettingsViewModel>(),
-            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            viewModel = getRadioConfigViewModel(backStack),
             onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
         ) {
             backStack.add(it)
@@ -87,7 +102,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     entry<SettingsRoutes.Settings> {
         SettingsScreen(
             settingsViewModel = koinViewModel<AndroidSettingsViewModel>(),
-            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            viewModel = getRadioConfigViewModel(backStack),
             onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
         ) {
             backStack.add(it)
@@ -96,7 +111,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
     entry<SettingsRoutes.DeviceConfiguration> {
         DeviceConfigurationScreen(
-            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            viewModel = getRadioConfigViewModel(backStack),
             onBack = { backStack.removeLastOrNull() },
             onNavigate = { route -> backStack.add(route) },
         )
@@ -106,7 +121,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
         val settingsViewModel: AndroidSettingsViewModel = koinViewModel()
         val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
         ModuleConfigurationScreen(
-            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            viewModel = getRadioConfigViewModel(backStack),
             excludedModulesUnlocked = excludedModulesUnlocked,
             onBack = { backStack.removeLastOrNull() },
             onNavigate = { route -> backStack.add(route) },
@@ -114,10 +129,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     entry<SettingsRoutes.Administration> {
-        AdministrationScreen(
-            viewModel = koinViewModel<AndroidRadioConfigViewModel>(),
-            onBack = { backStack.removeLastOrNull() },
-        )
+        AdministrationScreen(viewModel = getRadioConfigViewModel(backStack), onBack = { backStack.removeLastOrNull() })
     }
 
     entry<SettingsRoutes.CleanNodeDb> {
@@ -126,7 +138,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ConfigRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class) { viewModel ->
+        configComposable(routeInfo.route::class, backStack) { viewModel ->
             LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
             when (routeInfo) {
                 ConfigRoute.USER -> UserConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
@@ -144,7 +156,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     ModuleRoute.entries.forEach { routeInfo ->
-        configComposable(routeInfo.route::class) { viewModel ->
+        configComposable(routeInfo.route::class, backStack) { viewModel ->
             LaunchedEffect(Unit) { viewModel.setResponseStateLoading(routeInfo) }
             when (routeInfo) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(viewModel, onBack = { backStack.removeLastOrNull() })
@@ -196,13 +208,15 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
 
 fun <R : Route> EntryProviderScope<NavKey>.configComposable(
     route: KClass<R>,
+    backStack: NavBackStack<NavKey>,
     content: @Composable (AndroidRadioConfigViewModel) -> Unit,
 ) {
-    addEntryProvider(route) { content(koinViewModel<AndroidRadioConfigViewModel>()) }
+    addEntryProvider(route) { content(getRadioConfigViewModel(backStack)) }
 }
 
 inline fun <reified R : Route> EntryProviderScope<NavKey>.configComposable(
+    backStack: NavBackStack<NavKey>,
     noinline content: @Composable (AndroidRadioConfigViewModel) -> Unit,
 ) {
-    entry<R> { content(koinViewModel<AndroidRadioConfigViewModel>()) }
+    entry<R> { content(getRadioConfigViewModel(backStack)) }
 }
