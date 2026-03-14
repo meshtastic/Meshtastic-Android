@@ -59,6 +59,8 @@ compose.desktop {
             )
             packageName = "Meshtastic"
 
+            modules("java.net.http")
+
             // App Icon
             macOS { iconFile.set(project.file("src/main/resources/icon.png")) }
             windows { iconFile.set(project.file("src/main/resources/icon.png")) }
