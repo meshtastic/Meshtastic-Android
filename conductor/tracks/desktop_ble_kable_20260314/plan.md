@@ -16,9 +16,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Refactor Nordic Implementation to use Abstraction' (Protocol in workflow.md) dc700a5
 
 ## Phase 3: Implement Kable Backend for Desktop
-- [ ] Task: Setup Kable dependencies for `jvmMain` in `core:ble`
+- [x] Task: Setup Kable dependencies for `jvmMain` in `core:ble` b152eff
     - [ ] Update `build.gradle.kts` to include Kable dependency for Desktop
-- [ ] Task: Implement Kable `MeshtasticRadioProfile` backend (`jvmMain`)
+- [~] Task: Implement Kable `MeshtasticRadioProfile` backend (`jvmMain`)
     - [ ] Write `commonMain` unit tests with Kable fakes to verify scanning, connection, and read/write operations
     - [ ] Implement Kable scanning logic
     - [ ] Implement Kable connection and characteristic management
