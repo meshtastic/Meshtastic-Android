@@ -51,7 +51,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.ktx)
         }
 
-        jvmMain.dependencies { }
+        jvmMain.dependencies {}
 
         commonTest.dependencies {
             implementation(kotlin("test"))
