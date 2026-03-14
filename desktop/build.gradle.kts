@@ -95,11 +95,11 @@ dependencies {
 
     // Compose Desktop
     implementation(compose.desktop.currentOs)
-    linuxAmd64(compose.desktop.linux_x64)
-    linuxAarch64(compose.desktop.linux_arm64)
-    macAmd64(compose.desktop.macos_x64)
-    macAarch64(compose.desktop.macos_arm64)
-    windowsAmd64(compose.desktop.windows_x64)
+    linuxAmd64(libs.compose.multiplatform.desktop.linux.x64)
+    linuxAarch64(libs.compose.multiplatform.desktop.linux.arm64)
+    macAmd64(libs.compose.multiplatform.desktop.macos.x64)
+    macAarch64(libs.compose.multiplatform.desktop.macos.arm64)
+    windowsAmd64(libs.compose.multiplatform.desktop.windows.x64)
 
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.materialIconsExtended)
