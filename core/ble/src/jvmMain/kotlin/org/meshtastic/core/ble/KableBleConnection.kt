@@ -23,10 +23,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -42,7 +40,11 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     override val device: BleDevice?
         get() = _deviceFlow.replayCache.firstOrNull()
 
-    private val _connectionState = MutableSharedFlow<BleConnectionState>(replay = 1)
+    private val _connectionState =
+        MutableSharedFlow<BleConnectionState>(
+            extraBufferCapacity = 1,
+            onBufferOverflow = kotlinx.coroutines.channels.BufferOverflow.DROP_OLDEST,
+        )
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
     override suspend fun connect(device: BleDevice) {
@@ -73,10 +75,15 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         timeoutMs: Long,
         onRegister: suspend () -> Unit,
     ): BleConnectionState {
-        scope.launch { connect(device) }
         onRegister()
-        // wait for connected or disconnected
-        return connectionState.first { it is BleConnectionState.Connected || it is BleConnectionState.Disconnected }
+        return try {
+            kotlinx.coroutines.withTimeout(timeoutMs) {
+                connect(device)
+                BleConnectionState.Connected
+            }
+        } catch (e: Exception) {
+            BleConnectionState.Disconnected
+        }
     }
 
     override suspend fun disconnect() {
