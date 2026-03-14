@@ -4,8 +4,8 @@
 - [x] Task: Extract common Kable state mapping logic from jvmMain to commonMain 10cdd16
     - [x] Create `commonMain` tests for `BleConnectionState` mapping using Kable `State`
     - [x] Move `KableMeshtasticRadioProfile` and `KableBleConnection` logic that doesn't depend on platform specifics to `commonMain`
-- [ ] Task: Implement common Kable `Scanner` and `Peripheral` wrappers
-    - [ ] Extract generic connection lifecycle (connect, reconnect, close) to `commonMain` using Kable's `Peripheral` interface
+- [x] Task: Implement common Kable `Scanner` and `Peripheral` wrappers 2691d70
+    - [x] Extract generic connection lifecycle (connect, reconnect, close) to `commonMain` using Kable's `Peripheral` interface
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Deduplicate Kable Abstractions into commonMain' (Protocol in workflow.md)
 
 ## Phase 2: Implement Kable Backend for Android (`androidMain`)
