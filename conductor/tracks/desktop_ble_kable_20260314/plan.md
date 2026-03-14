@@ -15,7 +15,7 @@
     - [ ] Refactor transport layer (e.g., `NordicBleInterface` usages) to use the new profile interface
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Refactor Nordic Implementation to use Abstraction' (Protocol in workflow.md) dc700a5
 
-## Phase 3: Implement Kable Backend for Desktop
+## Phase 3: Implement Kable Backend for Desktop [checkpoint: ed2a459]
 - [x] Task: Setup Kable dependencies for `jvmMain` in `core:ble` b152eff
     - [ ] Update `build.gradle.kts` to include Kable dependency for Desktop
 - [x] Task: Implement Kable `MeshtasticRadioProfile` backend (`jvmMain`) fa5cc82
@@ -23,10 +23,10 @@
     - [ ] Implement Kable scanning logic
     - [ ] Implement Kable connection and characteristic management
     - [ ] Implement Kable read/write data transfer logic
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Implement Kable Backend for Desktop' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Implement Kable Backend for Desktop' (Protocol in workflow.md) ed2a459
 
 ## Phase 4: Integration and Final Testing
-- [ ] Task: Integrate Kable backend into Desktop app DI graph
+- [~] Task: Integrate Kable backend into Desktop app DI graph
     - [ ] Wire up the Kable implementation in `desktop` module DI
 - [ ] Task: End-to-end verification
     - [ ] Verify Android app still compiles and connects using Nordic
