@@ -162,6 +162,9 @@ class DesktopBleInterface(
 
                 onConnected()
                 discoverServicesAndSetupCharacteristics()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                Logger.d { "[$address] BLE connection coroutine cancelled" }
+                throw e
             } catch (e: Exception) {
                 val failureTime = nowMillis - connectionStartTime
                 Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
