@@ -20,4 +20,6 @@
 
 ## Networking & Transport
 - **Ktor:** Multiplatform HTTP client for web services and TCP streaming.
+- **Kable:** Multiplatform BLE library used for Desktop (and future iOS) transport.
+- **Nordic Android Common Libraries:** Legacy but robust BLE transport for the Android target.
 - **Coroutines & Flows:** For asynchronous programming and state management.

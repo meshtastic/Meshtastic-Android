@@ -19,6 +19,6 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application designed to facil
 - Device configuration and firmware updates
 
 ## Key Architecture Goals
-- Provide a robust, shared KMP core (`core:model`, `core:repository`, `core:domain`, `core:data`, `core:network`) to support multiple platforms (Android, Desktop, iOS)
+- Provide a robust, shared KMP core (`core:model`, `core:ble`, `core:repository`, `core:domain`, `core:data`, `core:network`) to support multiple platforms (Android, Desktop, iOS)
 - Ensure offline-first functionality and resilient data persistence (Room KMP)
 - Decouple UI logic into shared components (`core:ui`, `feature:*`) using Compose Multiplatform
