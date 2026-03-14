@@ -111,9 +111,18 @@ fun desktopModule() = module {
  * Stubs for truly platform-specific interfaces that have no `commonMain` implementation. These require Android APIs
  * (BLE/USB transport, notifications, WorkManager, location, broadcasts, widgets).
  */
+@Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
     single<ServiceRepository> { org.meshtastic.core.service.ServiceRepositoryImpl() }
-    single<RadioInterfaceService> { DesktopRadioInterfaceService(dispatchers = get(), radioPrefs = get()) }
+    single<RadioInterfaceService> {
+        DesktopRadioInterfaceService(
+            dispatchers = get(),
+            radioPrefs = get(),
+            scanner = get(),
+            bluetoothRepository = get(),
+            connectionFactory = get(),
+        )
+    }
     single<RadioController> {
         org.meshtastic.core.service.DirectRadioControllerImpl(
             serviceRepository = get(),

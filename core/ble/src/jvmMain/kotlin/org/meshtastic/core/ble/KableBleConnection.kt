@@ -20,6 +20,7 @@ import com.juul.kable.Peripheral
 import com.juul.kable.State
 import com.juul.kable.peripheral
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -30,9 +31,11 @@ import kotlin.uuid.Uuid
 
 class KableBleService(val peripheral: Peripheral) : BleService
 
+@Suppress("UnusedPrivateProperty")
 class KableBleConnection(private val scope: CoroutineScope, private val tag: String) : BleConnection {
 
     private var peripheral: Peripheral? = null
+    private var stateJob: Job? = null
 
     private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
     override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
@@ -50,37 +53,42 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     override suspend fun connect(device: BleDevice) {
         val kableDevice = device as KableBleDevice
         val p = Peripheral(kableDevice.advertisement)
+        peripheral?.disconnect()
+        peripheral?.close()
         peripheral = p
         _deviceFlow.emit(device)
 
+        stateJob?.cancel()
         var hasStartedConnecting = false
-        p.state
-            .onEach { kableState ->
-                val mappedState =
-                    when (kableState) {
-                        is State.Connecting -> {
-                            hasStartedConnecting = true
-                            BleConnectionState.Connecting
+        stateJob =
+            p.state
+                .onEach { kableState ->
+                    val mappedState =
+                        when (kableState) {
+                            is State.Connecting -> {
+                                hasStartedConnecting = true
+                                BleConnectionState.Connecting
+                            }
+                            is State.Connected -> {
+                                hasStartedConnecting = true
+                                BleConnectionState.Connected
+                            }
+                            is State.Disconnecting -> BleConnectionState.Disconnecting
+                            is State.Disconnected -> {
+                                // Ignore the initial Disconnected state emitted by StateFlow upon subscription
+                                if (!hasStartedConnecting) return@onEach
+                                BleConnectionState.Disconnected
+                            }
                         }
-                        is State.Connected -> {
-                            hasStartedConnecting = true
-                            BleConnectionState.Connected
-                        }
-                        is State.Disconnecting -> BleConnectionState.Disconnecting
-                        is State.Disconnected -> {
-                            // Ignore the initial Disconnected state emitted by StateFlow upon subscription
-                            if (!hasStartedConnecting) return@onEach
-                            BleConnectionState.Disconnected
-                        }
-                    }
-                kableDevice.updateState(mappedState)
-                _connectionState.emit(mappedState)
-            }
-            .launchIn(scope)
+                    kableDevice.updateState(mappedState)
+                    _connectionState.emit(mappedState)
+                }
+                .launchIn(scope)
 
         p.connect()
     }
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override suspend fun connectAndAwait(
         device: BleDevice,
         timeoutMs: Long,
@@ -98,7 +106,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     }
 
     override suspend fun disconnect() {
+        stateJob?.cancel()
+        stateJob = null
         peripheral?.disconnect()
+        peripheral?.close()
+        peripheral = null
+        _deviceFlow.emit(null)
     }
 
     override suspend fun <T> profile(
@@ -106,7 +119,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         timeout: Duration,
         setup: suspend CoroutineScope.(BleService) -> T,
     ): T {
-        val p = peripheral ?: throw IllegalStateException("Not connected")
+        val p = peripheral ?: error("Not connected")
         val service = KableBleService(p)
         return scope.setup(service)
     }

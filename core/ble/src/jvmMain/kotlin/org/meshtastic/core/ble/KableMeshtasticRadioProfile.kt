@@ -29,6 +29,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
+import kotlin.uuid.Uuid
 
 class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : MeshtasticRadioProfile {
 
@@ -40,21 +41,38 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
 
     private val triggerDrain = MutableSharedFlow<Unit>(extraBufferCapacity = 64)
 
+    private fun hasCharacteristic(uuid: Uuid): Boolean = peripheral.services.value?.any { svc ->
+        svc.serviceUuid == SERVICE_UUID && svc.characteristics.any { it.characteristicUuid == uuid }
+    } == true
+
     // Using observe() for fromRadioSync or legacy read loop for fromRadio
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
         // Try to observe FROMRADIOSYNC if available. If it fails, fallback to FROMNUM/FROMRADIO.
         // For simplicity in this implementation, we will just use the observe extension.
         // This might need more robust fallback logic mirroring the Android implementation eventually.
         launch {
             try {
-                peripheral.observe(fromRadioSync).collect { send(it) }
+                if (hasCharacteristic(FROMRADIOSYNC_CHARACTERISTIC)) {
+                    peripheral.observe(fromRadioSync).collect { send(it) }
+                } else {
+                    error("fromRadioSync missing")
+                }
             } catch (e: Exception) {
                 // Fallback to legacy
-                launch { peripheral.observe(fromNum).collect { triggerDrain.tryEmit(Unit) } }
+                launch {
+                    if (hasCharacteristic(FROMNUM_CHARACTERISTIC)) {
+                        peripheral.observe(fromNum).collect { triggerDrain.tryEmit(Unit) }
+                    }
+                }
                 triggerDrain.collect {
                     var keepReading = true
                     while (keepReading) {
                         try {
+                            if (!hasCharacteristic(FROMRADIO_CHARACTERISTIC)) {
+                                keepReading = false
+                                continue
+                            }
                             val packet = peripheral.read(fromRadioChar)
                             if (packet.isEmpty()) keepReading = false else send(packet)
                         } catch (e: Exception) {
@@ -66,7 +84,16 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
         }
     }
 
-    override val logRadio: Flow<ByteArray> = peripheral.observe(logRadioChar)
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
+    override val logRadio: Flow<ByteArray> = channelFlow {
+        try {
+            if (hasCharacteristic(LOGRADIO_CHARACTERISTIC)) {
+                peripheral.observe(logRadioChar).collect { send(it) }
+            }
+        } catch (e: Exception) {
+            // logRadio is optional, ignore if not found
+        }
+    }
 
     override suspend fun sendToRadio(packet: ByteArray) {
         peripheral.write(toRadio, packet, WriteType.WithoutResponse)

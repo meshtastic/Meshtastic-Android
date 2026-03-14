@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -68,6 +69,7 @@ private val SCAN_TIMEOUT = 5.seconds
  * @param address The BLE address of the device to connect to.
  */
 @OptIn(kotlin.uuid.ExperimentalUuidApi::class)
+@Suppress("TooManyFunctions", "TooGenericExceptionCaught", "SwallowedException")
 class DesktopBleInterface(
     private val serviceScope: CoroutineScope,
     private val scanner: BleScanner,
@@ -91,7 +93,9 @@ class DesktopBleInterface(
     }
 
     private val connectionScope: CoroutineScope =
-        CoroutineScope(serviceScope.coroutineContext + SupervisorJob() + exceptionHandler)
+        CoroutineScope(
+            serviceScope.coroutineContext + SupervisorJob(serviceScope.coroutineContext.job) + exceptionHandler,
+        )
     private val bleConnection: BleConnection = connectionFactory.create(connectionScope, address)
     private val writeMutex: Mutex = Mutex()
 
