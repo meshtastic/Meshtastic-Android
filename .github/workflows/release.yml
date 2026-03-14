@@ -295,6 +295,10 @@ jobs:
       - name: Export Full Library Licenses
         run: ./gradlew exportLibraryDefinitions -Pci=true
 
+      - name: Install dependencies for AppImage
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfuse2t64
+
       - name: Package Native Distributions
         env:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
