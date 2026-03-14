@@ -63,23 +63,10 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         stateJob =
             p.state
                 .onEach { kableState ->
-                    val mappedState =
-                        when (kableState) {
-                            is State.Connecting -> {
-                                hasStartedConnecting = true
-                                BleConnectionState.Connecting
-                            }
-                            is State.Connected -> {
-                                hasStartedConnecting = true
-                                BleConnectionState.Connected
-                            }
-                            is State.Disconnecting -> BleConnectionState.Disconnecting
-                            is State.Disconnected -> {
-                                // Ignore the initial Disconnected state emitted by StateFlow upon subscription
-                                if (!hasStartedConnecting) return@onEach
-                                BleConnectionState.Disconnected
-                            }
-                        }
+                    val mappedState = kableState.toBleConnectionState(hasStartedConnecting) ?: return@onEach
+                    if (kableState is State.Connecting || kableState is State.Connected) {
+                        hasStartedConnecting = true
+                    }
                     kableDevice.updateState(mappedState)
                     _connectionState.emit(mappedState)
                 }

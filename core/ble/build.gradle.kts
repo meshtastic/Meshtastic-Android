@@ -37,6 +37,7 @@ kotlin {
 
             implementation(libs.kermit)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kable.core)
         }
 
         androidMain.dependencies {
@@ -50,7 +51,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.ktx)
         }
 
-        jvmMain.dependencies { implementation(libs.kable.core) }
+        jvmMain.dependencies { }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
