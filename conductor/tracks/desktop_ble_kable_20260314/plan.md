@@ -25,10 +25,10 @@
     - [ ] Implement Kable read/write data transfer logic
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Implement Kable Backend for Desktop' (Protocol in workflow.md) ed2a459
 
-## Phase 4: Integration and Final Testing
+## Phase 4: Integration and Final Testing [checkpoint: af6d3b3]
 - [x] Task: Integrate Kable backend into Desktop app DI graph 28afcad
     - [ ] Wire up the Kable implementation in `desktop` module DI
 - [x] Task: End-to-end verification 84aae75
     - [ ] Verify Android app still compiles and connects using Nordic
     - [ ] Verify Desktop app compiles and connects using Kable
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Integration and Final Testing' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Integration and Final Testing' (Protocol in workflow.md) af6d3b3
