@@ -25,6 +25,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.conveyor)
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
@@ -108,6 +109,7 @@ compose.desktop {
                     ?: "1.0.0"
             val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(rawVersion)?.value ?: "1.0.0"
             packageVersion = sanitizedVersion
+            project.version = sanitizedVersion
 
             description = "Meshtastic Desktop Application"
             vendor = "Meshtastic LLC"
@@ -146,6 +148,12 @@ dependencies {
 
     // Compose Desktop
     implementation(compose.desktop.currentOs)
+    linuxAmd64(compose.desktop.linux_x64)
+    linuxAarch64(compose.desktop.linux_arm64)
+    macAmd64(compose.desktop.macos_x64)
+    macAarch64(compose.desktop.macos_arm64)
+    windowsAmd64(compose.desktop.windows_x64)
+
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.materialIconsExtended)
     implementation(libs.compose.multiplatform.runtime)

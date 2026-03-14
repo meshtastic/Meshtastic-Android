@@ -62,7 +62,7 @@ vico = "3.0.3"
 dependency-guard = "0.5.0"
 nordic-ble = "2.0.0-alpha16"
 nordic-common = "2.9.2"
-
+conveyor = "2.0"
 
 [libraries]
 # AndroidX
@@ -260,6 +260,7 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", version.ref = "testRetry" }
 
 [plugins]
+conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
