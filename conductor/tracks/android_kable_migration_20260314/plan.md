@@ -1,12 +1,12 @@
 # Implementation Plan: Replace Nordic with Kable on Android (Deduplication Pass)
 
-## Phase 1: Deduplicate Kable Abstractions into `commonMain`
+## Phase 1: Deduplicate Kable Abstractions into `commonMain` [checkpoint: 709f6e3]
 - [x] Task: Extract common Kable state mapping logic from jvmMain to commonMain 10cdd16
     - [x] Create `commonMain` tests for `BleConnectionState` mapping using Kable `State`
     - [x] Move `KableMeshtasticRadioProfile` and `KableBleConnection` logic that doesn't depend on platform specifics to `commonMain`
 - [x] Task: Implement common Kable `Scanner` and `Peripheral` wrappers 2691d70
     - [x] Extract generic connection lifecycle (connect, reconnect, close) to `commonMain` using Kable's `Peripheral` interface
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Deduplicate Kable Abstractions into commonMain' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Deduplicate Kable Abstractions into commonMain' (Protocol in workflow.md) 709f6e3
 
 ## Phase 2: Implement Kable Backend for Android (`androidMain`)
 - [ ] Task: Add Kable dependency to Android source set in `core:ble/build.gradle.kts`
