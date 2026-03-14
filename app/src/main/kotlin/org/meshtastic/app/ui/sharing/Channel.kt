@@ -302,7 +302,7 @@ private const val QR_CODE_SIZE = 960
 
 @Composable
 private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
-    val commonUri = channelSet.getChannelUrl(shouldAddChannel)
+    val commonUri = channelSet.getChannelUrl(false, shouldAddChannel)
     val uriString = commonUri.toString()
     val qrCode = remember(uriString) { generateQrCode(uriString, QR_CODE_SIZE) }
     QrDialog(
