@@ -37,6 +37,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isShiftPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +64,7 @@ import org.meshtastic.core.ui.util.createClipEntry
 import org.meshtastic.feature.messaging.MessageViewModel
 import org.meshtastic.feature.messaging.component.ActionModeTopBar
 import org.meshtastic.feature.messaging.component.DeleteMessageDialog
+import org.meshtastic.feature.messaging.component.MESSAGE_CHARACTER_LIMIT_BYTES
 import org.meshtastic.feature.messaging.component.MessageInput
 import org.meshtastic.feature.messaging.component.MessageItem
 import org.meshtastic.feature.messaging.component.MessageMenuAction
@@ -301,6 +308,24 @@ fun DesktopMessageContent(
                     },
                     isEnabled = connectionState.isConnected(),
                     isHomoglyphEncodingEnabled = homoglyphEncodingEnabled,
+                    modifier =
+                    Modifier.onPreviewKeyEvent { event ->
+                        if (event.type == KeyEventType.KeyDown && event.key == Key.Enter && !event.isShiftPressed) {
+                            val currentByteLength = messageText.encodeToByteArray().size
+                            val isOverLimit = currentByteLength > MESSAGE_CHARACTER_LIMIT_BYTES
+                            val trimmed = messageText.trim()
+                            if (trimmed.isNotEmpty() && connectionState.isConnected() && !isOverLimit) {
+                                viewModel.sendMessage(trimmed, contactKey, replyingToPacketId)
+                                if (replyingToPacketId != null) replyingToPacketId = null
+                                messageText = ""
+                                return@onPreviewKeyEvent true
+                            }
+                            // If over limit or empty, we still consume Enter to prevent newlines if the user
+                            // intended to send, but only if they are not holding shift.
+                            if (!event.isShiftPressed) return@onPreviewKeyEvent true
+                        }
+                        false
+                    },
                 )
             }
         },
