@@ -32,3 +32,6 @@
     - [ ] Verify Android app still compiles and connects using Nordic
     - [ ] Verify Desktop app compiles and connects using Kable
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Integration and Final Testing' (Protocol in workflow.md) af6d3b3
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions b36da82
