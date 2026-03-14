@@ -259,9 +259,13 @@ jobs:
           subject-path: app/build/outputs/apk/fdroid/release/*.apk
 
   release-desktop:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     needs: [prepare-build-info]
     environment: Release
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-22.04, ubuntu-22.04-arm]
     env:
       GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
       GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
@@ -291,21 +295,32 @@ jobs:
       - name: Export Full Library Licenses
         run: ./gradlew exportLibraryDefinitions -Pci=true
 
-      - name: Setup Conveyor
-        uses: hydraulic-software/setup-conveyor@v1.2
+      - name: Install dependencies for AppImage
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libfuse2
 
-      - name: Build all Desktop Artifacts
+      - name: Package Native Distributions
         env:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-        run: conveyor make site
+          APPIMAGE_EXTRACT_AND_RUN: 1
+        run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS --no-daemon
+
+      - name: List Desktop Binaries
+        if: runner.os == 'Linux'
+        run: ls -R desktop/build/compose/binaries/main-release
 
       - name: Upload Desktop Artifacts
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: desktop-all-platforms
+          name: desktop-${{ runner.os }}-${{ runner.arch }}
           path: |
-            output/*
+            desktop/build/compose/binaries/main-release/*/*.dmg
+            desktop/build/compose/binaries/main-release/*/*.msi
+            desktop/build/compose/binaries/main-release/*/*.exe
+            desktop/build/compose/binaries/main-release/*/*.deb
+            desktop/build/compose/binaries/main-release/*/*.rpm
+            desktop/build/compose/binaries/main-release/*/*.AppImage
           retention-days: 1
           if-no-files-found: ignore
 

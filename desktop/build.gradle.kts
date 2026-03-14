@@ -18,13 +18,13 @@
 import com.mikepenz.aboutlibraries.plugin.DuplicateMode
 import com.mikepenz.aboutlibraries.plugin.DuplicateRule
 import io.gitlab.arturbosch.detekt.Detekt
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose.multiplatform)
-    alias(libs.plugins.conveyor)
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
@@ -50,19 +50,70 @@ compose.desktop {
             isEnabled.set(false)
             configurationFiles.from(project.file("proguard-rules.pro"))
         }
+
+        nativeDistributions {
+            packageName = "Meshtastic"
+
+            // Ensure critical JVM modules are included in the custom JRE bundled with the app.
+            // jdeps might miss some of these if they are loaded via reflection or JNI.
+            modules(
+                "java.net.http", // Ktor Java client
+                "jdk.crypto.ec", // Required for SSL/TLS HTTPS requests
+                "jdk.unsupported", // sun.misc.Unsafe used by Coroutines & Okio
+                "java.sql", // Sometimes required by SQLite JNI
+                "java.naming", // Required by Ktor for DNS resolution
+            )
+
+            // Default JVM arguments for the packaged application
+            // Increase max heap size to prevent OOM issues on complex maps/data
+            jvmArgs("-Xmx2G")
+
+            // App Icon & OS Specific Configurations
+            macOS {
+                iconFile.set(project.file("src/main/resources/icon.icns"))
+                // TODO: To prepare for real distribution on macOS, you'll need to sign and notarize.
+                // You can inject these from CI environment variables.
+                // bundleID = "org.meshtastic.desktop"
+                // sign = true
+                // notarize = true
+                // appleID = System.getenv("APPLE_ID")
+                // appStorePassword = System.getenv("APPLE_APP_SPECIFIC_PASSWORD")
+            }
+            windows {
+                iconFile.set(project.file("src/main/resources/icon.ico"))
+                menuGroup = "Meshtastic"
+                // TODO: Must generate and set a consistent UUID for Windows upgrades.
+                // upgradeUuid = "YOUR-UPGRADE-UUID-HERE"
+            }
+            linux {
+                iconFile.set(project.file("src/main/resources/icon.png"))
+                menuGroup = "Network"
+            }
+
+            // Define target formats based on the current host OS to avoid configuration errors
+            // (e.g., trying to configure Linux AppImage notarization on macOS).
+            val currentOs = System.getProperty("os.name").lowercase()
+            when {
+                currentOs.contains("mac") -> targetFormats(TargetFormat.Dmg)
+                currentOs.contains("win") -> targetFormats(TargetFormat.Msi, TargetFormat.Exe)
+                else -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
+            }
+
+            // Read version from project properties (passed by CI) or default to 1.0.0
+            // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes
+            val rawVersion =
+                project.findProperty("android.injected.version.name")?.toString()
+                    ?: project.findProperty("appVersionName")?.toString()
+                    ?: System.getenv("VERSION_NAME")
+                    ?: "1.0.0"
+            val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(rawVersion)?.value ?: "1.0.0"
+            packageVersion = sanitizedVersion
+
+            description = "Meshtastic Desktop Application"
+            vendor = "Meshtastic LLC"
+        }
     }
 }
-
-// Read version from project properties (passed by CI) or default to 1.0.0
-// Native installers require strict numeric semantic versions (X.Y.Z) without suffixes
-val rawVersion =
-    project.findProperty("android.injected.version.name")?.toString()
-        ?: project.findProperty("appVersionName")?.toString()
-        ?: System.getenv("VERSION_NAME")
-        ?: "1.0.0"
-val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(rawVersion)?.value ?: "1.0.0"
-
-project.version = sanitizedVersion
 
 dependencies {
     implementation(libs.aboutlibraries.core)
@@ -95,12 +146,6 @@ dependencies {
 
     // Compose Desktop
     implementation(compose.desktop.currentOs)
-    linuxAmd64(libs.compose.multiplatform.desktop.linux.x64)
-    linuxAarch64(libs.compose.multiplatform.desktop.linux.arm64)
-    macAmd64(libs.compose.multiplatform.desktop.macos.x64)
-    macAarch64(libs.compose.multiplatform.desktop.macos.arm64)
-    windowsAmd64(libs.compose.multiplatform.desktop.windows.x64)
-
     implementation(libs.compose.multiplatform.material3)
     implementation(libs.compose.multiplatform.materialIconsExtended)
     implementation(libs.compose.multiplatform.runtime)

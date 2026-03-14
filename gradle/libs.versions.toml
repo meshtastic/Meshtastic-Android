@@ -62,7 +62,7 @@ vico = "3.0.3"
 dependency-guard = "0.5.0"
 nordic-ble = "2.0.0-alpha16"
 nordic-common = "2.9.2"
-conveyor = "2.0"
+
 
 [libraries]
 # AndroidX
@@ -134,13 +134,6 @@ compose-multiplatform-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooli
 compose-multiplatform-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform" }
 compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" }
-
-# Compose Desktop Native Distributions
-compose-multiplatform-desktop-linux-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-x64", version.ref = "compose-multiplatform" }
-compose-multiplatform-desktop-linux-arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-linux-arm64", version.ref = "compose-multiplatform" }
-compose-multiplatform-desktop-macos-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-x64", version.ref = "compose-multiplatform" }
-compose-multiplatform-desktop-macos-arm64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-macos-arm64", version.ref = "compose-multiplatform" }
-compose-multiplatform-desktop-windows-x64 = { module = "org.jetbrains.compose.desktop:desktop-jvm-windows-x64", version.ref = "compose-multiplatform" }
 
 # JetBrains Material 3 Adaptive (multiplatform — Android, Desktop, iOS)
 jetbrains-compose-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "jetbrains-adaptive" }
@@ -267,7 +260,6 @@ spotless-gradlePlugin = { module = "com.diffplug.spotless:spotless-plugin-gradle
 test-retry-gradlePlugin = { module = "org.gradle:test-retry-gradle-plugin", version.ref = "testRetry" }
 
 [plugins]
-conveyor = { id = "dev.hydraulic.conveyor", version.ref = "conveyor" }
 # Android
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
