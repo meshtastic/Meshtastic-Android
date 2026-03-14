@@ -374,6 +374,10 @@
     <string name="battery">Aku</string>
     <string name="channel_utilization">Kanali kasutus</string>
     <string name="air_utilization">Saate kasutus</string>
+    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
+    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Temperatuur</string>
     <string name="humidity">Niiskus</string>
     <string name="soil_temperature">Pinnase temperatuur</string>
