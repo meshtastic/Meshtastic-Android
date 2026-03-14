@@ -18,9 +18,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Implement Kable Backend for Android' (Protocol in workflow.md) 12217de
 
 ## Phase 3: Migrate OTA Firmware Update Logic
-- [ ] Task: Deprecate `NordicDfuHandler` and replace with Kable-based DFU
-    - [ ] Write failing tests for Kable DFU integration
-    - [ ] Implement new DFU handler in `feature:firmware` using `MeshtasticRadioProfile` / Kable abstraction
+- [x] Task: Deprecate `NordicDfuHandler` and replace with Kable-based DFU 06fe4f5
+    - [x] Write failing tests for Kable DFU integration
+    - [x] Implement new DFU handler in `feature:firmware` using `MeshtasticRadioProfile` / Kable abstraction
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Migrate OTA Firmware Update Logic' (Protocol in workflow.md)
 
 ## Phase 4: Wire Kable into Android App and Remove Nordic
