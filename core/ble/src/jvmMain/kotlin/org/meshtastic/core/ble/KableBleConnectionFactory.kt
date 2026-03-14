@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,10 @@
  */
 package org.meshtastic.core.ble
 
-actual fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile {
-    val kableService = this as KableBleService
-    return KableMeshtasticRadioProfile(kableService.peripheral)
+import kotlinx.coroutines.CoroutineScope
+import org.koin.core.annotation.Single
+
+@Single
+class KableBleConnectionFactory : BleConnectionFactory {
+    override fun create(scope: CoroutineScope, tag: String): BleConnection = KableBleConnection(scope, tag)
 }

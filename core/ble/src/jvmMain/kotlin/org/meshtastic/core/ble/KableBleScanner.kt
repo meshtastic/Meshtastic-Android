@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,19 @@
  */
 package org.meshtastic.core.ble
 
-actual fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile {
-    val kableService = this as KableBleService
-    return KableMeshtasticRadioProfile(kableService.peripheral)
+import com.juul.kable.Scanner
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Single
+import kotlin.time.Duration
+import kotlin.uuid.Uuid
+
+@Single
+class KableBleScanner : BleScanner {
+    override fun scan(timeout: Duration, serviceUuid: Uuid?): Flow<BleDevice> {
+        val scanner = Scanner()
+        // Kable's Scanner doesn't currently take timeout directly in the builder, it runs until cancelled
+        // We will just map advertisements. The caller handles the timeout using `take` or `withTimeoutOrNull`.
+        return scanner.advertisements.map { KableBleDevice(it) }
+    }
 }
