@@ -50,6 +50,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.ktx)
         }
 
+        jvmMain.dependencies { implementation(libs.kable.core) }
+
         commonTest.dependencies {
             implementation(kotlin("test"))
             implementation(libs.kotlinx.coroutines.test)

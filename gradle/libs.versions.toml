@@ -60,6 +60,7 @@ spotless = "8.3.0"
 wire = "6.0.0"
 vico = "3.0.3"
 dependency-guard = "0.5.0"
+kable = "0.42.0"
 nordic-ble = "2.0.0-alpha16"
 nordic-common = "2.9.2"
 
@@ -220,6 +221,8 @@ nordic-core-mock = { module = "no.nordicsemi.kotlin.ble:core-mock", version.ref 
 nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.11.0" }
 nordic-ble-env-android = { module = "no.nordicsemi.kotlin.ble:environment-android", version.ref = "nordic-ble" }
 nordic-ble-env-android-compose = { module = "no.nordicsemi.kotlin.ble:environment-android-compose", version.ref = "nordic-ble" }
+
+kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 
 nordic-common-core = { module = "no.nordicsemi.android.common:core", version.ref = "nordic-common" }
 nordic-common-permissions-ble = { module = "no.nordicsemi.android.common:permissions-ble", version.ref = "nordic-common" }
