@@ -310,6 +310,7 @@ jobs:
             desktop/build/compose/binaries/main-release/*/*.exe
             desktop/build/compose/binaries/main-release/*/*.deb
             desktop/build/compose/binaries/main-release/*/*.rpm
+            desktop/build/compose/binaries/main-release/*/*.AppImage
           retention-days: 1
           if-no-files-found: ignore
 

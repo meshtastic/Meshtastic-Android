@@ -78,19 +78,25 @@ compose.desktop {
                 // notarize = true
                 // appleID = System.getenv("APPLE_ID")
                 // appStorePassword = System.getenv("APPLE_APP_SPECIFIC_PASSWORD")
-                targetFormats(TargetFormat.Dmg)
             }
             windows {
                 iconFile.set(project.file("src/main/resources/icon.ico"))
                 menuGroup = "Meshtastic"
                 // TODO: Must generate and set a consistent UUID for Windows upgrades.
                 // upgradeUuid = "YOUR-UPGRADE-UUID-HERE"
-                targetFormats(TargetFormat.Msi, TargetFormat.Exe)
             }
             linux {
                 iconFile.set(project.file("src/main/resources/icon.png"))
                 menuGroup = "Network"
-                targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
+            }
+
+            // Define target formats based on the current host OS to avoid configuration errors
+            // (e.g., trying to configure Linux AppImage notarization on macOS).
+            val currentOs = System.getProperty("os.name").lowercase()
+            when {
+                currentOs.contains("mac") -> targetFormats(TargetFormat.Dmg)
+                currentOs.contains("win") -> targetFormats(TargetFormat.Msi, TargetFormat.Exe)
+                else -> targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
             }
 
             // Read version from project properties (passed by CI) or default to 1.0.0
