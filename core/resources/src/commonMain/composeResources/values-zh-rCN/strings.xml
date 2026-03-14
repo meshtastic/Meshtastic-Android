@@ -198,12 +198,20 @@
     <string name="connecting">正在连接</string>
     <string name="not_connected">尚未联机</string>
     <string name="no_device_selected">未选择设备</string>
+    <string name="unknown_device">未知设备</string>
+    <string name="no_network_devices_found">未找到网络设备</string>
+    <string name="no_usb_devices_found">未找到USB设备。</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">演示模式</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="app_too_old">需要更新应用程序</string>
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <string name="none">无 (停用)</string>
     <string name="meshtastic_service_notifications">服务通知</string>
     <string name="acknowledgements">开源</string>
+    <string name="open_source_libraries">开源库</string>
+    <string name="open_source_description">Meshtastic 是用以下开源库构建的。点击任何库查看其许可证。</string>
+    <string name="library_count">%1$d 库</string>
     <string name="channel_invalid">此频道 URL 无效，无法使用</string>
     <string name="contact_invalid">此频道 URL 无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
@@ -365,6 +373,10 @@
     <string name="battery">电池</string>
     <string name="channel_utilization">ChUtil</string>
     <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
+    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">温度</string>
     <string name="humidity">湿度</string>
     <string name="soil_temperature">土壤温度</string>
@@ -1212,5 +1224,15 @@
     <string name="traffic_management_exhaust_hop_telemetry">仅本地远程远程(中继)</string>
     <string name="traffic_management_exhaust_hop_position">本地位置(中继)</string>
     <string name="traffic_management_router_preserve_hops">保留路由跳数</string>
+    <string name="no_messages_yet">尚无消息</string>
+    <string name="unread_count">%1$d 未读</string>
+    <string name="map_coming_soon">地图支持将很快到桌面</string>
     <string name="no_device_connected">设备未连接</string>
+    <string name="update_status">更新状态</string>
+    <string name="ready_for_firmware_update">准备好固件更新</string>
+    <string name="check_for_updates">检查更新</string>
+    <string name="download_firmware">下载固件</string>
+    <string name="update_device">更新设备</string>
+    <string name="note">备注</string>
+    <string name="firmware_charge_warning">在启动固件更新之前确认您的设备已完全充电。在更新过程中不要断开连接或断开设备。</string>
 </resources>

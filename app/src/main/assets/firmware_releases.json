@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9903",
+      "title": "feat: Support INA219/INA226 as primary battery sensor without ADC pin",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9903",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9895",
       "title": "fix(native): implement BinarySemaphorePosix with proper pthread synchronization",
       "page_url": "https://github.com/meshtastic/firmware/pull/9895",

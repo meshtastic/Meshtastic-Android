@@ -45,6 +45,7 @@
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
     <string name="message_status_queued">Наредено на опашка за изпращане</string>
+    <string name="message_status_sfpp_routing"></string>
     <string name="routing_error_none">Признато</string>
     <string name="routing_error_no_route">Няма маршрут</string>
     <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
@@ -63,6 +64,7 @@
     <string name="role_client">Клиент</string>
     <string name="role_client_desc">Свързано с приложение или самостоятелно устройство за съобщения.</string>
     <string name="role_client_mute_desc">Устройство, което не препредава пакети от други устройства.фигурир</string>
+    <string name="role_client_base_desc">Третира пакетите от или до предпочитани възли като ROUTER_LATE, а всички останали пакети като CLIENT.</string>
     <string name="role_router">Рутер</string>
     <string name="role_router_desc">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения. Вижда се в списъка с възли.</string>
     <string name="role_router_client">Рутер клиент</string>
@@ -98,8 +100,8 @@
     <string name="config_lora_region_summary">Регионът, където ще използвате радиостанциите си.</string>
     <string name="config_lora_modem_preset_summary">Налични предварително зададени настройки на модема, по подразбиране е Дълъг Бърз.</string>
     <string name="config_lora_hop_limit_summary">Задава максималния брой отскоци, по подразбиране е 3. Увеличаването на броя отскоци също увеличава претоварването и трябва да се използва внимателно. Съобщенията с 0 отскока няма да получат ACK.</string>
-    <string name="config_network_wifi_enabled_summary">Активирането на WiFi ще дезактивира Bluetooth връзката с приложението.</string>
-    <string name="config_network_eth_enabled_summary">Активирането на Ethernet ще дезактивира Bluetooth връзката с приложението. TCP връзки с възли не са налични на устройства на Apple.</string>
+    <string name="config_network_wifi_enabled_summary">Активирането на WiFi ще деактивира Bluetooth връзката с приложението.</string>
+    <string name="config_network_eth_enabled_summary">Активирането на Ethernet ще деактивира Bluetooth връзката с приложението. TCP връзки с възли не са налични на устройства на Apple.</string>
     <string name="config_position_broadcast_secs_summary">Максималният интервал, който може да изтече, без възела да излъчи позиция.</string>
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">Най-бързо ще бъдат изпратени актуализации на позицията, ако е спазено минималното разстояние.</string>
     <string name="config_security_public_key">Генерира се от вашия публичен ключ и се изпраща до други възли в мрежата, за да им позволи да изчислят споделен секретен ключ.</string>
@@ -160,7 +162,7 @@
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
-    <string name="none">Няма (дезактивирано)</string>
+    <string name="none">Няма (деактивирано)</string>
     <string name="meshtastic_service_notifications">Сервизни известия</string>
     <string name="acknowledgements">Благодарности</string>
     <string name="open_source_libraries">Библиотеки с отворен код</string>
@@ -194,6 +196,8 @@
     <string name="debug_filter_add_custom">Добавяне на персонализиран филтър</string>
     <string name="debug_filter_preset_title">Предварително зададени филтри</string>
     <string name="debug_filter_show_ignored">Показване само на игнорираните възли</string>
+    <string name="debug_store_logs_title">Съхраняване на mesh мрежови журнали</string>
+    <string name="debug_store_logs_summary">Деактивирайте, за да пропуснете записването на журналите на mesh мрежата на диска</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
@@ -316,6 +320,10 @@
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
     <string name="battery">Батерия</string>
+    <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
+    <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
+    <string name="device_metrics_numeric_value">%1$.1f</string>
+    <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="logs">записа</string>
     <string name="hops_away">Брой отскоци</string>
     <string name="hops_away_template">Брой отскоци: %1$d</string>
@@ -551,10 +559,13 @@
     <string name="number_of_records">Брой записи</string>
     <string name="server">Сървър</string>
     <string name="telemetry_config">Конфигуриране на телеметрията</string>
+    <string name="device_metrics_update_interval_seconds">Интервал на актуализиране на показателите на устройството</string>
+    <string name="environment_metrics_update_interval_seconds">Интервал на актуализиране на показателите за средата</string>
     <string name="environment_metrics_module_enabled">Модулът за измерване на околната среда е активиран</string>
     <string name="environment_metrics_on_screen_enabled">Показателите на околната среда на екрана са активирани</string>
     <string name="environment_metrics_use_fahrenheit">Показателите на околната среда използват Фаренхайт</string>
     <string name="air_quality_metrics_module_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
+    <string name="air_quality_metrics_update_interval_seconds">Интервал на актуализиране на показателите за качеството на въздуха</string>
     <string name="air_quality_icon">Икона за качество на въздуха</string>
     <string name="user_config">Конфигуриране на потребителя</string>
     <string name="node_id">ID на възела</string>
@@ -680,6 +691,7 @@
     <string name="security_icon_insecure_precise_only">Несигурен канал, прецизно местоположение</string>
     <string name="security_icon_help_red_open_lock">Червеният отворен катинар означава, че каналът не е сигурно криптиран, използва се за точни данни за местоположение и не използва ключ или използва известен ключ от 1 байт.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Предупреждение: Несигурно, точно местоположение &amp; MQTT Uplink</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Сигурност на канала</string>
     <string name="security_icon_help_title_all">Значения на сигурността на канала</string>
@@ -771,6 +783,7 @@
     <string name="device_configuration">Конфигурация на устройството</string>
     <string name="remotely_administrating">"[Отдалечен] %1$s"</string>
     <string name="device_telemetry_enabled">Изпращане на телеметрия на устройството</string>
+    <string name="device_telemetry_enabled_summary">Активиране/деактивиране на модула за телеметрия на устройството за изпращане на показатели към мрежата. Това са номинални стойности. Претоварените мрежи автоматично ще се мащабират до по-дълги интервали въз основа на броя на онлайн възлите.</string>
     <string name="one_hour">1 час</string>
     <string name="eight_hours">8 часа</string>
     <string name="one_day">24 часа</string>
@@ -888,6 +901,9 @@
     <string name="mark_as_read">Маркиране като прочетено</string>
     <string name="now">Сега</string>
     <string name="add_channels_title">Добавяне на канали</string>
+    <string name="add_channels_description">Следните канали бяха открити в QR кода. Изберете канала, който искате да добавите към устройството си. Съществуващите канали ще бъдат запазени.</string>
+    <string name="replace_channels_and_settings_title">Замяна на канали &amp; настройки</string>
+    <string name="replace_channels_and_settings_description">Този QR код съдържа пълна конфигурация. Той ще ЗАМЕНИ съществуващите ви канали и настройки на радиото. Всички съществуващи канали ще бъдат премахнати.</string>
     <string name="loading">Зареждане</string>
     <!-- Message Filter -->
     <string name="filter_enable">Активиране на филтрирането</string>
@@ -900,7 +916,7 @@
     <string name="filter_disable_for_contact">Дезактивиране на филтрирането</string>
     <string name="scan_nfc">Сканиране на NFC</string>
     <string name="generate_qr_code">Генериране на QR код</string>
-    <string name="nfc_disabled">NFC е дезактивиран. Моля, активирайте го в системните настройки.</string>
+    <string name="nfc_disabled">NFC е деактивиран. Моля, активирайте го в системните настройки.</string>
     <string name="all_time">Всички</string>
     <string name="bluetooth_permission">Bluetooth</string>
     <string name="configure_bluetooth_permissions">Конфигуриране на разрешения за Bluetooth</string>
@@ -951,6 +967,14 @@
     <string name="traffic_management">Управление на трафика</string>
     <string name="traffic_management_enabled">Модулът е активиран</string>
     <string name="traffic_management_nodeinfo_direct_response_max_hops">Максимален брой отскоци за директен отговор</string>
+    <string name="no_messages_yet">Все още няма съобщения</string>
+    <string name="unread_count">%1$d непрочетени</string>
+    <string name="map_coming_soon">Поддръжката на карти скоро ще бъде налична и за настолни компютри</string>
     <string name="no_device_connected">Няма свързано устройство</string>
+    <string name="ready_for_firmware_update">Готово за актуализация на фърмуера</string>
+    <string name="check_for_updates">Проверка за актуализации</string>
+    <string name="download_firmware">Изтегляне на фърмуера</string>
+    <string name="update_device">Актуализиране на устройството</string>
     <string name="note">Забележка</string>
+    <string name="firmware_charge_warning">Уверете се, че устройството ви е напълно заредено, преди да започнете актуализация на фърмуера. Не изключвайте устройството от контакта или захранването по време на процеса на актуализация.</string>
 </resources>
