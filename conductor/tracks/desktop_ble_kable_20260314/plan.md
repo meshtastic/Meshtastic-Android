@@ -18,7 +18,7 @@
 ## Phase 3: Implement Kable Backend for Desktop
 - [x] Task: Setup Kable dependencies for `jvmMain` in `core:ble` b152eff
     - [ ] Update `build.gradle.kts` to include Kable dependency for Desktop
-- [~] Task: Implement Kable `MeshtasticRadioProfile` backend (`jvmMain`)
+- [x] Task: Implement Kable `MeshtasticRadioProfile` backend (`jvmMain`) fa5cc82
     - [ ] Write `commonMain` unit tests with Kable fakes to verify scanning, connection, and read/write operations
     - [ ] Implement Kable scanning logic
     - [ ] Implement Kable connection and characteristic management
