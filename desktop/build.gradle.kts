@@ -44,6 +44,9 @@ compose.desktop {
         mainClass = "org.meshtastic.desktop.MainKt"
 
         buildTypes.release.proguard {
+            // Note: Enabling ProGuard will reduce final distribution size significantly,
+            // but will require thorough testing of serialization, reflection (Koin), and JNI (SQLite).
+            // Recommend enabling when ready: isEnabled.set(true)
             isEnabled.set(false)
             configurationFiles.from(project.file("proguard-rules.pro"))
         }
@@ -58,14 +61,43 @@ compose.desktop {
             )
             packageName = "Meshtastic"
 
-            modules("java.net.http")
+            // Ensure critical JVM modules are included in the custom JRE bundled with the app.
+            // jdeps might miss some of these if they are loaded via reflection or JNI.
+            modules(
+                "java.net.http",      // Ktor Java client
+                "jdk.crypto.ec",      // Required for SSL/TLS HTTPS requests
+                "jdk.unsupported",    // sun.misc.Unsafe used by Coroutines & Okio
+                "java.sql",           // Sometimes required by SQLite JNI
+                "java.naming"         // Required by Ktor for DNS resolution
+            )
+            
+            // Default JVM arguments for the packaged application
+            // Increase max heap size to prevent OOM issues on complex maps/data
+            jvmArgs("-Xmx2G")
 
-            // App Icon
-            macOS { iconFile.set(project.file("src/main/resources/icon.icns")) }
-            windows { iconFile.set(project.file("src/main/resources/icon.ico")) }
-            linux { iconFile.set(project.file("src/main/resources/icon.png")) }
+            // App Icon & OS Specific Configurations
+            macOS { 
+                iconFile.set(project.file("src/main/resources/icon.icns")) 
+                // TODO: To prepare for real distribution on macOS, you'll need to sign and notarize.
+                // You can inject these from CI environment variables.
+                // bundleID = "org.meshtastic.desktop"
+                // sign = true
+                // notarize = true
+                // appleID = System.getenv("APPLE_ID")
+                // appStorePassword = System.getenv("APPLE_APP_SPECIFIC_PASSWORD")
+            }
+            windows { 
+                iconFile.set(project.file("src/main/resources/icon.ico")) 
+                menuGroup = "Meshtastic"
+                // TODO: Must generate and set a consistent UUID for Windows upgrades. 
+                // upgradeUuid = "YOUR-UPGRADE-UUID-HERE"
+            }
+            linux { 
+                iconFile.set(project.file("src/main/resources/icon.png")) 
+                menuGroup = "Network"
+            }
 
-            // Read version from project properties (passed by CI) or default to 0.1.0
+            // Read version from project properties (passed by CI) or default to 1.0.0
             // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes
             val rawVersion = project.findProperty("android.injected.version.name")?.toString()
                 ?: System.getenv("VERSION_NAME")
