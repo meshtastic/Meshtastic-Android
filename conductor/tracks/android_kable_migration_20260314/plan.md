@@ -1,0 +1,41 @@
+# Implementation Plan: Replace Nordic with Kable on Android (Deduplication Pass)
+
+## Phase 1: Deduplicate Kable Abstractions into `commonMain`
+- [ ] Task: Extract common Kable state mapping logic from `jvmMain` to `commonMain`
+    - [ ] Create `commonMain` tests for `BleConnectionState` mapping using Kable `State`
+    - [ ] Move `KableMeshtasticRadioProfile` and `KableBleConnection` logic that doesn't depend on platform specifics to `commonMain`
+- [ ] Task: Implement common Kable `Scanner` and `Peripheral` wrappers
+    - [ ] Extract generic connection lifecycle (connect, reconnect, close) to `commonMain` using Kable's `Peripheral` interface
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Deduplicate Kable Abstractions into commonMain' (Protocol in workflow.md)
+
+## Phase 2: Implement Kable Backend for Android (`androidMain`)
+- [ ] Task: Add Kable dependency to Android source set in `core:ble/build.gradle.kts`
+- [ ] Task: Implement Android-specific `BleConnectionFactory` and `BleScanner` using the deduplicated `commonMain` logic
+    - [ ] Write failing integration tests for Android Kable scanner (using fakes/mocks)
+    - [ ] Implement `KableBleScanner` for `androidMain`
+    - [ ] Write failing integration tests for Android Kable connection (using fakes/mocks)
+    - [ ] Implement `KableBleConnection` for `androidMain` (handling Android-specific MTU requests if necessary)
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Implement Kable Backend for Android' (Protocol in workflow.md)
+
+## Phase 3: Migrate OTA Firmware Update Logic
+- [ ] Task: Deprecate `NordicDfuHandler` and replace with Kable-based DFU
+    - [ ] Write failing tests for Kable DFU integration
+    - [ ] Implement new DFU handler in `feature:firmware` using `MeshtasticRadioProfile` / Kable abstraction
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Migrate OTA Firmware Update Logic' (Protocol in workflow.md)
+
+## Phase 4: Wire Kable into Android App and Remove Nordic
+- [ ] Task: Deprecate and remove `NordicBleInterface` and `AndroidBleConnection`
+    - [ ] Remove `NordicAndroidCommonLibraries` and `NordicDfuLibrary` from `gradle/libs.versions.toml` and build files
+    - [ ] Delete `NordicBleInterface.kt` and associated Nordic-specific radio implementations
+- [ ] Task: Wire new `androidMain` Kable implementation into the Koin DI graph
+    - [ ] Update `AndroidRadioControllerImpl` or DI modules to provide the new Kable `BleConnectionFactory` and `BleScanner`
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: Wire Kable into Android App and Remove Nordic' (Protocol in workflow.md)
+
+## Phase 5: Final Testing and Integration
+- [ ] Task: Update Android `app` UI tests and BLE unit tests to use Kable fakes
+    - [ ] Fix any failing tests related to the Nordic removal
+- [ ] Task: Manual end-to-end verification
+    - [ ] Build and run the Android app, verify BLE scanning, connecting, and messaging
+    - [ ] Verify OTA updates work via BLE
+    - [ ] Verify the Desktop app still functions correctly
+- [ ] Task: Conductor - User Manual Verification 'Phase 5: Final Testing and Integration' (Protocol in workflow.md)
