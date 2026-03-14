@@ -59,6 +59,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("./offline-repository") }
     }
 }
 
@@ -75,6 +76,7 @@ dependencyResolutionManagement {
                 includeGroupByRegex("com\\.github\\..*")
             }
         }
+        maven { url = uri("./offline-repository") }
     }
 }
 
