@@ -26,6 +26,7 @@ pluginManagement {
                 includeGroupByRegex("com\\.github\\..*")
             }
         }
+        maven { url = uri("../offline-repository") }
     }
 }
 
@@ -50,6 +51,7 @@ dependencyResolutionManagement {
                 includeGroupByRegex("com\\.github\\..*")
             }
         }
+        maven { url = uri("../offline-repository") }
     }
     versionCatalogs {
         create("libs") {

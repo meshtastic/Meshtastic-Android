@@ -42,6 +42,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
     alias(libs.plugins.dependency.guard) apply false
+    alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.meshtastic.root)
 }
 
@@ -51,4 +52,10 @@ plugins {
 
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("flatpak-sources.json")
+    downloadDirectory = "./offline-repository"
+    includeConfigurations = listOf(":desktop:compileClasspath")
 }

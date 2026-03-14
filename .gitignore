@@ -52,3 +52,6 @@ wireless-install.sh
 # Git worktrees
 .worktrees/
 /firebase-debug.log
+
+# flatpakGradleGenerator output
+flatpak-sources.json

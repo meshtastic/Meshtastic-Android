@@ -294,6 +294,7 @@ room = { id = "androidx.room", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
 dependency-guard = { id = "com.dropbox.dependency-guard", version.ref = "dependency-guard" }
+flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.7.0" }
 
 # Meshtastic
 meshtastic-analytics = { id = "meshtastic.analytics" }
