@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -127,7 +126,13 @@ open class RadioConfigViewModel(
         toggleHomoglyphEncodingUseCase()
     }
 
-    private val destNum = savedStateHandle.get<Int>("destNum")
+    private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
+
+    fun initDestNum(id: Int?) {
+        if (id != null && destNumFlow.value != id) {
+            destNumFlow.value = id
+        }
+    }
 
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>
@@ -148,8 +153,7 @@ open class RadioConfigViewModel(
     open suspend fun getCurrentLocation(): Any? = null
 
     init {
-        nodeRepository.nodeDBbyNum
-            .mapLatest { nodes -> nodes[destNum] ?: nodes.values.firstOrNull() }
+        combine(destNumFlow, nodeRepository.nodeDBbyNum) { id, nodes -> nodes[id] ?: nodes.values.firstOrNull() }
             .distinctUntilChanged()
             .onEach {
                 _destNode.value = it
@@ -182,10 +186,9 @@ open class RadioConfigViewModel(
         }
             .launchIn(viewModelScope)
 
-        nodeRepository.myNodeInfo
-            .onEach { ni ->
-                _radioConfigState.update { it.copy(isLocal = (destNum == null) || (destNum == ni?.myNodeNum)) }
-            }
+        combine(nodeRepository.myNodeInfo, destNumFlow) { ni, id ->
+            _radioConfigState.update { it.copy(isLocal = (id == null) || (id == ni?.myNodeNum)) }
+        }
             .launchIn(viewModelScope)
 
         Logger.d { "RadioConfigViewModel created" }
