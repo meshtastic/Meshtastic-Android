@@ -302,7 +302,12 @@ jobs:
       - name: Package Native Distributions
         env:
           ORG_GRADLE_PROJECT_appVersionName: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
+          APPIMAGE_EXTRACT_AND_RUN: 1
         run: ./gradlew :desktop:packageReleaseDistributionForCurrentOS --no-daemon
+
+      - name: List Desktop Binaries
+        if: runner.os == 'Linux'
+        run: ls -R desktop/build/compose/binaries/main-release
 
       - name: Upload Desktop Artifacts
         if: always()
