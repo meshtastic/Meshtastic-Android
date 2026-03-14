@@ -31,8 +31,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.meshtastic.core.ble.AndroidBleDevice
-import org.meshtastic.core.ble.AndroidBleService
 import org.meshtastic.core.ble.BleConnection
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
@@ -42,6 +40,7 @@ import org.meshtastic.core.ble.BleWriteType
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.ble.retryBleOperation
+import org.meshtastic.core.ble.toMeshtasticRadioProfile
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -169,8 +168,7 @@ class NordicBleInterface(
     private suspend fun onConnected() {
         try {
             bleConnection.deviceFlow.first()?.let { device ->
-                val androidDevice = device as AndroidBleDevice
-                val rssi = retryBleOperation(tag = address) { androidDevice.peripheral.readRssi() }
+                val rssi = retryBleOperation(tag = address) { device.readRssi() }
                 Logger.d { "[$address] Connection confirmed. Initial RSSI: $rssi dBm" }
             }
         } catch (e: Exception) {
@@ -202,8 +200,7 @@ class NordicBleInterface(
     private suspend fun discoverServicesAndSetupCharacteristics() {
         try {
             bleConnection.profile(serviceUuid = SERVICE_UUID) { service ->
-                val androidService = (service as AndroidBleService).service
-                val radioService = MeshtasticRadioServiceImpl(androidService)
+                val radioService = service.toMeshtasticRadioProfile()
 
                 // Wire up notifications
                 radioService.fromRadio
@@ -325,16 +322,14 @@ class NordicBleInterface(
 
     private fun Throwable.toDisconnectReason(): Pair<Boolean, String> {
         val isPermanent =
-            this is no.nordicsemi.kotlin.ble.core.exception.BluetoothUnavailableException ||
-                this is no.nordicsemi.kotlin.ble.core.exception.ManagerClosedException
+            this::class.simpleName == "BluetoothUnavailableException" ||
+                this::class.simpleName == "ManagerClosedException"
         val msg =
-            when (this) {
-                is RadioNotConnectedException -> this.message ?: "Device not found"
-                is NoSuchElementException,
-                is IllegalArgumentException,
-                -> "Required characteristic missing"
-                is no.nordicsemi.kotlin.ble.core.exception.GattException -> "GATT Error: ${this.message}"
-                else -> this.message ?: this.javaClass.simpleName
+            when {
+                this is RadioNotConnectedException -> this.message ?: "Device not found"
+                this is NoSuchElementException || this is IllegalArgumentException -> "Required characteristic missing"
+                this::class.simpleName == "GattException" -> "GATT Error: ${this.message}"
+                else -> this.message ?: this::class.simpleName ?: "Unknown"
             }
         return Pair(isPermanent, msg)
     }
