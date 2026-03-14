@@ -38,9 +38,17 @@ plugins {
     alias(libs.plugins.spotless) apply false
     alias(libs.plugins.dokka)
     alias(libs.plugins.test.retry) apply false
+    alias(libs.plugins.flatpak.gradle.generator)
     alias(libs.plugins.meshtastic.root)
 }
 
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("flatpak-sources.json")
+    downloadDirectory = "./offline-repository"
+    includeConfigurations = listOf(":desktop:compileClasspath")
+    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }

@@ -21,6 +21,7 @@ plugins {
     alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kotlin.parcelize)
     id("meshtastic.koin")
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 kotlin {
@@ -76,4 +77,10 @@ dependencies {
     "kspJvmTest"(libs.androidx.room.compiler)
     "kspAndroidHostTest"(libs.androidx.room.compiler)
     "kspAndroidDeviceTest"(libs.androidx.room.compiler)
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-core-database.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(listOf("androidRuntimeClasspath", "androidMainLintChecksClasspath", "androidHostTestRuntimeClasspath", "androidHostTestLintChecksClasspath", "androidHostTestCompileClasspath", "androidDeviceTestRuntimeClasspath", "androidDeviceTestLintChecksClasspath", "androidDeviceTestCompileClasspath", "androidCompileClasspath", "testCompileClasspath", "testRuntimeClasspath"))
 }
