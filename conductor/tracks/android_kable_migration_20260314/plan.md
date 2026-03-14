@@ -9,7 +9,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Deduplicate Kable Abstractions into commonMain' (Protocol in workflow.md) 709f6e3
 
 ## Phase 2: Implement Kable Backend for Android (`androidMain`)
-- [ ] Task: Add Kable dependency to Android source set in `core:ble/build.gradle.kts`
+- [x] Task: Add Kable dependency to Android source set in `core:ble/build.gradle.kts` 011d619
 - [ ] Task: Implement Android-specific `BleConnectionFactory` and `BleScanner` using the deduplicated `commonMain` logic
     - [ ] Write failing integration tests for Android Kable scanner (using fakes/mocks)
     - [ ] Implement `KableBleScanner` for `androidMain`
