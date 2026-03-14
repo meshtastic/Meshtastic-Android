@@ -15,7 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.kmp.feature) }
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    alias(libs.plugins.flatpak.gradle.generator)
+}
 
 kotlin {
     android {
@@ -55,4 +58,35 @@ kotlin {
 
         jvmTest.dependencies { implementation(compose.desktop.currentOs) }
     }
+}
+
+// Gradle's KMP variant resolution follows `available-at` redirects in module
+// metadata and needs android variant `.module` files for disambiguation, even
+// when building desktop-only offline. The androidCompileClasspath configuration
+// can't be resolved by the flatpak generator due to AGP variant ambiguity on
+// project dependencies, so we capture android KMP metadata via a dedicated
+// configuration that only holds external dependencies.
+val flatpakKmpAndroidMeta by
+    configurations.creating {
+        isCanBeResolved = true
+        isCanBeConsumed = false
+    }
+
+dependencies { flatpakKmpAndroidMeta("androidx.paging:paging-compose-android:${libs.versions.paging.get()}") }
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-feature-messaging.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(
+        listOf(
+            "androidRuntimeClasspath",
+            "androidMainLintChecksClasspath",
+            "androidCompileClasspath",
+            "androidHostTestCompileClasspath",
+            "androidHostTestLintChecksClasspath",
+            "androidHostTestRuntimeClasspath",
+            "testCompileClasspath",
+            "testRuntimeClasspath",
+        ),
+    )
 }

@@ -21,6 +21,7 @@ plugins {
     `kotlin-dsl`
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.flatpak.gradle.generator)
 }
 
 group = "org.meshtastic.buildlogic"
@@ -94,6 +95,12 @@ detekt {
     allRules = false
     baseline = file("detekt-baseline.xml")
     source.setFrom(files("src/main/java", "src/main/kotlin"))
+}
+
+tasks.flatpakGradleGenerator {
+    outputFile = file("../../flatpak-sources-convention.json")
+    downloadDirectory.set("./offline-repository")
+    excludeConfigurations.set(listOf("testCompileClasspath", "testRuntimeClasspath"))
 }
 
 gradlePlugin {

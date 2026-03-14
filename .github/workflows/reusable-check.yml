@@ -15,6 +15,9 @@ on:
       run_desktop_builds:
         type: boolean
         default: true
+      run_desktop_flatpak_src:
+        type: boolean
+        default: true
       upload_artifacts:
         type: boolean
         default: true
@@ -489,4 +492,63 @@ jobs:
         with:
           name: desktop-app-${{ runner.os }}-${{ runner.arch }}
           path: desktop/build/compose/binaries/main/app/
+          retention-days: 7
+
+  # ── Flatpak Sources ───────────────────────────────────────────────────
+  build-flatpak-src:
+    name: Generate Flatpak Sources (${{ matrix.os }})
+    if: inputs.run_desktop_flatpak_src == true
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    needs: lint-check
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm]
+    env:
+      VERSION_CODE: ${{ needs.lint-check.outputs.version_code }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+          submodules: true
+
+      - name: Gradle Setup
+        uses: ./.github/actions/gradle-setup
+        with:
+          gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache_read_only: true
+      
+      - name: Python Setup
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.x'
+
+      - name: Install ast-grep
+        run: pip install ast-grep-cli
+
+      # Remove Android/iOS targets and other non-desktop bits
+      # that would break the flatpakGradleGenerator
+      - name: Prepare Offline Desktop Build
+        run: ./scripts/desktop-only-prep.sh
+
+      - name: Generate Flatpak Sources
+        env:
+          DESKTOP_ONLY: true
+        run: >
+          ./gradlew :build-logic:convention:flatpakGradleGenerator flatpakGradleGenerator
+          --no-configuration-cache --refresh-dependencies --no-parallel
+      
+      - run: ls -lah flatpak-sources*.json
+
+      - name: Upload Flatpak Sources
+        if: ${{ inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: flatpak-sources-${{ runner.arch }}
+          path: flatpak-sources*.json
           retention-days: 7

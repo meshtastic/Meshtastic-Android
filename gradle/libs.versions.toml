@@ -300,6 +300,7 @@ wire = { id = "com.squareup.wire", version.ref = "wire" }
 room = { id = "androidx.room3", version.ref = "room" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 test-retry = { id = "org.gradle.test-retry", version.ref = "testRetry" }
+flatpak-gradle-generator = { id = "io.github.jwharm.flatpak-gradle-generator", version = "1.7.0" }
 
 # Meshtastic
 meshtastic-android-application = { id = "meshtastic.android.application" }

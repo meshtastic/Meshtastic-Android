@@ -60,3 +60,6 @@ firebase-debug.log
 /coil/
 /kable/
 .opencode/
+
+# flatpakGradleGenerator output
+flatpak-sources*.json
