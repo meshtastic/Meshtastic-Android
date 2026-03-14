@@ -261,6 +261,7 @@ jobs:
   release-desktop:
     runs-on: ${{ matrix.os }}
     needs: [prepare-build-info]
+    environment: Release
     strategy:
       fail-fast: false
       matrix:
