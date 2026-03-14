@@ -8,14 +8,14 @@
     - [x] Extract generic connection lifecycle (connect, reconnect, close) to `commonMain` using Kable's `Peripheral` interface
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Deduplicate Kable Abstractions into commonMain' (Protocol in workflow.md) 709f6e3
 
-## Phase 2: Implement Kable Backend for Android (`androidMain`)
+## Phase 2: Implement Kable Backend for Android (`androidMain`) [checkpoint: 12217de]
 - [x] Task: Add Kable dependency to Android source set in `core:ble/build.gradle.kts` 011d619
 - [x] Task: Implement Android-specific `BleConnectionFactory` and `BleScanner` using the deduplicated `commonMain` logic 589ee93
     - [x] Write failing integration tests for Android Kable scanner (using fakes/mocks)
     - [x] Implement `KableBleScanner` for `androidMain`
     - [x] Write failing integration tests for Android Kable connection (using fakes/mocks)
     - [x] Implement `KableBleConnection` for `androidMain` (handling Android-specific MTU requests if necessary)
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Implement Kable Backend for Android' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Implement Kable Backend for Android' (Protocol in workflow.md) 12217de
 
 ## Phase 3: Migrate OTA Firmware Update Logic
 - [ ] Task: Deprecate `NordicDfuHandler` and replace with Kable-based DFU
