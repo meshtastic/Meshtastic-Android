@@ -306,7 +306,6 @@ jobs:
           name: desktop-${{ runner.os }}
           path: |
             desktop/build/compose/binaries/main-release/*/*.dmg
-            desktop/build/compose/binaries/main-release/*/*.pkg
             desktop/build/compose/binaries/main-release/*/*.msi
             desktop/build/compose/binaries/main-release/*/*.exe
             desktop/build/compose/binaries/main-release/*/*.deb
