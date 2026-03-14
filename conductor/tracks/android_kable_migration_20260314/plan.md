@@ -10,11 +10,11 @@
 
 ## Phase 2: Implement Kable Backend for Android (`androidMain`)
 - [x] Task: Add Kable dependency to Android source set in `core:ble/build.gradle.kts` 011d619
-- [ ] Task: Implement Android-specific `BleConnectionFactory` and `BleScanner` using the deduplicated `commonMain` logic
-    - [ ] Write failing integration tests for Android Kable scanner (using fakes/mocks)
-    - [ ] Implement `KableBleScanner` for `androidMain`
-    - [ ] Write failing integration tests for Android Kable connection (using fakes/mocks)
-    - [ ] Implement `KableBleConnection` for `androidMain` (handling Android-specific MTU requests if necessary)
+- [x] Task: Implement Android-specific `BleConnectionFactory` and `BleScanner` using the deduplicated `commonMain` logic 589ee93
+    - [x] Write failing integration tests for Android Kable scanner (using fakes/mocks)
+    - [x] Implement `KableBleScanner` for `androidMain`
+    - [x] Write failing integration tests for Android Kable connection (using fakes/mocks)
+    - [x] Implement `KableBleConnection` for `androidMain` (handling Android-specific MTU requests if necessary)
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Implement Kable Backend for Android' (Protocol in workflow.md)
 
 ## Phase 3: Migrate OTA Firmware Update Logic
