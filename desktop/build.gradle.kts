@@ -52,7 +52,6 @@ compose.desktop {
         }
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Exe, TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "Meshtastic"
 
             // Ensure critical JVM modules are included in the custom JRE bundled with the app.
@@ -79,22 +78,26 @@ compose.desktop {
                 // notarize = true
                 // appleID = System.getenv("APPLE_ID")
                 // appStorePassword = System.getenv("APPLE_APP_SPECIFIC_PASSWORD")
+                targetFormats(TargetFormat.Dmg)
             }
             windows {
                 iconFile.set(project.file("src/main/resources/icon.ico"))
                 menuGroup = "Meshtastic"
                 // TODO: Must generate and set a consistent UUID for Windows upgrades.
                 // upgradeUuid = "YOUR-UPGRADE-UUID-HERE"
+                targetFormats(TargetFormat.Msi, TargetFormat.Exe)
             }
             linux {
                 iconFile.set(project.file("src/main/resources/icon.png"))
                 menuGroup = "Network"
+                targetFormats(TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage)
             }
 
             // Read version from project properties (passed by CI) or default to 1.0.0
             // Native installers require strict numeric semantic versions (X.Y.Z) without suffixes
             val rawVersion =
                 project.findProperty("android.injected.version.name")?.toString()
+                    ?: project.findProperty("appVersionName")?.toString()
                     ?: System.getenv("VERSION_NAME")
                     ?: "1.0.0"
             val sanitizedVersion = Regex("^\\d+\\.\\d+\\.\\d+").find(rawVersion)?.value ?: "1.0.0"
