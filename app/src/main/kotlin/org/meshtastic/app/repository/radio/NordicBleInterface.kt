@@ -246,7 +246,7 @@ class NordicBleInterface(
         }
     }
 
-    private var radioService: MeshtasticRadioProfile.State? = null
+    private var radioService: org.meshtastic.core.ble.MeshtasticRadioProfile? = null
 
     // --- RadioTransport Implementation ---
 

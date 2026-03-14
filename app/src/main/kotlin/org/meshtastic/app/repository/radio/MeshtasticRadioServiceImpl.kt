@@ -29,7 +29,8 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.FROMRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.LOGRADIO_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.TORADIO_CHARACTERISTIC
 
-class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) : MeshtasticRadioProfile.State {
+class MeshtasticRadioServiceImpl(private val remoteService: RemoteService) :
+    org.meshtastic.core.ble.MeshtasticRadioProfile {
 
     private val toRadioCharacteristic: RemoteCharacteristic =
         remoteService.characteristics.first { it.uuid == TORADIO_CHARACTERISTIC }
