@@ -61,6 +61,7 @@
     <string name="routing_error_pki_send_fail_public_key">Odeslání PKI selhalo, chybí veřejný klíč.</string>
     <string name="role_client_desc">Připojená aplikace nebo nezávislé zařízení.</string>
     <string name="role_client_mute_desc">Zařízení, které nepřeposílá pakety ostatních zařízení.</string>
+    <string name="role_client_base_desc">Pakety od oblíbených uzlů nebo směrované k nim jsou označeny jako ROUTER_LATE, ostatní pakety jako CLIENT.</string>
     <string name="role_router_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přeposíláním zpráv. Viditelné v seznamu uzlů.</string>
     <string name="role_router_client_desc">Kombinace ROUTER a CLIENT. Ne u mobilních zařízení.</string>
     <string name="role_repeater_desc">Uzel infrastruktury pro rozšíření pokrytí sítě přenosem zpráv s minimální režií. Není viditelné v seznamu uzlů.</string>
@@ -93,6 +94,7 @@
     <string name="config_display_flip_screen_summary">Otočit displej vzhůru nohama.</string>
     <string name="config_display_units_summary">Jednotky, které se zobrazují na displeji zařízení.</string>
     <string name="config_display_oled_summary">Přepsat automatickou detekci OLED displeje.</string>
+    <string name="config_display_displaymode_summary">Přepíše výchozí rozložení obrazovky.</string>
     <string name="config_display_heading_bold_summary">Zobrazit nadpis na obrazovce tučně.</string>
     <string name="config_display_wake_on_tap_or_motion_summary">Tato funkce vyžaduje, aby vaše zařízení mělo akcelerometr.</string>
     <string name="config_lora_region_summary">Oblast, ve které budete svá rádia používat.</string>
@@ -118,9 +120,12 @@
     <string name="position_packet">Polohový paket</string>
     <string name="broadcast_interval">Interval vysílání</string>
     <string name="smart_position">Chytrá poloha</string>
+    <string name="minimum_interval">Chytrý Interval</string>
+    <string name="minimum_distance">Chytrá vzdálenost</string>
     <string name="device_gps">GPS zařízení</string>
     <string name="fixed_position">Pevná poloha</string>
     <string name="altitude">Nadm. výška</string>
+    <string name="update_interval">Interval aktualizace GPS</string>
     <string name="advanced_device_gps">Pokročilé nastavení GPS zařízení</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Ladění</string>
@@ -156,12 +161,20 @@
     <string name="connecting">Připojování</string>
     <string name="not_connected">Nepřipojeno</string>
     <string name="no_device_selected">Není vybráno žádné zařízení</string>
+    <string name="unknown_device">Neznámé zařízení</string>
+    <string name="no_network_devices_found">Nenalezena žádná síťová zařízení</string>
+    <string name="no_usb_devices_found">Nenalezena žádná USB zařízení</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">Demo režim</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
     <string name="app_too_old">Aplikace je příliš stará</string>
     <string name="must_update">Musíte aktualizovat aplikaci v obchodu Google Play (nebo z Githubu). Je příliš stará pro komunikaci s touto verzí firmware vysílače. Přečtěte si prosím naše <a href="https://meshtastic.org/docs/software/android/installation">dokumenty</a> na toto téma.</string>
     <string name="none">Žádný (zakázat)</string>
     <string name="meshtastic_service_notifications">Servisní upozornění</string>
     <string name="acknowledgements">Poděkování</string>
+    <string name="open_source_libraries">Open source knihovny</string>
+    <string name="open_source_description">Meshtastic používá následující open-source knihovny. Klepnutím zobrazíte jejich licence.</string>
+    <string name="library_count">%1$d knihoven</string>
     <string name="channel_invalid">Tato adresa URL kanálu je neplatná a nelze ji použít</string>
     <string name="contact_invalid">Tento kontakt je neplatný a nelze jej přidat</string>
     <string name="debug_panel">Panel pro ladění</string>
@@ -170,6 +183,18 @@
     <string name="debug_export_success">%1$d exportováno</string>
     <string name="debug_export_failed">Nepodařilo se zapsat soubor protokolu: %1$s</string>
     <string name="debug_export_no_logs">Žádné protokoly k exportu</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d hodina</item>
+        <item quantity="few">%1$d hodin</item>
+        <item quantity="many">%1$d hodin</item>
+        <item quantity="other">%1$d hodin</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d den</item>
+        <item quantity="few">%1$d dnů</item>
+        <item quantity="many">%1$d dní</item>
+        <item quantity="other">%1$d dní</item>
+    </plurals>
     <string name="debug_filters">Filtry</string>
     <string name="debug_active_filters">Aktivní filtry</string>
     <string name="debug_default_search">Hledat v protokolech…</string>
@@ -180,7 +205,9 @@
     <string name="debug_filter_preset_title">Přednastavené filtry</string>
     <string name="debug_filter_show_ignored">Zobrazit jen ignorované uzly</string>
     <string name="debug_store_logs_title">Uložit protokoly sítě</string>
+    <string name="debug_store_logs_summary">Vypněte, pokud nechcete ukládat mesh logy na disk</string>
     <string name="debug_clear">Vymazat protokoly</string>
+    <string name="debug_clear_logs_confirm">Tímto odstraníte všechny logované pakety a záznamy databáze ze zařízení – jde o úplný reset a je nevratný.</string>
     <string name="clear">Vymazat</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="new_messages_below">Nové zprávy</string>
@@ -207,6 +234,7 @@
     <string name="theme_system">Podle systému</string>
     <string name="choose_theme">Vyberte vzhled</string>
     <string name="provide_location_to_mesh">Poskytnout polohu síti</string>
+    <string name="use_homoglyph_characters_encoding">Úsporné kódování pro cyriliku</string>
     <plurals name="delete_messages">
         <item quantity="one">Smazat zprávu?</item>
         <item quantity="few">Smazat zprávy?</item>
@@ -230,6 +258,7 @@
     <string name="resend">Poslat znovu</string>
     <string name="shutdown">Vypnout</string>
     <string name="cant_shutdown">Vypnutí není na tomto zařízení podporováno</string>
+    <string name="shutdown_warning">⚠️ Tímto dojde k VYPNUTÍ uzlu. K jeho opětovnému zapnutí bude nutný fyzický zásah.</string>
     <string name="shutdown_critical_node">⚠️ Toto je kritický infrastrukturní uzel. Pro potvrzení zadejte název uzlu:</string>
     <string name="shutdown_node_name">Uzel: %1$s</string>
     <string name="shutdown_type_name">Typ: %1$s</string>
@@ -253,6 +282,7 @@
     <string name="direct_message">Přímá zpráva</string>
     <string name="nodedb_reset">Reset NodeDB</string>
     <string name="delivery_confirmed">Doručeno</string>
+    <string name="delivery_confirmed_reboot_warning">Vaše zařízení se může odpojit a restartovat při aplikaci nastavení.</string>
     <string name="error">Chyba</string>
     <string name="ignore">Ignorovat</string>
     <string name="remove_ignored">Odstranit z ignorovaných</string>
@@ -304,6 +334,9 @@
     <string name="wifi_qr_code_error">Neplatný formát QR kódu WiFi</string>
     <string name="navigate_back">Přejít zpět</string>
     <string name="battery">Baterie</string>
+    <string name="channel_utilization">ChUtil</string>
+    <string name="air_utilization">AirUtil</string>
+    <string name="device_metrics_label_value">%1$s: %2$s</string>
     <string name="temperature">Teplota</string>
     <string name="humidity">Vlhkost</string>
     <string name="logs">Logy</string>
@@ -453,6 +486,9 @@
     <string name="messages">Zprávy</string>
     <string name="device_db_cache_limit">Limit mezipaměti databáze zařízení</string>
     <string name="device_db_cache_limit_summary">Maximální počet databází zařízení uchovávaných v tomto telefonu</string>
+    <string name="log_retention_days">Doba ukládání mesh logů</string>
+    <string name="log_retention_days_summary">Zvolte, jak dlouho chcete uchovávat záznamy. Chcete-li zanechat všechny logy, vyberte Nikdy pro jejich zachování.</string>
+    <string name="log_retention_never">Nikdy neodstraňovat záznamy</string>
     <string name="detection_sensor_config">Konfigurace detekčního senzoru</string>
     <string name="detection_sensor_enabled">Detekční senzor povolen</string>
     <string name="minimum_broadcast_seconds">Minimální vysílání (sekundy)</string>
@@ -466,7 +502,7 @@
     <string name="button_gpio">Tlačítko GPIO</string>
     <string name="buzzer_gpio">Bzučák GPIO</string>
     <string name="rebroadcast_mode">Režim opětovného vysílání</string>
-    <string name="nodeinfo_broadcast_interval">Interval vysílání NodeInfo (v sekundách)</string>
+    <string name="nodeinfo_broadcast_interval">Interval vysílání Node Info</string>
     <string name="double_tap_as_button_press">Dvojité klepnutí jako stisk tlačítka</string>
     <string name="triple_click_adhoc_ping">Okamžitý ping (trojitý stisk)</string>
     <string name="time_zone">Časové pásmo</string>
@@ -498,7 +534,7 @@
     <string name="use_pwm_buzzer">Použít PWM bzučák</string>
     <string name="output_vibra_gpio">Výstupní pin vybračního motorku (GPIO)</string>
     <string name="output_duration_milliseconds">Doba trvání výstupu (v milisekundách)</string>
-    <string name="nag_timeout_seconds">Interval opakovaného zvonění (v sekundách)</string>
+    <string name="nag_timeout_seconds">Interval opakovaného zvonění</string>
     <string name="ringtone">Vyzváněcí tón</string>
     <string name="use_i2s_as_buzzer">Použít I2S jako bzučák</string>
     <string name="lora_config">LoRa</string>
@@ -513,7 +549,7 @@
     <string name="tx_enabled">Vysílání povoleno</string>
     <string name="tx_power_dbm">Vysílací výkon</string>
     <string name="frequency_slot">Frekvenční slot</string>
-    <string name="override_duty_cycle">Přepsat střídu</string>
+    <string name="override_duty_cycle">Přepsat pracovní cyklus</string>
     <string name="ignore_incoming">Ignorovat příchozí</string>
     <string name="sx126x_rx_boosted_gain">Zvýšené zesílení přijímače (RX)</string>
     <string name="override_frequency_mhz">Ruční nastavení frekvence</string>
@@ -530,7 +566,7 @@
     <string name="root_topic">Kořenové téma</string>
     <string name="proxy_to_client_enabled">Proxy na klienta povoleno</string>
     <string name="map_reporting">Hlášení mapy</string>
-    <string name="map_reporting_interval_seconds">Interval hlášení mapy (v sekundách)</string>
+    <string name="map_reporting_interval_seconds">Interval hlášení mapy</string>
     <string name="neighbor_info_config">Nastavení informace o sousedech</string>
     <string name="neighbor_info_enabled">Informace o sousedech povoleny</string>
     <string name="update_interval_seconds">Interval aktualizace (v sekundách)</string>
@@ -579,7 +615,7 @@
     <string name="battery_ina_2xx_i2c_address">Adresa INA_2XX I2C baterie</string>
     <string name="range_test_config">Nastavení testu pokrytí</string>
     <string name="range_test_enabled">Test pokrytí povolen</string>
-    <string name="sender_message_interval_seconds">Interval odesílání zpráv (v sekundách)</string>
+    <string name="sender_message_interval_seconds">Interval odesílání zpráv</string>
     <string name="save_csv_in_storage_esp32_only">Uložit .CSV do úložiště (pouze ESP32)</string>
     <string name="remote_hardware_config">Konfigurace vzdáleného modulu</string>
     <string name="remote_hardware_enabled">Vzdálený modul povolen</string>
@@ -607,17 +643,21 @@
     <string name="server">Server</string>
     <string name="telemetry_config">Nastavení telemetrie</string>
     <string name="device_metrics_update_interval_seconds">Interval aktualizace metrik zařízení</string>
+    <string name="environment_metrics_update_interval_seconds">Interval aktualizace měření životního prostředí</string>
     <string name="environment_metrics_module_enabled">Modul měření životního prostředí povolen</string>
     <string name="environment_metrics_on_screen_enabled">Zobrazení měření životního prostředí povoleno</string>
     <string name="environment_metrics_use_fahrenheit">Měření životního prostředí používá Fahrenheit</string>
     <string name="air_quality_metrics_module_enabled">Modul měření kvality ovzduší povolen</string>
+    <string name="air_quality_metrics_update_interval_seconds">Interval aktualizace měření kvality ovzduší</string>
     <string name="power_metrics_module_enabled">Modul měření spotřeby povolen</string>
+    <string name="power_metrics_update_interval_seconds">Interval aktualizace měření napájení</string>
     <string name="power_metrics_on_screen_enabled">Měření spotřeby na obrazovce povoleno</string>
     <string name="user_config">Nastavení uživatele</string>
     <string name="node_id">Identifikátor uzlu</string>
     <string name="long_name">Dlouhé jméno</string>
     <string name="short_name">Krátké jméno</string>
     <string name="hardware_model">Hardwarový model</string>
+    <string name="licensed_amateur_radio">Licencované amatérské rádio (Ham)</string>
     <string name="licensed_amateur_radio_text">Povolení této možnosti zruší šifrování a není kompatibilní se základním nastavením Meshtastic sítě.</string>
     <string name="dew_point">Rosný bod</string>
     <string name="pressure">Tlak</string>
@@ -751,6 +791,7 @@
     <string name="message_input_label">Zpráva</string>
     <string name="type_a_message">Napište zprávu</string>
     <string name="wifi_devices">WiFi zařízení</string>
+    <string name="ble_devices">Zařízení bluetooth</string>
     <string name="bluetooth_paired_devices">Spárovaná zařízení</string>
     <string name="connected_device">Připojená zařízení</string>
     <string name="view_release">Zobrazit vydání</string>
@@ -762,6 +803,7 @@
     <string name="firmware_edition">Firmware edice</string>
     <string name="recent_network_devices">Nedávná síťová zařízení</string>
     <string name="discovered_network_devices">Nalezená síťová zařízení</string>
+    <string name="bluetooth_available_devices">Dostupná Bluetooth zařízení</string>
     <string name="get_started">Začněte hned</string>
     <string name="intro_welcome">Vítejte v</string>
     <string name="stay_connected_anywhere">Zůstaňte připojeni kdekoliv</string>
@@ -805,7 +847,9 @@
     <string name="map_type_terrain">Terénní</string>
     <string name="map_type_hybrid">Hybridní</string>
     <string name="manage_map_layers">Správa vrstev mapy</string>
+    <string name="map_layer_formats">Mapové vrstvy podporují formáty .kml, .kmz nebo GeoJSON.</string>
     <string name="map_layers_title">Mapové vrstvy</string>
+    <string name="no_map_layers_loaded">Žádné vlastní vrstvy nenačteny.</string>
     <string name="add_layer_button">Přidat vrstvu</string>
     <string name="hide_layer">Skrýt vrstvu</string>
     <string name="show_layer">Zobrazit vrstvu</string>
@@ -837,6 +881,7 @@
     <string name="system_settings">Nastavení systému</string>
     <string name="no_local_stats">Žádné statistiky k dispozici</string>
     <string name="analytics_notice">Shromažďujeme analytická data, která nám pomáhají vylepšovat aplikaci pro Android (děkujeme). Získáváme anonymizované informace o chování uživatelů, například hlášení o pádech aplikace, používání jednotlivých obrazovek apod.</string>
+    <string name="analytics_platforms">Analytické nástroje:</string>
     <string name="for_more_information_see_our_privacy_policy">Další informace naleznete v našich zásadách ochrany osobních údajů.</string>
     <string name="unset">Nenastaveno – 0</string>
     <string name="relayed_by">Přeposláno uzlem: %1$s</string>
@@ -923,6 +968,19 @@
     <string name="firmware_update_erasing">Mazání...</string>
     <string name="back">Zpět</string>
     <string name="interval_unset">Zrušit nastavení</string>
+    <string name="interval_always_on">Vždy zapnuto</string>
+    <plurals name="plurals_seconds">
+        <item quantity="one">%1$d sekunda</item>
+        <item quantity="few">%1$d sekund</item>
+        <item quantity="many">%1$d sekund</item>
+        <item quantity="other">%1$d sekund</item>
+    </plurals>
+    <plurals name="plurals_minutes">
+        <item quantity="one">%1$d minuta</item>
+        <item quantity="few">%1$d minut</item>
+        <item quantity="many">%1$d minut</item>
+        <item quantity="other">%1$d minut</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompas</string>
     <string name="open_compass">Otevřít kompas</string>
@@ -961,9 +1019,30 @@
     <string name="nfc_disabled">NFC je zakázáno. Povolte jej v nastavení systému.</string>
     <string name="all_time">Vše</string>
     <string name="bluetooth_permission">Bluetooth</string>
+    <string name="configure_bluetooth_permissions">Nastavení oprávnění Bluetooth</string>
+    <string name="bluetooth_feature_discovery">Objevujte</string>
+    <string name="bluetooth_feature_discovery_description">Najděte a identifikujte zařízení Meshtastic ve svém okolí.</string>
+    <string name="local_stats_battery">Baterie: %1$d %%</string>
+    <string name="local_stats_nodes">Uzly: %1$d online / %2$d celkem</string>
+    <string name="local_stats_uptime">Doba provozu: %1$s</string>
+    <string name="local_stats_utilization">ChUtil: %1$.2f%% | AirTX: %2$.2f%%</string>
+    <string name="local_stats_traffic">Provoz: TX %1$d / RX %2$d (D: %3$d)</string>
+    <string name="local_stats_diagnostics_prefix">Diagnostika: %1$s</string>
+    <string name="local_stats_bad">Poškozené %1$d</string>
+    <string name="local_stats_heap_value">%1$d/%2$d</string>
+    <string name="local_stats_updated_at">%1$s</string>
+    <string name="powered">Napájeno</string>
+    <string name="updated">Aktualizováno</string>
     <!-- Network Map Layers -->
+    <string name="add_network_layer">Přidat síťovou vrstvu</string>
     <string name="tak_team_red">Červená</string>
     <string name="tak_team_blue">Modrá</string>
     <string name="tak_team_green">Zelená</string>
+    <string name="traffic_management_position_min_interval">Minimální interval pozice (v sekundách)</string>
+    <string name="no_messages_yet">Zatím žádné zprávy</string>
+    <string name="unread_count">%1$d nepřečtených</string>
     <string name="no_device_connected">Není připojeno žádné zařízení</string>
+    <string name="ready_for_firmware_update">Připraveno k aktualizaci firmware</string>
+    <string name="note">Poznámka</string>
+    <string name="firmware_charge_warning">Ujistěte se, že je vaše zařízení plně nabito před spuštěním aktualizace firmware. Během aktualizace zařízení neodpojujte nebo nevypínejte.</string>
 </resources>

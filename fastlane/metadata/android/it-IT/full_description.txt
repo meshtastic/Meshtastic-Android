@@ -4,7 +4,7 @@ For more information about the Meshtastic project, please visit our website: <a 
 
 <b>Community and Support</b>
 
-Questo progetto è attualmente in beta. Ci piacerebbe sapere cosa ne pensi! Se hai domande, feedback o riscontri problemi, unisciti alla nostra comunità amichevole e attiva:
+Questo progetto attualmente è in beta. Ci piacerebbe sapere cosa ne pensi! Se hai domande, feedback o riscontri problemi, unisciti alla nostra comunità amichevole e attiva:
 
 • <b>Discussion Forum:</b> <a href="https://github.com/orgs/meshtastic/discussions">https://github.com/orgs/meshtastic/discussions</a>
 • <b>Discord:</b> <a href="https://discord.gg/meshtastic">https://discord.gg/meshtastic</a>
