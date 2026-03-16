@@ -85,8 +85,8 @@ These items address structural gaps identified in the March 2026 architecture re
 
 ## Medium-Term Priorities (60 days)
 
-1. **App module thinning** — 63 files remaining (down from 90). Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules.
-    - **Next:** Extract remaining 5 ViewModels: `AndroidSettingsViewModel`, `AndroidRadioConfigViewModel`, `AndroidDebugViewModel`, `AndroidMetricsViewModel`, `UIViewModel`.
+1. **App module thinning** — Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules.
+    - ✅ **Done:** Extracted remaining 5 ViewModels: `SettingsViewModel`, `RadioConfigViewModel`, `DebugViewModel`, `MetricsViewModel`, `UIViewModel` to shared KMP modules.
     - **Next:** Extract service/worker/radio files from `app` to `core:service/androidMain` and `core:network/androidMain`.
 2. **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
 3. **MQTT transport** — cloud relay operation (KMP, benefits all targets)
