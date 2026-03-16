@@ -18,6 +18,7 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
+import com.juul.kable.toIdentifier
 
 internal actual suspend fun Peripheral.platformConnectSetup() {
     // Desktop Kable does not support explicit MTU requests or priority requests.
@@ -30,6 +31,4 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
 internal actual fun createPeripheral(
     address: String,
     builderAction: PeripheralBuilder.() -> Unit
-): Peripheral {
-    error("Direct connection by address is not currently supported on JVM without an advertisement")
-}
+): Peripheral = com.juul.kable.Peripheral(address.toIdentifier(), builderAction)

@@ -18,6 +18,7 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
+import com.juul.kable.toIdentifier
 import co.touchlab.kermit.Logger
 
 internal actual suspend fun Peripheral.platformConnectSetup() {
@@ -46,9 +47,4 @@ internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
 internal actual fun createPeripheral(
     address: String,
     builderAction: PeripheralBuilder.() -> Unit
-): Peripheral {
-    val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
-        ?: error("Bluetooth not supported")
-    val device = adapter.getRemoteDevice(address)
-    return com.juul.kable.Peripheral(device, builderAction)
-}
+): Peripheral = com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
