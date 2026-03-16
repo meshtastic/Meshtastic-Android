@@ -42,10 +42,7 @@ kotlin {
             api(libs.okio)
             implementation(libs.kermit)
         }
-        androidMain.dependencies {
-            api(libs.androidx.core.ktx)
-            api(libs.nordic.common.core)
-        }
+        androidMain.dependencies { api(libs.androidx.core.ktx) }
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

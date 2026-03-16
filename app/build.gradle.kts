@@ -273,13 +273,6 @@ dependencies {
     implementation(libs.kermit)
     implementation(libs.kotlinx.datetime)
 
-    implementation(libs.nordic.client.android)
-    implementation(libs.nordic.common.core)
-    implementation(libs.nordic.common.permissions.ble)
-    implementation(libs.nordic.common.permissions.notification)
-    implementation(libs.nordic.common.scanner.ble)
-    implementation(libs.nordic.common.ui)
-
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.glance.preview)
 
@@ -307,8 +300,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    androidTestImplementation(libs.nordic.client.android.mock)
-    androidTestImplementation(libs.nordic.core.mock)
     androidTestImplementation(libs.koin.test)
 
     testImplementation(libs.androidx.work.testing)
@@ -316,9 +307,6 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
-    testImplementation(libs.nordic.client.android.mock)
-    testImplementation(libs.nordic.client.core.mock)
-    testImplementation(libs.nordic.core.mock)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
     testImplementation(libs.androidx.compose.ui.test.junit4)

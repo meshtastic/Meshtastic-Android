@@ -68,7 +68,7 @@ The app follows modern Android development practices, built on top of a shared K
 - **Data Layer:** Repository pattern with Room KMP (local DB), DataStore (prefs), and Protobuf (device comms).
 
 ### Bluetooth Low Energy (BLE)
-The BLE stack uses a hybrid interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, while the Android implementation utilizes **Nordic Semiconductor's Kotlin BLE Library**. This provides a robust, Coroutine-based architecture for reliable device communication while remaining KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
+The BLE stack uses a multiplatform interface-driven architecture. Platform-agnostic interfaces live in `commonMain`, utilizing the **Kable** multiplatform BLE library to handle device communication across all supported targets (Android, Desktop). This provides a robust, Coroutine-based architecture for reliable device communication while remaining fully KMP compatible. See [core/ble/README.md](core/ble/README.md) for details.
 
 ## Translations
 

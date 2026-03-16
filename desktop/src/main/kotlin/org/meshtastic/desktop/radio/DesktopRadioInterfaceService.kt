@@ -44,14 +44,19 @@ import org.meshtastic.core.repository.RadioPrefs
  * Desktop implementation of [RadioInterfaceService] with real TCP transport.
  *
  * Delegates all TCP socket management, stream framing, reconnect logic, and heartbeat to the shared [TcpTransport] from
- * `core:network`. Desktop only supports TCP connections (no BLE/USB/Serial).
+ * `core:network`. Desktop supports TCP and BLE connections.
  */
 @Suppress("TooManyFunctions")
-class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers, private val radioPrefs: RadioPrefs) :
-    RadioInterfaceService {
+class DesktopRadioInterfaceService(
+    private val dispatchers: CoroutineDispatchers,
+    private val radioPrefs: RadioPrefs,
+    private val scanner: org.meshtastic.core.ble.BleScanner,
+    private val bluetoothRepository: org.meshtastic.core.ble.BluetoothRepository,
+    private val connectionFactory: org.meshtastic.core.ble.BleConnectionFactory,
+) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<org.meshtastic.core.model.DeviceType> =
-        listOf(org.meshtastic.core.model.DeviceType.TCP)
+        listOf(org.meshtastic.core.model.DeviceType.TCP, org.meshtastic.core.model.DeviceType.BLE)
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
@@ -70,6 +75,7 @@ class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers
         private set
 
     private var transport: TcpTransport? = null
+    private var bleTransport: DesktopBleInterface? = null
 
     init {
         // Observe radioPrefs to handle asynchronous loads from DataStore
@@ -78,10 +84,10 @@ class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers
                 if (_currentDeviceAddressFlow.value != addr) {
                     _currentDeviceAddressFlow.value = addr
                 }
-                // Auto-connect if we have a valid TCP address and are disconnected
-                if (addr != null && addr.startsWith("t") && _connectionState.value == ConnectionState.Disconnected) {
+                // Auto-connect if we have a valid address and are disconnected
+                if (addr != null && _connectionState.value == ConnectionState.Disconnected) {
                     Logger.i { "DesktopRadio: Auto-connecting to saved address ${addr.anonymize}" }
-                    startTcpConnection(addr.removePrefix("t"))
+                    startConnection(addr)
                 }
             }
             .launchIn(serviceScope)
@@ -95,11 +101,11 @@ class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers
 
     override fun connect() {
         val address = getDeviceAddress()
-        if (address == null || !address.startsWith("t")) {
-            Logger.w { "DesktopRadio: No TCP address configured, skipping connect" }
+        if (address.isNullOrBlank() || address == "n") {
+            Logger.w { "DesktopRadio: No address configured, skipping connect" }
             return
         }
-        startTcpConnection(address.removePrefix("t"))
+        startConnection(address)
     }
 
     override fun setDeviceAddress(deviceAddr: String?): Boolean {
@@ -119,15 +125,18 @@ class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers
         radioPrefs.setDevAddr(sanitized)
         _currentDeviceAddressFlow.value = sanitized
 
-        // Start connection if we have a TCP address
-        if (sanitized != null && sanitized.startsWith("t")) {
-            startTcpConnection(sanitized.removePrefix("t"))
+        // Start connection if we have a valid address
+        if (sanitized != null && sanitized != "n") {
+            startConnection(sanitized)
         }
         return true
     }
 
     override fun sendToRadio(bytes: ByteArray) {
-        serviceScope.handledLaunch { transport?.sendPacket(bytes) }
+        serviceScope.handledLaunch {
+            transport?.sendPacket(bytes)
+            bleTransport?.handleSendToRadio(bytes)
+        }
     }
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
@@ -156,7 +165,34 @@ class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers
 
     // endregion
 
-    // region TCP Connection Management
+    // region Connection Management
+
+    private fun startConnection(address: String) {
+        if (address.startsWith("t")) {
+            startTcpConnection(address.removePrefix("t"))
+        } else if (address.startsWith("x")) {
+            startBleConnection(address.removePrefix("x"))
+        } else {
+            // Assume BLE if no prefix, or prefix is not supported
+            val stripped = if (address.startsWith("!")) address.removePrefix("!") else address
+            startBleConnection(stripped)
+        }
+    }
+
+    private fun startBleConnection(address: String) {
+        transport?.stop()
+        bleTransport?.close()
+
+        bleTransport =
+            DesktopBleInterface(
+                serviceScope = serviceScope,
+                scanner = scanner,
+                bluetoothRepository = bluetoothRepository,
+                connectionFactory = connectionFactory,
+                service = this,
+                address = address,
+            )
+    }
 
     private fun startTcpConnection(address: String) {
         transport?.stop()
@@ -188,6 +224,9 @@ class DesktopRadioInterfaceService(private val dispatchers: CoroutineDispatchers
     private fun stopInterface() {
         transport?.stop()
         transport = null
+
+        bleTransport?.close()
+        bleTransport = null
 
         // Recreate the service scope
         serviceScope.cancel("stopping interface")

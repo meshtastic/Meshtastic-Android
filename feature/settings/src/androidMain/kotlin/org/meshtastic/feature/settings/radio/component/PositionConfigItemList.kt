@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.core.location.LocationCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.common.permissions.ble.RequireLocation
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.resources.Res
@@ -251,16 +250,16 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },
                     )
                     HorizontalDivider()
-                    RequireLocation { isLocationRequiredAndDisabled: Boolean ->
-                        TextButton(
-                            enabled = state.connected && !isLocationRequiredAndDisabled,
-                            onClick = {
-                                @SuppressLint("MissingPermission")
-                                coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
-                            },
-                        ) {
-                            Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
-                        }
+                    // RequireLocation wrapper removed to complete Nordic removal.
+                    // Should be replaced with a generic solution later.
+                    TextButton(
+                        enabled = state.connected,
+                        onClick = {
+                            @SuppressLint("MissingPermission")
+                            coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() as? Location }
+                        },
+                    ) {
+                        Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
                     }
                 } else {
                     HorizontalDivider()

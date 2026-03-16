@@ -23,38 +23,38 @@ classDef unknown fill:#FFADAD,stroke:#000,stroke-width:2px,color:#000;
 
 ## Overview
 
-The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It has been modernized to use **Nordic Semiconductor's Android Common Libraries** and **Kotlin BLE Library**.
+The `:core:ble` module contains the foundation for Bluetooth Low Energy (BLE) communication in the Meshtastic Android app. It uses the **Kable** multiplatform BLE library to provide a unified, Coroutine-based architecture across all supported targets (Android, Desktop, and future iOS).
 
-This modernization replaces legacy callback-based implementations with robust, Coroutine-based architecture, ensuring better stability, maintainability, and standard compliance.
+This module abstracts platform-specific BLE operations behind common Kotlin interfaces (`BleDevice`, `BleScanner`, `BleConnection`, `BleConnectionFactory`), ensuring that business logic in `commonMain` remains platform-agnostic and testable.
 
 ## Key Components
 
 ### 1. `BleConnection`
-A robust wrapper around Nordic's `Peripheral` and `CentralManager` that simplifies the connection lifecycle and service discovery using modern Coroutine APIs.
+A robust wrapper around Kable's `Peripheral` that simplifies the connection lifecycle and service discovery using modern Coroutine APIs.
 
 - **Features:**
     - **Connection & Await:** Provides suspend functions to connect and wait for a terminal state (Connected or Disconnected).
     - **Unified Profile Helper:** A `profile` function that manages service discovery, characteristic setup, and lifecycle in a single block, with automatic timeout and error handling.
-    - **Observability:** Exposes `peripheralFlow` and `connectionState` as Flows for reactive UI and service updates.
-    - **Connection Management:** Handles PHY updates, MTU logging, and connection priority requests automatically.
+    - **Observability:** Exposes `connectionState` as a Flow for reactive UI and service updates.
+    - **Platform Setup:** Seamlessly handles platform-specific configuration (like MTU negotiation on Android or direct connections on Desktop) via `platformConfig()` extensions.
 
 ### 2. `BluetoothRepository`
-A Singleton repository responsible for the global state of Bluetooth on the Android device.
+A Singleton repository responsible for the global state of Bluetooth on the device.
 
 - **Features:**
     - **State Management:** Exposes a `StateFlow<BluetoothState>` reflecting whether Bluetooth is enabled, permissions are granted, and which devices are bonded.
-    - **Permission Handling:** Centralizes logic for checking Bluetooth and Location permissions across different Android versions.
-    - **Bonding:** Simplifies the process of creating bonds with peripherals.
+    - **Permission Handling:** Centralizes logic for checking Bluetooth and Location permissions across different platforms.
+    - **Bonding:** Simplifies the process of creating and validating bonds with peripherals.
 
 ### 3. `BleScanner`
-A wrapper around Nordic's `CentralManager` scanning capabilities to provide a consistent and easy-to-use API for BLE scanning with built-in peripheral deduplication.
+A wrapper around Kable's `Scanner` to provide a consistent and easy-to-use API for BLE scanning with built-in peripheral mapping.
 
 ### 4. `BleRetry`
 A utility for executing BLE operations with retry logic, essential for handling the inherent unreliability of wireless communication.
 
 ## Integration in `app`
 
-The `:core:ble` module is used by `NordicBleInterface` in the main application module to implement the `RadioTransport` interface for Bluetooth devices.
+The `:core:ble` module is used by `BleRadioInterface` in the main application module to implement the `RadioTransport` interface for Bluetooth devices.
 
 ## Usage
 
@@ -62,17 +62,15 @@ Dependencies are managed via the version catalog (`libs.versions.toml`).
 
 ```toml
 [versions]
-nordic-ble = "2.0.0-alpha15"
-nordic-common = "2.8.2"
+kable = "0.42.0"
 
 [libraries]
-nordic-client-android = { module = "no.nordicsemi.kotlin.ble:client-android", version.ref = "nordic-ble" }
-# ... other nordic dependencies
+kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 ```
 
 ## Architecture
 
-The module follows a clean architecture approach:
+The module follows a clean multiplatform architecture approach:
 
 - **Repository Pattern:** `BluetoothRepository` mediates data access.
 - **Coroutines & Flow:** All asynchronous operations use Kotlin Coroutines and Flows.
@@ -80,4 +78,4 @@ The module follows a clean architecture approach:
 
 ## Testing
 
-The module includes unit tests for key components, mocking the underlying Nordic libraries to ensure logic correctness without requiring a physical device.
+The module includes unit tests for key components, utilizing Kable's architecture and standard coroutine testing tools to ensure logic correctness.

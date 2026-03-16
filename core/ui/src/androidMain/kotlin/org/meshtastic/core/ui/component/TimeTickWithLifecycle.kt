@@ -16,20 +16,40 @@
  */
 package org.meshtastic.core.ui.component
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import no.nordicsemi.android.common.core.registerReceiver
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 actual fun rememberTimeTickWithLifecycle(): Long {
+    val context = LocalContext.current
     var value by remember { mutableLongStateOf(System.currentTimeMillis()) }
 
-    registerReceiver(IntentFilter(Intent.ACTION_TIME_TICK)) { value = System.currentTimeMillis() }
+    DisposableEffect(context) {
+        val receiver =
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    value = System.currentTimeMillis()
+                }
+            }
+
+        androidx.core.content.ContextCompat.registerReceiver(
+            context,
+            receiver,
+            IntentFilter(Intent.ACTION_TIME_TICK),
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
+
+        onDispose { context.unregisterReceiver(receiver) }
+    }
 
     return value
 }

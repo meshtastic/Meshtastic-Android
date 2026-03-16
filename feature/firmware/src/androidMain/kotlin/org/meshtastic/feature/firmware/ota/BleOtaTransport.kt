@@ -17,6 +17,7 @@
 package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
+import com.juul.kable.characteristicOf
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -30,25 +31,18 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeout
-import no.nordicsemi.kotlin.ble.client.RemoteCharacteristic
-import org.meshtastic.core.ble.AndroidBleService
 import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BleWriteType
+import org.meshtastic.core.ble.KableBleService
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_NOTIFY_CHARACTERISTIC
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * BLE transport implementation for ESP32 Unified OTA protocol.
- *
- * Service UUID: 4FAFC201-1FB5-459E-8FCC-C5C9C331914B
- * - OTA Characteristic (Write): 62ec0272-3ec5-11eb-b378-0242ac130005
- * - TX Characteristic (Notify): 62ec0272-3ec5-11eb-b378-0242ac130003
- */
+/** BLE transport implementation for ESP32 Unified OTA protocol using Kable. */
 class BleOtaTransport(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
@@ -58,15 +52,16 @@ class BleOtaTransport(
 
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "BLE OTA")
-    private var otaCharacteristic: RemoteCharacteristic? = null
+
+    private val otaChar = characteristicOf(OTA_SERVICE_UUID, OTA_WRITE_CHARACTERISTIC)
+    private val txChar = characteristicOf(OTA_SERVICE_UUID, OTA_NOTIFY_CHARACTERISTIC)
 
     private val responseChannel = Channel<String>(Channel.UNLIMITED)
 
     private var isConnected = false
 
-    /** Scan for the device by MAC address with retries. After reboot, the device needs time to come up in OTA mode. */
+    /** Scan for the device by MAC address with retries. */
     private suspend fun scanForOtaDevice(): BleDevice? {
-        // ESP32 OTA bootloader may use MAC address with last byte incremented by 1
         val otaAddress = calculateOtaAddress(macAddress = address)
         val targetAddresses = setOf(address, otaAddress)
         Logger.i { "BLE OTA: Will match addresses: $targetAddresses" }
@@ -77,7 +72,7 @@ class BleOtaTransport(
             val foundDevices = mutableSetOf<String>()
             val device =
                 scanner
-                    .scan(SCAN_TIMEOUT)
+                    .scan(timeout = SCAN_TIMEOUT, serviceUuid = OTA_SERVICE_UUID)
                     .onEach { d ->
                         if (foundDevices.add(d.address)) {
                             Logger.d { "BLE OTA: Scan found device: ${d.address} (name=${d.name})" }
@@ -100,11 +95,7 @@ class BleOtaTransport(
         return null
     }
 
-    /**
-     * Calculate the potential OTA MAC address by incrementing the last byte. Some ESP32 bootloaders use MAC+1 for OTA
-     * mode to distinguish from normal operation.
-     */
-    @Suppress("MagicNumber", "ReturnCount")
+    @Suppress("ReturnCount", "MagicNumber")
     private fun calculateOtaAddress(macAddress: String): String {
         val parts = macAddress.split(":")
         if (parts.size != 6) return macAddress
@@ -114,13 +105,12 @@ class BleOtaTransport(
         return parts.take(5).joinToString(":") + ":" + incrementedByte
     }
 
-    /** Connect to the device and discover OTA service. */
-    @Suppress("LongMethod")
+    @Suppress("MagicNumber")
     override suspend fun connect(): Result<Unit> = runCatching {
         Logger.i { "BLE OTA: Waiting ${REBOOT_DELAY_MS}ms for device to reboot into OTA mode..." }
         delay(REBOOT_DELAY_MS)
 
-        Logger.i { "BLE OTA: Connecting to $address using Nordic BLE Library..." }
+        Logger.i { "BLE OTA: Connecting to $address using Kable..." }
 
         val device =
             scanForOtaDevice()
@@ -149,19 +139,9 @@ class BleOtaTransport(
 
         Logger.i { "BLE OTA: Connected to ${device.address}, discovering services..." }
 
-        // Discover services using our unified profile helper
         bleConnection.profile(OTA_SERVICE_UUID) { service ->
-            val androidService = (service as AndroidBleService).service
-            val ota =
-                requireNotNull(androidService.characteristics.firstOrNull { it.uuid == OTA_WRITE_CHARACTERISTIC }) {
-                    "OTA characteristic not found"
-                }
-            val txChar =
-                requireNotNull(androidService.characteristics.firstOrNull { it.uuid == OTA_NOTIFY_CHARACTERISTIC }) {
-                    "TX characteristic not found"
-                }
-
-            otaCharacteristic = ota
+            val kableService = service as KableBleService
+            val peripheral = kableService.peripheral
 
             // Log negotiated MTU for diagnostics
             val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
@@ -169,13 +149,14 @@ class BleOtaTransport(
 
             // Enable notifications and collect responses
             val subscribed = CompletableDeferred<Unit>()
-            txChar
-                .subscribe {
-                    Logger.d { "BLE OTA: TX characteristic subscribed" }
-                    subscribed.complete(Unit)
-                }
+            peripheral
+                .observe(txChar)
                 .onEach { notifyBytes ->
                     try {
+                        if (!subscribed.isCompleted) {
+                            Logger.d { "BLE OTA: TX characteristic subscribed" }
+                            subscribed.complete(Unit)
+                        }
                         val response = notifyBytes.decodeToString()
                         Logger.d { "BLE OTA: Received response: $response" }
                         responseChannel.trySend(response)
@@ -189,12 +170,17 @@ class BleOtaTransport(
                 }
                 .launchIn(this)
 
+            // Kable's observe doesn't provide a way to know when subscription is finished,
+            // but usually first value or just waiting a bit works.
+            // For Meshtastic, it might not emit immediately.
+            delay(500)
+            if (!subscribed.isCompleted) subscribed.complete(Unit)
+
             subscribed.await()
             Logger.i { "BLE OTA: Service discovered and ready" }
         }
     }
 
-    /** Initiates the OTA update by sending the size and hash. */
     override suspend fun startOta(
         sizeBytes: Long,
         sha256Hash: String,
@@ -214,19 +200,16 @@ class BleOtaTransport(
                         handshakeComplete = true
                     }
                 }
-
                 is OtaResponse.Erasing -> {
                     Logger.i { "BLE OTA: Device erasing flash..." }
                     onHandshakeStatus(OtaHandshakeStatus.Erasing)
                 }
-
                 is OtaResponse.Error -> {
                     if (parsed.message.contains("Hash Rejected", ignoreCase = true)) {
                         throw OtaProtocolException.HashRejected(sha256Hash)
                     }
                     throw OtaProtocolException.CommandFailed(command, parsed)
                 }
-
                 else -> {
                     Logger.w { "BLE OTA: Unexpected handshake response: $response" }
                 }
@@ -234,7 +217,7 @@ class BleOtaTransport(
         }
     }
 
-    /** Streams the firmware data in chunks. */
+    @Suppress("MagicNumber")
     override suspend fun streamFirmware(
         data: ByteArray,
         chunkSize: Int,
@@ -252,20 +235,15 @@ class BleOtaTransport(
             val currentChunkSize = minOf(chunkSize, remainingBytes)
             val chunk = data.copyOfRange(sentBytes, sentBytes + currentChunkSize)
 
-            // Write chunk
             val packetsSentForChunk = writeData(chunk, BleWriteType.WITHOUT_RESPONSE)
 
-            // Wait for responses
             val nextSentBytes = sentBytes + currentChunkSize
             repeat(packetsSentForChunk) { i ->
                 val response = waitForResponse(ACK_TIMEOUT_MS)
                 val isLastPacketOfChunk = i == packetsSentForChunk - 1
 
                 when (val parsed = OtaResponse.parse(response)) {
-                    is OtaResponse.Ack -> {
-                        // Normal packet success
-                    }
-
+                    is OtaResponse.Ack -> {}
                     is OtaResponse.Ok -> {
                         if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
                             sentBytes = nextSentBytes
@@ -273,14 +251,12 @@ class BleOtaTransport(
                             return@runCatching Unit
                         }
                     }
-
                     is OtaResponse.Error -> {
                         if (parsed.message.contains("Hash Mismatch", ignoreCase = true)) {
                             throw OtaProtocolException.VerificationFailed("Firmware hash mismatch after transfer")
                         }
                         throw OtaProtocolException.TransferFailed("Transfer failed: ${parsed.message}")
                     }
-
                     else -> throw OtaProtocolException.TransferFailed("Unexpected response: $response")
                 }
             }
@@ -298,7 +274,6 @@ class BleOtaTransport(
                 }
                 throw OtaProtocolException.TransferFailed("Verification failed: ${parsed.message}")
             }
-
             else -> throw OtaProtocolException.TransferFailed("Expected OK after transfer, got: $parsed")
         }
     }
@@ -315,9 +290,6 @@ class BleOtaTransport(
     }
 
     private suspend fun writeData(data: ByteArray, writeType: BleWriteType): Int {
-        val characteristic =
-            otaCharacteristic ?: throw OtaProtocolException.ConnectionFailed("OTA characteristic not available")
-
         val maxLen = bleConnection.maximumWriteValueLength(writeType) ?: data.size
         var offset = 0
         var packetsSent = 0
@@ -327,13 +299,17 @@ class BleOtaTransport(
                 val chunkSize = minOf(data.size - offset, maxLen)
                 val packet = data.copyOfRange(offset, offset + chunkSize)
 
-                val nordicWriteType =
+                val kableWriteType =
                     when (writeType) {
-                        BleWriteType.WITH_RESPONSE -> no.nordicsemi.kotlin.ble.core.WriteType.WITH_RESPONSE
-                        BleWriteType.WITHOUT_RESPONSE -> no.nordicsemi.kotlin.ble.core.WriteType.WITHOUT_RESPONSE
+                        BleWriteType.WITH_RESPONSE -> com.juul.kable.WriteType.WithResponse
+                        BleWriteType.WITHOUT_RESPONSE -> com.juul.kable.WriteType.WithoutResponse
                     }
 
-                characteristic.write(packet, writeType = nordicWriteType)
+                bleConnection.profile(OTA_SERVICE_UUID) { service ->
+                    val peripheral = (service as KableBleService).peripheral
+                    peripheral.write(otaChar, packet, kableWriteType)
+                }
+
                 offset += chunkSize
                 packetsSent++
             }
@@ -350,17 +326,14 @@ class BleOtaTransport(
     }
 
     companion object {
-        // Timeouts and retries
         private val SCAN_TIMEOUT = 10.seconds
         private const val CONNECTION_TIMEOUT_MS = 15_000L
         private const val ERASING_TIMEOUT_MS = 60_000L
         private const val ACK_TIMEOUT_MS = 10_000L
         private const val VERIFICATION_TIMEOUT_MS = 10_000L
-
         private const val REBOOT_DELAY_MS = 5_000L
         private const val SCAN_RETRY_COUNT = 3
         private const val SCAN_RETRY_DELAY_MS = 2_000L
-
         const val RECOMMENDED_CHUNK_SIZE = 512
     }
 }

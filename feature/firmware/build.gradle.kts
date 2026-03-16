@@ -48,6 +48,7 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
+            implementation(libs.kable.core)
             implementation(libs.jetbrains.lifecycle.viewmodel.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
@@ -64,31 +65,26 @@ kotlin {
             implementation(libs.androidx.compose.material3)
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.navigation.common)
+            implementation(libs.nordic.dfu)
             implementation(libs.coil)
             implementation(libs.coil.network.okhttp)
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
-
-            // DFU / Nordic specific dependencies
-            implementation(libs.nordic.client.android)
-            implementation(libs.nordic.dfu)
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }
 
-        androidUnitTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.mockk)
-            implementation(libs.robolectric)
-            implementation(libs.turbine)
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.androidx.compose.ui.test.junit4)
-            implementation(libs.androidx.test.ext.junit)
-            implementation(libs.nordic.client.android.mock)
-            implementation(libs.nordic.client.core.mock)
-            implementation(libs.nordic.core.mock)
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.mockk)
+                implementation(libs.robolectric)
+                implementation(libs.turbine)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.androidx.compose.ui.test.junit4)
+                implementation(libs.androidx.test.ext.junit)
+            }
         }
     }
 }

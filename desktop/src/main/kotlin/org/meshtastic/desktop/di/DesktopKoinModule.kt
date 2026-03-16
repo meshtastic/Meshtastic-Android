@@ -54,6 +54,7 @@ import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
 import org.meshtastic.desktop.stub.NoopServiceBroadcasts
+import org.meshtastic.core.ble.di.module as coreBleModule
 import org.meshtastic.core.common.di.module as coreCommonModule
 import org.meshtastic.core.data.di.module as coreDataModule
 import org.meshtastic.core.database.di.module as coreDatabaseModule
@@ -94,6 +95,7 @@ fun desktopModule() = module {
         org.meshtastic.core.domain.di.CoreDomainModule().coreDomainModule(),
         org.meshtastic.core.repository.di.CoreRepositoryModule().coreRepositoryModule(),
         org.meshtastic.core.network.di.CoreNetworkModule().coreNetworkModule(),
+        org.meshtastic.core.ble.di.CoreBleModule().coreBleModule(),
         org.meshtastic.core.ui.di.CoreUiModule().coreUiModule(),
         org.meshtastic.core.service.di.CoreServiceModule().coreServiceModule(),
         org.meshtastic.feature.settings.di.FeatureSettingsModule().featureSettingsModule(),
@@ -109,9 +111,18 @@ fun desktopModule() = module {
  * Stubs for truly platform-specific interfaces that have no `commonMain` implementation. These require Android APIs
  * (BLE/USB transport, notifications, WorkManager, location, broadcasts, widgets).
  */
+@Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
     single<ServiceRepository> { org.meshtastic.core.service.ServiceRepositoryImpl() }
-    single<RadioInterfaceService> { DesktopRadioInterfaceService(dispatchers = get(), radioPrefs = get()) }
+    single<RadioInterfaceService> {
+        DesktopRadioInterfaceService(
+            dispatchers = get(),
+            radioPrefs = get(),
+            scanner = get(),
+            bluetoothRepository = get(),
+            connectionFactory = get(),
+        )
+    }
     single<RadioController> {
         org.meshtastic.core.service.DirectRadioControllerImpl(
             serviceRepository = get(),
