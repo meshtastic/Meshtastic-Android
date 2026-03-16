@@ -39,3 +39,6 @@
     - [x] Verify OTA updates work via BLE
     - [x] Verify the Desktop app still functions correctly
 - [x] Task: Conductor - User Manual Verification 'Phase 5: Final Testing and Integration' (Protocol in workflow.md) 4778c0e
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions e5dffd9
