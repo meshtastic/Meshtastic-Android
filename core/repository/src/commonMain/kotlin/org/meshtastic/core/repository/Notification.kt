@@ -14,13 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service
+package org.meshtastic.core.repository
 
 data class Notification(
     val title: String,
     val message: String,
     val type: Type = Type.Info,
-    val category: Category = Category.Message
+    val category: Category = Category.Message,
+    val contactKey: String? = null,
+    val isSilent: Boolean = false,
+    val group: String? = null,
+    val id: Int? = null
 ) {
     enum class Type {
         None, Info, Warning, Error

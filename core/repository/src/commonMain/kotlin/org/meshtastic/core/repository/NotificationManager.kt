@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.core.service
+package org.meshtastic.core.repository
 
 interface NotificationManager {
     fun dispatch(notification: Notification)
+
+    fun cancel(id: Int)
+
+    fun cancelAll()
 }

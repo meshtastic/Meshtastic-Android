@@ -23,6 +23,8 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import org.koin.core.annotation.Single
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.getString
@@ -81,11 +83,23 @@ class AndroidNotificationManager(
             .setContentText(notification.message)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
             .setAutoCancel(true)
+            .setSilent(notification.isSilent)
+
+        notification.group?.let { builder.setGroup(it) }
 
         if (notification.type == Notification.Type.Error) {
             builder.setPriority(NotificationCompat.PRIORITY_HIGH)
         }
 
-        notificationManager.notify(notification.hashCode(), builder.build())
+        val id = notification.id ?: notification.hashCode()
+        notificationManager.notify(id, builder.build())
+    }
+
+    override fun cancel(id: Int) {
+        notificationManager.cancel(id)
+    }
+
+    override fun cancelAll() {
+        notificationManager.cancelAll()
     }
 }

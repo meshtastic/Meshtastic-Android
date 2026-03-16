@@ -24,6 +24,8 @@ import io.mockk.verify
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
 
 class AndroidNotificationManagerTest {
