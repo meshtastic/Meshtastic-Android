@@ -88,6 +88,7 @@ private fun ContactsEntryContent(
     val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
     val contactsViewModel = koinViewModel<ContactsViewModel>()
     val messageViewModel = koinViewModel<MessageViewModel>()
+    initialContactKey?.let { messageViewModel.setContactKey(it) }
 
     AdaptiveContactsScreen(
         backStack = backStack,

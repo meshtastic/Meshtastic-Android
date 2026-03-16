@@ -111,6 +111,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
 
     entry<NodeDetailRoutes.NodeMap> { args ->
         val vm = koinViewModel<NodeMapViewModel>()
+        vm.setDestNum(args.destNum)
         NodeMapScreen(vm, onNavigateUp = { backStack.removeLastOrNull() })
     }
 

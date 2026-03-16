@@ -35,6 +35,7 @@ fun MapScreen(
     navigateToNodeDetails: (Int) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SharedMapViewModel,
+    waypointId: Int? = null,
 ) {
     val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle()
@@ -58,6 +59,7 @@ fun MapScreen(
             modifier = Modifier.fillMaxSize().padding(paddingValues),
             viewModel = viewModel,
             navigateToNodeDetails = navigateToNodeDetails,
+            waypointId = waypointId,
         )
     }
 }

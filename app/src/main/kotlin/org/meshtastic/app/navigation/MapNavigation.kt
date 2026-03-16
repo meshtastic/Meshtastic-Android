@@ -26,12 +26,13 @@ import org.meshtastic.feature.map.MapScreen
 import org.meshtastic.feature.map.SharedMapViewModel
 
 fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
-    entry<MapRoutes.Map> {
+    entry<MapRoutes.Map> { args ->
         val viewModel = koinViewModel<SharedMapViewModel>()
         MapScreen(
             viewModel = viewModel,
             onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
             navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
+            waypointId = args.waypointId,
         )
     }
 }

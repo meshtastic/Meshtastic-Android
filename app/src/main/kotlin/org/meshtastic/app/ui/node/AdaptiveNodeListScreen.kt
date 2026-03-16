@@ -66,7 +66,8 @@ fun AdaptiveNodeListScreen(
         val currentKey = backStack.lastOrNull()
         val isNodesRoute = currentKey is NodesRoutes.Nodes || currentKey is NodesRoutes.NodesGraph
         val previousKey = if (backStack.size > 1) backStack[backStack.size - 2] else null
-        val isFromDifferentGraph = previousKey !is NodesRoutes.NodesGraph && previousKey !is NodesRoutes.Nodes
+        val isFromDifferentGraph =
+            previousKey != null && previousKey !is NodesRoutes.NodesGraph && previousKey !is NodesRoutes.Nodes
 
         if (isFromDifferentGraph && !isNodesRoute) {
             // Navigate back via NavController to return to the previous screen

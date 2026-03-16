@@ -18,8 +18,10 @@ package org.meshtastic.feature.map.node
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -44,11 +46,19 @@ class NodeMapViewModel(
     buildConfigProvider: BuildConfigProvider,
     private val mapPrefs: MapPrefs,
 ) : ViewModel() {
-    private val destNum = savedStateHandle.get<Int>("destNum") ?: 0
+    private val destNumFromRoute = savedStateHandle.get<Int>("destNum")
+    private val manualDestNum = MutableStateFlow<Int?>(null)
+
+    private val destNumFlow =
+        combine(MutableStateFlow(destNumFromRoute), manualDestNum) { route, manual -> manual ?: route ?: 0 }
+
+    fun setDestNum(num: Int) {
+        manualDestNum.value = num
+    }
 
     val node =
-        nodeRepository.nodeDBbyNum
-            .mapLatest { it[destNum] }
+        destNumFlow
+            .flatMapLatest { destNum -> nodeRepository.nodeDBbyNum.mapLatest { it[destNum] } }
             .distinctUntilChanged()
             .stateInWhileSubscribed(initialValue = null)
 
@@ -57,8 +67,9 @@ class NodeMapViewModel(
     private val ourNodeNumFlow = nodeRepository.myNodeInfo.map { it?.myNodeNum }.distinctUntilChanged()
 
     val positionLogs: StateFlow<List<Position>> =
-        ourNodeNumFlow
-            .map { if (destNum == it) MeshLog.NODE_NUM_LOCAL else destNum }
+        combine(ourNodeNumFlow, destNumFlow) { ourNodeNum, destNum ->
+            if (destNum == ourNodeNum) MeshLog.NODE_NUM_LOCAL else destNum
+        }
             .distinctUntilChanged()
             .flatMapLatest { logId ->
                 meshLogRepository.getMeshPacketsFrom(logId, PortNum.POSITION_APP.value).map { packets ->

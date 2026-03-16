@@ -47,6 +47,12 @@ class MapViewModel(
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
+    fun setWaypointId(id: Int?) {
+        if (id != null) {
+            _selectedWaypointId.value = id
+        }
+    }
+
     var mapStyleId: Int
         get() = mapPrefs.mapStyle.value
         set(value) {
