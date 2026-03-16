@@ -21,10 +21,6 @@ import com.juul.kable.PeripheralBuilder
 import com.juul.kable.toIdentifier
 import co.touchlab.kermit.Logger
 
-internal actual suspend fun Peripheral.platformConnectSetup() {
-    // Simplified: No specific platform setup required initially.
-}
-
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
     // If we're connecting blindly to a bonded device without a fresh scan (DirectBleDevice),
     // we MUST use autoConnect = true. Otherwise, Android's direct connect algorithm will often fail

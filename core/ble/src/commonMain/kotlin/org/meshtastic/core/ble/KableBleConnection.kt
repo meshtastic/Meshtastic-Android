@@ -84,7 +84,6 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                 .launchIn(scope)
 
         p.connect()
-        p.platformConnectSetup()
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")

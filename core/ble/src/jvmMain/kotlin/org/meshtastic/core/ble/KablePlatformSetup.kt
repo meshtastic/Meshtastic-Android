@@ -20,10 +20,6 @@ import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.toIdentifier
 
-internal actual suspend fun Peripheral.platformConnectSetup() {
-    // Desktop Kable does not support explicit MTU requests or priority requests.
-}
-
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
     // Desktop Kable uses direct connections without needing autoConnect.
 }

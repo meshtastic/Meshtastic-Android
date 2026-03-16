@@ -19,9 +19,6 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 
-/** Platform-specific setup to be run immediately after connecting. */
-internal expect suspend fun Peripheral.platformConnectSetup()
-
 /** Platform-specific configuration for the Peripheral builder based on device type. */
 internal expect fun PeripheralBuilder.platformConfig(device: BleDevice)
 
