@@ -123,14 +123,30 @@ class GoogleMapsPrefsImpl(
     }
 
     override val cameraTargetLat: StateFlow<Double> =
-        dataStore.data.map { it[KEY_CAMERA_TARGET_LAT_PREF] ?: 0.0 }.stateIn(scope, SharingStarted.Eagerly, 0.0)
+        dataStore.data
+            .map {
+                try {
+                    it[KEY_CAMERA_TARGET_LAT_PREF] ?: 0.0
+                } catch (_: ClassCastException) {
+                    it[floatPreferencesKey(KEY_CAMERA_TARGET_LAT_PREF.name)]?.toDouble() ?: 0.0
+                }
+            }
+            .stateIn(scope, SharingStarted.Eagerly, 0.0)
 
     override fun setCameraTargetLat(value: Double) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_TARGET_LAT_PREF] = value } }
     }
 
     override val cameraTargetLng: StateFlow<Double> =
-        dataStore.data.map { it[KEY_CAMERA_TARGET_LNG_PREF] ?: 0.0 }.stateIn(scope, SharingStarted.Eagerly, 0.0)
+        dataStore.data
+            .map {
+                try {
+                    it[KEY_CAMERA_TARGET_LNG_PREF] ?: 0.0
+                } catch (_: ClassCastException) {
+                    it[floatPreferencesKey(KEY_CAMERA_TARGET_LNG_PREF.name)]?.toDouble() ?: 0.0
+                }
+            }
+            .stateIn(scope, SharingStarted.Eagerly, 0.0)
 
     override fun setCameraTargetLng(value: Double) {
         scope.launch { dataStore.edit { it[KEY_CAMERA_TARGET_LNG_PREF] = value } }

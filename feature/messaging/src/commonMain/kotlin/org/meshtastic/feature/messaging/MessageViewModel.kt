@@ -151,6 +151,12 @@ class MessageViewModel(
         }
     }
 
+    fun setContactKey(contactKey: String) {
+        if (contactKeyForPagedMessages.value != contactKey) {
+            contactKeyForPagedMessages.value = contactKey
+        }
+    }
+
     fun setTitle(title: String) {
         viewModelScope.launch { _title.value = title }
     }

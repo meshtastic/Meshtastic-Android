@@ -299,24 +299,36 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                                 TopLevelDestination.Nodes -> {
                                     val onNodesList = currentKey is NodesRoutes.Nodes
                                     if (!onNodesList) {
-                                        backStack.clear()
-                                        backStack.add(destination.route)
+                                        if (backStack.isNotEmpty()) {
+                                            backStack[0] = destination.route
+                                            while (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                                        } else {
+                                            backStack.add(destination.route)
+                                        }
                                     }
                                     uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.NodesTabPressed)
                                 }
                                 TopLevelDestination.Conversations -> {
                                     val onConversationsList = currentKey is ContactsRoutes.Contacts
                                     if (!onConversationsList) {
-                                        backStack.clear()
-                                        backStack.add(destination.route)
+                                        if (backStack.isNotEmpty()) {
+                                            backStack[0] = destination.route
+                                            while (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                                        } else {
+                                            backStack.add(destination.route)
+                                        }
                                     }
                                     uIViewModel.emitScrollToTopEvent(ScrollToTopEvent.ConversationsTabPressed)
                                 }
                                 else -> Unit
                             }
                         } else {
-                            backStack.clear()
-                            backStack.add(destination.route)
+                            if (backStack.isNotEmpty()) {
+                                backStack[0] = destination.route
+                                while (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
+                            } else {
+                                backStack.add(destination.route)
+                            }
                         }
                     },
                 )

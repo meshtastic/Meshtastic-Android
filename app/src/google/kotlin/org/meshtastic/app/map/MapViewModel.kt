@@ -91,6 +91,20 @@ class MapViewModel(
     private val _selectedWaypointId = MutableStateFlow(savedStateHandle.get<Int>("waypointId"))
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
+    fun setWaypointId(id: Int?) {
+        if (id != null && _selectedWaypointId.value != id) {
+            _selectedWaypointId.value = id
+            viewModelScope.launch {
+                val wpMap = waypoints.first { it.containsKey(id) }
+                wpMap[id]?.let { packet ->
+                    val waypoint = packet.waypoint!!
+                    val latLng = LatLng((waypoint.latitude_i ?: 0) / 1e7, (waypoint.longitude_i ?: 0) / 1e7)
+                    cameraPositionState.position = CameraPosition.fromLatLngZoom(latLng, 15f)
+                }
+            }
+        }
+    }
+
     private val targetLatLng =
         googleMapsPrefs.cameraTargetLat.value
             .takeIf { it != 0.0 }

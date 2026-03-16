@@ -37,6 +37,7 @@ interface MapViewProvider {
         tracerouteOverlay: Any? = null,
         tracerouteNodePositions: Map<Int, Any> = emptyMap(),
         onTracerouteMappableCountChanged: (Int, Int) -> Unit = { _, _ -> },
+        waypointId: Int? = null,
     )
 }
 

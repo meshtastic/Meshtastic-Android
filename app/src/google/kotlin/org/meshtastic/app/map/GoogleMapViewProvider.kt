@@ -17,6 +17,7 @@
 package org.meshtastic.app.map
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.Single
@@ -34,8 +35,10 @@ class GoogleMapViewProvider : MapViewProvider {
         tracerouteOverlay: Any?,
         tracerouteNodePositions: Map<Int, Any>,
         onTracerouteMappableCountChanged: (Int, Int) -> Unit,
+        waypointId: Int?,
     ) {
         val mapViewModel: MapViewModel = koinViewModel()
+        LaunchedEffect(waypointId) { mapViewModel.setWaypointId(waypointId) }
         org.meshtastic.app.map.MapView(
             modifier = modifier,
             mapViewModel = mapViewModel,

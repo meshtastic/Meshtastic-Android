@@ -78,7 +78,8 @@ fun AdaptiveContactsScreen(
             // Check if we navigated here from another screen (e.g., from Nodes or Map)
             val previousKey = if (backStack.size > 1) backStack[backStack.size - 2] else null
             val isFromDifferentGraph =
-                previousKey !is ContactsRoutes.ContactsGraph &&
+                previousKey != null &&
+                    previousKey !is ContactsRoutes.ContactsGraph &&
                     previousKey !is ContactsRoutes.Contacts &&
                     previousKey !is ContactsRoutes.Messages
 
