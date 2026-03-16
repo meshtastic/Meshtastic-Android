@@ -17,4 +17,7 @@
 package org.meshtastic.core.ble
 
 /** Extension to convert a [BleService] to a [MeshtasticRadioProfile]. */
-expect fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile
+fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile {
+    val kableService = this as KableBleService
+    return KableMeshtasticRadioProfile(kableService.peripheral)
+}
