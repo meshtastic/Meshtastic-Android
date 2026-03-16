@@ -1,8 +1,0 @@
-{
-  "track_id": "extract_viewmodels_20260316",
-  "type": "refactor",
-  "status": "new",
-  "created_at": "2026-03-16T12:00:00Z",
-  "updated_at": "2026-03-16T12:00:00Z",
-  "description": "Extract remaining 5 App-Only ViewModels (AndroidSettingsViewModel, AndroidRadioConfigViewModel, AndroidDebugViewModel, AndroidMetricsViewModel, UIViewModel) to shared KMP feature/core modules by isolating Android-specific dependencies (Uri, Location, Locale) behind abstractions."
-}
