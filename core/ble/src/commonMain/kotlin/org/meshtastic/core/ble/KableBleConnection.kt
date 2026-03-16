@@ -21,11 +21,13 @@ import com.juul.kable.State
 import com.juul.kable.peripheral
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
 
@@ -52,8 +54,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
 
     override suspend fun connect(device: BleDevice) {
         val p = when (device) {
-            is KableBleDevice -> Peripheral(device.advertisement) { platformConfig() }
-            is DirectBleDevice -> createPeripheral(device.address) { platformConfig() }
+            is KableBleDevice -> Peripheral(device.advertisement) { platformConfig(device) }
+            is DirectBleDevice -> createPeripheral(device.address) { platformConfig(device) }
             else -> error("Unsupported BleDevice type: ${device::class}")
         }
         
@@ -102,7 +104,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         }
     }
 
-    override suspend fun disconnect() {
+    override suspend fun disconnect() = withContext(NonCancellable) {
         stateJob?.cancel()
         stateJob = null
         peripheral?.disconnect()

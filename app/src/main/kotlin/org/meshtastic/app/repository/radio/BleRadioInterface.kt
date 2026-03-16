@@ -103,6 +103,8 @@ class BleRadioInterface(
     private var bytesReceived: Long = 0
     private var bytesSent: Long = 0
 
+    @Volatile private var isFullyConnected = false
+
     init {
         connect()
     }
@@ -140,12 +142,16 @@ class BleRadioInterface(
     private fun connect() {
         connectionScope.launch {
             try {
+                // Add a delay to allow any pending background disconnects (from a previous close() call)
+                // to complete and the Android BLE stack to settle before we attempt a new connection.
+                kotlinx.coroutines.delay(1000)
+
                 connectionStartTime = nowMillis
                 Logger.i { "[$address] BLE connection attempt started" }
 
                 bleConnection.connectionState
                     .onEach { state ->
-                        if (state is BleConnectionState.Disconnected) {
+                        if (state is BleConnectionState.Disconnected && isFullyConnected) {
                             onDisconnected(state)
                         }
                     }
@@ -156,11 +162,21 @@ class BleRadioInterface(
                     .launchIn(connectionScope)
 
                 val device = findDevice()
-                val state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+
+                if (state !is BleConnectionState.Connected) {
+                    // Kable on Android occasionally fails the first connection attempt with NotConnectedException
+                    // if the previous peripheral wasn't fully cleaned up by the OS. A quick retry resolves it.
+                    Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+                    kotlinx.coroutines.delay(1500)
+                    state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                }
+
                 if (state !is BleConnectionState.Connected) {
                     throw RadioNotConnectedException("Failed to connect to device at address $address")
                 }
 
+                isFullyConnected = true
                 onConnected()
                 discoverServicesAndSetupCharacteristics()
             } catch (e: kotlinx.coroutines.CancellationException) {
@@ -307,7 +323,7 @@ class BleRadioInterface(
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        serviceScope.launch {
+        kotlinx.coroutines.GlobalScope.launch {
             connectionScope.cancel()
             bleConnection.disconnect()
             service.onDisconnect(true)

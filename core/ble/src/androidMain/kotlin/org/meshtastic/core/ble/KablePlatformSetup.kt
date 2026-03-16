@@ -24,9 +24,12 @@ internal actual suspend fun Peripheral.platformConnectSetup() {
     // Simplified: No specific platform setup required initially.
 }
 
-internal actual fun PeripheralBuilder.platformConfig() {
-    // Default to direct connections (autoConnect = false) which are much faster and more reliable
-    // when connecting immediately after a scan.
+internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
+    // If we're connecting blindly to a bonded device without a fresh scan (DirectBleDevice),
+    // we MUST use autoConnect = true. Otherwise, Android's direct connect algorithm will often fail
+    // immediately with GATT 133 or timeout, especially if the device uses random resolvable addresses.
+    // If we just scanned the device (KableBleDevice), direct connection (autoConnect = false) is faster.
+    autoConnectIf { device is DirectBleDevice }
     
     onServicesDiscovered {
         try {
