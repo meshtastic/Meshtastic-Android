@@ -20,7 +20,7 @@ import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 
 /** Platform-specific configuration for the Peripheral builder based on device type. */
-internal expect fun PeripheralBuilder.platformConfig(device: BleDevice)
+internal expect fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean)
 
 /** Platform-specific instantiation of a Peripheral by address. */
 internal expect fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral

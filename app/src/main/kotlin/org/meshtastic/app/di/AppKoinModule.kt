@@ -37,7 +37,6 @@ import org.meshtastic.core.database.di.CoreDatabaseAndroidModule
 import org.meshtastic.core.database.di.CoreDatabaseModule
 import org.meshtastic.core.datastore.di.CoreDatastoreAndroidModule
 import org.meshtastic.core.datastore.di.CoreDatastoreModule
-import org.meshtastic.core.di.di.CoreDiModule
 import org.meshtastic.core.network.di.CoreNetworkModule
 import org.meshtastic.core.prefs.di.CorePrefsAndroidModule
 import org.meshtastic.core.prefs.di.CorePrefsModule

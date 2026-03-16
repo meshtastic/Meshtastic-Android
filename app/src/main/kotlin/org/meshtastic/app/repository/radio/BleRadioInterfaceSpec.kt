@@ -16,17 +16,13 @@
  */
 package org.meshtastic.app.repository.radio
 
-import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.BluetoothRepository
-import org.meshtastic.core.model.util.anonymize
 import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Bluetooth backend implementation. */
 @Single
 class BleRadioInterfaceSpec(
     private val factory: BleRadioInterfaceFactory,
-    private val bluetoothRepository: BluetoothRepository,
 ) : InterfaceSpec<BleRadioInterface> {
     override fun createInterface(rest: String, service: RadioInterfaceService): BleRadioInterface =
         factory.create(rest, service)

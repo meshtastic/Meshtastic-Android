@@ -20,11 +20,9 @@ import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.toIdentifier
 
-internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
+internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
     // Desktop Kable uses direct connections without needing autoConnect.
 }
 
-internal actual fun createPeripheral(
-    address: String,
-    builderAction: PeripheralBuilder.() -> Unit
-): Peripheral = com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
+internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
+    com.juul.kable.Peripheral(address.toIdentifier(), builderAction)

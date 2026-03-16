@@ -17,7 +17,6 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Advertisement
-import com.juul.kable.Peripheral
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -34,7 +33,7 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     // On desktop, bonding isn't strictly required before connecting via Kable,
     // and we don't have a pairing flow. Defaulting to true lets the UI connect directly.
     override val isBonded: Boolean = true
-    
+
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.activeAddress == address
 

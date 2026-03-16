@@ -16,21 +16,17 @@
  */
 package org.meshtastic.core.ble
 
-import com.juul.kable.Peripheral
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /** Represents a BLE device known by address only (e.g. from bonded list) without an active advertisement. */
-class DirectBleDevice(
-    override val address: String,
-    override val name: String? = null,
-) : BleDevice {
+class DirectBleDevice(override val address: String, override val name: String? = null) : BleDevice {
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
 
     override val isBonded: Boolean = true
-    
+
     override val isConnected: Boolean
         get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.activeAddress == address
 
@@ -43,6 +39,7 @@ class DirectBleDevice(
             0
         }
     }
+
     override suspend fun bond() {}
 
     fun updateState(newState: BleConnectionState) {

@@ -19,9 +19,8 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 
 /**
- * A simple global tracker for the currently active BLE connection.
- * This resolves instance mismatch issues between dynamically created UI devices 
- * (scanned vs bonded) and the actual connection.
+ * A simple global tracker for the currently active BLE connection. This resolves instance mismatch issues between
+ * dynamically created UI devices (scanned vs bonded) and the actual connection.
  */
 internal object ActiveBleConnection {
     var activePeripheral: Peripheral? = null

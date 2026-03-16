@@ -16,31 +16,30 @@
  */
 package org.meshtastic.core.ble
 
+import co.touchlab.kermit.Logger
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 import com.juul.kable.toIdentifier
-import co.touchlab.kermit.Logger
 
-internal actual fun PeripheralBuilder.platformConfig(device: BleDevice) {
+internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
     // If we're connecting blindly to a bonded device without a fresh scan (DirectBleDevice),
     // we MUST use autoConnect = true. Otherwise, Android's direct connect algorithm will often fail
     // immediately with GATT 133 or timeout, especially if the device uses random resolvable addresses.
     // If we just scanned the device (KableBleDevice), direct connection (autoConnect = false) is faster.
-    autoConnectIf { device is DirectBleDevice }
-    
+    autoConnectIf(autoConnect)
+
     onServicesDiscovered {
         try {
             // Android defaults to 23 bytes MTU. Meshtastic packets can be 512 bytes.
             // Requesting the max MTU is critical for preventing dropped packets and stalls.
+            @Suppress("MagicNumber")
             val negotiatedMtu = requestMtu(512)
             Logger.i { "Negotiated MTU: $negotiatedMtu" }
-        } catch (e: Exception) {
+        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
             Logger.w(e) { "Failed to request MTU" }
         }
     }
 }
 
-internal actual fun createPeripheral(
-    address: String,
-    builderAction: PeripheralBuilder.() -> Unit
-): Peripheral = com.juul.kable.Peripheral(address.toIdentifier(), builderAction)
+internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
+    com.juul.kable.Peripheral(address.toIdentifier(), builderAction)

@@ -25,7 +25,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -124,11 +123,12 @@ class BleRadioInterface(
         repeat(SCAN_RETRY_COUNT) { attempt ->
             try {
                 val d = kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
-                    scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first { it.address == address }
+                    scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address)
+                        .first { it.address == address }
                 }
                 if (d != null) return d
             } catch (e: Exception) {
-                // Ignore timeout exceptions
+                Logger.v(e) { "Scan attempt failed or timed out" }
             }
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
@@ -144,7 +144,9 @@ class BleRadioInterface(
             try {
                 // Add a delay to allow any pending background disconnects (from a previous close() call)
                 // to complete and the Android BLE stack to settle before we attempt a new connection.
-                kotlinx.coroutines.delay(1000)
+                @Suppress("MagicNumber")
+                val connectDelayMs = 1000L
+                kotlinx.coroutines.delay(connectDelayMs)
 
                 connectionStartTime = nowMillis
                 Logger.i { "[$address] BLE connection attempt started" }
@@ -168,7 +170,9 @@ class BleRadioInterface(
                     // Kable on Android occasionally fails the first connection attempt with NotConnectedException
                     // if the previous peripheral wasn't fully cleaned up by the OS. A quick retry resolves it.
                     Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
-                    kotlinx.coroutines.delay(1500)
+                    @Suppress("MagicNumber")
+                    val retryDelayMs = 1500L
+                    kotlinx.coroutines.delay(retryDelayMs)
                     state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
                 }
 

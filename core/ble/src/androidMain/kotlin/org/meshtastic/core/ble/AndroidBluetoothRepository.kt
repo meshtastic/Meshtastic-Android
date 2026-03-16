@@ -59,8 +59,8 @@ class AndroidBluetoothRepository(
     @SuppressLint("MissingPermission")
     override suspend fun bond(device: BleDevice) {
         val macAddress = device.address
-        val remoteDevice = bluetoothAdapter?.getRemoteDevice(macAddress) 
-            ?: throw Exception("Bluetooth adapter unavailable")
+        val remoteDevice =
+            bluetoothAdapter?.getRemoteDevice(macAddress) ?: throw Exception("Bluetooth adapter unavailable")
 
         if (remoteDevice.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED) {
             updateBluetoothState()
@@ -68,36 +68,61 @@ class AndroidBluetoothRepository(
         }
 
         kotlinx.coroutines.suspendCancellableCoroutine<Unit> { cont ->
-            val receiver = object : android.content.BroadcastReceiver() {
-                @SuppressLint("MissingPermission")
-                override fun onReceive(c: Context, intent: android.content.Intent) {
-                    if (intent.action == android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
-                        val d = intent.getParcelableExtra<android.bluetooth.BluetoothDevice>(android.bluetooth.BluetoothDevice.EXTRA_DEVICE)
-                        if (d?.address?.equals(macAddress, ignoreCase = true) == true) {
-                            val state = intent.getIntExtra(android.bluetooth.BluetoothDevice.EXTRA_BOND_STATE, android.bluetooth.BluetoothDevice.ERROR)
-                            val prevState = intent.getIntExtra(android.bluetooth.BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE, android.bluetooth.BluetoothDevice.ERROR)
-                            
-                            if (state == android.bluetooth.BluetoothDevice.BOND_BONDED) {
-                                try { context.unregisterReceiver(this) } catch (e: Exception) {}
-                                if (cont.isActive) cont.resume(Unit) { }
-                            } else if (state == android.bluetooth.BluetoothDevice.BOND_NONE && prevState == android.bluetooth.BluetoothDevice.BOND_BONDING) {
-                                try { context.unregisterReceiver(this) } catch (e: Exception) {}
-                                if (cont.isActive) cont.resumeWith(Result.failure(Exception("Bonding failed or rejected")))
+            val receiver =
+                object : android.content.BroadcastReceiver() {
+                    @SuppressLint("MissingPermission")
+                    override fun onReceive(c: Context, intent: android.content.Intent) {
+                        if (intent.action == android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED) {
+                            val d =
+                                intent.getParcelableExtra<android.bluetooth.BluetoothDevice>(
+                                    android.bluetooth.BluetoothDevice.EXTRA_DEVICE,
+                                )
+                            if (d?.address?.equals(macAddress, ignoreCase = true) == true) {
+                                val state =
+                                    intent.getIntExtra(
+                                        android.bluetooth.BluetoothDevice.EXTRA_BOND_STATE,
+                                        android.bluetooth.BluetoothDevice.ERROR,
+                                    )
+                                val prevState =
+                                    intent.getIntExtra(
+                                        android.bluetooth.BluetoothDevice.EXTRA_PREVIOUS_BOND_STATE,
+                                        android.bluetooth.BluetoothDevice.ERROR,
+                                    )
+
+                                if (state == android.bluetooth.BluetoothDevice.BOND_BONDED) {
+                                    try {
+                                        context.unregisterReceiver(this)
+                                    } catch (e: Exception) {}
+                                    if (cont.isActive) cont.resume(Unit) {}
+                                } else if (
+                                    state == android.bluetooth.BluetoothDevice.BOND_NONE &&
+                                    prevState == android.bluetooth.BluetoothDevice.BOND_BONDING
+                                ) {
+                                    try {
+                                        context.unregisterReceiver(this)
+                                    } catch (e: Exception) {}
+                                    if (cont.isActive) {
+                                        cont.resumeWith(Result.failure(Exception("Bonding failed or rejected")))
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            }
 
             val filter = android.content.IntentFilter(android.bluetooth.BluetoothDevice.ACTION_BOND_STATE_CHANGED)
             context.registerReceiver(receiver, filter)
 
             cont.invokeOnCancellation {
-                try { context.unregisterReceiver(receiver) } catch (e: Exception) {}
+                try {
+                    context.unregisterReceiver(receiver)
+                } catch (e: Exception) {}
             }
 
             if (!remoteDevice.createBond()) {
-                try { context.unregisterReceiver(receiver) } catch (e: Exception) {}
+                try {
+                    context.unregisterReceiver(receiver)
+                } catch (e: Exception) {}
                 if (cont.isActive) cont.resumeWith(Result.failure(Exception("Failed to initiate bonding")))
             }
         }
@@ -118,20 +143,15 @@ class AndroidBluetoothRepository(
     }
 
     @SuppressLint("MissingPermission")
-    private fun getBondedAppPeripherals(): List<BleDevice> =
-        bluetoothAdapter?.bondedDevices?.map { device ->
-            deviceCache.getOrPut(device.address) {
-                DirectBleDevice(device.address, device.name)
-            }
-        } ?: emptyList()
+    private fun getBondedAppPeripherals(): List<BleDevice> = bluetoothAdapter?.bondedDevices?.map { device ->
+        deviceCache.getOrPut(device.address) { DirectBleDevice(device.address, device.name) }
+    } ?: emptyList()
 
     @SuppressLint("MissingPermission")
-    override fun isBonded(address: String): Boolean {
-        return try {
-            bluetoothAdapter?.bondedDevices?.any { it.address.equals(address, ignoreCase = true) } ?: false
-        } catch (e: SecurityException) {
-            Logger.w(e) { "SecurityException checking bonded devices. Missing BLUETOOTH_CONNECT?" }
-            false
-        }
+    override fun isBonded(address: String): Boolean = try {
+        bluetoothAdapter?.bondedDevices?.any { it.address.equals(address, ignoreCase = true) } ?: false
+    } catch (e: SecurityException) {
+        Logger.w(e) { "SecurityException checking bonded devices. Missing BLUETOOTH_CONNECT?" }
+        false
     }
 }

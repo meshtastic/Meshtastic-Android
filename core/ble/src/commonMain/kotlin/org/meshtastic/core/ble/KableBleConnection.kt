@@ -18,11 +18,12 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
 import com.juul.kable.State
-import com.juul.kable.peripheral
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
@@ -54,19 +55,22 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
     override suspend fun connect(device: BleDevice) {
-        val p = when (device) {
-            is KableBleDevice -> Peripheral(device.advertisement) { platformConfig(device) }
-            is DirectBleDevice -> createPeripheral(device.address) { platformConfig(device) }
-            else -> error("Unsupported BleDevice type: ${device::class}")
-        }
-        
+        val autoConnect = MutableStateFlow(device is DirectBleDevice)
+
+        val p =
+            when (device) {
+                is KableBleDevice -> Peripheral(device.advertisement) { platformConfig(device) { autoConnect.value } }
+                is DirectBleDevice -> createPeripheral(device.address) { platformConfig(device) { autoConnect.value } }
+                else -> error("Unsupported BleDevice type: ${device::class}")
+            }
+
         peripheral?.disconnect()
         peripheral?.close()
         peripheral = p
-        
+
         ActiveBleConnection.activePeripheral = p
         ActiveBleConnection.activeAddress = device.address
-        
+
         _deviceFlow.emit(device)
 
         stateJob?.cancel()
@@ -78,17 +82,26 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                     if (kableState is State.Connecting || kableState is State.Connected) {
                         hasStartedConnecting = true
                     }
-                    
+
                     when (device) {
                         is KableBleDevice -> device.updateState(mappedState)
                         is DirectBleDevice -> device.updateState(mappedState)
                     }
-                    
+
                     _connectionState.emit(mappedState)
                 }
                 .launchIn(scope)
 
-        connectionScope = p.connect()
+        while (p.state.value !is State.Connected) {
+            autoConnect.value = try {
+                connectionScope = p.connect()
+                false
+            } catch (e: CancellationException) {
+                throw e
+            } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                true
+            }
+        }
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -115,10 +128,10 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         peripheral?.close()
         peripheral = null
         connectionScope = null
-        
+
         ActiveBleConnection.activePeripheral = null
         ActiveBleConnection.activeAddress = null
-        
+
         _deviceFlow.emit(null)
     }
 
