@@ -38,6 +38,7 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -58,6 +59,7 @@ class MeshDataHandlerTest {
     private val packetRepository: PacketRepository = mockk(relaxed = true)
     private val packetRepositoryLazy: Lazy<PacketRepository> = lazy { packetRepository }
     private val serviceBroadcasts: ServiceBroadcasts = mockk(relaxed = true)
+    private val notificationManager: NotificationManager = mockk(relaxed = true)
     private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
     private val analytics: PlatformAnalytics = mockk(relaxed = true)
     private val dataMapper: MeshDataMapper = mockk(relaxed = true)
@@ -86,6 +88,7 @@ class MeshDataHandlerTest {
                 serviceRepository,
                 packetRepositoryLazy,
                 serviceBroadcasts,
+                notificationManager,
                 serviceNotifications,
                 analytics,
                 dataMapper,
