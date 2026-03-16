@@ -16,6 +16,8 @@
  */
 package org.meshtastic.app
 
+import org.meshtastic.core.common.util.toMeshtasticUri
+
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
@@ -51,7 +53,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
-import org.meshtastic.app.model.UIViewModel
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
@@ -206,7 +208,7 @@ class MainActivity : ComponentActivity() {
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
         if (uri.toString().startsWith(DEEP_LINK_BASE_URI)) {
-            model.handleNavigationDeepLink(uri)
+            model.handleNavigationDeepLink(uri.toMeshtasticUri())
             return
         }
 

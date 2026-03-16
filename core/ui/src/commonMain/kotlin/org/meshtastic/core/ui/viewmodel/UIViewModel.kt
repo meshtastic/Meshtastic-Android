@@ -33,6 +33,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
@@ -58,15 +60,17 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.SharedContact
 
+import org.koin.core.annotation.KoinViewModel
+
 /**
  * Shared base for the application-level ViewModel.
  *
  * Contains all platform-independent state and actions (themes, alerts, connection state, firmware checks, traceroute,
- * shared contacts, channel sets, unread counts, etc.). The thin Android adapter [org.meshtastic.app.model.UIViewModel]
- * extends this class and adds the deep-link / URI boundary that requires `android.net.Uri`.
+ * shared contacts, channel sets, unread counts, etc.).
  */
+@KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
-abstract class BaseUIViewModel(
+class UIViewModel(
     private val nodeDB: NodeRepository,
     protected val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
@@ -78,6 +82,22 @@ abstract class BaseUIViewModel(
     packetRepository: PacketRepository,
     private val alertManager: AlertManager,
 ) : ViewModel() {
+
+    private val _navigationDeepLink = MutableSharedFlow<MeshtasticUri>(replay = 1)
+    val navigationDeepLink = _navigationDeepLink.asSharedFlow()
+
+    fun handleNavigationDeepLink(uri: MeshtasticUri) {
+        _navigationDeepLink.tryEmit(uri)
+    }
+
+    /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
+    fun handleScannedUri(uri: MeshtasticUri, onInvalid: () -> Unit) {
+        org.meshtastic.core.common.util.CommonUri.parse(uri.uriString).dispatchMeshtasticUri(
+            onContact = { setSharedContactRequested(it) },
+            onChannel = { setRequestChannelSet(it) },
+            onInvalid = onInvalid,
+        )
+    }
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme
 
@@ -186,7 +206,7 @@ abstract class BaseUIViewModel(
             }
             .launchIn(viewModelScope)
 
-        Logger.d { "BaseUIViewModel created" }
+        Logger.d { "UIViewModel created" }
     }
 
     private val _sharedContactRequested: MutableStateFlow<SharedContact?> = MutableStateFlow(null)
@@ -223,7 +243,7 @@ abstract class BaseUIViewModel(
 
     override fun onCleared() {
         super.onCleared()
-        Logger.d { "BaseUIViewModel cleared" }
+        Logger.d { "UIViewModel cleared" }
     }
 
     val tracerouteResponse: Flow<TracerouteResponse?>

@@ -24,7 +24,7 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.model.UIViewModel
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.MessageViewModel

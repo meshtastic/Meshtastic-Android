@@ -47,6 +47,8 @@ import org.meshtastic.feature.messaging.MessageScreen
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
 
+import org.meshtastic.core.common.util.MeshtasticUri
+
 @Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -57,7 +59,7 @@ fun AdaptiveContactsScreen(
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     sharedContactRequested: SharedContact?,
     requestChannelSet: ChannelSet?,
-    onHandleScannedUri: (Uri, onInvalid: () -> Unit) -> Unit,
+    onHandleScannedUri: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
     onClearRequestChannelUrl: () -> Unit,
     initialContactKey: String? = null,

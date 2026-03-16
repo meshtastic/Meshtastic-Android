@@ -14,7 +14,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extractions' (Protocol in workflow.md) d00b384
 
 ## Phase 3: Core UI & Cleanup
-- [ ] Task: Extract `UIViewModel` logic to `core:ui/commonMain`.
+- [~] Task: Extract `UIViewModel` logic to `core:ui/commonMain`.
 - [ ] Task: Verify the `app` module thinning progress and finalize any remaining DI cleanup in `AppKoinModule`.
 - [x] Task: Ensure all new shared ViewModels have baseline `commonTest` coverage using `core:testing` fakes. fdf34f5
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Core UI & Cleanup' (Protocol in workflow.md)
