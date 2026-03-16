@@ -1,12 +1,12 @@
 # Implementation Plan: Wire Up Notifications
 
-## Phase 1: Shared Abstraction (commonMain)
+## Phase 1: Shared Abstraction (commonMain) [checkpoint: 930ce02]
 - [x] Task: Define `NotificationManager` interface in `core:service/src/commonMain` 4f2107d
-    - [ ] Create `Notification` data model (title, message, type)
-    - [ ] Define `dispatch(notification: Notification)` method
+    - [x] Create `Notification` data model (title, message, type)
+    - [x] Define `dispatch(notification: Notification)` method
 - [x] Task: Create `NotificationPreferencesDataSource` using DataStore in `core:prefs` 346c2a4
-    - [ ] Define boolean preferences for categories (e.g., Messages, Node Events)
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Shared Abstraction (commonMain)' (Protocol in workflow.md)
+    - [x] Define boolean preferences for categories (e.g., Messages, Node Events)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Shared Abstraction (commonMain)' (Protocol in workflow.md)
 
 ## Phase 2: Migrate Android Implementation (androidMain)
 - [ ] Task: Audit existing Android notifications
