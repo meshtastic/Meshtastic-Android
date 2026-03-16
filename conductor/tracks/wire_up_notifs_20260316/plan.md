@@ -16,7 +16,7 @@
     - [x] Adapt existing Android notification code to the new `NotificationManager` interface
     - [x] Inject `Context` and `NotificationPreferencesDataSource`
     - [x] Respect user notification preferences
-- [~] Task: Wire `AndroidNotificationManager` into Koin DI
+- [x] Task: Wire `AndroidNotificationManager` into Koin DI 31c2a1e
 - [ ] Task: Replace old Android notification calls with the new unified interface
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
 
