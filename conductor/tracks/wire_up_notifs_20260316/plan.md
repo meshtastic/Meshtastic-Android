@@ -8,17 +8,17 @@
     - [x] Define boolean preferences for categories (e.g., Messages, Node Events)
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Shared Abstraction (commonMain)' (Protocol in workflow.md)
 
-## Phase 2: Migrate Android Implementation (androidMain)
+## Phase 2: Migrate Android Implementation (androidMain) [checkpoint: 1eb3cb0]
 - [x] Task: Audit existing Android notifications 930ce02
-    - [ ] Locate current implementation for local push notifications
-    - [ ] Analyze triggers and UX (channels, icons, sounds)
+    - [x] Locate current implementation for local push notifications
+    - [x] Analyze triggers and UX (channels, icons, sounds)
 - [x] Task: Implement `AndroidNotificationManager` 31c2a1e
     - [x] Adapt existing Android notification code to the new `NotificationManager` interface
     - [x] Inject `Context` and `NotificationPreferencesDataSource`
     - [x] Respect user notification preferences
 - [x] Task: Wire `AndroidNotificationManager` into Koin DI 31c2a1e
 - [x] Task: Replace old Android notification calls with the new unified interface 81fd10b
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
 
 ## Phase 3: Desktop Implementation (desktop)
 - [ ] Task: Implement `DesktopNotificationManager`
