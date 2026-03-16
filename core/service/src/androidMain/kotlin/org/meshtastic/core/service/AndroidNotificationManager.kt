@@ -68,16 +68,6 @@ class AndroidNotificationManager(
     }
 
     override fun dispatch(notification: Notification) {
-        val enabled = when (notification.category) {
-            Notification.Category.Message -> prefs.messagesEnabled.value
-            Notification.Category.NodeEvent -> prefs.nodeEventsEnabled.value
-            Notification.Category.Battery -> prefs.lowBatteryEnabled.value
-            Notification.Category.Alert -> true
-            Notification.Category.Service -> true
-        }
-
-        if (!enabled) return
-
         val builder = NotificationCompat.Builder(context, notification.category.name)
             .setContentTitle(notification.title)
             .setContentText(notification.message)
