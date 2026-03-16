@@ -155,7 +155,8 @@ open class RadioConfigViewModel(
     val currentDeviceProfile
         get() = _currentDeviceProfile.value
 
-    open suspend fun getCurrentLocation(): org.meshtastic.core.repository.Location? = locationService.getCurrentLocation()
+    open suspend fun getCurrentLocation(): org.meshtastic.core.repository.Location? =
+        locationService.getCurrentLocation()
 
     init {
         combine(destNumFlow, nodeRepository.nodeDBbyNum) { id, nodes -> nodes[id] ?: nodes.values.firstOrNull() }
