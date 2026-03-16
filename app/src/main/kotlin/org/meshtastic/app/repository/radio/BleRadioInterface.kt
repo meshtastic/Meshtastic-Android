@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -157,7 +158,7 @@ class BleRadioInterface(
                 }
                 .launchIn(connectionScope)
 
-            while (kotlinx.coroutines.isActive) {
+            while (isActive) {
                 try {
                     // Add a delay to allow any pending background disconnects (from a previous close() call)
                     // to complete and the Android BLE stack to settle before we attempt a new connection.
