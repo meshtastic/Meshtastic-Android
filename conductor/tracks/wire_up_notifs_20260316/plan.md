@@ -4,7 +4,7 @@
 - [x] Task: Define `NotificationManager` interface in `core:service/src/commonMain` 4f2107d
     - [ ] Create `Notification` data model (title, message, type)
     - [ ] Define `dispatch(notification: Notification)` method
-- [ ] Task: Create `NotificationPreferencesDataSource` using DataStore in `core:prefs`
+- [x] Task: Create `NotificationPreferencesDataSource` using DataStore in `core:prefs` 346c2a4
     - [ ] Define boolean preferences for categories (e.g., Messages, Node Events)
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Shared Abstraction (commonMain)' (Protocol in workflow.md)
 
