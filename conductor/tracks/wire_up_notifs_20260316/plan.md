@@ -9,14 +9,14 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Shared Abstraction (commonMain)' (Protocol in workflow.md)
 
 ## Phase 2: Migrate Android Implementation (androidMain)
-- [ ] Task: Audit existing Android notifications
+- [x] Task: Audit existing Android notifications 930ce02
     - [ ] Locate current implementation for local push notifications
     - [ ] Analyze triggers and UX (channels, icons, sounds)
-- [ ] Task: Implement `AndroidNotificationManager`
-    - [ ] Adapt existing Android notification code to the new `NotificationManager` interface
-    - [ ] Inject `Context` and `NotificationPreferencesDataSource`
-    - [ ] Respect user notification preferences
-- [ ] Task: Wire `AndroidNotificationManager` into Koin DI
+- [x] Task: Implement `AndroidNotificationManager` 31c2a1e
+    - [x] Adapt existing Android notification code to the new `NotificationManager` interface
+    - [x] Inject `Context` and `NotificationPreferencesDataSource`
+    - [x] Respect user notification preferences
+- [~] Task: Wire `AndroidNotificationManager` into Koin DI
 - [ ] Task: Replace old Android notification calls with the new unified interface
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
 
