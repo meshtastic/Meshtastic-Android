@@ -18,6 +18,9 @@ package org.meshtastic.feature.firmware.ota
 
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.Severity
+import io.mockk.coEvery
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -34,7 +37,7 @@ import no.nordicsemi.kotlin.ble.core.CharacteristicProperty
 import no.nordicsemi.kotlin.ble.core.LegacyAdvertisingSetParameters
 import no.nordicsemi.kotlin.ble.core.Permission
 import no.nordicsemi.kotlin.ble.core.and
-import no.nordicsemi.kotlin.ble.environment.android.mock.MockAndroidEnvironment
+import org.junit.After
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -62,12 +65,19 @@ class BleOtaTransportNordicMockTest {
                 }
             },
         )
+        mockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
+        coEvery { org.jetbrains.compose.resources.getString(any()) } returns "Mocked String"
+        coEvery { org.jetbrains.compose.resources.getString(any(), *anyVararg()) } returns "Mocked String"
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
     }
 
     @Test
     fun `full ota flow with nordic mocks`() = runTest(testDispatcher) {
-        val mockEnvironment = MockAndroidEnvironment.Api31(isBluetoothEnabled = true)
-        val centralManager = CentralManager.mock(mockEnvironment, scope = backgroundScope)
+        val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
 
         var txCharHandle: Int = -1
         val totalExpectedBytes = AtomicLong(64) // Smaller data for faster test

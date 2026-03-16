@@ -41,7 +41,7 @@ class FirmwareRetrieverTest {
                 architecture = "esp32-s3",
                 hasMui = false,
             )
-        val expectedFile = File("firmware-heltec-v3-2.5.0.bin")
+        val expectedFile = "firmware-heltec-v3-2.5.0.bin"
 
         // Generic fast OTA check fails
         coEvery { fileHandler.checkUrlExists(match { it.contains("mt-esp32s3-ota.bin") }) } returns false
@@ -51,7 +51,7 @@ class FirmwareRetrieverTest {
         // Board-specific check succeeds
         coEvery { fileHandler.checkUrlExists(match { it.contains("firmware-heltec-v3") }) } returns true
         coEvery { fileHandler.downloadFile(any(), "firmware-heltec-v3-2.5.0.bin", any()) } returns expectedFile
-        coEvery { fileHandler.extractFirmware(any<File>(), any(), any(), any()) } returns null
+        coEvery { fileHandler.extractFirmwareFromZip(any<String>(), any(), any(), any()) } returns null
 
         val result = retriever.retrieveEsp32Firmware(release, hardware) {}
 
@@ -70,7 +70,7 @@ class FirmwareRetrieverTest {
     fun `retrieveEsp32Firmware uses Unified OTA path for ESP32`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/esp32.zip")
         val hardware = DeviceHardware(hwModelSlug = "TLORA_V2", platformioTarget = "tlora-v2", architecture = "esp32")
-        val expectedFile = File("mt-esp32-ota.bin")
+        val expectedFile = "mt-esp32-ota.bin"
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
@@ -89,7 +89,7 @@ class FirmwareRetrieverTest {
     fun `retrieveOtaFirmware uses correct zip extension for NRF52`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/nrf52.zip")
         val hardware = DeviceHardware(hwModelSlug = "RAK4631", platformioTarget = "rak4631", architecture = "nrf52840")
-        val expectedFile = File("firmware-rak4631-2.5.0-ota.zip")
+        val expectedFile = "firmware-rak4631-2.5.0-ota.zip"
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
@@ -113,7 +113,7 @@ class FirmwareRetrieverTest {
                 platformioTarget = "rak4631_nomadstar_meteor_pro",
                 architecture = "nrf52840",
             )
-        val expectedFile = File("firmware-rak4631_nomadstar_meteor_pro-2.5.0-ota.zip")
+        val expectedFile = "firmware-rak4631_nomadstar_meteor_pro-2.5.0-ota.zip"
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
@@ -133,7 +133,7 @@ class FirmwareRetrieverTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/stm32.zip")
         val hardware =
             DeviceHardware(hwModelSlug = "ST_GENERIC", platformioTarget = "stm32-generic", architecture = "stm32")
-        val expectedFile = File("firmware-stm32-generic-2.5.0-ota.zip")
+        val expectedFile = "firmware-stm32-generic-2.5.0-ota.zip"
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
@@ -152,7 +152,7 @@ class FirmwareRetrieverTest {
     fun `retrieveUsbFirmware uses correct uf2 extension for RP2040`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/rp2040.zip")
         val hardware = DeviceHardware(hwModelSlug = "RPI_PICO", platformioTarget = "pico", architecture = "rp2040")
-        val expectedFile = File("firmware-pico-2.5.0.uf2")
+        val expectedFile = "firmware-pico-2.5.0.uf2"
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile
@@ -172,7 +172,7 @@ class FirmwareRetrieverTest {
     fun `retrieveUsbFirmware uses correct uf2 extension for NRF52`() = runTest {
         val release = FirmwareRelease(id = "v2.5.0", zipUrl = "https://example.com/nrf52.zip")
         val hardware = DeviceHardware(hwModelSlug = "T_ECHO", platformioTarget = "t-echo", architecture = "nrf52840")
-        val expectedFile = File("firmware-t-echo-2.5.0.uf2")
+        val expectedFile = "firmware-t-echo-2.5.0.uf2"
 
         coEvery { fileHandler.checkUrlExists(any()) } returns true
         coEvery { fileHandler.downloadFile(any(), any(), any()) } returns expectedFile

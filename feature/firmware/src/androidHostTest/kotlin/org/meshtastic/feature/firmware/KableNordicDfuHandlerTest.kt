@@ -4,12 +4,12 @@ import android.content.Context
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.toList
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.ble.BleConnectionFactory
@@ -18,7 +18,6 @@ import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
 import java.io.File
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class KableNordicDfuHandlerTest {
@@ -38,6 +37,10 @@ class KableNordicDfuHandlerTest {
         bleConnectionFactory = mockk(relaxed = true)
         context = mockk(relaxed = true)
 
+        mockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
+        coEvery { org.jetbrains.compose.resources.getString(any()) } returns "Mocked String"
+        coEvery { org.jetbrains.compose.resources.getString(any(), *anyVararg()) } returns "Mocked String"
+
         handler = KableNordicDfuHandler(
             firmwareRetriever = firmwareRetriever,
             radioController = radioController,
@@ -45,6 +48,11 @@ class KableNordicDfuHandlerTest {
             bleConnectionFactory = bleConnectionFactory,
             context = context
         )
+    }
+
+    @After
+    fun tearDown() {
+        unmockkStatic("org.jetbrains.compose.resources.StringResourcesKt")
     }
 
     @Test

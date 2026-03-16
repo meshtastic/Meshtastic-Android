@@ -30,6 +30,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.common.util.CommonUri
+import org.meshtastic.core.common.util.toPlatformUri
 import org.meshtastic.core.database.entity.FirmwareRelease
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.model.RadioController
@@ -84,22 +86,23 @@ class Esp32OtaUpdateHandlerTest {
         val release = FirmwareRelease(id = "local", title = "Local File", zipUrl = "", releaseNotes = "")
         val hardware = DeviceHardware(hwModelSlug = "V3", architecture = "esp32")
         val target = "00:11:22:33:44:55"
-        val uri: Uri = mockk()
+        val platformUri: Uri = mockk()
+        val commonUri: CommonUri = mockk()
+
+        mockkStatic("org.meshtastic.core.common.util.CommonUri_androidKt")
+        every { commonUri.toPlatformUri() } returns platformUri
 
         every { context.contentResolver } returns contentResolver
-        every { contentResolver.openInputStream(uri) } throws IOException("Read error")
+        every { contentResolver.openInputStream(platformUri) } throws IOException("Read error")
 
         val states = mutableListOf<FirmwareUpdateState>()
 
-        handler.startUpdate(release, hardware, target, { states.add(it) }, uri)
-
-        // Before fix, this would be FirmwareUpdateState.Error("Could not retrieve firmware file.")
-        // After fix, it should ideally contain "Read error" or be the original exception if we don't catch it too
-        // early.
-        // Esp32OtaUpdateHandler.performUpdate catches Exception and uses e.message.
+        handler.startUpdate(release, hardware, target, { states.add(it) }, commonUri)
 
         val lastState = states.last()
         assert(lastState is FirmwareUpdateState.Error)
         assertEquals("OTA update failed: Read error", (lastState as FirmwareUpdateState.Error).error)
+
+        unmockkStatic("org.meshtastic.core.common.util.CommonUri_androidKt")
     }
 }

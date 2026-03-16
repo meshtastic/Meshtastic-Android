@@ -196,6 +196,8 @@ class BleOtaTransportErrorTest {
         val centralManager = CentralManager.Factory.mock(scope = backgroundScope)
         lateinit var otaPeripheral: PeripheralSpec<String>
         var txCharHandle: Int = -1
+        var writeCount = 0
+        val totalExpectedWrites = (1024 / 20) + (if (1024 % 20 > 0) 1 else 0) // Roughly 52 writes for 1024 bytes with 20 MTU
 
         val eventHandler =
             object : PeripheralSpecEventHandler {
@@ -214,9 +216,16 @@ class BleOtaTransportErrorTest {
                 }
 
                 override fun onWriteCommand(characteristic: MockRemoteCharacteristic, value: ByteArray) {
+                    writeCount++
                     backgroundScope.launch {
                         delay(10.milliseconds)
                         otaPeripheral.simulateValueUpdate(txCharHandle, "ACK\n".toByteArray())
+                        
+                        // After all data is sent, send the Hash Mismatch error
+                        if (writeCount >= 50) { // Near the end
+                            delay(50.milliseconds)
+                            otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
+                        }
                     }
                 }
             }
@@ -254,12 +263,6 @@ class BleOtaTransportErrorTest {
         try {
             transport.connect().getOrThrow()
             transport.startOta(1024, "hash") {}.getOrThrow()
-
-            // Setup final response to be a Hash Mismatch error after chunks are sent
-            backgroundScope.launch {
-                delay(1000.milliseconds)
-                otaPeripheral.simulateValueUpdate(txCharHandle, "ERR Hash Mismatch\n".toByteArray())
-            }
 
             val data = ByteArray(1024) { it.toByte() }
             val result = transport.streamFirmware(data, 512) {}
