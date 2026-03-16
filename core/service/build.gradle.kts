@@ -27,6 +27,7 @@ kotlin {
     android {
         namespace = "org.meshtastic.core.service"
         androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -42,7 +43,20 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        androidMain.dependencies { api(projects.core.api) }
+        androidMain.dependencies {
+            api(projects.core.api)
+            implementation(libs.androidx.core.ktx)
+            implementation(libs.androidx.lifecycle.runtime.ktx)
+            implementation(libs.androidx.work.runtime.ktx)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.workmanager)
+        }
+
+        androidUnitTest.dependencies {
+            implementation(libs.robolectric)
+            implementation(libs.androidx.test.core)
+            implementation(libs.androidx.work.testing)
+        }
 
         commonTest.dependencies {
             implementation(kotlin("test"))
