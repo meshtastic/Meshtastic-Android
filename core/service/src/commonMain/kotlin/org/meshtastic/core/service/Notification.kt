@@ -19,9 +19,14 @@ package org.meshtastic.core.service
 data class Notification(
     val title: String,
     val message: String,
-    val type: Type = Type.Info
+    val type: Type = Type.Info,
+    val category: Category = Category.Message
 ) {
     enum class Type {
-        Info, Warning, Error
+        None, Info, Warning, Error
+    }
+
+    enum class Category {
+        Message, NodeEvent, Battery, Alert, Service
     }
 }
