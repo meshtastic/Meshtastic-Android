@@ -7,7 +7,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Abstractions' (Protocol in workflow.md) 89c6fd5
 
 ## Phase 2: Feature Module Extractions (Settings & Node)
-- [ ] Task: Extract `AndroidSettingsViewModel` & `AndroidRadioConfigViewModel` to `feature:settings/commonMain`.
+- [x] Task: Extract `AndroidSettingsViewModel` & `AndroidRadioConfigViewModel` to `feature:settings/commonMain`. 091452a
 - [ ] Task: Extract `AndroidMetricsViewModel` to `feature:node/commonMain`.
 - [ ] Task: Extract `AndroidDebugViewModel` to `feature:settings/commonMain`.
 - [ ] Task: Update Koin modules in `feature:settings` and `feature:node` to wire the new shared ViewModels.
