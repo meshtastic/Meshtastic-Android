@@ -26,7 +26,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.settings.AndroidDebugViewModel
+import org.meshtastic.feature.settings.debugging.DebugViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.core.navigation.NodesRoutes
@@ -189,7 +189,7 @@ fun EntryProviderScope<NavKey>.settingsGraph(backStack: NavBackStack<NavKey>) {
     }
 
     entry<SettingsRoutes.DebugPanel> {
-        val viewModel: AndroidDebugViewModel = koinViewModel()
+        val viewModel: DebugViewModel = koinViewModel()
         DebugScreen(viewModel = viewModel, onNavigateUp = { backStack.removeLastOrNull() })
     }
 
