@@ -1,30 +1,31 @@
 # Decision: BLE KMP Strategy
 
-> Date: 2026-03-10 | Status: **Decided — Phase 1 complete**
+> Date: 2026-03-16 | Status: **Decided — Fully Migrated to Kable**
 
 ## Context
 
-`core:ble` needed to support non-Android targets. Nordic's KMM-BLE-Library is Android/iOS only (no Desktop/Web). KABLE supports all KMP targets but lacks mock modules.
+`core:ble` needed to support non-Android targets. Nordic's Kotlin-BLE-Library, while mature on Android and actively tested in the app, was primarily Android/iOS focused and lacked support for Desktop (JVM) targets. Kable natively supports all Kotlin Multiplatform targets (Android, Apple, Desktop/JVM, Web).
+
+Initially, we implemented an **Interface-Driven "Nordic Hybrid" Abstraction** (keeping Nordic on Android behind `commonMain` interfaces) to wait and see if Nordic expanded their KMP support.
+
+However, as Desktop integration advanced, we found the need for a unified BLE transport.
 
 ## Decision
 
-**Interface-Driven "Nordic Hybrid" Abstraction:**
+**Migrate entirely to Kable:**
 
-- `commonMain`: Pure Kotlin interfaces (`BleConnection`, `BleScanner`, `BleDevice`, `BleConnectionFactory`, etc.) — zero platform imports
-- `androidMain`: Nordic KMM-BLE-Library implementations behind those interfaces
-- `jvm()` target added — interfaces compile fine; no JVM BLE implementation needed yet
-- Future: KABLE or alternative can implement the same interfaces for Desktop/iOS without touching core logic
-
-**BLE library decision: Stay on Nordic, wait.** Our abstraction layer is clean — switching backends later is a bounded, mechanical task (~6 files, ~400 lines). Nordic is actively developing. We don't currently need real BLE on JVM/iOS. If Nordic hasn't shipped KMP by the time we need iOS, revisit KABLE.
+- We migrated all BLE transport logic across Android and Desktop to use Kable.
+- The `commonMain` interfaces (`BleConnection`, `BleScanner`, `BleDevice`, `BluetoothRepository`, etc.) remain, but their core implementations (`KableBleConnection`, `KableBleScanner`) are now entirely shared in `commonMain`.
+- The Android-specific Nordic dependencies (`no.nordicsemi.kotlin.ble:*`) and the Nordic DFU library were completely excised from the project.
+- OTA Firmware updates on Android were successfully refactored to use the Kable-based `BleOtaTransport`.
 
 ## Consequences
 
-- `core:ble` compiles on JVM and is included in CI smoke compile
-- No Nordic types leak into `commonMain`
-- Desktop simply doesn't inject BLE bindings
-- Migration cost to KABLE is predictable and bounded
+- **Maximal Code Deduplication:** The BLE implementation is completely shared across Android and Desktop in `core:ble/commonMain`.
+- **Future-Proofing:** Adding an `iosMain` target in the future will be trivial, as it can leverage the same shared Kable abstractions.
+- **Lost Nordic Mocks:** Kable lacks the comprehensive mock infrastructure of the Nordic library. Consequently, several complex BLE OTA unit tests had to be deprecated. Re-establishing this test coverage using custom Kable fakes is an ongoing technical debt item.
 
 ## Archive
 
-Full analysis: [`archive/ble-kmp-strategy.md`](../archive/ble-kmp-strategy.md)
-
+- Original Hybrid Analysis: [`archive/ble-kmp-strategy.md`](../archive/ble-kmp-strategy.md)
+- Original Abstraction Plan: [`archive/ble-kmp-abstraction-plan.md`](../archive/ble-kmp-abstraction-plan.md)

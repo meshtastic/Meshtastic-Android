@@ -29,7 +29,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `core:prefs` | ✅ | ✅ | Preferences layer |
 | `core:network` | ✅ | ✅ | Ktor, `StreamFrameCodec`, `TcpTransport` |
 | `core:data` | ✅ | ✅ | Data orchestration |
-| `core:ble` | ✅ | ✅ | BLE abstractions in commonMain; Nordic in androidMain |
+| `core:ble` | ✅ | ✅ | Kable multiplatform BLE abstractions in commonMain |
 | `core:nfc` | ✅ | ✅ | NFC contract in commonMain; hardware in androidMain |
 | `core:service` | ✅ | ✅ | Service layer; Android bindings in androidMain |
 | `core:ui` | ✅ | ✅ | Shared Compose UI, `jvmAndroidMain` + `jvmMain` actuals |
@@ -103,7 +103,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 |---|---|---|
 | Navigation 3 parity model (shared `TopLevelDestination` + platform adapters) | ✅ Done | Both shells use shared enum + parity tests. See [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md) |
 | Hilt → Koin | ✅ Done | See [`decisions/koin-migration.md`](./decisions/koin-migration.md) |
-| BLE abstraction (Nordic Hybrid) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
+| BLE abstraction (Kable) | ✅ Done | See [`decisions/ble-strategy.md`](./decisions/ble-strategy.md) |
 | Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-alpha04` |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
@@ -141,7 +141,7 @@ Extracted to shared `commonMain` (no longer app-only):
 | Koin | `4.2.0-RC2` | Nav3 + K2 compiler plugin support |
 | JetBrains Lifecycle | `2.10.0-beta01` | Multiplatform ViewModel/lifecycle |
 | JetBrains Navigation 3 | `1.1.0-alpha04` | Multiplatform navigation |
-| Nordic BLE | `2.0.0-alpha16` | Behind abstraction boundary |
+| Kable BLE | `0.42.0` | Provides fully multiplatform BLE support |
 
 **Policy:** Stable by default. RC when it unlocks KMP functionality. Alpha only behind hard abstraction seams. Do not downgrade CMP or Koin — they enable critical KMP features.
 
