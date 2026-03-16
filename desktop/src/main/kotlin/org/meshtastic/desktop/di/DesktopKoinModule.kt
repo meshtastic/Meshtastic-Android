@@ -123,7 +123,9 @@ private fun desktopPlatformStubsModule() = module {
             locationManager = get(),
         )
     }
-    single<MeshServiceNotifications> { NoopMeshServiceNotifications() }
+    single<MeshServiceNotifications> {
+        org.meshtastic.desktop.notification.DesktopMeshServiceNotifications(notificationManager = get())
+    }
     single<PlatformAnalytics> { NoopPlatformAnalytics() }
     single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }
