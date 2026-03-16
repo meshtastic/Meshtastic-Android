@@ -8,7 +8,7 @@
 
 ## Phase 2: Feature Module Extractions (Settings & Node)
 - [x] Task: Extract `AndroidSettingsViewModel` & `AndroidRadioConfigViewModel` to `feature:settings/commonMain`. 091452a
-- [ ] Task: Extract `AndroidMetricsViewModel` to `feature:node/commonMain`.
+- [x] Task: Extract `AndroidMetricsViewModel` to `feature:node/commonMain`. 52c2f6e
 - [ ] Task: Extract `AndroidDebugViewModel` to `feature:settings/commonMain`.
 - [ ] Task: Update Koin modules in `feature:settings` and `feature:node` to wire the new shared ViewModels.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extractions' (Protocol in workflow.md)
