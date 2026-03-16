@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.node.metrics
 
+import org.meshtastic.core.common.util.toMeshtasticUri
+
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -119,7 +121,7 @@ fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val exportPositionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.savePositionCSV(uri) }
+                it.data?.data?.let { uri -> viewModel.savePositionCSV(uri.toMeshtasticUri()) }
             }
         }
 
