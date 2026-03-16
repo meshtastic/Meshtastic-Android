@@ -20,7 +20,7 @@ koin-annotations = "2.1.0"
 koin-plugin = "0.4.0"
 
 # Kotlin
-kotlin = "2.3.10"
+kotlin = "2.3.20"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-serialization = "1.10.0"
