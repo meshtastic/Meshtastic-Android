@@ -24,3 +24,6 @@ internal expect suspend fun Peripheral.platformConnectSetup()
 
 /** Platform-specific configuration for the Peripheral builder. */
 internal expect fun PeripheralBuilder.platformConfig()
+
+/** Platform-specific instantiation of a Peripheral by address. */
+internal expect fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral

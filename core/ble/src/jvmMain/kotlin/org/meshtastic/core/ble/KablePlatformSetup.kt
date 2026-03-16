@@ -26,3 +26,10 @@ internal actual suspend fun Peripheral.platformConnectSetup() {
 internal actual fun PeripheralBuilder.platformConfig() {
     // Desktop Kable uses direct connections without needing autoConnect.
 }
+
+internal actual fun createPeripheral(
+    address: String,
+    builderAction: PeripheralBuilder.() -> Unit
+): Peripheral {
+    error("Direct connection by address is not currently supported on JVM without an advertisement")
+}

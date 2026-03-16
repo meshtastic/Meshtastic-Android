@@ -51,10 +51,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     override val connectionState: SharedFlow<BleConnectionState> = _connectionState.asSharedFlow()
 
     override suspend fun connect(device: BleDevice) {
-        val kableDevice = device as KableBleDevice
-        val p = Peripheral(kableDevice.advertisement) {
-            platformConfig()
+        val p = when (device) {
+            is KableBleDevice -> Peripheral(device.advertisement) { platformConfig() }
+            is DirectBleDevice -> createPeripheral(device.address) { platformConfig() }
+            else -> error("Unsupported BleDevice type: ${device::class}")
         }
+        
         peripheral?.disconnect()
         peripheral?.close()
         peripheral = p
@@ -69,7 +71,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                     if (kableState is State.Connecting || kableState is State.Connected) {
                         hasStartedConnecting = true
                     }
-                    kableDevice.updateState(mappedState)
+                    
+                    when (device) {
+                        is KableBleDevice -> device.updateState(mappedState)
+                        is DirectBleDevice -> device.updateState(mappedState)
+                    }
+                    
                     _connectionState.emit(mappedState)
                 }
                 .launchIn(scope)

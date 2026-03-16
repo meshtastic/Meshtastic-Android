@@ -117,7 +117,9 @@ class AndroidBluetoothRepository(
 
     @SuppressLint("MissingPermission")
     private fun getBondedAppPeripherals(): List<BleDevice> =
-        emptyList() // TODO: Implement wrapping bonded devices for Kable
+        bluetoothAdapter?.bondedDevices?.map { device ->
+            DirectBleDevice(device.address, device.name)
+        } ?: emptyList()
 
     @SuppressLint("MissingPermission")
     override fun isBonded(address: String): Boolean {

@@ -39,3 +39,13 @@ internal actual fun PeripheralBuilder.platformConfig() {
         }
     }
 }
+
+internal actual fun createPeripheral(
+    address: String,
+    builderAction: PeripheralBuilder.() -> Unit
+): Peripheral {
+    val adapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+        ?: error("Bluetooth not supported")
+    val device = adapter.getRemoteDevice(address)
+    return com.juul.kable.Peripheral(device, builderAction)
+}
