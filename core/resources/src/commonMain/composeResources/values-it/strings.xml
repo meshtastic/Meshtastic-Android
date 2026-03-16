@@ -37,6 +37,8 @@
     <string name="node_sort_last_heard">Ricevuto più di recente</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
+    <string name="via_udp">via UDP</string>
+    <string name="via_api">via API</string>
     <string name="node_sort_via_favorite">via Preferiti</string>
     <string name="node_filter_show_ignored">Visualizza solo i nodi ignorati</string>
     <string name="unrecognized">Non riconosciuto</string>
@@ -58,10 +60,12 @@
     <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
     <string name="routing_error_admin_bad_session_key">Chiave di sessione non valida</string>
     <string name="routing_error_admin_public_key_unauthorized">Chiave Pubblica non autorizzata</string>
+    <string name="routing_error_pki_send_fail_public_key">Invio PKI non riuscito, nessuna chiave pubblica</string>
     <string name="role_client">Client</string>
     <string name="role_client_desc">App collegata o dispositivo di messaggistica standalone.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
+    <string name="role_client_base_desc">Tratta i pacchetti da o verso i nodi preferiti come ROUTER_LATE, e tutti gli altri pacchetti come CLIENT.</string>
     <string name="role_router">Router</string>
     <string name="role_router_desc">Nodo d'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell'elenco dei nodi.</string>
     <string name="role_router_client">Router Client</string>
@@ -132,15 +136,19 @@
     <string name="position_packet">Pacchetto Posizione</string>
     <string name="broadcast_interval">Intervallo Di Trasmissione</string>
     <string name="smart_position">Posizione Smart</string>
+    <string name="minimum_interval">Intervallo Intelligente</string>
+    <string name="minimum_distance">Distanza Intelligente</string>
     <string name="device_gps">GPS Del Dispositivo</string>
     <string name="fixed_position">Posizione Fissa</string>
     <string name="altitude">Altitudine</string>
+    <string name="update_interval">Intervallo Interrogazione GPS</string>
     <string name="advanced_device_gps">Impostazioni Avanzate Dispositivo GPS</string>
     <string name="gps_receive_gpio">GPIO di Ricezione del GPS</string>
     <string name="gps_transmit_gpio">GPIO di Trasmissione del GPS</string>
     <string name="gps_en_gpio">GPIO EN del GPS</string>
     <string name="gpio">GPIO</string>
     <string name="debug">Debug</string>
+    <string name="channel">Ch</string>
     <string name="channel_name">Nome del canale</string>
     <string name="qr_code">Codice QR</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
@@ -175,11 +183,21 @@
     <string name="ethernet_ip">IP Ethernet:</string>
     <string name="connecting">Connessione in corso</string>
     <string name="not_connected">Non connesso</string>
+    <string name="no_device_selected">Nessun dispositivo selezionato</string>
+    <string name="unknown_device">Dispositivo Sconosciuto</string>
+    <string name="no_network_devices_found">Nessun dispositivo di rete trovato</string>
+    <string name="no_usb_devices_found">Nessun dispositivo USB trovato</string>
+    <string name="usb">USB</string>
+    <string name="demo_mode">Modalità Demo</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
     <string name="app_too_old">Aggiornamento dell'applicazione necessario</string>
     <string name="must_update">È necessario aggiornare questa applicazione nell'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <string name="none">Nessuno (disattiva)</string>
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
+    <string name="acknowledgements">Ringraziamenti</string>
+    <string name="open_source_libraries">Librerie Open Source</string>
+    <string name="open_source_description">Meshtastic è costruito con le seguenti librerie open source. Tocca una libreria per visualizzare la sua licenza.</string>
+    <string name="library_count">%1$d librerie</string>
     <string name="channel_invalid">L'URL di questo Canale non è valida e non può essere usata</string>
     <string name="contact_invalid">Questo contatto non è valido e non può essere aggiunto</string>
     <string name="debug_panel">Pannello Di Debug</string>
@@ -188,6 +206,15 @@
     <string name="debug_export_cancelled">Esportazione annullata</string>
     <string name="debug_export_success">%1$d registri esportati</string>
     <string name="debug_export_failed">Impossibile scrivere il file di log: %1$s</string>
+    <string name="debug_export_no_logs">Nessun log da esportare</string>
+    <plurals name="log_retention_hours">
+        <item quantity="one">%1$d ora</item>
+        <item quantity="other">%1$d ore</item>
+    </plurals>
+    <plurals name="log_retention_days_quantity">
+        <item quantity="one">%1$d giorno</item>
+        <item quantity="other">%1$d giorni</item>
+    </plurals>
     <string name="debug_filters">Filtri</string>
     <string name="debug_active_filters">Filtri attivi</string>
     <string name="debug_default_search">Cerca nei log…</string>
@@ -197,7 +224,11 @@
     <string name="debug_filter_add">Aggiungi filtro</string>
     <string name="debug_filter_included">Filtra inclusi</string>
     <string name="debug_filter_clear">Rimuovi tutti i filtri</string>
+    <string name="debug_filter_add_custom">Aggiungi filtro personalizzato</string>
+    <string name="debug_filter_preset_title">Filtri Preset</string>
     <string name="debug_filter_show_ignored">Visualizza solo i nodi ignorati</string>
+    <string name="debug_store_logs_title">Memorizza i log della mesh</string>
+    <string name="debug_store_logs_summary">Disabilita per saltare la scrittura dei log di mesh sul disco</string>
     <string name="debug_clear">Cancella i log</string>
     <string name="match_any">Trova qualsiasi corrispondenza | Tutte</string>
     <string name="match_all">Trova tutte le corrispondenze | Qualsiasi</string>
@@ -207,6 +238,7 @@
     <string name="new_messages_below">Nuovi messaggi sotto</string>
     <string name="meshtastic_messages_notifications">Notifiche di messaggi diretti</string>
     <string name="meshtastic_broadcast_notifications">Notifiche di messaggi broadcast</string>
+    <string name="meshtastic_waypoints_notifications">Notifiche Waypoint</string>
     <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
     <string name="firmware_too_old">È necessario aggiornare il firmware.</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all'installazione del firmware</a>.</string>
@@ -227,6 +259,7 @@
     <string name="theme_system">Predefinito di sistema</string>
     <string name="choose_theme">Scegli tema</string>
     <string name="provide_location_to_mesh">Fornire la posizione alla mesh</string>
+    <string name="use_homoglyph_characters_encoding">Codifica compatta per cirillico</string>
     <plurals name="delete_messages">
         <item quantity="one">Eliminare il messaggio?</item>
         <item quantity="other">Eliminare %1$s messaggi?</item>
@@ -234,6 +267,7 @@
     <string name="delete">Elimina</string>
     <string name="delete_for_everyone">Elimina per tutti</string>
     <string name="delete_for_me">Elimina per me</string>
+    <string name="select">Seleziona</string>
     <string name="select_all">Seleziona tutti</string>
     <string name="close_selection">Chiudi selezione</string>
     <string name="delete_selection">Elimina selezionati</string>
@@ -262,6 +296,7 @@
     <string name="quick_chat_instant">Invio immediato</string>
     <string name="quick_chat_show">Mostra menu della chat rapida</string>
     <string name="quick_chat_hide">Nascondi menu della chat rapida</string>
+    <string name="quick_chat_show_label">Mostra chat rapida</string>
     <string name="factory_reset">Ripristina impostazioni di fabbrica</string>
     <string name="bluetooth_disabled">Il Bluetooth è disabilitato. Si prega di attivarlo nelle impostazioni del dispositivo.</string>
     <string name="open_settings">Apri impostazioni</string>
@@ -270,6 +305,7 @@
     <string name="direct_message">Messaggio diretto</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Consegna confermata</string>
+    <string name="delivery_confirmed_reboot_warning">Il dispositivo potrebbe disconnettersi e riavviarsi durante l'applicazione delle impostazioni.</string>
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
     <string name="remove_ignored">Rimuovi da ignorati</string>
@@ -314,11 +350,18 @@
     <string name="mute_status_unmuted">Non mutato</string>
     <string name="mute_status_muted_for_days">Mutato per %1$d giorni, %2$.1f ore</string>
     <string name="mute_status_muted_for_hours">Mutato per %1$.1f ore</string>
+    <string name="mute_status_label">Stato silenziato</string>
+    <string name="mute_add">Silenziare le notifiche per '%1$s'?</string>
+    <string name="mute_remove">Ripristinare le notifiche per '%1$s'?</string>
     <string name="replace">Sostituisci</string>
     <string name="wifi_qr_code_scan">Scansiona codice QR WiFi</string>
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
     <string name="navigate_back">Torna Indietro</string>
     <string name="battery">Batteria</string>
+    <string name="temperature">Temperatura</string>
+    <string name="humidity">Umidità</string>
+    <string name="soil_temperature">Temperatura Del Suolo</string>
+    <string name="soil_moisture">Umidità del Suolo</string>
     <string name="logs">Registri</string>
     <string name="hops_away">Distanza in Hop</string>
     <string name="hops_away_template">Distanza in Hop: %1$d</string>
@@ -332,6 +375,8 @@
     <string name="encryption_pkc">Crittografia a Chiave Pubblica</string>
     <string name="encryption_pkc_text">I messaggi diretti stanno usando la crittografia basata sulla nuova infrastruttura a chiave pubblica.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
+    <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi nuovamente, ma questo può indicare un problema di sicurezza più serio. Contattare l'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
+    <string name="userinfo">Informazioni Utente</string>
     <string name="meshtastic_new_nodes_notifications">Notifiche di nuovi nodi</string>
     <string name="more_details">Ulteriori informazioni</string>
     <string name="snr">SNR</string>
@@ -360,11 +405,23 @@
         <item quantity="other">%d hop</item>
     </plurals>
     <string name="traceroute_diff">Hops verso di lui %1$d Hops di ritorno %2$d</string>
+    <string name="traceroute_outgoing_route">Percorso in uscita</string>
+    <string name="traceroute_return_route">Percorso di ritorno</string>
+    <string name="traceroute_endpoint_missing">Impossibile mostrare la mappa del traceroute perché il nodo di partenza o destinazione non ha informazioni sulla posizione.</string>
+    <string name="view_on_map">Visualizza sulla mappa</string>
+    <string name="traceroute_map_no_data">Questo traceroute non ha ancora nodi mappabili.</string>
+    <string name="traceroute_showing_nodes">%1$d/%2$d nodi visualizzati</string>
+    <string name="traceroute_duration">Durata: %1$s s</string>
+    <string name="traceroute_time_and_text">%1$s - %2$s</string>
+    <string name="traceroute_route_towards_dest">Percorso verso la destinazione:\n\n</string>
+    <string name="traceroute_route_back_to_us">Percorso verso di noi:\n\n</string>
+    <string name="one_hour_short">1H</string>
     <string name="twenty_four_hours">24H</string>
     <string name="forty_eight_hours">48H</string>
     <string name="one_week">1S</string>
     <string name="two_weeks">2S</string>
     <string name="four_weeks">4S</string>
+    <string name="one_month">1M</string>
     <string name="max">Max</string>
     <string name="unknown_age">Età sconosciuta</string>
     <string name="copy">Copia</string>
@@ -375,6 +432,7 @@
     <string name="remove_favorite">Rimuovi dai preferiti</string>
     <string name="favorite_add">Aggiungere '%1$s' ai nodi preferiti?</string>
     <string name="favorite_remove">Rimuovere '%1$s' dai nodi preferiti?</string>
+    <string name="power_metrics_log">Metriche Alimentazione</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
     <string name="channel_3">Canale 3</string>
@@ -387,6 +445,7 @@
     <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
     <string name="low_battery_title">Poca energia rimanente nella batteria: %1$s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
+    <string name="baro_pressure">Pressione atmosferica</string>
     <string name="udp_enabled">Abilitato</string>
     <string name="udp_broadcast">Trasmissione UDP</string>
     <string name="udp_config">Configurazione UDP</string>
@@ -459,12 +518,15 @@
     <string name="messages">Messaggi</string>
     <string name="device_db_cache_limit">Limite cache DB del dispositivo</string>
     <string name="device_db_cache_limit_summary">Numero massimo di database di nodi da mantenere in questo telefono</string>
+    <string name="log_retention_days">Periodo di conservazione MeshLog</string>
+    <string name="log_retention_never">Non eliminare mai i log</string>
     <string name="detection_sensor_config">Configurazione Sensore Rilevamento</string>
     <string name="detection_sensor_enabled">Sensore Rilevamento attivo</string>
     <string name="minimum_broadcast_seconds">Trasmissione minima (secondi)</string>
     <string name="state_broadcast_seconds">Trasmissione stato (secondi)</string>
     <string name="send_bell_with_alert_message">Invia campanella con messaggio di avviso</string>
     <string name="friendly_name">Nome semplificato</string>
+    <string name="friendly_address">Indirizzo semplificato</string>
     <string name="gpio_pin_to_monitor">Pin GPIO da monitorare</string>
     <string name="detection_trigger_type">Tipo di trigger di rilevamento</string>
     <string name="use_input_pullup_mode">Usa modalità INPUT_PULLUP</string>
@@ -477,6 +539,7 @@
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="time_zone">Fuso Orario</string>
+    <string name="display_config">Schermo Dispositivo</string>
     <string name="screen_on_for">Tieni lo schermo acceso per</string>
     <string name="carousel_interval">Durata di ogni schermata</string>
     <string name="compass_north_top">Tieni in alto il nord della bussola</string>
@@ -551,6 +614,7 @@
     <string name="wifi_enabled">WiFi abilitato</string>
     <string name="ssid">SSID</string>
     <string name="psk">PSK</string>
+    <string name="get_document">Scarica Documento</string>
     <string name="ethernet_config">Opzioni Ethernet</string>
     <string name="ethernet_enabled">Ethernet abilitato</string>
     <string name="ntp_server">Server NTP</string>
@@ -560,6 +624,9 @@
     <string name="gateway">Gateway</string>
     <string name="paxcounter_config">Configurazione Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter abilitato</string>
+    <string name="status_message">Messaggio di Stato</string>
+    <string name="status_message_config">Configurazione Messaggio di Stato</string>
+    <string name="node_status_summary">La stringa di stato attuale</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Soglia RSSI WiFi (valore predefinito -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">Soglia RSSI BLE (valore predefinito -80)</string>
     <string name="position_config">Posizione</string>
@@ -637,6 +704,7 @@
     <string name="long_name">Nome Lungo</string>
     <string name="short_name">Nome Breve</string>
     <string name="hardware_model">Modello hardware</string>
+    <string name="licensed_amateur_radio">Radioamatore con licenza (Ham)</string>
     <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="pressure">Pressione</string>
@@ -658,6 +726,8 @@
     <string name="user_id">ID utente</string>
     <string name="uptime">Tempo di attività</string>
     <string name="load_indexed">Utilizzo %1$d</string>
+    <string name="fetching_channel_indexed">Recupero Canale %1$d/%2$d</string>
+    <string name="fetching_config">Recupero %1$s in corso</string>
     <string name="disk_free_indexed">Disco libero %1$d</string>
     <string name="timestamp">Data e ora</string>
     <string name="heading">Direzione</string>
@@ -684,9 +754,18 @@
     <string name="import_known_shared_contact_text">Attenzione: Questo contatto è noto, l'importazione sovrascriverà le informazioni di contatto precedenti.</string>
     <string name="public_key_changed">Chiave Pubblica Modificata</string>
     <string name="import_label">Importa</string>
+    <string name="request">Richiesta</string>
+    <string name="requesting_from">Richiesta di %1$s da %2$s in corso</string>
+    <string name="user_info">Informazioni utente</string>
+    <string name="request_telemetry">Richiedi Telemetria</string>
     <string name="request_device_metrics">Metriche Dispositivo</string>
     <string name="request_environment_metrics">Metriche Ambientali</string>
+    <string name="request_air_quality_metrics">Metriche Qualità Aria</string>
+    <string name="request_power_metrics">Metriche Alimentazione</string>
+    <string name="request_local_stats">Statistiche Locali</string>
     <string name="request_host_metrics">Metriche Host</string>
+    <string name="request_pax_metrics">Metriche Pax</string>
+    <string name="request_metadata">Metadati</string>
     <string name="actions">Azioni</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usa formato orologio 12h</string>
@@ -778,8 +857,11 @@
     <string name="clear_selection">Annulla selezione</string>
     <string name="message_input_label">Messaggio</string>
     <string name="type_a_message">Inserisci un messaggio</string>
+    <string name="pax_metrics_log">Metriche PAX</string>
     <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">Nessun log delle metriche PAX disponibile.</string>
     <string name="wifi_devices">Dispositivi WiFi</string>
+    <string name="ble_devices">Dispositivi Bluetooth</string>
     <string name="bluetooth_paired_devices">Dispositivi associati</string>
     <string name="connected_device">Dispositivo connesso</string>
     <string name="routing_error_rate_limit_exceeded">Limite di trasmissione superato. Riprova più tardi</string>
@@ -792,6 +874,7 @@
     <string name="firmware_edition">Edizione Firmware</string>
     <string name="recent_network_devices">Dispositivi di rete recenti</string>
     <string name="discovered_network_devices">Dispositivi di rete rilevati</string>
+    <string name="bluetooth_available_devices">Dispositivi Bluetooth Disponibili</string>
     <string name="get_started">Inizia ora</string>
     <string name="intro_welcome">Benvenuto a</string>
     <string name="stay_connected_anywhere">Rimani connesso ovunque</string>
@@ -838,7 +921,9 @@
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Ibrido</string>
     <string name="manage_map_layers">Gestisci livelli della mappa</string>
+    <string name="map_layer_formats">I livelli della mappa supportano i formati .kml, .kmz o GeoJSON.</string>
     <string name="map_layers_title">Livelli della mappa</string>
+    <string name="no_map_layers_loaded">Nessun livello di mappa caricato.</string>
     <string name="add_layer_button">Aggiungi livello</string>
     <string name="hide_layer">Nascondi livello</string>
     <string name="show_layer">Mostra livello</string>
@@ -929,6 +1014,7 @@
     <string name="firmware_update_method_detail">Aggiorna tramite %1$s</string>
     <string name="firmware_update_usb_instruction_title">Selezionare il Disco DFU USB</string>
     <string name="firmware_update_usb_instruction_text">Il dispositivo è stato riavviato in modalità DFU e dovrebbe apparire come un disco USB (ad es. RAK4631).\n\nQuando il selettore di file si apre, selezionare la cartella principale (root) dell'unità per salvare il file con il firmware.</string>
+    <string name="firmware_update_unknown_error">Errore sconosciuto</string>
     <string name="firmware_update_channel_name">Aggiornamento Firmware</string>
     <string name="back">Indietro</string>
     <string name="interval_unset">Non impostato</string>
