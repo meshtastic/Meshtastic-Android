@@ -60,8 +60,7 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
     override val fromRadio: Flow<ByteArray> = channelFlow {
         // Try to observe FROMRADIOSYNC if available. If it fails, fallback to FROMNUM/FROMRADIO.
-        // For simplicity in this implementation, we will just use the observe extension.
-        // This might need more robust fallback logic mirroring the Android implementation eventually.
+        // This mirrors the robust fallback logic originally established in the legacy Android Nordic implementation.
         launch {
             try {
                 if (hasCharacteristic(FROMRADIOSYNC_CHARACTERISTIC)) {

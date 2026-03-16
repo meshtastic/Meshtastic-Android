@@ -57,12 +57,21 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     override suspend fun connect(device: BleDevice) {
         val autoConnect = MutableStateFlow(device is DirectBleDevice)
 
-        val p =
-            when (device) {
-                is KableBleDevice -> Peripheral(device.advertisement) { platformConfig(device) { autoConnect.value } }
-                is DirectBleDevice -> createPeripheral(device.address) { platformConfig(device) { autoConnect.value } }
-                else -> error("Unsupported BleDevice type: ${device::class}")
+        val p = when (device) {
+            is KableBleDevice -> Peripheral(device.advertisement) {
+                observationExceptionHandler { cause ->
+                    co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                }
+                platformConfig(device) { autoConnect.value }
             }
+            is DirectBleDevice -> createPeripheral(device.address) {
+                observationExceptionHandler { cause ->
+                    co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                }
+                platformConfig(device) { autoConnect.value }
+            }
+            else -> error("Unsupported BleDevice type: ${device::class}")
+        }
 
         peripheral?.disconnect()
         peripheral?.close()

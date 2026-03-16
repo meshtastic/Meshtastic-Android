@@ -141,55 +141,68 @@ class BleRadioInterface(
 
     private fun connect() {
         connectionScope.launch {
-            try {
-                // Add a delay to allow any pending background disconnects (from a previous close() call)
-                // to complete and the Android BLE stack to settle before we attempt a new connection.
-                @Suppress("MagicNumber")
-                val connectDelayMs = 1000L
-                kotlinx.coroutines.delay(connectDelayMs)
+            val device = findDevice()
 
-                connectionStartTime = nowMillis
-                Logger.i { "[$address] BLE connection attempt started" }
-
-                bleConnection.connectionState
-                    .onEach { state ->
-                        if (state is BleConnectionState.Disconnected && isFullyConnected) {
-                            onDisconnected(state)
-                        }
+            bleConnection.connectionState
+                .onEach { state ->
+                    if (state is BleConnectionState.Disconnected && isFullyConnected) {
+                        isFullyConnected = false
+                        onDisconnected(state)
                     }
-                    .catch { e ->
-                        Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
-                        handleFailure(e)
-                    }
-                    .launchIn(connectionScope)
+                }
+                .catch { e ->
+                    Logger.w(e) { "[$address] bleConnection.connectionState flow crashed!" }
+                    handleFailure(e)
+                }
+                .launchIn(connectionScope)
 
-                val device = findDevice()
-                var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-
-                if (state !is BleConnectionState.Connected) {
-                    // Kable on Android occasionally fails the first connection attempt with NotConnectedException
-                    // if the previous peripheral wasn't fully cleaned up by the OS. A quick retry resolves it.
-                    Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+            while (kotlinx.coroutines.isActive) {
+                try {
+                    // Add a delay to allow any pending background disconnects (from a previous close() call)
+                    // to complete and the Android BLE stack to settle before we attempt a new connection.
                     @Suppress("MagicNumber")
-                    val retryDelayMs = 1500L
-                    kotlinx.coroutines.delay(retryDelayMs)
-                    state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
-                }
+                    val connectDelayMs = 1000L
+                    kotlinx.coroutines.delay(connectDelayMs)
 
-                if (state !is BleConnectionState.Connected) {
-                    throw RadioNotConnectedException("Failed to connect to device at address $address")
-                }
+                    connectionStartTime = nowMillis
+                    Logger.i { "[$address] BLE connection attempt started" }
 
-                isFullyConnected = true
-                onConnected()
-                discoverServicesAndSetupCharacteristics()
-            } catch (e: kotlinx.coroutines.CancellationException) {
-                Logger.d { "[$address] BLE connection coroutine cancelled" }
-                throw e
-            } catch (e: Exception) {
-                val failureTime = nowMillis - connectionStartTime
-                Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
-                handleFailure(e)
+                    var state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+
+                    if (state !is BleConnectionState.Connected) {
+                        // Kable on Android occasionally fails the first connection attempt with NotConnectedException
+                        // if the previous peripheral wasn't fully cleaned up by the OS. A quick retry resolves it.
+                        Logger.w { "[$address] First connection attempt failed, retrying in 1.5s..." }
+                        @Suppress("MagicNumber")
+                        val retryDelayMs = 1500L
+                        kotlinx.coroutines.delay(retryDelayMs)
+                        state = bleConnection.connectAndAwait(device, CONNECTION_TIMEOUT_MS)
+                    }
+
+                    if (state !is BleConnectionState.Connected) {
+                        throw RadioNotConnectedException("Failed to connect to device at address $address")
+                    }
+
+                    isFullyConnected = true
+                    onConnected()
+                    discoverServicesAndSetupCharacteristics()
+
+                    // Suspend here until Kable drops the connection
+                    bleConnection.connectionState.first { it is BleConnectionState.Disconnected }
+
+                    Logger.i { "[$address] BLE connection dropped, preparing to reconnect..." }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    Logger.d { "[$address] BLE connection coroutine cancelled" }
+                    throw e
+                } catch (e: Exception) {
+                    val failureTime = nowMillis - connectionStartTime
+                    Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
+                    handleFailure(e)
+
+                    // Wait before retrying to prevent hot loops
+                    @Suppress("MagicNumber")
+                    kotlinx.coroutines.delay(5000L)
+                }
             }
         }
     }
