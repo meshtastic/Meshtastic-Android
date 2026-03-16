@@ -52,7 +52,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
 
     override suspend fun connect(device: BleDevice) {
         val kableDevice = device as KableBleDevice
-        val p = Peripheral(kableDevice.advertisement)
+        val p = Peripheral(kableDevice.advertisement) {
+            platformConfig()
+        }
         peripheral?.disconnect()
         peripheral?.close()
         peripheral = p

@@ -122,7 +122,7 @@ class BleRadioInterface(
         repeat(SCAN_RETRY_COUNT) { attempt ->
             try {
                 val d = kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
-                    scanner.scan(SCAN_TIMEOUT).first { it.address == address }
+                    scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first { it.address == address }
                 }
                 if (d != null) return d
             } catch (e: Exception) {

@@ -19,6 +19,8 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 import com.juul.kable.WriteType
 import com.juul.kable.characteristicOf
+import com.juul.kable.writeWithoutResponse
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.channelFlow
@@ -40,6 +42,11 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
     private val logRadioChar = characteristicOf(SERVICE_UUID, LOGRADIO_CHARACTERISTIC)
 
     private val triggerDrain = MutableSharedFlow<Unit>(extraBufferCapacity = 64)
+
+    init {
+        val svc = peripheral.services.value?.find { it.serviceUuid == SERVICE_UUID }
+        Logger.i { "KableMeshtasticRadioProfile init. Discovered characteristics: ${svc?.characteristics?.map { it.characteristicUuid }}" }
+    }
 
     private fun hasCharacteristic(uuid: Uuid): Boolean = peripheral.services.value?.any { svc ->
         svc.serviceUuid == SERVICE_UUID && svc.characteristics.any { it.characteristicUuid == uuid }
@@ -95,8 +102,19 @@ class KableMeshtasticRadioProfile(private val peripheral: Peripheral) : Meshtast
         }
     }
 
+    private val toRadioWriteType: WriteType by lazy {
+        val svc = peripheral.services.value?.find { it.serviceUuid == SERVICE_UUID }
+        val char = svc?.characteristics?.find { it.characteristicUuid == TORADIO_CHARACTERISTIC }
+        
+        if (char?.properties?.writeWithoutResponse == true) {
+            WriteType.WithoutResponse
+        } else {
+            WriteType.WithResponse
+        }
+    }
+
     override suspend fun sendToRadio(packet: ByteArray) {
-        peripheral.write(toRadio, packet, WriteType.WithoutResponse)
+        peripheral.write(toRadio, packet, toRadioWriteType)
         triggerDrain.tryEmit(Unit)
     }
 }

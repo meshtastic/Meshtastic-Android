@@ -17,7 +17,12 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
+import com.juul.kable.PeripheralBuilder
 
 internal actual suspend fun Peripheral.platformConnectSetup() {
     // Desktop Kable does not support explicit MTU requests or priority requests.
+}
+
+internal actual fun PeripheralBuilder.platformConfig() {
+    // Desktop Kable uses direct connections without needing autoConnect.
 }

@@ -25,10 +25,19 @@ import kotlin.uuid.Uuid
 
 @Single
 class KableBleScanner : BleScanner {
-    override fun scan(timeout: Duration, serviceUuid: Uuid?): Flow<BleDevice> {
+    override fun scan(timeout: Duration, serviceUuid: Uuid?, address: String?): Flow<BleDevice> {
         val scanner = Scanner {
-            if (serviceUuid != null) {
-                filters { match { services = listOf(serviceUuid) } }
+            if (serviceUuid != null || address != null) {
+                filters {
+                    match {
+                        if (serviceUuid != null) {
+                            services = listOf(serviceUuid)
+                        }
+                        if (address != null) {
+                            this.address = address
+                        }
+                    }
+                }
             }
         }
         // Kable's Scanner doesn't currently take timeout directly in the builder, it runs until cancelled

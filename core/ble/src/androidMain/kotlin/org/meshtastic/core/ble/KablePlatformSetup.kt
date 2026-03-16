@@ -17,7 +17,25 @@
 package org.meshtastic.core.ble
 
 import com.juul.kable.Peripheral
+import com.juul.kable.PeripheralBuilder
+import co.touchlab.kermit.Logger
 
 internal actual suspend fun Peripheral.platformConnectSetup() {
     // Simplified: No specific platform setup required initially.
+}
+
+internal actual fun PeripheralBuilder.platformConfig() {
+    // Default to direct connections (autoConnect = false) which are much faster and more reliable
+    // when connecting immediately after a scan.
+    
+    onServicesDiscovered {
+        try {
+            // Android defaults to 23 bytes MTU. Meshtastic packets can be 512 bytes.
+            // Requesting the max MTU is critical for preventing dropped packets and stalls.
+            val negotiatedMtu = requestMtu(512)
+            Logger.i { "Negotiated MTU: $negotiatedMtu" }
+        } catch (e: Exception) {
+            Logger.w(e) { "Failed to request MTU" }
+        }
+    }
 }

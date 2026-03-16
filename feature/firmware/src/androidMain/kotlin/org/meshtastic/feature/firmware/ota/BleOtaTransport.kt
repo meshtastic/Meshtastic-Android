@@ -74,7 +74,7 @@ class BleOtaTransport(
             val foundDevices = mutableSetOf<String>()
             val device =
                 scanner
-                    .scan(SCAN_TIMEOUT)
+                    .scan(timeout = SCAN_TIMEOUT, serviceUuid = OTA_SERVICE_UUID)
                     .onEach { d ->
                         if (foundDevices.add(d.address)) {
                             Logger.d { "BLE OTA: Scan found device: ${d.address} (name=${d.name})" }
