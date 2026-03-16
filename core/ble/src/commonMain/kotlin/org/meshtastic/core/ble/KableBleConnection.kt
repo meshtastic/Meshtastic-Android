@@ -112,6 +112,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                 } catch (e: CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                    @Suppress("MagicNumber")
+                    val retryDelayMs = 1000L
+                    kotlinx.coroutines.delay(retryDelayMs)
                     true
                 }
         }
@@ -129,6 +132,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                 connect(device)
                 BleConnectionState.Connected
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             BleConnectionState.Disconnected
         }

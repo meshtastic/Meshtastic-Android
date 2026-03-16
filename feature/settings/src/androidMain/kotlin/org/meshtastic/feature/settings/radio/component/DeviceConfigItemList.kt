@@ -265,7 +265,12 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                                 appTzPosixString = ZoneId.systemDefault().toPosixString()
                             }
                         }
-                    context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
+                    androidx.core.content.ContextCompat.registerReceiver(
+                        context,
+                        receiver,
+                        IntentFilter(Intent.ACTION_TIMEZONE_CHANGED),
+                        androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
+                    )
                     onDispose { context.unregisterReceiver(receiver) }
                 }
 

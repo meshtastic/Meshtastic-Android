@@ -337,15 +337,15 @@ class BleRadioInterface(
                 0
             }
         Logger.i {
-            "[$address] BLE close() called - " +
+            "[$address] Disconnecting. " +
                 "Uptime: ${uptime}ms, " +
                 "Packets RX: $packetsReceived ($bytesReceived bytes), " +
                 "Packets TX: $packetsSent ($bytesSent bytes)"
         }
-        kotlinx.coroutines.GlobalScope.launch {
-            connectionScope.cancel()
+        connectionScope.launch {
             bleConnection.disconnect()
             service.onDisconnect(true)
+            connectionScope.cancel()
         }
     }
 

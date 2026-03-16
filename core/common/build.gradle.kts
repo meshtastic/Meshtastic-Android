@@ -44,7 +44,6 @@ kotlin {
         }
         androidMain.dependencies {
             api(libs.androidx.core.ktx)
-            api(libs.nordic.common.core)
         }
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }

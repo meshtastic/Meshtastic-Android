@@ -61,8 +61,6 @@ wire = "6.0.0"
 vico = "3.0.3"
 dependency-guard = "0.5.0"
 kable = "0.42.0"
-nordic-ble = "2.0.0-alpha16"
-nordic-common = "2.9.2"
 
 
 [libraries]
@@ -214,21 +212,8 @@ markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", v
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
 material = { module = "com.google.android.material:material", version = "1.13.0" }
-nordic-client-android = { module = "no.nordicsemi.kotlin.ble:client-android", version.ref = "nordic-ble" }
-nordic-client-android-mock = { module = "no.nordicsemi.kotlin.ble:client-android-mock", version.ref = "nordic-ble" }
-nordic-client-core-mock = { module = "no.nordicsemi.kotlin.ble:client-core-mock", version.ref = "nordic-ble" }
-nordic-core-mock = { module = "no.nordicsemi.kotlin.ble:core-mock", version.ref = "nordic-ble" }
-nordic-dfu = { module = "no.nordicsemi.android:dfu", version = "2.11.0" }
-nordic-ble-env-android = { module = "no.nordicsemi.kotlin.ble:environment-android", version.ref = "nordic-ble" }
-nordic-ble-env-android-compose = { module = "no.nordicsemi.kotlin.ble:environment-android-compose", version.ref = "nordic-ble" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
-
-nordic-common-core = { module = "no.nordicsemi.android.common:core", version.ref = "nordic-common" }
-nordic-common-permissions-ble = { module = "no.nordicsemi.android.common:permissions-ble", version.ref = "nordic-common" }
-nordic-common-permissions-notification = { module = "no.nordicsemi.android.common:permissions-notification", version.ref = "nordic-common" }
-nordic-common-scanner-ble = { module = "no.nordicsemi.android.common:scanner-ble", version.ref = "nordic-common" }
-nordic-common-ui = { module = "no.nordicsemi.android.common:ui", version.ref = "nordic-common" }
 
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }

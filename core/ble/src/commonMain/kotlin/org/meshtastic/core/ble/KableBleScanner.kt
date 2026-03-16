@@ -18,7 +18,6 @@ package org.meshtastic.core.ble
 
 import com.juul.kable.Scanner
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import kotlin.time.Duration
 import kotlin.uuid.Uuid
@@ -40,8 +39,13 @@ class KableBleScanner : BleScanner {
                 }
             }
         }
-        // Kable's Scanner doesn't currently take timeout directly in the builder, it runs until cancelled
-        // We will just map advertisements. The caller handles the timeout using `take` or `withTimeoutOrNull`.
-        return scanner.advertisements.map { KableBleDevice(it) }
+
+        // Kable's Scanner doesn't enforce timeout internally, it runs until the Flow is cancelled.
+        // By wrapping it in a channelFlow with a timeout, we enforce the BleScanner contract cleanly.
+        return kotlinx.coroutines.flow.channelFlow {
+            kotlinx.coroutines.withTimeoutOrNull(timeout) {
+                scanner.advertisements.collect { advertisement -> send(KableBleDevice(advertisement)) }
+            }
+        }
     }
 }

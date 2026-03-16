@@ -41,7 +41,12 @@ actual fun rememberTimeTickWithLifecycle(): Long {
                 }
             }
 
-        context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIME_TICK))
+        androidx.core.content.ContextCompat.registerReceiver(
+            context,
+            receiver,
+            IntentFilter(Intent.ACTION_TIME_TICK),
+            androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
 
         onDispose { context.unregisterReceiver(receiver) }
     }
