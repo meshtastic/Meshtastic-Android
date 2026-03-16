@@ -2,8 +2,8 @@
 
 ## Phase 1: Infrastructure & Abstractions
 - [x] Task: Implement `MeshtasticUri` (expect/actual wrapper for `android.net.Uri`) in `core:common`. 81e5a4a
-- [ ] Task: Define `FileService` and `LocationService` interfaces in `core:repository/commonMain`.
-- [ ] Task: Create Android implementations for these services in `core:service/androidMain`.
+- [x] Task: Define `FileService` and `LocationService` interfaces in `core:repository/commonMain`. 1ffa7d2
+- [x] Task: Create Android implementations for these services in `core:service/androidMain`. 1ffa7d2
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Abstractions' (Protocol in workflow.md)
 
 ## Phase 2: Feature Module Extractions (Settings & Node)
