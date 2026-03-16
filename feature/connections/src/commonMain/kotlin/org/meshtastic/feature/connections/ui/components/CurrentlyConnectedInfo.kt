@@ -75,12 +75,11 @@ fun CurrentlyConnectedInfo(
             while (bleDevice.device.isConnected) {
                 try {
                     rssi = withTimeout(RSSI_TIMEOUT.seconds) { bleDevice.device.readRssi() }
-                    delay(RSSI_DELAY.seconds)
                 } catch (e: Exception) {
-                    // RSSI reading failures are common when disconnecting; log as warning to avoid Crashlytics noise
-                    Logger.w(e) { "Failed to read RSSI ${e.message}" }
-                    break
+                    // RSSI reading failures (or timeouts) are common; log as debug to avoid Crashlytics noise
+                    Logger.d(e) { "Failed to read RSSI ${e.message}" }
                 }
+                delay(RSSI_DELAY.seconds)
             }
         }
     }
