@@ -51,6 +51,8 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MessageFilter
 import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
@@ -62,6 +64,8 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.critical_alert
 import org.meshtastic.core.resources.error_duty_cycle
 import org.meshtastic.core.resources.getString
+import org.meshtastic.core.resources.low_battery_message
+import org.meshtastic.core.resources.low_battery_title
 import org.meshtastic.core.resources.unknown_username
 import org.meshtastic.core.resources.waypoint_received
 import org.meshtastic.proto.AdminMessage
@@ -96,6 +100,7 @@ class MeshDataHandlerImpl(
     private val serviceRepository: ServiceRepository,
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: ServiceBroadcasts,
+    private val notificationManager: NotificationManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val analytics: PlatformAnalytics,
     private val dataMapper: MeshDataMapper,
@@ -425,7 +430,17 @@ class MeshDataHandlerImpl(
                         ) {
                             scope.launch {
                                 if (shouldBatteryNotificationShow(fromNum, t, myNodeNum)) {
-                                    serviceNotifications.showOrUpdateLowBatteryNotification(nextNode, isRemote)
+                                    notificationManager.dispatch(
+                                        Notification(
+                                            title = getString(Res.string.low_battery_title, nextNode.user.short_name),
+                                            message = getString(
+                                                Res.string.low_battery_message,
+                                                nextNode.user.long_name,
+                                                nextNode.deviceMetrics.battery_level ?: 0,
+                                            ),
+                                            category = Notification.Category.Battery,
+                                        ),
+                                    )
                                 }
                             }
                         } else {
@@ -435,7 +450,7 @@ class MeshDataHandlerImpl(
                                         batteryPercentCooldowns.remove(fromNum)
                                     }
                                 }
-                                serviceNotifications.cancelLowBatteryNotification(nextNode)
+                                notificationManager.cancel(nextNode.num)
                             }
                         }
                     }
@@ -642,10 +657,13 @@ class MeshDataHandlerImpl(
         val nodeMuted = nodeManager.nodeDBbyID[dataPacket.from]?.isMuted == true
         val isSilent = conversationMuted || nodeMuted
         if (dataPacket.dataType == PortNum.ALERT_APP.value && !isSilent) {
-            serviceNotifications.showAlertNotification(
-                contactKey,
-                getSenderName(dataPacket),
-                dataPacket.alert ?: getString(Res.string.critical_alert),
+            notificationManager.dispatch(
+                Notification(
+                    title = getSenderName(dataPacket),
+                    message = dataPacket.alert ?: getString(Res.string.critical_alert),
+                    category = Notification.Category.Alert,
+                    contactKey = contactKey,
+                ),
             )
         } else if (updateNotification && !isSilent) {
             scope.handledLaunch { updateNotification(contactKey, dataPacket, isSilent) }
@@ -682,12 +700,14 @@ class MeshDataHandlerImpl(
 
             PortNum.WAYPOINT_APP.value -> {
                 val message = getString(Res.string.waypoint_received, dataPacket.waypoint!!.name)
-                serviceNotifications.updateWaypointNotification(
-                    contactKey,
-                    getSenderName(dataPacket),
-                    message,
-                    dataPacket.waypoint!!.id,
-                    isSilent,
+                notificationManager.dispatch(
+                    Notification(
+                        title = getSenderName(dataPacket),
+                        message = message,
+                        category = Notification.Category.Message,
+                        contactKey = contactKey,
+                        isSilent = isSilent,
+                    ),
                 )
             }
 

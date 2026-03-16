@@ -44,6 +44,7 @@ import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -64,6 +65,7 @@ class MessageViewModel(
     private val uiPrefs: UiPrefs,
     private val customEmojiPrefs: CustomEmojiPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
+    private val notificationManager: NotificationManager,
     private val meshServiceNotifications: MeshServiceNotifications,
     private val sendMessageUseCase: SendMessageUseCase,
 ) : ViewModel() {
@@ -235,6 +237,6 @@ class MessageViewModel(
             packetRepository.clearUnreadCount(contact, lastReadTimestamp)
             packetRepository.updateLastReadMessage(contact, messageUuid, lastReadTimestamp)
             val unreadCount = packetRepository.getUnreadCount(contact)
-            if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
+            if (unreadCount == 0) notificationManager.cancel(contact.hashCode())
         }
 }

@@ -39,6 +39,7 @@ import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshPrefs
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.ServiceBroadcasts
@@ -61,6 +62,7 @@ class MeshActionHandlerImpl(
     private val analytics: PlatformAnalytics,
     private val meshPrefs: MeshPrefs,
     private val databaseManager: DatabaseManager,
+    private val notificationManager: NotificationManager,
     private val serviceNotifications: MeshServiceNotifications,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
 ) : MeshActionHandler {
@@ -346,7 +348,7 @@ class MeshActionHandlerImpl(
                 nodeManager.clear()
                 messageProcessor.value.clearEarlyPackets()
                 databaseManager.switchActiveDatabase(deviceAddr)
-                serviceNotifications.clearNotifications()
+                notificationManager.cancelAll()
                 nodeManager.loadCachedNodeDB()
             }
         }

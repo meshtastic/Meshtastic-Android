@@ -19,10 +19,14 @@ package org.meshtastic.core.data.manager
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshRouter
-import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.Notification
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.client_notification
+import org.meshtastic.core.resources.getString
 import org.meshtastic.proto.FromRadio
 
 /** Implementation of [FromRadioPacketHandler] that dispatches [FromRadio] variants to specialized handlers. */
@@ -32,7 +36,7 @@ class FromRadioPacketHandlerImpl(
     private val router: Lazy<MeshRouter>,
     private val mqttManager: MqttManager,
     private val packetHandler: PacketHandler,
-    private val serviceNotifications: MeshServiceNotifications,
+    private val notificationManager: NotificationManager,
 ) : FromRadioPacketHandler {
     @Suppress("CyclomaticComplexMethod")
     override fun handleFromRadio(proto: FromRadio) {
@@ -62,7 +66,13 @@ class FromRadioPacketHandlerImpl(
             channel != null -> router.value.configHandler.handleChannel(channel)
             clientNotification != null -> {
                 serviceRepository.setClientNotification(clientNotification)
-                serviceNotifications.showClientNotification(clientNotification)
+                notificationManager.dispatch(
+                    Notification(
+                        title = getString(Res.string.client_notification),
+                        message = clientNotification.message,
+                        category = Notification.Category.Alert,
+                    ),
+                )
                 packetHandler.removeResponse(0, complete = false)
             }
         }

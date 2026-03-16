@@ -48,6 +48,7 @@ import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
@@ -77,6 +78,7 @@ class UIViewModel(
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
+    private val notificationManager: NotificationManager,
     private val meshServiceNotifications: MeshServiceNotifications,
     packetRepository: PacketRepository,
     private val alertManager: AlertManager,
@@ -107,7 +109,7 @@ class UIViewModel(
 
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
-        meshServiceNotifications.clearClientNotification(notification)
+        notificationManager.cancel(notification.toString().hashCode())
     }
 
     /** Emits events for mesh network send/receive activity. */
