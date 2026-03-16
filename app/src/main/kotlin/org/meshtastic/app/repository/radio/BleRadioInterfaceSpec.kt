@@ -31,11 +31,10 @@ class BleRadioInterfaceSpec(
     override fun createInterface(rest: String, service: RadioInterfaceService): BleRadioInterface =
         factory.create(rest, service)
 
-    /** Return true if this address is still acceptable. For BLE that means, still bonded */
-    override fun addressValid(rest: String): Boolean = if (!bluetoothRepository.isBonded(rest)) {
-        Logger.w { "Ignoring stale bond to ${rest.anonymize}" }
-        false
-    } else {
-        true
+    /** Return true if this address is still acceptable. For Kable we don't strictly require prior bonding. */
+    override fun addressValid(rest: String): Boolean {
+        // We no longer strictly require the device to be in the bonded list before attempting connection,
+        // as Kable and Android will handle bonding seamlessly during connection/characteristic access if needed.
+        return rest.isNotBlank()
     }
 }

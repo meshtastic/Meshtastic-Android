@@ -120,8 +120,14 @@ class BleRadioInterface(
         Logger.i { "[$address] Device not found in bonded list, scanning..." }
 
         repeat(SCAN_RETRY_COUNT) { attempt ->
-            val d = scanner.scan(SCAN_TIMEOUT).firstOrNull { it.address == address }
-            if (d != null) return d
+            try {
+                val d = kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
+                    scanner.scan(SCAN_TIMEOUT).first { it.address == address }
+                }
+                if (d != null) return d
+            } catch (e: Exception) {
+                // Ignore timeout exceptions
+            }
 
             if (attempt < SCAN_RETRY_COUNT - 1) {
                 delay(SCAN_RETRY_DELAY_MS)
@@ -157,6 +163,9 @@ class BleRadioInterface(
 
                 onConnected()
                 discoverServicesAndSetupCharacteristics()
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                Logger.d { "[$address] BLE connection coroutine cancelled" }
+                throw e
             } catch (e: Exception) {
                 val failureTime = nowMillis - connectionStartTime
                 Logger.w(e) { "[$address] Failed to connect to device after ${failureTime}ms" }
