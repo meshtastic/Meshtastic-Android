@@ -1,0 +1,33 @@
+# Implementation Plan: Wire Up Notifications
+
+## Phase 1: Shared Abstraction (commonMain)
+- [ ] Task: Define `NotificationManager` interface in `core:service/src/commonMain`
+    - [ ] Create `Notification` data model (title, message, type)
+    - [ ] Define `dispatch(notification: Notification)` method
+- [ ] Task: Create `NotificationPreferencesDataSource` using DataStore in `core:prefs`
+    - [ ] Define boolean preferences for categories (e.g., Messages, Node Events)
+- [ ] Task: Conductor - User Manual Verification 'Phase 1: Shared Abstraction (commonMain)' (Protocol in workflow.md)
+
+## Phase 2: Migrate Android Implementation (androidMain)
+- [ ] Task: Audit existing Android notifications
+    - [ ] Locate current implementation for local push notifications
+    - [ ] Analyze triggers and UX (channels, icons, sounds)
+- [ ] Task: Implement `AndroidNotificationManager`
+    - [ ] Adapt existing Android notification code to the new `NotificationManager` interface
+    - [ ] Inject `Context` and `NotificationPreferencesDataSource`
+    - [ ] Respect user notification preferences
+- [ ] Task: Wire `AndroidNotificationManager` into Koin DI
+- [ ] Task: Replace old Android notification calls with the new unified interface
+- [ ] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
+
+## Phase 3: Desktop Implementation (desktop)
+- [ ] Task: Implement `DesktopNotificationManager`
+    - [ ] Inject `TrayState` and `NotificationPreferencesDataSource`
+    - [ ] Delegate `dispatch()` to `TrayState.sendNotification()` respecting user preferences
+- [ ] Task: Wire `DesktopNotificationManager` into Koin DI
+- [ ] Task: Conductor - User Manual Verification 'Phase 3: Desktop Implementation (desktop)' (Protocol in workflow.md)
+
+## Phase 4: UI Preferences Integration
+- [ ] Task: Create UI for notification preferences
+    - [ ] Add toggles for categories in the Settings screen
+- [ ] Task: Conductor - User Manual Verification 'Phase 4: UI Preferences Integration' (Protocol in workflow.md)
