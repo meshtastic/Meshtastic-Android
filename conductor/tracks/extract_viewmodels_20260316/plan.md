@@ -1,7 +1,7 @@
 # Implementation Plan: Extract Remaining App-Only ViewModels
 
 ## Phase 1: Infrastructure & Abstractions
-- [ ] Task: Implement `MeshtasticUri` (expect/actual wrapper for `android.net.Uri`) in `core:common`.
+- [x] Task: Implement `MeshtasticUri` (expect/actual wrapper for `android.net.Uri`) in `core:common`. 81e5a4a
 - [ ] Task: Define `FileService` and `LocationService` interfaces in `core:repository/commonMain`.
 - [ ] Task: Create Android implementations for these services in `core:service/androidMain`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Abstractions' (Protocol in workflow.md)
