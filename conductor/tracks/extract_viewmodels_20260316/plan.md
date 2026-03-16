@@ -9,12 +9,12 @@
 ## Phase 2: Feature Module Extractions (Settings & Node)
 - [x] Task: Extract `AndroidSettingsViewModel` & `AndroidRadioConfigViewModel` to `feature:settings/commonMain`. 091452a
 - [x] Task: Extract `AndroidMetricsViewModel` to `feature:node/commonMain`. 52c2f6e
-- [ ] Task: Extract `AndroidDebugViewModel` to `feature:settings/commonMain`.
-- [ ] Task: Update Koin modules in `feature:settings` and `feature:node` to wire the new shared ViewModels.
+- [x] Task: Extract `AndroidDebugViewModel` to `feature:settings/commonMain`. e1a0387
+- [x] Task: Update Koin modules in `feature:settings` and `feature:node` to wire the new shared ViewModels. (Handled automatically by Koin Annotations K2 plugin) e1a0387
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extractions' (Protocol in workflow.md)
 
 ## Phase 3: Core UI & Cleanup
 - [ ] Task: Extract `UIViewModel` logic to `core:ui/commonMain`.
 - [ ] Task: Verify the `app` module thinning progress and finalize any remaining DI cleanup in `AppKoinModule`.
-- [ ] Task: Ensure all new shared ViewModels have baseline `commonTest` coverage using `core:testing` fakes.
+- [x] Task: Ensure all new shared ViewModels have baseline `commonTest` coverage using `core:testing` fakes. fdf34f5
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Core UI & Cleanup' (Protocol in workflow.md)
