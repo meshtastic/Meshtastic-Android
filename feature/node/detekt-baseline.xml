@@ -2,10 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:CompassViewModel.kt$CompassViewModel$@Suppress("ReturnCount") private fun calculatePositionalAccuracyMeters(): Float?</ID>
-    <ID>CyclomaticComplexMethod:NodeDetailActions.kt$NodeDetailActions$fun handleNodeMenuAction(scope: CoroutineScope, action: NodeMenuAction)</ID>
-    <ID>CyclomaticComplexMethod:NodeDetailViewModel.kt$NodeDetailViewModel$fun handleNodeMenuAction(action: NodeMenuAction)</ID>
     <ID>MagicNumber:CompassViewModel.kt$CompassViewModel$180.0</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-5</ID>
+    <ID>MagicNumber:MetricsViewModel.kt$MetricsViewModel$1e-7</ID>
+    <ID>MaxLineLength:MetricsViewModel.kt$MetricsViewModel$"$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n"</ID>
     <ID>TooGenericExceptionCaught:MetricsViewModel.kt$MetricsViewModel$e: Exception</ID>
     <ID>TooGenericExceptionCaught:NodeManagementActions.kt$NodeManagementActions$ex: Exception</ID>
   </CurrentIssues>

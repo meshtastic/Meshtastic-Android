@@ -18,12 +18,8 @@ package org.meshtastic.core.common.util
 
 import android.net.Uri
 
-/**
- * Converts a multiplatform [MeshtasticUri] into an Android [Uri].
- */
+/** Converts a multiplatform [MeshtasticUri] into an Android [Uri]. */
 fun MeshtasticUri.toAndroidUri(): Uri = Uri.parse(this.uriString)
 
-/**
- * Converts an Android [Uri] into a multiplatform [MeshtasticUri].
- */
+/** Converts an Android [Uri] into a multiplatform [MeshtasticUri]. */
 fun Uri.toMeshtasticUri(): MeshtasticUri = MeshtasticUri(this.toString())

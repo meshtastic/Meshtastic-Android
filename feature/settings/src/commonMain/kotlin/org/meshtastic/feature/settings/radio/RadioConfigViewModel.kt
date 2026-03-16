@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
@@ -46,8 +47,10 @@ import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.Position
 import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.LocationRepository
+import org.meshtastic.core.repository.LocationService
 import org.meshtastic.core.repository.MapConsentPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
@@ -72,10 +75,6 @@ import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
-
-import org.meshtastic.core.repository.FileService
-import org.meshtastic.core.repository.LocationService
-import org.meshtastic.core.common.util.MeshtasticUri
 
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
@@ -385,9 +384,7 @@ open class RadioConfigViewModel(
         viewModelScope.launch {
             try {
                 fileService.write(uri) { sink ->
-                    exportProfileUseCase(sink, profile)
-                        .onSuccess { /* Success */ }
-                        .onFailure { throw it }
+                    exportProfileUseCase(sink, profile).onSuccess { /* Success */ }.onFailure { throw it }
                 }
             } catch (ex: Exception) {
                 Logger.e { "Can't write file error: ${ex.message}" }
@@ -399,9 +396,7 @@ open class RadioConfigViewModel(
         viewModelScope.launch {
             try {
                 fileService.write(uri) { sink ->
-                    exportSecurityConfigUseCase(sink, securityConfig)
-                        .onSuccess { /* Success */ }
-                        .onFailure { throw it }
+                    exportSecurityConfigUseCase(sink, securityConfig).onSuccess { /* Success */ }.onFailure { throw it }
                 }
             } catch (ex: Exception) {
                 Logger.e { "Can't write security keys JSON error: ${ex.message}" }

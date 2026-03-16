@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import org.meshtastic.core.common.util.toMeshtasticUri
-
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -56,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowSeconds
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.clear
 import org.meshtastic.core.resources.save

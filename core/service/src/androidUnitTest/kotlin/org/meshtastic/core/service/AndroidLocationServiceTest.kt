@@ -16,12 +16,12 @@
  */
 package org.meshtastic.core.service
 
+import android.app.Application
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import io.mockk.mockk
 import org.meshtastic.core.repository.LocationRepository
-import android.app.Application
 
 class AndroidLocationServiceTest {
     @Test

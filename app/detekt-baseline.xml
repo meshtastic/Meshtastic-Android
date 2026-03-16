@@ -2,30 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>LongMethod:TCPInterface.kt$TCPInterface$private suspend fun startConnect()</ID>
-    <ID>LongParameterList:AndroidMetricsViewModel.kt$AndroidMetricsViewModel$( savedStateHandle: SavedStateHandle, private val app: Application, dispatchers: CoroutineDispatchers, meshLogRepository: MeshLogRepository, serviceRepository: ServiceRepository, nodeRepository: NodeRepository, tracerouteSnapshotRepository: TracerouteSnapshotRepository, nodeRequestActions: NodeRequestActions, alertManager: AlertManager, getNodeDetailsUseCase: GetNodeDetailsUseCase, )</ID>
-    <ID>LongParameterList:AndroidNodeListViewModel.kt$AndroidNodeListViewModel$( savedStateHandle: SavedStateHandle, nodeRepository: NodeRepository, radioConfigRepository: RadioConfigRepository, serviceRepository: ServiceRepository, radioController: RadioController, nodeManagementActions: NodeManagementActions, getFilteredNodesUseCase: GetFilteredNodesUseCase, nodeFilterPreferences: NodeFilterPreferences, )</ID>
-    <ID>LongParameterList:AndroidRadioConfigViewModel.kt$AndroidRadioConfigViewModel$( savedStateHandle: SavedStateHandle, private val app: Application, radioConfigRepository: RadioConfigRepository, packetRepository: PacketRepository, serviceRepository: ServiceRepository, nodeRepository: NodeRepository, private val locationRepository: LocationRepository, mapConsentPrefs: MapConsentPrefs, analyticsPrefs: AnalyticsPrefs, homoglyphEncodingPrefs: HomoglyphPrefs, toggleAnalyticsUseCase: ToggleAnalyticsUseCase, toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase, importProfileUseCase: ImportProfileUseCase, exportProfileUseCase: ExportProfileUseCase, exportSecurityConfigUseCase: ExportSecurityConfigUseCase, installProfileUseCase: InstallProfileUseCase, radioConfigUseCase: RadioConfigUseCase, adminActionsUseCase: AdminActionsUseCase, processRadioResponseUseCase: ProcessRadioResponseUseCase, )</ID>
-    <ID>LongParameterList:AndroidSettingsViewModel.kt$AndroidSettingsViewModel$( private val app: Application, radioConfigRepository: RadioConfigRepository, radioController: RadioController, nodeRepository: NodeRepository, uiPrefs: UiPrefs, buildConfigProvider: BuildConfigProvider, databaseManager: DatabaseManager, meshLogPrefs: MeshLogPrefs, setThemeUseCase: SetThemeUseCase, setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase, setProvideLocationUseCase: SetProvideLocationUseCase, setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase, setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase, meshLocationUseCase: MeshLocationUseCase, exportDataUseCase: ExportDataUseCase, isOtaCapableUseCase: IsOtaCapableUseCase, )</ID>
-    <ID>MagicNumber:AndroidMetricsViewModel.kt$AndroidMetricsViewModel$1000L</ID>
-    <ID>MagicNumber:AndroidMetricsViewModel.kt$AndroidMetricsViewModel$1e-5</ID>
-    <ID>MagicNumber:AndroidMetricsViewModel.kt$AndroidMetricsViewModel$1e-7</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$21972</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
-    <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
-    <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
-    <ID>MagicNumber:StreamInterface.kt$StreamInterface$0xff</ID>
-    <ID>MagicNumber:StreamInterface.kt$StreamInterface$3</ID>
-    <ID>MagicNumber:StreamInterface.kt$StreamInterface$4</ID>
-    <ID>MagicNumber:StreamInterface.kt$StreamInterface$8</ID>
-    <ID>MagicNumber:TCPInterface.kt$TCPInterface$1000</ID>
-    <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
-    <ID>SwallowedException:TCPInterface.kt$TCPInterface$ex: SocketTimeoutException</ID>
-    <ID>TooGenericExceptionCaught:AndroidRadioConfigViewModel.kt$AndroidRadioConfigViewModel$ex: Exception</ID>
     <ID>TooGenericExceptionCaught:NordicBleInterface.kt$NordicBleInterface$e: Exception</ID>
-    <ID>TooGenericExceptionCaught:TCPInterface.kt$TCPInterface$ex: Throwable</ID>
     <ID>TooManyFunctions:NordicBleInterface.kt$NordicBleInterface : RadioTransport</ID>
   </CurrentIssues>
 </SmellBaseline>

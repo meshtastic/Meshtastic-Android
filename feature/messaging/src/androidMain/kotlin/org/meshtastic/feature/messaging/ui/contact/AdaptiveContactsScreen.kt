@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
-import android.net.Uri
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
@@ -34,6 +33,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
@@ -46,8 +46,6 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.feature.messaging.MessageScreen
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.SharedContact
-
-import org.meshtastic.core.common.util.MeshtasticUri
 
 @Suppress("LongMethod", "LongParameterList", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)

@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.node.NodeMapScreen
-import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.app.ui.node.AdaptiveNodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -56,6 +55,7 @@ import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
+import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.metrics.NeighborInfoLogScreen
 import org.meshtastic.feature.node.metrics.PaxMetricsScreen
 import org.meshtastic.feature.node.metrics.PositionLogScreen

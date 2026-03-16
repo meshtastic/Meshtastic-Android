@@ -2,16 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>CyclomaticComplexMethod:ExternalNotificationConfigItemList.kt$@Suppress("LongMethod", "TooGenericExceptionCaught") @Composable fun ExternalNotificationConfigScreen( onBack: () -> Unit, modifier: Modifier = Modifier, viewModel: RadioConfigViewModel, )</ID>
-    <ID>CyclomaticComplexMethod:MQTTConfigItemList.kt$@Composable fun MQTTConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:CannedMessageConfigItemList.kt$@Composable fun CannedMessageConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:DeviceConfigItemList.kt$@OptIn(ExperimentalMaterial3ExpressiveApi::class) @Composable fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:DisplayConfigItemList.kt$@Composable fun DisplayConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
@@ -22,6 +16,7 @@
     <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:UserConfigItemList.kt$@Composable fun UserConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>MagicNumber:Debug.kt$3</ID>
+    <ID>MagicNumber:DebugViewModel.kt$DebugViewModel$16</ID>
     <ID>MagicNumber:DebugViewModel.kt$DebugViewModel$8</ID>
     <ID>MagicNumber:EditChannelDialog.kt$16</ID>
     <ID>MagicNumber:EditChannelDialog.kt$32</ID>
@@ -29,9 +24,9 @@
     <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.CONFIG$4</ID>
     <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.FIXED_POSITION$6</ID>
     <ID>MagicNumber:EditDeviceProfileDialog.kt$ProfileField.MODULE_CONFIG$5</ID>
-    <ID>MagicNumber:PacketResponseStateDialog.kt$100</ID>
     <ID>ReturnCount:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
     <ID>TooGenericExceptionCaught:DebugViewModel.kt$DebugViewModel$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:RadioConfigViewModel.kt$RadioConfigViewModel$ex: Exception</ID>
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModel</ID>
     <ID>UnusedPrivateProperty:RadioConfigViewModel.kt$RadioConfigViewModel$private val locationRepository: LocationRepository</ID>
   </CurrentIssues>

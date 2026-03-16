@@ -21,21 +21,19 @@ import okio.BufferedSource
 import org.meshtastic.core.common.util.MeshtasticUri
 
 /**
- * Abstracts file system operations (like reading from or writing to URIs) 
- * so that ViewModels can remain platform-independent.
+ * Abstracts file system operations (like reading from or writing to URIs) so that ViewModels can remain
+ * platform-independent.
  */
 interface FileService {
     /**
-     * Opens a file or URI for writing and provides a [BufferedSink].
-     * The sink is automatically closed after [block] execution.
-     * Returns true if successful, false otherwise.
+     * Opens a file or URI for writing and provides a [BufferedSink]. The sink is automatically closed after [block]
+     * execution. Returns true if successful, false otherwise.
      */
     suspend fun write(uri: MeshtasticUri, block: suspend (BufferedSink) -> Unit): Boolean
 
     /**
-     * Opens a file or URI for reading and provides a [BufferedSource].
-     * The source is automatically closed after [block] execution.
-     * Returns true if successful, false otherwise.
+     * Opens a file or URI for reading and provides a [BufferedSource]. The source is automatically closed after [block]
+     * execution. Returns true if successful, false otherwise.
      */
     suspend fun read(uri: MeshtasticUri, block: suspend (BufferedSource) -> Unit): Boolean
 }

@@ -17,13 +17,13 @@
 package org.meshtastic.core.repository
 
 /**
- * Abstracts high-level location requests (such as one-off current location)
- * that may require platform-specific permission checks or hardware interactions.
+ * Abstracts high-level location requests (such as one-off current location) that may require platform-specific
+ * permission checks or hardware interactions.
  */
 interface LocationService {
     /**
-     * Requests the current location, if permissions and hardware allow.
-     * Returns null if unavailable or if permissions are not granted.
+     * Requests the current location, if permissions and hardware allow. Returns null if unavailable or if permissions
+     * are not granted.
      */
     suspend fun getCurrentLocation(): Location?
 }

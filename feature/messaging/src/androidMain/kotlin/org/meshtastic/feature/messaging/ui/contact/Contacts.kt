@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
-import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.common.util.toMeshtasticUri
-
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,7 +63,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.util.TimeConstants

@@ -29,6 +29,7 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.toAndroidUri
 import org.meshtastic.core.repository.FileService
+import java.io.FileOutputStream
 
 @Single
 class AndroidFileService(private val context: Application) : FileService {
@@ -36,9 +37,7 @@ class AndroidFileService(private val context: Application) : FileService {
         withContext(Dispatchers.IO) {
             try {
                 context.contentResolver.openFileDescriptor(uri.toAndroidUri(), "wt")?.use { pfd ->
-                    java.io.FileOutputStream(pfd.fileDescriptor).sink().buffer().use { sink ->
-                        block(sink)
-                    }
+                    FileOutputStream(pfd.fileDescriptor).sink().buffer().use { sink -> block(sink) }
                 }
                 true
             } catch (e: Exception) {
@@ -51,9 +50,7 @@ class AndroidFileService(private val context: Application) : FileService {
         withContext(Dispatchers.IO) {
             try {
                 context.contentResolver.openInputStream(uri.toAndroidUri())?.use { inputStream ->
-                    inputStream.source().buffer().use { source ->
-                        block(source)
-                    }
+                    inputStream.source().buffer().use { source -> block(source) }
                 }
                 true
             } catch (e: Exception) {

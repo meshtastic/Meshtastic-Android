@@ -35,9 +35,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import okio.ByteString.Companion.decodeBase64
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -46,6 +51,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -65,13 +71,6 @@ import org.meshtastic.feature.node.model.TimeFrame
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 import org.meshtastic.proto.Paxcount as ProtoPaxcount
-
-import org.meshtastic.core.repository.FileService
-import org.meshtastic.core.common.util.MeshtasticUri
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import okio.ByteString.Companion.decodeBase64
 
 /**
  * ViewModel responsible for managing and graphing metrics (telemetry, signal strength, paxcount) for a specific node.
@@ -327,13 +326,16 @@ open class MetricsViewModel(
         viewModelScope.launch(dispatchers.main) {
             val positions = state.value.positionLogs
             fileService.write(uri) { sink ->
-                sink.writeUtf8("\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n")
+                sink.writeUtf8(
+                    "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
+                )
 
                 positions.forEach { position ->
-                    val localDateTime = Instant.fromEpochSeconds(position.time.toLong())
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                    val localDateTime =
+                        Instant.fromEpochSeconds(position.time.toLong())
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
                     val rxDateTime = "\"${localDateTime.date}\",\"${localDateTime.time}\""
-                    
+
                     val latitude = (position.latitude_i ?: 0) * 1e-7
                     val longitude = (position.longitude_i ?: 0) * 1e-7
                     val altitude = position.altitude
@@ -343,7 +345,9 @@ open class MetricsViewModel(
                     // but we can just do basic string manipulation if needed.
                     val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
 
-                    sink.writeUtf8("$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n")
+                    sink.writeUtf8(
+                        "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n",
+                    )
                 }
             }
         }
@@ -377,7 +381,5 @@ open class MetricsViewModel(
         return null
     }
 
-    protected fun decodeBase64(base64: String): ByteArray {
-        return base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
-    }
+    protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
 }

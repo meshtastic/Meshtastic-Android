@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>TooGenericExceptionCaught:AndroidFileService.kt$AndroidFileService$e: Exception</ID>
+    <ID>TooGenericExceptionCaught:JvmFileService.kt$JvmFileService$e: Exception</ID>
+  </CurrentIssues>
 </SmellBaseline>

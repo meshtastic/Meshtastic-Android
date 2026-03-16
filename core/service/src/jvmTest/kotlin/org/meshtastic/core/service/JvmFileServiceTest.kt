@@ -26,7 +26,7 @@ class JvmFileServiceTest {
     fun testWriteAndRead() = runTest {
         val service = JvmFileService()
         // Just verify it doesn't crash on invalid paths for now.
-        val result = service.read(MeshtasticUri("invalid_file_path.txt")) { }
+        val result = service.read(MeshtasticUri("invalid_file_path.txt")) {}
         assertFalse(result)
     }
 }

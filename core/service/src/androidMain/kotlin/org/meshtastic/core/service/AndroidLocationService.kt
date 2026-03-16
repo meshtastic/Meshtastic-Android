@@ -27,16 +27,13 @@ import org.meshtastic.core.repository.LocationRepository
 import org.meshtastic.core.repository.LocationService
 
 @Single
-class AndroidLocationService(
-    private val context: Application,
-    private val locationRepository: LocationRepository
-) : LocationService {
+class AndroidLocationService(private val context: Application, private val locationRepository: LocationRepository) :
+    LocationService {
 
     override suspend fun getCurrentLocation(): Location? {
-        val hasPermission = ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+        val hasPermission =
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED
 
         if (!hasPermission) {
             return null

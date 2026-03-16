@@ -25,22 +25,23 @@ import org.junit.After
 import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
+import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.ui.util.AlertManager
 import org.meshtastic.feature.node.detail.NodeRequestActions
 import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
 
 class MetricsViewModelTest {
-    private val dispatchers = CoroutineDispatchers(
-        main = kotlinx.coroutines.Dispatchers.Unconfined,
-        io = kotlinx.coroutines.Dispatchers.Unconfined,
-        default = kotlinx.coroutines.Dispatchers.Unconfined
-    )
+    private val dispatchers =
+        CoroutineDispatchers(
+            main = kotlinx.coroutines.Dispatchers.Unconfined,
+            io = kotlinx.coroutines.Dispatchers.Unconfined,
+            default = kotlinx.coroutines.Dispatchers.Unconfined,
+        )
     private val meshLogRepository: MeshLogRepository = mockk(relaxed = true)
     private val serviceRepository: ServiceRepository = mockk(relaxed = true)
     private val nodeRepository: NodeRepository = mockk(relaxed = true)
@@ -56,18 +57,19 @@ class MetricsViewModelTest {
     fun setUp() {
         Dispatchers.setMain(dispatchers.main)
 
-        viewModel = MetricsViewModel(
-            destNum = 1234,
-            dispatchers = dispatchers,
-            meshLogRepository = meshLogRepository,
-            serviceRepository = serviceRepository,
-            nodeRepository = nodeRepository,
-            tracerouteSnapshotRepository = tracerouteSnapshotRepository,
-            nodeRequestActions = nodeRequestActions,
-            alertManager = alertManager,
-            getNodeDetailsUseCase = getNodeDetailsUseCase,
-            fileService = fileService,
-        )
+        viewModel =
+            MetricsViewModel(
+                destNum = 1234,
+                dispatchers = dispatchers,
+                meshLogRepository = meshLogRepository,
+                serviceRepository = serviceRepository,
+                nodeRepository = nodeRepository,
+                tracerouteSnapshotRepository = tracerouteSnapshotRepository,
+                nodeRequestActions = nodeRequestActions,
+                alertManager = alertManager,
+                getNodeDetailsUseCase = getNodeDetailsUseCase,
+                fileService = fileService,
+            )
     }
 
     @After
@@ -75,8 +77,5 @@ class MetricsViewModelTest {
         Dispatchers.resetMain()
     }
 
-    @Test
-    fun testInitialization() = runTest {
-        assertNotNull(viewModel)
-    }
+    @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
 }

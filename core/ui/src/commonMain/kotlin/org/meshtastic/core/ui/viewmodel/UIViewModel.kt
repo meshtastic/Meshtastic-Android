@@ -33,8 +33,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.data.repository.FirmwareReleaseRepository
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.datastore.UiPreferencesDataSource
@@ -44,6 +44,7 @@ import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.model.TracerouteMapAvailability
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
+import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
@@ -59,8 +60,6 @@ import org.meshtastic.core.ui.util.ComposableContent
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.SharedContact
-
-import org.koin.core.annotation.KoinViewModel
 
 /**
  * Shared base for the application-level ViewModel.
@@ -92,11 +91,12 @@ class UIViewModel(
 
     /** Unified handler for scanned Meshtastic URIs (contacts or channels). */
     fun handleScannedUri(uri: MeshtasticUri, onInvalid: () -> Unit) {
-        org.meshtastic.core.common.util.CommonUri.parse(uri.uriString).dispatchMeshtasticUri(
-            onContact = { setSharedContactRequested(it) },
-            onChannel = { setRequestChannelSet(it) },
-            onInvalid = onInvalid,
-        )
+        org.meshtastic.core.common.util.CommonUri.parse(uri.uriString)
+            .dispatchMeshtasticUri(
+                onContact = { setSharedContactRequested(it) },
+                onChannel = { setRequestChannelSet(it) },
+                onInvalid = onInvalid,
+            )
     }
 
     val theme: StateFlow<Int> = uiPreferencesDataSource.theme

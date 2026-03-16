@@ -16,8 +16,6 @@
  */
 package org.meshtastic.feature.settings
 
-import org.meshtastic.core.common.util.toMeshtasticUri
-
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,6 +41,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.resources.Res
@@ -99,7 +98,9 @@ fun SettingsScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 showEditDeviceProfileDialog = true
-                it.data?.data?.let { uri -> viewModel.importProfile(uri.toMeshtasticUri()) { profile -> deviceProfile = profile } }
+                it.data?.data?.let { uri ->
+                    viewModel.importProfile(uri.toMeshtasticUri()) { profile -> deviceProfile = profile }
+                }
             }
         }
 

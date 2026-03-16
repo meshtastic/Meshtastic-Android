@@ -16,9 +16,7 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
-import org.meshtastic.core.common.util.toMeshtasticUri
 import android.app.Activity
-
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +40,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key

@@ -20,11 +20,11 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.feature.connections.AndroidScannerViewModel
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
 fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>) {

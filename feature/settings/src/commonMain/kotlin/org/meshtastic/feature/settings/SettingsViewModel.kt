@@ -30,6 +30,7 @@ import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -42,13 +43,12 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
-import org.meshtastic.core.repository.FileService
-import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.proto.LocalConfig
 
 @KoinViewModel
@@ -165,9 +165,7 @@ class SettingsViewModel(
      * @param filterPortnum If provided, only packets with this port number will be exported.
      */
     fun saveDataCsv(uri: MeshtasticUri, filterPortnum: Int? = null) {
-        viewModelScope.launch {
-            fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) }
-        }
+        viewModelScope.launch { fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) } }
     }
 
     private suspend fun performDataExport(writer: BufferedSink, filterPortnum: Int?) {

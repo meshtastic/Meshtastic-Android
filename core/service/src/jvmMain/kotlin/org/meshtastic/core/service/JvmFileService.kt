@@ -37,9 +37,7 @@ class JvmFileService : FileService {
                 // Treat uriString as a local file path
                 val file = File(uri.uriString)
                 file.parentFile?.mkdirs()
-                file.sink().buffer().use { sink ->
-                    block(sink)
-                }
+                file.sink().buffer().use { sink -> block(sink) }
                 true
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to write to URI: $uri" }
@@ -51,9 +49,7 @@ class JvmFileService : FileService {
         withContext(Dispatchers.IO) {
             try {
                 val file = File(uri.uriString)
-                file.source().buffer().use { source ->
-                    block(source)
-                }
+                file.source().buffer().use { source -> block(source) }
                 true
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to read from URI: $uri" }

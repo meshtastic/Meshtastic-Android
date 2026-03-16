@@ -67,7 +67,6 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
-import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.app.navigation.channelsGraph
 import org.meshtastic.app.navigation.connectionsGraph
 import org.meshtastic.app.navigation.contactsGraph
@@ -107,6 +106,7 @@ import org.meshtastic.core.ui.theme.StatusColors.StatusOrange
 import org.meshtastic.core.ui.theme.StatusColors.StatusYellow
 import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.core.ui.util.toMessageRes
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.ScannerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
