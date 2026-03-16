@@ -44,6 +44,8 @@ class AndroidBluetoothRepository(
     private val _state = MutableStateFlow(BluetoothState(hasPermissions = true))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()
 
+    private val deviceCache = mutableMapOf<String, DirectBleDevice>()
+
     init {
         processLifecycle.coroutineScope.launch(dispatchers.default) { updateBluetoothState() }
     }
@@ -118,7 +120,9 @@ class AndroidBluetoothRepository(
     @SuppressLint("MissingPermission")
     private fun getBondedAppPeripherals(): List<BleDevice> =
         bluetoothAdapter?.bondedDevices?.map { device ->
-            DirectBleDevice(device.address, device.name)
+            deviceCache.getOrPut(device.address) {
+                DirectBleDevice(device.address, device.name)
+            }
         } ?: emptyList()
 
     @SuppressLint("MissingPermission")

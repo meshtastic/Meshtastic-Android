@@ -37,12 +37,8 @@ class DirectBleDevice(
     @OptIn(com.juul.kable.ExperimentalApi::class)
     override suspend fun readRssi(): Int {
         val peripheral = activePeripheral
-        return if (peripheral != null && isConnected) {
-            try {
-                peripheral.rssi()
-            } catch (e: Exception) {
-                0
-            }
+        return if (peripheral != null) {
+            peripheral.rssi()
         } else {
             0
         }

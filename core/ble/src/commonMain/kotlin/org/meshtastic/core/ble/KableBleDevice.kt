@@ -42,12 +42,8 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
     @OptIn(com.juul.kable.ExperimentalApi::class)
     override suspend fun readRssi(): Int {
         val peripheral = activePeripheral
-        return if (peripheral != null && isConnected) {
-            try {
-                peripheral.rssi()
-            } catch (e: Exception) {
-                advertisement.rssi
-            }
+        return if (peripheral != null) {
+            peripheral.rssi()
         } else {
             advertisement.rssi
         }
