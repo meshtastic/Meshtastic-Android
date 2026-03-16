@@ -42,9 +42,7 @@ import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_SERVICE_UUID
 import org.meshtastic.core.ble.MeshtasticBleConstants.OTA_WRITE_CHARACTERISTIC
 import kotlin.time.Duration.Companion.seconds
 
-/**
- * BLE transport implementation for ESP32 Unified OTA protocol using Kable.
- */
+/** BLE transport implementation for ESP32 Unified OTA protocol using Kable. */
 class BleOtaTransport(
     private val scanner: BleScanner,
     connectionFactory: BleConnectionFactory,
@@ -54,7 +52,7 @@ class BleOtaTransport(
 
     private val transportScope = CoroutineScope(SupervisorJob() + dispatcher)
     private val bleConnection = connectionFactory.create(transportScope, "BLE OTA")
-    
+
     private val otaChar = characteristicOf(OTA_SERVICE_UUID, OTA_WRITE_CHARACTERISTIC)
     private val txChar = characteristicOf(OTA_SERVICE_UUID, OTA_NOTIFY_CHARACTERISTIC)
 
@@ -97,6 +95,7 @@ class BleOtaTransport(
         return null
     }
 
+    @Suppress("ReturnCount", "MagicNumber")
     private fun calculateOtaAddress(macAddress: String): String {
         val parts = macAddress.split(":")
         if (parts.size != 6) return macAddress
@@ -106,6 +105,7 @@ class BleOtaTransport(
         return parts.take(5).joinToString(":") + ":" + incrementedByte
     }
 
+    @Suppress("MagicNumber")
     override suspend fun connect(): Result<Unit> = runCatching {
         Logger.i { "BLE OTA: Waiting ${REBOOT_DELAY_MS}ms for device to reboot into OTA mode..." }
         delay(REBOOT_DELAY_MS)
@@ -149,7 +149,8 @@ class BleOtaTransport(
 
             // Enable notifications and collect responses
             val subscribed = CompletableDeferred<Unit>()
-            peripheral.observe(txChar)
+            peripheral
+                .observe(txChar)
                 .onEach { notifyBytes ->
                     try {
                         if (!subscribed.isCompleted) {
@@ -169,12 +170,12 @@ class BleOtaTransport(
                 }
                 .launchIn(this)
 
-            // Kable's observe doesn't provide a way to know when subscription is finished, 
+            // Kable's observe doesn't provide a way to know when subscription is finished,
             // but usually first value or just waiting a bit works.
             // For Meshtastic, it might not emit immediately.
             delay(500)
             if (!subscribed.isCompleted) subscribed.complete(Unit)
-            
+
             subscribed.await()
             Logger.i { "BLE OTA: Service discovered and ready" }
         }
@@ -216,6 +217,7 @@ class BleOtaTransport(
         }
     }
 
+    @Suppress("MagicNumber")
     override suspend fun streamFirmware(
         data: ByteArray,
         chunkSize: Int,
@@ -241,7 +243,7 @@ class BleOtaTransport(
                 val isLastPacketOfChunk = i == packetsSentForChunk - 1
 
                 when (val parsed = OtaResponse.parse(response)) {
-                    is OtaResponse.Ack -> { }
+                    is OtaResponse.Ack -> {}
                     is OtaResponse.Ok -> {
                         if (nextSentBytes >= totalBytes && isLastPacketOfChunk) {
                             sentBytes = nextSentBytes
@@ -297,16 +299,17 @@ class BleOtaTransport(
                 val chunkSize = minOf(data.size - offset, maxLen)
                 val packet = data.copyOfRange(offset, offset + chunkSize)
 
-                val kableWriteType = when (writeType) {
-                    BleWriteType.WITH_RESPONSE -> com.juul.kable.WriteType.WithResponse
-                    BleWriteType.WITHOUT_RESPONSE -> com.juul.kable.WriteType.WithoutResponse
-                }
+                val kableWriteType =
+                    when (writeType) {
+                        BleWriteType.WITH_RESPONSE -> com.juul.kable.WriteType.WithResponse
+                        BleWriteType.WITHOUT_RESPONSE -> com.juul.kable.WriteType.WithoutResponse
+                    }
 
                 bleConnection.profile(OTA_SERVICE_UUID) { service ->
                     val peripheral = (service as KableBleService).peripheral
                     peripheral.write(otaChar, packet, kableWriteType)
                 }
-                
+
                 offset += chunkSize
                 packetsSent++
             }

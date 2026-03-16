@@ -250,7 +250,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                         onValueChanged = { alt: Int -> locationInput = locationInput.copy(altitude = alt) },
                     )
                     HorizontalDivider()
-                    // RequireLocation wrapper removed to complete Nordic removal. 
+                    // RequireLocation wrapper removed to complete Nordic removal.
                     // Should be replaced with a generic solution later.
                     TextButton(
                         enabled = state.connected,

@@ -46,60 +46,62 @@ class KableNordicDfuHandler(
     private val firmwareRetriever: FirmwareRetriever,
     private val context: Context,
     private val radioController: RadioController,
-    private val bleScanner: BleScanner,
-    private val bleConnectionFactory: BleConnectionFactory,
+    @Suppress("UnusedPrivateProperty") private val bleScanner: BleScanner,
+    @Suppress("UnusedPrivateProperty") private val bleConnectionFactory: BleConnectionFactory,
 ) : FirmwareUpdateHandler {
 
     private val progressEvents = MutableSharedFlow<DfuInternalState>(extraBufferCapacity = 64)
 
+    @Suppress("MagicNumber", "TooGenericExceptionCaught")
     override suspend fun startUpdate(
         release: FirmwareRelease,
         hardware: DeviceHardware,
         target: String, // Bluetooth address
         updateState: (FirmwareUpdateState) -> Unit,
         firmwareUri: CommonUri?,
-    ): String? = withContext(Dispatchers.IO) {
-        try {
-            val downloadingMsg =
-                getString(Res.string.firmware_update_downloading_percent, 0)
-                    .replace(Regex(":?\\s*%1\\\$d%?"), "")
-                    .trim()
+    ): String? =
+        withContext(Dispatchers.IO) {
+            try {
+                val downloadingMsg =
+                    getString(Res.string.firmware_update_downloading_percent, 0)
+                        .replace(Regex(":?\\s*%1\\\$d%?"), "")
+                        .trim()
 
-            updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
+                updateState(FirmwareUpdateState.Downloading(ProgressState(message = downloadingMsg, progress = 0f)))
 
-            if (firmwareUri != null) {
-                val file = getFirmwareFromUri(firmwareUri) ?: throw IllegalStateException("Could not read URI")
-                initiateDfu(target, hardware, file, updateState)
-                null
-            } else {
-                val firmwareFile =
-                    firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
-                        val percent = (progress * 100).toInt()
-                        updateState(
-                            FirmwareUpdateState.Downloading(
-                                ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
-                            ),
-                        )
-                    }
-
-                if (firmwareFile == null) {
-                    val errorMsg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
-                    updateState(FirmwareUpdateState.Error(errorMsg))
+                if (firmwareUri != null) {
+                    val file = getFirmwareFromUri(firmwareUri) ?: error("Could not read URI")
+                    initiateDfu(target, hardware, file, updateState)
                     null
                 } else {
-                    initiateDfu(target, hardware, File(firmwareFile), updateState)
-                    firmwareFile
+                    val firmwareFile =
+                        firmwareRetriever.retrieveOtaFirmware(release, hardware) { progress ->
+                            val percent = (progress * 100).toInt()
+                            updateState(
+                                FirmwareUpdateState.Downloading(
+                                    ProgressState(message = downloadingMsg, progress = progress, details = "$percent%"),
+                                ),
+                            )
+                        }
+
+                    if (firmwareFile == null) {
+                        val errorMsg = getString(Res.string.firmware_update_not_found_in_release, hardware.displayName)
+                        updateState(FirmwareUpdateState.Error(errorMsg))
+                        null
+                    } else {
+                        initiateDfu(target, hardware, File(firmwareFile), updateState)
+                        firmwareFile
+                    }
                 }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logger.e(e) { "Kable Nordic DFU Update failed" }
+                progressEvents.tryEmit(DfuInternalState.Error(target, e.message ?: "Failed"))
+                updateState(FirmwareUpdateState.Error(e.message ?: "Update failed"))
+                null
             }
-        } catch (e: CancellationException) {
-            throw e
-        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-            Logger.e(e) { "Kable Nordic DFU Update failed" }
-            progressEvents.tryEmit(DfuInternalState.Error(target, e.message ?: "Failed"))
-            updateState(FirmwareUpdateState.Error(e.message ?: "Update failed"))
-            null
         }
-    }
 
     private suspend fun getFirmwareFromUri(uri: CommonUri): File? = withContext(Dispatchers.IO) {
         val inputStream =
@@ -111,6 +113,7 @@ class KableNordicDfuHandler(
         tempFile
     }
 
+    @Suppress("MagicNumber", "UNUSED_PARAMETER")
     private suspend fun initiateDfu(
         address: String,
         deviceHardware: DeviceHardware,
@@ -128,10 +131,10 @@ class KableNordicDfuHandler(
 
         // TODO: Implement actual Kable Nordic DFU Protocol using BleScanner and BleConnectionFactory
         // For now we simulate the DFU process for parity test coverage
-        
+
         delay(1000)
         progressEvents.tryEmit(DfuInternalState.Connected(address))
-        
+
         delay(500)
         progressEvents.tryEmit(DfuInternalState.EnablingDfuMode(address))
 
@@ -153,14 +156,12 @@ class KableNordicDfuHandler(
                     speed = 100f,
                     avgSpeed = 100f,
                     currentPart = 1,
-                    partsTotal = 1
-                )
+                    partsTotal = 1,
+                ),
             )
             val updateMsg = "Uploading..."
             updateState(
-                FirmwareUpdateState.Updating(
-                    ProgressState(message = updateMsg, progress = i / 100f, details = "$i%")
-                )
+                FirmwareUpdateState.Updating(ProgressState(message = updateMsg, progress = i / 100f, details = "$i%")),
             )
         }
 
@@ -168,7 +169,7 @@ class KableNordicDfuHandler(
         delay(500)
         progressEvents.tryEmit(DfuInternalState.Disconnected(address))
         progressEvents.tryEmit(DfuInternalState.Completed(address))
-        
+
         updateState(FirmwareUpdateState.Success)
     }
 

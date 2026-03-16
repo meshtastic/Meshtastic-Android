@@ -21,9 +21,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Bluetooth backend implementation. */
 @Single
-class BleRadioInterfaceSpec(
-    private val factory: BleRadioInterfaceFactory,
-) : InterfaceSpec<BleRadioInterface> {
+class BleRadioInterfaceSpec(private val factory: BleRadioInterfaceFactory) : InterfaceSpec<BleRadioInterface> {
     override fun createInterface(rest: String, service: RadioInterfaceService): BleRadioInterface =
         factory.create(rest, service)
 

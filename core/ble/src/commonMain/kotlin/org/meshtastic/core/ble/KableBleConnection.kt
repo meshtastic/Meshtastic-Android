@@ -57,21 +57,24 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
     override suspend fun connect(device: BleDevice) {
         val autoConnect = MutableStateFlow(device is DirectBleDevice)
 
-        val p = when (device) {
-            is KableBleDevice -> Peripheral(device.advertisement) {
-                observationExceptionHandler { cause ->
-                    co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
-                }
-                platformConfig(device) { autoConnect.value }
+        val p =
+            when (device) {
+                is KableBleDevice ->
+                    Peripheral(device.advertisement) {
+                        observationExceptionHandler { cause ->
+                            co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                        }
+                        platformConfig(device) { autoConnect.value }
+                    }
+                is DirectBleDevice ->
+                    createPeripheral(device.address) {
+                        observationExceptionHandler { cause ->
+                            co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
+                        }
+                        platformConfig(device) { autoConnect.value }
+                    }
+                else -> error("Unsupported BleDevice type: ${device::class}")
             }
-            is DirectBleDevice -> createPeripheral(device.address) {
-                observationExceptionHandler { cause ->
-                    co.touchlab.kermit.Logger.w(cause) { "[${device.address}] Observation failure suppressed" }
-                }
-                platformConfig(device) { autoConnect.value }
-            }
-            else -> error("Unsupported BleDevice type: ${device::class}")
-        }
 
         peripheral?.disconnect()
         peripheral?.close()
@@ -102,14 +105,15 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                 .launchIn(scope)
 
         while (p.state.value !is State.Connected) {
-            autoConnect.value = try {
-                connectionScope = p.connect()
-                false
-            } catch (e: CancellationException) {
-                throw e
-            } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
-                true
-            }
+            autoConnect.value =
+                try {
+                    connectionScope = p.connect()
+                    false
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (@Suppress("TooGenericExceptionCaught", "SwallowedException") e: Exception) {
+                    true
+                }
         }
     }
 

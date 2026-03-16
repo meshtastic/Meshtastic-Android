@@ -56,6 +56,7 @@ class AndroidBluetoothRepository(
 
     override fun isValid(bleAddress: String): Boolean = BluetoothAdapter.checkBluetoothAddress(bleAddress)
 
+    @Suppress("TooGenericExceptionThrown", "TooGenericExceptionCaught", "SwallowedException")
     @SuppressLint("MissingPermission")
     override suspend fun bond(device: BleDevice) {
         val macAddress = device.address
@@ -92,7 +93,7 @@ class AndroidBluetoothRepository(
                                 if (state == android.bluetooth.BluetoothDevice.BOND_BONDED) {
                                     try {
                                         context.unregisterReceiver(this)
-                                    } catch (e: Exception) {}
+                                    } catch (ignored: Exception) {}
                                     if (cont.isActive) cont.resume(Unit) {}
                                 } else if (
                                     state == android.bluetooth.BluetoothDevice.BOND_NONE &&
@@ -100,7 +101,7 @@ class AndroidBluetoothRepository(
                                 ) {
                                     try {
                                         context.unregisterReceiver(this)
-                                    } catch (e: Exception) {}
+                                    } catch (ignored: Exception) {}
                                     if (cont.isActive) {
                                         cont.resumeWith(Result.failure(Exception("Bonding failed or rejected")))
                                     }
@@ -116,13 +117,13 @@ class AndroidBluetoothRepository(
             cont.invokeOnCancellation {
                 try {
                     context.unregisterReceiver(receiver)
-                } catch (e: Exception) {}
+                } catch (ignored: Exception) {}
             }
 
             if (!remoteDevice.createBond()) {
                 try {
                     context.unregisterReceiver(receiver)
-                } catch (e: Exception) {}
+                } catch (ignored: Exception) {}
                 if (cont.isActive) cont.resumeWith(Result.failure(Exception("Failed to initiate bonding")))
             }
         }

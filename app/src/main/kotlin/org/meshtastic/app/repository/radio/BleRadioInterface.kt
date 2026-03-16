@@ -52,8 +52,7 @@ private const val CONNECTION_TIMEOUT_MS = 15_000L
 private val SCAN_TIMEOUT = 5.seconds
 
 /**
- * A [RadioTransport] implementation for BLE devices using the common BLE abstractions
- * (which are powered by Kable).
+ * A [RadioTransport] implementation for BLE devices using the common BLE abstractions (which are powered by Kable).
  *
  * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
  * - Bonding and discovery.
@@ -122,10 +121,12 @@ class BleRadioInterface(
 
         repeat(SCAN_RETRY_COUNT) { attempt ->
             try {
-                val d = kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
-                    scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address)
-                        .first { it.address == address }
-                }
+                val d =
+                    kotlinx.coroutines.withTimeoutOrNull(SCAN_TIMEOUT) {
+                        scanner.scan(timeout = SCAN_TIMEOUT, serviceUuid = SERVICE_UUID, address = address).first {
+                            it.address == address
+                        }
+                    }
                 if (d != null) return d
             } catch (e: Exception) {
                 Logger.v(e) { "Scan attempt failed or timed out" }

@@ -33,8 +33,6 @@ import org.meshtastic.core.ble.BleConnectionFactory
 import org.meshtastic.core.ble.BleConnectionState
 import org.meshtastic.core.ble.BleDevice
 import org.meshtastic.core.ble.BleScanner
-import org.meshtastic.core.ble.KableBleService
-import com.juul.kable.Peripheral
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportTest {
@@ -53,19 +51,20 @@ class BleOtaTransportTest {
     fun setup() {
         every { connectionFactory.create(any(), any()) } returns connection
         every { connection.connectionState } returns MutableSharedFlow(replay = 1)
-        
-        transport = BleOtaTransport(
-            scanner = scanner,
-            connectionFactory = connectionFactory,
-            address = address,
-            dispatcher = testDispatcher
-        )
+
+        transport =
+            BleOtaTransport(
+                scanner = scanner,
+                connectionFactory = connectionFactory,
+                address = address,
+                dispatcher = testDispatcher,
+            )
     }
 
     @Test
     fun `connect throws when device not found`() = runTest(testDispatcher) {
         every { scanner.scan(any(), any()) } returns flowOf()
-        
+
         val result = transport.connect()
         assertTrue("Expected failure", result.isFailure)
         assertTrue(result.exceptionOrNull() is OtaProtocolException.ConnectionFailed)
@@ -76,10 +75,10 @@ class BleOtaTransportTest {
         val device: BleDevice = mockk()
         every { device.address } returns address
         every { device.name } returns "Test Device"
-        
+
         every { scanner.scan(any(), any()) } returns flowOf(device)
         coEvery { connection.connectAndAwait(any(), any(), any()) } returns BleConnectionState.Disconnected
-        
+
         val result = transport.connect()
         assertTrue("Expected failure", result.isFailure)
         assertTrue(result.exceptionOrNull() is OtaProtocolException.ConnectionFailed)

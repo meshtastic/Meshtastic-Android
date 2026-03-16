@@ -40,7 +40,9 @@ class DirectBleDevice(override val address: String, override val name: String? =
         }
     }
 
-    override suspend fun bond() {}
+    override suspend fun bond() {
+        // DirectBleDevice assumes we are already bonded.
+    }
 
     fun updateState(newState: BleConnectionState) {
         _state.value = newState
