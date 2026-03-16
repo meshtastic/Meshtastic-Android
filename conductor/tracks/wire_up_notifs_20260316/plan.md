@@ -28,7 +28,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Desktop Implementation (desktop)' (Protocol in workflow.md)
 
 
-## Phase 4: UI Preferences Integration
+## Phase 4: UI Preferences Integration [checkpoint: 3af1e4c]
 - [x] Task: Create UI for notification preferences 7ed59c6
     - [x] Add toggles for categories in the Settings screen
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: UI Preferences Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: UI Preferences Integration' (Protocol in workflow.md)
