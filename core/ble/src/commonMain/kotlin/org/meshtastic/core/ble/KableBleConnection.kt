@@ -62,6 +62,12 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         peripheral?.disconnect()
         peripheral?.close()
         peripheral = p
+        
+        when (device) {
+            is KableBleDevice -> device.activePeripheral = p
+            is DirectBleDevice -> device.activePeripheral = p
+        }
+        
         _deviceFlow.emit(device)
 
         stateJob?.cancel()
@@ -109,6 +115,13 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         peripheral?.disconnect()
         peripheral?.close()
         peripheral = null
+        
+        val device = _deviceFlow.replayCache.firstOrNull()
+        when (device) {
+            is KableBleDevice -> device.activePeripheral = null
+            is DirectBleDevice -> device.activePeripheral = null
+        }
+        
         _deviceFlow.emit(null)
     }
 

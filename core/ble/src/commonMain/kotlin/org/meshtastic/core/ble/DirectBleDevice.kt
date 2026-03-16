@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.ble
 
+import com.juul.kable.Peripheral
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -27,11 +28,25 @@ class DirectBleDevice(
 ) : BleDevice {
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
+    
+    internal var activePeripheral: Peripheral? = null
 
     override val isBonded: Boolean = true
     override val isConnected: Boolean get() = _state.value is BleConnectionState.Connected
 
-    override suspend fun readRssi(): Int = 0
+    @OptIn(com.juul.kable.ExperimentalApi::class)
+    override suspend fun readRssi(): Int {
+        val peripheral = activePeripheral
+        return if (peripheral != null && isConnected) {
+            try {
+                peripheral.rssi()
+            } catch (e: Exception) {
+                0
+            }
+        } else {
+            0
+        }
+    }
     override suspend fun bond() {}
 
     fun updateState(newState: BleConnectionState) {
