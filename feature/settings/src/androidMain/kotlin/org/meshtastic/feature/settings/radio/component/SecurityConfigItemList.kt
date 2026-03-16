@@ -16,7 +16,9 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
+import org.meshtastic.core.common.util.toMeshtasticUri
 import android.app.Activity
+
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -94,7 +96,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri, securityConfig) }
+                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toMeshtasticUri(), securityConfig) }
             }
         }
 

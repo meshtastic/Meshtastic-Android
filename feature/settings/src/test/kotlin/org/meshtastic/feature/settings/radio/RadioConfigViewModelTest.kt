@@ -83,6 +83,8 @@ class RadioConfigViewModelTest {
     private val radioConfigUseCase: RadioConfigUseCase = mockk(relaxed = true)
     private val adminActionsUseCase: AdminActionsUseCase = mockk(relaxed = true)
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase = mockk(relaxed = true)
+    private val locationService: org.meshtastic.core.repository.LocationService = mockk(relaxed = true)
+    private val fileService: org.meshtastic.core.repository.FileService = mockk(relaxed = true)
 
     private lateinit var viewModel: RadioConfigViewModel
 
@@ -110,7 +112,6 @@ class RadioConfigViewModelTest {
 
     private fun createViewModel() = RadioConfigViewModel(
         savedStateHandle = SavedStateHandle(),
-        app = mockk(),
         radioConfigRepository = radioConfigRepository,
         packetRepository = packetRepository,
         serviceRepository = serviceRepository,
@@ -128,6 +129,8 @@ class RadioConfigViewModelTest {
         radioConfigUseCase = radioConfigUseCase,
         adminActionsUseCase = adminActionsUseCase,
         processRadioResponseUseCase = processRadioResponseUseCase,
+        locationService = locationService,
+        fileService = fileService,
     )
 
     @Test

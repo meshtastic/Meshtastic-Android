@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.settings
 
+import org.meshtastic.core.common.util.toMeshtasticUri
+
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -97,14 +99,14 @@ fun SettingsScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
                 showEditDeviceProfileDialog = true
-                it.data?.data?.let { uri -> viewModel.importProfile(uri) { profile -> deviceProfile = profile } }
+                it.data?.data?.let { uri -> viewModel.importProfile(uri.toMeshtasticUri()) { profile -> deviceProfile = profile } }
             }
         }
 
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportProfile(uri, deviceProfile!!) }
+                it.data?.data?.let { uri -> viewModel.exportProfile(uri.toMeshtasticUri(), deviceProfile!!) }
             }
         }
 
@@ -234,7 +236,7 @@ fun SettingsScreen(
                     cacheLimit = settingsViewModel.dbCacheLimit.collectAsStateWithLifecycle().value,
                     onSetCacheLimit = { settingsViewModel.setDbCacheLimit(it) },
                     nodeShortName = ourNode?.user?.short_name ?: "",
-                    onExportData = { settingsViewModel.saveDataCsv(it) },
+                    onExportData = { settingsViewModel.saveDataCsv(it.toMeshtasticUri()) },
                 )
 
                 AppInfoSection(

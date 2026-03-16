@@ -73,6 +73,10 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
 
+import org.meshtastic.core.repository.FileService
+import org.meshtastic.core.repository.LocationService
+import org.meshtastic.core.common.util.MeshtasticUri
+
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
     val isLocal: Boolean = false,
@@ -113,6 +117,8 @@ open class RadioConfigViewModel(
     private val radioConfigUseCase: RadioConfigUseCase,
     private val adminActionsUseCase: AdminActionsUseCase,
     private val processRadioResponseUseCase: ProcessRadioResponseUseCase,
+    private val locationService: LocationService,
+    private val fileService: FileService,
 ) : ViewModel() {
     var analyticsAllowedFlow = analyticsPrefs.analyticsAllowed
 
@@ -150,7 +156,7 @@ open class RadioConfigViewModel(
     val currentDeviceProfile
         get() = _currentDeviceProfile.value
 
-    open suspend fun getCurrentLocation(): Any? = null
+    suspend fun getCurrentLocation(): Any? = locationService.getCurrentLocation()
 
     init {
         combine(destNumFlow, nodeRepository.nodeDBbyNum) { id, nodes -> nodes[id] ?: nodes.values.firstOrNull() }
@@ -363,16 +369,44 @@ open class RadioConfigViewModel(
         viewModelScope.launch { radioConfigUseCase.removeFixedPosition(destNum) }
     }
 
-    open fun importProfile(uri: Any, onResult: (DeviceProfile) -> Unit) {
-        // To be implemented in platform-specific subclass
+    fun importProfile(uri: MeshtasticUri, onResult: (DeviceProfile) -> Unit) {
+        viewModelScope.launch {
+            try {
+                fileService.read(uri) { source ->
+                    importProfileUseCase(source).onSuccess(onResult).onFailure { throw it }
+                }
+            } catch (ex: Exception) {
+                Logger.e { "Import DeviceProfile error: ${ex.message}" }
+            }
+        }
     }
 
-    open fun exportProfile(uri: Any, profile: DeviceProfile) {
-        // To be implemented in platform-specific subclass
+    fun exportProfile(uri: MeshtasticUri, profile: DeviceProfile) {
+        viewModelScope.launch {
+            try {
+                fileService.write(uri) { sink ->
+                    exportProfileUseCase(sink, profile)
+                        .onSuccess { /* Success */ }
+                        .onFailure { throw it }
+                }
+            } catch (ex: Exception) {
+                Logger.e { "Can't write file error: ${ex.message}" }
+            }
+        }
     }
 
-    open fun exportSecurityConfig(uri: Any, securityConfig: Config.SecurityConfig) {
-        // To be implemented in platform-specific subclass
+    fun exportSecurityConfig(uri: MeshtasticUri, securityConfig: Config.SecurityConfig) {
+        viewModelScope.launch {
+            try {
+                fileService.write(uri) { sink ->
+                    exportSecurityConfigUseCase(sink, securityConfig)
+                        .onSuccess { /* Success */ }
+                        .onFailure { throw it }
+                }
+            } catch (ex: Exception) {
+                Logger.e { "Can't write security keys JSON error: ${ex.message}" }
+            }
+        }
     }
 
     fun installProfile(protobuf: DeviceProfile) {
