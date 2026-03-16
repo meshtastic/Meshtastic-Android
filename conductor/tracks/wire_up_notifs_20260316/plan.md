@@ -17,7 +17,7 @@
     - [x] Inject `Context` and `NotificationPreferencesDataSource`
     - [x] Respect user notification preferences
 - [x] Task: Wire `AndroidNotificationManager` into Koin DI 31c2a1e
-- [x] Task: Replace old Android notification calls with the new unified interface 31c2a1e
+- [x] Task: Replace old Android notification calls with the new unified interface 81fd10b
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
 
 ## Phase 3: Desktop Implementation (desktop)
