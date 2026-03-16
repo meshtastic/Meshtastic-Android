@@ -43,6 +43,12 @@ The `:core:testing` module provides lightweight, reusable test doubles (fakes, b
    (etc.)               (etc.)
 ```
 
+### Target Compatibility Warning (March 2026 Audit)
+
+- **MockK in commonMain:** This module includes `api(libs.mockk)` in `commonMain`. While this works for the current `jvm()` and `android()` targets, **MockK does not natively support Kotlin/Native (iOS)**.
+- **Future-Proofing:** If an iOS target is added, tests in `commonTest` that rely on MockK will fail to compile for iOS.
+- **Recommendation:** Favor manual fakes (like `FakeNodeRepository`) in `commonMain` and limit `mockk` usage to `androidUnitTest` or `jvmTest` where possible to maintain pure KMP portability.
+
 ### Key Design Rules
 
 1. **`:core:testing` has NO dependencies on heavy modules**: It only depends on:

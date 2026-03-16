@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-03-13
+> Last updated: 2026-03-16
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
