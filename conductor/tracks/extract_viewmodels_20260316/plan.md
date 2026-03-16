@@ -6,12 +6,12 @@
 - [x] Task: Create Android implementations for these services in `core:service/androidMain`. 1ffa7d2
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Abstractions' (Protocol in workflow.md) 89c6fd5
 
-## Phase 2: Feature Module Extractions (Settings & Node) [checkpoint: d00b384]
+## Phase 2: Feature Module Extractions (Settings & Node) [checkpoint: 3ea2b2a]
 - [x] Task: Extract `AndroidSettingsViewModel` & `AndroidRadioConfigViewModel` to `feature:settings/commonMain`. 091452a
 - [x] Task: Extract `AndroidMetricsViewModel` to `feature:node/commonMain`. 52c2f6e
 - [x] Task: Extract `AndroidDebugViewModel` to `feature:settings/commonMain`. e1a0387
 - [x] Task: Update Koin modules in `feature:settings` and `feature:node` to wire the new shared ViewModels. (Handled automatically by Koin Annotations K2 plugin) e1a0387
-- [x] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extractions' (Protocol in workflow.md) d00b384
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extractions' (Protocol in workflow.md) 3ea2b2a
 
 ## Phase 3: Core UI & Cleanup
 - [~] Task: Extract `UIViewModel` logic to `core:ui/commonMain`.
