@@ -49,7 +49,6 @@ import org.meshtastic.desktop.stub.NoopLocationRepository
 import org.meshtastic.desktop.stub.NoopMQTTRepository
 import org.meshtastic.desktop.stub.NoopMagneticFieldProvider
 import org.meshtastic.desktop.stub.NoopMeshLocationManager
-import org.meshtastic.desktop.stub.NoopMeshServiceNotifications
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics

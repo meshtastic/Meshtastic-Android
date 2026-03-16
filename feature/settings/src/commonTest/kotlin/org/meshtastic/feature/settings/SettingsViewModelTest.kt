@@ -23,7 +23,6 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.repository.MeshLogPrefs
-import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeNodeRepository

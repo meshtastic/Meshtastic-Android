@@ -74,6 +74,7 @@ import java.util.Locale
  */
 private val LocalAppLocale = staticCompositionLocalOf { "" }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 fun main() = application(exitProcessOnExit = false) {
     Logger.i { "Meshtastic Desktop — Starting" }
 
@@ -176,15 +177,17 @@ fun main() = application(exitProcessOnExit = false) {
             MenuBar {
                 Menu("File") {
                     Item("Settings", shortcut = KeyShortcut(Key.Comma, meta = true)) {
-                        if (TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())) {
+                        if (
+                            TopLevelDestination.Settings != TopLevelDestination.fromNavKey(backStack.lastOrNull())
+                        ) {
                             backStack.add(TopLevelDestination.Settings.route)
-                            while (backStack.size > 1) { backStack.removeAt(0) }
+                            while (backStack.size > 1) {
+                                backStack.removeAt(0)
+                            }
                         }
                     }
                     Separator()
-                    Item("Quit", shortcut = KeyShortcut(Key.Q, meta = true)) {
-                        exitApplication()
-                    }
+                    Item("Quit", shortcut = KeyShortcut(Key.Q, meta = true)) { exitApplication() }
                 }
                 Menu("View") {
                     Item("Toggle Theme", shortcut = KeyShortcut(Key.T, meta = true, shift = true)) {
@@ -195,26 +198,30 @@ fun main() = application(exitProcessOnExit = false) {
                 Menu("Navigate") {
                     Item("Conversations", shortcut = KeyShortcut(Key.One, meta = true)) {
                         backStack.add(TopLevelDestination.Conversations.route)
-                        while (backStack.size > 1) { backStack.removeAt(0) }
+                        while (backStack.size > 1) {
+                            backStack.removeAt(0)
+                        }
                     }
                     Item("Nodes", shortcut = KeyShortcut(Key.Two, meta = true)) {
                         backStack.add(TopLevelDestination.Nodes.route)
-                        while (backStack.size > 1) { backStack.removeAt(0) }
+                        while (backStack.size > 1) {
+                            backStack.removeAt(0)
+                        }
                     }
                     Item("Map", shortcut = KeyShortcut(Key.Three, meta = true)) {
                         backStack.add(TopLevelDestination.Map.route)
-                        while (backStack.size > 1) { backStack.removeAt(0) }
+                        while (backStack.size > 1) {
+                            backStack.removeAt(0)
+                        }
                     }
                     Item("Connections", shortcut = KeyShortcut(Key.Four, meta = true)) {
                         backStack.add(TopLevelDestination.Connections.route)
-                        while (backStack.size > 1) { backStack.removeAt(0) }
+                        while (backStack.size > 1) {
+                            backStack.removeAt(0)
+                        }
                     }
                 }
-                Menu("Help") {
-                    Item("About") {
-                        backStack.add(SettingsRoutes.About)
-                    }
-                }
+                Menu("Help") { Item("About") { backStack.add(SettingsRoutes.About) } }
             }
 
             // Providing localePref via a staticCompositionLocalOf forces the entire subtree to

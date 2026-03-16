@@ -24,13 +24,20 @@ data class Notification(
     val contactKey: String? = null,
     val isSilent: Boolean = false,
     val group: String? = null,
-    val id: Int? = null
+    val id: Int? = null,
 ) {
     enum class Type {
-        None, Info, Warning, Error
+        None,
+        Info,
+        Warning,
+        Error,
     }
 
     enum class Category {
-        Message, NodeEvent, Battery, Alert, Service
+        Message,
+        NodeEvent,
+        Battery,
+        Alert,
+        Service,
     }
 }

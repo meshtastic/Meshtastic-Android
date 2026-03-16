@@ -159,7 +159,9 @@ fun DesktopMainScreen(backStack: NavBackStack<NavKey>, radioService: RadioInterf
                         onClick = {
                             if (destination != selected) {
                                 backStack.add(destination.route)
-                                while (backStack.size > 1) { backStack.removeAt(0) }
+                                while (backStack.size > 1) {
+                                    backStack.removeAt(0)
+                                }
                             }
                         },
                         icon = {

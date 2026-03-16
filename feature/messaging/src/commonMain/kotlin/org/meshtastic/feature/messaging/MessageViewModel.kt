@@ -42,7 +42,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -66,7 +65,6 @@ class MessageViewModel(
     private val customEmojiPrefs: CustomEmojiPrefs,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val notificationManager: NotificationManager,
-    private val meshServiceNotifications: MeshServiceNotifications,
     private val sendMessageUseCase: SendMessageUseCase,
 ) : ViewModel() {
     private val _title = MutableStateFlow("")

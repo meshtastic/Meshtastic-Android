@@ -29,7 +29,9 @@ import org.meshtastic.core.resources.meshtastic_messages_notifications
 import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
 import org.meshtastic.core.ui.component.SwitchListItem
 
-/** Notification settings section with in-app toggles. Primarily used on platforms without system notification channels. */
+/**
+ * Notification settings section with in-app toggles. Primarily used on platforms without system notification channels.
+ */
 @Composable
 fun NotificationSection(
     messagesEnabled: Boolean,

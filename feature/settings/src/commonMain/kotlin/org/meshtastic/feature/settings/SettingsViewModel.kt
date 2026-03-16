@@ -130,7 +130,9 @@ class SettingsViewModel(
     val lowBatteryEnabled = notificationPrefs.lowBatteryEnabled
 
     fun setMessagesEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setMessagesEnabled(enabled)
+
     fun setNodeEventsEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setNodeEventsEnabled(enabled)
+
     fun setLowBatteryEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setLowBatteryEnabled(enabled)
 
     // MeshLog retention period (bounded by MeshLogPrefsImpl constants)

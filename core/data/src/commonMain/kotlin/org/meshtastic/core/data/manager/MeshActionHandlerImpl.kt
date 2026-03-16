@@ -37,7 +37,6 @@ import org.meshtastic.core.repository.MeshActionHandler
 import org.meshtastic.core.repository.MeshDataHandler
 import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshPrefs
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -63,7 +62,6 @@ class MeshActionHandlerImpl(
     private val meshPrefs: MeshPrefs,
     private val databaseManager: DatabaseManager,
     private val notificationManager: NotificationManager,
-    private val serviceNotifications: MeshServiceNotifications,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
 ) : MeshActionHandler {
     private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())

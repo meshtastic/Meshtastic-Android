@@ -30,14 +30,15 @@ import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Telemetry
 
 @Single
-class DesktopMeshServiceNotifications(
-    private val notificationManager: NotificationManager,
-) : MeshServiceNotifications {
+@Suppress("TooManyFunctions")
+class DesktopMeshServiceNotifications(private val notificationManager: NotificationManager) : MeshServiceNotifications {
     override fun clearNotifications() {
         notificationManager.cancelAll()
     }
 
-    override fun initChannels() {}
+    override fun initChannels() {
+        // no-op for desktop
+    }
 
     override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Any {
         // We don't have a foreground service on desktop
@@ -60,7 +61,7 @@ class DesktopMeshServiceNotifications(
                 contactKey = contactKey,
                 isSilent = isSilent,
                 id = contactKey.hashCode(),
-            ),
+            )
         )
     }
 
@@ -78,7 +79,7 @@ class DesktopMeshServiceNotifications(
                 category = Notification.Category.Message,
                 contactKey = contactKey,
                 isSilent = isSilent,
-            ),
+            )
         )
     }
 
@@ -97,10 +98,11 @@ class DesktopMeshServiceNotifications(
                 category = Notification.Category.Message,
                 contactKey = contactKey,
                 isSilent = isSilent,
-            ),
+            )
         )
     }
 
+    @Suppress("MaxLineLength")
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         notificationManager.dispatch(
             Notification(
@@ -118,7 +120,7 @@ class DesktopMeshServiceNotifications(
                 title = getString(Res.string.new_node_seen, node.user.short_name),
                 message = node.user.long_name,
                 category = Notification.Category.NodeEvent,
-            ),
+            )
         )
     }
 
@@ -126,14 +128,10 @@ class DesktopMeshServiceNotifications(
         notificationManager.dispatch(
             Notification(
                 title = getString(Res.string.low_battery_title, node.user.short_name),
-                message = getString(
-                    Res.string.low_battery_message,
-                    node.user.long_name,
-                    node.batteryLevel ?: 0,
-                ),
+                message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
                 category = Notification.Category.Battery,
                 id = node.num,
-            ),
+            )
         )
     }
 
@@ -144,7 +142,7 @@ class DesktopMeshServiceNotifications(
                 message = clientNotification.message,
                 category = Notification.Category.Alert,
                 id = clientNotification.toString().hashCode(),
-            ),
+            )
         )
     }
 

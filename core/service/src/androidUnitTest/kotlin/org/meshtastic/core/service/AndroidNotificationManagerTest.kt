@@ -16,7 +16,6 @@
  */
 package org.meshtastic.core.service
 
-import android.app.NotificationManager as SystemNotificationManager
 import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
@@ -25,8 +24,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.NotificationPrefs
+import android.app.NotificationManager as SystemNotificationManager
 
 class AndroidNotificationManagerTest {
 
@@ -60,9 +59,9 @@ class AndroidNotificationManagerTest {
     @Test
     fun `dispatch notifies when enabled`() {
         val notification = Notification("Title", "Message", category = Notification.Category.Message)
-        
+
         androidNotificationManager.dispatch(notification)
-        
+
         verify { notificationManager.notify(any(), any()) }
     }
 
@@ -70,9 +69,9 @@ class AndroidNotificationManagerTest {
     fun `dispatch does not notify when disabled`() {
         messagesEnabled.value = false
         val notification = Notification("Title", "Message", category = Notification.Category.Message)
-        
+
         androidNotificationManager.dispatch(notification)
-        
+
         verify(exactly = 0) { notificationManager.notify(any(), any()) }
     }
 }

@@ -401,6 +401,7 @@ class MeshDataHandlerImpl(
         rememberDataPacket(dataPacket, myNodeNum)
     }
 
+    @Suppress("LongMethod")
     private fun handleTelemetry(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int) {
         val payload = packet.decoded?.payload ?: return
         val t =
@@ -433,7 +434,8 @@ class MeshDataHandlerImpl(
                                     notificationManager.dispatch(
                                         Notification(
                                             title = getString(Res.string.low_battery_title, nextNode.user.short_name),
-                                            message = getString(
+                                            message =
+                                            getString(
                                                 Res.string.low_battery_message,
                                                 nextNode.user.long_name,
                                                 nextNode.deviceMetrics.battery_level ?: 0,

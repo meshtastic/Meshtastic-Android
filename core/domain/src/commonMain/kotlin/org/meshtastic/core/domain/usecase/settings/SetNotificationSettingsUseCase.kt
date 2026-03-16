@@ -21,9 +21,7 @@ import org.meshtastic.core.repository.NotificationPrefs
 
 /** Use case for updating application-level notification preferences. */
 @Single
-class SetNotificationSettingsUseCase(
-    private val notificationPrefs: NotificationPrefs,
-) {
+class SetNotificationSettingsUseCase(private val notificationPrefs: NotificationPrefs) {
     fun setMessagesEnabled(enabled: Boolean) = notificationPrefs.setMessagesEnabled(enabled)
 
     fun setNodeEventsEnabled(enabled: Boolean) = notificationPrefs.setNodeEventsEnabled(enabled)

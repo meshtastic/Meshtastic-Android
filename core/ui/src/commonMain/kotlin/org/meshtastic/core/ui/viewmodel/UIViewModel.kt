@@ -46,7 +46,6 @@ import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
@@ -79,7 +78,6 @@ class UIViewModel(
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val notificationManager: NotificationManager,
-    private val meshServiceNotifications: MeshServiceNotifications,
     packetRepository: PacketRepository,
     private val alertManager: AlertManager,
 ) : ViewModel() {

@@ -19,9 +19,9 @@ package org.meshtastic.core.data.manager
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.FromRadioPacketHandler
 import org.meshtastic.core.repository.MeshRouter
+import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.Notification
 import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.MqttManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res

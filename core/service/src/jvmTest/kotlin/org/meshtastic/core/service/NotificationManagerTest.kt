@@ -28,9 +28,9 @@ class NotificationManagerTest {
     fun `dispatch calls implementation`() {
         val manager = mockk<NotificationManager>(relaxed = true)
         val notification = Notification("Title", "Message")
-        
+
         manager.dispatch(notification)
-        
+
         verify { manager.dispatch(notification) }
     }
 }

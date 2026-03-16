@@ -40,27 +40,21 @@ class NotificationPrefsImpl(
     private val scope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
     override val messagesEnabled: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_MESSAGES_ENABLED] ?: true }
-            .stateIn(scope, SharingStarted.Eagerly, true)
+        dataStore.data.map { it[KEY_MESSAGES_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 
     override fun setMessagesEnabled(enabled: Boolean) {
         scope.launch { dataStore.edit { it[KEY_MESSAGES_ENABLED] = enabled } }
     }
 
     override val nodeEventsEnabled: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_NODE_EVENTS_ENABLED] ?: true }
-            .stateIn(scope, SharingStarted.Eagerly, true)
+        dataStore.data.map { it[KEY_NODE_EVENTS_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 
     override fun setNodeEventsEnabled(enabled: Boolean) {
         scope.launch { dataStore.edit { it[KEY_NODE_EVENTS_ENABLED] = enabled } }
     }
 
     override val lowBatteryEnabled: StateFlow<Boolean> =
-        dataStore.data
-            .map { it[KEY_LOW_BATTERY_ENABLED] ?: true }
-            .stateIn(scope, SharingStarted.Eagerly, true)
+        dataStore.data.map { it[KEY_LOW_BATTERY_ENABLED] ?: true }.stateIn(scope, SharingStarted.Eagerly, true)
 
     override fun setLowBatteryEnabled(enabled: Boolean) {
         scope.launch { dataStore.edit { it[KEY_LOW_BATTERY_ENABLED] = enabled } }
