@@ -61,6 +61,7 @@ wire = "6.0.0"
 vico = "3.0.3"
 dependency-guard = "0.5.0"
 kable = "0.42.0"
+nordic-dfu = "2.11.0"
 
 
 [libraries]
@@ -212,6 +213,7 @@ markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", v
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
 material = { module = "com.google.android.material:material", version = "1.13.0" }
+nordic-dfu = { module = "no.nordicsemi.android:dfu", version.ref = "nordic-dfu" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 

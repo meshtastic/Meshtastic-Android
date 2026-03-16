@@ -65,7 +65,7 @@ Dependencies are managed via the version catalog (`libs.versions.toml`).
 kable = "0.42.0"
 
 [libraries]
-kable-core = { module = "com.juul.kable:core", version.ref = "kable" }
+kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 ```
 
 ## Architecture

@@ -65,7 +65,7 @@ kotlin {
             implementation(libs.androidx.compose.material3)
             implementation(libs.androidx.compose.ui.text)
             implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.androidx.navigation.common)
+            implementation(libs.nordic.dfu)
             implementation(libs.coil)
             implementation(libs.coil.network.okhttp)
             implementation(libs.markdown.renderer.android)

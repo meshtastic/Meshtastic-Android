@@ -54,8 +54,6 @@ class MeshtasticRadioProfileTest {
 
         fake.emitFromRadio(expectedPacket)
 
-        // This test should fail initially because we haven't implemented the real abstraction
-        // Actually, it will fail to compile because MeshtasticRadioProfile doesn't exist in core:ble.
         val received = fake.fromRadio.first()
         assertEquals(expectedPacket.toList(), received.toList())
     }
