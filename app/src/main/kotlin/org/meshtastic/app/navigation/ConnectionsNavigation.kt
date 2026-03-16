@@ -20,7 +20,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.app.settings.AndroidRadioConfigViewModel
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.feature.connections.AndroidScannerViewModel
@@ -31,7 +31,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
     entry<ConnectionsRoutes.ConnectionsGraph> {
         ConnectionsScreen(
             scanModel = koinViewModel<AndroidScannerViewModel>(),
-            radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onClickNodeChip = {
                 // Navigation 3 ignores back stack behavior options; we handle this by popping if necessary.
                 backStack.add(NodesRoutes.NodeDetailGraph(it))
@@ -44,7 +44,7 @@ fun EntryProviderScope<NavKey>.connectionsGraph(backStack: NavBackStack<NavKey>)
     entry<ConnectionsRoutes.Connections> {
         ConnectionsScreen(
             scanModel = koinViewModel<AndroidScannerViewModel>(),
-            radioConfigViewModel = koinViewModel<AndroidRadioConfigViewModel>(),
+            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
             onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
             onNavigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
             onConfigNavigate = { route -> backStack.add(route) },

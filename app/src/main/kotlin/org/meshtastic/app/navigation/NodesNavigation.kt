@@ -56,7 +56,6 @@ import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
-import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.metrics.NeighborInfoLogScreen
 import org.meshtastic.feature.node.metrics.PaxMetricsScreen
 import org.meshtastic.feature.node.metrics.PositionLogScreen
