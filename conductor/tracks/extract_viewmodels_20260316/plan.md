@@ -1,10 +1,10 @@
 # Implementation Plan: Extract Remaining App-Only ViewModels
 
-## Phase 1: Infrastructure & Abstractions
+## Phase 1: Infrastructure & Abstractions [checkpoint: 89c6fd5]
 - [x] Task: Implement `MeshtasticUri` (expect/actual wrapper for `android.net.Uri`) in `core:common`. 81e5a4a
 - [x] Task: Define `FileService` and `LocationService` interfaces in `core:repository/commonMain`. 1ffa7d2
 - [x] Task: Create Android implementations for these services in `core:service/androidMain`. 1ffa7d2
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Abstractions' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Infrastructure & Abstractions' (Protocol in workflow.md) 89c6fd5
 
 ## Phase 2: Feature Module Extractions (Settings & Node)
 - [ ] Task: Extract `AndroidSettingsViewModel` & `AndroidRadioConfigViewModel` to `feature:settings/commonMain`.
