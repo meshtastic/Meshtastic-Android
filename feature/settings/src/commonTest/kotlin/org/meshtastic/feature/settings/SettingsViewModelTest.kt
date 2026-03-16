@@ -23,6 +23,7 @@ import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.repository.MeshLogPrefs
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -71,12 +72,14 @@ class SettingsViewModelTest {
                 buildConfigProvider = buildConfigProvider,
                 databaseManager = databaseManager,
                 meshLogPrefs = meshLogPrefs,
+                notificationPrefs = mockk(relaxed = true),
                 setThemeUseCase = mockk(relaxed = true),
                 setLocaleUseCase = mockk(relaxed = true),
                 setAppIntroCompletedUseCase = mockk(relaxed = true),
                 setProvideLocationUseCase = mockk(relaxed = true),
                 setDatabaseCacheLimitUseCase = mockk(relaxed = true),
                 setMeshLogSettingsUseCase = mockk(relaxed = true),
+                setNotificationSettingsUseCase = mockk(relaxed = true),
                 meshLocationUseCase = mockk(relaxed = true),
                 exportDataUseCase = mockk(relaxed = true),
                 isOtaCapableUseCase = mockk(relaxed = true),

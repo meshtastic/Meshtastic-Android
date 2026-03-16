@@ -61,6 +61,7 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.feature.settings.component.AppInfoSection
 import org.meshtastic.feature.settings.component.AppearanceSection
+import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.component.PersistenceSection
 import org.meshtastic.feature.settings.component.PrivacySection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
@@ -226,6 +227,15 @@ fun SettingsScreen(
                     onToggleHomoglyph = { viewModel.toggleHomoglyphCharactersEncodingEnabled() },
                     startProvideLocation = { settingsViewModel.startProvidingLocation() },
                     stopProvideLocation = { settingsViewModel.stopProvidingLocation() },
+                )
+
+                NotificationSection(
+                    messagesEnabled = settingsViewModel.messagesEnabled.collectAsStateWithLifecycle().value,
+                    onToggleMessages = { settingsViewModel.setMessagesEnabled(it) },
+                    nodeEventsEnabled = settingsViewModel.nodeEventsEnabled.collectAsStateWithLifecycle().value,
+                    onToggleNodeEvents = { settingsViewModel.setNodeEventsEnabled(it) },
+                    lowBatteryEnabled = settingsViewModel.lowBatteryEnabled.collectAsStateWithLifecycle().value,
+                    onToggleLowBattery = { settingsViewModel.setLowBatteryEnabled(it) },
                 )
 
                 AppearanceSection(

@@ -38,6 +38,7 @@ import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
 import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
 import org.meshtastic.core.domain.usecase.settings.SetLocaleUseCase
 import org.meshtastic.core.domain.usecase.settings.SetMeshLogSettingsUseCase
+import org.meshtastic.core.domain.usecase.settings.SetNotificationSettingsUseCase
 import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
 import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.MyNodeInfo
@@ -46,6 +47,7 @@ import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationPrefs
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -61,12 +63,14 @@ class SettingsViewModel(
     private val buildConfigProvider: BuildConfigProvider,
     private val databaseManager: DatabaseManager,
     private val meshLogPrefs: MeshLogPrefs,
+    private val notificationPrefs: NotificationPrefs,
     private val setThemeUseCase: SetThemeUseCase,
     private val setLocaleUseCase: SetLocaleUseCase,
     private val setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase,
     private val setProvideLocationUseCase: SetProvideLocationUseCase,
     private val setDatabaseCacheLimitUseCase: SetDatabaseCacheLimitUseCase,
     private val setMeshLogSettingsUseCase: SetMeshLogSettingsUseCase,
+    private val setNotificationSettingsUseCase: SetNotificationSettingsUseCase,
     private val meshLocationUseCase: MeshLocationUseCase,
     private val exportDataUseCase: ExportDataUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
@@ -119,6 +123,15 @@ class SettingsViewModel(
     fun setDbCacheLimit(limit: Int) {
         setDatabaseCacheLimitUseCase(limit)
     }
+
+    // Notifications
+    val messagesEnabled = notificationPrefs.messagesEnabled
+    val nodeEventsEnabled = notificationPrefs.nodeEventsEnabled
+    val lowBatteryEnabled = notificationPrefs.lowBatteryEnabled
+
+    fun setMessagesEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setMessagesEnabled(enabled)
+    fun setNodeEventsEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setNodeEventsEnabled(enabled)
+    fun setLowBatteryEnabled(enabled: Boolean) = setNotificationSettingsUseCase.setLowBatteryEnabled(enabled)
 
     // MeshLog retention period (bounded by MeshLogPrefsImpl constants)
     private val _meshLogRetentionDays = MutableStateFlow(meshLogPrefs.retentionDays.value)
