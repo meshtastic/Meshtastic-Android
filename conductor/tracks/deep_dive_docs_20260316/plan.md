@@ -1,11 +1,11 @@
 # Implementation Plan: Deep Dive & Validation of Project Docs & Plans
 
 ## Phase 1: Audit & Discovery
-- [ ] Task: Audit Gradle dependencies (`libs.versions.toml`) against 2026 KMP best practices (Koin, Compose, Navigation 3, etc.).
-- [ ] Task: Analyze Core Logic (`core:*`) and platform modules (Android, Desktop) for architectural alignment (MVI/Shared ViewModels).
-- [ ] Task: Review current UI and feature module implementations for Compose Multiplatform standard adherence.
-- [ ] Task: Evaluate testing patterns, coverage, and the use of shared test doubles (`core:testing`).
-- [ ] Task: Compile a list of discrepancies between current documentation/plans and the actual codebase.
+- [x] Task: Audit Gradle dependencies (`libs.versions.toml`) against 2026 KMP best practices (Koin, Compose, Navigation 3, etc.). baed3d6
+- [x] Task: Analyze Core Logic (`core:*`) and platform modules (Android, Desktop) for architectural alignment (MVI/Shared ViewModels). baed3d6
+- [x] Task: Review current UI and feature module implementations for Compose Multiplatform standard adherence. baed3d6
+- [x] Task: Evaluate testing patterns, coverage, and the use of shared test doubles (`core:testing`). baed3d6
+- [x] Task: Compile a list of discrepancies between current documentation/plans and the actual codebase. baed3d6
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Audit & Discovery' (Protocol in workflow.md)
 
 ## Phase 2: Documentation Updates
