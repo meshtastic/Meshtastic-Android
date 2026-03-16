@@ -1,7 +1,7 @@
 # Implementation Plan: Wire Up Notifications
 
 ## Phase 1: Shared Abstraction (commonMain)
-- [ ] Task: Define `NotificationManager` interface in `core:service/src/commonMain`
+- [x] Task: Define `NotificationManager` interface in `core:service/src/commonMain` 4f2107d
     - [ ] Create `Notification` data model (title, message, type)
     - [ ] Define `dispatch(notification: Notification)` method
 - [ ] Task: Create `NotificationPreferencesDataSource` using DataStore in `core:prefs`
