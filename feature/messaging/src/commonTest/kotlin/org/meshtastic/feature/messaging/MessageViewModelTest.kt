@@ -101,6 +101,7 @@ class MessageViewModelTest {
                 customEmojiPrefs = customEmojiPrefs,
                 homoglyphEncodingPrefs = homoglyphPrefs,
                 uiPrefs = uiPrefs,
+                notificationManager = mockk(relaxed = true),
                 meshServiceNotifications = meshServiceNotifications,
             )
     }
