@@ -14,3 +14,6 @@
 ## Phase 3: Menu Bar & Shortcuts
 - [x] Integrate the `MenuBar` composable into the `Window`.
 - [x] Implement global application shortcuts.
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions 3bda1c007
