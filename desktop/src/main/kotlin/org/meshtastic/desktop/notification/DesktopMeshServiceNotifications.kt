@@ -129,7 +129,7 @@ class DesktopMeshServiceNotifications(
                 message = getString(
                     Res.string.low_battery_message,
                     node.user.long_name,
-                    node.deviceMetrics.batteryLevel,
+                    node.batteryLevel ?: 0,
                 ),
                 category = Notification.Category.Battery,
                 id = node.num,
