@@ -61,7 +61,7 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
                 contactKey = contactKey,
                 isSilent = isSilent,
                 id = contactKey.hashCode(),
-            )
+            ),
         )
     }
 
@@ -79,7 +79,7 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
                 category = Notification.Category.Message,
                 contactKey = contactKey,
                 isSilent = isSilent,
-            )
+            ),
         )
     }
 
@@ -98,11 +98,11 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
                 category = Notification.Category.Message,
                 contactKey = contactKey,
                 isSilent = isSilent,
-            )
+            ),
         )
     }
 
-    @Suppress("MaxLineLength")
+    @Suppress("ktlint:standard:max-line-length")
     override fun showAlertNotification(contactKey: String, name: String, alert: String) {
         notificationManager.dispatch(
             Notification(
@@ -120,7 +120,7 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
                 title = getString(Res.string.new_node_seen, node.user.short_name),
                 message = node.user.long_name,
                 category = Notification.Category.NodeEvent,
-            )
+            ),
         )
     }
 
@@ -131,7 +131,7 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
                 message = getString(Res.string.low_battery_message, node.user.long_name, node.batteryLevel ?: 0),
                 category = Notification.Category.Battery,
                 id = node.num,
-            )
+            ),
         )
     }
 
@@ -142,7 +142,7 @@ class DesktopMeshServiceNotifications(private val notificationManager: Notificat
                 message = clientNotification.message,
                 category = Notification.Category.Alert,
                 id = clientNotification.toString().hashCode(),
-            )
+            ),
         )
     }
 
