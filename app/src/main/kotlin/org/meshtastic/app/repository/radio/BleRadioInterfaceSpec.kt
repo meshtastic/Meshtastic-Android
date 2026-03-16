@@ -24,11 +24,11 @@ import org.meshtastic.core.repository.RadioInterfaceService
 
 /** Bluetooth backend implementation. */
 @Single
-class NordicBleInterfaceSpec(
-    private val factory: NordicBleInterfaceFactory,
+class BleRadioInterfaceSpec(
+    private val factory: BleRadioInterfaceFactory,
     private val bluetoothRepository: BluetoothRepository,
-) : InterfaceSpec<NordicBleInterface> {
-    override fun createInterface(rest: String, service: RadioInterfaceService): NordicBleInterface =
+) : InterfaceSpec<BleRadioInterface> {
+    override fun createInterface(rest: String, service: RadioInterfaceService): BleRadioInterface =
         factory.create(rest, service)
 
     /** Return true if this address is still acceptable. For BLE that means, still bonded */

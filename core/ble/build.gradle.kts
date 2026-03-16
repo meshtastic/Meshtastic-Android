@@ -27,6 +27,7 @@ kotlin {
     android {
         namespace = "org.meshtastic.core.ble"
         androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
     }
 
     sourceSets {
@@ -41,12 +42,6 @@ kotlin {
         }
 
         androidMain.dependencies {
-            api(libs.nordic.client.android)
-            api(libs.nordic.ble.env.android)
-            api(libs.nordic.ble.env.android.compose)
-            api(libs.nordic.common.scanner.ble)
-            api(libs.nordic.common.core)
-
             implementation(libs.androidx.lifecycle.process)
             implementation(libs.androidx.lifecycle.runtime.ktx)
         }
@@ -59,12 +54,11 @@ kotlin {
             implementation(libs.mockk)
         }
 
-        androidUnitTest.dependencies {
-            implementation(libs.junit)
-            implementation(libs.nordic.client.android.mock)
-            implementation(libs.nordic.client.core.mock)
-            implementation(libs.nordic.core.mock)
-            implementation(libs.androidx.lifecycle.testing)
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.androidx.lifecycle.testing)
+            }
         }
     }
 }

@@ -54,7 +54,7 @@ A utility for executing BLE operations with retry logic, essential for handling 
 
 ## Integration in `app`
 
-The `:core:ble` module is used by `NordicBleInterface` in the main application module to implement the `RadioTransport` interface for Bluetooth devices.
+The `:core:ble` module is used by `BleRadioInterface` in the main application module to implement the `RadioTransport` interface for Bluetooth devices.
 
 ## Usage
 

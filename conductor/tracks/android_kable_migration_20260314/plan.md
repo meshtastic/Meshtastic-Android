@@ -23,12 +23,12 @@
     - [x] Implement new DFU handler in `feature:firmware` using `MeshtasticRadioProfile` / Kable abstraction
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Migrate OTA Firmware Update Logic' (Protocol in workflow.md) 663c8e2
 
-## Phase 4: Wire Kable into Android App and Remove Nordic
-- [ ] Task: Deprecate and remove `NordicBleInterface` and `AndroidBleConnection`
-    - [ ] Remove `NordicAndroidCommonLibraries` and `NordicDfuLibrary` from `gradle/libs.versions.toml` and build files
-    - [ ] Delete `NordicBleInterface.kt` and associated Nordic-specific radio implementations
-- [ ] Task: Wire new `androidMain` Kable implementation into the Koin DI graph
-    - [ ] Update `AndroidRadioControllerImpl` or DI modules to provide the new Kable `BleConnectionFactory` and `BleScanner`
+## Phase 4: Wire Kable into Android App and Remove Nordic [checkpoint: 747b4bf]
+- [x] Task: Deprecate and remove `NordicBleInterface` and `AndroidBleConnection` 747b4bf
+    - [x] Remove `NordicAndroidCommonLibraries` and `NordicDfuLibrary` from `gradle/libs.versions.toml` and build files
+    - [x] Delete `NordicBleInterface.kt` and associated Nordic-specific radio implementations
+- [x] Task: Wire new `androidMain` Kable implementation into the Koin DI graph 747b4bf
+    - [x] Update `AndroidRadioControllerImpl` or DI modules to provide the new Kable `BleConnectionFactory` and `BleScanner`
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Wire Kable into Android App and Remove Nordic' (Protocol in workflow.md)
 
 ## Phase 5: Final Testing and Integration

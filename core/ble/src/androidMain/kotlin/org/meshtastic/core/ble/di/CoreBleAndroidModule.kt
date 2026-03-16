@@ -19,13 +19,6 @@ package org.meshtastic.core.ble.di
 import android.app.Application
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.native
-import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
-import no.nordicsemi.kotlin.ble.environment.android.NativeAndroidEnvironment
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
@@ -33,16 +26,6 @@ import org.koin.core.annotation.Single
 @Module
 @ComponentScan("org.meshtastic.core.ble")
 class CoreBleAndroidModule {
-    @Single
-    fun provideAndroidEnvironment(app: Application): AndroidEnvironment =
-        NativeAndroidEnvironment.getInstance(app, isNeverForLocationFlagSet = true)
-
-    @Single
-    fun provideCentralManager(environment: AndroidEnvironment): CentralManager = CentralManager.native(
-        environment as NativeAndroidEnvironment,
-        CoroutineScope(SupervisorJob() + Dispatchers.Default),
-    )
-
     @Single
     fun provideLocationManager(app: Application): LocationManager =
         ContextCompat.getSystemService(app, LocationManager::class.java)!!

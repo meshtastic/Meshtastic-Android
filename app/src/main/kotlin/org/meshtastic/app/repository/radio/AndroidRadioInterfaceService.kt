@@ -142,7 +142,7 @@ class AndroidRadioInterfaceService(
                 .onEach { state ->
                     if (state.enabled) {
                         startInterface()
-                    } else if (radioIf is NordicBleInterface) {
+                    } else if (radioIf is BleRadioInterface) {
                         stopInterface()
                     }
                 }

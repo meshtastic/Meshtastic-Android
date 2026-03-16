@@ -31,7 +31,7 @@ import org.meshtastic.feature.firmware.ota.Esp32OtaUpdateHandler
 @Single
 class AndroidFirmwareUpdateManager(
     private val radioPrefs: RadioPrefs,
-    private val nordicDfuHandler: NordicDfuHandler,
+    private val nordicDfuHandler: KableNordicDfuHandler,
     private val usbUpdateHandler: UsbUpdateHandler,
     private val esp32OtaUpdateHandler: Esp32OtaUpdateHandler,
 ) : FirmwareUpdateManager {

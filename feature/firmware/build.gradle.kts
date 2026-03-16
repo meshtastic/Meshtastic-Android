@@ -48,6 +48,7 @@ kotlin {
             implementation(projects.core.resources)
             implementation(projects.core.ui)
 
+            implementation(libs.kable.core)
             implementation(libs.jetbrains.lifecycle.viewmodel.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.kermit)
@@ -70,10 +71,6 @@ kotlin {
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
-
-            // DFU / Nordic specific dependencies
-            implementation(libs.nordic.client.android)
-            implementation(libs.nordic.dfu)
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }
@@ -87,9 +84,6 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.androidx.compose.ui.test.junit4)
                 implementation(libs.androidx.test.ext.junit)
-                implementation(libs.nordic.client.android.mock)
-                implementation(libs.nordic.client.core.mock)
-                implementation(libs.nordic.core.mock)
             }
         }
     }

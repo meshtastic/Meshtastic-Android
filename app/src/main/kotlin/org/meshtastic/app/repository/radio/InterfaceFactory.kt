@@ -30,7 +30,7 @@ import org.meshtastic.core.repository.RadioTransport
 @Single
 class InterfaceFactory(
     private val nopInterfaceFactory: NopInterfaceFactory,
-    private val bluetoothSpec: Lazy<NordicBleInterfaceSpec>,
+    private val bluetoothSpec: Lazy<BleRadioInterfaceSpec>,
     private val mockSpec: Lazy<MockInterfaceSpec>,
     private val serialSpec: Lazy<SerialInterfaceSpec>,
     private val tcpSpec: Lazy<TCPInterfaceSpec>,

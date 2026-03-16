@@ -22,14 +22,14 @@ import org.meshtastic.core.ble.BleScanner
 import org.meshtastic.core.ble.BluetoothRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 
-/** Factory for creating `NordicBleInterface` instances. */
+/** Factory for creating `BleRadioInterface` instances. */
 @Single
-class NordicBleInterfaceFactory(
+class BleRadioInterfaceFactory(
     private val scanner: BleScanner,
     private val bluetoothRepository: BluetoothRepository,
     private val connectionFactory: BleConnectionFactory,
 ) {
-    fun create(rest: String, service: RadioInterfaceService): NordicBleInterface = NordicBleInterface(
+    fun create(rest: String, service: RadioInterfaceService): BleRadioInterface = BleRadioInterface(
         serviceScope = service.serviceScope,
         scanner = scanner,
         bluetoothRepository = bluetoothRepository,

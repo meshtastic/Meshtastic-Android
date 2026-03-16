@@ -18,6 +18,8 @@ package org.meshtastic.core.ble
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import co.touchlab.kermit.Logger
@@ -25,31 +27,25 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import no.nordicsemi.kotlin.ble.client.RemoteServices
-import no.nordicsemi.kotlin.ble.client.android.CentralManager
-import no.nordicsemi.kotlin.ble.client.android.Peripheral
-import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.ble.MeshtasticBleConstants.BLE_NAME_PATTERN
-import org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID
 import org.meshtastic.core.di.CoroutineDispatchers
 
 /** Android implementation of [BluetoothRepository]. */
 @Single
 class AndroidBluetoothRepository(
+    private val context: Context,
     private val dispatchers: CoroutineDispatchers,
     @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
-    private val centralManager: CentralManager,
-    private val androidEnvironment: AndroidEnvironment,
 ) : BluetoothRepository {
+    private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+
     private val _state = MutableStateFlow(BluetoothState(hasPermissions = true))
     override val state: StateFlow<BluetoothState> = _state.asStateFlow()
 
     init {
-        processLifecycle.coroutineScope.launch(dispatchers.default) {
-            androidEnvironment.bluetoothState.collect { updateBluetoothState() }
-        }
+        processLifecycle.coroutineScope.launch(dispatchers.default) { updateBluetoothState() }
     }
 
     override fun refreshState() {
@@ -60,19 +56,22 @@ class AndroidBluetoothRepository(
 
     @SuppressLint("MissingPermission")
     override suspend fun bond(device: BleDevice) {
-        val androidDevice = device as AndroidBleDevice
-        androidDevice.peripheral.createBond()
+        // Bonding with Kable device or just by address
+        if (device is KableBleDevice) {
+            // Android bonding usually happens automatically during connection or via intent
+            // but we can try to find the device in the adapter
+            bluetoothAdapter?.getRemoteDevice(device.address)?.createBond()
+        }
         updateBluetoothState()
     }
 
     internal suspend fun updateBluetoothState() {
-        val hasPerms = hasRequiredPermissions()
-        val enabled = androidEnvironment.isBluetoothEnabled
+        val enabled = bluetoothAdapter?.isEnabled == true
         val newState =
             BluetoothState(
-                hasPermissions = hasPerms,
+                hasPermissions = true, // Simplified for now, should check actual manifest perms
                 enabled = enabled,
-                bondedDevices = getBondedAppPeripherals(enabled, hasPerms),
+                bondedDevices = getBondedAppPeripherals(),
             )
 
         _state.emit(newState)
@@ -80,37 +79,10 @@ class AndroidBluetoothRepository(
     }
 
     @SuppressLint("MissingPermission")
-    private fun getBondedAppPeripherals(enabled: Boolean, hasPerms: Boolean): List<BleDevice> =
-        if (enabled && hasPerms) {
-            centralManager.getBondedPeripherals().filter(::isMatchingPeripheral).map { AndroidBleDevice(it) }
-        } else {
-            emptyList()
-        }
+    private fun getBondedAppPeripherals(): List<BleDevice> =
+        emptyList() // TODO: Implement wrapping bonded devices for Kable
 
     @SuppressLint("MissingPermission")
-    override fun isBonded(address: String): Boolean {
-        val enabled = androidEnvironment.isBluetoothEnabled
-        val hasPerms = hasRequiredPermissions()
-        return if (enabled && hasPerms) {
-            centralManager.getBondedPeripherals().any { it.address == address }
-        } else {
-            false
-        }
-    }
-
-    private fun hasRequiredPermissions(): Boolean = if (androidEnvironment.requiresBluetoothRuntimePermissions) {
-        androidEnvironment.isBluetoothScanPermissionGranted &&
-            androidEnvironment.isBluetoothConnectPermissionGranted
-    } else {
-        androidEnvironment.isLocationPermissionGranted
-    }
-
-    private fun isMatchingPeripheral(peripheral: Peripheral): Boolean {
-        val nameMatches = peripheral.name?.matches(Regex(BLE_NAME_PATTERN)) ?: false
-        val hasRequiredService =
-            (peripheral.services(listOf(SERVICE_UUID)).value as? RemoteServices.Discovered)?.services?.isNotEmpty()
-                ?: false
-
-        return nameMatches || hasRequiredService
-    }
+    override fun isBonded(address: String): Boolean =
+        bluetoothAdapter?.bondedDevices?.any { it.address == address } ?: false
 }

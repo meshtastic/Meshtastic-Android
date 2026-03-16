@@ -43,8 +43,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
-import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
-import no.nordicsemi.kotlin.ble.environment.android.compose.LocalEnvironmentOwner
 import org.koin.android.ext.android.inject
 import org.koin.androidx.compose.koinViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -82,8 +80,6 @@ class MainActivity : ComponentActivity() {
      * itself as a LifecycleObserver in its init block.
      */
     internal val meshServiceClient: MeshServiceClient by inject { parametersOf(this) }
-
-    internal val androidEnvironment: AndroidEnvironment by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -124,9 +120,7 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
-            @Suppress("SpreadOperator")
             CompositionLocalProvider(
-                *(LocalEnvironmentOwner provides androidEnvironment),
                 LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
                 LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
                 LocalAnalyticsIntroProvider provides { AnalyticsIntro() },

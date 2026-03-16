@@ -17,6 +17,6 @@
 package org.meshtastic.core.ble
 
 actual fun BleService.toMeshtasticRadioProfile(): MeshtasticRadioProfile {
-    val androidService = this as AndroidBleService
-    return MeshtasticRadioServiceImpl(androidService.service)
+    val kableService = this as KableBleService
+    return KableMeshtasticRadioProfile(kableService.peripheral)
 }

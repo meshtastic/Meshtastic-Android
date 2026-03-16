@@ -53,8 +53,8 @@ private const val CONNECTION_TIMEOUT_MS = 15_000L
 private val SCAN_TIMEOUT = 5.seconds
 
 /**
- * A [RadioTransport] implementation for BLE devices using Nordic Kotlin BLE Library.
- * https://github.com/NordicSemiconductor/Kotlin-BLE-Library.
+ * A [RadioTransport] implementation for BLE devices using the common BLE abstractions
+ * (which are powered by Kable).
  *
  * This class handles the high-level connection lifecycle for Meshtastic radios over BLE, including:
  * - Bonding and discovery.
@@ -70,7 +70,7 @@ private val SCAN_TIMEOUT = 5.seconds
  * @param address The BLE address of the device to connect to.
  */
 @SuppressLint("MissingPermission")
-class NordicBleInterface(
+class BleRadioInterface(
     private val serviceScope: CoroutineScope,
     private val scanner: BleScanner,
     private val bluetoothRepository: BluetoothRepository,
@@ -226,7 +226,7 @@ class NordicBleInterface(
                     .launchIn(this)
 
                 // Store reference for handleSendToRadio
-                this@NordicBleInterface.radioService = radioService
+                this@BleRadioInterface.radioService = radioService
 
                 Logger.i { "[$address] Profile service active and characteristics subscribed" }
 
@@ -234,7 +234,7 @@ class NordicBleInterface(
                 val maxLen = bleConnection.maximumWriteValueLength(BleWriteType.WITHOUT_RESPONSE)
                 Logger.i { "[$address] BLE Radio Session Ready. Max write length (WITHOUT_RESPONSE): $maxLen bytes" }
 
-                this@NordicBleInterface.service.onConnect()
+                this@BleRadioInterface.service.onConnect()
             }
         } catch (e: Exception) {
             Logger.w(e) { "[$address] Profile service discovery or operation failed" }
