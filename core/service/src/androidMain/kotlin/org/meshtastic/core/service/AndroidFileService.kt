@@ -36,8 +36,13 @@ class AndroidFileService(private val context: Application) : FileService {
     override suspend fun write(uri: MeshtasticUri, block: suspend (BufferedSink) -> Unit): Boolean =
         withContext(Dispatchers.IO) {
             try {
-                context.contentResolver.openFileDescriptor(uri.toAndroidUri(), "wt")?.use { pfd ->
-                    FileOutputStream(pfd.fileDescriptor).sink().buffer().use { sink -> block(sink) }
+                val pfd = context.contentResolver.openFileDescriptor(uri.toAndroidUri(), "wt")
+                if (pfd == null) {
+                    Logger.e { "Failed to obtain file descriptor for URI: $uri" }
+                    return@withContext false
+                }
+                pfd.use { descriptor ->
+                    FileOutputStream(descriptor.fileDescriptor).sink().buffer().use { sink -> block(sink) }
                 }
                 true
             } catch (e: Exception) {
@@ -49,10 +54,12 @@ class AndroidFileService(private val context: Application) : FileService {
     override suspend fun read(uri: MeshtasticUri, block: suspend (BufferedSource) -> Unit): Boolean =
         withContext(Dispatchers.IO) {
             try {
-                context.contentResolver.openInputStream(uri.toAndroidUri())?.use { inputStream ->
-                    inputStream.source().buffer().use { source -> block(source) }
-                }
-                true
+                val success =
+                    context.contentResolver.openInputStream(uri.toAndroidUri())?.use { inputStream ->
+                        inputStream.source().buffer().use { source -> block(source) }
+                        true
+                    } ?: false
+                success
             } catch (e: Exception) {
                 Logger.e(e) { "Failed to read from URI: $uri" }
                 false

@@ -155,7 +155,7 @@ open class RadioConfigViewModel(
     val currentDeviceProfile
         get() = _currentDeviceProfile.value
 
-    suspend fun getCurrentLocation(): Any? = locationService.getCurrentLocation()
+    open suspend fun getCurrentLocation(): org.meshtastic.core.repository.Location? = locationService.getCurrentLocation()
 
     init {
         combine(destNumFlow, nodeRepository.nodeDBbyNum) { id, nodes -> nodes[id] ?: nodes.values.firstOrNull() }
@@ -371,9 +371,11 @@ open class RadioConfigViewModel(
     fun importProfile(uri: MeshtasticUri, onResult: (DeviceProfile) -> Unit) {
         viewModelScope.launch {
             try {
+                var profile: DeviceProfile? = null
                 fileService.read(uri) { source ->
-                    importProfileUseCase(source).onSuccess(onResult).onFailure { throw it }
+                    importProfileUseCase(source).onSuccess { profile = it }.onFailure { throw it }
                 }
+                profile?.let { onResult(it) }
             } catch (ex: Exception) {
                 Logger.e { "Import DeviceProfile error: ${ex.message}" }
             }
