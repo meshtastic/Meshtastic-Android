@@ -59,7 +59,6 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.zxing.core)
-            implementation(libs.nordic.common.core)
         }
 
         commonTest.dependencies {

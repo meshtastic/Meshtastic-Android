@@ -57,7 +57,6 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
     includes =
     [
         org.meshtastic.app.MainKoinModule::class,
-        CoreDiModule::class,
         CoreCommonModule::class,
         CoreBleModule::class,
         CoreBleAndroidModule::class,
@@ -90,6 +89,14 @@ class AppKoinModule {
     @Single
     @Named("ProcessLifecycle")
     fun provideProcessLifecycle(): Lifecycle = ProcessLifecycleOwner.get().lifecycle
+
+    @Single
+    fun provideCoroutineDispatchers(): org.meshtastic.core.di.CoroutineDispatchers =
+        org.meshtastic.core.di.CoroutineDispatchers(
+            io = kotlinx.coroutines.Dispatchers.IO,
+            main = kotlinx.coroutines.Dispatchers.Main,
+            default = kotlinx.coroutines.Dispatchers.Default,
+        )
 
     @Single
     fun provideBuildConfigProvider(): BuildConfigProvider = object : BuildConfigProvider {

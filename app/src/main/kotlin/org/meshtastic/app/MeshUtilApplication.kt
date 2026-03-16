@@ -33,7 +33,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import no.nordicsemi.kotlin.ble.core.android.AndroidEnvironment
 import org.koin.android.ext.android.get
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.workmanager.koin.workManagerFactory
@@ -119,7 +118,6 @@ open class MeshUtilApplication :
     override fun onTerminate() {
         // Shutdown managers (useful for Robolectric tests)
         get<DatabaseManager>().close()
-        get<AndroidEnvironment>().close()
         applicationScope.cancel()
         super.onTerminate()
         org.koin.core.context.stopKoin()

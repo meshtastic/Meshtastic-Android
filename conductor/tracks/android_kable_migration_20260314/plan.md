@@ -31,11 +31,11 @@
     - [x] Update `AndroidRadioControllerImpl` or DI modules to provide the new Kable `BleConnectionFactory` and `BleScanner`
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Wire Kable into Android App and Remove Nordic' (Protocol in workflow.md) ebe1617
 
-## Phase 5: Final Testing and Integration
-- [ ] Task: Update Android `app` UI tests and BLE unit tests to use Kable fakes
-    - [ ] Fix any failing tests related to the Nordic removal
-- [ ] Task: Manual end-to-end verification
-    - [ ] Build and run the Android app, verify BLE scanning, connecting, and messaging
-    - [ ] Verify OTA updates work via BLE
-    - [ ] Verify the Desktop app still functions correctly
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Final Testing and Integration' (Protocol in workflow.md)
+## Phase 5: Final Testing and Integration [checkpoint: 4778c0e]
+- [x] Task: Update Android `app` UI tests and BLE unit tests to use Kable fakes 4778c0e
+    - [x] Fix any failing tests related to the Nordic removal
+- [x] Task: Manual end-to-end verification 4778c0e
+    - [x] Build and run the Android app, verify BLE scanning, connecting, and messaging
+    - [x] Verify OTA updates work via BLE
+    - [x] Verify the Desktop app still functions correctly
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Final Testing and Integration' (Protocol in workflow.md) 4778c0e

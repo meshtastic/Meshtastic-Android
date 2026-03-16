@@ -16,6 +16,8 @@
  */
 package org.meshtastic.feature.settings.radio.component
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import androidx.compose.foundation.clickable
@@ -38,6 +40,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -56,7 +60,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import no.nordicsemi.android.common.core.registerReceiver
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.util.toPosixString
@@ -252,10 +255,18 @@ fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
         }
         item {
             TitledCard(title = stringResource(Res.string.time_zone)) {
+                val context = LocalContext.current
                 var appTzPosixString by remember { mutableStateOf(ZoneId.systemDefault().toPosixString()) }
 
-                registerReceiver(IntentFilter(Intent.ACTION_TIMEZONE_CHANGED)) {
-                    appTzPosixString = ZoneId.systemDefault().toPosixString()
+                DisposableEffect(context) {
+                    val receiver =
+                        object : BroadcastReceiver() {
+                            override fun onReceive(context: Context, intent: Intent) {
+                                appTzPosixString = ZoneId.systemDefault().toPosixString()
+                            }
+                        }
+                    context.registerReceiver(receiver, IntentFilter(Intent.ACTION_TIMEZONE_CHANGED))
+                    onDispose { context.unregisterReceiver(receiver) }
                 }
 
                 EditTextPreference(

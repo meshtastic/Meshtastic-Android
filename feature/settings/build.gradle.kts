@@ -73,8 +73,6 @@ kotlin {
             implementation(libs.markdown.renderer.android)
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
-            implementation(libs.nordic.common.core)
-            implementation(libs.nordic.common.permissions.ble)
         }
 
         commonTest.dependencies { implementation(projects.core.testing) }
