@@ -30,19 +30,18 @@ class KableBleDevice(val advertisement: Advertisement) : BleDevice {
 
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
     override val state: StateFlow<BleConnectionState> = _state
-    
-    internal var activePeripheral: Peripheral? = null
 
     // On desktop, bonding isn't strictly required before connecting via Kable,
     // and we don't have a pairing flow. Defaulting to true lets the UI connect directly.
     override val isBonded: Boolean = true
+    
     override val isConnected: Boolean
-        get() = _state.value is BleConnectionState.Connected
+        get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.activeAddress == address
 
     @OptIn(com.juul.kable.ExperimentalApi::class)
     override suspend fun readRssi(): Int {
-        val peripheral = activePeripheral
-        return if (peripheral != null) {
+        val peripheral = ActiveBleConnection.activePeripheral
+        return if (peripheral != null && ActiveBleConnection.activeAddress == address) {
             peripheral.rssi()
         } else {
             advertisement.rssi

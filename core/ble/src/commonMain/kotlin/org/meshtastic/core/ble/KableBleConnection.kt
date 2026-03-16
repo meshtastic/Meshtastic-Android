@@ -38,6 +38,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
 
     private var peripheral: Peripheral? = null
     private var stateJob: Job? = null
+    private var connectionScope: CoroutineScope? = null
 
     private val _deviceFlow = MutableSharedFlow<BleDevice?>(replay = 1)
     override val deviceFlow: SharedFlow<BleDevice?> = _deviceFlow.asSharedFlow()
@@ -63,10 +64,8 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         peripheral?.close()
         peripheral = p
         
-        when (device) {
-            is KableBleDevice -> device.activePeripheral = p
-            is DirectBleDevice -> device.activePeripheral = p
-        }
+        ActiveBleConnection.activePeripheral = p
+        ActiveBleConnection.activeAddress = device.address
         
         _deviceFlow.emit(device)
 
@@ -89,7 +88,7 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
                 }
                 .launchIn(scope)
 
-        p.connect()
+        connectionScope = p.connect()
     }
 
     @Suppress("TooGenericExceptionCaught", "SwallowedException")
@@ -115,12 +114,10 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         peripheral?.disconnect()
         peripheral?.close()
         peripheral = null
+        connectionScope = null
         
-        val device = _deviceFlow.replayCache.firstOrNull()
-        when (device) {
-            is KableBleDevice -> device.activePeripheral = null
-            is DirectBleDevice -> device.activePeripheral = null
-        }
+        ActiveBleConnection.activePeripheral = null
+        ActiveBleConnection.activeAddress = null
         
         _deviceFlow.emit(null)
     }
@@ -131,8 +128,9 @@ class KableBleConnection(private val scope: CoroutineScope, private val tag: Str
         setup: suspend CoroutineScope.(BleService) -> T,
     ): T {
         val p = peripheral ?: error("Not connected")
+        val cScope = connectionScope ?: error("No active connection scope")
         val service = KableBleService(p)
-        return scope.setup(service)
+        return cScope.setup(service)
     }
 
     override fun maximumWriteValueLength(writeType: BleWriteType): Int? {

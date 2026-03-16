@@ -28,16 +28,16 @@ class DirectBleDevice(
 ) : BleDevice {
     private val _state = MutableStateFlow<BleConnectionState>(BleConnectionState.Disconnected)
     override val state: StateFlow<BleConnectionState> = _state.asStateFlow()
-    
-    internal var activePeripheral: Peripheral? = null
 
     override val isBonded: Boolean = true
-    override val isConnected: Boolean get() = _state.value is BleConnectionState.Connected
+    
+    override val isConnected: Boolean
+        get() = _state.value is BleConnectionState.Connected || ActiveBleConnection.activeAddress == address
 
     @OptIn(com.juul.kable.ExperimentalApi::class)
     override suspend fun readRssi(): Int {
-        val peripheral = activePeripheral
-        return if (peripheral != null) {
+        val peripheral = ActiveBleConnection.activePeripheral
+        return if (peripheral != null && ActiveBleConnection.activeAddress == address) {
             peripheral.rssi()
         } else {
             0
