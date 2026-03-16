@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9916",
+      "title": "Fix for preserving pki_encrypted and public_key when relaying UDP multicast packets to radio.",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9916",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9903",
       "title": "feat: Support INA219/INA226 as primary battery sensor without ADC pin",
       "page_url": "https://github.com/meshtastic/firmware/pull/9903",
@@ -216,12 +222,6 @@
       "id": "9827",
       "title": "Align 920–925 MHz limits as per NBTC regulations in Thailand (27 dBm, 10% duty cycle) ",
       "page_url": "https://github.com/meshtastic/firmware/pull/9827",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9798",
-      "title": "Fix: Traceroute through MQTT misses uplink node if MQTT is encrypted",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9798",
       "zip_url": "https://discord.com/invite/meshtastic"
     }
   ]
