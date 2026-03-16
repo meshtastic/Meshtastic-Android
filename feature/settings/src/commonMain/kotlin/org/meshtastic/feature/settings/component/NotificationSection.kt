@@ -16,15 +16,47 @@
  */
 package org.meshtastic.feature.settings.component
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.BatteryAlert
+import androidx.compose.material.icons.rounded.Message
+import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.resources.Res
+import org.meshtastic.core.resources.app_notifications
+import org.meshtastic.core.resources.meshtastic_low_battery_notifications
+import org.meshtastic.core.resources.meshtastic_messages_notifications
+import org.meshtastic.core.resources.meshtastic_new_nodes_notifications
+import org.meshtastic.core.ui.component.SwitchListItem
 
-/** Platform-specific notification settings section. */
+/** Notification settings section with in-app toggles. Primarily used on platforms without system notification channels. */
 @Composable
-expect fun NotificationSection(
+fun NotificationSection(
     messagesEnabled: Boolean,
     onToggleMessages: (Boolean) -> Unit,
     nodeEventsEnabled: Boolean,
     onToggleNodeEvents: (Boolean) -> Unit,
     lowBatteryEnabled: Boolean,
     onToggleLowBattery: (Boolean) -> Unit,
-)
+) {
+    ExpressiveSection(title = stringResource(Res.string.app_notifications)) {
+        SwitchListItem(
+            text = stringResource(Res.string.meshtastic_messages_notifications),
+            leadingIcon = Icons.Rounded.Message,
+            checked = messagesEnabled,
+            onClick = { onToggleMessages(!messagesEnabled) },
+        )
+        SwitchListItem(
+            text = stringResource(Res.string.meshtastic_new_nodes_notifications),
+            leadingIcon = Icons.Rounded.PersonAdd,
+            checked = nodeEventsEnabled,
+            onClick = { onToggleNodeEvents(!nodeEventsEnabled) },
+        )
+        SwitchListItem(
+            text = stringResource(Res.string.meshtastic_low_battery_notifications),
+            leadingIcon = Icons.Rounded.BatteryAlert,
+            checked = lowBatteryEnabled,
+            onClick = { onToggleLowBattery(!lowBatteryEnabled) },
+        )
+    }
+}
