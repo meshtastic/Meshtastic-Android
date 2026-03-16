@@ -35,9 +35,14 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import okio.ByteString.Companion.decodeBase64
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.di.CoroutineDispatchers
@@ -46,6 +51,7 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.util.UnitConversions
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -81,6 +87,7 @@ open class MetricsViewModel(
     private val nodeRequestActions: NodeRequestActions,
     private val alertManager: AlertManager,
     private val getNodeDetailsUseCase: GetNodeDetailsUseCase,
+    private val fileService: FileService,
 ) : ViewModel() {
 
     private val nodeIdFromRoute: Int?
@@ -315,8 +322,35 @@ open class MetricsViewModel(
         Logger.d { "MetricsViewModel cleared" }
     }
 
-    open fun savePositionCSV(uri: Any) {
-        // To be implemented in platform-specific subclass
+    fun savePositionCSV(uri: MeshtasticUri) {
+        viewModelScope.launch(dispatchers.main) {
+            val positions = state.value.positionLogs
+            fileService.write(uri) { sink ->
+                sink.writeUtf8(
+                    "\"date\",\"time\",\"latitude\",\"longitude\",\"altitude\",\"satsInView\",\"speed\",\"heading\"\n",
+                )
+
+                positions.forEach { position ->
+                    val localDateTime =
+                        Instant.fromEpochSeconds(position.time.toLong())
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                    val rxDateTime = "\"${localDateTime.date}\",\"${localDateTime.time}\""
+
+                    val latitude = (position.latitude_i ?: 0) * 1e-7
+                    val longitude = (position.longitude_i ?: 0) * 1e-7
+                    val altitude = position.altitude
+                    val satsInView = position.sats_in_view
+                    val speed = position.ground_speed
+                    // Kotlin string format is available in common code on 1.9.20+ via String.format,
+                    // but we can just do basic string manipulation if needed.
+                    val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
+
+                    sink.writeUtf8(
+                        "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n",
+                    )
+                }
+            }
+        }
     }
 
     @Suppress("MagicNumber", "CyclomaticComplexMethod", "ReturnCount")
@@ -347,8 +381,5 @@ open class MetricsViewModel(
         return null
     }
 
-    protected open fun decodeBase64(base64: String): ByteArray {
-        // To be overridden in platform-specific subclass or use KMP library
-        return ByteArray(0)
-    }
+    protected fun decodeBase64(base64: String): ByteArray = base64.decodeBase64()?.toByteArray() ?: ByteArray(0)
 }

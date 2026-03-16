@@ -40,6 +40,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.util.encodeToString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.admin_key
@@ -94,7 +95,7 @@ fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri, securityConfig) }
+                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri.toMeshtasticUri(), securityConfig) }
             }
         }
 

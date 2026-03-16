@@ -51,11 +51,11 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.intro.AnalyticsIntro
 import org.meshtastic.app.map.getMapViewProvider
-import org.meshtastic.app.model.UIViewModel
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.nfc.NfcScannerEffect
@@ -70,6 +70,7 @@ import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.intro.AppIntroductionScreen
 import org.meshtastic.feature.intro.IntroViewModel
 
@@ -206,7 +207,7 @@ class MainActivity : ComponentActivity() {
     private fun handleMeshtasticUri(uri: Uri) {
         Logger.d { "Handling Meshtastic URI: $uri" }
         if (uri.toString().startsWith(DEEP_LINK_BASE_URI)) {
-            model.handleNavigationDeepLink(uri)
+            model.handleNavigationDeepLink(uri.toMeshtasticUri())
             return
         }
 

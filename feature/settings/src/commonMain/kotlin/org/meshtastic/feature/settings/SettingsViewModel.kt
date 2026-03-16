@@ -30,6 +30,7 @@ import okio.BufferedSink
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.domain.usecase.settings.ExportDataUseCase
 import org.meshtastic.core.domain.usecase.settings.IsOtaCapableUseCase
 import org.meshtastic.core.domain.usecase.settings.MeshLocationUseCase
@@ -42,6 +43,7 @@ import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -51,7 +53,7 @@ import org.meshtastic.proto.LocalConfig
 
 @KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
-open class SettingsViewModel(
+class SettingsViewModel(
     radioConfigRepository: RadioConfigRepository,
     private val radioController: RadioController,
     private val nodeRepository: NodeRepository,
@@ -68,6 +70,7 @@ open class SettingsViewModel(
     private val meshLocationUseCase: MeshLocationUseCase,
     private val exportDataUseCase: ExportDataUseCase,
     private val isOtaCapableUseCase: IsOtaCapableUseCase,
+    private val fileService: FileService,
 ) : ViewModel() {
     val myNodeInfo: StateFlow<MyNodeInfo?> = nodeRepository.myNodeInfo
 
@@ -161,11 +164,11 @@ open class SettingsViewModel(
      * @param uri The destination URI for the CSV file.
      * @param filterPortnum If provided, only packets with this port number will be exported.
      */
-    open fun saveDataCsv(uri: Any, filterPortnum: Int? = null) {
-        // To be implemented in platform-specific subclass
+    fun saveDataCsv(uri: MeshtasticUri, filterPortnum: Int? = null) {
+        viewModelScope.launch { fileService.write(uri) { writer -> performDataExport(writer, filterPortnum) } }
     }
 
-    protected suspend fun performDataExport(writer: BufferedSink, filterPortnum: Int?) {
+    private suspend fun performDataExport(writer: BufferedSink, filterPortnum: Int?) {
         val myNodeNum = myNodeNum ?: return
         exportDataUseCase(writer, myNodeNum, filterPortnum)
     }

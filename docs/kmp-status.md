@@ -1,6 +1,6 @@
 # KMP Migration Status
 
-> Last updated: 2026-03-13
+> Last updated: 2026-03-16
 
 Single source of truth for Kotlin Multiplatform migration progress. For the forward-looking roadmap, see [`roadmap.md`](./roadmap.md). For completed decision records, see [`decisions/`](./decisions/).
 
@@ -93,10 +93,9 @@ Working Compose Desktop application with:
 
 Based on the latest codebase investigation, the following steps are proposed to complete the multi-target and iOS-readiness migrations:
 
-1. **Extract remaining App-Only ViewModels:** Migrate the 5 remaining `Android*ViewModel`s by isolating their Android-specific dependencies (e.g., `android.net.Uri` for file I/O, Location permissions) behind expect/actual or injected interface abstractions.
-2. **Wire Desktop Features:** Complete desktop UI wiring for `feature:intro` and implement a shared fallback for `feature:map` (which is currently a placeholder on desktop).
-3. **Decouple Firmware DFU:** `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it into a separate plugin to allow the core `feature:firmware` module to be fully utilized on desktop/iOS.
-4. **Prepare for iOS Target:** Set up an initial skeleton Xcode project to start validating `commonMain` compilation on Kotlin/Native (iOS).
+1. **Wire Desktop Features:** Complete desktop UI wiring for `feature:intro` and implement a shared fallback for `feature:map` (which is currently a placeholder on desktop).
+2. **Decouple Firmware DFU:** `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it into a separate plugin to allow the core `feature:firmware` module to be fully utilized on desktop/iOS.
+3. **Prepare for iOS Target:** Set up an initial skeleton Xcode project to start validating `commonMain` compilation on Kotlin/Native (iOS).
 
 ## Key Architecture Decisions
 
@@ -123,17 +122,14 @@ Based on the latest codebase investigation, the following steps are proposed to 
 
 ## Remaining App-Only ViewModels
 
-Only ViewModels with **genuine Android-specific logic** retain wrappers:
-
-| ViewModel | Android-Specific Reason |
-|---|---|
-| `AndroidSettingsViewModel` | File I/O via `android.net.Uri` |
-| `AndroidRadioConfigViewModel` | Location permissions, file I/O |
-| `AndroidDebugViewModel` | `Locale`-aware hex formatting |
-| `AndroidMetricsViewModel` | CSV export via `android.net.Uri` |
-| `UIViewModel` | Deep links via `android.net.Uri`, `IMeshService` |
+All major ViewModels have now been extracted to `commonMain` and no longer rely on Android-specific subclasses. Platform-specific dependencies (like `android.net.Uri` or Location permissions) have been successfully isolated behind injected `core:repository` interfaces (e.g., `FileService`, `LocationService`).
 
 Extracted to shared `commonMain` (no longer app-only):
+- `SettingsViewModel` → `feature:settings/commonMain`
+- `RadioConfigViewModel` → `feature:settings/commonMain`
+- `DebugViewModel` → `feature:settings/commonMain`
+- `MetricsViewModel` → `feature:node/commonMain`
+- `UIViewModel` → `core:ui/commonMain`
 - `ChannelViewModel` → `feature:settings/commonMain`
 - `NodeMapViewModel` → `feature:map/commonMain`
 

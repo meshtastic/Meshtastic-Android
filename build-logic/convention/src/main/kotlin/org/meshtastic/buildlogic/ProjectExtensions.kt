@@ -66,6 +66,7 @@ internal fun Project.configureTestOptions() {
     tasks.withType<Test>().configureEach {
         // Parallelize unit tests
         maxParallelForks = (Runtime.getRuntime().availableProcessors() / 2).coerceAtLeast(1)
+        maxHeapSize = "2g"
 
         // Show test results in the console
         testLogging {

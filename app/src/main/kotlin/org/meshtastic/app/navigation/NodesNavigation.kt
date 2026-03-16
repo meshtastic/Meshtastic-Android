@@ -35,7 +35,6 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.map.node.NodeMapScreen
-import org.meshtastic.app.node.AndroidMetricsViewModel
 import org.meshtastic.app.ui.node.AdaptiveNodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodeDetailRoutes
@@ -116,7 +115,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteLog> { args ->
-        val metricsViewModel = koinViewModel<AndroidMetricsViewModel>()
+        val metricsViewModel = koinViewModel<MetricsViewModel>()
         metricsViewModel.setNodeId(args.destNum)
 
         TracerouteLogScreen(
@@ -135,7 +134,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteMap> { args ->
-        val metricsViewModel = koinViewModel<AndroidMetricsViewModel>()
+        val metricsViewModel = koinViewModel<MetricsViewModel>()
         metricsViewModel.setNodeId(args.destNum)
 
         TracerouteMapScreen(
@@ -177,7 +176,7 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
     crossinline getDestNum: (R) -> Int,
 ) {
     entry<R> { args ->
-        val metricsViewModel = koinViewModel<AndroidMetricsViewModel>()
+        val metricsViewModel = koinViewModel<MetricsViewModel>()
         val destNum = getDestNum(args)
         metricsViewModel.setNodeId(destNum)
 

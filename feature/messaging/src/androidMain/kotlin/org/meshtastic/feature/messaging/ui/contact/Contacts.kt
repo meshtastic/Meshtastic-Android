@@ -16,7 +16,6 @@
  */
 package org.meshtastic.feature.messaging.ui.contact
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -64,7 +63,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.nowMillis
+import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.util.TimeConstants
@@ -118,7 +119,7 @@ fun ContactsScreen(
     onNavigateToShare: () -> Unit,
     sharedContactRequested: SharedContact?,
     requestChannelSet: ChannelSet?,
-    onHandleScannedUri: (Uri, onInvalid: () -> Unit) -> Unit,
+    onHandleScannedUri: (MeshtasticUri, onInvalid: () -> Unit) -> Unit,
     onClearSharedContactRequested: () -> Unit,
     onClearRequestChannelUrl: () -> Unit,
     viewModel: ContactsViewModel,
@@ -256,7 +257,7 @@ fun ContactsScreen(
                 MeshtasticImportFAB(
                     sharedContact = sharedContactRequested,
                     onImport = { uriString ->
-                        onHandleScannedUri(uriString.toUri()) {
+                        onHandleScannedUri(uriString.toUri().toMeshtasticUri()) {
                             scope.launch { context.showToast(Res.string.channel_invalid) }
                         }
                     },

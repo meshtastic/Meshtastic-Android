@@ -214,7 +214,7 @@ class LogFilterManager {
 
 @KoinViewModel
 @Suppress("TooManyFunctions")
-open class DebugViewModel(
+class DebugViewModel(
     private val meshLogRepository: MeshLogRepository,
     private val nodeRepository: NodeRepository,
     private val meshLogPrefs: MeshLogPrefs,
@@ -395,10 +395,7 @@ open class DebugViewModel(
         return false
     }
 
-    protected open fun Int.toHex(length: Int): String {
-        // Platform specific hex implementation
-        return "!$this"
-    }
+    private fun Int.toHex(length: Int): String = "!" + this.toUInt().toString(16).padStart(length, '0')
 
     fun requestDeleteAllLogs() {
         alertManager.showAlert(
@@ -498,7 +495,7 @@ open class DebugViewModel(
         }
     }
 
-    protected open fun Byte.toHex(): String = this.toString()
+    private fun Byte.toHex(): String = this.toUByte().toString(16).padStart(2, '0')
 
     private fun formatNodeWithShortName(nodeNum: Int): String {
         val user = nodeRepository.nodeDBbyNum.value[nodeNum]?.user

@@ -80,6 +80,7 @@ class SettingsViewModelTest {
                 meshLocationUseCase = mockk(relaxed = true),
                 exportDataUseCase = mockk(relaxed = true),
                 isOtaCapableUseCase = mockk(relaxed = true),
+                fileService = mockk(relaxed = true),
             )
     }
 

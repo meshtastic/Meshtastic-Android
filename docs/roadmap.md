@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: 2026-03-12
+> Last updated: 2026-03-16
 
 Forward-looking priorities for the Meshtastic KMP multi-target effort. For current state, see [`kmp-status.md`](./kmp-status.md). For the full gap analysis, see [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md).
 
@@ -85,10 +85,13 @@ These items address structural gaps identified in the March 2026 architecture re
 
 ## Medium-Term Priorities (60 days)
 
-1. **App module thinning** — 63 files remaining (down from 90). Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules. Remaining: extract service/worker/radio files from `app` to `core:service/androidMain` and `core:network/androidMain`
+1. **App module thinning** — Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules.
+    - ✅ **Done:** Extracted remaining 5 ViewModels: `SettingsViewModel`, `RadioConfigViewModel`, `DebugViewModel`, `MetricsViewModel`, `UIViewModel` to shared KMP modules.
+    - **Next:** Extract service/worker/radio files from `app` to `core:service/androidMain` and `core:network/androidMain`.
 2. **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
 3. **MQTT transport** — cloud relay operation (KMP, benefits all targets)
-4. **Desktop ViewModel auto-wiring** — ✅ Done: ensured Koin K2 Compiler Plugin generates ViewModel modules for JVM target; eliminated manual wiring in `DesktopKoinModule`
+4. **Evaluate KMP-native mocking** — Evaluate `mockative` or similar to replace `mockk` in `commonMain` of `core:testing` for iOS readiness.
+5. **Desktop ViewModel auto-wiring** — ✅ Done: ensured Koin K2 Compiler Plugin generates ViewModel modules for JVM target; eliminated manual wiring in `DesktopKoinModule`
 5. **KMP charting** — ✅ Done: Vico charts migrated to `feature:node/commonMain` using KMP artifacts; desktop wires them directly
 6. **Navigation contract extraction** — ✅ Done: shared `TopLevelDestination` enum in `core:navigation`; icon mapping in `core:ui`; parity tests in place. Both shells derive from the same source of truth.
 7. **Dependency stabilization** — track stable releases for CMP, Koin, Lifecycle, Nav3

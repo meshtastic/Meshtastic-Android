@@ -256,7 +256,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
                             enabled = state.connected && !isLocationRequiredAndDisabled,
                             onClick = {
                                 @SuppressLint("MissingPermission")
-                                coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() as? Location }
+                                coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
                             },
                         ) {
                             Text(text = stringResource(Res.string.position_config_set_fixed_from_phone))
