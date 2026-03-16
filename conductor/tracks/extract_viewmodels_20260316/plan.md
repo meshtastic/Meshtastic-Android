@@ -13,8 +13,8 @@
 - [x] Task: Update Koin modules in `feature:settings` and `feature:node` to wire the new shared ViewModels. (Handled automatically by Koin Annotations K2 plugin) e1a0387
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extractions' (Protocol in workflow.md) 3ea2b2a
 
-## Phase 3: Core UI & Cleanup
-- [~] Task: Extract `UIViewModel` logic to `core:ui/commonMain`.
-- [ ] Task: Verify the `app` module thinning progress and finalize any remaining DI cleanup in `AppKoinModule`.
+## Phase 3: Core UI & Cleanup [checkpoint: c59243d]
+- [x] Task: Extract `UIViewModel` logic to `core:ui/commonMain`. 3ea2b2a
+- [x] Task: Verify the `app` module thinning progress and finalize any remaining DI cleanup in `AppKoinModule`. 3ea2b2a
 - [x] Task: Ensure all new shared ViewModels have baseline `commonTest` coverage using `core:testing` fakes. fdf34f5
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Core UI & Cleanup' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Core UI & Cleanup' (Protocol in workflow.md) c59243d
