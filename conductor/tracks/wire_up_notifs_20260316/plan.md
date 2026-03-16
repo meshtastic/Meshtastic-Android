@@ -20,12 +20,13 @@
 - [x] Task: Replace old Android notification calls with the new unified interface 81fd10b
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Migrate Android Implementation (androidMain)' (Protocol in workflow.md)
 
-## Phase 3: Desktop Implementation (desktop)
+## Phase 3: Desktop Implementation (desktop) [checkpoint: 759914f]
 - [x] Task: Implement `DesktopNotificationManager` 1eb3cb0
     - [x] Inject `TrayState` and `NotificationPreferencesDataSource`
     - [x] Delegate `dispatch()` to `TrayState.sendNotification()` respecting user preferences
 - [x] Task: Wire `DesktopNotificationManager` into Koin DI 1eb3cb0
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Desktop Implementation (desktop)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Desktop Implementation (desktop)' (Protocol in workflow.md)
+
 
 ## Phase 4: UI Preferences Integration
 - [ ] Task: Create UI for notification preferences
