@@ -29,6 +29,6 @@
 
 
 ## Phase 4: UI Preferences Integration
-- [ ] Task: Create UI for notification preferences
-    - [ ] Add toggles for categories in the Settings screen
+- [x] Task: Create UI for notification preferences 7ed59c6
+    - [x] Add toggles for categories in the Settings screen
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: UI Preferences Integration' (Protocol in workflow.md)
