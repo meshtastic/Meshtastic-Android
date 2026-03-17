@@ -19,7 +19,7 @@
 - [x] Task: Conductor - User Manual Verification 'Extraction to core:service' (Protocol in workflow.md)
 
 ## Phase 3: Extraction to `core:network`
-- [~] Task: Move Radio connection and networking files from `app` to `core:network/androidMain`
+- [x] Task: Move Radio connection and networking files from `app` to `core:network/androidMain` [b5233cf]
     - [x] Move the files
     - [x] Update imports and Koin injections
 - [ ] Task: Abstract shared radio/network logic into `core:network/commonMain`
