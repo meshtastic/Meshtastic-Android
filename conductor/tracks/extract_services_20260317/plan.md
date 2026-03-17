@@ -8,7 +8,7 @@
 - [x] Task: Conductor - User Manual Verification 'Preparation & Analysis' (Protocol in workflow.md)
 
 ## Phase 2: Extraction to `core:service`
-- [ ] Task: Setup `core:service` module for Android and Common targets (if not already fully configured)
+- [x] Task: Setup `core:service` module for Android and Common targets (if not already fully configured) [a114084]
 - [ ] Task: Move Android `Service` implementations to `core:service/androidMain`
     - [ ] Move the files
     - [ ] Update imports and Koin injections
