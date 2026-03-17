@@ -12,7 +12,7 @@
 - [x] Task: Move Android `Service` implementations to `core:service/androidMain` [965def0]
     - [x] Move the files
     - [x] Update imports and Koin injections
-- [~] Task: Abstract shared service logic into `core:service/commonMain`
+- [x] Task: Abstract shared service logic into `core:service/commonMain` [a85e282]
     - [x] Write failing tests for abstracted shared logic (TDD Red)
     - [x] Extract interfaces and platform-agnostic logic (TDD Green)
     - [x] Refactor the implementations to use these shared abstractions
