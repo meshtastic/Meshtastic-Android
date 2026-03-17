@@ -32,6 +32,7 @@ import org.koin.test.verify.injectedParameters
 import org.koin.test.verify.verify
 import org.meshtastic.app.map.MapViewModel
 import org.meshtastic.core.model.util.NodeIdLookup
+import org.meshtastic.feature.node.metrics.MetricsViewModel
 
 class KoinVerificationTest {
 
@@ -54,7 +55,11 @@ class KoinVerificationTest {
                     HttpClientEngine::class,
                     OkHttpClient::class,
                 ),
-                injections = injectedParameters(definition<MapViewModel>(SavedStateHandle::class)),
+                injections =
+                injectedParameters(
+                    definition<MapViewModel>(SavedStateHandle::class),
+                    definition<MetricsViewModel>(Int::class),
+                ),
             )
     }
 }

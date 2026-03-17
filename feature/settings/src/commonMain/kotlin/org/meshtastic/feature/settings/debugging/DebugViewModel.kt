@@ -193,19 +193,19 @@ class LogFilterManager {
         return logs.filter { logItem ->
             when (filterMode) {
                 FilterMode.OR ->
-                    filterTexts.any {
-                        it.contains(logItem.logMessage, ignoreCase = true) ||
-                            it.contains(logItem.messageType, ignoreCase = true) ||
-                            it.contains(logItem.formattedReceivedDate, ignoreCase = true) ||
-                            (logItem.decodedPayload?.contains(it, ignoreCase = true) == true)
+                    filterTexts.any { filter ->
+                        logItem.logMessage.contains(filter, ignoreCase = true) ||
+                            logItem.messageType.contains(filter, ignoreCase = true) ||
+                            logItem.formattedReceivedDate.contains(filter, ignoreCase = true) ||
+                            (logItem.decodedPayload?.contains(filter, ignoreCase = true) == true)
                     }
 
                 FilterMode.AND ->
-                    filterTexts.all {
-                        it.contains(logItem.logMessage, ignoreCase = true) ||
-                            it.contains(logItem.messageType, ignoreCase = true) ||
-                            it.contains(logItem.formattedReceivedDate, ignoreCase = true) ||
-                            (logItem.decodedPayload?.contains(it, ignoreCase = true) == true)
+                    filterTexts.all { filter ->
+                        logItem.logMessage.contains(filter, ignoreCase = true) ||
+                            logItem.messageType.contains(filter, ignoreCase = true) ||
+                            logItem.formattedReceivedDate.contains(filter, ignoreCase = true) ||
+                            (logItem.decodedPayload?.contains(filter, ignoreCase = true) == true)
                     }
             }
         }
