@@ -27,12 +27,8 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.koin.android.ext.android.inject
-
 import org.meshtastic.core.common.hasLocationPermission
-import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.toRemoteExceptions
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceVersion
@@ -43,18 +39,12 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
-import org.meshtastic.core.repository.MeshLocationManager
-import org.meshtastic.core.repository.MeshMessageProcessor
 import org.meshtastic.core.repository.MeshRouter
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeManager
-import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.service.IMeshService
-
 import org.meshtastic.proto.PortNum
 
 @Suppress("TooManyFunctions", "LargeClass")
@@ -64,13 +54,9 @@ class MeshService : Service() {
 
     private val serviceRepository: ServiceRepository by inject()
 
-    private val packetHandler: PacketHandler by inject()
-
     private val serviceBroadcasts: ServiceBroadcasts by inject()
 
     private val nodeManager: NodeManager by inject()
-
-    private val messageProcessor: MeshMessageProcessor by inject()
 
     private val commandSender: CommandSender by inject()
 
