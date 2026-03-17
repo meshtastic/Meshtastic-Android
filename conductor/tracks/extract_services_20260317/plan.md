@@ -1,7 +1,7 @@
 # Implementation Plan: Extract service/worker/radio files from `app`
 
 ## Phase 1: Preparation & Analysis
-- [ ] Task: Identify all Android-specific classes to be moved (Services, WorkManager workers, Radio connections in `app`)
+- [x] Task: Identify all Android-specific classes to be moved (Services, WorkManager workers, Radio connections in `app`) [fd916e3]
     - [ ] Locate `Service` classes in `app/src/main/java/org/meshtastic/app`
     - [ ] Locate WorkManager `Worker` classes
     - [ ] Locate Radio connection classes
