@@ -121,7 +121,7 @@ kotlin {
 ```
 
 **What the plugin provides automatically:**
-- `commonMain`: `compose-multiplatform-material3`, `compose-multiplatform-materialIconsExtended`, `jetbrains-lifecycle-viewmodel-compose`, `jetbrains-lifecycle-runtime-compose`, `koin-compose-viewmodel`, `kermit`
+- `commonMain`: `compose-multiplatform-material3`, `compose-multiplatform-materialIconsExtended`, `jetbrains-lifecycle-viewmodel-compose`, `koin-compose-viewmodel`, `kermit`
 - `androidMain`: `androidx-compose-bom` (platform), `accompanist-permissions`, `androidx-activity-compose`, `androidx-compose-material3`, `androidx-compose-material-iconsExtended`, `androidx-compose-ui-text`, `androidx-compose-ui-tooling-preview`
 - `commonTest`: `core:testing`
 
