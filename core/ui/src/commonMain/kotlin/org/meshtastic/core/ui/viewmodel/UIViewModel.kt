@@ -46,8 +46,8 @@ import org.meshtastic.core.model.evaluateTracerouteMapAvailability
 import org.meshtastic.core.model.service.TracerouteResponse
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
 import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
@@ -77,7 +77,7 @@ class UIViewModel(
     meshLogRepository: MeshLogRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPreferencesDataSource: UiPreferencesDataSource,
-    private val meshServiceNotifications: MeshServiceNotifications,
+    private val notificationManager: NotificationManager,
     packetRepository: PacketRepository,
     private val alertManager: AlertManager,
 ) : ViewModel() {
@@ -107,7 +107,7 @@ class UIViewModel(
 
     fun clearClientNotification(notification: ClientNotification) {
         serviceRepository.clearClientNotification()
-        meshServiceNotifications.clearClientNotification(notification)
+        notificationManager.cancel(notification.toString().hashCode())
     }
 
     /** Emits events for mesh network send/receive activity. */

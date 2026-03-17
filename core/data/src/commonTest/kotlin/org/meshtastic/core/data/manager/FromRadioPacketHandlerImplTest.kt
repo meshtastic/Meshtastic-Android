@@ -18,14 +18,16 @@ package org.meshtastic.core.data.manager
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
 import io.mockk.verify
 import org.junit.Before
 import org.junit.Test
 import org.meshtastic.core.repository.MeshRouter
-import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MqttManager
+import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.resources.getString
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.DeviceMetadata
@@ -39,19 +41,23 @@ class FromRadioPacketHandlerImplTest {
     private val router: MeshRouter = mockk(relaxed = true)
     private val mqttManager: MqttManager = mockk(relaxed = true)
     private val packetHandler: PacketHandler = mockk(relaxed = true)
-    private val serviceNotifications: MeshServiceNotifications = mockk(relaxed = true)
+    private val notificationManager: NotificationManager = mockk(relaxed = true)
 
     private lateinit var handler: FromRadioPacketHandlerImpl
 
     @Before
     fun setup() {
+        mockkStatic("org.meshtastic.core.resources.GetStringKt")
+        every { getString(any()) } returns "test string"
+        every { getString(any(), *anyVararg()) } returns "test string"
+
         handler =
             FromRadioPacketHandlerImpl(
                 serviceRepository,
                 lazy { router },
                 mqttManager,
                 packetHandler,
-                serviceNotifications,
+                notificationManager,
             )
     }
 
@@ -126,7 +132,7 @@ class FromRadioPacketHandlerImplTest {
         handler.handleFromRadio(proto)
 
         verify { serviceRepository.setClientNotification(notification) }
-        verify { serviceNotifications.showClientNotification(notification) }
+        verify { notificationManager.dispatch(any()) }
         verify { packetHandler.removeResponse(0, complete = false) }
     }
 }

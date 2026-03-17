@@ -16,7 +16,10 @@
  */
 package org.meshtastic.feature.node.list
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.core.testing.TestDataFactory
@@ -37,8 +40,14 @@ class NodeIntegrationTest {
 
     @BeforeTest
     fun setUp() {
+        kotlinx.coroutines.Dispatchers.setMain(kotlinx.coroutines.Dispatchers.Unconfined)
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
+    }
+
+    @kotlin.test.AfterTest
+    fun tearDown() {
+        kotlinx.coroutines.Dispatchers.resetMain()
     }
 
     @Test

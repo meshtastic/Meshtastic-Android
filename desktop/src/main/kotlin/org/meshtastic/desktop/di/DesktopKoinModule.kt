@@ -49,7 +49,6 @@ import org.meshtastic.desktop.stub.NoopLocationRepository
 import org.meshtastic.desktop.stub.NoopMQTTRepository
 import org.meshtastic.desktop.stub.NoopMagneticFieldProvider
 import org.meshtastic.desktop.stub.NoopMeshLocationManager
-import org.meshtastic.desktop.stub.NoopMeshServiceNotifications
 import org.meshtastic.desktop.stub.NoopMeshWorkerManager
 import org.meshtastic.desktop.stub.NoopPhoneLocationProvider
 import org.meshtastic.desktop.stub.NoopPlatformAnalytics
@@ -134,7 +133,9 @@ private fun desktopPlatformStubsModule() = module {
             locationManager = get(),
         )
     }
-    single<MeshServiceNotifications> { NoopMeshServiceNotifications() }
+    single<MeshServiceNotifications> {
+        org.meshtastic.desktop.notification.DesktopMeshServiceNotifications(notificationManager = get())
+    }
     single<PlatformAnalytics> { NoopPlatformAnalytics() }
     single<ServiceBroadcasts> { NoopServiceBroadcasts() }
     single<AppWidgetUpdater> { NoopAppWidgetUpdater() }

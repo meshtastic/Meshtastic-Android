@@ -84,6 +84,21 @@ interface UiPrefs {
     fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean)
 }
 
+/** Reactive interface for notification preferences. */
+interface NotificationPrefs {
+    val messagesEnabled: StateFlow<Boolean>
+
+    fun setMessagesEnabled(enabled: Boolean)
+
+    val nodeEventsEnabled: StateFlow<Boolean>
+
+    fun setNodeEventsEnabled(enabled: Boolean)
+
+    val lowBatteryEnabled: StateFlow<Boolean>
+
+    fun setLowBatteryEnabled(enabled: Boolean)
+}
+
 /** Reactive interface for general map preferences. */
 interface MapPrefs {
     val mapStyle: StateFlow<Int>

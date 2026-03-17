@@ -74,6 +74,7 @@ import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.SettingsViewModel
 import org.meshtastic.feature.settings.component.ExpressiveSection
 import org.meshtastic.feature.settings.component.HomoglyphSetting
+import org.meshtastic.feature.settings.component.NotificationSection
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.RadioConfigItemList
@@ -201,6 +202,15 @@ fun DesktopSettingsScreen(
                         summary = stringResource(Res.string.device_db_cache_limit_summary),
                     )
                 }
+
+                NotificationSection(
+                    messagesEnabled = settingsViewModel.messagesEnabled.collectAsStateWithLifecycle().value,
+                    onToggleMessages = { settingsViewModel.setMessagesEnabled(it) },
+                    nodeEventsEnabled = settingsViewModel.nodeEventsEnabled.collectAsStateWithLifecycle().value,
+                    onToggleNodeEvents = { settingsViewModel.setNodeEventsEnabled(it) },
+                    lowBatteryEnabled = settingsViewModel.lowBatteryEnabled.collectAsStateWithLifecycle().value,
+                    onToggleLowBattery = { settingsViewModel.setLowBatteryEnabled(it) },
+                )
 
                 DesktopAppInfoSection(
                     appVersionName = settingsViewModel.appVersionName,

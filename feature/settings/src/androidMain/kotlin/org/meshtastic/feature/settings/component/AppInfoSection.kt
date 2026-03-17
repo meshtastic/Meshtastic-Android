@@ -26,6 +26,7 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.AppSettingsAlt
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Memory
+import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.acknowledgements
+import org.meshtastic.core.resources.app_notifications
 import org.meshtastic.core.resources.app_version
 import org.meshtastic.core.resources.info
 import org.meshtastic.core.resources.intro_show
@@ -72,6 +74,18 @@ fun AppInfoSection(
             trailingIcon = null,
         ) {
             onShowAppIntro()
+        }
+
+        ListItem(
+            text = stringResource(Res.string.app_notifications),
+            leadingIcon = Icons.Rounded.Notifications,
+            trailingIcon = null,
+        ) {
+            val intent =
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+            settingsLauncher.launch(intent)
         }
 
         ListItem(

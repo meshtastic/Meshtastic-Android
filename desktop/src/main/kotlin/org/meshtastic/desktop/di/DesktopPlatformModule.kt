@@ -155,9 +155,9 @@ fun desktopPlatformModule() = module {
             override val isDebug: Boolean = true
             override val applicationId: String = "org.meshtastic.desktop"
             override val versionCode: Int = 1
-            override val versionName: String = "0.1.0-desktop"
-            override val absoluteMinFwVersion: String = "2.0.0"
-            override val minFwVersion: String = "2.5.0"
+            override val versionName: String = "2.7.14"
+            override val absoluteMinFwVersion: String = "2.3.15"
+            override val minFwVersion: String = "2.5.14"
         }
     }
 

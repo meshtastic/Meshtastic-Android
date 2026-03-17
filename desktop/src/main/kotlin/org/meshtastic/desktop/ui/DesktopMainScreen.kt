@@ -28,9 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
 import androidx.savedstate.serialization.SavedStateConfiguration
 import kotlinx.serialization.modules.SerializersModule
@@ -55,7 +55,7 @@ import org.meshtastic.desktop.navigation.desktopNavGraph
  * Polymorphic serialization configuration for Navigation 3 saved-state support. Registers all route types used in the
  * desktop navigation graph.
  */
-private val navSavedStateConfig = SavedStateConfiguration {
+internal val navSavedStateConfig = SavedStateConfiguration {
     serializersModule = SerializersModule {
         polymorphic(NavKey::class) {
             // Nodes
@@ -142,8 +142,7 @@ private val navSavedStateConfig = SavedStateConfiguration {
  * app, proving the shared backstack architecture works across targets.
  */
 @Composable
-fun DesktopMainScreen(radioService: RadioInterfaceService = koinInject()) {
-    val backStack = rememberNavBackStack(navSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
+fun DesktopMainScreen(backStack: NavBackStack<NavKey>, radioService: RadioInterfaceService = koinInject()) {
     val currentKey = backStack.lastOrNull()
     val selected = TopLevelDestination.fromNavKey(currentKey)
 
@@ -159,8 +158,10 @@ fun DesktopMainScreen(radioService: RadioInterfaceService = koinInject()) {
                         selected = destination == selected,
                         onClick = {
                             if (destination != selected) {
-                                backStack.clear()
                                 backStack.add(destination.route)
+                                while (backStack.size > 1) {
+                                    backStack.removeAt(0)
+                                }
                             }
                         },
                         icon = {

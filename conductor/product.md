@@ -14,6 +14,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application designed to facil
 ## Core Features
 - Direct communication with Meshtastic hardware (via BLE, USB, TCP)
 - Decentralized text messaging across the mesh network
+- Unified cross-platform notifications for messages and node events
 - Adaptive node and contact management
 - Offline map rendering and device positioning
 - Device configuration and firmware updates
