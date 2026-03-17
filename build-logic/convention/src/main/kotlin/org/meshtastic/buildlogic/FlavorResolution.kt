@@ -34,6 +34,7 @@ internal fun Project.configureAndroidMarketplaceFallback() {
     val legacyMarketplaceAttr = Attribute.of(LEGACY_MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
 
     configurations.configureEach {
+        if (!isCanBeResolved || isCanBeConsumed) return@configureEach
         if (!name.contains("android", ignoreCase = true)) return@configureEach
         if (attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null) {
             return@configureEach
