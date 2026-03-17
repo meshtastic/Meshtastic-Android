@@ -88,6 +88,8 @@ class NodeListViewModel(
                 onlyDirect = onlyDirect,
                 showIgnored = showIgnored,
             )
+        }.combine(nodeFilterPreferences.excludeMqtt) { toggles, excludeMqtt ->
+            toggles.copy(excludeMqtt = excludeMqtt)
         }
 
     private val nodeFilter: Flow<NodeFilterState> =
@@ -99,6 +101,7 @@ class NodeListViewModel(
                 onlyOnline = filterToggles.onlyOnline,
                 onlyDirect = filterToggles.onlyDirect,
                 showIgnored = filterToggles.showIgnored,
+                excludeMqtt = filterToggles.excludeMqtt,
             )
         }
     val nodesUiState: StateFlow<NodesUiState> =
@@ -183,6 +186,7 @@ data class NodeFilterState(
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
+    val excludeMqtt: Boolean = false,
 )
 
 data class NodeFilterToggles(
@@ -191,4 +195,5 @@ data class NodeFilterToggles(
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
     val showIgnored: Boolean = false,
+    val excludeMqtt: Boolean = false,
 )

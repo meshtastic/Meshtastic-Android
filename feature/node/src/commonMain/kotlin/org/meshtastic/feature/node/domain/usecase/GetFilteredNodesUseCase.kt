@@ -57,5 +57,6 @@ class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeReposi
                         true
                     }
                 }
+                .filter { node -> if (filter.excludeMqtt) !node.viaMqtt else true }
         }
 }

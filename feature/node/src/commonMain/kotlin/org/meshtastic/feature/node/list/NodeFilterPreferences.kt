@@ -28,6 +28,7 @@ class NodeFilterPreferences constructor(private val uiPreferencesDataSource: UiP
     val onlyOnline = uiPreferencesDataSource.onlyOnline
     val onlyDirect = uiPreferencesDataSource.onlyDirect
     val showIgnored = uiPreferencesDataSource.showIgnored
+    val excludeMqtt = uiPreferencesDataSource.excludeMqtt
 
     val nodeSortOption =
         uiPreferencesDataSource.nodeSort.map { NodeSortOption.entries.getOrElse(it) { NodeSortOption.VIA_FAVORITE } }
@@ -54,5 +55,9 @@ class NodeFilterPreferences constructor(private val uiPreferencesDataSource: UiP
 
     fun toggleShowIgnored() {
         uiPreferencesDataSource.setShowIgnored(!showIgnored.value)
+    }
+
+    fun toggleExcludeMqtt() {
+        uiPreferencesDataSource.setExcludeMqtt(!excludeMqtt.value)
     }
 }
