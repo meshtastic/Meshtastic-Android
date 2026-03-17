@@ -334,3 +334,9 @@ aboutLibraries {
         duplicationRule = DuplicateRule.SIMPLE
     }
 }
+
+// Ensure aboutlibraries.json is always up-to-date during the build.
+// This is required since AboutLibraries v11+ no longer auto-exports.
+tasks
+    .matching { it.name.startsWith("process") && it.name.endsWith("Resources") }
+    .configureEach { dependsOn("exportLibraryDefinitions") }

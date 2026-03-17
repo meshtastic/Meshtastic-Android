@@ -66,7 +66,10 @@ class AnalyticsConventionPlugin : Plugin<Project> {
 
             plugins.withId("com.datadoghq.dd-sdk-android-gradle-plugin") {
                 tasks.configureEach {
-                    if ((name.contains("datadog", ignoreCase = true) || name.contains("uploadMapping", ignoreCase = true)) && name.contains("fdroid", ignoreCase = true)) {
+                    if ((name.contains("datadog", ignoreCase = true) || 
+                            name.contains("uploadMapping", ignoreCase = true) || 
+                            name.contains("buildId", ignoreCase = true)) && 
+                        name.contains("fdroid", ignoreCase = true)) {
                         enabled = false
                     }
                 }
