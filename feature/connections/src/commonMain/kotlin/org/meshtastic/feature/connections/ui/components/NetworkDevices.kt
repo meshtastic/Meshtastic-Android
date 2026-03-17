@@ -60,7 +60,7 @@ import org.meshtastic.core.resources.no_network_devices_found
 import org.meshtastic.core.resources.recent_network_devices
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
-import org.meshtastic.feature.connections.repository.NetworkConstants
+import org.meshtastic.core.network.repository.NetworkConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

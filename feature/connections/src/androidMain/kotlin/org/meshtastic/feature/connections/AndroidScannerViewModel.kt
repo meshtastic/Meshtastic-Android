@@ -32,7 +32,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.feature.connections.model.AndroidUsbDeviceData
 import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
-import org.meshtastic.feature.connections.repository.UsbRepository
+import org.meshtastic.core.network.repository.UsbRepository
 
 @KoinViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
