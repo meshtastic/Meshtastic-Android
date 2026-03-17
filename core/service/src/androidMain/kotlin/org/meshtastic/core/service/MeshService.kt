@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.service
+package org.meshtastic.core.service
 
 import android.app.Service
 import android.content.Context
@@ -30,7 +30,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.koin.android.ext.android.inject
-import org.meshtastic.app.BuildConfig
+
 import org.meshtastic.core.common.hasLocationPermission
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.toRemoteExceptions
@@ -54,7 +54,7 @@ import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.service.IMeshService
-import org.meshtastic.feature.connections.NO_DEVICE_SELECTED
+
 import org.meshtastic.proto.PortNum
 
 @Suppress("TooManyFunctions", "LargeClass")
@@ -102,8 +102,8 @@ class MeshService : Service() {
             startService(context)
         }
 
-        val minDeviceVersion = DeviceVersion(BuildConfig.MIN_FW_VERSION)
-        val absoluteMinDeviceVersion = DeviceVersion(BuildConfig.ABS_MIN_FW_VERSION)
+        val minDeviceVersion = DeviceVersion(DeviceVersion.MIN_FW_VERSION)
+        val absoluteMinDeviceVersion = DeviceVersion(DeviceVersion.ABS_MIN_FW_VERSION)
     }
 
     override fun onCreate() {
@@ -143,7 +143,7 @@ class MeshService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val a = radioInterfaceService.getDeviceAddress()
-        val wantForeground = a != null && a != NO_DEVICE_SELECTED
+        val wantForeground = a != null && a != "n"
 
         val notification = connectionManager.updateStatusNotification() as android.app.Notification
 

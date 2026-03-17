@@ -25,8 +25,8 @@ import androidx.lifecycle.lifecycleScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Factory
-import org.meshtastic.app.service.MeshService
-import org.meshtastic.app.service.startService
+import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.startService
 import org.meshtastic.core.common.util.SequentialJob
 import org.meshtastic.core.service.AndroidServiceRepository
 import org.meshtastic.core.service.BindFailedException

@@ -52,4 +52,9 @@ data class DeviceVersion(val asString: String) : Comparable<DeviceVersion> {
     }
 
     override fun compareTo(other: DeviceVersion): Int = asInt.compareTo(other.asInt)
+
+    companion object {
+        const val MIN_FW_VERSION = "2.5.14"
+        const val ABS_MIN_FW_VERSION = "2.3.15"
+    }
 }

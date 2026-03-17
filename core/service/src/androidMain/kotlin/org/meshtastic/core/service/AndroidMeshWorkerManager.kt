@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.service
+package org.meshtastic.core.service
 
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import org.koin.core.annotation.Single
-import org.meshtastic.app.messaging.domain.worker.SendMessageWorker
+import org.meshtastic.core.service.worker.SendMessageWorker
 import org.meshtastic.core.repository.MeshWorkerManager
 
 @Single

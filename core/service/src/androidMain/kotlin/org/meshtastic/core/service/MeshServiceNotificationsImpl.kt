@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.service
+package org.meshtastic.core.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -40,11 +40,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
-import org.meshtastic.app.MainActivity
-import org.meshtastic.app.R.raw
-import org.meshtastic.app.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
-import org.meshtastic.app.service.ReactionReceiver.Companion.REACT_ACTION
-import org.meshtastic.app.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
+
+import org.meshtastic.core.resources.R.raw
+import org.meshtastic.core.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
+import org.meshtastic.core.service.ReactionReceiver.Companion.REACT_ACTION
+import org.meshtastic.core.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -453,7 +453,7 @@ class MeshServiceNotificationsImpl(
 
         val summaryNotification =
             commonBuilder(NotificationType.DirectMessage)
-                .setSmallIcon(org.meshtastic.app.R.drawable.app_icon)
+                .setSmallIcon(context.applicationInfo.icon)
                 .setStyle(messagingStyle)
                 .setGroup(GROUP_KEY_MESSAGES)
                 .setGroupSummary(true)
@@ -697,14 +697,14 @@ class MeshServiceNotificationsImpl(
 
     // region Helper/Builder Methods
     private val openAppIntent: PendingIntent by lazy {
-        val intent = Intent(context, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
+        val intent = Intent(context, Class.forName("org.meshtastic.app.MainActivity")).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
         val deepLinkUri = "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()
         val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
@@ -717,7 +717,7 @@ class MeshServiceNotificationsImpl(
     private fun createOpenWaypointIntent(waypointId: Int): PendingIntent {
         val deepLinkUri = "$DEEP_LINK_BASE_URI/map?waypointId=$waypointId".toUri()
         val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
@@ -730,7 +730,7 @@ class MeshServiceNotificationsImpl(
     private fun createOpenNodeDetailIntent(nodeNum: Int): PendingIntent {
         val deepLinkUri = "$DEEP_LINK_BASE_URI/node?destNum=$nodeNum".toUri()
         val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, Class.forName("org.meshtastic.app.MainActivity")).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
@@ -811,7 +811,7 @@ class MeshServiceNotificationsImpl(
         type: NotificationType,
         contentIntent: PendingIntent? = null,
     ): NotificationCompat.Builder {
-        val smallIcon = org.meshtastic.app.R.drawable.app_icon
+        val smallIcon = context.applicationInfo.icon
 
         return NotificationCompat.Builder(context, type.channelId)
             .setSmallIcon(smallIcon)

@@ -74,7 +74,7 @@ import org.meshtastic.app.navigation.firmwareGraph
 import org.meshtastic.app.navigation.mapGraph
 import org.meshtastic.app.navigation.nodesGraph
 import org.meshtastic.app.navigation.settingsGraph
-import org.meshtastic.app.service.MeshService
+import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.DeviceVersion

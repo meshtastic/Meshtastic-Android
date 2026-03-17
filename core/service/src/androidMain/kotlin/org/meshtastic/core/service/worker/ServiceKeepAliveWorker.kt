@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.worker
+package org.meshtastic.core.service.worker
 
 import android.app.Notification
 import android.content.Context
@@ -26,9 +26,9 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
 import org.koin.android.annotation.KoinWorker
-import org.meshtastic.app.R
-import org.meshtastic.app.service.MeshService
-import org.meshtastic.app.service.startService
+
+import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.startService
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
 
@@ -81,7 +81,7 @@ class ServiceKeepAliveWorker(
         // We use "my_service" which matches NotificationType.ServiceState.channelId in MeshServiceNotificationsImpl
 
         return NotificationCompat.Builder(applicationContext, "my_service")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(applicationContext.applicationInfo.icon)
             .setContentTitle("Resuming Mesh Service")
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true)

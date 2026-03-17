@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.service
+package org.meshtastic.core.service
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.content.Context
@@ -23,8 +23,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
-import org.meshtastic.app.BuildConfig
-import org.meshtastic.app.worker.ServiceKeepAliveWorker
+
+import org.meshtastic.core.service.worker.ServiceKeepAliveWorker
 
 // / Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
@@ -36,7 +36,7 @@ fun MeshService.Companion.startService(context: Context) {
     // Before binding we want to explicitly create - so the service stays alive forever (so it can keep
     // listening for the bluetooth packets arriving from the radio. And when they arrive forward them
     // to Signal or whatever.
-    Logger.i { "Trying to start service debug=${BuildConfig.DEBUG}" }
+    Logger.i { "Trying to start service debug=${false}" }
 
     val intent = createIntent(context)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

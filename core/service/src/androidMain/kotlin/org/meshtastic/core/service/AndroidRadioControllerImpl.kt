@@ -200,7 +200,7 @@ class AndroidRadioControllerImpl(
         // Ensure service is running/restarted to handle the new address
         val intent =
             android.content.Intent().apply {
-                setClassName("com.geeksville.mesh", "org.meshtastic.app.service.MeshService")
+                setClassName("com.geeksville.mesh", "org.meshtastic.core.service.MeshService")
             }
         context.startForegroundService(intent)
     }

@@ -9,7 +9,7 @@
 
 ## Phase 2: Extraction to `core:service`
 - [x] Task: Setup `core:service` module for Android and Common targets (if not already fully configured) [a114084]
-- [ ] Task: Move Android `Service` implementations to `core:service/androidMain`
+- [~] Task: Move Android `Service` implementations to `core:service/androidMain`
     - [ ] Move the files
     - [ ] Update imports and Koin injections
 - [ ] Task: Abstract shared service logic into `core:service/commonMain`
