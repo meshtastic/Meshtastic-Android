@@ -19,8 +19,11 @@ package org.meshtastic.feature.node.list
 import androidx.lifecycle.SavedStateHandle
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -51,6 +54,7 @@ class NodeListViewModelTest {
 
     @BeforeTest
     fun setUp() {
+        kotlinx.coroutines.Dispatchers.setMain(kotlinx.coroutines.Dispatchers.Unconfined)
         // Use real fakes
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
@@ -80,6 +84,11 @@ class NodeListViewModelTest {
                 getFilteredNodesUseCase = getFilteredNodesUseCase,
                 nodeFilterPreferences = nodeFilterPreferences,
             )
+    }
+
+    @kotlin.test.AfterTest
+    fun tearDown() {
+        kotlinx.coroutines.Dispatchers.resetMain()
     }
 
     @Test
