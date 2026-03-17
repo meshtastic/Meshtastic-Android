@@ -33,22 +33,24 @@ internal fun Project.configureAndroidMarketplaceFallback() {
     val marketplaceAttr = ProductFlavorAttr.of(MeshtasticFlavor.fdroid.dimension.name)
     val legacyMarketplaceAttr = Attribute.of(LEGACY_MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
 
-    configurations.configureEach {
-        if (!isCanBeResolved || isCanBeConsumed) return@configureEach
-        if (!name.contains("android", ignoreCase = true)) return@configureEach
-        if (attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null) {
-            return@configureEach
-        }
-
-        // Prefer explicit flavor from configuration name; otherwise use configurable default.
-        val inferredMarketplace =
-            when {
-                name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
-                name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
-                else -> defaultMarketplace
+    afterEvaluate {
+        configurations.configureEach {
+            if (!isCanBeResolved || isCanBeConsumed) return@configureEach
+            if (!name.contains("android", ignoreCase = true)) return@configureEach
+            if (attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null) {
+                return@configureEach
             }
 
-        attributes.attribute(marketplaceAttr, objects.named(ProductFlavorAttr::class.java, inferredMarketplace))
-        attributes.attribute(legacyMarketplaceAttr, inferredMarketplace)
+            // Prefer explicit flavor from configuration name; otherwise use configurable default.
+            val inferredMarketplace =
+                when {
+                    name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
+                    name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
+                    else -> defaultMarketplace
+                }
+
+            attributes.attribute(marketplaceAttr, objects.named(ProductFlavorAttr::class.java, inferredMarketplace))
+            attributes.attribute(legacyMarketplaceAttr, inferredMarketplace)
+        }
     }
 }
