@@ -22,10 +22,10 @@
 - [x] Task: Move Radio connection and networking files from `app` to `core:network/androidMain` [b5233cf]
     - [x] Move the files
     - [x] Update imports and Koin injections
-- [ ] Task: Abstract shared radio/network logic into `core:network/commonMain`
-    - [ ] Write failing tests for abstracted radio logic (TDD Red)
-    - [ ] Extract platform-agnostic business logic (TDD Green)
-    - [ ] Refactor implementations to use shared abstractions
+- [~] Task: Abstract shared radio/network logic into `core:network/commonMain`
+    - [x] Write failing tests for abstracted radio logic (TDD Red)
+    - [x] Extract platform-agnostic business logic (TDD Green)
+    - [x] Refactor implementations to use shared abstractions
 - [ ] Task: Conductor - User Manual Verification 'Extraction to core:network' (Protocol in workflow.md)
 
 ## Phase 4: Desktop Integration
