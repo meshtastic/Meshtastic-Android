@@ -4,7 +4,7 @@ on:
   pull_request:
     branches: [ main, develop ]
     paths-ignore:
-      - '**.md'
+      - '**/*.md'
       - 'docs/**'
       - '.gitignore'
 
@@ -26,12 +26,29 @@ jobs:
         with:
           filters: |
             android:
+              # CI/workflow implementation
+              - '.github/workflows/**'
+              - '.github/actions/**'
+              # Product modules validated by reusable-check
               - 'app/**'
+              - 'baselineprofile/**'
+              - 'desktop/**'
               - 'core/**'
               - 'feature/**'
+              - 'mesh_service_example/**'
+              # Shared build infrastructure
               - 'build-logic/**'
+              - 'config/**'
+              - 'gradle/**'
+              # Root build entrypoints/config that can alter task graph or outputs
               - 'build.gradle.kts'
+              - 'config.properties'
+              - 'compose_compiler_config.conf'
               - 'gradle.properties'
+              - 'gradlew'
+              - 'gradlew.bat'
+              - 'settings.gradle.kts'
+              - 'test.gradle.kts'
 
   # 2. VALIDATION & BUILD: Delegate to reusable-check.yml
   # We disable instrumented tests for PRs to keep feedback fast (< 10 mins).

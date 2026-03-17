@@ -17,7 +17,7 @@ Run in this order for routine changes:
 
 Notes:
 - This order aligns with repository guidance in `AGENTS.md` and `.github/copilot-instructions.md`.
-- CI additionally runs `testDebugUnitTest` in `.github/workflows/reusable-check.yml`.
+- CI runs host verification and Android build/device verification in separate jobs inside `.github/workflows/reusable-check.yml`.
 
 ## 2) Change-type matrix
 
@@ -53,20 +53,25 @@ Run these when relevant to map/provider/flavor-specific behavior:
 Current reusable check workflow includes:
 
 - `spotlessCheck detekt`
-- `testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest`
-- `koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug`
-- JVM smoke compile (all 16 core + all 6 feature modules + `desktop:test`):
-  `:core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:service:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm :desktop:test`
-- `assembleDebug`
-- `lintDebug`
-- `connectedDebugAndroidTest` (when emulator tests are enabled)
+- Android lint for all directly runnable Android modules:
+  `app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug`
+- Host tests plus coverage aggregation:
+  `test koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug`
+- JVM smoke compile for all KMP JVM targets (all compile-only modules remain explicit):
+  `:core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:testing:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm`
+- Android build tasks:
+  `app:assembleFdroidDebug app:assembleGoogleDebug mesh_service_example:assembleDebug`
+- Instrumented tests (when emulator tests are enabled):
+  `app:connectedFdroidDebugAndroidTest app:connectedGoogleDebugAndroidTest core:barcode:connectedFdroidDebugAndroidTest core:barcode:connectedGoogleDebugAndroidTest`
+- Coverage uploads happen once from the host job; instrumented test results upload once from the first Android matrix API to avoid duplicate reporting.
 
 Reference: `.github/workflows/reusable-check.yml`
 
 PR workflow note:
 
-- `.github/workflows/pull-request.yml` ignores docs-only changes (`**.md`, `docs/**`), so doc-only PRs may skip Android CI by design.
-- Android CI on PRs runs with `run_instrumented_tests: false`; emulator tests are handled in other workflow contexts.
+- `.github/workflows/pull-request.yml` ignores docs-only changes (`**/*.md`, `docs/**`), so doc-only PRs may skip Android CI by design.
+- PR change detection includes workflow/build/config paths such as `.github/workflows/**`, `desktop/**`, `mesh_service_example/**`, `config/**`, `gradle/**`, `settings.gradle.kts`, and `test.gradle.kts`.
+- Android CI on PRs runs with `run_instrumented_tests: false`; merge queue keeps the full emulator matrix on API 26 and 35.
 
 ## 5) Practical guidance for agents
 
