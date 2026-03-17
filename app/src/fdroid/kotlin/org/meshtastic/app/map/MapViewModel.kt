@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.MapPrefs
 import org.meshtastic.core.repository.NodeRepository
@@ -37,7 +36,7 @@ import org.meshtastic.proto.LocalConfig
 class MapViewModel(
     mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
-    override val nodeRepository: NodeRepository,
+    nodeRepository: NodeRepository,
     radioController: RadioController,
     radioConfigRepository: RadioConfigRepository,
     buildConfigProvider: BuildConfigProvider,
@@ -65,6 +64,4 @@ class MapViewModel(
         get() = localConfig.value
 
     val applicationId = buildConfigProvider.applicationId
-
-    override fun getUser(userId: String?) = nodeRepository.getUser(userId ?: DataPacket.ID_BROADCAST)
 }

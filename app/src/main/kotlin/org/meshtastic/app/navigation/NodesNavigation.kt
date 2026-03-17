@@ -34,6 +34,7 @@ import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 import org.meshtastic.app.map.node.NodeMapScreen
 import org.meshtastic.app.ui.node.AdaptiveNodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
@@ -115,7 +116,8 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteLog> { args ->
-        val metricsViewModel = koinViewModel<MetricsViewModel>()
+        val metricsViewModel =
+            koinViewModel<MetricsViewModel>(key = "metrics-${args.destNum}") { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)
 
         TracerouteLogScreen(
@@ -134,7 +136,8 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.TracerouteMap> { args ->
-        val metricsViewModel = koinViewModel<MetricsViewModel>()
+        val metricsViewModel =
+            koinViewModel<MetricsViewModel>(key = "metrics-${args.destNum}") { parametersOf(args.destNum) }
         metricsViewModel.setNodeId(args.destNum)
 
         TracerouteMapScreen(
@@ -176,8 +179,8 @@ private inline fun <reified R : Route> EntryProviderScope<NavKey>.addNodeDetailS
     crossinline getDestNum: (R) -> Int,
 ) {
     entry<R> { args ->
-        val metricsViewModel = koinViewModel<MetricsViewModel>()
         val destNum = getDestNum(args)
+        val metricsViewModel = koinViewModel<MetricsViewModel>(key = "metrics-$destNum") { parametersOf(destNum) }
         metricsViewModel.setNodeId(destNum)
 
         routeInfo.screenComposable(metricsViewModel) { backStack.removeLastOrNull() }

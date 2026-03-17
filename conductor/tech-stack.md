@@ -7,6 +7,9 @@
 - **Compose Multiplatform:** Shared UI layer for rendering on Android and Desktop.
 - **Jetpack Compose:** Used where platform-specific UI (like charts or permissions) is necessary on Android.
 
+## Background & Services
+- **Platform Services:** Core service orchestrations and background work are abstracted into `core:service` to maximize logic reuse across targets, using platform-specific implementations (e.g., WorkManager/Service on Android) only where necessary.
+
 ## Architecture
 - **MVI / Unidirectional Data Flow:** Shared view models using the multiplatform `androidx.lifecycle.ViewModel`.
 - **JetBrains Navigation 3:** Multiplatform fork for state-based, compose-first navigation without relying on `NavController`.

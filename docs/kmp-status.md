@@ -120,7 +120,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 - Parity tests exist in `core:navigation/commonTest` (`NavigationParityTest`) and `desktop/test` (`DesktopTopLevelDestinationParityTest`).
 - Remaining parity work is documented in [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md): serializer registration validation and platform exception tracking.
 
-## Remaining App-Only ViewModels
+## App Module Thinning Status
 
 All major ViewModels have now been extracted to `commonMain` and no longer rely on Android-specific subclasses. Platform-specific dependencies (like `android.net.Uri` or Location permissions) have been successfully isolated behind injected `core:repository` interfaces (e.g., `FileService`, `LocationService`).
 
@@ -132,6 +132,18 @@ Extracted to shared `commonMain` (no longer app-only):
 - `UIViewModel` → `core:ui/commonMain`
 - `ChannelViewModel` → `feature:settings/commonMain`
 - `NodeMapViewModel` → `feature:map/commonMain`
+
+Extracted to core KMP modules (Android-specific implementations):
+- Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
+- BLE, USB/Serial, TCP radio connections, and NsdManager → `core:network/androidMain`
+
+Remaining to be extracted from `:app` to achieve a true thin-shell module:
+- Navigation routes (`ChannelsNavigation.kt`, `SettingsNavigation.kt`, etc.)
+- Android App Widgets (`LocalStatsWidget.kt`, `AndroidAppWidgetUpdater.kt`)
+- Message Queue implementation (`WorkManagerMessageQueue.kt`)
+- Location provider bindings (`AndroidMeshLocationManager.kt`)
+- Top-level UI composition (`ui/Main.kt`, `ui/node/AdaptiveNodeListScreen.kt`)
+- Root Activity and Koin bootstrapping (`MainActivity.kt`, `MeshUtilApplication.kt`, `MeshServiceClient.kt`)
 
 ## Prerelease Dependencies
 

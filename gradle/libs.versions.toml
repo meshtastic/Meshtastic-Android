@@ -15,7 +15,7 @@ navigation3 = "1.1.0-alpha04"
 paging = "3.4.2"
 room = "2.8.4"
 savedstate = "1.4.0"
-koin = "4.2.0-RC2"
+koin = "4.2.0"
 koin-annotations = "2.1.0"
 koin-plugin = "0.4.0"
 
@@ -235,7 +235,7 @@ android-tools-common = { module = "com.android.tools:common", version = "32.1.0"
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
-datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.23.0" }
+datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.24.0" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.6" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
@@ -276,7 +276,7 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
-datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.23.0" }
+datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.24.0" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }

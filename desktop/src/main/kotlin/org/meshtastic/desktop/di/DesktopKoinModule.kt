@@ -41,7 +41,6 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.desktop.radio.DesktopMeshServiceController
 import org.meshtastic.desktop.radio.DesktopRadioInterfaceService
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
@@ -151,19 +150,6 @@ private fun desktopPlatformStubsModule() = module {
     single<org.meshtastic.feature.node.compass.MagneticFieldProvider> { NoopMagneticFieldProvider() }
 
     // Desktop mesh service controller — replaces Android's MeshService lifecycle
-    single {
-        DesktopMeshServiceController(
-            radioInterfaceService = get(),
-            serviceRepository = get(),
-            messageProcessor = get(),
-            connectionManager = get(),
-            packetHandler = get(),
-            router = get(),
-            nodeManager = get(),
-            commandSender = get(),
-        )
-    }
-
     // Ktor HttpClient for JVM/Desktop (equivalent of CoreNetworkAndroidModule on Android)
     single<HttpClient> { HttpClient(Java) { install(ContentNegotiation) { json(get<Json>()) } } }
 

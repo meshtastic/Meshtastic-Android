@@ -49,11 +49,11 @@ import org.koin.core.context.startKoin
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
+import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
-import org.meshtastic.desktop.radio.DesktopMeshServiceController
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.desktop.ui.navSavedStateConfig
 import java.util.Locale
@@ -82,7 +82,7 @@ fun main() = application(exitProcessOnExit = false) {
     val systemLocale = remember { Locale.getDefault() }
 
     // Start the mesh service processing chain (desktop equivalent of Android's MeshService)
-    val meshServiceController = remember { koinApp.koin.get<DesktopMeshServiceController>() }
+    val meshServiceController = remember { koinApp.koin.get<MeshServiceOrchestrator>() }
     DisposableEffect(Unit) {
         meshServiceController.start()
         onDispose { meshServiceController.stop() }

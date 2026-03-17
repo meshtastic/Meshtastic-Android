@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
@@ -42,6 +43,7 @@ import org.meshtastic.core.repository.ServiceRepository
  * All injected dependencies are `commonMain` interfaces with real implementations in `core:data`.
  */
 @Suppress("LongParameterList")
+@Single
 class MeshServiceOrchestrator(
     private val radioInterfaceService: RadioInterfaceService,
     private val serviceRepository: ServiceRepository,
