@@ -39,6 +39,7 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.RadioNotConnectedException
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.MeshConnectionManager
+import org.meshtastic.core.repository.MeshLocationManager
 import org.meshtastic.core.repository.MeshRouter
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.RadioInterfaceService
