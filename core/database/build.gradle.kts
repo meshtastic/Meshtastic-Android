@@ -50,7 +50,6 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.androidx.room.testing)
         }
-        androidMain.dependencies { implementation(libs.javax.inject) }
 
         val androidHostTest by getting {
             dependencies {

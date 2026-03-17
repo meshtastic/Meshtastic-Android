@@ -79,6 +79,11 @@ internal enum class PluginType(val id: String, val ref: String, val style: Strin
         ref = "jvm-library",
         style = "fill:#BDB2FF,stroke:#000,stroke-width:2px,color:#000",
     ),
+    KmpFeature(
+        id = "meshtastic.kmp.feature",
+        ref = "kmp-feature",
+        style = "fill:#FFD6A5,stroke:#000,stroke-width:2px,color:#000",
+    ),
     KmpLibrary(
         id = "meshtastic.kmp.library",
         ref = "kmp-library",
@@ -123,6 +128,7 @@ internal fun Project.configureGraphTasks() {
             val type = when {
                 pluginManager.hasPlugin("meshtastic.android.application") || pluginManager.hasPlugin("meshtastic.android.application.compose") -> PluginType.AndroidApplication
                 targetProjectPath.startsWith(":desktop") -> PluginType.ComposeDesktopApplication
+                pluginManager.hasPlugin("meshtastic.kmp.feature") -> PluginType.KmpFeature
                 targetProjectPath.startsWith(":feature:") -> PluginType.AndroidFeature
                 else -> PluginType.entries.firstOrNull { pluginManager.hasPlugin(it.id) } ?: Unknown
             }

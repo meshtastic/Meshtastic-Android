@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9931",
+      "title": "fix: apply LoRa config changes live without rebooting",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9931",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9916",
       "title": "Fix for preserving pki_encrypted and public_key when relaying UDP multicast packets to radio.",
       "page_url": "https://github.com/meshtastic/firmware/pull/9916",

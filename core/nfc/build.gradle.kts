@@ -34,7 +34,6 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
-            implementation(libs.compose.multiplatform.runtime)
             implementation(libs.compose.multiplatform.ui)
         }
 

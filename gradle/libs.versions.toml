@@ -17,7 +17,7 @@ room = "2.8.4"
 savedstate = "1.4.0"
 koin = "4.2.0"
 koin-annotations = "2.1.0"
-koin-plugin = "0.4.0"
+koin-plugin = "0.4.1"
 
 # Kotlin
 kotlin = "2.3.20"
@@ -49,10 +49,13 @@ ktor = "3.4.1"
 # Other
 aboutlibraries = "13.2.1"
 coil = "3.4.0"
+datadog-gradle = "1.24.0"
 dd-sdk-android = "3.7.1"
 detekt = "1.23.8"
 dokka = "2.2.0-Beta"
 devtools-ksp = "2.3.6"
+firebase-crashlytics-gradle = "3.0.6"
+google-services-gradle = "4.4.4"
 markdownRenderer = "0.39.2"
 okio = "3.17.0"
 osmdroid-android = "6.1.20"
@@ -159,7 +162,6 @@ mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
-truth = { module = "com.google.truth:truth", version = "1.4.5" }
 
 # Jetbrains
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
@@ -208,7 +210,6 @@ dd-sdk-android-timber = { module = "com.datadoghq:dd-sdk-android-timber", versio
 dd-sdk-android-trace = { module = "com.datadoghq:dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace-otel = { module = "com.datadoghq:dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
 dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-documentation-plugin", version.ref = "dokka" }
-javax-inject = { module = "javax.inject:javax.inject", version = "1" }
 markdown-renderer = { module = "com.mikepenz:multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { module = "com.mikepenz:multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
@@ -235,12 +236,12 @@ android-tools-common = { module = "com.android.tools:common", version = "32.1.0"
 androidx-room-gradlePlugin = { module = "androidx.room:room-gradle-plugin", version.ref = "room" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-gradlePlugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
-datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version = "1.24.0" }
+datadog-gradlePlugin = { module = "com.datadoghq.dd-sdk-android-gradle-plugin:com.datadoghq.dd-sdk-android-gradle-plugin.gradle.plugin", version.ref = "datadog-gradle" }
 detekt-compose = { module = "io.nlopez.compose.rules:detekt", version = "0.5.6" }
 detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
 detekt-gradlePlugin = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
-firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version = "3.0.6" }
-google-services-gradlePlugin = { module = "com.google.gms.google-services:com.google.gms.google-services.gradle.plugin", version = "4.4.4" }
+firebase-crashlytics-gradlePlugin = { module = "com.google.firebase:firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
+google-services-gradlePlugin = { module = "com.google.gms.google-services:com.google.gms.google-services.gradle.plugin", version.ref = "google-services-gradle" }
 koin-gradlePlugin = { module = "io.insert-koin.compiler.plugin:io.insert-koin.compiler.plugin.gradle.plugin", version.ref = "koin-plugin" }
 kover-gradlePlugin = { module = "org.jetbrains.kotlinx.kover:org.jetbrains.kotlinx.kover.gradle.plugin", version.ref = "kover" }
 ksp-gradlePlugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
@@ -267,16 +268,16 @@ kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 # Google
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
-google-services = { id = "com.google.gms.google-services", version = "4.4.4" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services-gradle" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1" }
 
 # Firebase
-firebase-crashlytics = { id = "com.google.firebase.crashlytics", version = "3.0.6" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
 firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.2" }
 
 # Other
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
-datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.24.0" }
+datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "datadog-gradle" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 wire = { id = "com.squareup.wire", version.ref = "wire" }
@@ -299,6 +300,7 @@ meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-koin = { id = "meshtastic.koin" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
+meshtastic-kmp-feature = { id = "meshtastic.kmp.feature" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }

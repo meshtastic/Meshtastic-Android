@@ -64,11 +64,3 @@ kotlin {
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }
-
-val marketplaceAttr = Attribute.of("marketplace", String::class.java)
-
-configurations.all {
-    if (name.contains("android", ignoreCase = true)) {
-        attributes.attribute(marketplaceAttr, "fdroid")
-    }
-}
