@@ -26,11 +26,10 @@ import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import co.touchlab.kermit.Logger
 import org.koin.android.annotation.KoinWorker
-
-import org.meshtastic.core.service.MeshService
-import org.meshtastic.core.service.startService
 import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.service.MeshService
+import org.meshtastic.core.service.startService
 
 /**
  * A worker whose sole purpose is to start the MeshService from the background. This is used as a fallback when

@@ -40,11 +40,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.Single
-
-import org.meshtastic.core.resources.R.raw
-import org.meshtastic.core.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
-import org.meshtastic.core.service.ReactionReceiver.Companion.REACT_ACTION
-import org.meshtastic.core.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -55,6 +50,7 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.SERVICE_NOTIFY_ID
+import org.meshtastic.core.resources.R.raw
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.client_notification
 import org.meshtastic.core.resources.getString
@@ -87,6 +83,9 @@ import org.meshtastic.core.resources.no_local_stats
 import org.meshtastic.core.resources.powered
 import org.meshtastic.core.resources.reply
 import org.meshtastic.core.resources.you
+import org.meshtastic.core.service.MarkAsReadReceiver.Companion.MARK_AS_READ_ACTION
+import org.meshtastic.core.service.ReactionReceiver.Companion.REACT_ACTION
+import org.meshtastic.core.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import org.meshtastic.proto.ClientNotification
 import org.meshtastic.proto.DeviceMetrics
 import org.meshtastic.proto.LocalStats
@@ -697,7 +696,10 @@ class MeshServiceNotificationsImpl(
 
     // region Helper/Builder Methods
     private val openAppIntent: PendingIntent by lazy {
-        val intent = Intent(context, Class.forName("org.meshtastic.app.MainActivity")).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
+        val intent =
+            Intent(context, Class.forName("org.meshtastic.app.MainActivity")).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
         PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 

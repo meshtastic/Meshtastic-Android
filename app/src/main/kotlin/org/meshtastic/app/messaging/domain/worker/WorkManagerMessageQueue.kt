@@ -18,11 +18,11 @@ package org.meshtastic.app.messaging.domain.worker
 
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
-import org.meshtastic.core.service.worker.SendMessageWorker
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import org.koin.core.annotation.Single
 import org.meshtastic.core.repository.MessageQueue
+import org.meshtastic.core.service.worker.SendMessageWorker
 
 /** Android implementation of [MessageQueue] that uses [WorkManager] for reliable background transmission. */
 @Single

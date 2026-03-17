@@ -50,6 +50,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.isValidAddress
 import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.network.repository.NetworkConstants
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add_network_device
 import org.meshtastic.core.resources.address
@@ -60,7 +61,6 @@ import org.meshtastic.core.resources.no_network_devices_found
 import org.meshtastic.core.resources.recent_network_devices
 import org.meshtastic.feature.connections.ScannerViewModel
 import org.meshtastic.feature.connections.model.DeviceListEntry
-import org.meshtastic.core.network.repository.NetworkConstants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

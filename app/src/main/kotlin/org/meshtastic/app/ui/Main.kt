@@ -74,7 +74,6 @@ import org.meshtastic.app.navigation.firmwareGraph
 import org.meshtastic.app.navigation.mapGraph
 import org.meshtastic.app.navigation.nodesGraph
 import org.meshtastic.app.navigation.settingsGraph
-import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.DeviceVersion
@@ -96,6 +95,7 @@ import org.meshtastic.core.resources.should_update
 import org.meshtastic.core.resources.should_update_firmware
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.view_on_map
+import org.meshtastic.core.service.MeshService
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.core.ui.navigation.icon

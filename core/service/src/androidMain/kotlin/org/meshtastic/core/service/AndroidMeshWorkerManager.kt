@@ -21,8 +21,8 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import org.koin.core.annotation.Single
-import org.meshtastic.core.service.worker.SendMessageWorker
 import org.meshtastic.core.repository.MeshWorkerManager
+import org.meshtastic.core.service.worker.SendMessageWorker
 
 @Single
 class AndroidMeshWorkerManager(private val workManager: WorkManager) : MeshWorkerManager {

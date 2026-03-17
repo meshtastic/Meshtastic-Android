@@ -28,6 +28,9 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
+import org.meshtastic.core.network.repository.UsbRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.resources.Res
@@ -38,9 +41,6 @@ import org.meshtastic.feature.connections.model.DeviceListEntry
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import org.meshtastic.feature.connections.model.getMeshtasticShortName
-import org.meshtastic.core.network.repository.NetworkRepository
-import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
-import org.meshtastic.core.network.repository.UsbRepository
 import java.util.Locale
 
 @Suppress("LongParameterList")

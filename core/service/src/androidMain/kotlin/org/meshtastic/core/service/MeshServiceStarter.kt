@@ -23,7 +23,6 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import co.touchlab.kermit.Logger
-
 import org.meshtastic.core.service.worker.ServiceKeepAliveWorker
 
 // / Helper function to start running our service

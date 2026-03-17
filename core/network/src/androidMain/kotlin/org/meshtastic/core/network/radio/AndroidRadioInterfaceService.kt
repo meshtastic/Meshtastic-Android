@@ -37,8 +37,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
-import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.ble.BluetoothRepository
+import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.util.BinaryLogFile
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
@@ -49,11 +49,11 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.InterfaceId
 import org.meshtastic.core.model.MeshActivity
 import org.meshtastic.core.model.util.anonymize
+import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.RadioTransport
-import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.proto.Heartbeat
 import org.meshtastic.proto.ToRadio
 

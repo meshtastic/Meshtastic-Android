@@ -49,11 +49,11 @@ import org.koin.core.context.startKoin
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
+import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
-import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.desktop.ui.navSavedStateConfig
 import java.util.Locale
