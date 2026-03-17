@@ -87,7 +87,8 @@ These items address structural gaps identified in the March 2026 architecture re
 
 1. **App module thinning** — Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules.
     - ✅ **Done:** Extracted remaining 5 ViewModels: `SettingsViewModel`, `RadioConfigViewModel`, `DebugViewModel`, `MetricsViewModel`, `UIViewModel` to shared KMP modules.
-    - **Next:** Extract service/worker/radio files from `app` to `core:service/androidMain` and `core:network/androidMain`.
+    - ✅ **Done:** Extracted service, worker, and radio files from `app` to `core:service/androidMain` and `core:network/androidMain`.
+    - **Next:** Extract remaining Android-specific files (e.g., Navigation files, App Widgets, message queues, and root Activity logic) out of `:app` to establish a truly thin app module.
 2. **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
 3. **MQTT transport** — cloud relay operation (KMP, benefits all targets)
 4. **Evaluate KMP-native mocking** — Evaluate `mockative` or similar to replace `mockk` in `commonMain` of `core:testing` for iOS readiness.
