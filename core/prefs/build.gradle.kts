@@ -35,8 +35,6 @@ kotlin {
             implementation(projects.core.common)
             implementation(projects.core.di)
 
-            // TODO: Migrate @javax.inject.Qualifier → @org.koin.core.annotation.Named
-            implementation(libs.javax.inject)
             implementation(libs.androidx.datastore.preferences)
             implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.collections.immutable)
