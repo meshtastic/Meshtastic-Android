@@ -1,11 +1,11 @@
 # Implementation Plan: Extract service/worker/radio files from `app`
 
-## Phase 1: Preparation & Analysis
+## Phase 1: Preparation & Analysis [checkpoint: 72022ed]
 - [x] Task: Identify all Android-specific classes to be moved (Services, WorkManager workers, Radio connections in `app`) [fd916e3]
     - [ ] Locate `Service` classes in `app/src/main/java/org/meshtastic/app`
     - [ ] Locate WorkManager `Worker` classes
     - [ ] Locate Radio connection classes
-- [ ] Task: Conductor - User Manual Verification 'Preparation & Analysis' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Preparation & Analysis' (Protocol in workflow.md)
 
 ## Phase 2: Extraction to `core:service`
 - [ ] Task: Setup `core:service` module for Android and Common targets (if not already fully configured)
