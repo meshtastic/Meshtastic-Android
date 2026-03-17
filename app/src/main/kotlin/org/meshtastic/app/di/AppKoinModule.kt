@@ -37,14 +37,15 @@ import org.meshtastic.core.database.di.CoreDatabaseAndroidModule
 import org.meshtastic.core.database.di.CoreDatabaseModule
 import org.meshtastic.core.datastore.di.CoreDatastoreAndroidModule
 import org.meshtastic.core.datastore.di.CoreDatastoreModule
+import org.meshtastic.core.network.di.CoreNetworkAndroidModule
 import org.meshtastic.core.network.di.CoreNetworkModule
+import org.meshtastic.core.network.repository.ProbeTableProvider
 import org.meshtastic.core.prefs.di.CorePrefsAndroidModule
 import org.meshtastic.core.prefs.di.CorePrefsModule
 import org.meshtastic.core.service.di.CoreServiceAndroidModule
 import org.meshtastic.core.service.di.CoreServiceModule
 import org.meshtastic.core.ui.di.CoreUiModule
 import org.meshtastic.feature.connections.di.FeatureConnectionsModule
-import org.meshtastic.feature.connections.repository.ProbeTableProvider
 import org.meshtastic.feature.firmware.di.FeatureFirmwareModule
 import org.meshtastic.feature.intro.di.FeatureIntroModule
 import org.meshtastic.feature.map.di.FeatureMapModule
@@ -72,6 +73,7 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
         CoreServiceModule::class,
         CoreServiceAndroidModule::class,
         CoreNetworkModule::class,
+        CoreNetworkAndroidModule::class,
         CoreUiModule::class,
         FeatureNodeModule::class,
         FeatureMessagingModule::class,

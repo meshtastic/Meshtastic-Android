@@ -40,10 +40,10 @@ import org.koin.core.context.startKoin
 import org.meshtastic.app.di.AppKoinModule
 import org.meshtastic.app.di.module
 import org.meshtastic.app.widget.LocalStatsWidgetReceiver
-import org.meshtastic.app.worker.MeshLogCleanupWorker
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
+import org.meshtastic.core.service.worker.MeshLogCleanupWorker
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.toJavaDuration

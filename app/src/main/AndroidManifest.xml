@@ -152,7 +152,7 @@
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
-            android:name="org.meshtastic.app.service.MeshService"
+            android:name="org.meshtastic.core.service.MeshService"
             android:enabled="true"
             android:foregroundServiceType="connectedDevice|location"
             android:exported="true" tools:ignore="ExportedActivity">
@@ -228,7 +228,7 @@
                 android:resource="@xml/device_filter" />
         </activity>
 
-        <receiver android:name="org.meshtastic.app.service.BootCompleteReceiver"
+        <receiver android:name="org.meshtastic.core.service.BootCompleteReceiver"
             android:exported="false">
             <!-- handle boot events -->
             <intent-filter>
@@ -252,9 +252,9 @@
                     android:path="com.geeksville.mesh" /> -->
             </intent-filter>
         </receiver>
-        <receiver android:name="org.meshtastic.app.service.ReplyReceiver" android:exported="false" />
-        <receiver android:name="org.meshtastic.app.service.MarkAsReadReceiver" android:exported="false" />
-        <receiver android:name="org.meshtastic.app.service.ReactionReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.core.service.ReplyReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.core.service.MarkAsReadReceiver" android:exported="false" />
+        <receiver android:name="org.meshtastic.core.service.ReactionReceiver" android:exported="false" />
 
         <receiver
             android:name="org.meshtastic.app.widget.LocalStatsWidgetReceiver"
