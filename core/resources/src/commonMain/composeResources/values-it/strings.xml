@@ -39,11 +39,14 @@
     <string name="via_mqtt">via MQTT</string>
     <string name="via_udp">via UDP</string>
     <string name="via_api">via API</string>
+    <string name="internal">Interno</string>
     <string name="node_sort_via_favorite">via Preferiti</string>
     <string name="node_filter_show_ignored">Visualizza solo i nodi ignorati</string>
     <string name="unrecognized">Non riconosciuto</string>
     <string name="message_status_enroute">In attesa di conferma</string>
     <string name="message_status_queued">In coda per l'invio</string>
+    <string name="message_status_sfpp_routing">Percorso tramite catena SF++…</string>
+    <string name="message_status_sfpp_confirmed">Confermato sulla catena SF++</string>
     <string name="routing_error_none">Confermato</string>
     <string name="routing_error_no_route">Nessun percorso</string>
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
@@ -65,6 +68,7 @@
     <string name="role_client_desc">App collegata o dispositivo di messaggistica standalone.</string>
     <string name="role_client_mute">Client Mute</string>
     <string name="role_client_mute_desc">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
+    <string name="role_client_base">Base Client</string>
     <string name="role_client_base_desc">Tratta i pacchetti da o verso i nodi preferiti come ROUTER_LATE, e tutti gli altri pacchetti come CLIENT.</string>
     <string name="role_router">Router</string>
     <string name="role_router_desc">Nodo d'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell'elenco dei nodi.</string>
@@ -117,6 +121,16 @@
     <string name="config_lora_modem_preset_summary">Le preimpostazioni del modem disponibili, la predefinita è Long Fast.</string>
     <string name="config_lora_hop_limit_summary">Imposta il numero massimo di hop, il predefinito è 3. Aumentare gli hop comporta anche aumentare la congestione e dovrebbe essere utilizzato con attenzione. Con 0 hop, i messaggi non otterranno conferma di ricezione.</string>
     <string name="config_lora_frequency_slot_summary">La frequenza di funzionamento del nodo viene calcolata in base alla regione, alla preimpostazione del modem e a questo campo. Quando è a 0, lo slot viene calcolato automaticamente in base al nome del canale primario e cambierà rispetto allo slot pubblico predefinito. Torna allo slot pubblico predefinito se sono configurati canali primari privati e secondari pubblici.</string>
+    <string name="label_very_long_slow">Distanza Molto Grande / Lento</string>
+    <string name="label_long_fast">Distanza Grande / Lento</string>
+    <string name="label_long_turbo">Lungo Raggio - Turbo</string>
+    <string name="label_long_moderate">Lungo Raggio - Moderato</string>
+    <string name="label_long_slow">Distanza Molto Grande / Lento</string>
+    <string name="label_medium_fast">Distanza Media / Lento</string>
+    <string name="label_medium_slow">Distanza Media / Lento</string>
+    <string name="label_short_turbo">Lungo Raggio - Turbo</string>
+    <string name="label_short_fast">Distanza Breve / Veloce</string>
+    <string name="label_short_slow">Distanza Breve / Lento</string>
     <string name="config_network_wifi_enabled_summary">L'attivazione della WiFi disabiliterà la connessione bluetooth con l'app.</string>
     <string name="config_network_eth_enabled_summary">L'attivazione della connessione Ethernet disabiliterà la connessione bluetooth all'app. La connessione al nodo via TCP non è disponibile per i dispositivi Apple.</string>
     <string name="config_network_udp_enabled_summary">Abilita la trasmissione di pacchetti tramite UDP sulla rete locale.</string>
@@ -358,6 +372,7 @@
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
     <string name="navigate_back">Torna Indietro</string>
     <string name="battery">Batteria</string>
+    <string name="channel_utilization">Canale di utilizzo</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Umidità</string>
     <string name="soil_temperature">Temperatura Del Suolo</string>
@@ -539,6 +554,7 @@
     <string name="double_tap_as_button_press">Doppio tocco come pressione pulsante</string>
     <string name="triple_click_adhoc_ping">Triple Click Ad Hoc Ping</string>
     <string name="time_zone">Fuso Orario</string>
+    <string name="led_heartbeat">Battito Cuore Led</string>
     <string name="display_config">Schermo Dispositivo</string>
     <string name="screen_on_for">Tieni lo schermo acceso per</string>
     <string name="carousel_interval">Durata di ogni schermata</string>
@@ -950,6 +966,7 @@
     <string name="device_configuration">Configurazione dispositivo</string>
     <string name="remotely_administrating">"[Remote] %1$s"</string>
     <string name="device_telemetry_enabled">Invia Telemetria Dispositivo</string>
+    <string name="device_telemetry_enabled_summary">Abilita/Disabilita Il dispositivo modulo per la telemetria nella rete mesh</string>
     <string name="any">Qualsiasi</string>
     <string name="one_hour">1 Ora</string>
     <string name="eight_hours">8 Ore</string>
