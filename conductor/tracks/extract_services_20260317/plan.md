@@ -7,7 +7,7 @@
     - [ ] Locate Radio connection classes
 - [x] Task: Conductor - User Manual Verification 'Preparation & Analysis' (Protocol in workflow.md)
 
-## Phase 2: Extraction to `core:service`
+## Phase 2: Extraction to `core:service` [checkpoint: ff47af8]
 - [x] Task: Setup `core:service` module for Android and Common targets (if not already fully configured) [a114084]
 - [x] Task: Move Android `Service` implementations to `core:service/androidMain` [965def0]
     - [x] Move the files
@@ -16,7 +16,7 @@
     - [x] Write failing tests for abstracted shared logic (TDD Red)
     - [x] Extract interfaces and platform-agnostic logic (TDD Green)
     - [x] Refactor the implementations to use these shared abstractions
-- [ ] Task: Conductor - User Manual Verification 'Extraction to core:service' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Extraction to core:service' (Protocol in workflow.md)
 
 ## Phase 3: Extraction to `core:network`
 - [ ] Task: Move Radio connection and networking files from `app` to `core:network/androidMain`
