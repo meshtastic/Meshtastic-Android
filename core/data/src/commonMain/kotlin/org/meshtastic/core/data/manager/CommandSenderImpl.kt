@@ -258,7 +258,7 @@ class CommandSenderImpl(
                 wantAck = true,
                 id = requestId,
                 channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                decoded = Data(portnum = PortNum.TRACEROUTE_APP, want_response = true),
+                decoded = Data(portnum = PortNum.TRACEROUTE_APP, want_response = true, dest = destNum),
             ),
         )
     }
@@ -296,7 +296,7 @@ class CommandSenderImpl(
                 to = destNum,
                 id = requestId,
                 channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                decoded = Data(portnum = portNum, payload = payloadBytes, want_response = true),
+                decoded = Data(portnum = portNum, payload = payloadBytes, want_response = true, dest = destNum),
             ),
         )
     }
@@ -349,7 +349,7 @@ class CommandSenderImpl(
                     wantAck = true,
                     id = requestId,
                     channel = nodeManager.nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                    decoded = Data(portnum = PortNum.NEIGHBORINFO_APP, want_response = true),
+                    decoded = Data(portnum = PortNum.NEIGHBORINFO_APP, want_response = true, dest = destNum),
                 ),
             )
         }
