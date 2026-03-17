@@ -316,7 +316,11 @@ dependencies {
 
 aboutLibraries {
     // Fetch full license text + funding info from GitHub API when on CI with a token
-    val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(false)
+    val isCi =
+        providers
+            .gradleProperty("ci")
+            .map { it.toBoolean() }
+            .getOrElse(providers.environmentVariable("CI").map { it.toBoolean() }.getOrElse(false))
     val ghToken = providers.environmentVariable("GITHUB_TOKEN")
     collect {
         fetchRemoteLicense = isCi && ghToken.isPresent
@@ -334,3 +338,9 @@ aboutLibraries {
         duplicationRule = DuplicateRule.SIMPLE
     }
 }
+
+// Ensure aboutlibraries.json is always up-to-date during the build.
+// This is required since AboutLibraries v11+ no longer auto-exports.
+tasks
+    .matching { it.name.startsWith("process") && it.name.endsWith("Resources") }
+    .configureEach { dependsOn("exportLibraryDefinitions") }
