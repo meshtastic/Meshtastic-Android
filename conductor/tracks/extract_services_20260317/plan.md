@@ -12,10 +12,10 @@
 - [x] Task: Move Android `Service` implementations to `core:service/androidMain` [965def0]
     - [x] Move the files
     - [x] Update imports and Koin injections
-- [ ] Task: Abstract shared service logic into `core:service/commonMain`
-    - [ ] Write failing tests for abstracted shared logic (TDD Red)
-    - [ ] Extract interfaces and platform-agnostic logic (TDD Green)
-    - [ ] Refactor the implementations to use these shared abstractions
+- [~] Task: Abstract shared service logic into `core:service/commonMain`
+    - [x] Write failing tests for abstracted shared logic (TDD Red)
+    - [x] Extract interfaces and platform-agnostic logic (TDD Green)
+    - [x] Refactor the implementations to use these shared abstractions
 - [ ] Task: Conductor - User Manual Verification 'Extraction to core:service' (Protocol in workflow.md)
 
 ## Phase 3: Extraction to `core:network`

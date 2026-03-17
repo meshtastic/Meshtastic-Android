@@ -78,7 +78,7 @@ class MeshService : Service() {
 
     private val connectionManager: MeshConnectionManager by inject()
 
-    private val serviceNotifications: MeshServiceNotifications by inject()
+    private val orchestrator: MeshServiceOrchestrator by inject()
 
     private val router: MeshRouter by inject()
 
@@ -121,24 +121,8 @@ class MeshService : Service() {
             throw e
         }
         Logger.i { "Creating mesh service" }
-        serviceNotifications.initChannels()
 
-        packetHandler.start(serviceScope)
-        router.start(serviceScope)
-        nodeManager.start(serviceScope)
-        connectionManager.start(serviceScope)
-        messageProcessor.start(serviceScope)
-        commandSender.start(serviceScope)
-
-        serviceScope.handledLaunch { radioInterfaceService.connect() }
-
-        radioInterfaceService.receivedData
-            .onEach { bytes -> messageProcessor.handleFromRadio(bytes, nodeManager.myNodeNum) }
-            .launchIn(serviceScope)
-
-        serviceRepository.serviceAction.onEach(router.actionHandler::onServiceAction).launchIn(serviceScope)
-
-        nodeManager.loadCachedNodeDB()
+        orchestrator.start()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -207,6 +191,7 @@ class MeshService : Service() {
     override fun onDestroy() {
         Logger.i { "Destroying mesh service" }
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
+        orchestrator.stop()
         serviceJob.cancel()
         super.onDestroy()
     }
