@@ -44,6 +44,7 @@ const val KEY_EXCLUDE_INFRASTRUCTURE = "exclude-infrastructure"
 const val KEY_ONLY_ONLINE = "only-online"
 const val KEY_ONLY_DIRECT = "only-direct"
 const val KEY_SHOW_IGNORED = "show-ignored"
+const val KEY_EXCLUDE_MQTT = "exclude-mqtt"
 
 @Single
 @Suppress("TooManyFunctions") // One setter per preference field — inherently grows with preferences.
@@ -73,6 +74,7 @@ class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dat
     val onlyOnline: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_ONLINE, default = false)
     val onlyDirect: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_DIRECT, default = false)
     val showIgnored: StateFlow<Boolean> = dataStore.prefStateFlow(key = SHOW_IGNORED, default = false)
+    val excludeMqtt: StateFlow<Boolean> = dataStore.prefStateFlow(key = EXCLUDE_MQTT, default = false)
 
     fun setAppIntroCompleted(completed: Boolean) {
         dataStore.setPref(key = APP_INTRO_COMPLETED, value = completed)
@@ -106,6 +108,10 @@ class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dat
         dataStore.setPref(key = SHOW_IGNORED, value = value)
     }
 
+    fun setExcludeMqtt(value: Boolean) {
+        dataStore.setPref(key = EXCLUDE_MQTT, value = value)
+    }
+
     private fun <T : Any> DataStore<Preferences>.prefStateFlow(
         key: Preferences.Key<T>,
         default: T,
@@ -126,5 +132,6 @@ class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dat
         val ONLY_ONLINE = booleanPreferencesKey(KEY_ONLY_ONLINE)
         val ONLY_DIRECT = booleanPreferencesKey(KEY_ONLY_DIRECT)
         val SHOW_IGNORED = booleanPreferencesKey(KEY_SHOW_IGNORED)
+        val EXCLUDE_MQTT = booleanPreferencesKey(KEY_EXCLUDE_MQTT)
     }
 }

@@ -150,6 +150,8 @@ fun DesktopAdaptiveNodeListScreen(
                                     showIgnored = state.filter.showIgnored,
                                     onToggleShowIgnored = { viewModel.nodeFilterPreferences.toggleShowIgnored() },
                                     ignoredNodeCount = ignoredNodeCount,
+                                    excludeMqtt = state.filter.excludeMqtt,
+                                    onToggleExcludeMqtt = { viewModel.nodeFilterPreferences.toggleExcludeMqtt() },
                                 )
                             }
 

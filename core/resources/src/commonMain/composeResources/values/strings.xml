@@ -53,6 +53,7 @@
     <string name="internal">Internal</string>
     <string name="node_sort_via_favorite">via Favorite</string>
     <string name="node_filter_show_ignored">Only show ignored Nodes</string>
+    <string name="node_filter_exclude_mqtt">Exclude MQTT</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>

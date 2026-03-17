@@ -47,9 +47,10 @@ class GetFilteredNodesUseCaseTest {
         role: Config.DeviceConfig.Role = Config.DeviceConfig.Role.CLIENT,
         ignored: Boolean = false,
         name: String = "Node$num",
+        viaMqtt: Boolean = false,
     ): Node {
         val user = User(id = "!$num", long_name = name, short_name = "N$num", role = role)
-        return Node(num = num, user = user, isIgnored = ignored)
+        return Node(num = num, user = user, isIgnored = ignored, viaMqtt = viaMqtt)
     }
 
     @Test
@@ -115,5 +116,40 @@ class GetFilteredNodesUseCaseTest {
         // Should only keep the CLIENT node, others are infrastructure
         assertEquals(1, result.size)
         assertEquals(1, result.first().num)
+    }
+
+    @Test
+    fun `invoke filters out MQTT nodes if excludeMqtt is true`() = runTest {
+        // Arrange
+        val loraNode = createNode(1, viaMqtt = false)
+        val mqttNode = createNode(2, viaMqtt = true)
+        val filter = NodeFilterState(excludeMqtt = true)
+
+        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns
+            flowOf(listOf(loraNode, mqttNode))
+
+        // Act
+        val result = useCase(filter, NodeSortOption.LAST_HEARD).first()
+
+        // Assert
+        assertEquals(1, result.size)
+        assertEquals(1, result.first().num)
+    }
+
+    @Test
+    fun `invoke keeps MQTT nodes if excludeMqtt is false`() = runTest {
+        // Arrange
+        val loraNode = createNode(1, viaMqtt = false)
+        val mqttNode = createNode(2, viaMqtt = true)
+        val filter = NodeFilterState(excludeMqtt = false)
+
+        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns
+            flowOf(listOf(loraNode, mqttNode))
+
+        // Act
+        val result = useCase(filter, NodeSortOption.LAST_HEARD).first()
+
+        // Assert
+        assertEquals(2, result.size)
     }
 }
