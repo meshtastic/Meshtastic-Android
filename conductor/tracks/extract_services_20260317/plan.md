@@ -29,9 +29,9 @@
 - [x] Task: Conductor - User Manual Verification 'Extraction to core:network' (Protocol in workflow.md)
 
 ## Phase 4: Desktop Integration
-- [ ] Task: Integrate newly extracted shared abstractions into the `desktop` module
-    - [ ] Implement desktop-specific actuals or Koin bindings for the shared interfaces
-    - [ ] Wire up abstracted services/radio logic in desktop Koin graph
+- [x] Task: Integrate newly extracted shared abstractions into the `desktop` module
+    - [x] Implement desktop-specific actuals or Koin bindings for the shared interfaces
+    - [x] Wire up abstracted services/radio logic in desktop Koin graph
 - [ ] Task: Conductor - User Manual Verification 'Desktop Integration' (Protocol in workflow.md)
 
 ## Phase 5: Verification & Cleanup
