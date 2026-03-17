@@ -71,7 +71,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          dependency-graph: generate-and-submit
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/gh-readonly-queue/') }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache-cleanup: on-success
           build-scan-publish: true
@@ -154,6 +154,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/gh-readonly-queue/') }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache-cleanup: on-success
           build-scan-publish: true

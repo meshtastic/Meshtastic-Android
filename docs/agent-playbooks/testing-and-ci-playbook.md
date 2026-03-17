@@ -72,6 +72,7 @@ PR workflow note:
 - `.github/workflows/pull-request.yml` ignores docs-only changes (`**/*.md`, `docs/**`), so doc-only PRs may skip Android CI by design.
 - PR change detection includes workflow/build/config paths such as `.github/workflows/**`, `desktop/**`, `mesh_service_example/**`, `config/**`, `gradle/**`, `settings.gradle.kts`, and `test.gradle.kts`.
 - Android CI on PRs runs with `run_instrumented_tests: false`; merge queue keeps the full emulator matrix on API 26 and 35.
+- Gradle cache writes are enabled for trusted refs/events (`main`, `merge_group`, and `gh-readonly-queue/*`); other refs run in read-only cache mode.
 
 ## 5) Practical guidance for agents
 

@@ -122,6 +122,8 @@ Always run commands in the following order to ensure reliability. Do not attempt
 - Host job runs style/static checks, explicit Android lint tasks, unit tests, and Kover XML coverage uploads once.
 - Android matrix job runs explicit assemble tasks for `app` and `mesh_service_example`; instrumentation is enabled by input and matrix API.
 - Prefer explicit Gradle task paths in CI (for example `app:lintFdroidDebug`, `app:connectedGoogleDebugAndroidTest`) instead of shorthand tasks like `lintDebug`.
+- Pull request CI is main-only (`.github/workflows/pull-request.yml` targets `main` branch).
+- Gradle cache writes are trusted on `main` and merge queue runs (`merge_group` / `gh-readonly-queue/*`); other refs use read-only cache mode in reusable CI.
 - PR `check-changes` path filtering lives in `.github/workflows/pull-request.yml` and must include module dirs plus build/workflow entrypoints (`build-logic/**`, `gradle/**`, `.github/workflows/**`, `gradlew`, `settings.gradle.kts`, etc.) so CI is not skipped for infra-only changes.
 
 ### C. Documentation Sync
