@@ -18,7 +18,7 @@
     - [x] Refactor the implementations to use these shared abstractions
 - [x] Task: Conductor - User Manual Verification 'Extraction to core:service' (Protocol in workflow.md)
 
-## Phase 3: Extraction to `core:network`
+## Phase 3: Extraction to `core:network` [checkpoint: 97a5b62]
 - [x] Task: Move Radio connection and networking files from `app` to `core:network/androidMain` [b5233cf]
     - [x] Move the files
     - [x] Update imports and Koin injections
@@ -26,7 +26,7 @@
     - [x] Write failing tests for abstracted radio logic (TDD Red)
     - [x] Extract platform-agnostic business logic (TDD Green)
     - [x] Refactor implementations to use shared abstractions
-- [ ] Task: Conductor - User Manual Verification 'Extraction to core:network' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Extraction to core:network' (Protocol in workflow.md)
 
 ## Phase 4: Desktop Integration
 - [ ] Task: Integrate newly extracted shared abstractions into the `desktop` module
