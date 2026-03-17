@@ -272,24 +272,22 @@ extensions.configure<CommonExtension> {
 
 ### ❌ **Mistake: Side effects during configuration**
 ```kotlin
-// WRONG: Task configuration during plugin apply (too early)
+// WRONG: Eager task configuration at plugin-apply time
 tasks.withType<Test> {
-    // This runs before build.gradle.kts is parsed!
+    // Can realize tasks too early
 }
 
-// RIGHT: Use afterEvaluate if needed
-afterEvaluate {
-    tasks.withType<Test> {
-        // Runs after all configuration
-    }
+// RIGHT: Lazy, configuration-cache-friendly wiring
+tasks.withType<Test>().configureEach {
+    // Applies to existing and future tasks lazily
 }
 ```
 
 ## Related Files
 
 - `AGENTS.md` - Development guidelines (Section 3.B testing, Section 4.A build protocol)
-- `docs/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` - History of optimizations
+- `docs/BUILD_LOGIC_INDEX.md` - Current build-logic doc entry point (with links to active references)
+- `docs/archive/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` - Historical optimization deep-dive
 - `build-logic/convention/build.gradle.kts` - Convention plugin build config
 - `.github/copilot-instructions.md` - Build & test commands
-
 

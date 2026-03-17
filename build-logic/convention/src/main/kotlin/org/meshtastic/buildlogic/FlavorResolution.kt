@@ -31,21 +31,19 @@ internal fun Project.configureAndroidMarketplaceFallback() {
 
     val marketplaceAttr = Attribute.of(MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
 
-    afterEvaluate {
-        configurations.all {
-            if (!isCanBeResolved || isCanBeConsumed) return@all
-            if (!name.contains("android", ignoreCase = true)) return@all
-            if (attributes.getAttribute(marketplaceAttr) != null) return@all
+    configurations.configureEach {
+        if (!isCanBeResolved || isCanBeConsumed) return@configureEach
+        if (!name.contains("android", ignoreCase = true)) return@configureEach
+        if (attributes.getAttribute(marketplaceAttr) != null) return@configureEach
 
-            // Prefer explicit flavor from configuration name; otherwise use configurable default.
-            val inferredMarketplace =
-                when {
-                    name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
-                    name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
-                    else -> defaultMarketplace
-                }
+        // Prefer explicit flavor from configuration name; otherwise use configurable default.
+        val inferredMarketplace =
+            when {
+                name.contains(MeshtasticFlavor.fdroid.name, ignoreCase = true) -> MeshtasticFlavor.fdroid.name
+                name.contains(MeshtasticFlavor.google.name, ignoreCase = true) -> MeshtasticFlavor.google.name
+                else -> defaultMarketplace
+            }
 
-            attributes.attribute(marketplaceAttr, inferredMarketplace)
-        }
+        attributes.attribute(marketplaceAttr, inferredMarketplace)
     }
 }
