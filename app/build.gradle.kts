@@ -316,9 +316,11 @@ dependencies {
 
 aboutLibraries {
     // Fetch full license text + funding info from GitHub API when on CI with a token
-    val isCi = providers.gradleProperty("ci").map { it.toBoolean() }.getOrElse(
-        providers.environmentVariable("CI").map { it.toBoolean() }.getOrElse(false)
-    )
+    val isCi =
+        providers
+            .gradleProperty("ci")
+            .map { it.toBoolean() }
+            .getOrElse(providers.environmentVariable("CI").map { it.toBoolean() }.getOrElse(false))
     val ghToken = providers.environmentVariable("GITHUB_TOKEN")
     collect {
         fetchRemoteLicense = isCi && ghToken.isPresent
