@@ -15,7 +15,7 @@ navigation3 = "1.1.0-alpha04"
 paging = "3.4.2"
 room = "2.8.4"
 savedstate = "1.4.0"
-koin = "4.2.0-RC2"
+koin = "4.2.0"
 koin-annotations = "2.1.0"
 koin-plugin = "0.4.0"
 
