@@ -444,7 +444,9 @@ fun MapView(
                         if (node.batteryStr != "") node.batteryStr else "?",
                     )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription = getString(Res.string.map_subDescription, ourNode.bearing(node).toString(), dist)
+                    ourNode.bearing(node)?.let { bearing ->
+                        subDescription = getString(Res.string.map_subDescription, bearing, dist)
+                    }
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
