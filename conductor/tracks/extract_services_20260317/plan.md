@@ -34,8 +34,8 @@
     - [x] Wire up abstracted services/radio logic in desktop Koin graph
 - [x] Task: Conductor - User Manual Verification 'Desktop Integration' (Protocol in workflow.md)
 
-## Phase 5: Verification & Cleanup
-- [ ] Task: Build project and verify no regressions in background processing or radio connectivity
-- [ ] Task: Verify test coverage (>80%) for all extracted and refactored code
-- [ ] Task: Remove any lingering unused dependencies or dead code in `app`
-- [ ] Task: Conductor - User Manual Verification 'Verification & Cleanup' (Protocol in workflow.md)
+## Phase 5: Verification & Cleanup [checkpoint: a0866e0]
+- [x] Task: Build project and verify no regressions in background processing or radio connectivity [a9edc2e]
+- [x] Task: Verify test coverage (>80%) for all extracted and refactored code [9cff9bc]
+- [x] Task: Remove any lingering unused dependencies or dead code in `app` [e39d2e2]
+- [x] Task: Conductor - User Manual Verification 'Verification & Cleanup' (Protocol in workflow.md)
