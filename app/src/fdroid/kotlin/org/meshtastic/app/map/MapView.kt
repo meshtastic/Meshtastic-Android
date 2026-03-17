@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
@@ -97,7 +96,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.calculating
 import org.meshtastic.core.resources.cancel
@@ -107,10 +105,7 @@ import org.meshtastic.core.resources.delete_for_everyone
 import org.meshtastic.core.resources.delete_for_me
 import org.meshtastic.core.resources.expires
 import org.meshtastic.core.resources.getString
-import org.meshtastic.core.resources.heading
-import org.meshtastic.core.resources.latitude
 import org.meshtastic.core.resources.location_disabled
-import org.meshtastic.core.resources.longitude
 import org.meshtastic.core.resources.map_cache_info
 import org.meshtastic.core.resources.map_cache_manager
 import org.meshtastic.core.resources.map_cache_size
@@ -142,7 +137,6 @@ import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.map.LastHeardFilter
 import org.meshtastic.feature.map.model.TracerouteOverlay
 import org.meshtastic.feature.map.tracerouteNodeSelection
-import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 import org.meshtastic.proto.Position
 import org.meshtastic.proto.Waypoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable

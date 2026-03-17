@@ -47,7 +47,7 @@ import org.meshtastic.proto.Waypoint
 @Suppress("TooManyFunctions")
 open class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
-    protected open val nodeRepository: NodeRepository,
+    protected val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
 ) : ViewModel() {
