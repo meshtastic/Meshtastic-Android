@@ -36,25 +36,22 @@ on:
       GRADLE_CACHE_PASSWORD:
         required: false
 
+env:
+  DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+  DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+  MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+  GITHUB_TOKEN: ${{ github.token }}
+  GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
+  GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
+  GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
+
 jobs:
-  check:
+  host-check:
     runs-on: ubuntu-latest
     permissions:
       contents: read
     timeout-minutes: 60
-    strategy:
-      fail-fast: true
-      matrix:
-        api_level: ${{ fromJson(inputs.api_levels) }}
-    env:
-      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-      MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-      GITHUB_TOKEN: ${{ github.token }}
-      GRADLE_CACHE_URL: ${{ secrets.GRADLE_CACHE_URL }}
-      GRADLE_CACHE_USERNAME: ${{ secrets.GRADLE_CACHE_USERNAME }}
-      GRADLE_CACHE_PASSWORD: ${{ secrets.GRADLE_CACHE_PASSWORD }}
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -74,7 +71,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          dependency-graph: generate-and-submit
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/gh-readonly-queue/') }}
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           cache-cleanup: on-success
           build-scan-publish: true
@@ -82,34 +79,125 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
 
-      - name: Determine Tasks
-        id: tasks
-        run: |
-          IS_FIRST_API=$(echo '${{ inputs.api_levels }}' | jq -r '.[0] == ${{ matrix.api_level }}')
-          
-          # Matrix-specific tasks
-          TASKS="assembleDebug "
-          [ "${{ inputs.run_lint }}" = "true" ] && TASKS="$TASKS lintDebug "
-          
-          # Instrumented Test Tasks
-          if [ "${{ inputs.run_instrumented_tests }}" = "true" ]; then
-             TASKS="$TASKS connectedDebugAndroidTest "
-          fi
-          
-          echo "tasks=$TASKS" >> $GITHUB_OUTPUT
-          echo "is_first_api=$IS_FIRST_API" >> $GITHUB_OUTPUT
-
       - name: Code Style & Static Analysis
-        if: steps.tasks.outputs.is_first_api == 'true'
+        if: inputs.run_lint == true
         run: ./gradlew spotlessCheck detekt -Pci=true --scan
 
-      - name: Shared Unit Tests
-        if: steps.tasks.outputs.is_first_api == 'true' && inputs.run_unit_tests == true
-        run: ./gradlew testDebugUnitTest testFdroidDebugUnitTest testGoogleDebugUnitTest koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug -Pci=true --continue --scan
+      - name: Android Lint
+        if: inputs.run_lint == true
+        run: ./gradlew app:lintFdroidDebug app:lintGoogleDebug core:barcode:lintFdroidDebug core:barcode:lintGoogleDebug core:api:lintDebug mesh_service_example:lintDebug -Pci=true --continue --scan
+
+      - name: Shared Unit Tests & Coverage
+        if: inputs.run_unit_tests == true
+        run: ./gradlew test koverXmlReport app:koverXmlReportFdroidDebug app:koverXmlReportGoogleDebug core:api:koverXmlReportDebug core:barcode:koverXmlReportFdroidDebug core:barcode:koverXmlReportGoogleDebug mesh_service_example:koverXmlReportDebug -Pci=true --continue --scan
 
       - name: KMP JVM Smoke Compile
-        if: steps.tasks.outputs.is_first_api == 'true'
-        run: ./gradlew :core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm :desktop:test -Pci=true --continue --scan
+        run: ./gradlew :core:proto:compileKotlinJvm :core:common:compileKotlinJvm :core:model:compileKotlinJvm :core:repository:compileKotlinJvm :core:di:compileKotlinJvm :core:navigation:compileKotlinJvm :core:resources:compileKotlinJvm :core:datastore:compileKotlinJvm :core:database:compileKotlinJvm :core:domain:compileKotlinJvm :core:prefs:compileKotlinJvm :core:network:compileKotlinJvm :core:data:compileKotlinJvm :core:ble:compileKotlinJvm :core:nfc:compileKotlinJvm :core:service:compileKotlinJvm :core:testing:compileKotlinJvm :core:ui:compileKotlinJvm :feature:intro:compileKotlinJvm :feature:messaging:compileKotlinJvm :feature:connections:compileKotlinJvm :feature:map:compileKotlinJvm :feature:node:compileKotlinJvm :feature:settings:compileKotlinJvm :feature:firmware:compileKotlinJvm -Pci=true --continue --scan
+
+      - name: Upload coverage results to Codecov
+        if: ${{ !cancelled() && inputs.run_unit_tests }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: host-unit
+          fail_ci_if_error: false
+          files: "**/build/reports/kover/report*.xml"
+
+      - name: Upload unit test results to Codecov
+        if: ${{ !cancelled() && inputs.run_unit_tests }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          flags: host-unit
+          fail_ci_if_error: false
+          report_type: test_results
+          files: "**/build/test-results/**/*.xml"
+
+      - name: Upload host reports
+        if: ${{ always() && inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: reports-host
+          path: |
+            **/build/reports
+            **/build/test-results
+          retention-days: 7
+
+  android-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    timeout-minutes: 60
+    strategy:
+      fail-fast: true
+      matrix:
+        api_level: ${{ fromJson(inputs.api_levels) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          java-version: '17'
+          distribution: 'zulu'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/gh-readonly-queue/') }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-cleanup: on-success
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
+
+      - name: Determine matrix metadata
+        id: matrix_meta
+        shell: bash
+        run: |
+          first_api=$(python3 - <<'PY'
+          import json
+          print(json.loads('${{ inputs.api_levels }}')[0])
+          PY
+          )
+
+          if [[ "${{ matrix.api_level }}" == "$first_api" ]]; then
+            echo "is_first_api=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_first_api=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Determine Android tasks
+        id: tasks
+        shell: bash
+        run: |
+          tasks=(
+            "app:assembleFdroidDebug"
+            "app:assembleGoogleDebug"
+            "mesh_service_example:assembleDebug"
+          )
+
+          if [[ "${{ inputs.run_instrumented_tests }}" == "true" ]]; then
+            tasks+=(
+              "app:connectedFdroidDebugAndroidTest"
+              "app:connectedGoogleDebugAndroidTest"
+              "core:barcode:connectedFdroidDebugAndroidTest"
+              "core:barcode:connectedGoogleDebugAndroidTest"
+            )
+          fi
+
+          printf 'tasks=%s\n' "${tasks[*]}" >> "$GITHUB_OUTPUT"
 
       - name: Enable KVM group perms
         if: inputs.run_instrumented_tests == true
@@ -118,7 +206,7 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Run Flavor Check (with Emulator)
+      - name: Run Android Build & Instrumented Tests
         if: inputs.run_instrumented_tests == true
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -127,30 +215,25 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --parallel --configuration-cache --continue --scan
+          script: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --parallel --configuration-cache --continue --scan
 
-      - name: Run Flavor Check (no Emulator)
+      - name: Run Android Build
         if: inputs.run_instrumented_tests == false
-        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true -PenableComposeCompilerMetrics=true -PenableComposeCompilerReports=true --parallel --configuration-cache --continue --scan
+        run: ./gradlew ${{ steps.tasks.outputs.tasks }} -Pci=true --parallel --configuration-cache --continue --scan
 
-      - name: Upload coverage results to Codecov
-        if: ${{ !cancelled() }}
+      - name: Upload instrumented test results to Codecov
+        if: ${{ !cancelled() && inputs.run_instrumented_tests && steps.matrix_meta.outputs.is_first_api == 'true' }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: meshtastic/Meshtastic-Android
-          files: "**/build/reports/kover/report*.xml"
-
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: android-instrumented
+          fail_ci_if_error: false
           report_type: test_results
-          files: "**/build/test-results/**/*.xml,**/build/outputs/androidTest-results/**/*.xml"
+          files: "**/build/outputs/androidTest-results/**/*.xml"
 
       - name: Upload debug artifact
-        if: ${{ steps.tasks.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
+        if: ${{ steps.matrix_meta.outputs.is_first_api == 'true' && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
           name: app-debug-apks
@@ -158,20 +241,18 @@ jobs:
           retention-days: 14
 
       - name: Report App Size
-        if: always() && steps.tasks.outputs.is_first_api == 'true'
+        if: ${{ always() && steps.matrix_meta.outputs.is_first_api == 'true' }}
         run: |
           echo "### 📦 App Size Report" >> $GITHUB_STEP_SUMMARY
           echo "| Artifact | Size |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
           find app/build/outputs/apk -name "*.apk" -exec du -h {} + | awk '{print "| " $2 " | " $1 " |"}' >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload reports
+      - name: Upload Android reports
         if: ${{ always() && inputs.upload_artifacts }}
         uses: actions/upload-artifact@v7
         with:
-          name: reports-api-${{ matrix.api_level }}
+          name: reports-android-api-${{ matrix.api_level }}
           path: |
-            **/build/reports
-            **/build/test-results
             **/build/outputs/androidTest-results
           retention-days: 7

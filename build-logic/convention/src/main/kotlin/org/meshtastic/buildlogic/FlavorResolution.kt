@@ -17,10 +17,11 @@
 
 package org.meshtastic.buildlogic
 
+import com.android.build.api.attributes.ProductFlavorAttr
 import org.gradle.api.Project
 import org.gradle.api.attributes.Attribute
 
-private const val MARKETPLACE_ATTRIBUTE_NAME = "com.android.build.api.attributes.ProductFlavor:marketplace"
+private const val LEGACY_MARKETPLACE_ATTRIBUTE_NAME = "marketplace"
 
 internal fun Project.configureAndroidMarketplaceFallback() {
     val defaultMarketplace =
@@ -29,13 +30,16 @@ internal fun Project.configureAndroidMarketplaceFallback() {
             .orElse(MeshtasticFlavor.entries.first { it.default }.name)
             .get()
 
-    val marketplaceAttr = Attribute.of(MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
+    val marketplaceAttr = ProductFlavorAttr.of(MeshtasticFlavor.fdroid.dimension.name)
+    val legacyMarketplaceAttr = Attribute.of(LEGACY_MARKETPLACE_ATTRIBUTE_NAME, String::class.java)
 
     afterEvaluate {
-        configurations.all {
-            if (!isCanBeResolved || isCanBeConsumed) return@all
-            if (!name.contains("android", ignoreCase = true)) return@all
-            if (attributes.getAttribute(marketplaceAttr) != null) return@all
+        configurations.configureEach {
+            if (!isCanBeResolved || isCanBeConsumed) return@configureEach
+            if (!name.contains("android", ignoreCase = true)) return@configureEach
+            if (attributes.getAttribute(marketplaceAttr) != null && attributes.getAttribute(legacyMarketplaceAttr) != null) {
+                return@configureEach
+            }
 
             // Prefer explicit flavor from configuration name; otherwise use configurable default.
             val inferredMarketplace =
@@ -45,7 +49,8 @@ internal fun Project.configureAndroidMarketplaceFallback() {
                     else -> defaultMarketplace
                 }
 
-            attributes.attribute(marketplaceAttr, inferredMarketplace)
+            attributes.attribute(marketplaceAttr, objects.named(ProductFlavorAttr::class.java, inferredMarketplace))
+            attributes.attribute(legacyMarketplaceAttr, inferredMarketplace)
         }
     }
 }

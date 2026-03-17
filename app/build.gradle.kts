@@ -31,7 +31,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.compose)
     id("meshtastic.koin")
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.secrets)
     alias(libs.plugins.aboutlibraries)
 }

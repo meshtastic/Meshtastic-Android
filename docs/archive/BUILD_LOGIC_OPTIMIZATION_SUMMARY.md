@@ -109,13 +109,13 @@ AFTER:
 - Summary of changes and impact
 - Benefits for module developers
 
-### 2. `docs/BUILD_LOGIC_OPTIMIZATION_ANALYSIS.md`
+### 2. `docs/archive/BUILD_LOGIC_OPTIMIZATION_ANALYSIS.md`
 - Complete analysis of 4 optimization opportunities
 - High/Medium/Low priority classification
 - Implementation cost/benefit analysis
 - Future recommendations
 
-### 3. `docs/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` ⭐ PRIMARY REFERENCE
+### 3. `docs/archive/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` ⭐ PRIMARY REFERENCE
 - Full summary of all optimizations
 - Build-logic plugin inventory with duplication status
 - Future opportunities with effort estimates
@@ -263,7 +263,7 @@ AFTER: 1 opt-in convention plugin
 ### For Developers
 - Use `docs/BUILD_LOGIC_CONVENTIONS_GUIDE.md` when modifying build-logic
 - Follow test dependency patterns when creating new KMP modules
-- Reference `docs/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` for consolidation opportunities
+- Reference `docs/archive/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` for consolidation opportunities
 
 ### For Code Reviewers
 - Watch for duplicate convention plugins (can consolidate if appropriate)

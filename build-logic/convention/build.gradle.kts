@@ -60,7 +60,6 @@ dependencies {
     compileOnly(libs.secrets.gradlePlugin)
     compileOnly(libs.spotless.gradlePlugin)
     compileOnly(libs.test.retry.gradlePlugin)
-    compileOnly(libs.truth)
 
     detektPlugins(libs.detekt.formatting)
 }
@@ -175,6 +174,11 @@ gradlePlugin {
         register("kmpLibraryCompose") {
             id = "meshtastic.kmp.library.compose"
             implementationClass = "KmpLibraryComposeConventionPlugin"
+        }
+
+        register("kmpFeature") {
+            id = "meshtastic.kmp.feature"
+            implementationClass = "KmpFeatureConventionPlugin"
         }
 
         register("dokka") {

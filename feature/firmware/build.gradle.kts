@@ -16,10 +16,8 @@
  */
 
 plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.kmp.library.compose)
+    alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -49,22 +47,12 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.kable.core)
-            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.kermit)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.ktor.client.core)
         }
 
         androidMain.dependencies {
-            implementation(project.dependencies.platform(libs.androidx.compose.bom))
-            implementation(libs.accompanist.permissions)
-            implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.appcompat)
-            implementation(libs.androidx.compose.material.iconsExtended)
-            implementation(libs.androidx.compose.material3)
-            implementation(libs.androidx.compose.ui.text)
-            implementation(libs.androidx.compose.ui.tooling.preview)
             implementation(libs.nordic.dfu)
             implementation(libs.coil)
             implementation(libs.coil.network.okhttp)
@@ -72,8 +60,6 @@ kotlin {
             implementation(libs.markdown.renderer.m3)
             implementation(libs.markdown.renderer)
         }
-
-        commonTest.dependencies { implementation(projects.core.testing) }
 
         val androidHostTest by getting {
             dependencies {

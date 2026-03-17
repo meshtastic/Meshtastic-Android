@@ -227,7 +227,7 @@ Add unit tests to `build-logic` verifying:
 ## Related Documentation
 
 - `docs/BUILD_CONVENTION_TEST_DEPS.md` - Details on test dependency centralization
-- `docs/BUILD_LOGIC_OPTIMIZATION_ANALYSIS.md` - Full analysis of optimization opportunities
+- `docs/archive/BUILD_LOGIC_OPTIMIZATION_ANALYSIS.md` - Full analysis of optimization opportunities
 - `AGENTS.md` - Updated testing + KMP hierarchy guidelines (Section 3.B)
 
 

@@ -15,10 +15,12 @@ Quick reference for maintaining and extending the build-logic convention system.
 build-logic/
 ├── convention/
 │   ├── src/main/kotlin/
-│   │   ├── KmpLibraryConventionPlugin.kt        # KMP modules: features, core
-│   │   ├── KmpJvmAndroidConventionPlugin.kt     # Opt-in jvmAndroidMain hierarchy for Android + desktop JVM
-│   │   ├── AndroidApplicationConventionPlugin.kt # Main app
-│   │   ├── AndroidLibraryConventionPlugin.kt     # Android-only libraries
+│   │   ├── KmpFeatureConventionPlugin.kt          # KMP feature modules (composes library + compose + koin + common deps)
+│   │   ├── KmpLibraryConventionPlugin.kt          # KMP modules: core libraries
+│   │   ├── KmpLibraryComposeConventionPlugin.kt   # KMP Compose Multiplatform setup
+│   │   ├── KmpJvmAndroidConventionPlugin.kt       # Opt-in jvmAndroidMain hierarchy for Android + desktop JVM
+│   │   ├── AndroidApplicationConventionPlugin.kt   # Main app
+│   │   ├── AndroidLibraryConventionPlugin.kt       # Android-only libraries
 │   │   ├── AndroidApplicationComposeConventionPlugin.kt
 │   │   ├── AndroidLibraryComposeConventionPlugin.kt
 │   │   ├── org/meshtastic/buildlogic/
@@ -82,6 +84,48 @@ kotlin {
 ```
 
 **Why:** The convention uses Kotlin's hierarchy template API to create `jvmAndroidMain` without the `Default Kotlin Hierarchy Template Not Applied Correctly` warning triggered by hand-written `dependsOn(...)` graphs.
+
+### Example: Creating a new KMP feature module
+
+**Current Pattern (GOOD ✅):**
+
+Use `meshtastic.kmp.feature` for any `feature:*` module. It composes `kmp.library` + `kmp.library.compose` + `koin` and provides all the common Compose/Lifecycle/Koin/Android dependencies that every feature needs:
+
+```kotlin
+plugins {
+    alias(libs.plugins.meshtastic.kmp.feature)
+    // Optional: add only if this feature needs serialization
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
+}
+
+kotlin {
+    jvm()
+    android {
+        namespace = "org.meshtastic.feature.yourfeature"
+        androidResources.enable = false
+        withHostTest { isIncludeAndroidResources = true }
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            // Only module-SPECIFIC deps here
+            implementation(projects.core.common)
+            implementation(projects.core.model)
+            implementation(projects.core.ui)
+        }
+        androidMain.dependencies {
+            // Only Android-specific extras here
+        }
+    }
+}
+```
+
+**What the plugin provides automatically:**
+- `commonMain`: `compose-multiplatform-material3`, `compose-multiplatform-materialIconsExtended`, `jetbrains-lifecycle-viewmodel-compose`, `koin-compose-viewmodel`, `kermit`
+- `androidMain`: `androidx-compose-bom` (platform), `accompanist-permissions`, `androidx-activity-compose`, `androidx-compose-material3`, `androidx-compose-material-iconsExtended`, `androidx-compose-ui-text`, `androidx-compose-ui-tooling-preview`
+- `commonTest`: `core:testing`
+
+**Why:** Eliminates ~15 duplicate dependency declarations per feature module (modelled after Now in Android's `AndroidFeatureImplConventionPlugin`).
 
 ### Example: Adding Android-specific test config
 
@@ -228,24 +272,22 @@ extensions.configure<CommonExtension> {
 
 ### ❌ **Mistake: Side effects during configuration**
 ```kotlin
-// WRONG: Task configuration during plugin apply (too early)
+// WRONG: Eager task configuration at plugin-apply time
 tasks.withType<Test> {
-    // This runs before build.gradle.kts is parsed!
+    // Can realize tasks too early
 }
 
-// RIGHT: Use afterEvaluate if needed
-afterEvaluate {
-    tasks.withType<Test> {
-        // Runs after all configuration
-    }
+// RIGHT: Lazy, configuration-cache-friendly wiring
+tasks.withType<Test>().configureEach {
+    // Applies to existing and future tasks lazily
 }
 ```
 
 ## Related Files
 
 - `AGENTS.md` - Development guidelines (Section 3.B testing, Section 4.A build protocol)
-- `docs/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` - History of optimizations
+- `docs/BUILD_LOGIC_INDEX.md` - Current build-logic doc entry point (with links to active references)
+- `docs/archive/BUILD_LOGIC_OPTIMIZATIONS_COMPLETE.md` - Historical optimization deep-dive
 - `build-logic/convention/build.gradle.kts` - Convention plugin build config
 - `.github/copilot-instructions.md` - Build & test commands
-
 
