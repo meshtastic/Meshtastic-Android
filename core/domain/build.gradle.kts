@@ -17,7 +17,6 @@
 
 plugins {
     alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.meshtastic.koin)
 }
 
@@ -41,7 +40,6 @@ kotlin {
             implementation(projects.core.datastore)
             implementation(projects.core.resources)
 
-            api(libs.javax.inject)
             implementation(libs.kermit)
             implementation(libs.compose.multiplatform.resources)
             implementation(libs.okio)

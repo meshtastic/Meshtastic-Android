@@ -29,10 +29,5 @@ kotlin {
         androidResources.enable = false
     }
 
-    sourceSets {
-        commonMain.dependencies {
-            api(libs.javax.inject)
-            implementation(libs.kotlinx.coroutines.core)
-        }
-    }
+    sourceSets { commonMain.dependencies { implementation(libs.kotlinx.coroutines.core) } }
 }

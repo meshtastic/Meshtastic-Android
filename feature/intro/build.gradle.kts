@@ -16,10 +16,8 @@
  */
 
 plugins {
-    alias(libs.plugins.meshtastic.kmp.library)
-    alias(libs.plugins.meshtastic.kmp.library.compose)
+    alias(libs.plugins.meshtastic.kmp.feature)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.meshtastic.koin)
 }
 
 kotlin {
@@ -40,23 +38,10 @@ kotlin {
             implementation(projects.core.ui)
             implementation(projects.core.resources)
 
-            implementation(libs.jetbrains.lifecycle.viewmodel.compose)
-            implementation(libs.koin.compose.viewmodel)
             implementation(libs.jetbrains.navigation3.runtime)
         }
 
-        androidMain.dependencies {
-            implementation(project.dependencies.platform(libs.androidx.compose.bom))
-            implementation(libs.accompanist.permissions)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.compose.material3)
-            implementation(libs.androidx.compose.material.iconsExtended)
-            implementation(libs.androidx.compose.ui.text)
-            implementation(libs.androidx.compose.ui.tooling.preview)
-            implementation(libs.jetbrains.navigation3.ui)
-        }
-
-        commonTest.dependencies { implementation(projects.core.testing) }
+        androidMain.dependencies { implementation(libs.jetbrains.navigation3.ui) }
 
         androidUnitTest.dependencies {
             implementation(libs.junit)

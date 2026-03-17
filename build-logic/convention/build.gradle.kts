@@ -177,6 +177,11 @@ gradlePlugin {
             implementationClass = "KmpLibraryComposeConventionPlugin"
         }
 
+        register("kmpFeature") {
+            id = "meshtastic.kmp.feature"
+            implementationClass = "KmpFeatureConventionPlugin"
+        }
+
         register("dokka") {
             id = "meshtastic.dokka"
             implementationClass = "DokkaConventionPlugin"

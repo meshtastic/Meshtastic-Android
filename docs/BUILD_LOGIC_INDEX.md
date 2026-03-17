@@ -82,7 +82,9 @@ Build Verification:
 
 ### Plugin Status
 ```
+✅ KmpFeatureConventionPlugin       - NEW (feature module dep consolidation)
 ✅ KmpLibraryConventionPlugin       - Enhanced (test deps added)
+✅ KmpLibraryComposeConventionPlugin - Enhanced (CMP runtime/resources)
 ✅ AndroidApplicationCompose        - Optimized (documented duplication)
 ✅ AndroidLibraryCompose            - Optimized (documented duplication)
 ✅ AndroidApplicationFlavors        - Optimized (documented opportunity)
@@ -137,7 +139,8 @@ Build Verification:
 ### Short Term
 - [ ] Consider plugin validation test suite
 - [ ] Review other configuration functions for consolidation opportunities
-- [ ] Investigate factoring out JetBrains CMP dependencies into `meshtastic.kmp.library.compose` convention.
+- [x] Investigate factoring out JetBrains CMP dependencies into `meshtastic.kmp.library.compose` convention.
+- [x] Create `meshtastic.kmp.feature` to eliminate cross-feature Compose/Lifecycle/Koin dep duplication.
 
 ### Long Term
 - [ ] Monitor if Android Application/Library handling diverges

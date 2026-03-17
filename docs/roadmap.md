@@ -1,6 +1,6 @@
 # Roadmap
 
-> Last updated: 2026-03-16
+> Last updated: 2026-03-17
 
 Forward-looking priorities for the Meshtastic KMP multi-target effort. For current state, see [`kmp-status.md`](./kmp-status.md). For the full gap analysis, see [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md).
 
@@ -16,7 +16,7 @@ These items address structural gaps identified in the March 2026 architecture re
 | Add feature module `commonTest` (settings, node, messaging) | Medium | Medium | ✅ |
 | Desktop Koin `checkModules()` integration test | Medium | Low | ✅ |
 | Auto-wire Desktop ViewModels via K2 Compiler (eliminate manual wiring) | Medium | Low | ✅ |
-| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low | ✅ |
+here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low | ✅ |
 
 ## Active Work
 
@@ -81,7 +81,7 @@ These items address structural gaps identified in the March 2026 architecture re
 4. **`feature:connections` module** — ✅ Done: Extracted connections UI into KMP feature module with dynamic transport availability detection
 5. **Navigation 3 parity baseline** — ✅ Done: shared `TopLevelDestination` in `core:navigation`; both shells use same enum; parity tests in `core:navigation/commonTest` and `desktop/test`
 6. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations)
-7. **Build-logic consolidation** — **Planned:** Consolidate expansive build-logic convention plugins. There is currently some duplication in Compose dependencies that should be factored into common conventions (`meshtastic.kmp.library.compose` vs manually specifying JetBrains CMP deps in feature modules).
+7. **Build-logic consolidation** — ✅ Done: Created `meshtastic.kmp.feature` convention plugin (modelled after NiA's `AndroidFeatureImplConventionPlugin`). Composes `kmp.library` + `kmp.library.compose` + `koin` and wires common Compose/Lifecycle/Koin/androidMain deps. All 7 feature modules migrated; ~100 duplicated dep lines eliminated.
 
 ## Medium-Term Priorities (60 days)
 

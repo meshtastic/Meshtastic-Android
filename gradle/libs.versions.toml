@@ -299,6 +299,7 @@ meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-koin = { id = "meshtastic.koin" }
 meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
+meshtastic-kmp-feature = { id = "meshtastic.kmp.feature" }
 meshtastic-kmp-library = { id = "meshtastic.kmp.library" }
 meshtastic-kmp-library-compose = { id = "meshtastic.kmp.library.compose" }
 meshtastic-root = { id = "meshtastic.root" }
