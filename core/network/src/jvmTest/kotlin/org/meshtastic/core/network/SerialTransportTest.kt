@@ -5,6 +5,7 @@ import org.meshtastic.core.repository.RadioTransport
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
+import kotlin.test.assertFalse
 
 class SerialTransportTest {
     @Test
@@ -15,8 +16,7 @@ class SerialTransportTest {
 
     @Test
     fun testSerialTransportImplementsRadioTransport() {
-        // Just instantiate to verify it implements the interface and compiles
-        val transport: RadioTransport = SerialTransport()
+        val transport: RadioTransport = SerialTransport("dummyPort")
         assertTrue(transport is SerialTransport, "Transport should be a SerialTransport")
     }
 
@@ -24,5 +24,13 @@ class SerialTransportTest {
     fun testGetAvailablePorts() {
         val ports = SerialTransport.getAvailablePorts()
         assertNotNull(ports, "Available ports should not be null")
+    }
+
+    @Test
+    fun testConnectToInvalidPortFailsGracefully() {
+        val transport = SerialTransport("invalid_port_name", 115200)
+        val connected = transport.connect()
+        assertFalse(connected, "Connecting to an invalid port should return false")
+        transport.close()
     }
 }
