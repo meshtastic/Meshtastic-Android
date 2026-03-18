@@ -14,12 +14,12 @@
 - [x] Task: Update package declarations and resolve broken imports.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Message Queue Abstraction' (Protocol in workflow.md)
 
-## Phase 3: Widget Extraction
-- [~] Task: Review the contents of `app/src/main/kotlin/org/meshtastic/app/widget/`.
-- [ ] Task: Decide whether to move widgets to an existing module (e.g. `core:ui` or `feature:node`) or create a new `feature:widget` module.
-- [ ] Task: Relocate `LocalStatsWidget.kt`, `LocalStatsWidgetReceiver.kt`, `LocalStatsWidgetState.kt`, `RefreshLocalStatsAction.kt`, and `AndroidAppWidgetUpdater.kt`.
-- [ ] Task: Relocate necessary widget resources, strings, and AndroidManifest declarations.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Widget Extraction' (Protocol in workflow.md)
+## Phase 3: Widget Extraction [checkpoint: 0c027e3]
+- [x] Task: Review the contents of `app/src/main/kotlin/org/meshtastic/app/widget/`.
+- [x] Task: Decide whether to move widgets to an existing module (e.g. `core:ui` or `feature:node`) or create a new `feature:widget` module.
+- [x] Task: Relocate `LocalStatsWidget.kt`, `LocalStatsWidgetReceiver.kt`, `LocalStatsWidgetState.kt`, `RefreshLocalStatsAction.kt`, and `AndroidAppWidgetUpdater.kt`.
+- [x] Task: Relocate necessary widget resources, strings, and AndroidManifest declarations.
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Widget Extraction' (Protocol in workflow.md)
 
 ## Phase 4: Dependency Injection Refactoring
 - [ ] Task: Review `app/src/main/kotlin/org/meshtastic/app/MainKoinModule.kt` and `di/AppKoinModule.kt`.
