@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9934",
+      "title": "fix: MQTT settings silently fail to persist when broker is unreachable",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9934",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9931",
       "title": "fix: apply LoRa config changes live without rebooting",
       "page_url": "https://github.com/meshtastic/firmware/pull/9931",
