@@ -16,15 +16,18 @@
  */
 package org.meshtastic.core.network.radio
 
-import io.mockk.confirmVerified
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifyNoMoreCalls
 import org.junit.Test
 import org.meshtastic.core.repository.RadioInterfaceService
 
 class StreamInterfaceTest {
 
-    private val service: RadioInterfaceService = mockk(relaxed = true)
+    private val service: RadioInterfaceService = mock(MockMode.autofill)
 
     // Concrete implementation for testing
     private class TestStreamInterface(service: RadioInterfaceService) : StreamInterface(service) {
@@ -75,7 +78,7 @@ class StreamInterfaceTest {
 
         verify { service.handleFromRadio(byteArrayOf(0x11)) }
         verify { service.handleFromRadio(byteArrayOf(0x22)) }
-        confirmVerified(service)
+        verifyNoMoreCalls(service)
     }
 
     @Test
@@ -98,6 +101,6 @@ class StreamInterfaceTest {
         header.forEach { streamInterface.testReadChar(it) }
 
         // Should ignore and reset, not expecting handleFromRadio
-        verify(exactly = 0) { service.handleFromRadio(any()) }
+        verify(mode = VerifyMode.exactly(0)) { service.handleFromRadio(any()) }
     }
 }

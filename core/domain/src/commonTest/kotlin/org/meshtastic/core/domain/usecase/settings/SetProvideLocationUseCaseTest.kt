@@ -16,29 +16,31 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import io.mockk.mockk
-import io.mockk.verify
-import org.meshtastic.core.repository.UiPrefs
+import dev.mokkery.MockMode
+import dev.mokkery.mock
+import dev.mokkery.verifySuspend
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.UiPreferences
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class SetProvideLocationUseCaseTest {
 
-    private lateinit var uiPrefs: UiPrefs
+    private lateinit var uiPreferences: UiPreferences
     private lateinit var useCase: SetProvideLocationUseCase
 
     @BeforeTest
     fun setUp() {
-        uiPrefs = mockk(relaxed = true)
-        useCase = SetProvideLocationUseCase(uiPrefs)
+        uiPreferences = mock(MockMode.autofill)
+        useCase = SetProvideLocationUseCase(uiPreferences)
     }
 
     @Test
-    fun `invoke calls setShouldProvideNodeLocation on uiPrefs`() {
+    fun `invoke calls setShouldProvideNodeLocation on uiPreferences`() = runTest {
         // Act
-        useCase(1234, true)
+        useCase(123, true)
 
         // Assert
-        verify { uiPrefs.setShouldProvideNodeLocation(1234, true) }
+        verifySuspend { uiPreferences.setShouldProvideNodeLocation(123, true) }
     }
 }

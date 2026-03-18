@@ -16,9 +16,10 @@
  */
 package org.meshtastic.feature.settings
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.every
+import dev.mokkery.mock
+import dev.mokkery.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,13 +53,13 @@ class LegacySettingsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    private val radioConfigRepository: RadioConfigRepository = mockk(relaxed = true)
-    private val radioController: RadioController = mockk(relaxed = true)
-    private val nodeRepository: NodeRepository = mockk(relaxed = true)
-    private val uiPrefs: UiPrefs = mockk(relaxed = true)
-    private val buildConfigProvider: BuildConfigProvider = mockk(relaxed = true)
-    private val databaseManager: DatabaseManager = mockk(relaxed = true)
-    private val meshLogPrefs: MeshLogPrefs = mockk(relaxed = true)
+    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    private val radioController: RadioController = mock(MockMode.autofill)
+    private val nodeRepository: NodeRepository = mock(MockMode.autofill)
+    private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private val buildConfigProvider: BuildConfigProvider = mock(MockMode.autofill)
+    private val databaseManager: DatabaseManager = mock(MockMode.autofill)
+    private val meshLogPrefs: MeshLogPrefs = mock(MockMode.autofill)
 
     private lateinit var setThemeUseCase: SetThemeUseCase
     private lateinit var setAppIntroCompletedUseCase: SetAppIntroCompletedUseCase
@@ -75,14 +76,14 @@ class LegacySettingsViewModelTest {
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
 
-        setThemeUseCase = mockk(relaxed = true)
-        setAppIntroCompletedUseCase = mockk(relaxed = true)
-        setProvideLocationUseCase = mockk(relaxed = true)
-        setDatabaseCacheLimitUseCase = mockk(relaxed = true)
-        setMeshLogSettingsUseCase = mockk(relaxed = true)
-        meshLocationUseCase = mockk(relaxed = true)
-        exportDataUseCase = mockk(relaxed = true)
-        isOtaCapableUseCase = mockk(relaxed = true)
+        setThemeUseCase = mock(MockMode.autofill)
+        setAppIntroCompletedUseCase = mock(MockMode.autofill)
+        setProvideLocationUseCase = mock(MockMode.autofill)
+        setDatabaseCacheLimitUseCase = mock(MockMode.autofill)
+        setMeshLogSettingsUseCase = mock(MockMode.autofill)
+        meshLocationUseCase = mock(MockMode.autofill)
+        exportDataUseCase = mock(MockMode.autofill)
+        isOtaCapableUseCase = mock(MockMode.autofill)
 
         // Return real StateFlows to avoid ClassCastException
         every { databaseManager.cacheLimit } returns MutableStateFlow(100)
@@ -95,7 +96,7 @@ class LegacySettingsViewModelTest {
 
         viewModel =
             SettingsViewModel(
-                app = mockk(),
+                app = mock(),
                 radioConfigRepository = radioConfigRepository,
                 radioController = radioController,
                 nodeRepository = nodeRepository,

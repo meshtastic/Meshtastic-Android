@@ -29,7 +29,7 @@ open class ImportProfileUseCase {
      * @param source The source to read the profile from.
      * @return A [Result] containing the imported [DeviceProfile] or an error.
      */
-    operator fun invoke(source: BufferedSource): Result<DeviceProfile> = runCatching {
+    open operator fun invoke(source: BufferedSource): Result<DeviceProfile> = runCatching {
         val bytes = source.readByteArray()
         DeviceProfile.ADAPTER.decode(bytes)
     }

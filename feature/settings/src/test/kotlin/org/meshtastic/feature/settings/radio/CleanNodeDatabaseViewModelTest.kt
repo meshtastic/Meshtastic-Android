@@ -16,9 +16,11 @@
  */
 package org.meshtastic.feature.settings.radio
 
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
+import dev.mokkery.MockMode
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -45,8 +47,8 @@ class CleanNodeDatabaseViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        cleanNodeDatabaseUseCase = mockk(relaxed = true)
-        alertManager = mockk(relaxed = true)
+        cleanNodeDatabaseUseCase = mock(MockMode.autofill)
+        alertManager = mock(MockMode.autofill)
         viewModel = CleanNodeDatabaseViewModel(cleanNodeDatabaseUseCase, alertManager)
     }
 
@@ -58,7 +60,7 @@ class CleanNodeDatabaseViewModelTest {
     @Test
     fun `getNodesToDelete updates state`() = runTest {
         val nodes = listOf(Node(num = 1), Node(num = 2))
-        coEvery { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
+        everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
 
         viewModel.getNodesToDelete()
         advanceUntilIdle()
@@ -69,14 +71,14 @@ class CleanNodeDatabaseViewModelTest {
     @Test
     fun `cleanNodes calls useCase and clears state`() = runTest {
         val nodes = listOf(Node(num = 1))
-        coEvery { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
+        everySuspend { cleanNodeDatabaseUseCase.getNodesToClean(any(), any(), any()) } returns nodes
         viewModel.getNodesToDelete()
         advanceUntilIdle()
 
         viewModel.cleanNodes()
         advanceUntilIdle()
 
-        coVerify { cleanNodeDatabaseUseCase.cleanNodes(listOf(1)) }
+        verifySuspend { cleanNodeDatabaseUseCase.cleanNodes(listOf(1)) }
         assertEquals(0, viewModel.nodesToDelete.value.size)
     }
 }

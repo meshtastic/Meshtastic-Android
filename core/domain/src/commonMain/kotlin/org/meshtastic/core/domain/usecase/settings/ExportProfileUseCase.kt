@@ -30,7 +30,7 @@ open class ExportProfileUseCase {
      * @param profile The device profile to export.
      * @return A [Result] indicating success or failure.
      */
-    operator fun invoke(sink: BufferedSink, profile: DeviceProfile): Result<Unit> = runCatching {
+    open operator fun invoke(sink: BufferedSink, profile: DeviceProfile): Result<Unit> = runCatching {
         sink.write(profile.encode())
         sink.flush()
     }

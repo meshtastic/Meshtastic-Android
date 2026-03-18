@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
+import org.meshtastic.core.common.UiPreferences
 
 const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 const val KEY_THEME = "theme"
@@ -48,68 +49,76 @@ const val KEY_EXCLUDE_MQTT = "exclude-mqtt"
 
 @Single
 @Suppress("TooManyFunctions") // One setter per preference field — inherently grows with preferences.
-class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+open class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) :
+    UiPreferences {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     // Start this flow eagerly, so app intro doesn't flash (when disabled) on cold app start.
-    val appIntroCompleted: StateFlow<Boolean> =
+    override val appIntroCompleted: StateFlow<Boolean> =
         dataStore.prefStateFlow(key = APP_INTRO_COMPLETED, default = false, started = SharingStarted.Eagerly)
 
     // Default value for AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-    val theme: StateFlow<Int> = dataStore.prefStateFlow(key = THEME, default = -1)
+    override val theme: StateFlow<Int> = dataStore.prefStateFlow(key = THEME, default = -1)
 
     /** Persisted language tag (e.g. "de", "pt-BR"). Empty string means system default. */
-    val locale: StateFlow<String> =
+    override val locale: StateFlow<String> =
         dataStore.prefStateFlow(key = LOCALE, default = "", started = SharingStarted.Eagerly)
 
-    fun setLocale(languageTag: String) {
+    override fun setLocale(languageTag: String) {
         dataStore.setPref(key = LOCALE, value = languageTag)
     }
 
-    val nodeSort: StateFlow<Int> = dataStore.prefStateFlow(key = NODE_SORT, default = -1)
-    val includeUnknown: StateFlow<Boolean> = dataStore.prefStateFlow(key = INCLUDE_UNKNOWN, default = false)
-    val excludeInfrastructure: StateFlow<Boolean> =
+    override val nodeSort: StateFlow<Int> = dataStore.prefStateFlow(key = NODE_SORT, default = -1)
+    override val includeUnknown: StateFlow<Boolean> = dataStore.prefStateFlow(key = INCLUDE_UNKNOWN, default = false)
+    override val excludeInfrastructure: StateFlow<Boolean> =
         dataStore.prefStateFlow(key = EXCLUDE_INFRASTRUCTURE, default = false)
-    val onlyOnline: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_ONLINE, default = false)
-    val onlyDirect: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_DIRECT, default = false)
-    val showIgnored: StateFlow<Boolean> = dataStore.prefStateFlow(key = SHOW_IGNORED, default = false)
-    val excludeMqtt: StateFlow<Boolean> = dataStore.prefStateFlow(key = EXCLUDE_MQTT, default = false)
+    override val onlyOnline: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_ONLINE, default = false)
+    override val onlyDirect: StateFlow<Boolean> = dataStore.prefStateFlow(key = ONLY_DIRECT, default = false)
+    override val showIgnored: StateFlow<Boolean> = dataStore.prefStateFlow(key = SHOW_IGNORED, default = false)
+    override val excludeMqtt: StateFlow<Boolean> = dataStore.prefStateFlow(key = EXCLUDE_MQTT, default = false)
 
-    fun setAppIntroCompleted(completed: Boolean) {
+    override fun setAppIntroCompleted(completed: Boolean) {
         dataStore.setPref(key = APP_INTRO_COMPLETED, value = completed)
     }
 
-    fun setTheme(value: Int) {
+    override fun setTheme(value: Int) {
         dataStore.setPref(key = THEME, value = value)
     }
 
-    fun setNodeSort(value: Int) {
+    override fun setNodeSort(value: Int) {
         dataStore.setPref(key = NODE_SORT, value = value)
     }
 
-    fun setIncludeUnknown(value: Boolean) {
+    override fun setIncludeUnknown(value: Boolean) {
         dataStore.setPref(key = INCLUDE_UNKNOWN, value = value)
     }
 
-    fun setExcludeInfrastructure(value: Boolean) {
+    override fun setExcludeInfrastructure(value: Boolean) {
         dataStore.setPref(key = EXCLUDE_INFRASTRUCTURE, value = value)
     }
 
-    fun setOnlyOnline(value: Boolean) {
+    override fun setOnlyOnline(value: Boolean) {
         dataStore.setPref(key = ONLY_ONLINE, value = value)
     }
 
-    fun setOnlyDirect(value: Boolean) {
+    override fun setOnlyDirect(value: Boolean) {
         dataStore.setPref(key = ONLY_DIRECT, value = value)
     }
 
-    fun setShowIgnored(value: Boolean) {
+    override fun setShowIgnored(value: Boolean) {
         dataStore.setPref(key = SHOW_IGNORED, value = value)
     }
 
-    fun setExcludeMqtt(value: Boolean) {
+    override fun setExcludeMqtt(value: Boolean) {
         dataStore.setPref(key = EXCLUDE_MQTT, value = value)
+    }
+
+    override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> =
+        dataStore.prefStateFlow(key = booleanPreferencesKey("provide-location-$nodeNum"), default = false)
+
+    override fun setShouldProvideNodeLocation(nodeNum: Int, provide: Boolean) {
+        dataStore.setPref(key = booleanPreferencesKey("provide-location-$nodeNum"), value = provide)
     }
 
     private fun <T : Any> DataStore<Preferences>.prefStateFlow(

@@ -65,7 +65,7 @@ open class ProcessRadioResponseUseCase {
      * @return A [RadioResponseResult] if the packet matches a request, or null otherwise.
      */
     @Suppress("CyclomaticComplexMethod", "NestedBlockDepth")
-    operator fun invoke(packet: MeshPacket, destNum: Int, requestIds: Set<Int>): RadioResponseResult? {
+    open operator fun invoke(packet: MeshPacket, destNum: Int, requestIds: Set<Int>): RadioResponseResult? {
         val data = packet.decoded
         if (data == null || data.request_id !in requestIds) {
             return null

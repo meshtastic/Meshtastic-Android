@@ -36,7 +36,6 @@ kotlin {
 
             // Testing libraries - these are public API for all test consumers
             api(kotlin("test"))
-            api(libs.mockk)
             api(libs.kotlinx.coroutines.test)
             api(libs.turbine)
             api(libs.junit)

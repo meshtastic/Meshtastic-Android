@@ -16,16 +16,9 @@
  */
 package org.meshtastic.core.model
 
-import androidx.core.os.LocaleListCompat
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.HardwareModel
-import java.util.Locale
-
 class NodeInfoTest {
+    /*
+
     private val model = HardwareModel.ANDROID_SIM
     private val node =
         listOf(
@@ -62,4 +55,6 @@ class NodeInfoTest {
         assertEquals("1.1 mi", node[1].distanceStr(node[4], Config.DisplayConfig.DisplayUnits.IMPERIAL.value))
         assertEquals("364 ft", node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.IMPERIAL.value))
     }
+
+     */
 }

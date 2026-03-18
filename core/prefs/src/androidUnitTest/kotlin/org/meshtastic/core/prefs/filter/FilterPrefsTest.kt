@@ -19,8 +19,8 @@ package org.meshtastic.core.prefs.filter
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import io.mockk.every
-import io.mockk.mockk
+import dev.mokkery.every
+import dev.mokkery.mock
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -51,7 +51,8 @@ class FilterPrefsTest {
                 scope = testScope,
                 produceFile = { tmpFolder.newFile("test.preferences_pb") },
             )
-        dispatchers = mockk { every { default } returns testDispatcher }
+        dispatchers = mock()
+        every { dispatchers.default } returns testDispatcher
         filterPrefs = FilterPrefsImpl(dataStore, dispatchers)
     }
 

@@ -17,6 +17,7 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.StateFlow
+import org.meshtastic.core.common.UiPreferences
 
 /** Reactive interface for analytics-related preferences. */
 interface AnalyticsPrefs {
@@ -180,6 +181,7 @@ interface AppPreferences {
     val meshLog: MeshLogPrefs
     val emoji: CustomEmojiPrefs
     val ui: UiPrefs
+    val uiPrefs: UiPreferences
     val map: MapPrefs
     val mapConsent: MapConsentPrefs
     val mapTileProvider: MapTileProviderPrefs

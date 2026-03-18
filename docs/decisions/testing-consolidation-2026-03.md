@@ -31,7 +31,7 @@ Created `core:testing` as a lightweight, reusable module for **shared test doubl
 ```
 core:testing
 ├── depends on: core:model, core:repository
-├── depends on: kotlin("test"), mockk, kotlinx.coroutines.test, turbine, junit
+├── depends on: kotlin("test"), kotlinx.coroutines.test, turbine, junit
 └── does NOT depend on: core:database, core:data, core:domain
 ```
 

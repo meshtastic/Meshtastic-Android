@@ -17,12 +17,11 @@
 package org.meshtastic.feature.map
 
 import android.app.Application
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.google.android.gms.maps.model.UrlTileProvider
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
+import dev.mokkery.MockMode
+import dev.mokkery.every
+import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,15 +53,15 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MapViewModelTest {
 
-    private val application = mockk<Application>(relaxed = true)
-    private val mapPrefs = mockk<MapPrefs>(relaxed = true)
-    private val googleMapsPrefs = mockk<GoogleMapsPrefs>(relaxed = true)
-    private val nodeRepository = mockk<NodeRepository>(relaxed = true)
-    private val packetRepository = mockk<PacketRepository>(relaxed = true)
-    private val radioConfigRepository = mockk<RadioConfigRepository>(relaxed = true)
-    private val radioController = mockk<RadioController>(relaxed = true)
-    private val customTileProviderRepository = mockk<CustomTileProviderRepository>(relaxed = true)
-    private val uiPreferencesDataSource = mockk<UiPreferencesDataSource>(relaxed = true)
+    private val application = mock<Application>(MockMode.autofill)
+    private val mapPrefs = mock<MapPrefs>(MockMode.autofill)
+    private val googleMapsPrefs = mock<GoogleMapsPrefs>(MockMode.autofill)
+    private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
+    private val packetRepository = mock<PacketRepository>(MockMode.autofill)
+    private val radioConfigRepository = mock<RadioConfigRepository>(MockMode.autofill)
+    private val radioController = mock<RadioController>(MockMode.autofill)
+    private val customTileProviderRepository = mock<CustomTileProviderRepository>(MockMode.autofill)
+    private val uiPreferencesDataSource = mock<UiPreferencesDataSource>(MockMode.autofill)
     private val savedStateHandle = SavedStateHandle(mapOf("waypointId" to null))
 
     private val testDispatcher = StandardTestDispatcher()
@@ -89,7 +88,7 @@ class MapViewModelTest {
         every { googleMapsPrefs.hiddenLayerUrls } returns MutableStateFlow(emptySet())
 
         every { customTileProviderRepository.getCustomTileProviders() } returns flowOf(emptyList())
-        every { radioConfigRepository.deviceProfileFlow } returns flowOf(mockk(relaxed = true))
+        every { radioConfigRepository.deviceProfileFlow } returns flowOf(mock(MockMode.autofill))
         every { uiPreferencesDataSource.theme } returns MutableStateFlow(1)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
@@ -133,13 +132,6 @@ class MapViewModelTest {
 
     @Test
     fun `addNetworkMapLayer detects GeoJSON based on extension`() = runTest(testDispatcher) {
-        mockkStatic(Uri::class)
-        val mockUri = mockk<Uri>()
-        every { Uri.parse("https://example.com/data.geojson") } returns mockUri
-        every { mockUri.scheme } returns "https"
-        every { mockUri.path } returns "/data.geojson"
-        every { mockUri.toString() } returns "https://example.com/data.geojson"
-
         viewModel.addNetworkMapLayer("Test Layer", "https://example.com/data.geojson")
         advanceUntilIdle()
 
@@ -149,13 +141,6 @@ class MapViewModelTest {
 
     @Test
     fun `addNetworkMapLayer defaults to KML for other extensions`() = runTest(testDispatcher) {
-        mockkStatic(Uri::class)
-        val mockUri = mockk<Uri>()
-        every { Uri.parse("https://example.com/map.kml") } returns mockUri
-        every { mockUri.scheme } returns "https"
-        every { mockUri.path } returns "/map.kml"
-        every { mockUri.toString() } returns "https://example.com/map.kml"
-
         viewModel.addNetworkMapLayer("Test KML", "https://example.com/map.kml")
         advanceUntilIdle()
 

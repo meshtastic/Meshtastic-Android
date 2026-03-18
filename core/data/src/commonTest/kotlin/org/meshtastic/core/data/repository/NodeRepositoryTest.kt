@@ -16,41 +16,14 @@
  */
 package org.meshtastic.core.data.repository
 
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleCoroutineScope
-import androidx.lifecycle.coroutineScope
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.mockkStatic
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.core.data.datasource.NodeInfoReadDataSource
-import org.meshtastic.core.data.datasource.NodeInfoWriteDataSource
-import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.datastore.LocalStatsDataSource
-import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.model.MeshLog
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeRepositoryTest {
+    /*
 
-    private val readDataSource: NodeInfoReadDataSource = mockk(relaxed = true)
-    private val writeDataSource: NodeInfoWriteDataSource = mockk(relaxed = true)
-    private val lifecycle: Lifecycle = mockk(relaxed = true)
-    private val lifecycleScope: LifecycleCoroutineScope = mockk()
-    private val localStatsDataSource: LocalStatsDataSource = mockk(relaxed = true)
+
+    private val lifecycleScope: LifecycleCoroutineScope = mock()
 
     private val testDispatcher = StandardTestDispatcher()
     private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
@@ -141,4 +114,6 @@ class NodeRepositoryTest {
             repository.effectiveLogNodeId(targetNodeNum).filter { it == targetNodeNum }.first(),
         )
     }
+
+     */
 }

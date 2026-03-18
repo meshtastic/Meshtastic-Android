@@ -17,7 +17,8 @@
 package org.meshtastic.core.service
 
 import android.app.Application
-import io.mockk.mockk
+import dev.mokkery.MockMode
+import dev.mokkery.mock
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -25,7 +26,7 @@ import org.junit.Test
 class AndroidFileServiceTest {
     @Test
     fun testInitialization() = runTest {
-        val mockContext = mockk<Application>(relaxed = true)
+        val mockContext = mock<Application>(MockMode.autofill)
         val service = AndroidFileService(mockContext)
         assertNotNull(service)
     }

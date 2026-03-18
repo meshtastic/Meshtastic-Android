@@ -20,6 +20,7 @@ package org.meshtastic.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
@@ -57,6 +58,7 @@ internal fun Project.configureKotlinAndroid(
         compileOptions.targetCompatibility = JavaVersion.VERSION_17
     }
 
+    configureMokkery()
     configureKotlin<KotlinAndroidProjectExtension>()
 }
 
@@ -80,7 +82,19 @@ internal fun Project.configureKotlinMultiplatform() {
         }
     }
 
+    configureMokkery()
     configureKotlin<KotlinMultiplatformExtension>()
+}
+
+/**
+ * Configure Mokkery for the project
+ */
+internal fun Project.configureMokkery() {
+    pluginManager.withPlugin(libs.plugin("mokkery").get().pluginId) {
+        extensions.configure<MokkeryGradleExtension> {
+            stubs.allowConcreteClassInstantiation.set(true)
+        }
+    }
 }
 
 /**
@@ -114,12 +128,24 @@ internal fun Project.configureKmpTestDependencies() {
             val commonTest = findByName("commonTest") ?: return@apply
             commonTest.dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.library("kotest-assertions"))
+                implementation(libs.library("kotest-property"))
+                implementation(libs.library("turbine"))
             }
             
             // Configure androidHostTest if it exists
             val androidHostTest = findByName("androidHostTest")
             androidHostTest?.dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.library("kotest-assertions"))
+                implementation(libs.library("kotest-property"))
+                implementation(libs.library("turbine"))
+            }
+
+            // Configure jvmTest if it exists
+            val jvmTest = findByName("jvmTest")
+            jvmTest?.dependencies {
+                implementation(libs.library("kotest-runner-junit6"))
             }
         }
     }

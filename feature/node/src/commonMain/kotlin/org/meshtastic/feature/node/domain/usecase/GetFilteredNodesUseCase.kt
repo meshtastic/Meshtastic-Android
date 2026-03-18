@@ -27,9 +27,9 @@ import org.meshtastic.feature.node.model.isEffectivelyUnmessageable
 import org.meshtastic.proto.Config
 
 @Single
-class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeRepository) {
+open class GetFilteredNodesUseCase constructor(private val nodeRepository: NodeRepository) {
     @Suppress("CyclomaticComplexMethod", "LongMethod")
-    operator fun invoke(filter: NodeFilterState, sort: NodeSortOption): Flow<List<Node>> = nodeRepository
+    open operator fun invoke(filter: NodeFilterState, sort: NodeSortOption): Flow<List<Node>> = nodeRepository
         .getNodes(
             sort = sort,
             filter = filter.filterText,

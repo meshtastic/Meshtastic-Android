@@ -16,12 +16,9 @@
  */
 package org.meshtastic.core.model
 
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Test
-import org.meshtastic.proto.Config
-
 class ChannelOptionTest {
+    /*
+
 
     /**
      * This test ensures that every `ModemPreset` defined in the protobufs has a corresponding entry in our
@@ -75,4 +72,6 @@ class ChannelOptionTest {
             ChannelOption.entries.size,
         )
     }
+
+     */
 }

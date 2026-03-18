@@ -53,7 +53,8 @@ open class ScannerViewModel(
     private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase,
     private val bleScanner: org.meshtastic.core.ble.BleScanner? = null,
 ) : ViewModel() {
-    val showMockInterface: StateFlow<Boolean> = MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
+    private val _showMockInterface = MutableStateFlow(false)
+    val showMockInterface: StateFlow<Boolean> = _showMockInterface.asStateFlow()
 
     private val _errorText = MutableStateFlow<String?>(null)
     val errorText: StateFlow<String?> = _errorText.asStateFlow()
@@ -64,6 +65,10 @@ open class ScannerViewModel(
     private val scannedBleDevices = MutableStateFlow<Map<String, org.meshtastic.core.ble.BleDevice>>(emptyMap())
 
     private var scanJob: kotlinx.coroutines.Job? = null
+
+    init {
+        _showMockInterface.value = radioInterfaceService.isMockInterface()
+    }
 
     fun startBleScan() {
         if (isBleScanningState.value || bleScanner == null) return

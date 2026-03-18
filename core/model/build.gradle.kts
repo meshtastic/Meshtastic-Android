@@ -57,7 +57,6 @@ kotlin {
             dependencies {
                 implementation(libs.junit)
                 implementation(libs.robolectric)
-                implementation(libs.mockk)
                 implementation(libs.androidx.test.ext.junit)
             }
         }

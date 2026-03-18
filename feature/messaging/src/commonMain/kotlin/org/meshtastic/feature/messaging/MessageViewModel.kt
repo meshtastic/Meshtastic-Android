@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.data.repository.QuickChatActionRepository
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -45,6 +44,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -78,8 +78,7 @@ class MessageViewModel(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat.value)
-    val showQuickChat: StateFlow<Boolean> = _showQuickChat
+    val showQuickChat = uiPrefs.showQuickChat
 
     private val _showFiltered = MutableStateFlow(false)
     val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()
@@ -182,7 +181,9 @@ class MessageViewModel(
         return flow { emitAll(packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)) }
     }
 
-    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.setShowQuickChat(it) }
+    fun toggleShowQuickChat() {
+        uiPrefs.setShowQuickChat(!uiPrefs.showQuickChat.value)
+    }
 
     fun toggleShowFiltered() {
         _showFiltered.update { !it }
@@ -190,13 +191,6 @@ class MessageViewModel(
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
-    }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
-        }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)

@@ -45,7 +45,6 @@ kotlin {
 
         androidUnitTest.dependencies {
             implementation(libs.junit)
-            implementation(libs.mockk)
             implementation(libs.robolectric)
             implementation(project.dependencies.platform(libs.androidx.compose.bom))
             implementation(libs.androidx.test.core)

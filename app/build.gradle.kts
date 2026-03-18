@@ -33,6 +33,7 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
     alias(libs.plugins.aboutlibraries)
+    id("dev.mokkery")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -303,7 +304,6 @@ dependencies {
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.koin.test)
     testImplementation(libs.junit)
-    testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)

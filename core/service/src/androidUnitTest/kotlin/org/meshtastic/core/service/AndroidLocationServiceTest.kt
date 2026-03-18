@@ -17,7 +17,8 @@
 package org.meshtastic.core.service
 
 import android.app.Application
-import io.mockk.mockk
+import dev.mokkery.MockMode
+import dev.mokkery.mock
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
@@ -26,8 +27,8 @@ import org.meshtastic.core.repository.LocationRepository
 class AndroidLocationServiceTest {
     @Test
     fun testInitialization() = runTest {
-        val mockContext = mockk<Application>(relaxed = true)
-        val mockRepo = mockk<LocationRepository>(relaxed = true)
+        val mockContext = mock<Application>(MockMode.autofill)
+        val mockRepo = mock<LocationRepository>(MockMode.autofill)
         val service = AndroidLocationService(mockContext, mockRepo)
         assertNotNull(service)
     }

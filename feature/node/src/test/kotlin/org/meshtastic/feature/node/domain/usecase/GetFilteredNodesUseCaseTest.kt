@@ -16,8 +16,9 @@
  */
 package org.meshtastic.feature.node.domain.usecase
 
-import io.mockk.every
-import io.mockk.mockk
+import dev.mokkery.every
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -38,7 +39,7 @@ class GetFilteredNodesUseCaseTest {
 
     @Before
     fun setUp() {
-        nodeRepository = mockk()
+        nodeRepository = mock()
         useCase = GetFilteredNodesUseCase(nodeRepository)
     }
 

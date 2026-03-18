@@ -19,10 +19,10 @@ package org.meshtastic.core.domain.usecase.settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
@@ -30,36 +30,42 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
+import org.meshtastic.proto.HardwareModel
 
 /** Use case to determine if the currently connected device is capable of over-the-air (OTA) updates. */
+interface IsOtaCapableUseCase {
+    operator fun invoke(): Flow<Boolean>
+}
+
 @Single
-open class IsOtaCapableUseCase
-constructor(
+class IsOtaCapableUseCaseImpl(
     private val nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val radioPrefs: RadioPrefs,
     private val deviceHardwareRepository: DeviceHardwareRepository,
-) {
-    operator fun invoke(): Flow<Boolean> = combine(nodeRepository.ourNodeInfo, radioController.connectionState) {
-            node: Node?,
-            connectionState: ConnectionState,
-        ->
-        node to connectionState
-    }
-        .flatMapLatest { (node, connectionState) ->
-            if (node == null || connectionState != ConnectionState.Connected) {
-                flowOf(false)
-            } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
-                val hwModel = node.user.hw_model.value
-                val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-
-                // ESP32 Unified OTA is only supported via BLE or WiFi (TCP), not USB Serial.
-                // TODO: Re-enable when supportsUnifiedOta is added to DeviceHardware
-                val isEsp32OtaSupported = false
-
-                flowOf(hw?.requiresDfu == true || isEsp32OtaSupported)
-            } else {
-                flowOf(false)
-            }
+) : IsOtaCapableUseCase {
+    override operator fun invoke(): Flow<Boolean> =
+        combine(nodeRepository.ourNodeInfo, radioController.connectionState) { node, connectionState ->
+            node to connectionState
         }
+            .flatMapLatest { (node, connectionState) ->
+                if (node == null || connectionState != ConnectionState.Connected) {
+                    flowOf(false)
+                } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
+                    flow {
+                        val hwModel = node.user.hw_model
+                        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel.value).getOrNull()
+                        // If we have hardware info, check if it's an architecture known to support OTA/DFU
+                        val isOtaCapable =
+                            hw?.let {
+                                it.isEsp32Arc ||
+                                    it.architecture.contains("nrf", ignoreCase = true) ||
+                                    it.requiresDfu == true
+                            } ?: (hwModel != HardwareModel.UNSET)
+                        emit(isOtaCapable)
+                    }
+                } else {
+                    flowOf(false)
+                }
+            }
 }

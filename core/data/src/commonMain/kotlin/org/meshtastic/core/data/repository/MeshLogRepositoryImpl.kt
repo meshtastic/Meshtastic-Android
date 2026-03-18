@@ -49,7 +49,7 @@ import org.meshtastic.proto.Telemetry
  */
 @Suppress("TooManyFunctions")
 @Single
-class MeshLogRepositoryImpl(
+open class MeshLogRepositoryImpl(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
     private val meshLogPrefs: MeshLogPrefs,

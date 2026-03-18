@@ -36,9 +36,9 @@ KMP Migration Timeline
 ### Before KMP Testing Consolidation
 ```
 Each module had scattered test dependencies:
-  feature:messaging → libs.junit, libs.mockk, libs.turbine
-  feature:node → libs.junit, libs.mockk, libs.turbine
-  core:domain → libs.junit, libs.mockk, libs.turbine
+  feature:messaging → libs.junit, libs.turbine
+  feature:node → libs.junit, libs.turbine
+  core:domain → libs.junit, libs.turbine
   ↓
   Result: Duplication, inconsistency, hard to maintain
   Problem: New developers don't know testing patterns

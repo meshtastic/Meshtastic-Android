@@ -28,6 +28,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(projects.core.model)
             implementation(projects.core.proto)
             api(libs.androidx.datastore)
             api(libs.androidx.datastore.preferences)

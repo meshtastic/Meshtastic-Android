@@ -27,7 +27,7 @@ import org.meshtastic.proto.LocalStats
 
 /** Class that handles saving and retrieving [LocalStats] data. */
 @Single
-class LocalStatsDataSource(@Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>) {
+open class LocalStatsDataSource(@Named("CoreLocalStatsDataStore") private val localStatsStore: DataStore<LocalStats>) {
     val localStatsFlow: Flow<LocalStats> =
         localStatsStore.data.catch { exception ->
             if (exception is IOException) {
@@ -38,11 +38,11 @@ class LocalStatsDataSource(@Named("CoreLocalStatsDataStore") private val localSt
             }
         }
 
-    suspend fun setLocalStats(stats: LocalStats) {
+    open suspend fun setLocalStats(stats: LocalStats) {
         localStatsStore.updateData { stats }
     }
 
-    suspend fun clearLocalStats() {
+    open suspend fun clearLocalStats() {
         localStatsStore.updateData { LocalStats() }
     }
 }

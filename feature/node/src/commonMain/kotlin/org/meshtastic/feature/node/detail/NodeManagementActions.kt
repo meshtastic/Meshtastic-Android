@@ -43,14 +43,14 @@ import org.meshtastic.core.resources.unmute
 import org.meshtastic.core.ui.util.AlertManager
 
 @Single
-class NodeManagementActions
+open class NodeManagementActions
 constructor(
     private val nodeRepository: NodeRepository,
     private val serviceRepository: ServiceRepository,
     private val radioController: RadioController,
     private val alertManager: AlertManager,
 ) {
-    fun requestRemoveNode(scope: CoroutineScope, node: Node) {
+    open fun requestRemoveNode(scope: CoroutineScope, node: Node) {
         alertManager.showAlert(
             titleRes = Res.string.remove,
             messageRes = Res.string.remove_node_text,
@@ -58,7 +58,7 @@ constructor(
         )
     }
 
-    fun removeNode(scope: CoroutineScope, nodeNum: Int) {
+    open fun removeNode(scope: CoroutineScope, nodeNum: Int) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Removing node '$nodeNum'" }
             val packetId = radioController.getPacketId()
@@ -67,7 +67,7 @@ constructor(
         }
     }
 
-    fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
+    open fun requestIgnoreNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
                 getString(if (node.isIgnored) Res.string.ignore_remove else Res.string.ignore_add, node.user.long_name)
@@ -79,11 +79,11 @@ constructor(
         }
     }
 
-    fun ignoreNode(scope: CoroutineScope, node: Node) {
+    open fun ignoreNode(scope: CoroutineScope, node: Node) {
         scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Ignore(node)) }
     }
 
-    fun requestMuteNode(scope: CoroutineScope, node: Node) {
+    open fun requestMuteNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
                 getString(if (node.isMuted) Res.string.mute_remove else Res.string.mute_add, node.user.long_name)
@@ -95,11 +95,11 @@ constructor(
         }
     }
 
-    fun muteNode(scope: CoroutineScope, node: Node) {
+    open fun muteNode(scope: CoroutineScope, node: Node) {
         scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Mute(node)) }
     }
 
-    fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
+    open fun requestFavoriteNode(scope: CoroutineScope, node: Node) {
         scope.launch {
             val message =
                 getString(
@@ -114,11 +114,11 @@ constructor(
         }
     }
 
-    fun favoriteNode(scope: CoroutineScope, node: Node) {
+    open fun favoriteNode(scope: CoroutineScope, node: Node) {
         scope.launch(Dispatchers.IO) { serviceRepository.onServiceAction(ServiceAction.Favorite(node)) }
     }
 
-    fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
+    open fun setNodeNotes(scope: CoroutineScope, nodeNum: Int, notes: String) {
         scope.launch(Dispatchers.IO) {
             try {
                 nodeRepository.setNodeNotes(nodeNum, notes)

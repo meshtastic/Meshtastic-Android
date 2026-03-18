@@ -22,7 +22,7 @@ import org.meshtastic.core.repository.AnalyticsPrefs
 /** Use case for toggling the analytics preference. */
 @Single
 open class ToggleAnalyticsUseCase constructor(private val analyticsPrefs: AnalyticsPrefs) {
-    operator fun invoke() {
+    open operator fun invoke() {
         analyticsPrefs.setAnalyticsAllowed(!analyticsPrefs.analyticsAllowed.value)
     }
 }

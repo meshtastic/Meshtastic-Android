@@ -17,12 +17,11 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
-import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.common.UiPreferences
 
-/** Use case for setting the application locale. Empty string means system default. */
 @Single
-open class SetLocaleUseCase constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
-    operator fun invoke(languageTag: String) {
-        uiPreferencesDataSource.setLocale(languageTag)
+open class SetLocaleUseCase constructor(private val uiPreferences: UiPreferences) {
+    operator fun invoke(value: String) {
+        uiPreferences.setLocale(value)
     }
 }

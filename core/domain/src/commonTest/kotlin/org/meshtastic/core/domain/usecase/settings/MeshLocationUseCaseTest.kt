@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.mock
+import dev.mokkery.verify
 import org.meshtastic.core.model.RadioController
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -29,7 +29,7 @@ class MeshLocationUseCaseTest {
 
     @BeforeTest
     fun setUp() {
-        radioController = mockk(relaxed = true)
+        radioController = mock(dev.mokkery.MockMode.autofill)
         useCase = MeshLocationUseCase(radioController)
     }
 

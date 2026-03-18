@@ -22,10 +22,14 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.IInterface
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.every
+import dev.mokkery.matcher.any
+import dev.mokkery.matcher.capture.Capture
+import dev.mokkery.matcher.capture.capture
+import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verify.exactly
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
@@ -41,51 +45,55 @@ class ServiceClientTest {
 
     interface MyInterface : IInterface
 
-    private val stubFactory: (IBinder) -> MyInterface = { _ -> mockk<MyInterface>() }
+    private val stubFactory: (IBinder) -> MyInterface = { _ -> mock<MyInterface>() }
     private val client = ServiceClient(stubFactory)
-    private val context = mockk<Context>(relaxed = true)
-    private val intent = mockk<Intent>()
-    private val binder = mockk<IBinder>()
+    private val context = mock<Context>(MockMode.autofill)
+    private val intent = mock<Intent>()
+    private val binder = mock<IBinder>()
 
     @Test
     fun `connect binds service successfully`() = runTest {
-        val slot = slot<ServiceConnection>()
-        every { context.bindService(any<Intent>(), capture(slot), any<Int>()) } returns true
+        val slot = Capture.slot<ServiceConnection>()
+        every { context.bindService(any(), capture(slot), any()) } returns true
 
         client.connect(context, intent, 0)
 
-        verify { context.bindService(intent, any<ServiceConnection>(), 0) }
+        verify { context.bindService(intent, any(), 0) }
 
         // Simulate connection
-        if (slot.isCaptured) {
-            slot.captured.onServiceConnected(ComponentName("pkg", "cls"), binder)
+        try {
+            slot.get().onServiceConnected(ComponentName("pkg", "cls"), binder)
             assertNotNull(client.serviceP)
-        } else {
+        } catch (e: NoSuchElementException) {
             fail("ServiceConnection was not captured")
         }
     }
 
     @Test
     fun `connect retries on failure`() = runTest {
-        val slot = slot<ServiceConnection>()
+        val slot = Capture.slot<ServiceConnection>()
         // First attempt fails, second succeeds
-        every { context.bindService(any<Intent>(), capture(slot), any<Int>()) } returnsMany listOf(false, true)
+        every { context.bindService(any(), capture(slot), any()) } sequentially
+            {
+                returns(false)
+                returns(true)
+            }
 
         client.connect(context, intent, 0)
 
-        verify(exactly = 2) { context.bindService(intent, any<ServiceConnection>(), 0) }
+        verify(exactly(2)) { context.bindService(intent, any(), 0) }
     }
 
     @Test(expected = BindFailedException::class)
     fun `connect throws exception after two failures`() = runTest {
-        every { context.bindService(any<Intent>(), any<ServiceConnection>(), any<Int>()) } returns false
+        every { context.bindService(any(), any(), any()) } returns false
         client.connect(context, intent, 0)
     }
 
     @Test
     fun `waitConnect blocks until connected`() {
-        val slot = slot<ServiceConnection>()
-        every { context.bindService(any<Intent>(), capture(slot), any<Int>()) } returns true
+        val slot = Capture.slot<ServiceConnection>()
+        every { context.bindService(any(), capture(slot), any()) } returns true
 
         // Run connect in a coroutine scope (it's suspend)
         runTest { client.connect(context, intent, 0) }
@@ -102,9 +110,9 @@ class ServiceClientTest {
         }
 
         // Simulate connection
-        if (slot.isCaptured) {
-            slot.captured.onServiceConnected(ComponentName("pkg", "cls"), binder)
-        } else {
+        try {
+            slot.get().onServiceConnected(ComponentName("pkg", "cls"), binder)
+        } catch (e: NoSuchElementException) {
             fail("ServiceConnection was not captured")
         }
 
@@ -118,16 +126,16 @@ class ServiceClientTest {
 
     @Test
     fun `close unbinds service`() = runTest {
-        val slot = slot<ServiceConnection>()
-        every { context.bindService(any<Intent>(), capture(slot), any<Int>()) } returns true
+        val slot = Capture.slot<ServiceConnection>()
+        every { context.bindService(any(), capture(slot), any()) } returns true
 
         client.connect(context, intent, 0)
 
-        if (slot.isCaptured) {
+        try {
             client.close()
-            verify { context.unbindService(slot.captured) }
+            verify { context.unbindService(slot.get()) }
             assertNull(client.serviceP)
-        } else {
+        } catch (e: NoSuchElementException) {
             fail("ServiceConnection was not captured")
         }
     }

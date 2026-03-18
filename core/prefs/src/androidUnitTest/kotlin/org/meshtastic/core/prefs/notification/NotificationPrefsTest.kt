@@ -19,8 +19,8 @@ package org.meshtastic.core.prefs.notification
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
-import io.mockk.every
-import io.mockk.mockk
+import dev.mokkery.every
+import dev.mokkery.mock
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -50,7 +50,8 @@ class NotificationPrefsTest {
                 scope = testScope,
                 produceFile = { tmpFolder.newFile("test.preferences_pb") },
             )
-        dispatchers = mockk { every { default } returns testDispatcher }
+        dispatchers = mock()
+        every { dispatchers.default } returns testDispatcher
         notificationPrefs = NotificationPrefsImpl(dataStore, dispatchers)
     }
 
