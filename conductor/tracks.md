@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: MQTT transport**
+- [~] **Track: MQTT transport**
 *Link: [./tracks/mqtt_transport_20260318/](./tracks/mqtt_transport_20260318/)*

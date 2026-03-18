@@ -220,6 +220,7 @@ nordic-dfu = { module = "no.nordicsemi.android:dfu", version.ref = "nordic-dfu" 
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 kmqtt-client = { module = "io.github.davidepianca98:kmqtt-client", version.ref = "kmqtt" }
+kmqtt-common = { module = "io.github.davidepianca98:kmqtt-common", version.ref = "kmqtt" }
 
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
