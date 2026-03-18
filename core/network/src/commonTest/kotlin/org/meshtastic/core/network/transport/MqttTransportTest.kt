@@ -70,4 +70,24 @@ class MqttTransportTest {
         assertEquals(123L, payload.id)
         assertEquals(1600000000L, payload.time)
     }
+
+    @Test
+    fun `test json payload serialization`() {
+        val payload = MqttJsonPayload(
+            type = "text",
+            from = 12345678,
+            to = 4294967295,
+            payload = "Hello World",
+            hopLimit = 3,
+            id = 123,
+            time = 1600000000
+        )
+        val json = Json { ignoreUnknownKeys = true }
+        val jsonStr = json.encodeToString(MqttJsonPayload.serializer(), payload)
+        
+        // Use contains to be resilient to field order
+        assert(jsonStr.contains("\"type\":\"text\""))
+        assert(jsonStr.contains("\"from\":12345678"))
+        assert(jsonStr.contains("\"payload\":\"Hello World\""))
+    }
 }
