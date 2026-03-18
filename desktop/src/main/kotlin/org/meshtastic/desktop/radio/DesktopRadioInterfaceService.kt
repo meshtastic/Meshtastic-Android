@@ -56,7 +56,11 @@ class DesktopRadioInterfaceService(
 ) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<org.meshtastic.core.model.DeviceType> =
-        listOf(org.meshtastic.core.model.DeviceType.TCP, org.meshtastic.core.model.DeviceType.BLE, org.meshtastic.core.model.DeviceType.USB)
+        listOf(
+            org.meshtastic.core.model.DeviceType.TCP,
+            org.meshtastic.core.model.DeviceType.BLE,
+            org.meshtastic.core.model.DeviceType.USB,
+        )
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()

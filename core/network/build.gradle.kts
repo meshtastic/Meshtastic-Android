@@ -66,11 +66,7 @@ kotlin {
             implementation(libs.okhttp3.logging.interceptor)
         }
 
-        val jvmTest by getting {
-            dependencies {
-                implementation(libs.mockk)
-            }
-        }
+        val jvmTest by getting { dependencies { implementation(libs.mockk) } }
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }
