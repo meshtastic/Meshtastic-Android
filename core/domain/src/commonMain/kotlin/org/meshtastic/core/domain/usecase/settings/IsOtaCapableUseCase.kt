@@ -19,10 +19,12 @@ package org.meshtastic.core.domain.usecase.settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import org.koin.core.annotation.Single
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
+import org.meshtastic.core.repository.DeviceHardwareRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
@@ -39,6 +41,7 @@ class IsOtaCapableUseCaseImpl(
     private val nodeRepository: NodeRepository,
     private val radioController: RadioController,
     private val radioPrefs: RadioPrefs,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
 ) : IsOtaCapableUseCase {
     override operator fun invoke(): Flow<Boolean> =
         combine(nodeRepository.ourNodeInfo, radioController.connectionState) { node, connectionState ->
@@ -48,8 +51,13 @@ class IsOtaCapableUseCaseImpl(
                 if (node == null || connectionState != ConnectionState.Connected) {
                     flowOf(false)
                 } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
-                    // For now, let's just use flowOf to keep it simple.
-                    flowOf(true)
+                    flow {
+                        val hwModel = node.user.hw_model.value
+                        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
+                        // If we have hardware info and it's actively supported, it's OTA capable
+                        // (or we can add more specific checks here later)
+                        emit(hw?.activelySupported ?: true)
+                    }
                 } else {
                     flowOf(false)
                 }

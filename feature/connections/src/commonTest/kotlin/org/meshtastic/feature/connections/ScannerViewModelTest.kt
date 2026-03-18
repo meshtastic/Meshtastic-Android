@@ -83,6 +83,7 @@ class ScannerViewModelTest {
             assertEquals(null, awaitItem())
             connectionProgressFlow.value = "Connecting..."
             assertEquals("Connecting...", awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -97,6 +98,7 @@ class ScannerViewModelTest {
 
             viewModel.stopBleScan()
             assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -124,6 +126,7 @@ class ScannerViewModelTest {
             discoveredDevicesFlow.value = DiscoveredDevices(usbDevices = listOf(device))
 
             assertEquals(listOf(device), awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

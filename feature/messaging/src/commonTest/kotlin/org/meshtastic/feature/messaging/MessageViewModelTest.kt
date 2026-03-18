@@ -129,6 +129,7 @@ class MessageViewModelTest {
             assertEquals("", awaitItem())
             viewModel.setTitle("New Title")
             assertEquals("New Title", awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -138,6 +139,7 @@ class MessageViewModelTest {
             assertEquals(org.meshtastic.core.model.ConnectionState.Disconnected, awaitItem())
             connectionStateFlow.value = org.meshtastic.core.model.ConnectionState.Connected
             assertEquals(org.meshtastic.core.model.ConnectionState.Connected, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -151,6 +153,7 @@ class MessageViewModelTest {
             // toggleShowQuickChat updates _showQuickChat AND calls uiPrefs.setShowQuickChat
             // Since we are collecting, we should see the update.
             assertEquals(true, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -212,6 +215,7 @@ class MessageViewModelTest {
             assertEquals(5, awaitItem())
             countFlow.value = 10
             assertEquals(10, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -243,6 +247,7 @@ class MessageViewModelTest {
             // First actual list from repo
             val list = awaitItem()
             assertEquals(3, list.size)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

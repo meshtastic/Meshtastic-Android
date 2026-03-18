@@ -104,6 +104,7 @@ class NodeListViewModelTest {
             nodesFlow.value = testNodes
 
             assertEquals(3, awaitItem().size)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -117,6 +118,7 @@ class NodeListViewModelTest {
             assertEquals(ConnectionState.Disconnected, awaitItem())
             stateFlow.value = ConnectionState.Connected
             assertEquals(ConnectionState.Connected, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

@@ -128,6 +128,7 @@ class SettingsViewModelTest {
 
             radioController.setConnectionState(ConnectionState.Disconnected)
             assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

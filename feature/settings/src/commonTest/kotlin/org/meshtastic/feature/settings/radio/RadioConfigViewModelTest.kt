@@ -35,7 +35,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
-import org.meshtastic.core.domain.usecase.settings.AdminRoute
 import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
 import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
 import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
@@ -161,6 +160,7 @@ class RadioConfigViewModelTest {
         viewModel.radioConfigState.test {
             val state = awaitItem()
             assertEquals(Config.DeviceConfig.Role.ROUTER, state.radioConfig.device?.role)
+            cancelAndIgnoreRemainingEvents()
         }
 
         verifySuspend { radioConfigUseCase.setConfig(123, config) }
@@ -203,6 +203,7 @@ class RadioConfigViewModelTest {
         viewModel.radioConfigState.test {
             val state = awaitItem()
             assertEquals("3.0.0", state.metadata?.firmware_version)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -271,6 +272,7 @@ class RadioConfigViewModelTest {
             assertEquals(false, awaitItem().nodeDbResetPreserveFavorites)
             viewModel.setPreserveFavorites(true)
             assertEquals(true, awaitItem().nodeDbResetPreserveFavorites)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
