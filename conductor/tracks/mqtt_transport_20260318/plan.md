@@ -25,8 +25,8 @@
 - [x] Task: Integrate `MqttTransport` into `core:service` and `core:data`. [d414556, e172f53]
     - [x] Create failing tests for orchestrating MQTT connection based on user preferences.
     - [x] Implement service-level bindings to maintain background connection.
-- [ ] Task: Implement MQTT UI Configuration Settings.
-    - [ ] Create failing UI tests/snapshot tests (if applicable) for the new MQTT settings UI.
-    - [ ] Add MQTT broker URL, username, password, and custom topic inputs to the UI, following Android UX patterns.
-    - [ ] Wire UI inputs to `core:prefs` and the `MqttTransport` configuration state.
+- [x] Task: Implement MQTT UI Configuration Settings. (Verified existing implementation)
+    - [x] Verified existing `MQTTConfigItemList.kt` correctly manages UI inputs.
+    - [x] Verified MQTT broker URL, username, password, and custom topic inputs exist in UI.
+    - [x] Verified UI inputs correctly wire to `ModuleConfig.MQTTConfig` used by `MQTTRepositoryImpl`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Service & UI Integration' (Protocol in workflow.md)
