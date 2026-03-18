@@ -35,7 +35,7 @@ compose-multiplatform = "1.11.0-alpha04"
 jetbrains-adaptive = "1.3.0-alpha06"
 
 # Google
-maps-compose = "8.2.1"
+maps-compose = "8.2.2"
 
 # ML Kit
 mlkit-barcode-scanning = "17.3.0"
