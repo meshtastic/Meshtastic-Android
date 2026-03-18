@@ -19,7 +19,7 @@
 - [x] Task: Implement publishing mechanism. [0991210]
     - [x] Create failing tests for formatting and publishing node information/messages to custom topics.
     - [x] Implement publish functionality in `MqttTransport`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Publishing & Subscribing' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Publishing & Subscribing' (Protocol in workflow.md) [7418e53]
 
 ## Phase 3: Service & UI Integration
 - [ ] Task: Integrate `MqttTransport` into `core:service` and `core:data`.
