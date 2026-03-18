@@ -33,7 +33,7 @@ open class ExportSecurityConfigUseCase {
      * @param securityConfig The security configuration to export.
      * @return A [Result] indicating success or failure.
      */
-    operator fun invoke(sink: BufferedSink, securityConfig: Config.SecurityConfig): Result<Unit> = runCatching {
+    operator open fun invoke(sink: BufferedSink, securityConfig: Config.SecurityConfig): Result<Unit> = runCatching {
         // Convert ByteStrings to Base64 strings
         val publicKeyBase64 = securityConfig.public_key.base64()
         val privateKeyBase64 = securityConfig.private_key.base64()

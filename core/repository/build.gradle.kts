@@ -31,6 +31,7 @@ kotlin {
             api(projects.core.model)
             api(projects.core.proto)
             implementation(projects.core.common)
+            implementation(projects.core.database)
 
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)

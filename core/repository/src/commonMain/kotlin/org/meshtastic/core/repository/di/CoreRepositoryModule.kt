@@ -25,6 +25,7 @@ import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.usecase.SendMessageUseCase
+import org.meshtastic.core.repository.usecase.SendMessageUseCaseImpl
 
 @Module
 class CoreRepositoryModule {
@@ -36,5 +37,5 @@ class CoreRepositoryModule {
         @Provided homoglyphEncodingPrefs: HomoglyphPrefs,
         @Provided messageQueue: MessageQueue,
     ): SendMessageUseCase =
-        SendMessageUseCase(nodeRepository, packetRepository, radioController, homoglyphEncodingPrefs, messageQueue)
+        SendMessageUseCaseImpl(nodeRepository, packetRepository, radioController, homoglyphEncodingPrefs, messageQueue)
 }

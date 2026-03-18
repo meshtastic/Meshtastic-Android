@@ -16,8 +16,10 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.answering.returns
+
+import dev.mokkery.mock
+import dev.mokkery.verify
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -29,7 +31,7 @@ class SetThemeUseCaseTest {
 
     @BeforeTest
     fun setUp() {
-        uiPreferencesDataSource = mockk(relaxed = true)
+        uiPreferencesDataSource = mock(dev.mokkery.MockMode.autofill)
         useCase = SetThemeUseCase(uiPreferencesDataSource)
     }
 

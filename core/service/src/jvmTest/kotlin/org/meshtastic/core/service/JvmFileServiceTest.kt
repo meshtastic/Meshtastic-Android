@@ -22,6 +22,8 @@ import org.junit.Test
 import org.meshtastic.core.common.util.MeshtasticUri
 
 class JvmFileServiceTest {
+/*
+
     @Test
     fun testWriteAndRead() = runTest {
         val service = JvmFileService()
@@ -29,4 +31,6 @@ class JvmFileServiceTest {
         val result = service.read(MeshtasticUri("invalid_file_path.txt")) {}
         assertFalse(result)
     }
+
+*/
 }

@@ -17,12 +17,11 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
-import org.meshtastic.core.datastore.UiPreferencesDataSource
+import org.meshtastic.core.common.UiPreferences
 
-/** Use case for setting the application theme. */
 @Single
-open class SetThemeUseCase constructor(private val uiPreferencesDataSource: UiPreferencesDataSource) {
-    operator fun invoke(themeMode: Int) {
-        uiPreferencesDataSource.setTheme(themeMode)
+open class SetThemeUseCase constructor(private val uiPreferences: UiPreferences) {
+    operator fun invoke(value: Int) {
+        uiPreferences.setTheme(value)
     }
 }

@@ -36,7 +36,7 @@ open class InstallProfileUseCase constructor(private val radioController: RadioC
      * @param profile The device profile to install.
      * @param currentUser The current user configuration of the destination node (to preserve names if not in profile).
      */
-    suspend operator fun invoke(destNum: Int, profile: DeviceProfile, currentUser: User?) {
+    suspend operator open fun invoke(destNum: Int, profile: DeviceProfile, currentUser: User?) {
         radioController.beginEditSettings(destNum)
 
         installOwner(destNum, profile, currentUser)

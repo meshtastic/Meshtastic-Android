@@ -27,10 +27,10 @@ import org.meshtastic.proto.MeshPacket
  *
  * This class is platform-agnostic and can be used in shared logic.
  */
-class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
+open class MeshDataMapper(private val nodeIdLookup: NodeIdLookup) {
 
     /** Maps a [MeshPacket] to a [DataPacket], or returns null if the packet has no decoded data. */
-    fun toDataPacket(packet: MeshPacket): DataPacket? {
+    open fun toDataPacket(packet: MeshPacket): DataPacket? {
         val decoded = packet.decoded ?: return null
         return DataPacket(
             from = nodeIdLookup.toNodeID(packet.from),

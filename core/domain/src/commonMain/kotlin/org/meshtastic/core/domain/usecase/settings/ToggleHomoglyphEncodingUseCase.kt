@@ -22,7 +22,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 /** Use case for toggling the homoglyph encoding preference. */
 @Single
 open class ToggleHomoglyphEncodingUseCase constructor(private val homoglyphEncodingPrefs: HomoglyphPrefs) {
-    operator fun invoke() {
+    operator open fun invoke() {
         homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(!homoglyphEncodingPrefs.homoglyphEncodingEnabled.value)
     }
 }

@@ -66,7 +66,6 @@ kotlin {
         }
 
         androidUnitTest.dependencies {
-            implementation(libs.mockk)
             implementation(libs.androidx.test.runner)
         }
     }

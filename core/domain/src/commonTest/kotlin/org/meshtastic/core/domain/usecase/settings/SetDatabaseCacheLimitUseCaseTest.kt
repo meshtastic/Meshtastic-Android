@@ -16,8 +16,10 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.answering.returns
+
+import dev.mokkery.mock
+import dev.mokkery.verify
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.database.DatabaseConstants
 import kotlin.test.BeforeTest
@@ -30,7 +32,7 @@ class SetDatabaseCacheLimitUseCaseTest {
 
     @BeforeTest
     fun setUp() {
-        databaseManager = mockk(relaxed = true)
+        databaseManager = mock(dev.mokkery.MockMode.autofill)
         useCase = SetDatabaseCacheLimitUseCase(databaseManager)
     }
 

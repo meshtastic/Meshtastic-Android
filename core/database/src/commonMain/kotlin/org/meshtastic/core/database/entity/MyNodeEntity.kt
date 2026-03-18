@@ -21,7 +21,7 @@ import androidx.room.PrimaryKey
 import org.meshtastic.core.model.MyNodeInfo
 
 @Entity(tableName = "my_node")
-data class MyNodeEntity(
+open class MyNodeEntity(
     @PrimaryKey(autoGenerate = false) val myNodeNum: Int,
     val model: String?,
     val firmwareVersion: String?,
@@ -39,7 +39,7 @@ data class MyNodeEntity(
     val firmwareString: String
         get() = "$model $firmwareVersion"
 
-    fun toMyNodeInfo() = MyNodeInfo(
+    open fun toMyNodeInfo() = MyNodeInfo(
         myNodeNum = myNodeNum,
         hasGPS = false,
         model = model,

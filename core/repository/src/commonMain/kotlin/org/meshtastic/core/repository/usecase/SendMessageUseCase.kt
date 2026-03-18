@@ -43,14 +43,22 @@ import kotlin.random.Random
  *
  * This implementation is platform-agnostic and relies on injected repositories and controllers.
  */
+interface SendMessageUseCase {
+    suspend operator fun invoke(
+        text: String,
+        contactKey: String = "0${DataPacket.ID_BROADCAST}",
+        replyId: Int? = null,
+    )
+}
+
 @Suppress("TooGenericExceptionCaught")
-class SendMessageUseCase(
+class SendMessageUseCaseImpl(
     private val nodeRepository: NodeRepository,
     private val packetRepository: PacketRepository,
     private val radioController: RadioController,
     private val homoglyphEncodingPrefs: HomoglyphPrefs,
     private val messageQueue: MessageQueue,
-) {
+) : SendMessageUseCase {
 
     /**
      * Executes the send message workflow.
@@ -60,10 +68,10 @@ class SendMessageUseCase(
      * @param replyId Optional ID of a message being replied to.
      */
     @Suppress("NestedBlockDepth", "LongMethod", "CyclomaticComplexMethod")
-    suspend operator fun invoke(
+    override suspend operator fun invoke(
         text: String,
-        contactKey: String = "0${DataPacket.ID_BROADCAST}",
-        replyId: Int? = null,
+        contactKey: String,
+        replyId: Int?,
     ) {
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey

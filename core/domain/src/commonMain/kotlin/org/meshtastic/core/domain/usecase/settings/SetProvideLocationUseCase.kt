@@ -17,12 +17,11 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import org.koin.core.annotation.Single
-import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.common.UiPreferences
 
-/** Use case for setting whether to provide the node location to the mesh. */
 @Single
-open class SetProvideLocationUseCase constructor(private val uiPrefs: UiPrefs) {
+open class SetProvideLocationUseCase constructor(private val uiPreferences: UiPreferences) {
     operator fun invoke(myNodeNum: Int, provideLocation: Boolean) {
-        uiPrefs.setShouldProvideNodeLocation(myNodeNum, provideLocation)
+        uiPreferences.setShouldProvideNodeLocation(myNodeNum, provideLocation)
     }
 }

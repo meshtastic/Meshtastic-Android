@@ -16,6 +16,7 @@
  */
 package org.meshtastic.core.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
@@ -23,23 +24,31 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.QuickChatActionRepository
 
 @Single
-class QuickChatActionRepository(
+class QuickChatActionRepositoryImpl(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
-) {
-    fun getAllActions() = dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
+) : QuickChatActionRepository {
+    override fun getAllActions(): Flow<List<QuickChatAction>> = 
+        dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
-    suspend fun upsert(action: QuickChatAction) =
+    override suspend fun upsert(action: QuickChatAction) {
         withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().upsert(action) }
+    }
 
-    suspend fun deleteAll() = withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().deleteAll() }
+    override suspend fun deleteAll() {
+        withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().deleteAll() }
+    }
 
-    suspend fun delete(action: QuickChatAction) =
+    override suspend fun delete(action: QuickChatAction) {
         withContext(dispatchers.io) { dbManager.currentDb.value.quickChatActionDao().delete(action) }
+    }
 
-    suspend fun setItemPosition(uuid: Long, newPos: Int) = withContext(dispatchers.io) {
-        dbManager.currentDb.value.quickChatActionDao().updateActionPosition(uuid, newPos)
+    override suspend fun setItemPosition(uuid: Long, newPos: Int) {
+        withContext(dispatchers.io) {
+            dbManager.currentDb.value.quickChatActionDao().updateActionPosition(uuid, newPos)
+        }
     }
 }

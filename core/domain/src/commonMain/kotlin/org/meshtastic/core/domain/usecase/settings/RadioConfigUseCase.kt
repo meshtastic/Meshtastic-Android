@@ -34,7 +34,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param user The new user configuration.
      * @return The packet ID of the request.
      */
-    suspend fun setOwner(destNum: Int, user: User): Int {
+    suspend open fun setOwner(destNum: Int, user: User): Int {
         val packetId = radioController.getPacketId()
         radioController.setOwner(destNum, user, packetId)
         return packetId
@@ -46,7 +46,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
-    suspend fun getOwner(destNum: Int): Int {
+    suspend open fun getOwner(destNum: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getOwner(destNum, packetId)
         return packetId
@@ -59,7 +59,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param config The new configuration.
      * @return The packet ID of the request.
      */
-    suspend fun setConfig(destNum: Int, config: Config): Int {
+    suspend open fun setConfig(destNum: Int, config: Config): Int {
         val packetId = radioController.getPacketId()
         radioController.setConfig(destNum, config, packetId)
         return packetId
@@ -72,7 +72,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param configType The type of configuration to request (from [org.meshtastic.proto.AdminMessage.ConfigType]).
      * @return The packet ID of the request.
      */
-    suspend fun getConfig(destNum: Int, configType: Int): Int {
+    suspend open fun getConfig(destNum: Int, configType: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getConfig(destNum, configType, packetId)
         return packetId
@@ -85,7 +85,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param config The new module configuration.
      * @return The packet ID of the request.
      */
-    suspend fun setModuleConfig(destNum: Int, config: ModuleConfig): Int {
+    suspend open fun setModuleConfig(destNum: Int, config: ModuleConfig): Int {
         val packetId = radioController.getPacketId()
         radioController.setModuleConfig(destNum, config, packetId)
         return packetId
@@ -98,7 +98,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param moduleConfigType The type of module configuration to request.
      * @return The packet ID of the request.
      */
-    suspend fun getModuleConfig(destNum: Int, moduleConfigType: Int): Int {
+    suspend open fun getModuleConfig(destNum: Int, moduleConfigType: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getModuleConfig(destNum, moduleConfigType, packetId)
         return packetId
@@ -111,7 +111,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param index The index of the channel to request.
      * @return The packet ID of the request.
      */
-    suspend fun getChannel(destNum: Int, index: Int): Int {
+    suspend open fun getChannel(destNum: Int, index: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getChannel(destNum, index, packetId)
         return packetId
@@ -124,24 +124,24 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param channel The new channel configuration.
      * @return The packet ID of the request.
      */
-    suspend fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel): Int {
+    suspend open fun setRemoteChannel(destNum: Int, channel: org.meshtastic.proto.Channel): Int {
         val packetId = radioController.getPacketId()
         radioController.setRemoteChannel(destNum, channel, packetId)
         return packetId
     }
 
     /** Updates the fixed position on the radio. */
-    suspend fun setFixedPosition(destNum: Int, position: Position) {
+    suspend open fun setFixedPosition(destNum: Int, position: Position) {
         radioController.setFixedPosition(destNum, position)
     }
 
     /** Removes the fixed position on the radio. */
-    suspend fun removeFixedPosition(destNum: Int) {
+    suspend open fun removeFixedPosition(destNum: Int) {
         radioController.setFixedPosition(destNum, Position(0.0, 0.0, 0))
     }
 
     /** Sets the ringtone on the radio. */
-    suspend fun setRingtone(destNum: Int, ringtone: String) {
+    suspend open fun setRingtone(destNum: Int, ringtone: String) {
         radioController.setRingtone(destNum, ringtone)
     }
 
@@ -151,14 +151,14 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
-    suspend fun getRingtone(destNum: Int): Int {
+    suspend open fun getRingtone(destNum: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getRingtone(destNum, packetId)
         return packetId
     }
 
     /** Sets the canned messages on the radio. */
-    suspend fun setCannedMessages(destNum: Int, messages: String) {
+    suspend open fun setCannedMessages(destNum: Int, messages: String) {
         radioController.setCannedMessages(destNum, messages)
     }
 
@@ -168,7 +168,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
-    suspend fun getCannedMessages(destNum: Int): Int {
+    suspend open fun getCannedMessages(destNum: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getCannedMessages(destNum, packetId)
         return packetId
@@ -180,7 +180,7 @@ open class RadioConfigUseCase constructor(private val radioController: RadioCont
      * @param destNum The node number to query.
      * @return The packet ID of the request.
      */
-    suspend fun getDeviceConnectionStatus(destNum: Int): Int {
+    suspend open fun getDeviceConnectionStatus(destNum: Int): Int {
         val packetId = radioController.getPacketId()
         radioController.getDeviceConnectionStatus(destNum, packetId)
         return packetId
