@@ -51,7 +51,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`). All are KMP with `jvm()` target. Use `meshtastic.kmp.feature` convention plugin. |
-| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP and Serial/USB transports with `want_config` handshake. |
+| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
 | `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
 ## 3. Development Guidelines & Coding Standards

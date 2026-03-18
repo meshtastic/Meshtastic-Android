@@ -56,9 +56,9 @@ Modules that share JVM-specific code between Android and desktop now standardize
 Working Compose Desktop application with:
 - Navigation 3 shell (`NavigationRail` + `NavDisplay`) using shared routes
 - Full Koin DI graph (stubs + real implementations)
-- TCP and Serial/USB transports with auto-reconnect and full `want_config` handshake
+- TCP, Serial/USB, and BLE transports with auto-reconnect and full `want_config` handshake
 - Adaptive list-detail screens for nodes and contacts
-- **Dynamic Connections screen** with automatic discovery of platform-supported transports (TCP, Serial/USB)
+- **Dynamic Connections screen** with automatic discovery of platform-supported transports (TCP, Serial/USB, BLE)
 - **Desktop language picker** backed by `UiPreferencesDataSource.locale`, with immediate Compose Multiplatform resource updates
 - **Navigation-preserving locale switching** via `Main.kt` `staticCompositionLocalOf` recomposition instead of recreating the Nav3 backstack
 - Node detail metrics screens (Device, Environment, Signal, Power, Pax) wired with shared KMP + Vico charts
