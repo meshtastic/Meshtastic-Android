@@ -16,3 +16,6 @@
 ## Phase 4: Validation [checkpoint: 1055752]
 - [x] Task: Verify end-to-end communication with a physical Meshtastic device over USB on the desktop target. [checkpoint: 1055752]
 - [x] Task: Ensure CI builds cleanly and that no `java.*` dependencies leaked into `commonMain`. [checkpoint: 1055752]
+
+## Phase: Review Fixes
+- [x] Task: Apply review suggestions [checkpoint: d2f7c82]
