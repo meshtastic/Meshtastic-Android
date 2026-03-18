@@ -1,6 +1,6 @@
 # Implementation Plan: Desktop Serial/USB Transport
 
-## Phase 1: JVM Setup & Dependency Integration
+## Phase 1: JVM Setup & Dependency Integration [checkpoint: a05916d]
 - [x] Task: Add the `jSerialComm` library to the `jvmMain` dependencies of the networking module. [checkpoint: 8994c66]
 - [x] Task: Create a `jvmMain` stub implementation for a `SerialTransport` class that implements the shared `RadioTransport` interface. [checkpoint: 83668e4]
 
