@@ -26,4 +26,4 @@
 - [x] Task: Move DI bindings for the relocated classes to their new respective modules (e.g., `ServiceKoinModule`, `MessagingKoinModule`).
 - [x] Task: Ensure the root app module's DI configuration successfully includes the feature and core Koin modules.
 - [x] Task: Run Android instrumented/unit tests to verify graph compilation.
-- [~] Task: Conductor - User Manual Verification 'Phase 4: Dependency Injection Refactoring' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Dependency Injection Refactoring' (Protocol in workflow.md)
