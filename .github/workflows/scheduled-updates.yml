@@ -85,7 +85,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: '17'
-          distribution: 'zulu'
+          distribution: 'jetbrains'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
