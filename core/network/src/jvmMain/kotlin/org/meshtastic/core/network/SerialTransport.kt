@@ -33,6 +33,8 @@ class SerialTransport(
             port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0)
             if (port.openPort()) {
                 serialPort = port
+                port.setDTR()
+                port.setRTS()
                 super.connect() // Sends WAKE_BYTES and signals service.onConnect()
                 startReadLoop(port)
                 true
@@ -48,12 +50,17 @@ class SerialTransport(
     private fun startReadLoop(port: SerialPort) {
         readJob = service.serviceScope.launch(Dispatchers.IO) {
             val input = port.inputStream
+            val buffer = ByteArray(1024)
             try {
                 while (isActive && port.isOpen) {
                     try {
-                        val c = input.read()
-                        if (c == -1) break
-                        readChar(c.toByte())
+                        val numRead = input.read(buffer)
+                        if (numRead == -1) break
+                        if (numRead > 0) {
+                            for (i in 0 until numRead) {
+                                readChar(buffer[i])
+                            }
+                        }
                     } catch (_: SerialPortTimeoutException) {
                         // Expected timeout when no data is available
                         continue
