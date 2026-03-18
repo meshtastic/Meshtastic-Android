@@ -1,9 +1,9 @@
 # Implementation Plan: MQTT Transport
 
 ## Phase 1: Core Networking & Library Integration
-- [ ] Task: Evaluate and add KMP MQTT library dependency (e.g. Kmqtt) to `core:network` or `libs.versions.toml`.
-    - [ ] Add dependency to `libs.versions.toml`.
-    - [ ] Apply dependency in `core:network/build.gradle.kts`.
+- [x] Task: Evaluate and add KMP MQTT library dependency (e.g. Kmqtt) to `core:network` or `libs.versions.toml`. [2a4aa35]
+    - [x] Add dependency to `libs.versions.toml`.
+    - [x] Apply dependency in `core:network/build.gradle.kts`.
 - [ ] Task: Implement `MqttTransport` class in `commonMain` of `core:network`.
     - [ ] Create failing tests in `commonTest` for MqttTransport initialization and configuration parsing.
     - [ ] Implement MqttTransport to parse URL (mqtt://, mqtts://), credentials, and configure the underlying MQTT client.
