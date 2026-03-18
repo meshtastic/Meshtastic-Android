@@ -194,9 +194,7 @@ class DesktopRadioInterfaceService(
 
         val serial = org.meshtastic.core.network.SerialTransport(portName = portName, service = this)
         serialTransport = serial
-        if (serial.startConnection()) {
-            onConnect()
-        } else {
+        if (!serial.startConnection()) {
             onDisconnect(isPermanent = true, errorMessage = "Failed to connect to $portName")
         }
     }

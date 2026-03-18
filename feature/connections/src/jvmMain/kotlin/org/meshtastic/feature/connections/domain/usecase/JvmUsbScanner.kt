@@ -18,6 +18,7 @@ package org.meshtastic.feature.connections.domain.usecase
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.isActive
 import org.koin.core.annotation.Single
@@ -44,6 +45,7 @@ class JvmUsbScanner : UsbScanner {
             delay(POLL_INTERVAL_MS)
         }
     }
+        .distinctUntilChanged()
 
     companion object {
         private const val POLL_INTERVAL_MS = 2000L

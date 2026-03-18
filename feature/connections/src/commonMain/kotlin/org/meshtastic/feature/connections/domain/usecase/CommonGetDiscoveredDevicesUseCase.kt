@@ -65,12 +65,14 @@ class CommonGetDiscoveredDevicesUseCase(
             DiscoveredDevices(
                 recentTcpDevices = recentTcpForUi,
                 usbDevices =
-                if (showMock) {
-                    val demoModeLabel = runCatching { getString(Res.string.demo_mode) }.getOrDefault("Demo Mode")
-                    listOf(DeviceListEntry.Mock(demoModeLabel))
-                } else {
-                    usbList
-                },
+                usbList +
+                    if (showMock) {
+                        val demoModeLabel =
+                            runCatching { getString(Res.string.demo_mode) }.getOrDefault("Demo Mode")
+                        listOf(DeviceListEntry.Mock(demoModeLabel))
+                    } else {
+                        emptyList()
+                    },
             )
         }
     }

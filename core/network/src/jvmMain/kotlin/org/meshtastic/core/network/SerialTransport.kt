@@ -43,7 +43,7 @@ class SerialTransport(
         return try {
             val port = SerialPort.getCommPort(portName) ?: return false
             port.setComPortParameters(baudRate, DATA_BITS, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY)
-            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0)
+            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, READ_TIMEOUT_MS, 0)
             if (port.openPort()) {
                 serialPort = port
                 port.setDTR()
@@ -87,7 +87,18 @@ class SerialTransport(
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Serial read loop outer error: ${e.message}" }
                 } finally {
-                    close()
+                    try {
+                        input.close()
+                    } catch (_: Exception) {
+                        // Ignore errors during input stream close
+                    }
+                    try {
+                        if (port.isOpen) {
+                            port.closePort()
+                        }
+                    } catch (_: Exception) {
+                        // Ignore errors during port close
+                    }
                 }
             }
     }
@@ -104,11 +115,15 @@ class SerialTransport(
         // Not specifically needed for raw serial unless implemented
     }
 
+    private fun closePortResources() {
+        serialPort?.takeIf { it.isOpen }?.closePort()
+        serialPort = null
+    }
+
     override fun close() {
         readJob?.cancel()
         readJob = null
-        serialPort?.takeIf { it.isOpen }?.closePort()
-        serialPort = null
+        closePortResources()
         super.close()
     }
 
@@ -116,6 +131,7 @@ class SerialTransport(
         private const val DEFAULT_BAUD_RATE = 115200
         private const val DATA_BITS = 8
         private const val READ_BUFFER_SIZE = 1024
+        private const val READ_TIMEOUT_MS = 100
 
         /**
          * Discovers and returns a list of available serial ports. Returns a list of the system port names (e.g.,
