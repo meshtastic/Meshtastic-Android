@@ -48,7 +48,12 @@ kotlin {
             implementation(libs.kermit)
         }
 
-        val jvmMain by getting { dependencies { implementation(libs.ktor.client.java) } }
+        val jvmMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.java)
+                implementation(libs.jserialcomm)
+            }
+        }
 
         androidMain.dependencies {
             implementation(projects.core.ble)
@@ -61,6 +66,7 @@ kotlin {
             implementation(libs.okhttp3.logging.interceptor)
         }
 
+        val jvmTest by getting { dependencies { implementation(libs.mockk) } }
         commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
     }
 }

@@ -48,6 +48,7 @@ ktor = "3.4.1"
 
 # Other
 aboutlibraries = "13.2.1"
+jserialcomm = "2.11.0"
 coil = "3.4.0"
 datadog-gradle = "1.24.0"
 dd-sdk-android = "3.7.1"
@@ -219,6 +220,7 @@ nordic-dfu = { module = "no.nordicsemi.android:dfu", version.ref = "nordic-dfu" 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
 
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
+jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid-android" }

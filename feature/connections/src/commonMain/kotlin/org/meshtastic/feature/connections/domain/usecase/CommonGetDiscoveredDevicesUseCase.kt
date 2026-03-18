@@ -34,13 +34,15 @@ class CommonGetDiscoveredDevicesUseCase(
     private val recentAddressesDataSource: RecentAddressesDataSource,
     private val nodeRepository: NodeRepository,
     private val databaseManager: DatabaseManager,
+    private val usbScanner: UsbScanner? = null,
 ) : GetDiscoveredDevicesUseCase {
     private val suffixLength = 4
 
     override fun invoke(showMock: Boolean): Flow<DiscoveredDevices> {
         val nodeDb = nodeRepository.nodeDBbyNum
+        val usbFlow = usbScanner?.scanUsbDevices() ?: kotlinx.coroutines.flow.flowOf(emptyList())
 
-        return combine(nodeDb, recentAddressesDataSource.recentAddresses) { db, recentList ->
+        return combine(nodeDb, recentAddressesDataSource.recentAddresses, usbFlow) { db, recentList, usbList ->
             val recentTcpForUi =
                 recentList
                     .map { DeviceListEntry.Tcp(it.name, it.address) }
@@ -63,12 +65,14 @@ class CommonGetDiscoveredDevicesUseCase(
             DiscoveredDevices(
                 recentTcpDevices = recentTcpForUi,
                 usbDevices =
-                if (showMock) {
-                    val demoModeLabel = runCatching { getString(Res.string.demo_mode) }.getOrDefault("Demo Mode")
-                    listOf(DeviceListEntry.Mock(demoModeLabel))
-                } else {
-                    emptyList()
-                },
+                usbList +
+                    if (showMock) {
+                        val demoModeLabel =
+                            runCatching { getString(Res.string.demo_mode) }.getOrDefault("Demo Mode")
+                        listOf(DeviceListEntry.Mock(demoModeLabel))
+                    } else {
+                        emptyList()
+                    },
             )
         }
     }
