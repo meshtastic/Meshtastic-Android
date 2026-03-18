@@ -13,6 +13,6 @@
 - [x] Task: Update the `feature:connections` UI or `DesktopScannerViewModel` to poll the new `SerialTransport` for available ports. [checkpoint: 2e85b5a]
 - [x] Task: Wire the user's serial port selection to initiate the connection via the DI graph and active service logic. [checkpoint: 94cb97c]
 
-## Phase 4: Validation
-- [ ] Task: Verify end-to-end communication with a physical Meshtastic device over USB on the desktop target.
-- [ ] Task: Ensure CI builds cleanly and that no `java.*` dependencies leaked into `commonMain`.
+## Phase 4: Validation [checkpoint: 1055752]
+- [x] Task: Verify end-to-end communication with a physical Meshtastic device over USB on the desktop target. [checkpoint: 1055752]
+- [x] Task: Ensure CI builds cleanly and that no `java.*` dependencies leaked into `commonMain`. [checkpoint: 1055752]
