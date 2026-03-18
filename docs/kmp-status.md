@@ -133,15 +133,16 @@ Extracted to shared `commonMain` (no longer app-only):
 - `MetricsViewModel` → `feature:node/commonMain`
 - `UIViewModel` → `core:ui/commonMain`
 - `ChannelViewModel` → `feature:settings/commonMain`
-- `NodeMapViewModel` → `feature:map/commonMain`
+- `NodeMapViewModel` → `feature:map/commonMain` (Shared logic for node-specific maps)
+- `BaseMapViewModel` → `feature:map/commonMain` (Core contract for all maps)
 
 Extracted to core KMP modules (Android-specific implementations):
 - Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
 - BLE, USB/Serial, TCP radio connections, and NsdManager → `core:network/androidMain`
 
-The `:app` module has successfully been reduced to a thin shell containing only 6 Kotlin files:
+Remaining to be extracted from `:app` or unified in `commonMain`:
+- `MapViewModel` (Unify Google/F-Droid flavors into a single `commonMain` class consuming a `MapConfigProvider` interface)
 - Top-level UI composition (`ui/Main.kt`)
-- Root Activity and Koin bootstrapping (`MainActivity.kt`, `MeshUtilApplication.kt`, `MainKoinModule.kt`, `AppKoinModule.kt`, `NetworkModule.kt`)
 
 ## Prerelease Dependencies
 

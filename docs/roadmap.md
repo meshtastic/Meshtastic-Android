@@ -79,9 +79,12 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 ## Near-Term Priorities (30 days)
 
 1. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.
-2. **Desktop Map Integration** — Address the major Desktop feature gap by implementing a `MapLibre` (or equivalent) map view via `SwingPanel` wrapper.
-3. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations) to ensure `commonMain` remains pure.
-4. **Dependency stabilization** — track stable releases for CMP, Koin, Lifecycle, Nav3 as they move out of alpha/beta.
+2. **Desktop Map Integration** — Address the major Desktop feature gap by implementing a raster map view using [**MapComposeMP**](https://github.com/p-lr/MapComposeMP).
+    - Implement a `MapComposeProvider` for Desktop.
+    - Implement a **Web Mercator Projection** helper in `feature:map/commonMain` to translate GPS coordinates to the 2D image plane.
+    - Leverage the existing `BaseMapViewModel` contract.
+3. **Unify `MapViewModel`** — Collapse the remaining Google and F-Droid specific `MapViewModel` classes in the `:app` module into a single `commonMain` implementation by isolating platform-specific settings (styles, tile sources) behind a repository interface.
+4. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations) to ensure `commonMain` remains pure.
 
 ## Medium-Term Priorities (60 days)
 
