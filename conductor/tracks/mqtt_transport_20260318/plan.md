@@ -12,10 +12,10 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Core Networking & Library Integration' (Protocol in workflow.md) [93d9a50]
 
 ## Phase 2: Publishing & Subscribing
-- [ ] Task: Implement message subscription and payload parsing.
-    - [ ] Create failing tests for receiving and mapping standard Meshtastic JSON payloads from subscribed topics.
-    - [ ] Implement topic subscription management in `MqttTransport`.
-    - [ ] Implement payload parsing and integration with `core:model` definitions.
+- [x] Task: Implement message subscription and payload parsing. [4900f69]
+    - [x] Create failing tests for receiving and mapping standard Meshtastic JSON payloads from subscribed topics.
+    - [x] Implement topic subscription management in `MqttTransport`.
+    - [x] Implement payload parsing and integration with `core:model` definitions.
 - [ ] Task: Implement publishing mechanism.
     - [ ] Create failing tests for formatting and publishing node information/messages to custom topics.
     - [ ] Implement publish functionality in `MqttTransport`.
