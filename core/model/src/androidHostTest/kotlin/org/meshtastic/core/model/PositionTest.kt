@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.model
 
-
 class PositionTest {
-/*
+    /*
 
     @Test
     fun degGood() {
@@ -35,5 +34,5 @@ class PositionTest {
         assertTrue(position.time != 0)
     }
 
-*/
+     */
 }

@@ -74,10 +74,6 @@ kotlin {
             implementation(project(":core:datastore"))
         }
 
-        val androidHostTest by getting {
-            dependencies {
-                implementation(project(":core:datastore"))
-            }
-        }
+        val androidHostTest by getting { dependencies { implementation(project(":core:datastore")) } }
     }
 }

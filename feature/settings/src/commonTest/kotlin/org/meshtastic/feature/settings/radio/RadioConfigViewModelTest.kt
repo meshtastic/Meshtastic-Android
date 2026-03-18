@@ -22,8 +22,8 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
-import dev.mokkery.mock
 import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
@@ -34,10 +34,38 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import org.meshtastic.core.domain.usecase.settings.*
+import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
+import org.meshtastic.core.domain.usecase.settings.AdminRoute
+import org.meshtastic.core.domain.usecase.settings.ExportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.ExportSecurityConfigUseCase
+import org.meshtastic.core.domain.usecase.settings.ImportProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.InstallProfileUseCase
+import org.meshtastic.core.domain.usecase.settings.ProcessRadioResponseUseCase
+import org.meshtastic.core.domain.usecase.settings.RadioConfigUseCase
+import org.meshtastic.core.domain.usecase.settings.RadioResponseResult
+import org.meshtastic.core.domain.usecase.settings.ToggleAnalyticsUseCase
+import org.meshtastic.core.domain.usecase.settings.ToggleHomoglyphEncodingUseCase
 import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.*
-import org.meshtastic.proto.*
+import org.meshtastic.core.repository.AnalyticsPrefs
+import org.meshtastic.core.repository.FileService
+import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.LocationRepository
+import org.meshtastic.core.repository.LocationService
+import org.meshtastic.core.repository.MapConsentPrefs
+import org.meshtastic.core.repository.NodeRepository
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.proto.ChannelSet
+import org.meshtastic.proto.ChannelSettings
+import org.meshtastic.proto.Config
+import org.meshtastic.proto.DeviceMetadata
+import org.meshtastic.proto.DeviceProfile
+import org.meshtastic.proto.LocalConfig
+import org.meshtastic.proto.LocalModuleConfig
+import org.meshtastic.proto.MeshPacket
+import org.meshtastic.proto.User
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -56,7 +84,7 @@ class RadioConfigViewModelTest {
     private val mapConsentPrefs: MapConsentPrefs = mock(MockMode.autofill)
     private val analyticsPrefs: AnalyticsPrefs = mock(MockMode.autofill)
     private val homoglyphEncodingPrefs: HomoglyphPrefs = mock(MockMode.autofill)
-    
+
     private val toggleAnalyticsUseCase: ToggleAnalyticsUseCase = mock(MockMode.autofill)
     private val toggleHomoglyphEncodingUseCase: ToggleHomoglyphEncodingUseCase = mock(MockMode.autofill)
     private val importProfileUseCase: ImportProfileUseCase = mock(MockMode.autofill)
@@ -85,7 +113,7 @@ class RadioConfigViewModelTest {
         every { serviceRepository.meshPacketFlow } returns MutableSharedFlow()
         every { serviceRepository.connectionState } returns
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
-        
+
         every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
 
         viewModel = createViewModel()
@@ -117,7 +145,6 @@ class RadioConfigViewModelTest {
         processRadioResponseUseCase = processRadioResponseUseCase,
         locationService = locationService,
         fileService = fileService,
-        
     )
 
     @Test
@@ -135,25 +162,25 @@ class RadioConfigViewModelTest {
             val state = awaitItem()
             assertEquals(Config.DeviceConfig.Role.ROUTER, state.radioConfig.device?.role)
         }
-        
+
         verifySuspend { radioConfigUseCase.setConfig(123, config) }
     }
 
     @Test
     fun `toggleAnalyticsAllowed calls useCase`() {
         every { toggleAnalyticsUseCase() } returns Unit
-        
+
         viewModel.toggleAnalyticsAllowed()
-        
+
         verify { toggleAnalyticsUseCase() }
     }
 
     @Test
     fun `toggleHomoglyphCharactersEncodingEnabled calls useCase`() {
         every { toggleHomoglyphEncodingUseCase() } returns Unit
-        
+
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
-        
+
         verify { toggleHomoglyphEncodingUseCase() }
     }
 
@@ -257,7 +284,7 @@ class RadioConfigViewModelTest {
         everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 42
 
         viewModel.setOwner(user)
-        
+
         verifySuspend { radioConfigUseCase.setOwner(123, user) }
     }
 
@@ -270,7 +297,7 @@ class RadioConfigViewModelTest {
         everySuspend { radioConfigUseCase.setRingtone(any(), any()) } returns Unit
 
         viewModel.setRingtone("ringtone.mp3")
-        
+
         assertEquals("ringtone.mp3", viewModel.radioConfigState.value.ringtone)
         verifySuspend { radioConfigUseCase.setRingtone(123, "ringtone.mp3") }
     }
@@ -284,7 +311,7 @@ class RadioConfigViewModelTest {
         everySuspend { radioConfigUseCase.setCannedMessages(any(), any()) } returns Unit
 
         viewModel.setCannedMessages("Hello|World")
-        
+
         assertEquals("Hello|World", viewModel.radioConfigState.value.cannedMessageMessages)
         verifySuspend { radioConfigUseCase.setCannedMessages(123, "Hello|World") }
     }

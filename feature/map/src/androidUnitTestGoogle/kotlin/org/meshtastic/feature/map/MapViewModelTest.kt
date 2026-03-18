@@ -17,7 +17,6 @@
 package org.meshtastic.feature.map
 
 import android.app.Application
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.google.android.gms.maps.model.UrlTileProvider
 import dev.mokkery.MockMode

@@ -16,21 +16,8 @@
  */
 package org.meshtastic.core.data.repository
 
-
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Test
-import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.data.datasource.BootloaderOtaQuirksJsonDataSource
-import org.meshtastic.core.data.datasource.DeviceHardwareJsonDataSource
-import org.meshtastic.core.data.datasource.DeviceHardwareLocalDataSource
-import org.meshtastic.core.database.entity.DeviceHardwareEntity
-import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
-
 class DeviceHardwareRepositoryTest {
-/*
+    /*
 
 
     private val remoteDataSource: DeviceHardwareRemoteDataSource = mock()
@@ -124,5 +111,5 @@ class DeviceHardwareRepositoryTest {
         lastUpdated = nowMillis,
     )
 
-*/
+     */
 }

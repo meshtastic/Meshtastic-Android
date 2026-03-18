@@ -17,23 +17,10 @@
 package org.meshtastic.feature.firmware.ota
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.core.ble.BleConnection
-import org.meshtastic.core.ble.BleConnectionFactory
-import org.meshtastic.core.ble.BleConnectionState
-import org.meshtastic.core.ble.BleDevice
-import org.meshtastic.core.ble.BleScanner
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BleOtaTransportTest {
-/*
+    /*
 
 
     private val testDispatcher = StandardTestDispatcher()
@@ -83,5 +70,5 @@ class BleOtaTransportTest {
         assertTrue(result.exceptionOrNull() is OtaProtocolException.ConnectionFailed)
     }
 
-*/
+     */
 }

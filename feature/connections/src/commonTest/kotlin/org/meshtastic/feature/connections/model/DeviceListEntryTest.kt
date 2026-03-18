@@ -16,18 +16,9 @@
  */
 package org.meshtastic.feature.connections.model
 
-import io.kotest.matchers.shouldBe
-
-import org.meshtastic.core.testing.TestDataFactory
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-
 /** Tests for [DeviceListEntry] sealed class and its variants. */
 class DeviceListEntryTest {
-/*
+    /*
 
 
     @Test
@@ -76,5 +67,5 @@ class DeviceListEntryTest {
         assertTrue(devices.recentTcpDevices.isEmpty())
     }
 
-*/
+     */
 }

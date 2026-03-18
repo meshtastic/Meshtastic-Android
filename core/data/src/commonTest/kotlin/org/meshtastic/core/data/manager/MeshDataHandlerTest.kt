@@ -19,8 +19,12 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.mock
 import org.meshtastic.core.model.util.MeshDataMapper
-import org.meshtastic.core.repository.*
+import org.meshtastic.core.repository.MeshServiceNotifications
+import org.meshtastic.core.repository.NotificationManager
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.PlatformAnalytics
+import org.meshtastic.core.repository.ServiceBroadcasts
+import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.proto.MeshPacket
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -50,26 +54,27 @@ class MeshDataHandlerTest {
 
     @BeforeTest
     fun setUp() {
-        handler = MeshDataHandlerImpl(
-            nodeManager = nodeManager,
-            packetHandler = packetHandler,
-            serviceRepository = serviceRepository,
-            packetRepository = lazy { packetRepository },
-            serviceBroadcasts = serviceBroadcasts,
-            notificationManager = notificationManager,
-            serviceNotifications = serviceNotifications,
-            analytics = analytics,
-            dataMapper = dataMapper,
-            configHandler = lazy { configHandler },
-            configFlowManager = lazy { configFlowManager },
-            commandSender = commandSender,
-            historyManager = historyManager,
-            connectionManager = lazy { connectionManager },
-            tracerouteHandler = tracerouteHandler,
-            neighborInfoHandler = neighborInfoHandler,
-            radioConfigRepository = radioConfigRepository,
-            messageFilter = messageFilter,
-        )
+        handler =
+            MeshDataHandlerImpl(
+                nodeManager = nodeManager,
+                packetHandler = packetHandler,
+                serviceRepository = serviceRepository,
+                packetRepository = lazy { packetRepository },
+                serviceBroadcasts = serviceBroadcasts,
+                notificationManager = notificationManager,
+                serviceNotifications = serviceNotifications,
+                analytics = analytics,
+                dataMapper = dataMapper,
+                configHandler = lazy { configHandler },
+                configFlowManager = lazy { configFlowManager },
+                commandSender = commandSender,
+                historyManager = historyManager,
+                connectionManager = lazy { connectionManager },
+                tracerouteHandler = tracerouteHandler,
+                neighborInfoHandler = neighborInfoHandler,
+                radioConfigRepository = radioConfigRepository,
+                messageFilter = messageFilter,
+            )
     }
 
     @Test

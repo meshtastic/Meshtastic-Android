@@ -73,10 +73,11 @@ class ServiceClientTest {
     fun `connect retries on failure`() = runTest {
         val slot = Capture.slot<ServiceConnection>()
         // First attempt fails, second succeeds
-        every { context.bindService(any(), capture(slot), any()) } sequentially {
-            returns(false)
-            returns(true)
-        }
+        every { context.bindService(any(), capture(slot), any()) } sequentially
+            {
+                returns(false)
+                returns(true)
+            }
 
         client.connect(context, intent, 0)
 

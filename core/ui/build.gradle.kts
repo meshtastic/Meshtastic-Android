@@ -65,8 +65,6 @@ kotlin {
             implementation(libs.turbine)
         }
 
-        androidUnitTest.dependencies {
-            implementation(libs.androidx.test.runner)
-        }
+        androidUnitTest.dependencies { implementation(libs.androidx.test.runner) }
     }
 }

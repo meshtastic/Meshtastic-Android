@@ -19,16 +19,14 @@ package org.meshtastic.core.data.manager
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
-import dev.mokkery.matcher.any
-import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioInterfaceService
@@ -77,7 +75,7 @@ class PacketHandlerImplTest {
         val toRadio = ToRadio(packet = MeshPacket(id = 123))
 
         handler.sendToRadio(toRadio)
-        
+
         // No explicit assertion here in original test, but we could verify call
     }
 

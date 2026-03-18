@@ -16,12 +16,8 @@
  */
 package org.meshtastic.core.service
 
-import org.junit.Test
-import org.meshtastic.core.repository.Notification
-import org.meshtastic.core.repository.NotificationManager
-
 class NotificationManagerTest {
-/*
+    /*
 
 
     @Test
@@ -34,5 +30,5 @@ class NotificationManagerTest {
         verify { manager.dispatch(notification) }
     }
 
-*/
+     */
 }

@@ -16,34 +16,13 @@
  */
 package org.meshtastic.feature.firmware
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.data.repository.FirmwareReleaseRepository
-import org.meshtastic.core.datastore.BootloaderWarningDataSource
-import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.MyNodeInfo
-import org.meshtastic.core.model.Node
-import org.meshtastic.core.repository.DeviceHardwareRepository
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.RadioPrefs
-import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.TestDataFactory
-import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.User
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertTrue
-
 /**
  * Integration tests for firmware feature.
  *
  * Tests firmware update flow, state management, and error handling.
  */
 class FirmwareUpdateIntegrationTest {
-/*
+    /*
 
 
     private lateinit var viewModel: FirmwareUpdateViewModel
@@ -198,5 +177,5 @@ class FirmwareUpdateIntegrationTest {
         assertTrue(true, "Reconnection after failure allows retry")
     }
 
-*/
+     */
 }

@@ -21,6 +21,7 @@ import androidx.room.PrimaryKey
 import org.meshtastic.core.model.MyNodeInfo
 
 @Entity(tableName = "my_node")
+@Suppress("LongParameterList")
 open class MyNodeEntity(
     @PrimaryKey(autoGenerate = false) val myNodeNum: Int,
     val model: String?,

@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.model
 
-
 class CapabilitiesTest {
-/*
+    /*
 
 
     private fun caps(version: String?) = Capabilities(version, forceEnableAll = false)
@@ -133,5 +132,5 @@ class CapabilitiesTest {
         assertFalse(DeviceVersion("2.6.9") >= DeviceVersion("2.7.0"))
     }
 
-*/
+     */
 }

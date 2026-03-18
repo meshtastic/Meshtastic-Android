@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -45,6 +44,7 @@ import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.NotificationManager
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -149,9 +149,7 @@ class MessageViewModel(
         if (contactKey != null) {
             contactKeyForPagedMessages.value = contactKey
         }
-        viewModelScope.launch {
-            uiPrefs.showQuickChat.collect { _showQuickChat.value = it }
-        }
+        viewModelScope.launch { uiPrefs.showQuickChat.collect { _showQuickChat.value = it } }
     }
 
     fun setContactKey(contactKey: String) {

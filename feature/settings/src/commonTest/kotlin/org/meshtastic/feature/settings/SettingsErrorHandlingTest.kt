@@ -16,23 +16,13 @@
  */
 package org.meshtastic.feature.settings
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.TestDataFactory
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-
 /**
  * Error handling tests for settings feature.
  *
  * Tests edge cases and error scenarios in settings management.
  */
 class SettingsErrorHandlingTest {
-/*
+    /*
 
 
     private lateinit var nodeRepository: FakeNodeRepository
@@ -179,5 +169,5 @@ class SettingsErrorHandlingTest {
         nodeRepository.nodeDBbyNum.value.size shouldBe 3
     }
 
-*/
+     */
 }

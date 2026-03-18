@@ -16,20 +16,6 @@
  */
 package org.meshtastic.feature.messaging
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.testing.FakeContactRepository
-import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakePacketRepository
-import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.TestDataFactory
-import org.meshtastic.core.testing.createTestContact
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-
 /**
  * Integration tests for messaging feature.
  *
@@ -37,7 +23,7 @@ import kotlin.test.assertTrue
  * multi-component testing using feature-specific fakes.
  */
 class MessagingIntegrationTest {
-/*
+    /*
 
 
     private lateinit var nodeRepository: FakeNodeRepository
@@ -157,5 +143,5 @@ class MessagingIntegrationTest {
         contactRepository.getContactCount() shouldBe 0
     }
 
-*/
+     */
 }

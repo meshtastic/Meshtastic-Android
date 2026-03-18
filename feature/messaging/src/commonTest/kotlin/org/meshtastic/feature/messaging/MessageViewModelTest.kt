@@ -22,19 +22,18 @@ import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
-import dev.mokkery.mock
 import dev.mokkery.matcher.any
-import dev.mokkery.verify
+import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
 import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -65,10 +64,14 @@ class MessageViewModelTest {
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
     private val notificationManager: org.meshtastic.core.repository.NotificationManager = mock(MockMode.autofill)
 
-    private val connectionStateFlow = MutableStateFlow<org.meshtastic.core.model.ConnectionState>(org.meshtastic.core.model.ConnectionState.Disconnected)
+    private val connectionStateFlow =
+        MutableStateFlow<org.meshtastic.core.model.ConnectionState>(
+            org.meshtastic.core.model.ConnectionState.Disconnected,
+        )
     private val showQuickChatFlow = MutableStateFlow(false)
     private val customEmojiFrequencyFlow = MutableStateFlow<String?>(null)
-    private val contactSettingsFlow = MutableStateFlow<Map<String, org.meshtastic.core.model.ContactSettings>>(emptyMap())
+    private val contactSettingsFlow =
+        MutableStateFlow<Map<String, org.meshtastic.core.model.ContactSettings>>(emptyMap())
 
     @BeforeTest
     fun setUp() {
@@ -85,42 +88,40 @@ class MessageViewModelTest {
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
         every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
-        
+
         every { serviceRepository.serviceAction } returns emptyFlow<ServiceAction>()
         every { serviceRepository.connectionState } returns connectionStateFlow
-        
+
         every { customEmojiPrefs.customEmojiFrequency } returns customEmojiFrequencyFlow
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
         every { uiPrefs.showQuickChat } returns showQuickChatFlow
         every { uiPrefs.setShowQuickChat(any()) } returns Unit
-        
+
         every { packetRepository.getContactSettings() } returns contactSettingsFlow
         every { packetRepository.getFirstUnreadMessageUuid(any<String>()) } returns MutableStateFlow(null)
         every { packetRepository.hasUnreadMessages(any<String>()) } returns MutableStateFlow(false)
         every { packetRepository.getUnreadCountFlow(any<String>()) } returns MutableStateFlow(0)
         every { packetRepository.getFilteredCountFlow(any<String>()) } returns MutableStateFlow(0)
-        
+
         every { quickChatActionRepository.getAllActions() } returns MutableStateFlow(emptyList())
 
-        viewModel = MessageViewModel(
-            savedStateHandle = savedStateHandle,
-            nodeRepository = nodeRepository,
-            radioConfigRepository = radioConfigRepository,
-            quickChatActionRepository = quickChatActionRepository,
-            packetRepository = packetRepository,
-            serviceRepository = serviceRepository,
-            sendMessageUseCase = sendMessageUseCase,
-            customEmojiPrefs = customEmojiPrefs,
-            homoglyphEncodingPrefs = homoglyphPrefs,
-            uiPrefs = uiPrefs,
-            notificationManager = notificationManager,
-        )
+        viewModel =
+            MessageViewModel(
+                savedStateHandle = savedStateHandle,
+                nodeRepository = nodeRepository,
+                radioConfigRepository = radioConfigRepository,
+                quickChatActionRepository = quickChatActionRepository,
+                packetRepository = packetRepository,
+                serviceRepository = serviceRepository,
+                sendMessageUseCase = sendMessageUseCase,
+                customEmojiPrefs = customEmojiPrefs,
+                homoglyphEncodingPrefs = homoglyphPrefs,
+                uiPrefs = uiPrefs,
+                notificationManager = notificationManager,
+            )
     }
 
-    @Test
-    fun testInitialization() = runTest {
-        assertNotNull(viewModel)
-    }
+    @Test fun testInitialization() = runTest { assertNotNull(viewModel) }
 
     @Test
     fun testSetTitle() = runTest {
@@ -145,7 +146,7 @@ class MessageViewModelTest {
         // The VM init collects from uiPrefs.showQuickChat
         viewModel.showQuickChat.test {
             assertEquals(false, awaitItem())
-            
+
             viewModel.toggleShowQuickChat()
             // toggleShowQuickChat updates _showQuickChat AND calls uiPrefs.setShowQuickChat
             // Since we are collecting, we should see the update.
@@ -156,7 +157,7 @@ class MessageViewModelTest {
     @Test
     fun testFrequentEmojis() = runTest {
         customEmojiFrequencyFlow.value = "👍=10,👎=5,😂=20"
-        
+
         // frequentEmojis is a property, not a flow.
         val emojis = viewModel.frequentEmojis
         assertEquals(listOf("😂", "👍", "👎"), emojis)
@@ -165,12 +166,12 @@ class MessageViewModelTest {
     @Test
     fun testSendMessage() = runTest {
         everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns Unit
-        
+
         viewModel.sendMessage("Hello", "0!12345678", null)
-        
+
         // Wait for coroutine to finish
         advanceUntilIdle()
-        
+
         // Verify via mokkery
         verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
     }
@@ -178,24 +179,22 @@ class MessageViewModelTest {
     @Test
     fun testSendReaction() = runTest {
         everySuspend { serviceRepository.onServiceAction(any()) } returns Unit
-        
+
         viewModel.sendReaction("❤️", 123, "0!12345678")
-        
+
         advanceUntilIdle()
-        
-        verifySuspend { 
-            serviceRepository.onServiceAction(ServiceAction.Reaction("❤️", 123, "0!12345678")) 
-        }
+
+        verifySuspend { serviceRepository.onServiceAction(ServiceAction.Reaction("❤️", 123, "0!12345678")) }
     }
 
     @Test
     fun testDeleteMessages() = runTest {
         everySuspend { packetRepository.deleteMessages(any()) } returns Unit
-        
+
         viewModel.deleteMessages(listOf(1L, 2L))
-        
+
         advanceUntilIdle()
-        
+
         verifySuspend { packetRepository.deleteMessages(listOf(1L, 2L)) }
     }
 
@@ -203,9 +202,9 @@ class MessageViewModelTest {
     fun testUnreadCount() = runTest {
         val countFlow = MutableStateFlow(5)
         every { packetRepository.getUnreadCountFlow("new_contact") } returns countFlow
-        
+
         viewModel.setContactKey("new_contact")
-        
+
         viewModel.unreadCount.test {
             // Initial 0 from stateIn
             assertEquals(0, awaitItem())
@@ -225,9 +224,9 @@ class MessageViewModelTest {
         every { notificationManager.cancel(contact.hashCode()) } returns Unit
 
         viewModel.clearUnreadCount(contact, 1L, 1000L)
-        
+
         advanceUntilIdle()
-        
+
         verifySuspend { packetRepository.clearUnreadCount(contact, 1000L) }
         verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) }
         verifySuspend { notificationManager.cancel(contact.hashCode()) }
@@ -237,7 +236,7 @@ class MessageViewModelTest {
     fun testNodeRepositoryIntegration() = runTest {
         val testNodes = TestDataFactory.createTestNodes(3)
         nodeRepository.setNodes(testNodes)
-        
+
         viewModel.nodeList.test {
             // Initial value from stateIn
             assertEquals(emptyList(), awaitItem())

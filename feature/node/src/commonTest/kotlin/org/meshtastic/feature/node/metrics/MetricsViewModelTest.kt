@@ -16,35 +16,8 @@
  */
 package org.meshtastic.feature.node.metrics
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import okio.Buffer
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.core.common.util.MeshtasticUri
-import org.meshtastic.core.data.repository.TracerouteSnapshotRepository
-import org.meshtastic.core.di.CoroutineDispatchers
-import org.meshtastic.core.repository.FileService
-import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.ui.util.AlertManager
-import org.meshtastic.feature.node.detail.NodeDetailUiState
-import org.meshtastic.feature.node.detail.NodeRequestActions
-import org.meshtastic.feature.node.domain.usecase.GetNodeDetailsUseCase
-import org.meshtastic.feature.node.model.MetricsState
-import org.meshtastic.proto.Position
-
 class MetricsViewModelTest {
-/*
+    /*
 
     private val dispatchers =
         CoroutineDispatchers(
@@ -141,5 +114,5 @@ class MetricsViewModelTest {
         collectionJob.cancel()
     }
 
-*/
+     */
 }

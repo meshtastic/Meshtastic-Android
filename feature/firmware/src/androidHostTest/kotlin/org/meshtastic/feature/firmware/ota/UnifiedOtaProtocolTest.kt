@@ -16,11 +16,8 @@
  */
 package org.meshtastic.feature.firmware.ota
 
-import org.junit.Assert.assertEquals
-import org.junit.Test
-
 class UnifiedOtaProtocolTest {
-/*
+    /*
 
 
     @Test
@@ -89,5 +86,5 @@ class UnifiedOtaProtocolTest {
         assertEquals("Unknown response: RANDOM_GARBAGE", (response as OtaResponse.Error).message)
     }
 
-*/
+     */
 }

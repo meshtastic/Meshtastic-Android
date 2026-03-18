@@ -16,13 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-
-import org.meshtastic.core.repository.HomoglyphPrefs
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-
 class ToggleHomoglyphEncodingUseCaseTest {
-/*
+    /*
 
 
     private lateinit var homoglyphEncodingPrefs: HomoglyphPrefs
@@ -57,5 +52,5 @@ class ToggleHomoglyphEncodingUseCaseTest {
         verify { homoglyphEncodingPrefs.setHomoglyphEncodingEnabled(false) }
     }
 
-*/
+     */
 }

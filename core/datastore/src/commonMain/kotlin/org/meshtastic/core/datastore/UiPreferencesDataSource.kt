@@ -49,7 +49,8 @@ const val KEY_EXCLUDE_MQTT = "exclude-mqtt"
 
 @Single
 @Suppress("TooManyFunctions") // One setter per preference field — inherently grows with preferences.
-open class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) : UiPreferences {
+open class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) :
+    UiPreferences {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 

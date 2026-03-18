@@ -21,8 +21,8 @@ import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.mock
 import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.model.ConnectionState
@@ -59,7 +59,7 @@ class NodeListViewModelTest {
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile())
         every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
-        
+
         every { nodeFilterPreferences.nodeSortOption } returns MutableStateFlow(NodeSortOption.LAST_HEARD)
         every { nodeFilterPreferences.includeUnknown } returns MutableStateFlow(true)
         every { nodeFilterPreferences.excludeInfrastructure } returns MutableStateFlow(false)
@@ -93,16 +93,16 @@ class NodeListViewModelTest {
     fun `nodeList emits updates when repository changes`() = runTest {
         val nodesFlow = MutableStateFlow<List<Node>>(emptyList())
         every { getFilteredNodesUseCase(any(), any()) } returns nodesFlow
-        
+
         val vm = createViewModel()
         vm.nodeList.test {
             // Initial value from stateIn
             assertEquals(emptyList(), awaitItem())
-            
+
             // Trigger update
             val testNodes = TestDataFactory.createTestNodes(3)
             nodesFlow.value = testNodes
-            
+
             assertEquals(3, awaitItem().size)
         }
     }
@@ -111,7 +111,7 @@ class NodeListViewModelTest {
     fun `connectionState reflects serviceRepository state`() = runTest {
         val stateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
         every { serviceRepository.connectionState } returns stateFlow
-        
+
         val vm = createViewModel()
         vm.connectionState.test {
             assertEquals(ConnectionState.Disconnected, awaitItem())

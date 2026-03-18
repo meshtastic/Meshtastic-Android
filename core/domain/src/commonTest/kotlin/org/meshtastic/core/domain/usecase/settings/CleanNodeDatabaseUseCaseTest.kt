@@ -17,13 +17,9 @@
 package org.meshtastic.core.domain.usecase.settings
 
 //
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.NodeRepository
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 
 class CleanNodeDatabaseUseCaseTest {
-/*
+    /*
 
 
     private lateinit var nodeRepository: NodeRepository
@@ -42,5 +38,5 @@ class CleanNodeDatabaseUseCaseTest {
         // Assert
     }
 
-*/
+     */
 }

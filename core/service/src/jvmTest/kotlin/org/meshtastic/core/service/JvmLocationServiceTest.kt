@@ -16,12 +16,8 @@
  */
 package org.meshtastic.core.service
 
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertNull
-import org.junit.Test
-
 class JvmLocationServiceTest {
-/*
+    /*
 
     @Test
     fun testGetCurrentLocationReturnsNullOnJvm() = runTest {
@@ -30,5 +26,5 @@ class JvmLocationServiceTest {
         assertNull(location)
     }
 
-*/
+     */
 }

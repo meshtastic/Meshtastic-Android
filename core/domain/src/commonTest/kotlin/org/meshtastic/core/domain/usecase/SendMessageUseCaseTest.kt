@@ -52,7 +52,8 @@ class SendMessageUseCaseTest {
         nodeRepository = mock(MockMode.autofill)
         packetRepository = mock(MockMode.autofill)
         radioController = FakeRadioController()
-        homoglyphEncodingPrefs = mock(MockMode.autofill) { every { homoglyphEncodingEnabled } returns MutableStateFlow(false) }
+        homoglyphEncodingPrefs =
+            mock(MockMode.autofill) { every { homoglyphEncodingEnabled } returns MutableStateFlow(false) }
         messageQueue = mock(MockMode.autofill)
 
         useCase =
@@ -83,11 +84,12 @@ class SendMessageUseCaseTest {
     @Test
     fun `invoke with direct message to older firmware triggers favoriteNode`() = runTest {
         // Arrange
-        val ourNode = Node(
-            num = 1,
-            user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-            metadata = DeviceMetadata(firmware_version = "2.0.0")
-        )
+        val ourNode =
+            Node(
+                num = 1,
+                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
+                metadata = DeviceMetadata(firmware_version = "2.0.0"),
+            )
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(ourNode)
 
         val destNode = Node(num = 12345, isFavorite = false)
@@ -106,11 +108,12 @@ class SendMessageUseCaseTest {
     @Test
     fun `invoke with direct message to new firmware triggers sendSharedContact`() = runTest {
         // Arrange
-        val ourNode = Node(
-            num = 1,
-            user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
-            metadata = DeviceMetadata(firmware_version = "2.7.12")
-        )
+        val ourNode =
+            Node(
+                num = 1,
+                user = User(id = "!local", role = Config.DeviceConfig.Role.CLIENT),
+                metadata = DeviceMetadata(firmware_version = "2.7.12"),
+            )
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(ourNode)
 
         val destNode = Node(num = 67890)
@@ -134,7 +137,7 @@ class SendMessageUseCaseTest {
         every { homoglyphEncodingPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(true)
 
         val originalText = "\u0410pple" // Cyrillic A
-        
+
         // Act
         useCase(originalText, "0${DataPacket.ID_BROADCAST}", null)
 

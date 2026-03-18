@@ -16,19 +16,13 @@
  */
 package org.meshtastic.feature.intro
 
-import io.kotest.matchers.shouldBe
-
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-
 /**
  * Bootstrap tests for IntroViewModel.
  *
  * Tests the intro navigation flow logic.
  */
 class IntroViewModelTest {
-/*
+    /*
 
 
     private val viewModel = IntroViewModel()
@@ -69,5 +63,5 @@ class IntroViewModelTest {
         assertNull(next, "CriticalAlerts should not navigate further")
     }
 
-*/
+     */
 }

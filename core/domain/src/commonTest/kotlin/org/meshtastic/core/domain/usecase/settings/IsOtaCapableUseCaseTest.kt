@@ -50,13 +50,14 @@ class IsOtaCapableUseCaseTest {
         radioController = mock(MockMode.autofill)
         deviceHardwareRepository = mock(MockMode.autofill)
         radioPrefs = mock(MockMode.autofill)
-        
-        useCase = IsOtaCapableUseCaseImpl(
-            nodeRepository = nodeRepository,
-            radioController = radioController,
-            radioPrefs = radioPrefs,
-            deviceHardwareRepository = deviceHardwareRepository
-        )
+
+        useCase =
+            IsOtaCapableUseCaseImpl(
+                nodeRepository = nodeRepository,
+                radioController = radioController,
+                radioPrefs = radioPrefs,
+                deviceHardwareRepository = deviceHardwareRepository,
+            )
     }
 
     @Test
@@ -64,10 +65,17 @@ class IsOtaCapableUseCaseTest {
         // Arrange
         val node = Node(num = 123, user = User(hw_model = HardwareModel.TBEAM))
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
-        dev.mokkery.every { radioController.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
-        
-        val hw = DeviceHardware(activelySupported = true, architecture = "esp32", hwModel = HardwareModel.TBEAM.value, requiresDfu = false)
+
+        val hw =
+            DeviceHardware(
+                activelySupported = true,
+                architecture = "esp32",
+                hwModel = HardwareModel.TBEAM.value,
+                requiresDfu = false,
+            )
         everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
 
         useCase().test {
@@ -81,11 +89,12 @@ class IsOtaCapableUseCaseTest {
         // Arrange
         val node = Node(num = 123, user = User(hw_model = HardwareModel.TBEAM))
         dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
-        dev.mokkery.every { radioController.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
-        
+
         // In the current implementation placeholder, it returns true if it's BLE/Serial/Tcp.
-        
+
         useCase().test {
             assertTrue(awaitItem())
             cancelAndIgnoreRemainingEvents()

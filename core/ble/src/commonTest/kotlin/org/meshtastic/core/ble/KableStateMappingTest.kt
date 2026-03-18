@@ -16,44 +16,43 @@
  */
 package org.meshtastic.core.ble
 
-
 class KableStateMappingTest {
-/*
+    /*
 
-/*
+    /*
 
 
-    @Test
-    fun `Connecting maps to Connecting`() {
-        val result = state.toBleConnectionState(hasStartedConnecting = false)
-        assertEquals(BleConnectionState.Connecting, result)
-    }
+        @Test
+        fun `Connecting maps to Connecting`() {
+            val result = state.toBleConnectionState(hasStartedConnecting = false)
+            assertEquals(BleConnectionState.Connecting, result)
+        }
 
-    @Test
-    fun `Connected maps to Connected`() {
-        val result = state.toBleConnectionState(hasStartedConnecting = true)
-        assertEquals(BleConnectionState.Connected, result)
-    }
+        @Test
+        fun `Connected maps to Connected`() {
+            val result = state.toBleConnectionState(hasStartedConnecting = true)
+            assertEquals(BleConnectionState.Connected, result)
+        }
 
-    @Test
-    fun `Disconnecting maps to Disconnecting`() {
-        val result = state.toBleConnectionState(hasStartedConnecting = true)
-        assertEquals(BleConnectionState.Disconnecting, result)
-    }
+        @Test
+        fun `Disconnecting maps to Disconnecting`() {
+            val result = state.toBleConnectionState(hasStartedConnecting = true)
+            assertEquals(BleConnectionState.Disconnecting, result)
+        }
 
-    @Test
-    fun `Disconnected ignores initial emission if not started connecting`() {
-        val result = state.toBleConnectionState(hasStartedConnecting = false)
-        assertNull(result)
-    }
+        @Test
+        fun `Disconnected ignores initial emission if not started connecting`() {
+            val result = state.toBleConnectionState(hasStartedConnecting = false)
+            assertNull(result)
+        }
 
-    @Test
-    fun `Disconnected maps to Disconnected if started connecting`() {
-        val result = state.toBleConnectionState(hasStartedConnecting = true)
-        assertEquals(BleConnectionState.Disconnected, result)
-    }
+        @Test
+        fun `Disconnected maps to Disconnected if started connecting`() {
+            val result = state.toBleConnectionState(hasStartedConnecting = true)
+            assertEquals(BleConnectionState.Disconnected, result)
+        }
 
-*/
+     */
 
-*/
+     */
 }

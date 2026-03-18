@@ -37,7 +37,6 @@ class FakeMeshServiceNotifications : MeshServiceNotifications {
     override fun updateServiceStateNotification(summaryString: String?, telemetry: Telemetry?): Notification =
         mock(MockMode.autofill)
 
-
     override suspend fun updateMessageNotification(
         contactKey: String,
         name: String,

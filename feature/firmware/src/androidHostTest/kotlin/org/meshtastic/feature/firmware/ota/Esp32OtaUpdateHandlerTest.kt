@@ -16,28 +16,11 @@
  */
 package org.meshtastic.feature.firmware.ota
 
-import android.content.ContentResolver
-import android.content.Context
-import android.net.Uri
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.core.common.util.CommonUri
-import org.meshtastic.core.common.util.toPlatformUri
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.model.RadioController
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.feature.firmware.FirmwareRetriever
-import org.meshtastic.feature.firmware.FirmwareUpdateState
-import java.io.IOException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class Esp32OtaUpdateHandlerTest {
-/*
+    /*
 
 
     private val firmwareRetriever: FirmwareRetriever = mockk()
@@ -103,5 +86,5 @@ class Esp32OtaUpdateHandlerTest {
         unmockkStatic("org.meshtastic.core.common.util.CommonUri_androidKt")
     }
 
-*/
+     */
 }

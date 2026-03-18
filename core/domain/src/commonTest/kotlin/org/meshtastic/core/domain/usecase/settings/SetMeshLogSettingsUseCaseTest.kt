@@ -16,15 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.MeshLogPrefs
-import org.meshtastic.core.repository.MeshLogRepository
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-
 class SetMeshLogSettingsUseCaseTest {
-/*
+    /*
 
 
     private lateinit var meshLogRepository: MeshLogRepository
@@ -69,5 +62,5 @@ class SetMeshLogSettingsUseCaseTest {
         verifySuspend { meshLogRepository.deleteAll() }
     }
 
-*/
+     */
 }

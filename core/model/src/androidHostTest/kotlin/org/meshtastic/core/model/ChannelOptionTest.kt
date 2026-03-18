@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.model
 
-
 class ChannelOptionTest {
-/*
+    /*
 
 
     /**
@@ -74,5 +73,5 @@ class ChannelOptionTest {
         )
     }
 
-*/
+     */
 }

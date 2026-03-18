@@ -16,13 +16,8 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-
-import org.meshtastic.core.repository.AnalyticsPrefs
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-
 class ToggleAnalyticsUseCaseTest {
-/*
+    /*
 
 
     private lateinit var analyticsPrefs: AnalyticsPrefs
@@ -57,5 +52,5 @@ class ToggleAnalyticsUseCaseTest {
         verify { analyticsPrefs.setAnalyticsAllowed(false) }
     }
 
-*/
+     */
 }

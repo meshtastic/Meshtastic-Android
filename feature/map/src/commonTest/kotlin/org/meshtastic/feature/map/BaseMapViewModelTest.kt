@@ -16,28 +16,13 @@
  */
 package org.meshtastic.feature.map
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.repository.MapPrefs
-import org.meshtastic.core.repository.PacketRepository
-import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.TestDataFactory
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-
 /**
  * Bootstrap tests for BaseMapViewModel.
  *
  * Tests map functionality using FakeNodeRepository and test data.
  */
 class BaseMapViewModelTest {
-/*
+    /*
 
 
     private lateinit var viewModel: BaseMapViewModel
@@ -104,5 +89,5 @@ class BaseMapViewModelTest {
         "Nodes added to repository" shouldBe 3, nodeRepository.nodeDBbyNum.value.size
     }
 
-*/
+     */
 }

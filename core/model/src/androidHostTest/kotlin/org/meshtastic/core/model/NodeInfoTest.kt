@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.model
 
-
 class NodeInfoTest {
-/*
+    /*
 
     private val model = HardwareModel.ANDROID_SIM
     private val node =
@@ -57,5 +56,5 @@ class NodeInfoTest {
         assertEquals("364 ft", node[1].distanceStr(node[3], Config.DisplayConfig.DisplayUnits.IMPERIAL.value))
     }
 
-*/
+     */
 }

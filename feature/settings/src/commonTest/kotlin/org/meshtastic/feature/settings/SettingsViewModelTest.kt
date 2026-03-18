@@ -29,14 +29,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.BuildConfigProvider
+import org.meshtastic.core.common.UiPreferences
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.domain.usecase.settings.*
+import org.meshtastic.core.domain.usecase.settings.SetAppIntroCompletedUseCase
+import org.meshtastic.core.domain.usecase.settings.SetDatabaseCacheLimitUseCase
+import org.meshtastic.core.domain.usecase.settings.SetProvideLocationUseCase
+import org.meshtastic.core.domain.usecase.settings.SetThemeUseCase
 import org.meshtastic.core.model.ConnectionState
-import org.meshtastic.core.repository.*
+import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.UiPrefs
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.LocalConfig
-import org.meshtastic.core.common.UiPreferences
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -70,7 +74,7 @@ class SettingsViewModelTest {
         every { notificationPrefs.messagesEnabled } returns MutableStateFlow(true)
         every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(true)
         every { notificationPrefs.lowBatteryEnabled } returns MutableStateFlow(true)
-        
+
         val isOtaCapableUseCase: IsOtaCapableUseCase = mock(MockMode.autofill)
         every { isOtaCapableUseCase() } returns flowOf(true)
 
@@ -84,27 +88,28 @@ class SettingsViewModelTest {
         val meshLocationUseCase = MeshLocationUseCase(radioController)
         val exportDataUseCase = ExportDataUseCase(nodeRepository, meshLogRepository)
 
-        viewModel = SettingsViewModel(
-            radioConfigRepository = radioConfigRepository,
-            radioController = radioController,
-            nodeRepository = nodeRepository,
-            uiPrefs = uiPrefs,
-            buildConfigProvider = buildConfigProvider,
-            databaseManager = databaseManager,
-            meshLogPrefs = meshLogPrefs,
-            notificationPrefs = notificationPrefs,
-            setThemeUseCase = setThemeUseCase,
-            setLocaleUseCase = setLocaleUseCase,
-            setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
-            setProvideLocationUseCase = setProvideLocationUseCase,
-            setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
-            setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
-            setNotificationSettingsUseCase = setNotificationSettingsUseCase,
-            meshLocationUseCase = meshLocationUseCase,
-            exportDataUseCase = exportDataUseCase,
-            isOtaCapableUseCase = isOtaCapableUseCase,
-            fileService = fileService,
-        )
+        viewModel =
+            SettingsViewModel(
+                radioConfigRepository = radioConfigRepository,
+                radioController = radioController,
+                nodeRepository = nodeRepository,
+                uiPrefs = uiPrefs,
+                buildConfigProvider = buildConfigProvider,
+                databaseManager = databaseManager,
+                meshLogPrefs = meshLogPrefs,
+                notificationPrefs = notificationPrefs,
+                setThemeUseCase = setThemeUseCase,
+                setLocaleUseCase = setLocaleUseCase,
+                setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
+                setProvideLocationUseCase = setProvideLocationUseCase,
+                setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
+                setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
+                setNotificationSettingsUseCase = setNotificationSettingsUseCase,
+                meshLocationUseCase = meshLocationUseCase,
+                exportDataUseCase = exportDataUseCase,
+                isOtaCapableUseCase = isOtaCapableUseCase,
+                fileService = fileService,
+            )
     }
 
     @Test

@@ -16,24 +16,8 @@
  */
 package org.meshtastic.core.data.manager
 
-
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.core.model.DataPacket
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.repository.NotificationManager
-import org.meshtastic.core.repository.ServiceBroadcasts
-import org.meshtastic.core.resources.getString
-import org.meshtastic.proto.HardwareModel
-import org.meshtastic.proto.Position
-import org.meshtastic.proto.User
-
 class NodeManagerImplTest {
-/*
+    /*
 
 
 
@@ -196,5 +180,5 @@ class NodeManagerImplTest {
         assertNull(nodeManager.myNodeNum)
     }
 
-*/
+     */
 }

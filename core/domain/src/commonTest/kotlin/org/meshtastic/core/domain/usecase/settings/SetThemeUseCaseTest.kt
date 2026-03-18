@@ -16,8 +16,6 @@
  */
 package org.meshtastic.core.domain.usecase.settings
 
-import dev.mokkery.answering.returns
-
 import dev.mokkery.mock
 import dev.mokkery.verify
 import org.meshtastic.core.datastore.UiPreferencesDataSource

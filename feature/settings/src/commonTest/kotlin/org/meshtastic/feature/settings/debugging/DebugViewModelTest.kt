@@ -16,27 +16,11 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
-import org.meshtastic.core.repository.MeshLogPrefs
-import org.meshtastic.core.repository.MeshLogRepository
-import org.meshtastic.core.repository.NodeRepository
-import org.meshtastic.core.ui.util.AlertManager
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DebugViewModelTest {
-/*
+    /*
 
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -108,5 +92,5 @@ class DebugViewModelTest {
         verify { alertManager.showAlert(titleRes = any(), messageRes = any(), onConfirm = any()) }
     }
 
-*/
+     */
 }

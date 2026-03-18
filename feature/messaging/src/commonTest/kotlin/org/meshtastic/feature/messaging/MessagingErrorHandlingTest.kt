@@ -16,25 +16,13 @@
  */
 package org.meshtastic.feature.messaging
 
-import io.kotest.matchers.shouldBe
-
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.testing.FakeContactRepository
-import org.meshtastic.core.testing.FakeNodeRepository
-import org.meshtastic.core.testing.FakeRadioController
-import org.meshtastic.core.testing.createTestContact
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertTrue
-
 /**
  * Error handling tests for messaging feature.
  *
  * Tests failure scenarios, recovery paths, and edge cases.
  */
 class MessagingErrorHandlingTest {
-/*
+    /*
 
 
     private lateinit var nodeRepository: FakeNodeRepository
@@ -178,5 +166,5 @@ class MessagingErrorHandlingTest {
         contactRepository.getContactCount() shouldBe 1
     }
 
-*/
+     */
 }

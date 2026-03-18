@@ -31,7 +31,7 @@ class QuickChatActionRepositoryImpl(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
 ) : QuickChatActionRepository {
-    override fun getAllActions(): Flow<List<QuickChatAction>> = 
+    override fun getAllActions(): Flow<List<QuickChatAction>> =
         dbManager.currentDb.flatMapLatest { it.quickChatActionDao().getAll() }.flowOn(dispatchers.io)
 
     override suspend fun upsert(action: QuickChatAction) {

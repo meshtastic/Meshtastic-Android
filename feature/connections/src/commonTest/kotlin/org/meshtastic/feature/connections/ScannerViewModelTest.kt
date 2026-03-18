@@ -20,15 +20,14 @@ import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.mock
 import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
 import kotlin.test.BeforeTest
@@ -54,7 +53,7 @@ class ScannerViewModelTest {
         every { radioInterfaceService.isMockInterface() } returns false
         every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
         every { radioInterfaceService.supportedDeviceTypes } returns emptyList()
-        
+
         every { serviceRepository.connectionProgress } returns connectionProgressFlow
         every { getDiscoveredDevicesUseCase.invoke(any()) } returns discoveredDevicesFlow
         every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
@@ -62,14 +61,15 @@ class ScannerViewModelTest {
         connectionProgressFlow.value = null
         discoveredDevicesFlow.value = DiscoveredDevices()
 
-        viewModel = ScannerViewModel(
-            serviceRepository = serviceRepository,
-            radioController = radioController,
-            radioInterfaceService = radioInterfaceService,
-            recentAddressesDataSource = recentAddressesDataSource,
-            getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
-            bleScanner = bleScanner
-        )
+        viewModel =
+            ScannerViewModel(
+                serviceRepository = serviceRepository,
+                radioController = radioController,
+                radioInterfaceService = radioInterfaceService,
+                recentAddressesDataSource = recentAddressesDataSource,
+                getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+                bleScanner = bleScanner,
+            )
     }
 
     @Test
@@ -89,12 +89,12 @@ class ScannerViewModelTest {
     @Test
     fun `startBleScan updates isBleScanning`() = runTest {
         every { bleScanner.scan(any(), any()) } returns kotlinx.coroutines.flow.emptyFlow()
-        
+
         viewModel.isBleScanning.test {
             assertEquals(false, awaitItem())
             viewModel.startBleScan()
             assertEquals(true, awaitItem())
-            
+
             viewModel.stopBleScan()
             assertEquals(false, awaitItem())
         }
@@ -103,9 +103,9 @@ class ScannerViewModelTest {
     @Test
     fun `changeDeviceAddress calls radioController`() {
         every { radioController.setDeviceAddress(any()) } returns Unit
-        
+
         viewModel.changeDeviceAddress("test_address")
-        
+
         dev.mokkery.verify { radioController.setDeviceAddress("test_address") }
     }
 
@@ -113,15 +113,16 @@ class ScannerViewModelTest {
     fun `usbDevicesForUi emits updates`() = runTest {
         viewModel.usbDevicesForUi.test {
             assertEquals(emptyList(), awaitItem())
-            
-            val device = org.meshtastic.feature.connections.model.DeviceListEntry.Usb(
-                usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
-                name = "USB Device",
-                fullAddress = "usb_address",
-                bonded = true
-            )
+
+            val device =
+                org.meshtastic.feature.connections.model.DeviceListEntry.Usb(
+                    usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
+                    name = "USB Device",
+                    fullAddress = "usb_address",
+                    bonded = true,
+                )
             discoveredDevicesFlow.value = DiscoveredDevices(usbDevices = listOf(device))
-            
+
             assertEquals(listOf(device), awaitItem())
         }
     }

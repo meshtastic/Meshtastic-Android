@@ -16,19 +16,13 @@
  */
 package org.meshtastic.feature.intro
 
-import io.kotest.matchers.shouldBe
-
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNull
-
 /**
  * Integration tests for intro feature.
  *
  * Tests the complete onboarding flow and navigation logic.
  */
 class IntroFlowIntegrationTest {
-/*
+    /*
 
 
     private val viewModel = IntroViewModel()
@@ -143,5 +137,5 @@ class IntroFlowIntegrationTest {
         notificationsWithPermissions shouldBe CriticalAlerts
     }
 
-*/
+     */
 }

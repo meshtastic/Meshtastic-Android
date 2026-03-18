@@ -16,14 +16,8 @@
  */
 package org.meshtastic.feature.firmware
 
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Test
-import org.meshtastic.core.database.entity.FirmwareRelease
-import org.meshtastic.core.model.DeviceHardware
-
 class FirmwareRetrieverTest {
-/*
+    /*
 
 
     private val fileHandler: FirmwareFileHandler = mockk()
@@ -185,5 +179,5 @@ class FirmwareRetrieverTest {
         }
     }
 
-*/
+     */
 }

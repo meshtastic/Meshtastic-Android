@@ -17,16 +17,9 @@
 package org.meshtastic.core.domain.usecase.settings
 
 //
-import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.RadioController
-import org.meshtastic.proto.Config
-import org.meshtastic.proto.User
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class RadioConfigUseCaseTest {
-/*
+    /*
 
 
     private lateinit var radioController: RadioController
@@ -51,5 +44,5 @@ class RadioConfigUseCaseTest {
         verifySuspend { radioController.setConfig(123, config, 1) }
     }
 
-*/
+     */
 }

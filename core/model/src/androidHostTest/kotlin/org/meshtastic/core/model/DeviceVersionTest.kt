@@ -16,9 +16,8 @@
  */
 package org.meshtastic.core.model
 
-
 class DeviceVersionTest {
-/*
+    /*
 
     /** make sure we match the python and device code behavior */
     @Test
@@ -29,5 +28,5 @@ class DeviceVersionTest {
         assertEquals(12357, DeviceVersion("1.23.57.abde123").asInt)
     }
 
-*/
+     */
 }

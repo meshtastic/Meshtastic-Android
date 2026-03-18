@@ -16,13 +16,8 @@
  */
 package org.meshtastic.core.service
 
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertFalse
-import org.junit.Test
-import org.meshtastic.core.common.util.MeshtasticUri
-
 class JvmFileServiceTest {
-/*
+    /*
 
     @Test
     fun testWriteAndRead() = runTest {
@@ -32,5 +27,5 @@ class JvmFileServiceTest {
         assertFalse(result)
     }
 
-*/
+     */
 }

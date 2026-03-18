@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 package org.meshtastic.core.common
 
 import dev.mokkery.answering.returns
@@ -33,15 +32,13 @@ class MokkeryIntegrationTest {
     @Test
     fun testMokkeryAndKotestIntegration() {
         val mock = mock<SimpleInterface>()
-        
+
         every { mock.doSomething("hello") } returns 42
-        
+
         val result = mock.doSomething("hello")
-        
+
         result shouldBe 42
-        
-        verify {
-            mock.doSomething("hello")
-        }
+
+        verify { mock.doSomething("hello") }
     }
 }
