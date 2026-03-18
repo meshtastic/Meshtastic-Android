@@ -52,6 +52,7 @@ import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
+import org.meshtastic.core.service.MeshServiceClient
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.util.dispatchMeshtasticUri

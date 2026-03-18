@@ -1,7 +1,7 @@
 # Implementation Plan: Extract remaining background services and workers from app module
 
 ## Phase 1: Preparation & Location Manager Abstraction
-- [ ] Task: Review current implementations in `app/src/main/kotlin/org/meshtastic/app/service/AndroidMeshLocationManager.kt` and `app/src/main/kotlin/org/meshtastic/app/MeshServiceClient.kt`.
+- [~] Task: Review current implementations in `app/src/main/kotlin/org/meshtastic/app/service/AndroidMeshLocationManager.kt` and `app/src/main/kotlin/org/meshtastic/app/MeshServiceClient.kt`.
 - [ ] Task: Create KMP shared interface or base class in `core:service/commonMain` for the Location Manager if applicable, aligning with KMP best practices.
 - [ ] Task: Relocate `AndroidMeshLocationManager.kt` and `MeshServiceClient.kt` to `core:service/src/androidMain/...`.
 - [ ] Task: Update package declarations and resolve broken imports in the app module.
