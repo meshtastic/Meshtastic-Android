@@ -48,7 +48,7 @@ ktor = "3.4.1"
 
 # Other
 aboutlibraries = "13.2.1"
-jserialcomm = "2.11.0"
+jserialcomm = "2.11.4"
 coil = "3.4.0"
 datadog-gradle = "1.24.0"
 dd-sdk-android = "3.7.1"
