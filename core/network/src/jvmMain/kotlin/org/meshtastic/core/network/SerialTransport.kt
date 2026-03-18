@@ -60,6 +60,7 @@ class SerialTransport(
         }
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun startReadLoop(port: SerialPort) {
         readJob =
             service.serviceScope.launch(Dispatchers.IO) {
@@ -82,14 +83,22 @@ class SerialTransport(
                         } catch (e: kotlinx.coroutines.CancellationException) {
                             throw e
                         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                            Logger.e(e) { "Serial read IOException: ${e.message}" }
+                            if (isActive) {
+                                Logger.e(e) { "Serial read IOException: ${e.message}" }
+                            } else {
+                                Logger.d { "Serial read interrupted by cancellation: ${e.message}" }
+                            }
                             reading = false
                         }
                     }
                 } catch (e: kotlinx.coroutines.CancellationException) {
                     throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                    Logger.e(e) { "Serial read loop outer error: ${e.message}" }
+                    if (isActive) {
+                        Logger.e(e) { "Serial read loop outer error: ${e.message}" }
+                    } else {
+                        Logger.d { "Serial read loop outer interrupted by cancellation: ${e.message}" }
+                    }
                 } finally {
                     try {
                         input.close()
