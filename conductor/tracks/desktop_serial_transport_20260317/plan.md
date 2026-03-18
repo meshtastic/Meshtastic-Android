@@ -11,7 +11,7 @@
 
 ## Phase 3: UI Integration
 - [x] Task: Update the `feature:connections` UI or `DesktopScannerViewModel` to poll the new `SerialTransport` for available ports. [checkpoint: 2e85b5a]
-- [ ] Task: Wire the user's serial port selection to initiate the connection via the DI graph and active service logic.
+- [x] Task: Wire the user's serial port selection to initiate the connection via the DI graph and active service logic. [checkpoint: 94cb97c]
 
 ## Phase 4: Validation
 - [ ] Task: Verify end-to-end communication with a physical Meshtastic device over USB on the desktop target.
