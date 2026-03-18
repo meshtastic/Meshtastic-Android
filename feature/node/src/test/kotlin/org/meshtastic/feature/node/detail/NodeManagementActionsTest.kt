@@ -16,8 +16,10 @@
  */
 package org.meshtastic.feature.node.detail
 
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -33,10 +35,10 @@ import org.meshtastic.proto.User
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeManagementActionsTest {
 
-    private val nodeRepository = mockk<NodeRepository>(relaxed = true)
-    private val serviceRepository = mockk<ServiceRepository>(relaxed = true)
-    private val radioController = mockk<RadioController>(relaxed = true)
-    private val alertManager = mockk<AlertManager>(relaxed = true)
+    private val nodeRepository = mock<NodeRepository>(MockMode.autofill)
+    private val serviceRepository = mock<ServiceRepository>(MockMode.autofill)
+    private val radioController = mock<RadioController>(MockMode.autofill)
+    private val alertManager = mock<AlertManager>(MockMode.autofill)
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 

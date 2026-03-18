@@ -37,12 +37,12 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.datastore.model.RecentAddress
 
 @Single
-class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
+open class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) {
     private object PreferencesKeys {
         val RECENT_IP_ADDRESSES = stringPreferencesKey("recent-ip-addresses")
     }
 
-    val recentAddresses: Flow<List<RecentAddress>> =
+    open val recentAddresses: Flow<List<RecentAddress>> =
         dataStore.data.map { preferences ->
             val jsonString = preferences[PreferencesKeys.RECENT_IP_ADDRESSES]
             if (jsonString != null) {
@@ -95,20 +95,20 @@ class RecentAddressesDataSource(@Named("CorePreferencesDataStore") private val d
         }
     }
 
-    suspend fun setRecentAddresses(addresses: List<RecentAddress>) {
+    open suspend fun setRecentAddresses(addresses: List<RecentAddress>) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.RECENT_IP_ADDRESSES] = Json.encodeToString(addresses)
         }
     }
 
-    suspend fun add(address: RecentAddress) {
+    open suspend fun add(address: RecentAddress) {
         val currentAddresses = recentAddresses.first()
         val updatedList = mutableListOf(address)
         currentAddresses.filterTo(updatedList) { it.address != address.address }
         setRecentAddresses(updatedList.take(CACHE_CAPACITY))
     }
 
-    suspend fun remove(address: String) {
+    open suspend fun remove(address: String) {
         val currentAddresses = recentAddresses.first()
         val updatedList = currentAddresses.filter { it.address != address }
         setRecentAddresses(updatedList)

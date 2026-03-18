@@ -33,6 +33,7 @@ plugins {
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.secrets)
     alias(libs.plugins.aboutlibraries)
+    id("dev.mokkery")
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")

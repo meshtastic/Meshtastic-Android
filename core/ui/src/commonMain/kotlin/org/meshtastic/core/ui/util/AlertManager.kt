@@ -32,7 +32,7 @@ fun interface ComposableContent {
  * direct dependencies on UI components.
  */
 @Single
-class AlertManager {
+open class AlertManager {
     data class AlertData(
         val title: String? = null,
         val titleRes: StringResource? = null,

@@ -17,9 +17,13 @@
 package org.meshtastic.core.service
 
 import android.content.Context
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Test
@@ -40,13 +44,12 @@ class AndroidNotificationManagerTest {
 
     @Before
     fun setup() {
-        context = mockk(relaxed = true)
-        notificationManager = mockk(relaxed = true)
-        prefs = mockk {
-            every { messagesEnabled } returns this@AndroidNotificationManagerTest.messagesEnabled
-            every { nodeEventsEnabled } returns this@AndroidNotificationManagerTest.nodeEventsEnabled
-            every { lowBatteryEnabled } returns this@AndroidNotificationManagerTest.lowBatteryEnabled
-        }
+        context = mock(MockMode.autofill)
+        notificationManager = mock(MockMode.autofill)
+        prefs = mock(MockMode.autofill)
+        every { prefs.messagesEnabled } returns this@AndroidNotificationManagerTest.messagesEnabled
+        every { prefs.nodeEventsEnabled } returns this@AndroidNotificationManagerTest.nodeEventsEnabled
+        every { prefs.lowBatteryEnabled } returns this@AndroidNotificationManagerTest.lowBatteryEnabled
 
         every { context.getSystemService(Context.NOTIFICATION_SERVICE) } returns notificationManager
         every { context.packageName } returns "org.meshtastic.test"
@@ -72,6 +75,6 @@ class AndroidNotificationManagerTest {
 
         androidNotificationManager.dispatch(notification)
 
-        verify(exactly = 0) { notificationManager.notify(any(), any()) }
+        verify(VerifyMode.exactly(0)) { notificationManager.notify(any(), any()) }
     }
 }

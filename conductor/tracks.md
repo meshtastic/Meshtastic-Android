@@ -7,7 +7,7 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: MQTT transport**
 *Link: [./tracks/mqtt_transport_20260318/](./tracks/mqtt_transport_20260318/)*
 
-- [ ] **Track: Migrate tests to KMP best practices and expand coverage**
+- [x] **Track: Migrate tests to KMP best practices and expand coverage**
 *Link: [./tracks/kmp_test_migration_20260318/](./tracks/kmp_test_migration_20260318/)*
 
 - [ ] **Track: Expand Testing Coverage**

@@ -22,12 +22,14 @@ import androidx.work.ListenableWorker
 import androidx.work.WorkerParameters
 import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.workDataOf
-import io.mockk.Runs
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
-import io.mockk.just
-import io.mockk.mockk
+import dev.mokkery.MockMode
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
+import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import okio.ByteString.Companion.toByteString
@@ -52,8 +54,8 @@ class SendMessageWorkerTest {
     @Before
     fun setUp() {
         context = ApplicationProvider.getApplicationContext()
-        packetRepository = mockk(relaxed = true)
-        radioController = mockk(relaxed = true)
+        packetRepository = mock(MockMode.autofill)
+        radioController = mock(MockMode.autofill)
         every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Connected)
     }
 
@@ -62,10 +64,10 @@ class SendMessageWorkerTest {
         // Arrange
         val packetId = 12345
         val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
-        coEvery { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
+        everySuspend { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
         every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Connected)
-        coEvery { radioController.sendMessage(any()) } just Runs
-        coEvery { packetRepository.updateMessageStatus(any(), any()) } just Runs
+        everySuspend { radioController.sendMessage(any()) } returns Unit
+        everySuspend { packetRepository.updateMessageStatus(any(), any()) } returns Unit
 
         val worker =
             TestListenableWorkerBuilder<SendMessageWorker>(context)
@@ -87,8 +89,8 @@ class SendMessageWorkerTest {
 
         // Assert
         assertEquals(ListenableWorker.Result.success(), result)
-        coVerify { radioController.sendMessage(dataPacket) }
-        coVerify { packetRepository.updateMessageStatus(dataPacket, MessageStatus.ENROUTE) }
+        verifySuspend { radioController.sendMessage(dataPacket) }
+        verifySuspend { packetRepository.updateMessageStatus(dataPacket, MessageStatus.ENROUTE) }
     }
 
     @Test
@@ -96,7 +98,7 @@ class SendMessageWorkerTest {
         // Arrange
         val packetId = 12345
         val dataPacket = DataPacket(to = "dest", bytes = "Hello".encodeToByteArray().toByteString(), dataType = 0)
-        coEvery { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
+        everySuspend { packetRepository.getPacketByPacketId(packetId) } returns dataPacket
         every { radioController.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
 
         val worker =
@@ -119,14 +121,14 @@ class SendMessageWorkerTest {
 
         // Assert
         assertEquals(ListenableWorker.Result.retry(), result)
-        coVerify(exactly = 0) { radioController.sendMessage(any()) }
+        verifySuspend(mode = VerifyMode.exactly(0)) { radioController.sendMessage(any()) }
     }
 
     @Test
     fun `doWork returns failure when packet is missing`() = runTest {
         // Arrange
         val packetId = 999
-        coEvery { packetRepository.getPacketByPacketId(packetId) } returns null
+        everySuspend { packetRepository.getPacketByPacketId(packetId) } returns null
 
         val worker =
             TestListenableWorkerBuilder<SendMessageWorker>(context)

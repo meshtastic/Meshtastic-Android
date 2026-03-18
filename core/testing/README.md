@@ -45,16 +45,16 @@ The `:core:testing` module provides lightweight, reusable test doubles (fakes, b
 
 ### Target Compatibility Warning (March 2026 Audit)
 
-- **MockK in commonMain:** This module includes `api(libs.mockk)` in `commonMain`. While this works for the current `jvm()` and `android()` targets, **MockK does not natively support Kotlin/Native (iOS)**.
-- **Future-Proofing:** If an iOS target is added, tests in `commonTest` that rely on MockK will fail to compile for iOS.
-- **Recommendation:** Favor manual fakes (like `FakeNodeRepository`) in `commonMain` and limit `mockk` usage to `androidUnitTest` or `jvmTest` where possible to maintain pure KMP portability.
+- **MockK Removal:** MockK has been removed from `commonMain` because it does not natively support Kotlin/Native (iOS).
+- **Future-Proofing:** The project is migrating to `dev.mokkery` for KMP-compatible mocking or favoring manual fakes.
+- **Recommendation:** Favor manual fakes (like `FakeNodeRepository`) in `commonMain` to maintain pure KMP portability.
 
 ### Key Design Rules
 
 1. **`:core:testing` has NO dependencies on heavy modules**: It only depends on:
    - `core:model` — Domain types (Node, User, etc.)
    - `core:repository` — Interfaces (NodeRepository, etc.)
-   - Test libraries (`kotlin("test")`, `mockk`, `kotlinx.coroutines.test`, `turbine`, `junit`)
+   - Test libraries (`kotlin("test")`, `kotlinx.coroutines.test`, `turbine`, `junit`)
 
 2. **No circular dependencies**: Modules that depend on `:core:testing` (in `commonTest`) cannot be dependencies of `:core:testing` itself.
 

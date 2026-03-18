@@ -17,11 +17,10 @@
 package org.meshtastic.core.domain.usecase.settings
 
 import dev.mokkery.MockMode
-import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.model.util.UiPreferences
+import org.meshtastic.core.common.UiPreferences
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 

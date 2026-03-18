@@ -16,9 +16,11 @@
  */
 package org.meshtastic.core.network.radio
 
-import io.mockk.coEvery
-import io.mockk.every
-import io.mockk.mockk
+import dev.mokkery.MockMode
+import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,11 +44,11 @@ import org.meshtastic.core.repository.RadioInterfaceService
 class BleRadioInterfaceTest {
 
     private val testScope = TestScope()
-    private val scanner: BleScanner = mockk()
-    private val bluetoothRepository: BluetoothRepository = mockk()
-    private val connectionFactory: BleConnectionFactory = mockk()
-    private val connection: BleConnection = mockk()
-    private val service: RadioInterfaceService = mockk(relaxed = true)
+    private val scanner: BleScanner = mock()
+    private val bluetoothRepository: BluetoothRepository = mock()
+    private val connectionFactory: BleConnectionFactory = mock()
+    private val connection: BleConnection = mock()
+    private val service: RadioInterfaceService = mock(MockMode.autofill)
     private val address = "00:11:22:33:44:55"
 
     private val connectionStateFlow = MutableSharedFlow<BleConnectionState>(replay = 1)
@@ -63,12 +65,12 @@ class BleRadioInterfaceTest {
 
     @Test
     fun `connect attempts to scan and connect via init`() = runTest {
-        val device: BleDevice = mockk()
+        val device: BleDevice = mock()
         every { device.address } returns address
         every { device.name } returns "Test Device"
 
         every { scanner.scan(any(), any()) } returns flowOf(device)
-        coEvery { connection.connectAndAwait(any(), any(), any()) } returns BleConnectionState.Connected
+        everySuspend { connection.connectAndAwait(any(), any(), any()) } returns BleConnectionState.Connected
 
         val bleInterface =
             BleRadioInterface(

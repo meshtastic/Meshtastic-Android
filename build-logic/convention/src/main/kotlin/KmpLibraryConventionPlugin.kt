@@ -15,9 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
 import org.meshtastic.buildlogic.configureAndroidMarketplaceFallback
 import org.meshtastic.buildlogic.configureKmpTestDependencies
 import org.meshtastic.buildlogic.configureKotlinMultiplatform
@@ -35,6 +37,10 @@ class KmpLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.dokka")
             apply(plugin = "meshtastic.kover")
             apply(plugin = libs.plugin("mokkery").get().pluginId)
+
+            extensions.configure<MokkeryGradleExtension> {
+                stubs.allowConcreteClassInstantiation.set(true)
+            }
 
             configureKotlinMultiplatform()
             configureKmpTestDependencies()

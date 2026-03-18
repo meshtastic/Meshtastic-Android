@@ -20,9 +20,11 @@ package org.meshtastic.buildlogic
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.CommonExtension
 import com.android.build.api.dsl.KotlinMultiplatformAndroidLibraryTarget
+import dev.mokkery.gradle.MokkeryGradleExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
@@ -57,7 +59,17 @@ internal fun Project.configureKotlinAndroid(
         compileOptions.targetCompatibility = JavaVersion.VERSION_17
     }
 
+    configureMokkery()
+    configureAndroidTestDependencies()
     configureKotlin<KotlinAndroidProjectExtension>()
+}
+
+/**
+ * Configure common test dependencies for Android-only modules
+ */
+internal fun Project.configureAndroidTestDependencies() {
+    dependencies.apply {
+    }
 }
 
 /**
@@ -80,7 +92,19 @@ internal fun Project.configureKotlinMultiplatform() {
         }
     }
 
+    configureMokkery()
     configureKotlin<KotlinMultiplatformExtension>()
+}
+
+/**
+ * Configure Mokkery for the project
+ */
+internal fun Project.configureMokkery() {
+    pluginManager.withPlugin(libs.plugin("mokkery").get().pluginId) {
+        extensions.configure<MokkeryGradleExtension> {
+            stubs.allowConcreteClassInstantiation.set(true)
+        }
+    }
 }
 
 /**

@@ -16,9 +16,11 @@
  */
 package org.meshtastic.feature.settings.filter
 
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import dev.mokkery.MockMode
+import dev.mokkery.every
+import dev.mokkery.matcher.any
+import dev.mokkery.mock
+import dev.mokkery.verify
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -27,8 +29,8 @@ import org.meshtastic.core.repository.MessageFilter
 
 class FilterSettingsViewModelTest {
 
-    private val filterPrefs: FilterPrefs = mockk(relaxed = true)
-    private val messageFilter: MessageFilter = mockk(relaxed = true)
+    private val filterPrefs: FilterPrefs = mock(MockMode.autofill)
+    private val messageFilter: MessageFilter = mock(MockMode.autofill)
 
     private lateinit var viewModel: FilterSettingsViewModel
 

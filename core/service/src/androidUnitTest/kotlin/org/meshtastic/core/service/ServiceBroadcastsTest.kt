@@ -19,8 +19,10 @@ package org.meshtastic.core.service
 import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import io.mockk.every
-import io.mockk.mockk
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -35,7 +37,7 @@ import org.robolectric.Shadows.shadowOf
 class ServiceBroadcastsTest {
 
     private lateinit var context: Context
-    private val serviceRepository: ServiceRepository = mockk(relaxed = true)
+    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
     private lateinit var broadcasts: ServiceBroadcasts
 
     @Before

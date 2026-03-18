@@ -16,14 +16,18 @@
  */
 package org.meshtastic.feature.node.list
 
-import io.kotest.matchers.shouldBe
-
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.Dispatchers
+import app.cash.turbine.test
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import dev.mokkery.matcher.any
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.Node
+import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.testing.FakeNodeRepository
@@ -34,96 +38,85 @@ import org.meshtastic.feature.node.domain.usecase.GetFilteredNodesUseCase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
 
-/**
- * Bootstrap tests for NodeListViewModel.
- *
- * Demonstrates using FakeNodeRepository with a node list feature.
- */
 class NodeListViewModelTest {
-/*
-
 
     private lateinit var viewModel: NodeListViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
-    private lateinit var radioConfigRepository: RadioConfigRepository
-    private lateinit var serviceRepository: ServiceRepository
-    private lateinit var nodeFilterPreferences: NodeFilterPreferences
-    private lateinit var nodeManagementActions: NodeManagementActions
-    private lateinit var getFilteredNodesUseCase: GetFilteredNodesUseCase
+    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val nodeFilterPreferences: NodeFilterPreferences = mock(MockMode.autofill)
+    private val nodeManagementActions: NodeManagementActions = mock(MockMode.autofill)
+    private val getFilteredNodesUseCase: GetFilteredNodesUseCase = mock(MockMode.autofill)
 
     @BeforeTest
     fun setUp() {
-        kotlinx.coroutines.Dispatchers.setMain(kotlinx.coroutines.Dispatchers.Unconfined)
-        // Use real fakes
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
 
-        // Mock remaining dependencies with explicit types
-        nodeFilterPreferences =
-                every { nodeSortOption } returns MutableStateFlow(org.meshtastic.core.model.NodeSortOption.LAST_HEARD)
-                every { includeUnknown } returns MutableStateFlow(true)
-                every { excludeInfrastructure } returns MutableStateFlow(false)
-                every { onlyOnline } returns MutableStateFlow(false)
-            }
-        @Suppress("UNCHECKED_CAST")
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(org.meshtastic.proto.LocalConfig())
+        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(org.meshtastic.proto.DeviceProfile())
+        every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
+        
+        every { nodeFilterPreferences.nodeSortOption } returns MutableStateFlow(NodeSortOption.LAST_HEARD)
+        every { nodeFilterPreferences.includeUnknown } returns MutableStateFlow(true)
+        every { nodeFilterPreferences.excludeInfrastructure } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.onlyOnline } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.onlyDirect } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.showIgnored } returns MutableStateFlow(false)
+        every { nodeFilterPreferences.excludeMqtt } returns MutableStateFlow(false)
 
-        viewModel =
-            NodeListViewModel(
-                savedStateHandle = SavedStateHandle(),
-                nodeRepository = nodeRepository,
-                radioConfigRepository = radioConfigRepository,
-                serviceRepository = serviceRepository,
-                radioController = radioController,
-                nodeManagementActions = nodeManagementActions,
-                getFilteredNodesUseCase = getFilteredNodesUseCase,
-                nodeFilterPreferences = nodeFilterPreferences,
-            )
+        every { getFilteredNodesUseCase(any(), any()) } returns MutableStateFlow(emptyList())
+
+        viewModel = createViewModel()
     }
 
-    @kotlin.test.AfterTest
-    fun tearDown() {
-        kotlinx.coroutines.Dispatchers.resetMain()
+    private fun createViewModel() = NodeListViewModel(
+        savedStateHandle = SavedStateHandle(),
+        nodeRepository = nodeRepository,
+        radioConfigRepository = radioConfigRepository,
+        serviceRepository = serviceRepository,
+        radioController = radioController,
+        nodeManagementActions = nodeManagementActions,
+        getFilteredNodesUseCase = getFilteredNodesUseCase,
+        nodeFilterPreferences = nodeFilterPreferences,
+    )
+
+    @Test
+    fun testInitialization() {
+        assertNotNull(viewModel)
     }
 
     @Test
-    fun testInitialization() = runTest {
-        setUp()
-        // ViewModel should initialize without errors
-        assertTrue(true, "NodeListViewModel initialized successfully")
+    fun `nodeList emits updates when repository changes`() = runTest {
+        val nodesFlow = MutableStateFlow<List<Node>>(emptyList())
+        every { getFilteredNodesUseCase(any(), any()) } returns nodesFlow
+        
+        val vm = createViewModel()
+        vm.nodeList.test {
+            // Initial value from stateIn
+            assertEquals(emptyList(), awaitItem())
+            
+            // Trigger update
+            val testNodes = TestDataFactory.createTestNodes(3)
+            nodesFlow.value = testNodes
+            
+            assertEquals(3, awaitItem().size)
+        }
     }
 
     @Test
-    fun testOurNodeInfoFlow() = runTest {
-        setUp()
-        // Verify ourNodeInfo StateFlow is accessible
-        val ourNode = viewModel.ourNodeInfo.value
-        assertTrue(ourNode == null, "ourNodeInfo starts as null before connection")
+    fun `connectionState reflects serviceRepository state`() = runTest {
+        val stateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
+        every { serviceRepository.connectionState } returns stateFlow
+        
+        val vm = createViewModel()
+        vm.connectionState.test {
+            assertEquals(ConnectionState.Disconnected, awaitItem())
+            stateFlow.value = ConnectionState.Connected
+            assertEquals(ConnectionState.Connected, awaitItem())
+        }
     }
-
-    @Test
-    fun testNodeCounts() = runTest {
-        setUp()
-        // Add test nodes to repository
-        val testNodes = TestDataFactory.createTestNodes(3)
-        nodeRepository.setNodes(testNodes)
-
-        // Verify nodes are in repository
-        "Test nodes added to repository" shouldBe 3, nodeRepository.nodeDBbyNum.value.size
-    }
-
-    @Test
-    fun testTotalAndOnlineNodeCounts() = runTest {
-        setUp()
-        // Verify count flows are accessible
-        val totalCount = viewModel.totalNodeCount.value
-        val onlineCount = viewModel.onlineNodeCount.value
-
-        // Both should be accessible without error
-        assertTrue(true, "Node count flows are accessible")
-    }
-
-*/
 }
