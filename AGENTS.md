@@ -38,7 +38,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
 | `core:domain` | Pure KMP business logic and UseCases. |
 | `core:data` | Core manager implementations and data orchestration. |
-| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec` in commonMain, `TcpTransport` in jvmAndroidMain). |
+| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3. |
 | `core:ui` | Shared Compose UI components (`EmptyDetailPlaceholder`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
@@ -51,7 +51,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`). All are KMP with `jvm()` target. Use `meshtastic.kmp.feature` convention plugin. |
-| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP transport with `want_config` handshake. |
+| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP and Serial/USB transports with `want_config` handshake. |
 | `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
 ## 3. Development Guidelines & Coding Standards

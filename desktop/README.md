@@ -91,6 +91,6 @@ The module depends on the JVM variants of KMP modules:
 - [x] Add desktop language picker backed by shared `UiPreferencesDataSource.locale` with live translation updates
 - [ ] Wire remaining `feature:*` composables (map) into the nav graph
 - [ ] Move remaining node detail and message composables from `androidMain` to `commonMain`
-- [ ] Add serial/USB transport for direct radio connection on Desktop
+- [x] Add serial/USB transport for direct radio connection on Desktop
 - [ ] Add MQTT transport for cloud-connected operation
 - [x] Package as native distributions (DMG, MSI, DEB) via CI release pipeline
