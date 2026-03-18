@@ -30,6 +30,7 @@ import org.meshtastic.core.repository.RadioPrefs
 import org.meshtastic.core.repository.isBle
 import org.meshtastic.core.repository.isSerial
 import org.meshtastic.core.repository.isTcp
+import org.meshtastic.proto.HardwareModel
 
 /** Use case to determine if the currently connected device is capable of over-the-air (OTA) updates. */
 interface IsOtaCapableUseCase {
@@ -52,11 +53,16 @@ class IsOtaCapableUseCaseImpl(
                     flowOf(false)
                 } else if (radioPrefs.isBle() || radioPrefs.isSerial() || radioPrefs.isTcp()) {
                     flow {
-                        val hwModel = node.user.hw_model.value
-                        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel).getOrNull()
-                        // If we have hardware info and it's actively supported, it's OTA capable
-                        // (or we can add more specific checks here later)
-                        emit(hw?.activelySupported ?: true)
+                        val hwModel = node.user.hw_model
+                        val hw = deviceHardwareRepository.getDeviceHardwareByModel(hwModel.value).getOrNull()
+                        // If we have hardware info, check if it's an architecture known to support OTA/DFU
+                        val isOtaCapable =
+                            hw?.let {
+                                it.isEsp32Arc ||
+                                    it.architecture.contains("nrf", ignoreCase = true) ||
+                                    it.requiresDfu == true
+                            } ?: (hwModel != HardwareModel.UNSET)
+                        emit(isOtaCapable)
                     }
                 } else {
                     flowOf(false)

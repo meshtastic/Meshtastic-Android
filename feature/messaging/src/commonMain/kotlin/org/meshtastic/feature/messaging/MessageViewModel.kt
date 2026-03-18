@@ -78,7 +78,7 @@ class MessageViewModel(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
-    private val _showQuickChat = MutableStateFlow(false)
+    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat.value)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     private val _showFiltered = MutableStateFlow(false)

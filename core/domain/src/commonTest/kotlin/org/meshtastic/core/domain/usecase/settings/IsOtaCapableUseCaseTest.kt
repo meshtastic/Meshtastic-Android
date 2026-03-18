@@ -34,6 +34,7 @@ import org.meshtastic.proto.HardwareModel
 import org.meshtastic.proto.User
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class IsOtaCapableUseCaseTest {
@@ -93,7 +94,66 @@ class IsOtaCapableUseCaseTest {
             MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
         dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
 
-        // In the current implementation placeholder, it returns true if it's BLE/Serial/Tcp.
+        val hw = DeviceHardware(activelySupported = false, hwModel = HardwareModel.TBEAM.value)
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+
+        useCase().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `invoke returns true when requires Dfu and actively supported`() = runTest {
+        // Arrange
+        val node = Node(num = 123, user = User(hw_model = HardwareModel.TBEAM))
+        dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
+
+        val hw =
+            DeviceHardware(
+                activelySupported = true,
+                architecture = "nrf52840",
+                hwModel = HardwareModel.TBEAM.value,
+                requiresDfu = true,
+            )
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.success(hw)
+
+        useCase().test {
+            assertTrue(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `invoke returns false when hardware model is UNSET`() = runTest {
+        // Arrange
+        val node = Node(num = 123, user = User(hw_model = HardwareModel.UNSET))
+        dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
+
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.failure(Exception())
+
+        useCase().test {
+            assertFalse(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `invoke returns true when hardware lookup fails but model is set`() = runTest {
+        // Arrange
+        val node = Node(num = 123, user = User(hw_model = HardwareModel.TBEAM))
+        dev.mokkery.every { nodeRepository.ourNodeInfo } returns MutableStateFlow(node)
+        dev.mokkery.every { radioController.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Connected)
+        dev.mokkery.every { radioPrefs.devAddr } returns MutableStateFlow("x12345678") // x for BLE
+
+        everySuspend { deviceHardwareRepository.getDeviceHardwareByModel(any()) } returns Result.failure(Exception())
 
         useCase().test {
             assertTrue(awaitItem())
