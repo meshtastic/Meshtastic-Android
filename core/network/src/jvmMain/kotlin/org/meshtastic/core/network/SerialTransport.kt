@@ -30,7 +30,7 @@ class SerialTransport(
         return try {
             val port = SerialPort.getCommPort(portName) ?: return false
             port.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY)
-            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_BLOCKING, 1000, 0)
+            port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0)
             if (port.openPort()) {
                 serialPort = port
                 port.setDTR()
@@ -64,10 +64,13 @@ class SerialTransport(
                     } catch (_: SerialPortTimeoutException) {
                         // Expected timeout when no data is available
                         continue
+                    } catch (e: Exception) {
+                        Logger.e(e) { "Serial read IOException: ${e.message}" }
+                        break
                     }
                 }
             } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.e(e) { "Serial read loop error" }
+                Logger.e(e) { "Serial read loop outer error: ${e.message}" }
             } finally {
                 close()
             }
