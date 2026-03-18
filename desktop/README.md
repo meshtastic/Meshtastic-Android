@@ -92,5 +92,6 @@ The module depends on the JVM variants of KMP modules:
 - [ ] Wire remaining `feature:*` composables (map) into the nav graph
 - [ ] Move remaining node detail and message composables from `androidMain` to `commonMain`
 - [x] Add serial/USB transport for direct radio connection on Desktop
+- [x] Add BLE transport (via Kable) for direct radio connection on Desktop
 - [ ] Add MQTT transport for cloud-connected operation
 - [x] Package as native distributions (DMG, MSI, DEB) via CI release pipeline
