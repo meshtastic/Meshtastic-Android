@@ -9,7 +9,7 @@
     - [x] Implement MqttTransport to parse URL (mqtt://, mqtts://), credentials, and configure the underlying MQTT client.
     - [x] Write failing tests for connection state flows.
     - [x] Implement connection lifecycle handling (connect, disconnect, reconnect).
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Core Networking & Library Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Core Networking & Library Integration' (Protocol in workflow.md) [93d9a50]
 
 ## Phase 2: Publishing & Subscribing
 - [ ] Task: Implement message subscription and payload parsing.
