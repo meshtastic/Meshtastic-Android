@@ -14,19 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.navigation
+package org.meshtastic.feature.settings.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.FirmwareRoutes
-import org.meshtastic.feature.firmware.FirmwareUpdateScreen
-import org.meshtastic.feature.firmware.FirmwareUpdateViewModel
+import org.meshtastic.core.navigation.ChannelsRoutes
+import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 
-fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
-    entry<FirmwareRoutes.FirmwareUpdate> {
-        val viewModel = koinViewModel<FirmwareUpdateViewModel>()
-        FirmwareUpdateScreen(onNavigateUp = { backStack.removeLastOrNull() }, viewModel = viewModel)
+/** Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels]. */
+fun EntryProviderScope<NavKey>.channelsGraph(backStack: NavBackStack<NavKey>) {
+    entry<ChannelsRoutes.ChannelsGraph> {
+        ChannelScreen(
+            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
+            onNavigate = { route -> backStack.add(route) },
+            onNavigateUp = { backStack.removeLastOrNull() },
+        )
+    }
+
+    entry<ChannelsRoutes.Channels> {
+        ChannelScreen(
+            radioConfigViewModel = koinViewModel<RadioConfigViewModel>(),
+            onNavigate = { route -> backStack.add(route) },
+            onNavigateUp = { backStack.removeLastOrNull() },
+        )
     }
 }

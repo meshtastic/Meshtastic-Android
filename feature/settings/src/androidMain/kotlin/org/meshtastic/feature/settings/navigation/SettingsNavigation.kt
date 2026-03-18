@@ -16,7 +16,7 @@
  */
 @file:Suppress("Wrapping", "SpacingAroundColon")
 
-package org.meshtastic.app.navigation
+package org.meshtastic.feature.settings.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

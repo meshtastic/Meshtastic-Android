@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.ui.sharing
+package org.meshtastic.feature.settings.navigation
 
 import android.os.RemoteException
 import androidx.compose.foundation.border

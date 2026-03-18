@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.navigation
+package org.meshtastic.feature.node.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CellTower
@@ -35,8 +35,6 @@ import kotlinx.coroutines.flow.Flow
 import org.jetbrains.compose.resources.StringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import org.meshtastic.app.map.node.NodeMapScreen
-import org.meshtastic.app.ui.node.AdaptiveNodeListScreen
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
@@ -66,7 +64,11 @@ import org.meshtastic.feature.node.metrics.TracerouteLogScreen
 import org.meshtastic.feature.node.metrics.TracerouteMapScreen
 import kotlin.reflect.KClass
 
-fun EntryProviderScope<NavKey>.nodesGraph(backStack: NavBackStack<NavKey>, scrollToTopEvents: Flow<ScrollToTopEvent>) {
+fun EntryProviderScope<NavKey>.nodesGraph(
+    backStack: NavBackStack<NavKey>,
+    scrollToTopEvents: Flow<ScrollToTopEvent>,
+    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit
+) {
     entry<NodesRoutes.NodesGraph> {
         AdaptiveNodeListScreen(
             backStack = backStack,
@@ -83,13 +85,14 @@ fun EntryProviderScope<NavKey>.nodesGraph(backStack: NavBackStack<NavKey>, scrol
         )
     }
 
-    nodeDetailGraph(backStack, scrollToTopEvents)
+    nodeDetailGraph(backStack, scrollToTopEvents, nodeMapScreen)
 }
 
 @Suppress("LongMethod")
 fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
+    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit
 ) {
     entry<NodesRoutes.NodeDetailGraph> { args ->
         AdaptiveNodeListScreen(
@@ -110,9 +113,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
     }
 
     entry<NodeDetailRoutes.NodeMap> { args ->
-        val vm = koinViewModel<NodeMapViewModel>()
-        vm.setDestNum(args.destNum)
-        NodeMapScreen(vm, onNavigateUp = { backStack.removeLastOrNull() })
+        nodeMapScreen(args.destNum) { backStack.removeLastOrNull() }
     }
 
     entry<NodeDetailRoutes.TracerouteLog> { args ->

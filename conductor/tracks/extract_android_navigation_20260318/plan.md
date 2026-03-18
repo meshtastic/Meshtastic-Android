@@ -7,20 +7,20 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Base Module Abstraction' (Protocol in workflow.md)
 
 ## Phase 2: Feature Module Extraction
-- [ ] Task: Extract Settings Navigation.
-    - [ ] Move `SettingsNavigation.kt` to `feature:settings/androidMain`.
-    - [ ] Fix package declarations and broken imports.
-- [ ] Task: Extract Nodes & Connections Navigation.
-    - [ ] Move `NodesNavigation.kt` to `feature:node/androidMain`.
-    - [ ] Move `ConnectionsNavigation.kt` to `feature:connections/androidMain`.
-    - [ ] Fix package declarations and broken imports.
-- [ ] Task: Extract Messaging & Remaining Navigation.
-    - [ ] Move `ContactsNavigation.kt` to `feature:messaging/androidMain`.
-    - [ ] Move `ChannelsNavigation.kt` to `feature:settings/androidMain` or `feature:node`.
-    - [ ] Move `FirmwareNavigation.kt` to `feature:firmware/androidMain`.
-    - [ ] Move `MapNavigation.kt` to `feature:map/androidMain`.
-    - [ ] Fix package declarations and broken imports.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extraction' (Protocol in workflow.md)
+- [x] Task: Extract Settings Navigation.
+    - [x] Move `SettingsNavigation.kt` to `feature:settings/androidMain`.
+    - [x] Fix package declarations and broken imports.
+- [x] Task: Extract Nodes & Connections Navigation.
+    - [x] Move `NodesNavigation.kt` to `feature:node/androidMain`.
+    - [x] Move `ConnectionsNavigation.kt` to `feature:connections/androidMain`.
+    - [x] Fix package declarations and broken imports.
+- [x] Task: Extract Messaging & Remaining Navigation.
+    - [x] Move `ContactsNavigation.kt` to `feature:messaging/androidMain`.
+    - [x] Move `ChannelsNavigation.kt` to `feature:settings/androidMain` or `feature:node`.
+    - [x] Move `FirmwareNavigation.kt` to `feature:firmware/androidMain`.
+    - [x] Move `MapNavigation.kt` to `feature:map/androidMain`.
+    - [x] Fix package declarations and broken imports.
+- [~] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extraction' (Protocol in workflow.md)
 
 ## Phase 3: Root Assembly & Testing
 - [ ] Task: Refactor Root App Graph.

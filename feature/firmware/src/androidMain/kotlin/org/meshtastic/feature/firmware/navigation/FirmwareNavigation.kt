@@ -14,25 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.navigation
+package org.meshtastic.feature.firmware.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
-import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.feature.map.MapScreen
-import org.meshtastic.feature.map.SharedMapViewModel
+import org.meshtastic.core.navigation.FirmwareRoutes
+import org.meshtastic.feature.firmware.FirmwareUpdateScreen
+import org.meshtastic.feature.firmware.FirmwareUpdateViewModel
 
-fun EntryProviderScope<NavKey>.mapGraph(backStack: NavBackStack<NavKey>) {
-    entry<MapRoutes.Map> { args ->
-        val viewModel = koinViewModel<SharedMapViewModel>()
-        MapScreen(
-            viewModel = viewModel,
-            onClickNodeChip = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-            navigateToNodeDetails = { backStack.add(NodesRoutes.NodeDetailGraph(it)) },
-            waypointId = args.waypointId,
-        )
+fun EntryProviderScope<NavKey>.firmwareGraph(backStack: NavBackStack<NavKey>) {
+    entry<FirmwareRoutes.FirmwareUpdate> {
+        val viewModel = koinViewModel<FirmwareUpdateViewModel>()
+        FirmwareUpdateScreen(onNavigateUp = { backStack.removeLastOrNull() }, viewModel = viewModel)
     }
 }
