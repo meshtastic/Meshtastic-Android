@@ -10,7 +10,7 @@
 - [x] Task: Map the input/output streams of the open serial port to the existing KMP stream framing logic (`StreamFrameCodec`). [checkpoint: 04ba9c2]
 
 ## Phase 3: UI Integration
-- [ ] Task: Update the `feature:connections` UI or `DesktopScannerViewModel` to poll the new `SerialTransport` for available ports.
+- [x] Task: Update the `feature:connections` UI or `DesktopScannerViewModel` to poll the new `SerialTransport` for available ports. [checkpoint: 2e85b5a]
 - [ ] Task: Wire the user's serial port selection to initiate the connection via the DI graph and active service logic.
 
 ## Phase 4: Validation
