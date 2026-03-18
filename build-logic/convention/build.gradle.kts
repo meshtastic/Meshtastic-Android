@@ -54,6 +54,7 @@ dependencies {
     compileOnly(libs.google.services.gradlePlugin)
     compileOnly(libs.koin.gradlePlugin)
     implementation(libs.kover.gradlePlugin)
+    implementation(libs.mokkery.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.androidx.room.gradlePlugin)

@@ -114,12 +114,24 @@ internal fun Project.configureKmpTestDependencies() {
             val commonTest = findByName("commonTest") ?: return@apply
             commonTest.dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.library("kotest-assertions"))
+                implementation(libs.library("kotest-property"))
+                implementation(libs.library("turbine"))
             }
             
             // Configure androidHostTest if it exists
             val androidHostTest = findByName("androidHostTest")
             androidHostTest?.dependencies {
                 implementation(kotlin("test"))
+                implementation(libs.library("kotest-assertions"))
+                implementation(libs.library("kotest-property"))
+                implementation(libs.library("turbine"))
+            }
+
+            // Configure jvmTest if it exists
+            val jvmTest = findByName("jvmTest")
+            jvmTest?.dependencies {
+                implementation(libs.library("kotest-runner-junit6"))
             }
         }
     }
