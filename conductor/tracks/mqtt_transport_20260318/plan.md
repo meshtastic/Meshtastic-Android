@@ -29,4 +29,4 @@
     - [x] Verified existing `MQTTConfigItemList.kt` correctly manages UI inputs.
     - [x] Verified MQTT broker URL, username, password, and custom topic inputs exist in UI.
     - [x] Verified UI inputs correctly wire to `ModuleConfig.MQTTConfig` used by `MQTTRepositoryImpl`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Service & UI Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Service & UI Integration' (Protocol in workflow.md) [deaa324]
