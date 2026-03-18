@@ -981,6 +981,12 @@
         <item quantity="many">%1$d minut</item>
         <item quantity="other">%1$d minut</item>
     </plurals>
+    <plurals name="plurals_hours">
+        <item quantity="one">%1$d hodina</item>
+        <item quantity="few">%1$d hodin</item>
+        <item quantity="many">%1$d hodin</item>
+        <item quantity="other">%1$d hodin</item>
+    </plurals>
     <!-- Compass -->
     <string name="compass_title">Kompas</string>
     <string name="open_compass">Otevřít kompas</string>
@@ -1022,6 +1028,8 @@
     <string name="configure_bluetooth_permissions">Nastavení oprávnění Bluetooth</string>
     <string name="bluetooth_feature_discovery">Objevujte</string>
     <string name="bluetooth_feature_discovery_description">Najděte a identifikujte zařízení Meshtastic ve svém okolí.</string>
+    <string name="bluetooth_feature_config">Nastavení</string>
+    <string name="bluetooth_feature_config_description">Bezdrátová správa nastavení a kanálů zařízení.</string>
     <string name="local_stats_battery">Baterie: %1$d %%</string>
     <string name="local_stats_nodes">Uzly: %1$d online / %2$d celkem</string>
     <string name="local_stats_uptime">Doba provozu: %1$s</string>
