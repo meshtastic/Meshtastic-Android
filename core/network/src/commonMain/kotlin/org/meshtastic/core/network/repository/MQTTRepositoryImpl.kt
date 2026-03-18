@@ -90,12 +90,14 @@ class MQTTRepositoryImpl(
             publishReceived = { packet ->
                 val topic = packet.topicName
                 val payload = packet.payload?.toByteArray()
+                Logger.d { "MQTT received message on topic $topic (size: ${payload?.size ?: 0} bytes)" }
                 
                 if (topic.contains("/json/")) {
                     try {
                         val jsonStr = payload?.decodeToString() ?: ""
                         // Validate JSON by parsing it
                         json.decodeFromString<MqttJsonPayload>(jsonStr)
+                        Logger.d { "MQTT parsed JSON payload successfully" }
                         
                         trySend(
                             MqttClientProxyMessage(
@@ -142,6 +144,7 @@ class MQTTRepositoryImpl(
         subscriptions.add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)))
         
         if (subscriptions.isNotEmpty()) {
+            Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
             newClient.subscribe(subscriptions)
         }
 
@@ -152,6 +155,7 @@ class MQTTRepositoryImpl(
 
     @OptIn(ExperimentalUnsignedTypes::class)
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {
+        Logger.d { "MQTT publishing message to topic $topic (size: ${data.size} bytes, retained: $retained)" }
         client?.publish(
             retain = retained,
             qos = Qos.AT_LEAST_ONCE,
