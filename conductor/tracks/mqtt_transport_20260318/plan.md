@@ -16,9 +16,9 @@
     - [x] Create failing tests for receiving and mapping standard Meshtastic JSON payloads from subscribed topics.
     - [x] Implement topic subscription management in `MqttTransport`.
     - [x] Implement payload parsing and integration with `core:model` definitions.
-- [ ] Task: Implement publishing mechanism.
-    - [ ] Create failing tests for formatting and publishing node information/messages to custom topics.
-    - [ ] Implement publish functionality in `MqttTransport`.
+- [x] Task: Implement publishing mechanism. [0991210]
+    - [x] Create failing tests for formatting and publishing node information/messages to custom topics.
+    - [x] Implement publish functionality in `MqttTransport`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Publishing & Subscribing' (Protocol in workflow.md)
 
 ## Phase 3: Service & UI Integration
