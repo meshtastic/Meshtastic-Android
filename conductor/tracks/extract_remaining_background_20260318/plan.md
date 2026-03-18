@@ -8,7 +8,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Location Manager Abstraction' (Protocol in workflow.md)
 
 ## Phase 2: Message Queue Abstraction
-- [ ] Task: Review `app/src/main/kotlin/org/meshtastic/app/messaging/domain/worker/WorkManagerMessageQueue.kt`.
+- [~] Task: Review `app/src/main/kotlin/org/meshtastic/app/messaging/domain/worker/WorkManagerMessageQueue.kt`.
 - [ ] Task: Identify opportunities to extract non-Android specific queue logic to `feature:messaging/commonMain`.
 - [ ] Task: Relocate `WorkManagerMessageQueue.kt` to `feature:messaging/src/androidMain/...`.
 - [ ] Task: Update package declarations and resolve broken imports.
