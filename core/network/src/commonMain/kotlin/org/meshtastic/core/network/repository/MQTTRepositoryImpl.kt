@@ -41,7 +41,7 @@ import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.proto.MqttClientProxyMessage
 
-@Single
+@Single(binds = [MQTTRepository::class])
 class MQTTRepositoryImpl(
     private val radioConfigRepository: RadioConfigRepository,
     private val nodeRepository: NodeRepository,
