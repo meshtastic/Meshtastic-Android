@@ -2,7 +2,7 @@
 
 ## Phase 1: JVM Setup & Dependency Integration
 - [x] Task: Add the `jSerialComm` library to the `jvmMain` dependencies of the networking module. [checkpoint: 8994c66]
-- [ ] Task: Create a `jvmMain` stub implementation for a `SerialTransport` class that implements the shared `RadioTransport` interface.
+- [x] Task: Create a `jvmMain` stub implementation for a `SerialTransport` class that implements the shared `RadioTransport` interface. [checkpoint: 83668e4]
 
 ## Phase 2: Serial Port Scanning & Connection Management
 - [ ] Task: Implement port discovery using `jSerialComm` to list available serial ports.
