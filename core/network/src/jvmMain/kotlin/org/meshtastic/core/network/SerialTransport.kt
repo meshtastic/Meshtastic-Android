@@ -79,11 +79,15 @@ class SerialTransport(
                             }
                         } catch (_: SerialPortTimeoutException) {
                             // Expected timeout when no data is available
+                        } catch (e: kotlinx.coroutines.CancellationException) {
+                            throw e
                         } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                             Logger.e(e) { "Serial read IOException: ${e.message}" }
                             reading = false
                         }
                     }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
                 } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
                     Logger.e(e) { "Serial read loop outer error: ${e.message}" }
                 } finally {
@@ -98,6 +102,9 @@ class SerialTransport(
                         }
                     } catch (_: Exception) {
                         // Ignore errors during port close
+                    }
+                    if (isActive) {
+                        onDeviceDisconnect(true)
                     }
                 }
             }
