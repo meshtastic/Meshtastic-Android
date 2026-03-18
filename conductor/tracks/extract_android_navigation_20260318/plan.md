@@ -1,10 +1,10 @@
 # Implementation Plan: Extract Android Navigation
 
-## Phase 1: Preparation & Base Module Abstraction
+## Phase 1: Preparation & Base Module Abstraction [checkpoint: 421a587]
 - [x] Task: Review current navigation graph assembly in `app/src/main/kotlin/org/meshtastic/app/navigation/`.
     - [x] Identify dependencies between feature navigation graphs and core routing definitions.
     - [x] Create missing directory structures in feature modules' `androidMain/kotlin/org/meshtastic/feature/*/navigation` if they don't exist.
-- [~] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Base Module Abstraction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Base Module Abstraction' (Protocol in workflow.md)
 
 ## Phase 2: Feature Module Extraction
 - [ ] Task: Extract Settings Navigation.
