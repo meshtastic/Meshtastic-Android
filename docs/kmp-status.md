@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
 | Shared feature/UI logic | **8.5/10** | All 7 KMP; feature:connections unified with dynamic transport detection |
-| Android decoupling | **8.5/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation & connections extracted) |
+| Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **8/10** | Full JVM; release-ready desktop; iOS not declared |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |

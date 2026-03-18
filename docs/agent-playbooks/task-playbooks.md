@@ -19,12 +19,10 @@ Reference examples:
 1. Implement or extend base ViewModel logic in `feature/<name>/src/commonMain/...`.
 2. Keep shared class free of Android framework dependencies.
 3. Keep Android framework dependencies out of shared logic; if the module already uses Koin annotations in `commonMain`, keep patterns consistent and ensure app root inclusion.
-4. Add/update Android wrapper in `app/src/main/kotlin/org/meshtastic/app/...` with `@KoinViewModel` when Android instantiation is needed.
-5. Update navigation entry points in `feature/*/src/androidMain/kotlin/org/meshtastic/feature/*/navigation/...` to resolve wrapper ViewModels with `koinViewModel()`.
+4. Update navigation entry points in `feature/*/src/androidMain/kotlin/org/meshtastic/feature/*/navigation/...` to resolve ViewModels with `koinViewModel()`.
 
 Reference examples:
 - Shared base: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt`
-- Android wrapper (remaining): `app/src/main/kotlin/org/meshtastic/app/node/AndroidMetricsViewModel.kt`
 - Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/BaseUIViewModel.kt`
 - Navigation usage: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
 - Desktop navigation usage: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
