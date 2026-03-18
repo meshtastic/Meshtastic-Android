@@ -25,6 +25,7 @@
 - **Ktor:** Multiplatform HTTP client for web services and TCP streaming.
 - **Kable:** Multiplatform BLE library used as the primary BLE transport for all targets (Android, Desktop, and future iOS).
 - **jSerialComm:** Cross-platform Java library used for direct Serial/USB communication with Meshtastic devices on the Desktop (JVM) target.
+- **KMQTT:** Kotlin Multiplatform MQTT client and broker used for MQTT transport, replacing the Android-only Paho library.
 - **Coroutines & Flows:** For asynchronous programming and state management.
 
 ## Testing (KMP)
