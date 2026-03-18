@@ -47,7 +47,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
 | `core:barcode` | Barcode scanning (Android-only). |
 | `core:nfc` | NFC abstractions (KMP). Android NFC hardware implementation in `androidMain`. |
-| `core/ble/` | Bluetooth Low Energy stack using Nordic libraries. |
+| `core/ble/` | Bluetooth Low Energy stack using Kable. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
 | `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`). All are KMP with `jvm()` target. Use `meshtastic.kmp.feature` convention plugin. |
@@ -72,7 +72,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (0.4.0+). Keep root graph assembly in `app`.
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
--   **BLE:** All Bluetooth communication must route through `core:ble` using Nordic Semiconductor's Android Common Libraries.
+-   **BLE:** All Bluetooth communication must route through `core:ble` using Kable.
 -   **Dependencies:** Check `gradle/libs.versions.toml` before assuming a library is available.
 -   **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`.
 -   **Compose Multiplatform:** Version catalog aliases for Compose Multiplatform artifacts use the `compose-multiplatform-*` prefix (e.g., `compose-multiplatform-material3`, `compose-multiplatform-foundation`). Never use plain `androidx.compose` dependencies in common Main.

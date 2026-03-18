@@ -63,6 +63,7 @@ Working Compose Desktop application with:
 - **Navigation-preserving locale switching** via `Main.kt` `staticCompositionLocalOf` recomposition instead of recreating the Nav3 backstack
 - Node detail metrics screens (Device, Environment, Signal, Power, Pax) wired with shared KMP + Vico charts
 - 7 desktop-specific screens (Settings, Device, Position, Network, Security, ExternalNotification, Debug)
+- **Native notifications and system tray icon** wired via `DesktopNotificationManager`
 - **Native release pipeline** generating `.dmg` (macOS), `.msi` (Windows), and `.deb` (Linux) installers in CI
 
 ## Scorecard

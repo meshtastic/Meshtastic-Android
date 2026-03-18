@@ -41,7 +41,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
     -   Test navigation flows end-to-end
 2.  **Tier 2: Polish (High Priority)**
     -   Additional desktop-specific settings polish
-    -   Keyboard shortcuts
+    -   ✅ **MenuBar integration** and Keyboard shortcuts
     -   Window management
     -   State persistence
 3.  **Tier 3: Advanced (Nice-to-have)**
@@ -55,9 +55,10 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 | TCP | Desktop (JVM) | ✅ Done — shared `StreamFrameCodec` + `TcpTransport` in `core:network` |
 | Serial/USB | Desktop (JVM) | ❌ Next — jSerialComm |
 | MQTT | All (KMP) | ❌ Planned — Ktor/MQTT (currently Android-only via Eclipse Paho) |
-| BLE | Desktop | ❌ Future — Kable (JVM) |
+| BLE | Android | ✅ Done — Kable |
+| BLE | Desktop | ✅ Done — Kable (JVM) |
 | BLE | iOS | ❌ Future — Kable/CoreBluetooth |
-
+   
 ### Desktop Feature Gaps
 
 | Feature | Status |
@@ -70,6 +71,8 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 | Map | ❌ Needs MapLibre or equivalent |
 | Charts | ✅ Vico KMP charts wired in commonMain (Device, Environment, Signal, Power, Pax) |
 | Debug Panel | ✅ Real screen (mesh log viewer via shared `DebugViewModel`) |
+| Notifications | ✅ Desktop native notifications with system tray icon support |
+| MenuBar | ✅ Done — Native application menu bar with File/View menus |
 | About | ✅ Shared `commonMain` screen (AboutLibraries KMP `produceLibraries` + per-platform JSON) |
 | Packaging | ✅ Done — Native distribution pipeline in CI (DMG, MSI, DEB) |
 
@@ -91,7 +94,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
     - **Next:** Extract remaining Android-specific files (e.g., Navigation files, App Widgets, message queues, and root Activity logic) out of `:app` to establish a truly thin app module.
 2. **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
 3. **MQTT transport** — cloud relay operation (KMP, benefits all targets)
-4. **Evaluate KMP-native mocking** — Evaluate `mockative` or similar to replace `mockk` in `commonMain` of `core:testing` for iOS readiness.
+4. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.
 5. **Desktop ViewModel auto-wiring** — ✅ Done: ensured Koin K2 Compiler Plugin generates ViewModel modules for JVM target; eliminated manual wiring in `DesktopKoinModule`
 5. **KMP charting** — ✅ Done: Vico charts migrated to `feature:node/commonMain` using KMP artifacts; desktop wires them directly
 6. **Navigation contract extraction** — ✅ Done: shared `TopLevelDestination` enum in `core:navigation`; icon mapping in `core:ui`; parity tests in place. Both shells derive from the same source of truth.
@@ -100,17 +103,23 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 ## Longer-Term (90+ days)
 
 1. **iOS proof target** — declare `iosArm64()`/`iosSimulatorArm64()` in KMP modules; BLE via Kable/CoreBluetooth
-2. **Map on Desktop** — evaluate MapLibre for cross-platform maps
+2. **Platform-Native UI Interop** — 
+   - **iOS Maps & Camera:** Implement `MapLibre` or `MKMapView` via Compose Multiplatform's `UIKitView`. Leverage `AVCaptureSession` wrapped in `UIKitView` to fulfill the `LocalBarcodeScannerProvider` contract.
+   - **Desktop Maps:** Implement maps via `SwingPanel` wrapper, utilizing experimental interop blending (`compose.interop.blending=true`) to ensure tooltips and Compose overlays render correctly on top of the native JComponent.
+   - **Web (wasmJs) Integrations:** Leverage `HtmlView` to embed raw DOM elements (e.g., `<video>`, `<iframe>`, or canvas-based maps) directly into the Compose UI tree while binding the root app via `CanvasBasedWindow`.
 3. **`core:api` contract split** — separate transport-neutral service contracts from Android AIDL packaging
 4. **Native packaging** — ✅ Done: DMG, MSI, DEB distributions for Desktop via release pipeline
 5. **Module maturity dashboard** — living inventory of per-module KMP readiness
+6. **Shared UI vs Shared Logic split** — If the iOS target utilizes native SwiftUI instead of Compose Multiplatform, evaluate splitting feature modules into pure `sharedLogic` (business rules, ViewModels) and `sharedUI` (Compose Multiplatform) to prevent dragging Compose dependencies into pure native iOS apps.
 
 ## Design Principles
 
 1. **Solve in `commonMain` first.** If it doesn't need platform APIs, it belongs in `commonMain`.
-2. **Interfaces in `commonMain`, implementations per-target.** The repository pattern is established — extend it.
-3. **Stubs are a valid first implementation.** Every target starts with no-op stubs, then graduates to real implementations.
-4. **Feature modules stay target-agnostic in `commonMain`.** Platform UI goes in platform source sets.
-5. **Transport is a pluggable adapter.** BLE, serial, TCP, MQTT all implement `RadioInterfaceService`.
-6. **CI validates every target.** If a module declares `jvm()`, CI compiles it. No exceptions.
-7. **Test in `commonTest` first.** ViewModel and business logic tests belong in `commonTest` so every target runs them.
+2. **Interfaces in `commonMain`, implementations per-target.** The repository pattern is established — extend it. Prefer dependency injection (Koin) with interfaces over `expect`/`actual` declarations whenever possible to keep architecture decoupled and highly testable.
+3. **UI Interop Strategies.** When a Compose Multiplatform equivalent doesn't exist (e.g., Maps, Camera), use standard interop APIs rather than extracting the entire screen to native code. Use `AndroidView` for Android, `UIKitView` for iOS, `SwingPanel` for JVM/Desktop, and `HtmlView` for Web (`wasmJs`). Always wrap these in a shared `commonMain` interface contract (like `LocalBarcodeScannerProvider`).
+4. **Stubs are a valid first implementation.** Every target starts with no-op stubs, then graduates to real implementations.
+5. **Feature modules stay target-agnostic in `commonMain`.** Platform UI goes in platform source sets. Keep the UI layer dumb and rely on shared ViewModels (Unidirectional Data Flow) to drive state.
+6. **Transport is a pluggable adapter.** BLE, serial, TCP, MQTT all implement `RadioInterfaceService`.
+7. **CI validates every target.** If a module declares `jvm()`, CI compiles it. No exceptions. Run tests on appropriate host runners (macOS for iOS, Linux for JVM/Android) to catch platform regressions.
+8. **Test in `commonTest` first.** ViewModel and business logic tests belong in `commonTest` so every target runs them. Use shared `core:testing` utilities to minimize duplication.
+9. **Zero Platform Leaks.** Never import `java.*` or `android.*` inside `commonMain`. Use KMP-native alternatives like `kotlinx-datetime` and `Okio`.
