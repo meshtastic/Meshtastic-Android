@@ -125,8 +125,7 @@ class GetFilteredNodesUseCaseTest {
         val mqttNode = createNode(2, viaMqtt = true)
         val filter = NodeFilterState(excludeMqtt = true)
 
-        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns
-            flowOf(listOf(loraNode, mqttNode))
+        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns flowOf(listOf(loraNode, mqttNode))
 
         // Act
         val result = useCase(filter, NodeSortOption.LAST_HEARD).first()
@@ -143,8 +142,7 @@ class GetFilteredNodesUseCaseTest {
         val mqttNode = createNode(2, viaMqtt = true)
         val filter = NodeFilterState(excludeMqtt = false)
 
-        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns
-            flowOf(listOf(loraNode, mqttNode))
+        every { nodeRepository.getNodes(any(), any(), any(), any(), any()) } returns flowOf(listOf(loraNode, mqttNode))
 
         // Act
         val result = useCase(filter, NodeSortOption.LAST_HEARD).first()
