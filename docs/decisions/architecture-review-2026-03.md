@@ -11,7 +11,7 @@ The codebase is **~98% structurally KMP** — 18/20 core modules and 7/7 feature
 
 Of the five structural gaps originally identified, four are resolved and one remains in progress:
 
-1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(In progress — connections extracted, Android navigation extracted, ChannelViewModel/NodeMapViewModel/NodeContextMenu/EmptyDetailPlaceholder moved to shared modules, background services and widgets extracted, currently ~40 files)*
+1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(✅ Resolved — app module reduced to 6 files: `MainActivity`, `MeshUtilApplication`, Nav shell, and DI config)*
 2. ~~**Radio transport layer is app-locked**~~ — ✅ Resolved: `RadioTransport` interface in `core:repository/commonMain`; shared `StreamFrameCodec` + `TcpTransport` in `core:network`.
 3. ~~**`java.*` APIs leak into `commonMain`**~~ — ✅ Resolved: `Locale`, `ConcurrentHashMap`, `ReentrantLock` purged.
 4. ~~**Zero feature-level `commonTest`**~~ — ✅ Resolved: 131 shared tests across all 7 features; `core:testing` module established.
@@ -24,7 +24,7 @@ Of the five structural gaps originally identified, four are resolved and one rem
 | `core/*/commonMain` | 337 | 32,700 | Shared business/data logic |
 | `feature/*/commonMain` | 146 | 19,700 | Shared feature UI + ViewModels |
 | `feature/*/androidMain` | 62 | 14,700 | Platform UI (charts, previews, permissions) |
-| `app/src/main` | 63 | ~9,500 | Android app shell (target: ~20 files) |
+| `app/src/main` | 6 | ~300 | Android app shell (target achieved) |
 | `desktop/src` | 26 | 4,800 | Desktop app shell |
 | `core/*/androidMain` | 49 | 3,500 | Platform implementations |
 | `core/*/jvmMain` | 11 | ~500 | JVM actuals |
@@ -38,7 +38,7 @@ Of the five structural gaps originally identified, four are resolved and one rem
 
 ### A1. `app` module is a God module
 
-The `app` module should be a thin shell (~20 files): `MainActivity`, DI assembly, nav host. Originally it held **90 files / ~11K LOC**, now reduced to **63 files / ~9.5K LOC**:
+The `app` module should be a thin shell (~20 files): `MainActivity`, DI assembly, nav host. Originally it held **90 files / ~11K LOC**, now completely reduced to a **6-file shell**:
 
 | Area | Files | LOC | Where it should live |
 |---|---:|---:|---|

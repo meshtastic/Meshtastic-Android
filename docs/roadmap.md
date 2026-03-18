@@ -88,12 +88,10 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 
 ## Medium-Term Priorities (60 days)
 
-1. **App module thinning** — Extracted ChannelViewModel, NodeMapViewModel, NodeContextMenu, EmptyDetailPlaceholder to shared modules.
-    - ✅ **Done:** Extracted remaining 5 ViewModels: `SettingsViewModel`, `RadioConfigViewModel`, `DebugViewModel`, `MetricsViewModel`, `UIViewModel` to shared KMP modules.
-    - ✅ **Done:** Extracted service, worker, and radio files from `app` to `core:service/androidMain` and `core:network/androidMain`.
-    - ✅ **Done:** Extracted Android Navigation graphs to feature modules.
-    - ✅ **Done:** Extracted remaining background services, workers, and App Widgets to `core:service/androidMain`, `feature:messaging/androidMain`, and `feature:widget`.
-    - **Next:** Consolidate root Activity logic and DI assembly to establish a truly thin app module.
+1. ✅ **Done:** **App module thinning** — Reduced the `app` God module from 90+ files down to 6 files.
+    - Extracted 9 ViewModels, UI components, and navigation graphs to feature modules.
+    - Extracted services, workers, widgets, and radio transports to `core:service`, `feature:messaging`, `feature:widget`, and `core:network`.
+    - The `app` module is now just a thin root shell (`MainActivity.kt`, `MeshUtilApplication.kt`, and `AppKoinModule.kt`).
 2. ✅ **Done:** **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
 3. **MQTT transport** — cloud relay operation (KMP, benefits all targets) ✅
 4. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.

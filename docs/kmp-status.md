@@ -84,9 +84,9 @@ Working Compose Desktop application with:
 
 | Lens | % |
 |---|---:|
-| Android-first structural KMP | ~98% |
-| Shared business logic | ~95% |
-| Shared feature/UI | ~90% |
+| Android-first structural KMP | ~100% |
+| Shared business logic | ~98% |
+| Shared feature/UI | ~95% |
 | True multi-target readiness | ~75% |
 | "Add iOS without surprises" | ~65% |
 
@@ -139,13 +139,9 @@ Extracted to core KMP modules (Android-specific implementations):
 - Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
 - BLE, USB/Serial, TCP radio connections, and NsdManager → `core:network/androidMain`
 
-Remaining to be extracted from `:app` to achieve a true thin-shell module:
-- Navigation routes (`ChannelsNavigation.kt`, `SettingsNavigation.kt`, etc.)
-- Android App Widgets (`LocalStatsWidget.kt`, `AndroidAppWidgetUpdater.kt`)
-- Message Queue implementation (`WorkManagerMessageQueue.kt`)
-- Location provider bindings (`AndroidMeshLocationManager.kt`)
-- Top-level UI composition (`ui/Main.kt`, `ui/node/AdaptiveNodeListScreen.kt`)
-- Root Activity and Koin bootstrapping (`MainActivity.kt`, `MeshUtilApplication.kt`, `MeshServiceClient.kt`)
+The `:app` module has successfully been reduced to a thin shell containing only 6 Kotlin files:
+- Top-level UI composition (`ui/Main.kt`)
+- Root Activity and Koin bootstrapping (`MainActivity.kt`, `MeshUtilApplication.kt`, `MainKoinModule.kt`, `AppKoinModule.kt`, `NetworkModule.kt`)
 
 ## Prerelease Dependencies
 
