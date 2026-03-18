@@ -24,4 +24,12 @@
 ## Networking & Transport
 - **Ktor:** Multiplatform HTTP client for web services and TCP streaming.
 - **Kable:** Multiplatform BLE library used as the primary BLE transport for all targets (Android, Desktop, and future iOS).
+- **jSerialComm:** Cross-platform Java library used for direct Serial/USB communication with Meshtastic devices on the Desktop (JVM) target.
 - **Coroutines & Flows:** For asynchronous programming and state management.
+
+## Testing (KMP)
+- **Shared Tests First:** The majority of business logic, ViewModels, and state interactions are tested in the `commonTest` source set using standard `kotlin.test`.
+- **Coroutines Testing:** Use `kotlinx-coroutines-test` for virtual time management in asynchronous flows.
+- **Mocking Strategy:** Avoid JVM-specific mocking libraries. Prefer `Mokkery` or `Mockative` for multiplatform-compatible mocking interfaces, alongside handwritten fakes in `core:testing`.
+- **Flow Assertions:** Use `Turbine` for testing multiplatform `Flow` emissions and state updates.
+- **Property-Based Testing:** Consider evaluating `Kotest` for multiplatform data-driven and property-based testing scenarios if standard `kotlin.test` becomes insufficient.

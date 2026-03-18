@@ -27,7 +27,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `core:database` | ✅ | ✅ | Room KMP |
 | `core:domain` | ✅ | ✅ | UseCases |
 | `core:prefs` | ✅ | ✅ | Preferences layer |
-| `core:network` | ✅ | ✅ | Ktor, `StreamFrameCodec`, `TcpTransport` |
+| `core:network` | ✅ | ✅ | Ktor, `StreamFrameCodec`, `TcpTransport`, `SerialTransport` |
 | `core:data` | ✅ | ✅ | Data orchestration |
 | `core:ble` | ✅ | ✅ | Kable multiplatform BLE abstractions in commonMain |
 | `core:nfc` | ✅ | ✅ | NFC contract in commonMain; hardware in androidMain |
@@ -56,13 +56,14 @@ Modules that share JVM-specific code between Android and desktop now standardize
 Working Compose Desktop application with:
 - Navigation 3 shell (`NavigationRail` + `NavDisplay`) using shared routes
 - Full Koin DI graph (stubs + real implementations)
-- TCP transport with auto-reconnect and full `want_config` handshake
+- TCP, Serial/USB, and BLE transports with auto-reconnect and full `want_config` handshake
 - Adaptive list-detail screens for nodes and contacts
-- **Dynamic Connections screen** with automatic discovery of platform-supported transports (TCP)
+- **Dynamic Connections screen** with automatic discovery of platform-supported transports (TCP, Serial/USB, BLE)
 - **Desktop language picker** backed by `UiPreferencesDataSource.locale`, with immediate Compose Multiplatform resource updates
 - **Navigation-preserving locale switching** via `Main.kt` `staticCompositionLocalOf` recomposition instead of recreating the Nav3 backstack
 - Node detail metrics screens (Device, Environment, Signal, Power, Pax) wired with shared KMP + Vico charts
 - 7 desktop-specific screens (Settings, Device, Position, Network, Security, ExternalNotification, Debug)
+- **Native notifications and system tray icon** wired via `DesktopNotificationManager`
 - **Native release pipeline** generating `.dmg` (macOS), `.msi` (Windows), and `.deb` (Linux) installers in CI
 
 ## Scorecard
@@ -107,7 +108,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | Material 3 Adaptive (JetBrains) | ✅ Done | Version `1.3.0-alpha06` aligned with CMP `1.11.0-alpha04` |
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
-| Transport deduplication | ✅ Done | `StreamFrameCodec` + `TcpTransport` shared in `core:network` |
+| Transport deduplication | ✅ Done | `StreamFrameCodec`, `TcpTransport`, and `SerialTransport` shared in `core:network` |
 | **Transport UI Unification** | ✅ Done | `RadioInterfaceService` provides dynamic transport capability to shared UI |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
 

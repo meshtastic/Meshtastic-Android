@@ -56,7 +56,11 @@ class DesktopRadioInterfaceService(
 ) : RadioInterfaceService {
 
     override val supportedDeviceTypes: List<org.meshtastic.core.model.DeviceType> =
-        listOf(org.meshtastic.core.model.DeviceType.TCP, org.meshtastic.core.model.DeviceType.BLE)
+        listOf(
+            org.meshtastic.core.model.DeviceType.TCP,
+            org.meshtastic.core.model.DeviceType.BLE,
+            org.meshtastic.core.model.DeviceType.USB,
+        )
 
     private val _connectionState = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     override val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
@@ -76,6 +80,7 @@ class DesktopRadioInterfaceService(
 
     private var transport: TcpTransport? = null
     private var bleTransport: DesktopBleInterface? = null
+    private var serialTransport: org.meshtastic.core.network.SerialTransport? = null
 
     init {
         // Observe radioPrefs to handle asynchronous loads from DataStore
@@ -136,6 +141,7 @@ class DesktopRadioInterfaceService(
         serviceScope.handledLaunch {
             transport?.sendPacket(bytes)
             bleTransport?.handleSendToRadio(bytes)
+            serialTransport?.handleSendToRadio(bytes)
         }
     }
 
@@ -170,12 +176,26 @@ class DesktopRadioInterfaceService(
     private fun startConnection(address: String) {
         if (address.startsWith("t")) {
             startTcpConnection(address.removePrefix("t"))
+        } else if (address.startsWith("s")) {
+            startSerialConnection(address.removePrefix("s"))
         } else if (address.startsWith("x")) {
             startBleConnection(address.removePrefix("x"))
         } else {
             // Assume BLE if no prefix, or prefix is not supported
             val stripped = if (address.startsWith("!")) address.removePrefix("!") else address
             startBleConnection(stripped)
+        }
+    }
+
+    private fun startSerialConnection(portName: String) {
+        transport?.stop()
+        bleTransport?.close()
+        serialTransport?.close()
+
+        val serial = org.meshtastic.core.network.SerialTransport(portName = portName, service = this)
+        serialTransport = serial
+        if (!serial.startConnection()) {
+            onDisconnect(isPermanent = true, errorMessage = "Failed to connect to $portName")
         }
     }
 
@@ -227,6 +247,9 @@ class DesktopRadioInterfaceService(
 
         bleTransport?.close()
         bleTransport = null
+
+        serialTransport?.close()
+        serialTransport = null
 
         // Recreate the service scope
         serviceScope.cancel("stopping interface")
