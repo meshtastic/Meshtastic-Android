@@ -78,39 +78,24 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 
 ## Near-Term Priorities (30 days)
 
-1. **`core:testing` module** — ✅ Done (established shared fakes for cross-module `commonTest`)
-2. **Feature `commonTest` bootstrap** — ✅ Done (131 shared tests across all 7 features covering integration and error handling)
-3. **Radio transport abstraction** — ✅ Done: Defined `RadioTransport` interface in `core:repository/commonMain` and replaced `IRadioInterface`; Next: continue extracting remaining platform transports from `app/repository/radio/` into core modules
-4. **`feature:connections` module** — ✅ Done: Extracted connections UI into KMP feature module with dynamic transport availability detection
-5. **Navigation 3 parity baseline** — ✅ Done: shared `TopLevelDestination` in `core:navigation`; both shells use same enum; parity tests in `core:navigation/commonTest` and `desktop/test`
-6. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations)
-7. **Build-logic consolidation** — ✅ Done: Created `meshtastic.kmp.feature` convention plugin (modelled after NiA's `AndroidFeatureImplConventionPlugin`). Composes `kmp.library` + `kmp.library.compose` + `koin` and wires common Compose/Lifecycle/Koin/androidMain deps. All 7 feature modules migrated; ~100 duplicated dep lines eliminated.
+1. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.
+2. **Desktop Map Integration** — Address the major Desktop feature gap by implementing a `MapLibre` (or equivalent) map view via `SwingPanel` wrapper.
+3. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations) to ensure `commonMain` remains pure.
+4. **Dependency stabilization** — track stable releases for CMP, Koin, Lifecycle, Nav3 as they move out of alpha/beta.
 
 ## Medium-Term Priorities (60 days)
 
-1. ✅ **Done:** **App module thinning** — Reduced the `app` God module from 90+ files down to 6 files.
-    - Extracted 9 ViewModels, UI components, and navigation graphs to feature modules.
-    - Extracted services, workers, widgets, and radio transports to `core:service`, `feature:messaging`, `feature:widget`, and `core:network`.
-    - The `app` module is now just a thin root shell (`MainActivity.kt`, `MeshUtilApplication.kt`, and `AppKoinModule.kt`).
-2. ✅ **Done:** **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
-3. **MQTT transport** — cloud relay operation (KMP, benefits all targets) ✅
-4. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.
-5. **Desktop ViewModel auto-wiring** — ✅ Done: ensured Koin K2 Compiler Plugin generates ViewModel modules for JVM target; eliminated manual wiring in `DesktopKoinModule`
-5. **KMP charting** — ✅ Done: Vico charts migrated to `feature:node/commonMain` using KMP artifacts; desktop wires them directly
-6. **Navigation contract extraction** — ✅ Done: shared `TopLevelDestination` enum in `core:navigation`; icon mapping in `core:ui`; parity tests in place. Both shells derive from the same source of truth.
-7. **Dependency stabilization** — track stable releases for CMP, Koin, Lifecycle, Nav3
+1. **iOS proof target** — Begin stubbing iOS target implementations (`NoopStubs.kt` equivalent) and setup an Xcode skeleton project.
+2. **`core:api` contract split** — separate transport-neutral service contracts from the Android AIDL packaging to support iOS/Desktop service layers.
+3. **Decouple Firmware DFU** — `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it to allow the core `feature:firmware` module to be utilized on desktop/iOS.
 
 ## Longer-Term (90+ days)
 
-1. **iOS proof target** — declare `iosArm64()`/`iosSimulatorArm64()` in KMP modules; BLE via Kable/CoreBluetooth
-2. **Platform-Native UI Interop** — 
+1. **Platform-Native UI Interop** — 
    - **iOS Maps & Camera:** Implement `MapLibre` or `MKMapView` via Compose Multiplatform's `UIKitView`. Leverage `AVCaptureSession` wrapped in `UIKitView` to fulfill the `LocalBarcodeScannerProvider` contract.
-   - **Desktop Maps:** Implement maps via `SwingPanel` wrapper, utilizing experimental interop blending (`compose.interop.blending=true`) to ensure tooltips and Compose overlays render correctly on top of the native JComponent.
    - **Web (wasmJs) Integrations:** Leverage `HtmlView` to embed raw DOM elements (e.g., `<video>`, `<iframe>`, or canvas-based maps) directly into the Compose UI tree while binding the root app via `CanvasBasedWindow`.
-3. **`core:api` contract split** — separate transport-neutral service contracts from Android AIDL packaging
-4. **Native packaging** — ✅ Done: DMG, MSI, DEB distributions for Desktop via release pipeline
-5. **Module maturity dashboard** — living inventory of per-module KMP readiness
-6. **Shared UI vs Shared Logic split** — If the iOS target utilizes native SwiftUI instead of Compose Multiplatform, evaluate splitting feature modules into pure `sharedLogic` (business rules, ViewModels) and `sharedUI` (Compose Multiplatform) to prevent dragging Compose dependencies into pure native iOS apps.
+2. **Module maturity dashboard** — living inventory of per-module KMP readiness.
+3. **Shared UI vs Shared Logic split** — If the iOS target utilizes native SwiftUI instead of Compose Multiplatform, evaluate splitting feature modules into pure `sharedLogic` (business rules, ViewModels) and `sharedUI` (Compose Multiplatform) to prevent dragging Compose dependencies into pure native iOS apps.
 
 ## Design Principles
 
