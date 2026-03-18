@@ -41,6 +41,7 @@ kotlin {
             implementation(projects.core.proto)
 
             implementation(libs.okio)
+            implementation(libs.kmqtt.client)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
