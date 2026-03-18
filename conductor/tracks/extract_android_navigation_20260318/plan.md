@@ -6,7 +6,7 @@
     - [x] Create missing directory structures in feature modules' `androidMain/kotlin/org/meshtastic/feature/*/navigation` if they don't exist.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Base Module Abstraction' (Protocol in workflow.md)
 
-## Phase 2: Feature Module Extraction
+## Phase 2: Feature Module Extraction [checkpoint: 9a27cce]
 - [x] Task: Extract Settings Navigation.
     - [x] Move `SettingsNavigation.kt` to `feature:settings/androidMain`.
     - [x] Fix package declarations and broken imports.
@@ -20,7 +20,7 @@
     - [x] Move `FirmwareNavigation.kt` to `feature:firmware/androidMain`.
     - [x] Move `MapNavigation.kt` to `feature:map/androidMain`.
     - [x] Fix package declarations and broken imports.
-- [~] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extraction' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extraction' (Protocol in workflow.md)
 
 ## Phase 3: Root Assembly & Testing
 - [ ] Task: Refactor Root App Graph.
