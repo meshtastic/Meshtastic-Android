@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2026 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 package org.meshtastic.core.network
 
 import co.touchlab.kermit.Logger
@@ -11,25 +27,22 @@ import org.meshtastic.core.network.radio.StreamInterface
 import org.meshtastic.core.repository.RadioInterfaceService
 
 /**
- * JVM-specific implementation of [RadioTransport] using jSerialComm.
- * Uses [StreamInterface] for START1/START2 packet framing.
+ * JVM-specific implementation of [RadioTransport] using jSerialComm. Uses [StreamInterface] for START1/START2 packet
+ * framing.
  */
 class SerialTransport(
     private val portName: String,
-    private val baudRate: Int = 115200,
-    service: RadioInterfaceService
+    private val baudRate: Int = DEFAULT_BAUD_RATE,
+    service: RadioInterfaceService,
 ) : StreamInterface(service) {
     private var serialPort: SerialPort? = null
     private var readJob: Job? = null
 
-    /**
-     * Attempts to open the serial port and starts the read loop.
-     * Returns true if successful, false otherwise.
-     */
+    /** Attempts to open the serial port and starts the read loop. Returns true if successful, false otherwise. */
     fun startConnection(): Boolean {
         return try {
             val port = SerialPort.getCommPort(portName) ?: return false
-            port.setComPortParameters(baudRate, 8, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY)
+            port.setComPortParameters(baudRate, DATA_BITS, SerialPort.ONE_STOP_BIT, SerialPort.NO_PARITY)
             port.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 0, 0)
             if (port.openPort()) {
                 serialPort = port
@@ -48,33 +61,35 @@ class SerialTransport(
     }
 
     private fun startReadLoop(port: SerialPort) {
-        readJob = service.serviceScope.launch(Dispatchers.IO) {
-            val input = port.inputStream
-            val buffer = ByteArray(1024)
-            try {
-                while (isActive && port.isOpen) {
-                    try {
-                        val numRead = input.read(buffer)
-                        if (numRead == -1) break
-                        if (numRead > 0) {
-                            for (i in 0 until numRead) {
-                                readChar(buffer[i])
+        readJob =
+            service.serviceScope.launch(Dispatchers.IO) {
+                val input = port.inputStream
+                val buffer = ByteArray(READ_BUFFER_SIZE)
+                try {
+                    var reading = true
+                    while (isActive && port.isOpen && reading) {
+                        try {
+                            val numRead = input.read(buffer)
+                            if (numRead == -1) {
+                                reading = false
+                            } else if (numRead > 0) {
+                                for (i in 0 until numRead) {
+                                    readChar(buffer[i])
+                                }
                             }
+                        } catch (_: SerialPortTimeoutException) {
+                            // Expected timeout when no data is available
+                        } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                            Logger.e(e) { "Serial read IOException: ${e.message}" }
+                            reading = false
                         }
-                    } catch (_: SerialPortTimeoutException) {
-                        // Expected timeout when no data is available
-                        continue
-                    } catch (e: Exception) {
-                        Logger.e(e) { "Serial read IOException: ${e.message}" }
-                        break
                     }
+                } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
+                    Logger.e(e) { "Serial read loop outer error: ${e.message}" }
+                } finally {
+                    close()
                 }
-            } catch (@Suppress("TooGenericExceptionCaught") e: Exception) {
-                Logger.e(e) { "Serial read loop outer error: ${e.message}" }
-            } finally {
-                close()
             }
-        }
     }
 
     override fun sendBytes(p: ByteArray) {
@@ -98,12 +113,14 @@ class SerialTransport(
     }
 
     companion object {
+        private const val DEFAULT_BAUD_RATE = 115200
+        private const val DATA_BITS = 8
+        private const val READ_BUFFER_SIZE = 1024
+
         /**
-         * Discovers and returns a list of available serial ports.
-         * Returns a list of the system port names (e.g., "COM3", "/dev/ttyUSB0").
+         * Discovers and returns a list of available serial ports. Returns a list of the system port names (e.g.,
+         * "COM3", "/dev/ttyUSB0").
          */
-        fun getAvailablePorts(): List<String> {
-            return SerialPort.getCommPorts().map { it.systemPortName }
-        }
+        fun getAvailablePorts(): List<String> = SerialPort.getCommPorts().map { it.systemPortName }
     }
 }
