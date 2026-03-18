@@ -260,7 +260,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.okhttp3.logging.interceptor)
-    implementation(libs.org.eclipse.paho.client.mqttv3)
     implementation(libs.usb.serial.android)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.koin.android)

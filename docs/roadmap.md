@@ -54,7 +54,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 |---|---|---|
 | TCP | Desktop (JVM) | ✅ Done — shared `StreamFrameCodec` + `TcpTransport` in `core:network` |
 | Serial/USB | Desktop (JVM) | ✅ Done — jSerialComm |
-| MQTT | All (KMP) | ❌ Planned — Ktor/MQTT (currently Android-only via Eclipse Paho) |
+| MQTT | All (KMP) | ✅ Completed — KMQTT in commonMain |
 | BLE | Android | ✅ Done — Kable |
 | BLE | Desktop | ✅ Done — Kable (JVM) |
 | BLE | iOS | ❌ Future — Kable/CoreBluetooth |
@@ -93,7 +93,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
     - ✅ **Done:** Extracted service, worker, and radio files from `app` to `core:service/androidMain` and `core:network/androidMain`.
     - **Next:** Extract remaining Android-specific files (e.g., Navigation files, App Widgets, message queues, and root Activity logic) out of `:app` to establish a truly thin app module.
 2. ✅ **Done:** **Serial/USB transport** — direct radio connection on Desktop via jSerialComm
-3. **MQTT transport** — cloud relay operation (KMP, benefits all targets)
+3. **MQTT transport** — cloud relay operation (KMP, benefits all targets) ✅
 4. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.
 5. **Desktop ViewModel auto-wiring** — ✅ Done: ensured Koin K2 Compiler Plugin generates ViewModel modules for JVM target; eliminated manual wiring in `DesktopKoinModule`
 5. **KMP charting** — ✅ Done: Vico charts migrated to `feature:node/commonMain` using KMP artifacts; desktop wires them directly
