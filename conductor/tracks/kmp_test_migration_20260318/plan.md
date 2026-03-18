@@ -6,8 +6,8 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Tool Evaluation & Integration' (Protocol in workflow.md) [3ccc7a7]
 
 ## Phase 2: Mockk Replacement
-- [x] Task: Refactor core modules to Mokkery
-- [x] Task: Refactor feature modules to Mokkery
+- [x] Task: Refactor core modules to Mokkery [7522d38]
+- [x] Task: Refactor feature modules to Mokkery [87c7eb6]
 - [ ] Task: Conductor - User Manual Verification 'Phase 2: Mockk Replacement' (Protocol in workflow.md)
 
 ## Phase 3: Coverage Expansion
