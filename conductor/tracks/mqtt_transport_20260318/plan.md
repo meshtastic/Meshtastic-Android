@@ -22,9 +22,9 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Publishing & Subscribing' (Protocol in workflow.md) [7418e53]
 
 ## Phase 3: Service & UI Integration
-- [~] Task: Integrate `MqttTransport` into `core:service` and `core:data`.
-    - [ ] Create failing tests for orchestrating MQTT connection based on user preferences.
-    - [ ] Implement service-level bindings to maintain background connection.
+- [x] Task: Integrate `MqttTransport` into `core:service` and `core:data`. [d414556, e172f53]
+    - [x] Create failing tests for orchestrating MQTT connection based on user preferences.
+    - [x] Implement service-level bindings to maintain background connection.
 - [ ] Task: Implement MQTT UI Configuration Settings.
     - [ ] Create failing UI tests/snapshot tests (if applicable) for the new MQTT settings UI.
     - [ ] Add MQTT broker URL, username, password, and custom topic inputs to the UI, following Android UX patterns.
