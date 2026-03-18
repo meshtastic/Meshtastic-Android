@@ -52,7 +52,6 @@ import org.meshtastic.app.map.getMapViewProvider
 import org.meshtastic.app.node.component.InlineMap
 import org.meshtastic.app.node.metrics.getTracerouteMapOverlayInsets
 import org.meshtastic.app.ui.MainScreen
-import org.meshtastic.core.service.MeshServiceClient
 import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.common.util.toMeshtasticUri
 import org.meshtastic.core.model.util.dispatchMeshtasticUri
@@ -60,6 +59,7 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.channel_invalid
+import org.meshtastic.core.service.MeshServiceClient
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider

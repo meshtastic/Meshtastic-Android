@@ -50,7 +50,6 @@ import org.meshtastic.core.resources.power
 import org.meshtastic.core.resources.signal
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.ui.component.ScrollToTopEvent
-import org.meshtastic.feature.map.node.NodeMapViewModel
 import org.meshtastic.feature.node.metrics.DeviceMetricsScreen
 import org.meshtastic.feature.node.metrics.EnvironmentMetricsScreen
 import org.meshtastic.feature.node.metrics.HostMetricsLogScreen
@@ -67,7 +66,7 @@ import kotlin.reflect.KClass
 fun EntryProviderScope<NavKey>.nodesGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit
+    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit,
 ) {
     entry<NodesRoutes.NodesGraph> {
         AdaptiveNodeListScreen(
@@ -92,7 +91,7 @@ fun EntryProviderScope<NavKey>.nodesGraph(
 fun EntryProviderScope<NavKey>.nodeDetailGraph(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
-    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit
+    nodeMapScreen: @Composable (destNum: Int, onNavigateUp: () -> Unit) -> Unit,
 ) {
     entry<NodesRoutes.NodeDetailGraph> { args ->
         AdaptiveNodeListScreen(
@@ -112,9 +111,7 @@ fun EntryProviderScope<NavKey>.nodeDetailGraph(
         )
     }
 
-    entry<NodeDetailRoutes.NodeMap> { args ->
-        nodeMapScreen(args.destNum) { backStack.removeLastOrNull() }
-    }
+    entry<NodeDetailRoutes.NodeMap> { args -> nodeMapScreen(args.destNum) { backStack.removeLastOrNull() } }
 
     entry<NodeDetailRoutes.TracerouteLog> { args ->
         val metricsViewModel =

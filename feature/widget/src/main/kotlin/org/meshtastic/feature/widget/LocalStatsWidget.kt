@@ -146,7 +146,14 @@ class LocalStatsWidget :
                     },
                     modifier =
                     GlanceModifier.fillMaxSize()
-                        .clickable(actionStartActivity(android.content.ComponentName(context.packageName, "org.meshtastic.app.MainActivity"))),
+                        .clickable(
+                            actionStartActivity(
+                                android.content.ComponentName(
+                                    context.packageName,
+                                    "org.meshtastic.app.MainActivity",
+                                ),
+                            ),
+                        ),
                 ) {
                     if (state.showContent) {
                         FullStatsContent(state)

@@ -39,8 +39,6 @@ import org.meshtastic.feature.settings.debugging.DebugScreen
 import org.meshtastic.feature.settings.debugging.DebugViewModel
 import org.meshtastic.feature.settings.filter.FilterSettingsScreen
 import org.meshtastic.feature.settings.filter.FilterSettingsViewModel
-import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.navigation.ModuleRoute
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseScreen
 import org.meshtastic.feature.settings.radio.CleanNodeDatabaseViewModel
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel

@@ -96,8 +96,6 @@ import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
 import org.meshtastic.core.ui.util.generateQrCode
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.channel.ChannelViewModel
-import org.meshtastic.feature.settings.navigation.ConfigRoute
-import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet

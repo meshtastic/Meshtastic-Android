@@ -20,7 +20,6 @@ import android.content.Context
 import androidx.glance.appwidget.updateAll
 import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
-import org.meshtastic.feature.widget.LocalStatsWidget
 import org.meshtastic.core.repository.AppWidgetUpdater
 
 @Single

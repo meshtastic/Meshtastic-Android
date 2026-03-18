@@ -67,13 +67,6 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.app.BuildConfig
-import org.meshtastic.feature.settings.navigation.channelsGraph
-import org.meshtastic.feature.connections.navigation.connectionsGraph
-import org.meshtastic.feature.messaging.navigation.contactsGraph
-import org.meshtastic.feature.firmware.navigation.firmwareGraph
-import org.meshtastic.feature.map.navigation.mapGraph
-import org.meshtastic.feature.node.navigation.nodesGraph
-import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.DeviceVersion
@@ -108,6 +101,13 @@ import org.meshtastic.core.ui.util.annotateTraceroute
 import org.meshtastic.core.ui.util.toMessageRes
 import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.connections.ScannerViewModel
+import org.meshtastic.feature.connections.navigation.connectionsGraph
+import org.meshtastic.feature.firmware.navigation.firmwareGraph
+import org.meshtastic.feature.map.navigation.mapGraph
+import org.meshtastic.feature.messaging.navigation.contactsGraph
+import org.meshtastic.feature.node.navigation.nodesGraph
+import org.meshtastic.feature.settings.navigation.channelsGraph
+import org.meshtastic.feature.settings.navigation.settingsGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -342,10 +342,11 @@ fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerVie
                     backStack = backStack,
                     scrollToTopEvents = uIViewModel.scrollToTopEventFlow,
                     nodeMapScreen = { destNum, onNavigateUp ->
-                        val vm = org.koin.compose.viewmodel.koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()
+                        val vm =
+                            org.koin.compose.viewmodel.koinViewModel<org.meshtastic.feature.map.node.NodeMapViewModel>()
                         vm.setDestNum(destNum)
                         org.meshtastic.app.map.node.NodeMapScreen(vm, onNavigateUp = onNavigateUp)
-                    }
+                    },
                 )
                 mapGraph(backStack)
                 channelsGraph(backStack)
