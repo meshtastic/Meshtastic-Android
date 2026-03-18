@@ -78,8 +78,7 @@ class MessageViewModel(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat.value)
-    val showQuickChat: StateFlow<Boolean> = _showQuickChat
+    val showQuickChat = uiPrefs.showQuickChat
 
     private val _showFiltered = MutableStateFlow(false)
     val showFiltered: StateFlow<Boolean> = _showFiltered.asStateFlow()
@@ -149,7 +148,6 @@ class MessageViewModel(
         if (contactKey != null) {
             contactKeyForPagedMessages.value = contactKey
         }
-        viewModelScope.launch { uiPrefs.showQuickChat.collect { _showQuickChat.value = it } }
     }
 
     fun setContactKey(contactKey: String) {
@@ -183,7 +181,9 @@ class MessageViewModel(
         return flow { emitAll(packetRepository.getMessagesFrom(contactKey, limit = limit, getNode = ::getNode)) }
     }
 
-    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.setShowQuickChat(it) }
+    fun toggleShowQuickChat() {
+        uiPrefs.setShowQuickChat(!uiPrefs.showQuickChat.value)
+    }
 
     fun toggleShowFiltered() {
         _showFiltered.update { !it }
@@ -191,13 +191,6 @@ class MessageViewModel(
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
         viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
-    }
-
-    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
-        (!state.value).let { toggled ->
-            state.update { toggled }
-            onChanged(toggled)
-        }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
