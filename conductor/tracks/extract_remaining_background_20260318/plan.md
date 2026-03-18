@@ -15,7 +15,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Message Queue Abstraction' (Protocol in workflow.md)
 
 ## Phase 3: Widget Extraction
-- [ ] Task: Review the contents of `app/src/main/kotlin/org/meshtastic/app/widget/`.
+- [~] Task: Review the contents of `app/src/main/kotlin/org/meshtastic/app/widget/`.
 - [ ] Task: Decide whether to move widgets to an existing module (e.g. `core:ui` or `feature:node`) or create a new `feature:widget` module.
 - [ ] Task: Relocate `LocalStatsWidget.kt`, `LocalStatsWidgetReceiver.kt`, `LocalStatsWidgetState.kt`, `RefreshLocalStatsAction.kt`, and `AndroidAppWidgetUpdater.kt`.
 - [ ] Task: Relocate necessary widget resources, strings, and AndroidManifest declarations.

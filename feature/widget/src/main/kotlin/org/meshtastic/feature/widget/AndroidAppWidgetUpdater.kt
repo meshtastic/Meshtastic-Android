@@ -14,12 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.service
+package org.meshtastic.feature.widget
 
 import android.content.Context
 import androidx.glance.appwidget.updateAll
+import co.touchlab.kermit.Logger
 import org.koin.core.annotation.Single
-import org.meshtastic.app.widget.LocalStatsWidget
+import org.meshtastic.feature.widget.LocalStatsWidget
 import org.meshtastic.core.repository.AppWidgetUpdater
 
 @Single

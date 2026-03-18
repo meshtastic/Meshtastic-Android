@@ -39,7 +39,7 @@ import org.koin.androidx.workmanager.koin.workManagerFactory
 import org.koin.core.context.startKoin
 import org.meshtastic.app.di.AppKoinModule
 import org.meshtastic.app.di.module
-import org.meshtastic.app.widget.LocalStatsWidgetReceiver
+import org.meshtastic.feature.widget.LocalStatsWidgetReceiver
 import org.meshtastic.core.common.ContextServices
 import org.meshtastic.core.database.DatabaseManager
 import org.meshtastic.core.repository.MeshPrefs
@@ -92,7 +92,7 @@ open class MeshUtilApplication :
 
                 pushPreview()
 
-                val widgetStateProvider: org.meshtastic.app.widget.LocalStatsWidgetStateProvider = get()
+                val widgetStateProvider: org.meshtastic.feature.widget.LocalStatsWidgetStateProvider = get()
                 try {
                     // Wait for real data for up to 30 seconds before pushing an updated preview
                     withTimeout(30.seconds) {

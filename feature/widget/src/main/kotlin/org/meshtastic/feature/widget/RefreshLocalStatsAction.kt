@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.widget
+package org.meshtastic.feature.widget
 
 import android.content.Context
 import androidx.glance.GlanceId

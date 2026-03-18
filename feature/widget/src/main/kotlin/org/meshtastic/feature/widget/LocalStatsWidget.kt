@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.app.widget
+package org.meshtastic.feature.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -132,11 +132,11 @@ class LocalStatsWidget :
                 Scaffold(
                     titleBar = {
                         TitleBar(
-                            startIcon = ImageProvider(org.meshtastic.app.R.drawable.app_icon),
+                            startIcon = ImageProvider(R.drawable.app_icon),
                             title = stringResource(Res.string.meshtastic_app_name),
                             actions = {
                                 CircleIconButton(
-                                    imageProvider = ImageProvider(org.meshtastic.app.R.drawable.ic_refresh),
+                                    imageProvider = ImageProvider(R.drawable.ic_refresh),
                                     contentDescription = stringResource(Res.string.refresh),
                                     onClick = actionRunCallback<RefreshLocalStatsAction>(),
                                     backgroundColor = null,
@@ -145,7 +145,8 @@ class LocalStatsWidget :
                         )
                     },
                     modifier =
-                    GlanceModifier.fillMaxSize().clickable(actionStartActivity<org.meshtastic.app.MainActivity>()),
+                    GlanceModifier.fillMaxSize()
+                        .clickable(actionStartActivity(android.content.ComponentName(context.packageName, "org.meshtastic.app.MainActivity"))),
                 ) {
                     if (state.showContent) {
                         FullStatsContent(state)
@@ -289,7 +290,7 @@ class LocalStatsWidget :
                 CircularProgressIndicator(modifier = GlanceModifier.size(24.dp))
             } else {
                 Image(
-                    provider = ImageProvider(org.meshtastic.app.R.drawable.app_icon),
+                    provider = ImageProvider(R.drawable.app_icon),
                     contentDescription = null,
                     modifier = GlanceModifier.size(32.dp),
                 )
