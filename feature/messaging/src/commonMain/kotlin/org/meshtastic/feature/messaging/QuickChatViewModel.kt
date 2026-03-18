@@ -21,7 +21,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.data.repository.QuickChatActionRepository
+import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
 

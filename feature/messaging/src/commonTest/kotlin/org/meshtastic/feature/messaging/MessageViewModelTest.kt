@@ -17,15 +17,20 @@
 package org.meshtastic.feature.messaging
 
 import androidx.lifecycle.SavedStateHandle
-import io.mockk.every
-import io.mockk.mockk
+import app.cash.turbine.test
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import dev.mokkery.matcher.any
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.data.repository.QuickChatActionRepository
+import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
+import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
@@ -36,89 +41,82 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.DeviceProfile
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
 
-/**
- * Example test for MessageViewModel demonstrating the use of core:testing utilities.
- *
- * This test is intentionally minimal to serve as a bootstrap template. Add more comprehensive tests as the feature
- * evolves.
- */
 class MessageViewModelTest {
 
     private lateinit var viewModel: MessageViewModel
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var nodeRepository: FakeNodeRepository
-    private lateinit var radioConfigRepository: RadioConfigRepository
-    private lateinit var quickChatActionRepository: QuickChatActionRepository
-    private lateinit var packetRepository: org.meshtastic.core.repository.PacketRepository
-    private lateinit var serviceRepository: ServiceRepository
-    private lateinit var sendMessageUseCase: SendMessageUseCase
-    private lateinit var customEmojiPrefs: CustomEmojiPrefs
-    private lateinit var homoglyphPrefs: HomoglyphPrefs
-    private lateinit var uiPrefs: UiPrefs
+    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    private val quickChatActionRepository: QuickChatActionRepository = mock(MockMode.autofill)
+    private val packetRepository: PacketRepository = mock(MockMode.autofill)
+    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val sendMessageUseCase: SendMessageUseCase = mock(MockMode.autofill)
+    private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
+    private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
+    private val uiPrefs: UiPrefs = mock(MockMode.autofill)
 
-    private fun setUp() {
-        // Create saved state with test contact ID
-        savedStateHandle = SavedStateHandle(mapOf("contactId" to 1L))
-
-        // Use real fake implementation
+    @BeforeTest
+    fun setUp() {
+        savedStateHandle = SavedStateHandle(mapOf("contactKey" to "0!12345678"))
         nodeRepository = FakeNodeRepository()
 
-        // Mock other dependencies with proper type hints
-        radioConfigRepository =
-            mockk(relaxed = true) {
-                every { channelSetFlow } returns MutableStateFlow<ChannelSet>(mockk(relaxed = true))
-                every { localConfigFlow } returns MutableStateFlow<LocalConfig>(mockk(relaxed = true))
-                every { moduleConfigFlow } returns MutableStateFlow<LocalModuleConfig>(mockk(relaxed = true))
-                every { deviceProfileFlow } returns MutableStateFlow<DeviceProfile>(mockk(relaxed = true))
-            }
-        quickChatActionRepository = mockk(relaxed = true)
-        packetRepository = mockk(relaxed = true)
-        serviceRepository = mockk(relaxed = true) { every { serviceAction } returns emptyFlow<ServiceAction>() }
-        sendMessageUseCase = mockk(relaxed = true)
-        customEmojiPrefs =
-            mockk(relaxed = true) { every { customEmojiFrequency } returns MutableStateFlow<String?>(null) }
-        homoglyphPrefs =
-            mockk(relaxed = true) { every { homoglyphEncodingEnabled } returns MutableStateFlow<Boolean>(false) }
-        uiPrefs = mockk(relaxed = true) { every { showQuickChat } returns MutableStateFlow<Boolean>(false) }
+        // Core flows - MUST be separate every blocks
+        every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        every { radioConfigRepository.moduleConfigFlow } returns MutableStateFlow(LocalModuleConfig())
+        every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
+        
+        every { serviceRepository.serviceAction } returns emptyFlow<ServiceAction>()
+        every { serviceRepository.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
+        
+        every { customEmojiPrefs.customEmojiFrequency } returns MutableStateFlow<String?>(null)
+        every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
+        every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
+        
+        every { packetRepository.getContactSettings() } returns MutableStateFlow(emptyMap())
+        every { packetRepository.getFirstUnreadMessageUuid(any<String>()) } returns MutableStateFlow(null)
+        every { packetRepository.hasUnreadMessages(any<String>()) } returns MutableStateFlow(false)
+        every { packetRepository.getUnreadCountFlow(any<String>()) } returns MutableStateFlow(0)
+        every { packetRepository.getFilteredCountFlow(any<String>()) } returns MutableStateFlow(0)
+        
+        every { quickChatActionRepository.getAllActions() } returns MutableStateFlow(emptyList())
 
-        // Create ViewModel with mocked dependencies
-        viewModel =
-            MessageViewModel(
-                savedStateHandle = savedStateHandle,
-                nodeRepository = nodeRepository,
-                radioConfigRepository = radioConfigRepository,
-                quickChatActionRepository = quickChatActionRepository,
-                packetRepository = packetRepository,
-                serviceRepository = serviceRepository,
-                sendMessageUseCase = sendMessageUseCase,
-                customEmojiPrefs = customEmojiPrefs,
-                homoglyphEncodingPrefs = homoglyphPrefs,
-                uiPrefs = uiPrefs,
-                notificationManager = mockk(relaxed = true),
-            )
+        viewModel = MessageViewModel(
+            savedStateHandle = savedStateHandle,
+            nodeRepository = nodeRepository,
+            radioConfigRepository = radioConfigRepository,
+            quickChatActionRepository = quickChatActionRepository,
+            packetRepository = packetRepository,
+            serviceRepository = serviceRepository,
+            sendMessageUseCase = sendMessageUseCase,
+            customEmojiPrefs = customEmojiPrefs,
+            homoglyphEncodingPrefs = homoglyphPrefs,
+            uiPrefs = uiPrefs,
+            notificationManager = mock(MockMode.autofill),
+        )
     }
 
     @Test
     fun testInitialization() = runTest {
-        setUp()
-        // ViewModel should initialize without errors
-        assertTrue(true, "ViewModel created successfully")
+        assertNotNull(viewModel)
     }
 
     @Test
     fun testNodeRepositoryIntegration() = runTest {
-        setUp()
-
-        // Add test nodes to the fake repository
         val testNodes = TestDataFactory.createTestNodes(3)
         nodeRepository.setNodes(testNodes)
-
-        // Verify nodes are accessible
-        assertEquals(3, nodeRepository.nodeDBbyNum.value.size)
-        assertEquals("Test User 0", nodeRepository.nodeDBbyNum.value[1]?.user?.long_name)
+        
+        viewModel.nodeList.test {
+            // Initial value from stateIn
+            assertEquals(emptyList(), awaitItem())
+            // First actual list from repo
+            val list = awaitItem()
+            assertEquals(3, list.size)
+        }
     }
 }

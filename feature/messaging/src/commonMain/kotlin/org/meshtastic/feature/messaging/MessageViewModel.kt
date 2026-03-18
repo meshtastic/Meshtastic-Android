@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
-import org.meshtastic.core.data.repository.QuickChatActionRepository
+import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -78,7 +78,7 @@ class MessageViewModel(
 
     val channels = radioConfigRepository.channelSetFlow.stateInWhileSubscribed(ChannelSet())
 
-    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat.value)
+    private val _showQuickChat = MutableStateFlow(false)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
     private val _showFiltered = MutableStateFlow(false)
@@ -148,6 +148,9 @@ class MessageViewModel(
         val contactKey = savedStateHandle.get<String>("contactKey")
         if (contactKey != null) {
             contactKeyForPagedMessages.value = contactKey
+        }
+        viewModelScope.launch {
+            uiPrefs.showQuickChat.collect { _showQuickChat.value = it }
         }
     }
 

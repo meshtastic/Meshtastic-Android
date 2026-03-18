@@ -16,109 +16,121 @@
  */
 package org.meshtastic.feature.settings
 
-import io.mockk.every
-import io.mockk.mockk
+import app.cash.turbine.test
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import io.kotest.matchers.ints.shouldBeInRange
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.common.BuildConfigProvider
 import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.repository.MeshLogPrefs
-import org.meshtastic.core.repository.RadioConfigRepository
-import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.core.domain.usecase.settings.*
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.*
 import org.meshtastic.core.testing.FakeNodeRepository
 import org.meshtastic.core.testing.FakeRadioController
 import org.meshtastic.proto.LocalConfig
+import org.meshtastic.core.common.UiPreferences
+import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
-/**
- * Bootstrap tests for SettingsViewModel.
- *
- * Demonstrates the basic test pattern for feature ViewModels using core:testing fakes. This is an intentionally minimal
- * test suite to establish the pattern; expand as needed for specific business logic.
- */
 class SettingsViewModelTest {
 
     private lateinit var viewModel: SettingsViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
-    private lateinit var radioConfigRepository: RadioConfigRepository
-    private lateinit var uiPrefs: UiPrefs
-    private lateinit var buildConfigProvider: BuildConfigProvider
-    private lateinit var databaseManager: DatabaseManager
-    private lateinit var meshLogPrefs: MeshLogPrefs
+    private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
+    private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private val uiPreferences: UiPreferences = mock(MockMode.autofill)
+    private val buildConfigProvider: BuildConfigProvider = mock(MockMode.autofill)
+    private val databaseManager: DatabaseManager = mock(MockMode.autofill)
+    private val meshLogPrefs: MeshLogPrefs = mock(MockMode.autofill)
+    private val notificationPrefs: NotificationPrefs = mock(MockMode.autofill)
+    private val meshLogRepository: MeshLogRepository = mock(MockMode.autofill)
+    private val fileService: FileService = mock(MockMode.autofill)
 
-    private fun setUp() {
-        // Use real fakes where available
+    @BeforeTest
+    fun setUp() {
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
 
-        // Mock remaining dependencies
-        radioConfigRepository =
-            mockk(relaxed = true) { every { localConfigFlow } returns MutableStateFlow(LocalConfig()) }
-        uiPrefs = mockk(relaxed = true)
-        buildConfigProvider = mockk(relaxed = true)
-        databaseManager = mockk(relaxed = true)
-        meshLogPrefs = mockk(relaxed = true)
+        // INDIVIDUAL BLOCKS FOR MOKKERY
+        every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
+        every { databaseManager.cacheLimit } returns MutableStateFlow(100)
+        every { meshLogPrefs.retentionDays } returns MutableStateFlow(30)
+        every { meshLogPrefs.loggingEnabled } returns MutableStateFlow(true)
+        every { notificationPrefs.messagesEnabled } returns MutableStateFlow(true)
+        every { notificationPrefs.nodeEventsEnabled } returns MutableStateFlow(true)
+        every { notificationPrefs.lowBatteryEnabled } returns MutableStateFlow(true)
+        
+        val isOtaCapableUseCase: IsOtaCapableUseCase = mock(MockMode.autofill)
+        every { isOtaCapableUseCase() } returns flowOf(true)
 
-        // Create ViewModel with dependencies
-        viewModel =
-            SettingsViewModel(
-                radioConfigRepository = radioConfigRepository,
-                radioController = radioController,
-                nodeRepository = nodeRepository,
-                uiPrefs = uiPrefs,
-                buildConfigProvider = buildConfigProvider,
-                databaseManager = databaseManager,
-                meshLogPrefs = meshLogPrefs,
-                notificationPrefs = mockk(relaxed = true),
-                setThemeUseCase = mockk(relaxed = true),
-                setLocaleUseCase = mockk(relaxed = true),
-                setAppIntroCompletedUseCase = mockk(relaxed = true),
-                setProvideLocationUseCase = mockk(relaxed = true),
-                setDatabaseCacheLimitUseCase = mockk(relaxed = true),
-                setMeshLogSettingsUseCase = mockk(relaxed = true),
-                setNotificationSettingsUseCase = mockk(relaxed = true),
-                meshLocationUseCase = mockk(relaxed = true),
-                exportDataUseCase = mockk(relaxed = true),
-                isOtaCapableUseCase = mockk(relaxed = true),
-                fileService = mockk(relaxed = true),
-            )
+        val setThemeUseCase = SetThemeUseCase(uiPreferences)
+        val setLocaleUseCase = SetLocaleUseCase(uiPreferences)
+        val setAppIntroCompletedUseCase = SetAppIntroCompletedUseCase(uiPreferences)
+        val setProvideLocationUseCase = SetProvideLocationUseCase(uiPreferences)
+        val setDatabaseCacheLimitUseCase = SetDatabaseCacheLimitUseCase(databaseManager)
+        val setMeshLogSettingsUseCase = SetMeshLogSettingsUseCase(meshLogRepository, meshLogPrefs)
+        val setNotificationSettingsUseCase = SetNotificationSettingsUseCase(notificationPrefs)
+        val meshLocationUseCase = MeshLocationUseCase(radioController)
+        val exportDataUseCase = ExportDataUseCase(nodeRepository, meshLogRepository)
+
+        viewModel = SettingsViewModel(
+            radioConfigRepository = radioConfigRepository,
+            radioController = radioController,
+            nodeRepository = nodeRepository,
+            uiPrefs = uiPrefs,
+            buildConfigProvider = buildConfigProvider,
+            databaseManager = databaseManager,
+            meshLogPrefs = meshLogPrefs,
+            notificationPrefs = notificationPrefs,
+            setThemeUseCase = setThemeUseCase,
+            setLocaleUseCase = setLocaleUseCase,
+            setAppIntroCompletedUseCase = setAppIntroCompletedUseCase,
+            setProvideLocationUseCase = setProvideLocationUseCase,
+            setDatabaseCacheLimitUseCase = setDatabaseCacheLimitUseCase,
+            setMeshLogSettingsUseCase = setMeshLogSettingsUseCase,
+            setNotificationSettingsUseCase = setNotificationSettingsUseCase,
+            meshLocationUseCase = meshLocationUseCase,
+            exportDataUseCase = exportDataUseCase,
+            isOtaCapableUseCase = isOtaCapableUseCase,
+            fileService = fileService,
+        )
     }
 
     @Test
-    fun testInitialization() = runTest {
-        setUp()
-        // ViewModel should initialize without errors
-        assertTrue(true, "SettingsViewModel initialized successfully")
+    fun testInitialization() {
+        assertNotNull(viewModel)
     }
 
     @Test
-    fun testMyNodeInfoFlow() = runTest {
-        setUp()
-        // Verify that myNodeInfo StateFlow is accessible and bound
-        val nodeInfo = viewModel.myNodeInfo.value
-        // Initially should be null (no node info set)
-        assertTrue(nodeInfo == null, "myNodeInfo starts as null before connection")
+    fun `isConnected flow emits updates using Turbine`() = runTest {
+        viewModel.isConnected.test {
+            // Initial state from FakeRadioController (default Disconnected)
+            assertEquals(false, awaitItem())
+
+            radioController.setConnectionState(ConnectionState.Connected)
+            assertEquals(true, awaitItem())
+
+            radioController.setConnectionState(ConnectionState.Disconnected)
+            assertEquals(false, awaitItem())
+        }
     }
 
     @Test
-    fun testIsConnectedFlow() = runTest {
-        setUp()
-        // Verify that isConnected flow reflects connection state
-        radioController.setConnectionState(org.meshtastic.core.model.ConnectionState.Disconnected)
-        // isConnected should reflect the radioController state
-        assertTrue(true, "isConnected flow is reactive")
-    }
-
-    @Test
-    fun testNodeRepositoryIntegration() = runTest {
-        setUp()
-        // Demonstrate using FakeNodeRepository with SettingsViewModel
-        val testNodes = org.meshtastic.core.testing.TestDataFactory.createTestNodes(2)
-        nodeRepository.setNodes(testNodes)
-
-        // Verify nodes are accessible
-        assertTrue(nodeRepository.nodeDBbyNum.value.size == 2, "FakeNodeRepository integration works")
+    fun `test property based bounds for mesh log retention days`() = runTest {
+        checkAll(Arb.int(-100, 500)) { input ->
+            viewModel.setMeshLogRetentionDays(input)
+            viewModel.meshLogRetentionDays.value shouldBeInRange -1..365
+        }
     }
 }

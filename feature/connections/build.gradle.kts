@@ -53,7 +53,6 @@ kotlin {
         androidMain.dependencies { implementation(libs.usb.serial.android) }
 
         androidUnitTest.dependencies {
-            implementation(libs.mockk)
             implementation(libs.androidx.test.core)
             implementation(libs.robolectric)
         }
