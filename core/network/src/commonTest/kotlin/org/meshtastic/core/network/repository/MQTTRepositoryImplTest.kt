@@ -26,26 +26,23 @@ class MQTTRepositoryImplTest {
     @Test
     fun `test address parsing logic`() {
         val address1 = "mqtt.example.com:1883"
-        val (host1, port1) = address1.split(":", limit = 2).let {
-            it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883)
-        }
+        val (host1, port1) = address1.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883) }
         assertEquals("mqtt.example.com", host1)
         assertEquals(1883, port1)
 
         val address2 = "mqtt.example.com"
-        val (host2, port2) = address2.split(":", limit = 2).let {
-            it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883)
-        }
+        val (host2, port2) = address2.split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: 1883) }
         assertEquals("mqtt.example.com", host2)
         assertEquals(1883, port2)
     }
 
     @Test
     fun `test json payload parsing`() {
-        val jsonStr = """{"type":"text","from":12345678,"to":4294967295,"payload":"Hello World","hop_limit":3,"id":123,"time":1600000000}"""
+        val jsonStr =
+            """{"type":"text","from":12345678,"to":4294967295,"payload":"Hello World","hop_limit":3,"id":123,"time":1600000000}"""
         val json = Json { ignoreUnknownKeys = true }
         val payload = json.decodeFromString<MqttJsonPayload>(jsonStr)
-        
+
         assertEquals("text", payload.type)
         assertEquals(12345678L, payload.from)
         assertEquals(4294967295L, payload.to)
@@ -57,18 +54,19 @@ class MQTTRepositoryImplTest {
 
     @Test
     fun `test json payload serialization`() {
-        val payload = MqttJsonPayload(
-            type = "text",
-            from = 12345678,
-            to = 4294967295,
-            payload = "Hello World",
-            hopLimit = 3,
-            id = 123,
-            time = 1600000000
-        )
+        val payload =
+            MqttJsonPayload(
+                type = "text",
+                from = 12345678,
+                to = 4294967295,
+                payload = "Hello World",
+                hopLimit = 3,
+                id = 123,
+                time = 1600000000,
+            )
         val json = Json { ignoreUnknownKeys = true }
         val jsonStr = json.encodeToString(MqttJsonPayload.serializer(), payload)
-        
+
         assert(jsonStr.contains("\"type\":\"text\""))
         assert(jsonStr.contains("\"from\":12345678"))
         assert(jsonStr.contains("\"payload\":\"Hello World\""))

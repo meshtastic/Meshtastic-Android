@@ -48,7 +48,6 @@ class MQTTRepositoryImpl(
 ) : MQTTRepository {
 
     companion object {
-        private const val DEFAULT_QOS = 1
         private const val DEFAULT_TOPIC_ROOT = "msh"
         private const val DEFAULT_TOPIC_LEVEL = "/2/e/"
         private const val JSON_TOPIC_LEVEL = "/2/json/"
@@ -72,95 +71,97 @@ class MQTTRepositoryImpl(
         val ownerId = "MeshtasticAndroidMqttProxy-${nodeRepository.myId.value ?: "unknown"}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
-        
+
         val rootTopic = mqttConfig?.root?.ifEmpty { DEFAULT_TOPIC_ROOT } ?: DEFAULT_TOPIC_ROOT
 
-        val (host, port) = (mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS).split(":", limit = 2).let {
-            it[0] to (it.getOrNull(1)?.toIntOrNull() ?: if (mqttConfig?.tls_enabled == true) 8883 else 1883)
-        }
+        val (host, port) =
+            (mqttConfig?.address ?: DEFAULT_SERVER_ADDRESS).split(":", limit = 2).let {
+                it[0] to (it.getOrNull(1)?.toIntOrNull() ?: if (mqttConfig?.tls_enabled == true) 8883 else 1883)
+            }
 
-        val newClient = MQTTClient(
-            mqttVersion = MQTTVersion.MQTT5,
-            address = host,
-            port = port,
-            tls = if (mqttConfig?.tls_enabled == true) TLSClientSettings() else null,
-            userName = mqttConfig?.username,
-            password = mqttConfig?.password?.encodeToByteArray()?.toUByteArray(),
-            clientId = ownerId,
-            publishReceived = { packet ->
-                val topic = packet.topicName
-                val payload = packet.payload?.toByteArray()
-                Logger.d { "MQTT received message on topic $topic (size: ${payload?.size ?: 0} bytes)" }
-                
-                if (topic.contains("/json/")) {
-                    try {
-                        val jsonStr = payload?.decodeToString() ?: ""
-                        // Validate JSON by parsing it
-                        json.decodeFromString<MqttJsonPayload>(jsonStr)
-                        Logger.d { "MQTT parsed JSON payload successfully" }
-                        
+        val newClient =
+            MQTTClient(
+                mqttVersion = MQTTVersion.MQTT5,
+                address = host,
+                port = port,
+                tls = if (mqttConfig?.tls_enabled == true) TLSClientSettings() else null,
+                userName = mqttConfig?.username,
+                password = mqttConfig?.password?.encodeToByteArray()?.toUByteArray(),
+                clientId = ownerId,
+                publishReceived = { packet ->
+                    val topic = packet.topicName
+                    val payload = packet.payload?.toByteArray()
+                    Logger.d { "MQTT received message on topic $topic (size: ${payload?.size ?: 0} bytes)" }
+
+                    if (topic.contains("/json/")) {
+                        try {
+                            val jsonStr = payload?.decodeToString() ?: ""
+                            // Validate JSON by parsing it
+                            json.decodeFromString<MqttJsonPayload>(jsonStr)
+                            Logger.d { "MQTT parsed JSON payload successfully" }
+
+                            trySend(MqttClientProxyMessage(topic = topic, text = jsonStr, retained = packet.retain))
+                        } catch (e: kotlinx.serialization.SerializationException) {
+                            Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+                        } catch (e: IllegalArgumentException) {
+                            Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+                        }
+                    } else {
                         trySend(
                             MqttClientProxyMessage(
                                 topic = topic,
-                                text = jsonStr,
+                                data_ = payload?.toByteString() ?: okio.ByteString.EMPTY,
                                 retained = packet.retain,
-                            )
+                            ),
                         )
-                    } catch (e: Exception) {
-                        Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
                     }
-                } else {
-                    trySend(
-                        MqttClientProxyMessage(
-                            topic = topic,
-                            data_ = payload?.toByteString() ?: okio.ByteString.EMPTY,
-                            retained = packet.retain,
-                        )
-                    )
-                }
-            }
-        )
+                },
+            )
 
         client = newClient
-        
-        clientJob = scope.launch {
-            try {
-                Logger.i { "MQTT Starting client loop for $host:$port" }
-                newClient.runSuspend()
-            } catch (e: Exception) {
-                Logger.e(e) { "MQTT Client loop error" }
-                close(e)
+
+        clientJob =
+            scope.launch {
+                try {
+                    Logger.i { "MQTT Starting client loop for $host:$port" }
+                    newClient.runSuspend()
+                } catch (e: io.github.davidepianca98.mqtt.MQTTException) {
+                    Logger.e(e) { "MQTT Client loop error (MQTT)" }
+                    close(e)
+                } catch (e: io.github.davidepianca98.socket.IOException) {
+                    Logger.e(e) { "MQTT Client loop error (IO)" }
+                    close(e)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    Logger.i { "MQTT Client loop cancelled" }
+                    throw e
+                }
             }
-        }
 
         // Subscriptions
         val subscriptions = mutableListOf<Subscription>()
         channelSet.subscribeList.forEach { globalId ->
-            subscriptions.add(Subscription("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)))
+            subscriptions.add(
+                Subscription("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)),
+            )
             if (mqttConfig?.json_enabled == true) {
-                subscriptions.add(Subscription("$rootTopic$JSON_TOPIC_LEVEL$globalId/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)))
+                subscriptions.add(
+                    Subscription("$rootTopic$JSON_TOPIC_LEVEL$globalId/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)),
+                )
             }
         }
         subscriptions.add(Subscription("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+", SubscriptionOptions(Qos.AT_LEAST_ONCE)))
-        
+
         if (subscriptions.isNotEmpty()) {
             Logger.d { "MQTT subscribing to ${subscriptions.size} topics" }
             newClient.subscribe(subscriptions)
         }
 
-        awaitClose {
-            disconnect()
-        }
+        awaitClose { disconnect() }
     }
 
     @OptIn(ExperimentalUnsignedTypes::class)
     override fun publish(topic: String, data: ByteArray, retained: Boolean) {
         Logger.d { "MQTT publishing message to topic $topic (size: ${data.size} bytes, retained: $retained)" }
-        client?.publish(
-            retain = retained,
-            qos = Qos.AT_LEAST_ONCE,
-            topic = topic,
-            payload = data.toUByteArray()
-        )
+        client?.publish(retain = retained, qos = Qos.AT_LEAST_ONCE, topic = topic, payload = data.toUByteArray())
     }
 }

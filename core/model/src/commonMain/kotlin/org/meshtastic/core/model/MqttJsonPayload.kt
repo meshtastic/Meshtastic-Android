@@ -26,8 +26,7 @@ data class MqttJsonPayload(
     val to: Long? = null,
     val channel: Int? = null,
     val payload: String? = null,
-    @SerialName("hop_limit")
-    val hopLimit: Int? = null,
+    @SerialName("hop_limit") val hopLimit: Int? = null,
     val id: Long? = null,
     val time: Long? = null,
     val sender: String? = null,
