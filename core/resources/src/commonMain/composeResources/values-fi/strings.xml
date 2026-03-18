@@ -42,6 +42,7 @@
     <string name="internal">Sisäinen</string>
     <string name="node_sort_via_favorite">Suosikkien kautta</string>
     <string name="node_filter_show_ignored">Näytä vain huomioimattomat solmut</string>
+    <string name="node_filter_exclude_mqtt">Rajaa MQTT pois</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
