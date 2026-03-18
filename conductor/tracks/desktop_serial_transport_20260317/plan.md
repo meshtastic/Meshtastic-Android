@@ -4,7 +4,7 @@
 - [x] Task: Add the `jSerialComm` library to the `jvmMain` dependencies of the networking module. [checkpoint: 8994c66]
 - [x] Task: Create a `jvmMain` stub implementation for a `SerialTransport` class that implements the shared `RadioTransport` interface. [checkpoint: 83668e4]
 
-## Phase 2: Serial Port Scanning & Connection Management
+## Phase 2: Serial Port Scanning & Connection Management [checkpoint: 9cda87d]
 - [x] Task: Implement port discovery using `jSerialComm` to list available serial ports. [checkpoint: c72501d]
 - [x] Task: Implement connect/disconnect logic for a selected serial port, handling port locking and baud rate configuration. [checkpoint: 23ee815]
 - [x] Task: Map the input/output streams of the open serial port to the existing KMP stream framing logic (`StreamFrameCodec`). [checkpoint: 04ba9c2]
