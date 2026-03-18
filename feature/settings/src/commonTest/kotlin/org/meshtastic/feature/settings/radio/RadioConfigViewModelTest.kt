@@ -21,6 +21,7 @@ import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import dev.mokkery.matcher.any
 import dev.mokkery.verifySuspend
@@ -125,7 +126,7 @@ class RadioConfigViewModelTest {
         viewModel = createViewModel()
 
         val config = Config(device = Config.DeviceConfig(role = Config.DeviceConfig.Role.ROUTER))
-        dev.mokkery.everySuspend { radioConfigUseCase.setConfig(any(), any()) } returns 42
+        everySuspend { radioConfigUseCase.setConfig(any(), any()) } returns 42
 
         viewModel.setConfig(config)
 
@@ -135,5 +136,74 @@ class RadioConfigViewModelTest {
         }
         
         verifySuspend { radioConfigUseCase.setConfig(123, config) }
+    }
+
+    @Test
+    fun `toggleAnalyticsAllowed calls useCase`() {
+        every { toggleAnalyticsUseCase() } returns Unit
+        
+        viewModel.toggleAnalyticsAllowed()
+        
+        dev.mokkery.verify { toggleAnalyticsUseCase() }
+    }
+
+    @Test
+    fun `toggleHomoglyphCharactersEncodingEnabled calls useCase`() {
+        every { toggleHomoglyphEncodingUseCase() } returns Unit
+        
+        viewModel.toggleHomoglyphCharactersEncodingEnabled()
+        
+        dev.mokkery.verify { toggleHomoglyphEncodingUseCase() }
+    }
+
+    @Test
+    fun `setPreserveFavorites updates state`() = runTest {
+        viewModel.radioConfigState.test {
+            assertEquals(false, awaitItem().nodeDbResetPreserveFavorites)
+            viewModel.setPreserveFavorites(true)
+            assertEquals(true, awaitItem().nodeDbResetPreserveFavorites)
+        }
+    }
+
+    @Test
+    fun `setOwner calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        viewModel = createViewModel()
+
+        val user = User(long_name = "Test User")
+        everySuspend { radioConfigUseCase.setOwner(any(), any()) } returns 42
+
+        viewModel.setOwner(user)
+        
+        verifySuspend { radioConfigUseCase.setOwner(123, user) }
+    }
+
+    @Test
+    fun `setRingtone calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setRingtone(any(), any()) } returns Unit
+
+        viewModel.setRingtone("ringtone.mp3")
+        
+        assertEquals("ringtone.mp3", viewModel.radioConfigState.value.ringtone)
+        verifySuspend { radioConfigUseCase.setRingtone(123, "ringtone.mp3") }
+    }
+
+    @Test
+    fun `setCannedMessages calls useCase`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        viewModel = createViewModel()
+
+        everySuspend { radioConfigUseCase.setCannedMessages(any(), any()) } returns Unit
+
+        viewModel.setCannedMessages("Hello|World")
+        
+        assertEquals("Hello|World", viewModel.radioConfigState.value.cannedMessageMessages)
+        verifySuspend { radioConfigUseCase.setCannedMessages(123, "Hello|World") }
     }
 }

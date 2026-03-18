@@ -21,10 +21,14 @@ import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import dev.mokkery.matcher.any
+import dev.mokkery.verify
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.model.service.ServiceAction
@@ -59,11 +63,22 @@ class MessageViewModelTest {
     private val customEmojiPrefs: CustomEmojiPrefs = mock(MockMode.autofill)
     private val homoglyphPrefs: HomoglyphPrefs = mock(MockMode.autofill)
     private val uiPrefs: UiPrefs = mock(MockMode.autofill)
+    private val notificationManager: org.meshtastic.core.repository.NotificationManager = mock(MockMode.autofill)
+
+    private val connectionStateFlow = MutableStateFlow<org.meshtastic.core.model.ConnectionState>(org.meshtastic.core.model.ConnectionState.Disconnected)
+    private val showQuickChatFlow = MutableStateFlow(false)
+    private val customEmojiFrequencyFlow = MutableStateFlow<String?>(null)
+    private val contactSettingsFlow = MutableStateFlow<Map<String, org.meshtastic.core.model.ContactSettings>>(emptyMap())
 
     @BeforeTest
     fun setUp() {
         savedStateHandle = SavedStateHandle(mapOf("contactKey" to "0!12345678"))
         nodeRepository = FakeNodeRepository()
+
+        connectionStateFlow.value = org.meshtastic.core.model.ConnectionState.Disconnected
+        showQuickChatFlow.value = false
+        customEmojiFrequencyFlow.value = null
+        contactSettingsFlow.value = emptyMap()
 
         // Core flows - MUST be separate every blocks
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
@@ -72,13 +87,14 @@ class MessageViewModelTest {
         every { radioConfigRepository.deviceProfileFlow } returns MutableStateFlow(DeviceProfile())
         
         every { serviceRepository.serviceAction } returns emptyFlow<ServiceAction>()
-        every { serviceRepository.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
+        every { serviceRepository.connectionState } returns connectionStateFlow
         
-        every { customEmojiPrefs.customEmojiFrequency } returns MutableStateFlow<String?>(null)
+        every { customEmojiPrefs.customEmojiFrequency } returns customEmojiFrequencyFlow
         every { homoglyphPrefs.homoglyphEncodingEnabled } returns MutableStateFlow(false)
-        every { uiPrefs.showQuickChat } returns MutableStateFlow(false)
+        every { uiPrefs.showQuickChat } returns showQuickChatFlow
+        every { uiPrefs.setShowQuickChat(any()) } returns Unit
         
-        every { packetRepository.getContactSettings() } returns MutableStateFlow(emptyMap())
+        every { packetRepository.getContactSettings() } returns contactSettingsFlow
         every { packetRepository.getFirstUnreadMessageUuid(any<String>()) } returns MutableStateFlow(null)
         every { packetRepository.hasUnreadMessages(any<String>()) } returns MutableStateFlow(false)
         every { packetRepository.getUnreadCountFlow(any<String>()) } returns MutableStateFlow(0)
@@ -97,13 +113,124 @@ class MessageViewModelTest {
             customEmojiPrefs = customEmojiPrefs,
             homoglyphEncodingPrefs = homoglyphPrefs,
             uiPrefs = uiPrefs,
-            notificationManager = mock(MockMode.autofill),
+            notificationManager = notificationManager,
         )
     }
 
     @Test
     fun testInitialization() = runTest {
         assertNotNull(viewModel)
+    }
+
+    @Test
+    fun testSetTitle() = runTest {
+        viewModel.title.test {
+            assertEquals("", awaitItem())
+            viewModel.setTitle("New Title")
+            assertEquals("New Title", awaitItem())
+        }
+    }
+
+    @Test
+    fun testConnectionState() = runTest {
+        viewModel.connectionState.test {
+            assertEquals(org.meshtastic.core.model.ConnectionState.Disconnected, awaitItem())
+            connectionStateFlow.value = org.meshtastic.core.model.ConnectionState.Connected
+            assertEquals(org.meshtastic.core.model.ConnectionState.Connected, awaitItem())
+        }
+    }
+
+    @Test
+    fun testToggleShowQuickChat() = runTest {
+        // The VM init collects from uiPrefs.showQuickChat
+        viewModel.showQuickChat.test {
+            assertEquals(false, awaitItem())
+            
+            viewModel.toggleShowQuickChat()
+            // toggleShowQuickChat updates _showQuickChat AND calls uiPrefs.setShowQuickChat
+            // Since we are collecting, we should see the update.
+            assertEquals(true, awaitItem())
+        }
+    }
+
+    @Test
+    fun testFrequentEmojis() = runTest {
+        customEmojiFrequencyFlow.value = "👍=10,👎=5,😂=20"
+        
+        // frequentEmojis is a property, not a flow.
+        val emojis = viewModel.frequentEmojis
+        assertEquals(listOf("😂", "👍", "👎"), emojis)
+    }
+
+    @Test
+    fun testSendMessage() = runTest {
+        everySuspend { sendMessageUseCase.invoke(any(), any(), any()) } returns Unit
+        
+        viewModel.sendMessage("Hello", "0!12345678", null)
+        
+        // Wait for coroutine to finish
+        advanceUntilIdle()
+        
+        // Verify via mokkery
+        verifySuspend { sendMessageUseCase.invoke("Hello", "0!12345678", null) }
+    }
+
+    @Test
+    fun testSendReaction() = runTest {
+        everySuspend { serviceRepository.onServiceAction(any()) } returns Unit
+        
+        viewModel.sendReaction("❤️", 123, "0!12345678")
+        
+        advanceUntilIdle()
+        
+        verifySuspend { 
+            serviceRepository.onServiceAction(ServiceAction.Reaction("❤️", 123, "0!12345678")) 
+        }
+    }
+
+    @Test
+    fun testDeleteMessages() = runTest {
+        everySuspend { packetRepository.deleteMessages(any()) } returns Unit
+        
+        viewModel.deleteMessages(listOf(1L, 2L))
+        
+        advanceUntilIdle()
+        
+        verifySuspend { packetRepository.deleteMessages(listOf(1L, 2L)) }
+    }
+
+    @Test
+    fun testUnreadCount() = runTest {
+        val countFlow = MutableStateFlow(5)
+        every { packetRepository.getUnreadCountFlow("new_contact") } returns countFlow
+        
+        viewModel.setContactKey("new_contact")
+        
+        viewModel.unreadCount.test {
+            // Initial 0 from stateIn
+            assertEquals(0, awaitItem())
+            // Value from countFlow
+            assertEquals(5, awaitItem())
+            countFlow.value = 10
+            assertEquals(10, awaitItem())
+        }
+    }
+
+    @Test
+    fun testClearUnreadCount() = runTest {
+        val contact = "0!12345678"
+        everySuspend { packetRepository.clearUnreadCount(contact, 1000L) } returns Unit
+        everySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) } returns Unit
+        everySuspend { packetRepository.getUnreadCount(contact) } returns 0
+        every { notificationManager.cancel(contact.hashCode()) } returns Unit
+
+        viewModel.clearUnreadCount(contact, 1L, 1000L)
+        
+        advanceUntilIdle()
+        
+        verifySuspend { packetRepository.clearUnreadCount(contact, 1000L) }
+        verifySuspend { packetRepository.updateLastReadMessage(contact, 1L, 1000L) }
+        verifySuspend { notificationManager.cancel(contact.hashCode()) }
     }
 
     @Test

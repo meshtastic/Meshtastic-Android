@@ -16,174 +16,113 @@
  */
 package org.meshtastic.feature.connections
 
-import io.kotest.matchers.shouldBe
-
+import app.cash.turbine.test
+import dev.mokkery.MockMode
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import dev.mokkery.matcher.any
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.meshtastic.core.datastore.RecentAddressesDataSource
-import org.meshtastic.core.model.DeviceType
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.RadioController
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.feature.connections.model.DeviceListEntry
+import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.feature.connections.model.DiscoveredDevices
 import org.meshtastic.feature.connections.model.GetDiscoveredDevicesUseCase
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
+import kotlin.test.assertNotNull
 
-/**
- * Tests for [ScannerViewModel] covering core device selection, connection, and state management.
- *
- * Uses `core:testing` fakes where available and mockk for remaining dependencies.
- */
 class ScannerViewModelTest {
-/*
-
 
     private lateinit var viewModel: ScannerViewModel
-    private lateinit var radioController: RadioController
-    private lateinit var serviceRepository: ServiceRepository
-    private lateinit var radioInterfaceService: RadioInterfaceService
-    private lateinit var recentAddressesDataSource: RecentAddressesDataSource
-    private lateinit var getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase
+    private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
+    private val radioController: RadioController = mock(MockMode.autofill)
+    private val radioInterfaceService: RadioInterfaceService = mock(MockMode.autofill)
+    private val recentAddressesDataSource: RecentAddressesDataSource = mock(MockMode.autofill)
+    private val getDiscoveredDevicesUseCase: GetDiscoveredDevicesUseCase = mock(MockMode.autofill)
+    private val bleScanner: org.meshtastic.core.ble.BleScanner = mock(MockMode.autofill)
 
-    private fun setUp() {
-        radioInterfaceService =
-                every { isMockInterface() } returns false
-                every { currentDeviceAddressFlow } returns MutableStateFlow(null)
-                every { supportedDeviceTypes } returns listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
-            }
-        getDiscoveredDevicesUseCase =
-            object : GetDiscoveredDevicesUseCase {
-                override fun invoke(showMock: Boolean) = flowOf(DiscoveredDevices())
-            }
+    private val connectionProgressFlow = MutableStateFlow<String?>(null)
+    private val discoveredDevicesFlow = MutableStateFlow(DiscoveredDevices())
 
-        viewModel =
-            ScannerViewModel(
-                serviceRepository = serviceRepository,
-                radioController = radioController,
-                radioInterfaceService = radioInterfaceService,
-                recentAddressesDataSource = recentAddressesDataSource,
-                getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
-            )
-    }
+    @BeforeTest
+    fun setUp() {
+        every { radioInterfaceService.isMockInterface() } returns false
+        every { radioInterfaceService.currentDeviceAddressFlow } returns MutableStateFlow(null)
+        every { radioInterfaceService.supportedDeviceTypes } returns emptyList()
+        
+        every { serviceRepository.connectionProgress } returns connectionProgressFlow
+        every { getDiscoveredDevicesUseCase.invoke(any()) } returns discoveredDevicesFlow
+        every { recentAddressesDataSource.recentAddresses } returns MutableStateFlow(emptyList())
 
-    @Test
-    fun testInitialization() = runTest {
-        setUp()
-        assertNull(viewModel.errorText.value, "Error text starts as null before connectionProgress emits")
-    }
+        connectionProgressFlow.value = null
+        discoveredDevicesFlow.value = DiscoveredDevices()
 
-    @Test
-    fun testSetErrorText() = runTest {
-        setUp()
-        viewModel.setErrorText("Test error")
-        viewModel.errorText.value shouldBe "Test error"
-    }
-
-    @Test
-    fun testDisconnect() = runTest {
-        setUp()
-        viewModel.disconnect()
-        verify { radioController.setDeviceAddress(NO_DEVICE_SELECTED) }
-    }
-
-    @Test
-    fun testChangeDeviceAddress() = runTest {
-        setUp()
-        viewModel.changeDeviceAddress("x12:34:56:78:90:AB")
-        verify { radioController.setDeviceAddress("x12:34:56:78:90:AB") }
-    }
-
-    @Test
-    fun testOnSelectedBleDeviceBonded() = runTest {
-        setUp()
-        val bleDevice =
-                every { bonded } returns true
-                every { fullAddress } returns "xAA:BB:CC:DD:EE:FF"
-            }
-        val result = viewModel.onSelected(bleDevice)
-        assertTrue(result, "Should return true for bonded BLE device")
-        verify { radioController.setDeviceAddress("xAA:BB:CC:DD:EE:FF") }
-    }
-
-    @Test
-    fun testOnSelectedBleDeviceNotBonded() = runTest {
-        setUp()
-        val result = viewModel.onSelected(bleDevice)
-        assertFalse(result, "Should return false for unbonded BLE device (triggers bonding)")
-    }
-
-    @Test
-    fun testOnSelectedTcpDevice() = runTest {
-        setUp()
-        val tcpDevice = DeviceListEntry.Tcp("Meshtastic_1234", "t192.168.1.100")
-        val result = viewModel.onSelected(tcpDevice)
-        assertTrue(result, "Should return true for TCP device")
-        verify { radioController.setDeviceAddress("t192.168.1.100") }
-    }
-
-    @Test
-    fun testOnSelectedMockDevice() = runTest {
-        setUp()
-        val mockDevice = DeviceListEntry.Mock("Demo Mode")
-        val result = viewModel.onSelected(mockDevice)
-        assertTrue(result, "Should return true for mock device")
-        verify { radioController.setDeviceAddress("m") }
-    }
-
-    @Test
-    fun testOnSelectedUsbDeviceBonded() = runTest {
-        setUp()
-        val usbDevice =
-                every { bonded } returns true
-                every { fullAddress } returns "s/dev/ttyACM0"
-            }
-        val result = viewModel.onSelected(usbDevice)
-        assertTrue(result, "Should return true for bonded USB device")
-        verify { radioController.setDeviceAddress("s/dev/ttyACM0") }
-    }
-
-    @Test
-    fun testOnSelectedUsbDeviceNotBonded() = runTest {
-        setUp()
-        val result = viewModel.onSelected(usbDevice)
-        assertFalse(result, "Should return false for unbonded USB device (triggers permission request)")
-    }
-
-    @Test
-    fun testAddRecentAddressIgnoresNonTcpAddresses() = runTest {
-        setUp()
-        viewModel.addRecentAddress("xBLE_ADDRESS", "BLE Device")
-        // Should not add — address doesn't start with "t"
-        verify(exactly = 0) { recentAddressesDataSource.toString() }
-    }
-
-    @Test
-    fun testSelectedNotNullFlowDefaultsToNoDeviceSelected() = runTest {
-        setUp()
-        assertEquals(
-            NO_DEVICE_SELECTED,
-            viewModel.selectedNotNullFlow.value,
-            "selectedNotNullFlow defaults to NO_DEVICE_SELECTED when no device is selected",
+        viewModel = ScannerViewModel(
+            serviceRepository = serviceRepository,
+            radioController = radioController,
+            radioInterfaceService = radioInterfaceService,
+            recentAddressesDataSource = recentAddressesDataSource,
+            getDiscoveredDevicesUseCase = getDiscoveredDevicesUseCase,
+            bleScanner = bleScanner
         )
     }
 
     @Test
-    fun testSupportedDeviceTypes() = runTest {
-        setUp()
-        viewModel.supportedDeviceTypes shouldBe listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
+    fun testInitialization() {
+        assertNotNull(viewModel)
     }
 
     @Test
-    fun testShowMockInterfaceFalseByDefault() = runTest {
-        setUp()
-        assertFalse(viewModel.showMockInterface.value, "showMockInterface defaults to false")
+    fun `errorText reflects connectionProgress`() = runTest {
+        viewModel.errorText.test {
+            assertEquals(null, awaitItem())
+            connectionProgressFlow.value = "Connecting..."
+            assertEquals("Connecting...", awaitItem())
+        }
     }
 
-*/
+    @Test
+    fun `startBleScan updates isBleScanning`() = runTest {
+        every { bleScanner.scan(any(), any()) } returns kotlinx.coroutines.flow.emptyFlow()
+        
+        viewModel.isBleScanning.test {
+            assertEquals(false, awaitItem())
+            viewModel.startBleScan()
+            assertEquals(true, awaitItem())
+            
+            viewModel.stopBleScan()
+            assertEquals(false, awaitItem())
+        }
+    }
+
+    @Test
+    fun `changeDeviceAddress calls radioController`() {
+        every { radioController.setDeviceAddress(any()) } returns Unit
+        
+        viewModel.changeDeviceAddress("test_address")
+        
+        dev.mokkery.verify { radioController.setDeviceAddress("test_address") }
+    }
+
+    @Test
+    fun `usbDevicesForUi emits updates`() = runTest {
+        viewModel.usbDevicesForUi.test {
+            assertEquals(emptyList(), awaitItem())
+            
+            val device = org.meshtastic.feature.connections.model.DeviceListEntry.Usb(
+                usbData = object : org.meshtastic.feature.connections.model.UsbDeviceData {},
+                name = "USB Device",
+                fullAddress = "usb_address",
+                bonded = true
+            )
+            discoveredDevicesFlow.value = DiscoveredDevices(usbDevices = listOf(device))
+            
+            assertEquals(listOf(device), awaitItem())
+        }
+    }
 }
