@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
 | Shared feature/UI logic | **8.5/10** | All 7 KMP; feature:connections unified with dynamic transport detection |
-| Android decoupling | **8/10** | No known `java.*` calls in `commonMain`; app module extraction in progress |
+| Android decoupling | **8.5/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation & connections extracted) |
 | Multi-target readiness | **8/10** | Full JVM; release-ready desktop; iOS not declared |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
@@ -118,6 +118,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 - Both shells iterate `TopLevelDestination.entries` with shared icon mapping from `core:ui` (`TopLevelDestinationExt.icon`).
 - Desktop locale changes now trigger a full subtree recomposition from `Main.kt` without resetting the shared Navigation 3 backstack, so translated labels update in place.
 - Firmware remains available as an in-flow route instead of a top-level destination, matching Android information architecture.
+- Android navigation graphs are decoupled and extracted into their respective feature modules, aligning with the Desktop architecture.
 - Parity tests exist in `core:navigation/commonTest` (`NavigationParityTest`) and `desktop/test` (`DesktopTopLevelDestinationParityTest`).
 - Remaining parity work is documented in [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md): serializer registration validation and platform exception tracking.
 

@@ -20,7 +20,7 @@ This document captures discoverable patterns that are already used in the reposi
 ## 3) Navigation conventions (Navigation 3)
 
 - Use Navigation 3 types (`NavKey`, `NavBackStack`, entry providers) instead of legacy controller-first patterns.
-- Example graph using `EntryProviderScope<NavKey>` and `backStack.add/removeLastOrNull`: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`.
+- Example graph using `EntryProviderScope<NavKey>` and `backStack.add/removeLastOrNull`: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`.
 - Example feature flow using `rememberNavBackStack` and `NavDisplay<NavKey>`: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/AppIntroductionScreen.kt`.
 
 ## 4) UI and resources

@@ -11,7 +11,7 @@ The codebase is **~98% structurally KMP** — 18/20 core modules and 7/7 feature
 
 Of the five structural gaps originally identified, four are resolved and one remains in progress:
 
-1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(In progress — connections extracted, ChannelViewModel/NodeMapViewModel/NodeContextMenu/EmptyDetailPlaceholder moved to shared modules, currently 63 files)*
+1. **`app` is a God module** — originally 90 files / ~11K LOC of transport, service, UI, and ViewModel code that should live in core/feature modules. *(In progress — connections extracted, Android navigation extracted, ChannelViewModel/NodeMapViewModel/NodeContextMenu/EmptyDetailPlaceholder moved to shared modules, currently ~56 files)*
 2. ~~**Radio transport layer is app-locked**~~ — ✅ Resolved: `RadioTransport` interface in `core:repository/commonMain`; shared `StreamFrameCodec` + `TcpTransport` in `core:network`.
 3. ~~**`java.*` APIs leak into `commonMain`**~~ — ✅ Resolved: `Locale`, `ConcurrentHashMap`, `ReentrantLock` purged.
 4. ~~**Zero feature-level `commonTest`**~~ — ✅ Resolved: 131 shared tests across all 7 features; `core:testing` module established.
@@ -44,7 +44,7 @@ The `app` module should be a thin shell (~20 files): `MainActivity`, DI assembly
 |---|---:|---:|---|
 | `repository/radio/` | 22 | ~2,000 | `core:service` / `core:network` |
 | `service/` | 12 | ~1,500 | `core:service/androidMain` |
-| `navigation/` | 7 | ~720 | Stay in `app` (Nav 3 host wiring) |
+| `navigation/` | ~1 | ~200 | Root Nav 3 host wiring stays in `app`. Feature graphs moved to `feature:*`. |
 | `settings/` ViewModels | 3 | ~350 | Thin Android wrappers (genuine platform deps) |
 | `widget/` | 4 | ~300 | Stay in `app` (Glance is Android-only) |
 | `worker/` | 4 | ~350 | `core:service/androidMain` |
@@ -204,7 +204,7 @@ Ordered by impact × effort:
 |---|---:|---:|---|
 | Shared business/data logic | 8.5/10 | **9/10** | RadioTransport interface unified; all core layers shared |
 | Shared feature/UI logic | 9.5/10 | **8.5/10** | All 7 KMP features; connections unified; Vico charts in commonMain |
-| Android decoupling | 8.5/10 | **8/10** | Connections extracted; GMS purged; ChannelViewModel/NodeMapViewModel/NodeContextMenu extracted; app 63→target 20 files |
+| Android decoupling | 8.5/10 | **8.5/10** | Connections & Navigation extracted; GMS purged; ChannelViewModel/NodeMapViewModel/NodeContextMenu extracted; app ~56->target 20 files |
 | Multi-target readiness | 8/10 | **8/10** | Full JVM; release-ready desktop; iOS not declared |
 | CI confidence | 8.5/10 | **9/10** | 25 modules validated; feature:connections + desktop in CI; native release installers |
 | DI portability | 7/10 | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
