@@ -53,7 +53,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 | Transport | Platform | Status |
 |---|---|---|
 | TCP | Desktop (JVM) | ✅ Done — shared `StreamFrameCodec` + `TcpTransport` in `core:network` |
-| Serial/USB | Desktop (JVM) | ❌ Next — jSerialComm |
+| Serial/USB | Desktop (JVM) | ✅ Done — jSerialComm |
 | MQTT | All (KMP) | ❌ Planned — Ktor/MQTT (currently Android-only via Eclipse Paho) |
 | BLE | Android | ✅ Done — Kable |
 | BLE | Desktop | ✅ Done — Kable (JVM) |
