@@ -6,7 +6,7 @@
 
 ## Phase 2: Serial Port Scanning & Connection Management
 - [x] Task: Implement port discovery using `jSerialComm` to list available serial ports. [checkpoint: c72501d]
-- [ ] Task: Implement connect/disconnect logic for a selected serial port, handling port locking and baud rate configuration.
+- [x] Task: Implement connect/disconnect logic for a selected serial port, handling port locking and baud rate configuration. [checkpoint: 23ee815]
 - [ ] Task: Map the input/output streams of the open serial port to the existing KMP stream framing logic (`StreamFrameCodec`).
 
 ## Phase 3: UI Integration
