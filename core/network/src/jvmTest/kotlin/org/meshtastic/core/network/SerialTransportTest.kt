@@ -19,4 +19,10 @@ class SerialTransportTest {
         val transport: RadioTransport = SerialTransport()
         assertTrue(transport is SerialTransport, "Transport should be a SerialTransport")
     }
+
+    @Test
+    fun testGetAvailablePorts() {
+        val ports = SerialTransport.getAvailablePorts()
+        assertNotNull(ports, "Available ports should not be null")
+    }
 }
