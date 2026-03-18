@@ -21,7 +21,7 @@
 - [x] Task: Relocate necessary widget resources, strings, and AndroidManifest declarations.
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Widget Extraction' (Protocol in workflow.md)
 
-## Phase 4: Dependency Injection Refactoring
+## Phase 4: Dependency Injection Refactoring [checkpoint: c5f09dc]
 - [x] Task: Review `app/src/main/kotlin/org/meshtastic/app/MainKoinModule.kt` and `di/AppKoinModule.kt`.
 - [x] Task: Move DI bindings for the relocated classes to their new respective modules (e.g., `ServiceKoinModule`, `MessagingKoinModule`).
 - [x] Task: Ensure the root app module's DI configuration successfully includes the feature and core Koin modules.
