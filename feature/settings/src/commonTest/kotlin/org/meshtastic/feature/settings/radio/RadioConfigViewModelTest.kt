@@ -24,6 +24,7 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import dev.mokkery.matcher.any
+import dev.mokkery.verify
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -144,7 +145,7 @@ class RadioConfigViewModelTest {
         
         viewModel.toggleAnalyticsAllowed()
         
-        dev.mokkery.verify { toggleAnalyticsUseCase() }
+        verify { toggleAnalyticsUseCase() }
     }
 
     @Test
@@ -153,7 +154,88 @@ class RadioConfigViewModelTest {
         
         viewModel.toggleHomoglyphCharactersEncodingEnabled()
         
-        dev.mokkery.verify { toggleHomoglyphEncodingUseCase() }
+        verify { toggleHomoglyphEncodingUseCase() }
+    }
+
+    @Test
+    fun `processPacketResponse updates state on metadata result`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+
+        val packet = MeshPacket()
+        val metadata = DeviceMetadata(firmware_version = "3.0.0")
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), 123, any()) } returns RadioResponseResult.Metadata(metadata)
+
+        viewModel = createViewModel()
+
+        packetFlow.emit(packet)
+
+        viewModel.radioConfigState.test {
+            val state = awaitItem()
+            assertEquals("3.0.0", state.metadata?.firmware_version)
+        }
+    }
+
+    @Test
+    fun `updateChannels calls useCase for each changed channel`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+        viewModel = createViewModel()
+
+        val old = listOf(ChannelSettings(name = "Old"))
+        val new = listOf(ChannelSettings(name = "New"))
+
+        everySuspend { radioConfigUseCase.setRemoteChannel(any(), any()) } returns 42
+
+        viewModel.updateChannels(new, old)
+
+        verifySuspend { radioConfigUseCase.setRemoteChannel(123, any()) }
+        assertEquals(new, viewModel.radioConfigState.value.channelList)
+    }
+
+    @Test
+    fun `setResponseStateLoading for REBOOT calls useCase after packet response`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+
+        viewModel = createViewModel()
+
+        everySuspend { adminActionsUseCase.reboot(any()) } returns 42
+
+        viewModel.setResponseStateLoading(AdminRoute.REBOOT)
+
+        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        packetFlow.emit(MeshPacket())
+
+        verifySuspend { adminActionsUseCase.reboot(123) }
+    }
+
+    @Test
+    fun `setResponseStateLoading for FACTORY_RESET calls useCase after packet response`() = runTest {
+        val node = Node(num = 123, user = User(id = "!123"))
+        every { nodeRepository.nodeDBbyNum } returns MutableStateFlow(mapOf(123 to node))
+
+        val packetFlow = MutableSharedFlow<MeshPacket>()
+        every { serviceRepository.meshPacketFlow } returns packetFlow
+        every { processRadioResponseUseCase(any(), any(), any()) } returns RadioResponseResult.Success
+
+        viewModel = createViewModel()
+
+        everySuspend { adminActionsUseCase.factoryReset(any(), any()) } returns 42
+
+        viewModel.setResponseStateLoading(AdminRoute.FACTORY_RESET)
+
+        // Emit a packet to trigger processPacketResponse -> sendAdminRequest
+        packetFlow.emit(MeshPacket())
+
+        verifySuspend { adminActionsUseCase.factoryReset(123, any()) }
     }
 
     @Test
