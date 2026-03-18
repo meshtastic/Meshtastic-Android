@@ -1,11 +1,11 @@
 # Implementation Plan: Extract remaining background services and workers from app module
 
-## Phase 1: Preparation & Location Manager Abstraction
-- [~] Task: Review current implementations in `app/src/main/kotlin/org/meshtastic/app/service/AndroidMeshLocationManager.kt` and `app/src/main/kotlin/org/meshtastic/app/MeshServiceClient.kt`.
-- [ ] Task: Create KMP shared interface or base class in `core:service/commonMain` for the Location Manager if applicable, aligning with KMP best practices.
-- [ ] Task: Relocate `AndroidMeshLocationManager.kt` and `MeshServiceClient.kt` to `core:service/src/androidMain/...`.
-- [ ] Task: Update package declarations and resolve broken imports in the app module.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Location Manager Abstraction' (Protocol in workflow.md)
+## Phase 1: Preparation & Location Manager Abstraction [checkpoint: 57052fc]
+- [x] Task: Review current implementations in `app/src/main/kotlin/org/meshtastic/app/service/AndroidMeshLocationManager.kt` and `app/src/main/kotlin/org/meshtastic/app/MeshServiceClient.kt`.
+- [x] Task: Create KMP shared interface or base class in `core:service/commonMain` for the Location Manager if applicable, aligning with KMP best practices.
+- [x] Task: Relocate `AndroidMeshLocationManager.kt` and `MeshServiceClient.kt` to `core:service/src/androidMain/...`.
+- [x] Task: Update package declarations and resolve broken imports in the app module.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Preparation & Location Manager Abstraction' (Protocol in workflow.md)
 
 ## Phase 2: Message Queue Abstraction
 - [ ] Task: Review `app/src/main/kotlin/org/meshtastic/app/messaging/domain/worker/WorkManagerMessageQueue.kt`.
