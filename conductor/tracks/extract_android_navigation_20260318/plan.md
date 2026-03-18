@@ -22,7 +22,7 @@
     - [x] Fix package declarations and broken imports.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Feature Module Extraction' (Protocol in workflow.md)
 
-## Phase 3: Root Assembly & Testing
+## Phase 3: Root Assembly & Testing [checkpoint: a1e9da3]
 - [x] Task: Refactor Root App Graph.
     - [x] Update root composition to import the newly relocated navigation extension functions.
     - [x] Remove any leftover navigation wiring from the `app` module.
@@ -30,4 +30,4 @@
     - [x] Add basic Android instrumented or Roboelectric tests in `:app` to verify that the `NavHost` successfully constructs all feature graphs without crashing.
 - [x] Task: Review previous steps and update project documentation.
     - [x] Update `conductor/tech-stack.md` and `conductor/product.md` if necessary to reflect the thinned app module and JetBrains Navigation 3 common usage.
-- [~] Task: Conductor - User Manual Verification 'Phase 3: Root Assembly & Testing' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Root Assembly & Testing' (Protocol in workflow.md)
