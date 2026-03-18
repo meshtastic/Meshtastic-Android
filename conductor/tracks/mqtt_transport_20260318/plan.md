@@ -4,11 +4,11 @@
 - [x] Task: Evaluate and add KMP MQTT library dependency (e.g. Kmqtt) to `core:network` or `libs.versions.toml`. [2a4aa35]
     - [x] Add dependency to `libs.versions.toml`.
     - [x] Apply dependency in `core:network/build.gradle.kts`.
-- [ ] Task: Implement `MqttTransport` class in `commonMain` of `core:network`.
-    - [ ] Create failing tests in `commonTest` for MqttTransport initialization and configuration parsing.
-    - [ ] Implement MqttTransport to parse URL (mqtt://, mqtts://), credentials, and configure the underlying MQTT client.
-    - [ ] Write failing tests for connection state flows.
-    - [ ] Implement connection lifecycle handling (connect, disconnect, reconnect).
+- [x] Task: Implement `MqttTransport` class in `commonMain` of `core:network`. [99d35b3]
+    - [x] Create failing tests in `commonTest` for MqttTransport initialization and configuration parsing.
+    - [x] Implement MqttTransport to parse URL (mqtt://, mqtts://), credentials, and configure the underlying MQTT client.
+    - [x] Write failing tests for connection state flows.
+    - [x] Implement connection lifecycle handling (connect, disconnect, reconnect).
 - [ ] Task: Conductor - User Manual Verification 'Phase 1: Core Networking & Library Integration' (Protocol in workflow.md)
 
 ## Phase 2: Publishing & Subscribing
