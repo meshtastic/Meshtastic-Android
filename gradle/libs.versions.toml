@@ -66,6 +66,7 @@ vico = "3.0.3"
 dependency-guard = "0.5.0"
 kable = "0.42.0"
 nordic-dfu = "2.11.0"
+kmqtt = "1.0.0"
 
 
 [libraries]
@@ -218,8 +219,9 @@ material = { module = "com.google.android.material:material", version = "1.13.0"
 nordic-dfu = { module = "no.nordicsemi.android:dfu", version.ref = "nordic-dfu" }
 
 kable-core = { module = "com.juul.kable:kable-core", version.ref = "kable" }
+kmqtt-client = { module = "io.github.davidepianca98:kmqtt-client", version.ref = "kmqtt" }
+kmqtt-common = { module = "io.github.davidepianca98:kmqtt-common", version.ref = "kmqtt" }
 
-org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version = "1.2.5" }
 jserialcomm = { module = "com.fazecast:jSerialComm", version.ref = "jserialcomm" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version = "6.9.0" }

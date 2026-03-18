@@ -109,16 +109,12 @@ Formerly found in 3 prefs files:
 
 **Outcome:** These caches now use `AtomicRef<PersistentMap<...>>` helpers in `commonMain`, eliminating the last `ConcurrentHashMap` usage from shared prefs code.
 
-### B3. MQTT is Android-only
+### B3. MQTT (Resolved)
 
-`MQTTRepositoryImpl` in `core:network/androidMain` uses Eclipse Paho (Java-only). Desktop and future iOS stub it.
+`MQTTRepositoryImpl` has been migrated to `commonMain` using KMQTT, replacing Eclipse Paho.
 
-**Fix:** Evaluate KMP MQTT options:
-- `mqtt-kmp` library
-- Ktor WebSocket-based MQTT
-- `hivemq-mqtt-client` (JVM-only, acceptable for `jvmAndroidMain`)
-
-Short-term: Move to `jvmAndroidMain` if using a JVM-compatible lib. Long-term: Full KMP MQTT in `commonMain`.
+**Fix:** Completed.
+- `kmqtt` library integrated for full KMP support.
 
 ### B4. Vico charts *(resolved)*
 

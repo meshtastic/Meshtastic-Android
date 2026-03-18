@@ -41,6 +41,8 @@ kotlin {
             implementation(projects.core.proto)
 
             implementation(libs.okio)
+            implementation(libs.kmqtt.client)
+            implementation(libs.kmqtt.common)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.content.negotiation)
@@ -58,7 +60,6 @@ kotlin {
         androidMain.dependencies {
             implementation(projects.core.ble)
             implementation(projects.core.prefs)
-            implementation(libs.org.eclipse.paho.client.mqttv3)
             implementation(libs.usb.serial.android)
             implementation(libs.coil.network.okhttp)
             implementation(libs.coil.svg)

@@ -53,11 +53,6 @@ class NetworkModule {
         application.getSystemService(Context.NSD_SERVICE) as NsdManager
 
     @Single
-    fun bindMqttRepository(
-        impl: org.meshtastic.core.network.repository.MQTTRepositoryImpl,
-    ): org.meshtastic.core.network.repository.MQTTRepository = impl
-
-    @Single
     fun provideImageLoader(
         okHttpClient: OkHttpClient,
         application: Context,
