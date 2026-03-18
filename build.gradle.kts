@@ -52,3 +52,9 @@ plugins {
 dependencies {
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
+
+subprojects {
+    tasks.withType<Test> {
+        failOnNoDiscoveredTests = false
+    }
+}

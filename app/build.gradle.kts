@@ -303,7 +303,6 @@ dependencies {
     testImplementation(libs.androidx.work.testing)
     testImplementation(libs.koin.test)
     testImplementation(libs.junit)
-    testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)
