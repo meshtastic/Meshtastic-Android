@@ -12,7 +12,7 @@
 
 ## Architecture
 - **MVI / Unidirectional Data Flow:** Shared view models using the multiplatform `androidx.lifecycle.ViewModel`.
-- **JetBrains Navigation 3:** Multiplatform fork for state-based, compose-first navigation without relying on `NavController`.
+- **JetBrains Navigation 3:** Multiplatform fork for state-based, compose-first navigation without relying on `NavController`. Navigation graphs are decoupled and extracted into their respective `feature:*` modules, allowing a thinned out root `app` module.
 
 ## Dependency Injection
 - **Koin 4.2:** Leverages Koin Annotations and the K2 Compiler Plugin for pure compile-time DI, completely replacing Hilt.
