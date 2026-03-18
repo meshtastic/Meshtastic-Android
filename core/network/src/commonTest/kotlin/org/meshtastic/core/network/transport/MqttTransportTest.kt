@@ -16,6 +16,8 @@
  */
 package org.meshtastic.core.network.transport
 
+import kotlinx.serialization.json.Json
+import org.meshtastic.core.model.MqttJsonPayload
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -52,5 +54,20 @@ class MqttTransportTest {
         }
         assertEquals("mqtt.example.com", host2)
         assertEquals(1883, port2)
+    }
+
+    @Test
+    fun `test json payload parsing`() {
+        val jsonStr = """{"type":"text","from":12345678,"to":4294967295,"payload":"Hello World","hop_limit":3,"id":123,"time":1600000000}"""
+        val json = Json { ignoreUnknownKeys = true }
+        val payload = json.decodeFromString<MqttJsonPayload>(jsonStr)
+        
+        assertEquals("text", payload.type)
+        assertEquals(12345678L, payload.from)
+        assertEquals(4294967295L, payload.to)
+        assertEquals("Hello World", payload.payload)
+        assertEquals(3, payload.hopLimit)
+        assertEquals(123L, payload.id)
+        assertEquals(1600000000L, payload.time)
     }
 }

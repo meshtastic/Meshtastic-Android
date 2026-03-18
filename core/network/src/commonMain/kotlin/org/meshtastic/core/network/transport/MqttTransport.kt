@@ -31,7 +31,9 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import okio.ByteString.Companion.toByteString
+import org.meshtastic.core.model.MqttJsonPayload
 import org.meshtastic.core.network.repository.MQTTRepository
 import org.meshtastic.proto.MqttClientProxyMessage
 
@@ -49,6 +51,7 @@ class MqttTransport(
     )
 
     private var client: MQTTClient? = null
+    private val json = Json { ignoreUnknownKeys = true }
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var clientJob: Job? = null
 
@@ -73,13 +76,34 @@ class MqttTransport(
             userName = config.username,
             password = config.password?.encodeToByteArray()?.toUByteArray(),
             publishReceived = { packet ->
-                trySend(
-                    MqttClientProxyMessage(
-                        topic = packet.topicName,
-                        data_ = packet.payload?.toByteArray()?.toByteString() ?: okio.ByteString.EMPTY,
-                        retained = packet.retain,
+                val topic = packet.topicName
+                val payload = packet.payload?.toByteArray()
+                
+                if (topic.contains("/json/")) {
+                    try {
+                        val jsonStr = payload?.decodeToString() ?: ""
+                        // Validate JSON by parsing it
+                        json.decodeFromString<MqttJsonPayload>(jsonStr)
+                        
+                        trySend(
+                            MqttClientProxyMessage(
+                                topic = topic,
+                                text = jsonStr,
+                                retained = packet.retain,
+                            )
+                        )
+                    } catch (e: Exception) {
+                        Logger.e(e) { "Failed to parse MQTT JSON: ${e.message}" }
+                    }
+                } else {
+                    trySend(
+                        MqttClientProxyMessage(
+                            topic = topic,
+                            data_ = payload?.toByteString() ?: okio.ByteString.EMPTY,
+                            retained = packet.retain,
+                        )
                     )
-                )
+                }
             }
         )
 
