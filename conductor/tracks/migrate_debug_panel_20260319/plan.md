@@ -13,7 +13,7 @@
 - [x] Task: Write or migrate corresponding unit tests to `commonTest`.
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptation to KMP' (Protocol in workflow.md)
 
-## Phase 3: Desktop Integration
+## Phase 3: Desktop Integration [checkpoint: de2ae06]
 - [x] Task: Wire the Debug Panel into the Desktop target's settings menu (`DesktopSettingsNavigation.kt`).
 - [x] Task: Add DI bindings for the Desktop module if the Debug Panel requires specific dependencies.
 - [x] Task: Verify the Debug Panel screen can be opened and navigated to from the Desktop app.
