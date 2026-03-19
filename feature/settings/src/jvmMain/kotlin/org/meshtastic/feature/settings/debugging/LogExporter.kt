@@ -82,7 +82,7 @@ actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.U
                             }
                         }
                         Logger.i { "MeshLog exported successfully to ${exportFile.absolutePath}" }
-                    } catch (e: Exception) {
+                    } catch (e: java.io.IOException) {
                         Logger.e(e) { "Failed to export logs to file: ${exportFile.absolutePath}" }
                     }
                 } else {

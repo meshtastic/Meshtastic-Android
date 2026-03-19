@@ -27,12 +27,12 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_export_failed
 import org.meshtastic.core.resources.debug_export_success
+import org.meshtastic.core.ui.util.showToast
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 
 @Composable
 actual fun rememberLogExporter(logsProvider: suspend () -> List<DebugViewModel.UiMeshLog>): (fileName: String) -> Unit {
@@ -86,7 +86,7 @@ private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: L
             }
             Logger.i { "MeshLog exported successfully to $targetUri" }
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
-        } catch (e: Exception) {
+        } catch (e: java.io.IOException) {
             Logger.e(e) { "Failed to export logs to URI: $targetUri" }
             withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
         }
