@@ -16,10 +16,6 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import android.content.Context
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -63,7 +59,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -71,7 +66,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -110,11 +105,9 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.util.showToast
+
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-import java.io.IOException
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
+
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
@@ -130,7 +123,6 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
@@ -157,13 +149,8 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
             listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
         }
     }
-    // Prepare a document creator for exporting logs via SAF
-    val exportLogsLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
-            if (createdUri != null) {
-                scope.launch { exportAllLogsToUri(context, createdUri, viewModel.loadLogsForExport()) }
-            }
-        }
+    // Prepare a document creator for exporting logs
+    val exportLogsLauncher = rememberLogExporter { viewModel.loadLogsForExport() }
 
     var showSettings by remember { mutableStateOf(false) }
 
@@ -216,7 +203,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                             val timestamp =
                                 fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"
-                            exportLogsLauncher.launch(fileName)
+                            exportLogsLauncher(fileName)
                         },
                     )
                     if (showSettings) {
@@ -431,52 +418,6 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<UiMeshLog>) =
-    withContext(Dispatchers.IO) {
-        try {
-            if (logs.isEmpty()) {
-                withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
-                Logger.w { "MeshLog export aborted: no logs available" }
-                return@withContext
-            }
-
-            context.contentResolver.openOutputStream(targetUri)?.use { os ->
-                OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer ->
-                    logs.forEach { log ->
-                        writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-                        writer.write(log.logMessage)
-                        log.decodedPayload?.let { decodedPayload ->
-                            if (decodedPayload.isNotBlank()) {
-                                writer.write("\n\nDecoded Payload:\n{")
-                                writer.write("\n")
-                                // Redact Decoded keys.
-                                decodedPayload.lineSequence().forEach { line ->
-                                    var outputLine = line
-                                    val redacted = redactedKeys.firstOrNull { line.contains(it) }
-                                    if (redacted != null) {
-                                        val idx = line.indexOf(':')
-                                        if (idx != -1) {
-                                            outputLine = line.take(idx + 1)
-                                            outputLine += "<redacted>"
-                                        }
-                                    }
-                                    writer.write(outputLine)
-                                    writer.write("\n")
-                                }
-                                writer.write("\n}")
-                            }
-                        }
-                        writer.write("\n\n")
-                    }
-                }
-            } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
-
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
-        } catch (e: IOException) {
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
-            Logger.w(e) { "MeshLog export failed" }
-        }
-    }
 
 @Composable
 private fun DecodedPayloadBlock(
@@ -542,7 +483,7 @@ private fun rememberAnnotatedDecodedPayload(
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugPacketPreview() {
     AppTheme {
@@ -572,7 +513,7 @@ private fun DebugPacketPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugItemWithSearchHighlightPreview() {
     AppTheme {
@@ -588,7 +529,7 @@ private fun DebugItemWithSearchHighlightPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugItemPositionPreview() {
     AppTheme {
@@ -603,7 +544,7 @@ private fun DebugItemPositionPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugItemErrorPreview() {
     AppTheme {
@@ -621,7 +562,7 @@ private fun DebugItemErrorPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugItemLongMessagePreview() {
     AppTheme {
@@ -645,7 +586,7 @@ private fun DebugItemLongMessagePreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugItemSelectedPreview() {
     AppTheme {
@@ -661,7 +602,7 @@ private fun DebugItemSelectedPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 private fun DebugMenuActionsPreview() {
     AppTheme {
@@ -679,7 +620,7 @@ private fun DebugMenuActionsPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 @Suppress("detekt:LongMethod") // big preview
 private fun DebugScreenEmptyPreview() {
@@ -741,7 +682,7 @@ private fun DebugScreenEmptyPreview() {
     }
 }
 
-@PreviewLightDark
+
 @Composable
 @Suppress("detekt:LongMethod") // big preview
 private fun DebugScreenWithSampleDataPreview() {

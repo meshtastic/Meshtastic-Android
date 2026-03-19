@@ -6,12 +6,12 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Analysis and Relocation' (Protocol in workflow.md)
 
 ## Phase 2: Adaptation to KMP
-- [ ] Task: Resolve compilation errors by removing Android-specific imports (`android.*`, `java.*`).
-- [ ] Task: Migrate Android Jetpack Compose imports (`androidx.compose`) to Compose Multiplatform equivalents (`org.jetbrains.compose.*` or ensuring the standard Multiplatform aliases are used).
-- [ ] Task: Ensure the Debug Panel ViewModel uses the multiplatform `androidx.lifecycle.ViewModel`.
-- [ ] Task: Abstract any necessary platform-specific logging or hardware interactions using `expect`/`actual` or KMP interfaces.
-- [ ] Task: Write or migrate corresponding unit tests to `commonTest`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Adaptation to KMP' (Protocol in workflow.md)
+- [x] Task: Resolve compilation errors by removing Android-specific imports (`android.*`, `java.*`).
+- [x] Task: Migrate Android Jetpack Compose imports (`androidx.compose`) to Compose Multiplatform equivalents (`org.jetbrains.compose.*` or ensuring the standard Multiplatform aliases are used).
+- [x] Task: Ensure the Debug Panel ViewModel uses the multiplatform `androidx.lifecycle.ViewModel`.
+- [x] Task: Abstract any necessary platform-specific logging or hardware interactions using `expect`/`actual` or KMP interfaces.
+- [x] Task: Write or migrate corresponding unit tests to `commonTest`.
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Adaptation to KMP' (Protocol in workflow.md)
 
 ## Phase 3: Desktop Integration
 - [ ] Task: Wire the Debug Panel into the Desktop target's settings menu (`DesktopSettingsNavigation.kt`).
