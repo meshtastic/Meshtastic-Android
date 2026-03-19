@@ -5,7 +5,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Baseline Measurement' (Protocol in workflow.md) 6d9ad468c
 
 ## Phase 2: Feature ViewModel Migration to Turbine
-- [~] Task: Refactor `MetricsViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
+- [x] Task: Refactor `MetricsViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. 79e059286
 - [ ] Task: Refactor `MessageViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
 - [ ] Task: Refactor `RadioConfigViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
 - [ ] Task: Refactor `NodeListViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
