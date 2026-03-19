@@ -31,10 +31,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
-import androidx.compose.material.icons.twotone.QrCodeScanner
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,7 +53,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Capabilities
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.model.util.getChannelUrl
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.add
 import org.meshtastic.core.resources.cancel
@@ -64,11 +61,9 @@ import org.meshtastic.core.resources.press_and_drag
 import org.meshtastic.core.resources.send
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.PreferenceFooter
-import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.component.dragContainer
 import org.meshtastic.core.ui.component.dragDropItemsIndexed
 import org.meshtastic.core.ui.component.rememberDragDropState
-import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.ResponseState
 import org.meshtastic.feature.settings.radio.channel.component.ChannelCard
@@ -78,11 +73,8 @@ import org.meshtastic.feature.settings.radio.channel.component.ChannelLegendDial
 import org.meshtastic.feature.settings.radio.channel.component.EditChannelDialog
 import org.meshtastic.feature.settings.radio.component.LoadingOverlay
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
-import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
-
-private const val QR_CODE_SIZE = 960
 
 @Composable
 fun ChannelConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit) {
@@ -145,19 +137,6 @@ private fun ChannelConfigScreen(
 
     var showEditChannelDialog: Int? by rememberSaveable { mutableStateOf(null) }
     var showChannelLegendDialog by rememberSaveable { mutableStateOf(false) }
-    var showShareDialog by remember { mutableStateOf(false) }
-
-    if (showShareDialog) {
-        val fullChannelSet = ChannelSet(settings = settingsListInput.toList(), lora_config = loraConfig)
-        val uriString = fullChannelSet.getChannelUrl(false, true).toString()
-        val qrPainter = rememberQrCodePainter(uriString, QR_CODE_SIZE)
-        QrDialog(
-            title = stringResource(Res.string.channels),
-            uriString = uriString,
-            qrPainter = qrPainter,
-            onDismiss = { showShareDialog = false },
-        )
-    }
 
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
@@ -188,11 +167,7 @@ private fun ChannelConfigScreen(
                 onNavigateUp = onBack,
                 ourNode = null,
                 showNodeChip = false,
-                actions = {
-                    IconButton(onClick = { showShareDialog = true }) {
-                        Icon(Icons.TwoTone.QrCodeScanner, contentDescription = stringResource(Res.string.channels))
-                    }
-                },
+                actions = {},
                 onClickChip = {},
             )
         },
