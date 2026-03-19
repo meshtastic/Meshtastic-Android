@@ -6,7 +6,7 @@
 
 ## Phase 2: Feature ViewModel Migration to Turbine
 - [x] Task: Refactor `MetricsViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. 79e059286
-- [ ] Task: Refactor `MessageViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
+- [x] Task: Refactor `MessageViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. b45697b53
 - [ ] Task: Refactor `RadioConfigViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
 - [ ] Task: Refactor `NodeListViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
 - [ ] Task: Refactor remaining `feature` ViewModels to use `Turbine` and `Mokkery`.
