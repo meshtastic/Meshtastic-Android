@@ -39,7 +39,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 **18/20** core modules are KMP with JVM targets. The 2 Android-only modules are intentionally platform-specific, with shared contracts already abstracted into `core:ui/commonMain`.
 
-### Feature Modules (7 total — all KMP with JVM)
+### Feature Modules (8 total — all KMP with JVM)
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
@@ -50,6 +50,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:intro` | ✅ | — |
 | `feature:map` | ✅ | Placeholder; shared `NodeMapViewModel` |
 | `feature:firmware` | — | Placeholder; DFU is Android-only |
+| `feature:widget` | ❌ | — | Android-only (App Widgets). Intentional. |
 
 ### Desktop Module
 
@@ -76,7 +77,7 @@ Working Compose Desktop application with:
 | Multi-target readiness | **8/10** | Full JVM; release-ready desktop; iOS not declared |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
-| Test maturity | **8/10** | 131 commonTest + 89 platform-specific = 219 tests across all 7 features; core:testing established |
+| Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 8 features |
 
 > See [`decisions/architecture-review-2026-03.md`](./decisions/architecture-review-2026-03.md) for the full gap analysis.
 
@@ -126,6 +127,8 @@ Based on the latest codebase investigation, the following steps are proposed to 
 
 All major ViewModels have now been extracted to `commonMain` and no longer rely on Android-specific subclasses. Platform-specific dependencies (like `android.net.Uri` or Location permissions) have been successfully isolated behind injected `core:repository` interfaces (e.g., `FileService`, `LocationService`).
 
+**The extraction of all feature-specific navigation graphs, background services, and widgets out of `:app` is complete.** The `:app` module now only serves as the root DI assembler and NavHost container.
+
 Extracted to shared `commonMain` (no longer app-only):
 - `SettingsViewModel` → `feature:settings/commonMain`
 - `RadioConfigViewModel` → `feature:settings/commonMain`
@@ -136,9 +139,10 @@ Extracted to shared `commonMain` (no longer app-only):
 - `NodeMapViewModel` → `feature:map/commonMain` (Shared logic for node-specific maps)
 - `BaseMapViewModel` → `feature:map/commonMain` (Core contract for all maps)
 
-Extracted to core KMP modules (Android-specific implementations):
+Extracted to core KMP modules:
 - Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
-- BLE, USB/Serial, TCP radio connections, and NsdManager → `core:network/androidMain`
+- BLE and USB/Serial radio connections → `core:network/androidMain`
+- TCP radio connections and mDNS/NSD Service Discovery → `core:network/commonMain` (with Android `NsdManager` and Desktop `JmDNS` implementations)
 
 Remaining to be extracted from `:app` or unified in `commonMain`:
 - `MapViewModel` (Unify Google/F-Droid flavors into a single `commonMain` class consuming a `MapConfigProvider` interface)
