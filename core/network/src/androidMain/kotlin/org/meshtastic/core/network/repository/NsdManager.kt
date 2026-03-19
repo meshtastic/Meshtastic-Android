@@ -27,24 +27,56 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 
-@OptIn(ExperimentalCoroutinesApi::class)
-internal fun NsdManager.serviceList(serviceType: String): Flow<List<NsdServiceInfo>> =
-    discoverServices(serviceType).mapLatest { serviceList -> serviceList.mapNotNull { resolveService(it) } }
+private const val RESOLVE_TIMEOUT_MS = 10000L
+private const val RESOLVE_BACKOFF_MS = 1000L
 
-private fun NsdManager.discoverServices(
+@Suppress("TooGenericExceptionCaught")
+@OptIn(ExperimentalCoroutinesApi::class)
+internal fun NsdManager.serviceList(
     serviceType: String,
     protocolType: Int = NsdManager.PROTOCOL_DNS_SD,
 ): Flow<List<NsdServiceInfo>> = callbackFlow {
-    val serviceList = CopyOnWriteArrayList<NsdServiceInfo>()
+    val resolvedServices = CopyOnWriteArrayList<NsdServiceInfo>()
+    val resolveChannel = Channel<NsdServiceInfo>(Channel.UNLIMITED)
+    val mutex = Mutex()
+
+    launch {
+        for (service in resolveChannel) {
+            mutex.withLock {
+                try {
+                    val resolved = withTimeoutOrNull(RESOLVE_TIMEOUT_MS) { resolveService(service) }
+                    if (resolved != null) {
+                        resolvedServices.removeAll { it.serviceName == resolved.serviceName }
+                        resolvedServices.add(resolved)
+                        trySend(resolvedServices.toList())
+                    }
+                } catch (e: IllegalArgumentException) {
+                    Logger.e(e) { "NSD resolution failed for ${service.serviceName}" }
+                    delay(RESOLVE_BACKOFF_MS)
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "NSD resolution failed for ${service.serviceName}" }
+                    delay(RESOLVE_BACKOFF_MS)
+                }
+            }
+        }
+    }
+
     val discoveryListener =
         object : NsdManager.DiscoveryListener {
             override fun onStartDiscoveryFailed(serviceType: String, errorCode: Int) {
@@ -66,14 +98,13 @@ private fun NsdManager.discoverServices(
 
             override fun onServiceFound(serviceInfo: NsdServiceInfo) {
                 Logger.d { "NSD Service found: $serviceInfo" }
-                serviceList += serviceInfo
-                trySend(serviceList)
+                resolveChannel.trySend(serviceInfo)
             }
 
             override fun onServiceLost(serviceInfo: NsdServiceInfo) {
                 Logger.d { "NSD Service lost: $serviceInfo" }
-                serviceList.removeAll { it.serviceName == serviceInfo.serviceName }
-                trySend(serviceList)
+                resolvedServices.removeAll { it.serviceName == serviceInfo.serviceName }
+                trySend(resolvedServices.toList())
             }
         }
     trySend(emptyList()) // Emit an initial empty list

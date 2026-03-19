@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,6 @@
  */
 package org.meshtastic.core.network.repository
 
-import android.net.ConnectivityManager
-import android.net.nsd.NsdManager
-import android.net.nsd.NsdServiceInfo
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -31,17 +28,16 @@ import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.di.CoroutineDispatchers
 
-@Single
-class NetworkRepository(
-    private val nsdManager: NsdManager,
-    private val connectivityManager: ConnectivityManager,
+@Single(binds = [NetworkRepository::class])
+class NetworkRepositoryImpl(
+    networkMonitor: NetworkMonitor,
+    serviceDiscovery: ServiceDiscovery,
     private val dispatchers: CoroutineDispatchers,
     @Named("ProcessLifecycle") private val processLifecycle: Lifecycle,
-) {
+) : NetworkRepository {
 
-    val networkAvailable: Flow<Boolean> by lazy {
-        connectivityManager
-            .networkAvailable()
+    override val networkAvailable: Flow<Boolean> by lazy {
+        networkMonitor.networkAvailable
             .flowOn(dispatchers.io)
             .conflate()
             .shareIn(
@@ -52,9 +48,8 @@ class NetworkRepository(
             .distinctUntilChanged()
     }
 
-    val resolvedList: Flow<List<NsdServiceInfo>> by lazy {
-        nsdManager
-            .serviceList(NetworkConstants.SERVICE_TYPE)
+    override val resolvedList: Flow<List<DiscoveredService>> by lazy {
+        serviceDiscovery.resolvedServices
             .flowOn(dispatchers.io)
             .conflate()
             .shareIn(
@@ -62,16 +57,5 @@ class NetworkRepository(
                 started = SharingStarted.WhileSubscribed(5000),
                 replay = 1,
             )
-    }
-
-    companion object {
-
-        fun NsdServiceInfo.toAddressString() = buildString {
-            @Suppress("DEPRECATION")
-            append(host.hostAddress)
-            if (serviceType.trim('.') == NetworkConstants.SERVICE_TYPE && port != NetworkConstants.SERVICE_PORT) {
-                append(":$port")
-            }
-        }
     }
 }

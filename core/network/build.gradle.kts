@@ -48,12 +48,14 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kermit)
+            implementation(libs.jetbrains.lifecycle.runtime)
         }
 
         val jvmMain by getting {
             dependencies {
                 implementation(libs.ktor.client.java)
                 implementation(libs.jserialcomm)
+                implementation(libs.jmdns)
             }
         }
 

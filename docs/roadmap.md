@@ -78,7 +78,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 
 ## Near-Term Priorities (30 days)
 
-1. **Evaluate KMP-native testing tools** — Evaluate `Mokkery` or `Mockative` to replace `mockk` in `commonMain` of `core:testing` for iOS readiness. Integrate `Turbine` for shared `Flow` testing.
+1. **Evaluate KMP-native testing tools** — ✅ **Done:** Fully evaluated and integrated `Mokkery`, `Turbine`, and `Kotest` across the KMP modules. `mockk` has been successfully replaced, enabling property-based and Flow testing in `commonTest` for iOS readiness.
 2. **Desktop Map Integration** — Address the major Desktop feature gap by implementing a raster map view using [**MapComposeMP**](https://github.com/p-lr/MapComposeMP).
     - Implement a `MapComposeProvider` for Desktop.
     - Implement a **Web Mercator Projection** helper in `feature:map/commonMain` to translate GPS coordinates to the 2D image plane.
