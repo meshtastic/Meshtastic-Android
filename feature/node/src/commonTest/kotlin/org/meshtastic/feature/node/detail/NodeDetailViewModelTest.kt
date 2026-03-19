@@ -27,7 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -45,7 +45,7 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class NodeDetailViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: NodeDetailViewModel
     private val nodeManagementActions: NodeManagementActions = mock()
     private val nodeRequestActions: NodeRequestActions = mock()
@@ -81,17 +81,15 @@ class NodeDetailViewModelTest {
     }
 
     @Test
-    fun `uiState emits updates from useCase`() = runTest {
-        val stateFlow = MutableStateFlow(NodeDetailUiState(node = Node(num = 1234, user = User(id = "!1234"))))
+    fun `uiState emits updates from useCase`() = runTest(testDispatcher) {
+        val node = Node(num = 1234, user = User(id = "!1234"))
+        val stateFlow = MutableStateFlow(NodeDetailUiState(node = node))
         every { getNodeDetailsUseCase(1234) } returns stateFlow
 
         val vm = createViewModel(1234)
 
         vm.uiState.test {
-            // Initial empty state from stateIn
-            assertEquals(null, awaitItem().node)
-
-            // State from useCase
+            // State from useCase (delivered immediately due to UnconfinedTestDispatcher)
             val state = awaitItem()
             assertEquals(1234, state.node?.num)
             cancelAndIgnoreRemainingEvents()
@@ -99,7 +97,7 @@ class NodeDetailViewModelTest {
     }
 
     @Test
-    fun `handleNodeMenuAction delegates to nodeManagementActions for Mute`() = runTest {
+    fun `handleNodeMenuAction delegates to nodeManagementActions for Mute`() = runTest(testDispatcher) {
         val node = Node(num = 1234, user = User(id = "!1234"))
         every { nodeManagementActions.requestMuteNode(any(), any()) } returns Unit
 
@@ -109,7 +107,7 @@ class NodeDetailViewModelTest {
     }
 
     @Test
-    fun `handleNodeMenuAction delegates to nodeRequestActions for Traceroute`() = runTest {
+    fun `handleNodeMenuAction delegates to nodeRequestActions for Traceroute`() = runTest(testDispatcher) {
         val node = Node(num = 1234, user = User(id = "!1234", long_name = "Test Node"))
         every { nodeRequestActions.requestTraceroute(any(), any(), any()) } returns Unit
 

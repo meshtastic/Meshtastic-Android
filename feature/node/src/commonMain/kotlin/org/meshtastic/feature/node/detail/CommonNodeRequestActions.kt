@@ -47,7 +47,7 @@ import org.meshtastic.core.resources.signal_quality
 import org.meshtastic.core.resources.traceroute
 import org.meshtastic.core.resources.user_info
 
-@Single
+@Single(binds = [NodeRequestActions::class])
 class CommonNodeRequestActions constructor(private val radioController: RadioController) : NodeRequestActions {
 
     private val _effects = MutableSharedFlow<NodeRequestEffect>()

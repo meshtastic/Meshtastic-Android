@@ -27,7 +27,7 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -45,7 +45,7 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class SharedContactViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: SharedContactViewModel
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val serviceRepository: ServiceRepository = mock(MockMode.autofill)
@@ -68,7 +68,7 @@ class SharedContactViewModelTest {
     }
 
     @Test
-    fun `unfilteredNodes reflects repository updates`() = runTest {
+    fun `unfilteredNodes reflects repository updates`() = runTest(testDispatcher) {
         val nodesFlow = MutableStateFlow<List<Node>>(emptyList())
         every { nodeRepository.getNodes() } returns nodesFlow
 
@@ -84,12 +84,12 @@ class SharedContactViewModelTest {
     }
 
     @Test
-    fun `addSharedContact delegates to serviceRepository`() = runTest {
+    fun `addSharedContact delegates to serviceRepository`() = runTest(testDispatcher) {
         val contact = SharedContact(node_num = 123)
         everySuspend { serviceRepository.onServiceAction(any()) } returns Unit
 
-        viewModel.addSharedContact(contact)
-        testScheduler.runCurrent()
+        val job = viewModel.addSharedContact(contact)
+        job.join()
 
         verifySuspend { serviceRepository.onServiceAction(ServiceAction.ImportContact(contact)) }
     }

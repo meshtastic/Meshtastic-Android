@@ -24,7 +24,7 @@ import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -43,7 +43,7 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContactsViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: ContactsViewModel
     private val nodeRepository: NodeRepository = mock(MockMode.autofill)
     private val packetRepository: PacketRepository = mock(MockMode.autofill)
@@ -83,7 +83,7 @@ class ContactsViewModelTest {
     }
 
     @Test
-    fun `unreadCountTotal reflects updates from repository`() = runTest {
+    fun `unreadCountTotal reflects updates from repository`() = runTest(testDispatcher) {
         val countFlow = MutableStateFlow(0)
         every { packetRepository.getUnreadCountTotal() } returns countFlow
 

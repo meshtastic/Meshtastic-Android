@@ -23,7 +23,7 @@ import dev.mokkery.mock
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -42,7 +42,7 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseMapViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: BaseMapViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
@@ -54,6 +54,7 @@ class BaseMapViewModelTest {
         Dispatchers.setMain(testDispatcher)
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
+        radioController.setConnectionState(ConnectionState.Disconnected)
 
         every { mapPrefs.showOnlyFavorites } returns MutableStateFlow(false)
         every { mapPrefs.showWaypointsOnMap } returns MutableStateFlow(false)
@@ -83,7 +84,7 @@ class BaseMapViewModelTest {
     }
 
     @Test
-    fun testMyNodeInfoFlow() = runTest {
+    fun testMyNodeInfoFlow() = runTest(testDispatcher) {
         viewModel.myNodeInfo.test {
             assertEquals(null, awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -91,7 +92,7 @@ class BaseMapViewModelTest {
     }
 
     @Test
-    fun testNodesWithPositionStartsEmpty() = runTest {
+    fun testNodesWithPositionStartsEmpty() = runTest(testDispatcher) {
         viewModel.nodesWithPosition.test {
             assertEquals(emptyList(), awaitItem())
             cancelAndIgnoreRemainingEvents()
@@ -99,7 +100,7 @@ class BaseMapViewModelTest {
     }
 
     @Test
-    fun testConnectionStateFlow() = runTest {
+    fun testConnectionStateFlow() = runTest(testDispatcher) {
         viewModel.isConnected.test {
             // Initially reflects radioController state (which is Disconnected in FakeRadioController default)
             assertEquals(false, awaitItem())
@@ -114,7 +115,7 @@ class BaseMapViewModelTest {
     }
 
     @Test
-    fun testNodeRepositoryIntegration() = runTest {
+    fun testNodeRepositoryIntegration() = runTest(testDispatcher) {
         val testNodes = TestDataFactory.createTestNodes(3)
         nodeRepository.setNodes(testNodes)
 

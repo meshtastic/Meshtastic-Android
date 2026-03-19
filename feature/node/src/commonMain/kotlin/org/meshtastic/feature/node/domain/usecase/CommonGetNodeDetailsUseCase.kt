@@ -51,7 +51,7 @@ import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.PortNum
 import org.meshtastic.proto.Telemetry
 
-@Single
+@Single(binds = [GetNodeDetailsUseCase::class])
 class CommonGetNodeDetailsUseCase
 constructor(
     private val nodeRepository: NodeRepository,

@@ -27,7 +27,7 @@ import dev.mokkery.verifySuspend
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
@@ -42,7 +42,7 @@ import kotlin.test.assertNotNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class QuickChatViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
+    private val testDispatcher = UnconfinedTestDispatcher()
     private lateinit var viewModel: QuickChatViewModel
     private val quickChatActionRepository: QuickChatActionRepository = mock(MockMode.autofill)
 
@@ -64,7 +64,7 @@ class QuickChatViewModelTest {
     }
 
     @Test
-    fun `quickChatActions reflects repository updates`() = runTest {
+    fun `quickChatActions reflects repository updates`() = runTest(testDispatcher) {
         val actionsFlow = MutableStateFlow<List<QuickChatAction>>(emptyList())
         every { quickChatActionRepository.getAllActions() } returns actionsFlow
 
@@ -81,12 +81,12 @@ class QuickChatViewModelTest {
     }
 
     @Test
-    fun `addQuickChatAction delegates to repository`() = runTest {
+    fun `addQuickChatAction delegates to repository`() = runTest(testDispatcher) {
         val action = QuickChatAction(uuid = 1L, name = "Test", message = "Hello", position = 0)
         everySuspend { quickChatActionRepository.upsert(any()) } returns Unit
 
-        viewModel.addQuickChatAction(action)
-        testScheduler.runCurrent()
+        val job = viewModel.addQuickChatAction(action)
+        job.join()
 
         verifySuspend { quickChatActionRepository.upsert(action) }
     }
