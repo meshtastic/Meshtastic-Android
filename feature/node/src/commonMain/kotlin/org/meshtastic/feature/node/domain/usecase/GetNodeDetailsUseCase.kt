@@ -19,9 +19,7 @@ package org.meshtastic.feature.node.domain.usecase
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.feature.node.detail.NodeDetailUiState
 
-/**
- * Use case for retrieving comprehensive details for a specific node.
- */
+/** Use case for retrieving comprehensive details for a specific node. */
 interface GetNodeDetailsUseCase {
     operator fun invoke(nodeId: Int): Flow<NodeDetailUiState>
 }

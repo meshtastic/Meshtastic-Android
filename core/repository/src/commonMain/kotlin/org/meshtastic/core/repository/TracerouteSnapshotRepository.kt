@@ -19,17 +19,11 @@ package org.meshtastic.core.repository
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.proto.Position
 
-/**
- * Repository interface for managing snapshots of traceroute results.
- */
+/** Repository interface for managing snapshots of traceroute results. */
 interface TracerouteSnapshotRepository {
-    /**
-     * Returns a reactive flow of positions associated with a specific traceroute log.
-     */
+    /** Returns a reactive flow of positions associated with a specific traceroute log. */
     fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>>
 
-    /**
-     * Persists a set of positions for a traceroute log.
-     */
+    /** Persists a set of positions for a traceroute log. */
     suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>)
 }

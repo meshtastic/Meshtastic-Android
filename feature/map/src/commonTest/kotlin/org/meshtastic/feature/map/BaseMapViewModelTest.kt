@@ -12,10 +12,6 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.map
@@ -67,12 +63,13 @@ class BaseMapViewModelTest {
 
         every { packetRepository.getWaypoints() } returns MutableStateFlow(emptyList())
 
-        viewModel = BaseMapViewModel(
-            mapPrefs = mapPrefs,
-            nodeRepository = nodeRepository,
-            packetRepository = packetRepository,
-            radioController = radioController,
-        )
+        viewModel =
+            BaseMapViewModel(
+                mapPrefs = mapPrefs,
+                nodeRepository = nodeRepository,
+                packetRepository = packetRepository,
+                radioController = radioController,
+            )
     }
 
     @AfterTest
@@ -106,10 +103,10 @@ class BaseMapViewModelTest {
         viewModel.isConnected.test {
             // Initially reflects radioController state (which is Disconnected in FakeRadioController default)
             assertEquals(false, awaitItem())
-            
+
             radioController.setConnectionState(ConnectionState.Connected)
             assertEquals(true, awaitItem())
-            
+
             radioController.setConnectionState(ConnectionState.Disconnected)
             assertEquals(false, awaitItem())
             cancelAndIgnoreRemainingEvents()

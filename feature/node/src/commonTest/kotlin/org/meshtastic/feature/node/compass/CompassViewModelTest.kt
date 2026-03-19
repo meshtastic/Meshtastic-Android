@@ -12,10 +12,6 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.compass
@@ -47,11 +43,7 @@ import kotlin.test.assertTrue
 class CompassViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
-    private val dispatchers = CoroutineDispatchers(
-        main = testDispatcher,
-        io = testDispatcher,
-        default = testDispatcher,
-    )
+    private val dispatchers = CoroutineDispatchers(main = testDispatcher, io = testDispatcher, default = testDispatcher)
 
     private lateinit var viewModel: CompassViewModel
     private val headingProvider: CompassHeadingProvider = mock()
@@ -64,17 +56,18 @@ class CompassViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         every { headingProvider.headingUpdates() } returns headingFlow
         every { phoneLocationProvider.locationUpdates() } returns locationFlow
         every { magneticFieldProvider.getDeclination(any(), any(), any(), any()) } returns 0f
 
-        viewModel = CompassViewModel(
-            headingProvider = headingProvider,
-            phoneLocationProvider = phoneLocationProvider,
-            magneticFieldProvider = magneticFieldProvider,
-            dispatchers = dispatchers,
-        )
+        viewModel =
+            CompassViewModel(
+                headingProvider = headingProvider,
+                phoneLocationProvider = phoneLocationProvider,
+                magneticFieldProvider = magneticFieldProvider,
+                dispatchers = dispatchers,
+            )
     }
 
     @AfterTest
@@ -90,7 +83,7 @@ class CompassViewModelTest {
     @Test
     fun `uiState reflects target node info after start`() = runTest {
         val node = Node(num = 1234, user = User(id = "!1234", long_name = "Target Node"))
-        
+
         viewModel.start(node, Config.DisplayConfig.DisplayUnits.METRIC)
 
         viewModel.uiState.test {
@@ -103,24 +96,30 @@ class CompassViewModelTest {
 
     @Test
     fun `uiState updates when heading and location change`() = runTest {
-        val node = Node(
-            num = 1234, 
-            user = User(id = "!1234"),
-            position = org.meshtastic.proto.Position(latitude_i = 10000000, longitude_i = 10000000) // 1 deg North, 1 deg East
-        )
-        
+        val node =
+            Node(
+                num = 1234,
+                user = User(id = "!1234"),
+                position =
+                org.meshtastic.proto.Position(
+                    latitude_i = 10000000,
+                    longitude_i = 10000000,
+                ), // 1 deg North, 1 deg East
+            )
+
         viewModel.start(node, Config.DisplayConfig.DisplayUnits.METRIC)
 
         viewModel.uiState.test {
             // Skip initial states
             awaitItem()
-            
+
             // Update location and heading
-            locationFlow.value = PhoneLocationState(
-                permissionGranted = true,
-                providerEnabled = true,
-                location = PhoneLocation(0.0, 0.0, 0.0, 1000L)
-            )
+            locationFlow.value =
+                PhoneLocationState(
+                    permissionGranted = true,
+                    providerEnabled = true,
+                    location = PhoneLocation(0.0, 0.0, 0.0, 1000L),
+                )
             headingFlow.value = HeadingState(heading = 0f)
 
             // Wait for state with both bearing and heading
@@ -128,12 +127,12 @@ class CompassViewModelTest {
             while (state.bearing == null || state.heading == null) {
                 state = awaitItem()
             }
-            
+
             // Bearing from (0,0) to (1,1) is approx 45 degrees
             assertEquals(45f, state.bearing!!, 0.5f)
             assertEquals(0f, state.heading!!, 0.1f)
             assertTrue(state.hasTargetPosition)
-            
+
             cancelAndIgnoreRemainingEvents()
         }
     }

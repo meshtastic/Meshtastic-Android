@@ -118,7 +118,7 @@ class PacketHandlerImplTest {
     fun `handleQueueStatus property test`() = runTest(testDispatcher) {
         checkAll(Arb.int(0, 10), Arb.int(0, 32), Arb.int(0, 100000)) { res, free, packetId ->
             val status = QueueStatus(res = res, free = free, mesh_packet_id = packetId)
-            
+
             // Ensure it doesn't crash on any input
             handler.handleQueueStatus(status)
             testScheduler.runCurrent()

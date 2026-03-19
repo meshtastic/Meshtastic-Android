@@ -12,10 +12,6 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.messaging.ui.contact
@@ -62,17 +58,18 @@ class ContactsViewModelTest {
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.myId } returns MutableStateFlow(null)
         every { nodeRepository.getNodes() } returns MutableStateFlow(emptyList())
-        
+
         every { serviceRepository.connectionState } returns MutableStateFlow(ConnectionState.Disconnected)
         every { packetRepository.getUnreadCountTotal() } returns MutableStateFlow(0)
         every { radioConfigRepository.channelSetFlow } returns MutableStateFlow(ChannelSet())
 
-        viewModel = ContactsViewModel(
-            nodeRepository = nodeRepository,
-            packetRepository = packetRepository,
-            radioConfigRepository = radioConfigRepository,
-            serviceRepository = serviceRepository,
-        )
+        viewModel =
+            ContactsViewModel(
+                nodeRepository = nodeRepository,
+                packetRepository = packetRepository,
+                radioConfigRepository = radioConfigRepository,
+                serviceRepository = serviceRepository,
+            )
     }
 
     @AfterTest
@@ -89,7 +86,7 @@ class ContactsViewModelTest {
     fun `unreadCountTotal reflects updates from repository`() = runTest {
         val countFlow = MutableStateFlow(0)
         every { packetRepository.getUnreadCountTotal() } returns countFlow
-        
+
         // Re-init VM
         viewModel = ContactsViewModel(nodeRepository, packetRepository, radioConfigRepository, serviceRepository)
 

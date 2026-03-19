@@ -27,22 +27,24 @@ sealed class NodeRequestEffect {
     data class ShowFeedback(val text: UiText) : NodeRequestEffect()
 }
 
-/**
- * Interface for high-level node request actions (e.g., requesting user info, position, telemetry).
- */
+/** Interface for high-level node request actions (e.g., requesting user info, position, telemetry). */
 interface NodeRequestActions {
     val effects: SharedFlow<NodeRequestEffect>
     val lastTracerouteTime: StateFlow<Long?>
     val lastRequestNeighborTimes: StateFlow<Map<Int, Long>>
 
     fun requestUserInfo(scope: CoroutineScope, destNum: Int, longName: String)
+
     fun requestNeighborInfo(scope: CoroutineScope, destNum: Int, longName: String)
+
     fun requestPosition(
         scope: CoroutineScope,
         destNum: Int,
         longName: String,
         position: Position = Position(0.0, 0.0, 0),
     )
+
     fun requestTelemetry(scope: CoroutineScope, destNum: Int, longName: String, type: TelemetryType)
+
     fun requestTraceroute(scope: CoroutineScope, destNum: Int, longName: String)
 }

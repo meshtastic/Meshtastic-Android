@@ -41,10 +41,21 @@ class StreamInterfaceTest {
 
     class FakeStreamInterface(service: RadioInterfaceService) : StreamInterface(service) {
         val sentBytes = mutableListOf<ByteArray>()
-        override fun sendBytes(p: ByteArray) { sentBytes.add(p) }
-        override fun flushBytes() { /* no-op */ }
-        override fun keepAlive() { /* no-op */ }
+
+        override fun sendBytes(p: ByteArray) {
+            sentBytes.add(p)
+        }
+
+        override fun flushBytes() {
+            /* no-op */
+        }
+
+        override fun keepAlive() {
+            /* no-op */
+        }
+
         fun feed(b: Byte) = readChar(b)
+
         public override fun connect() = super.connect()
     }
 
@@ -56,27 +67,25 @@ class StreamInterfaceTest {
     @Test
     fun `handleSendToRadio property test`() = runTest {
         fakeStream = FakeStreamInterface(radioService)
-        
-        checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload ->
-            fakeStream.handleSendToRadio(payload)
-        }
+
+        checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload -> fakeStream.handleSendToRadio(payload) }
     }
 
     @Test
     fun `readChar property test`() = runTest {
         fakeStream = FakeStreamInterface(radioService)
-        
+
         checkAll(Arb.byteArray(Arb.int(0, 100), Arb.byte())) { data ->
             data.forEach { fakeStream.feed(it) }
             // Ensure no crash
         }
     }
-    
+
     @Test
     fun `connect sends wake bytes`() {
         fakeStream = FakeStreamInterface(radioService)
         fakeStream.connect()
-        
+
         assertTrue(fakeStream.sentBytes.isNotEmpty())
         assertTrue(fakeStream.sentBytes[0].contentEquals(StreamFrameCodec.WAKE_BYTES))
         verify { radioService.onConnect() }

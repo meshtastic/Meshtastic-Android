@@ -69,14 +69,12 @@ class StreamFrameCodecTest {
         checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload ->
             var received: ByteArray? = null
             val codec = StreamFrameCodec(onPacketReceived = { received = it })
-            
+
             val bytes = mutableListOf<ByteArray>()
             codec.frameAndSend(payload, sendBytes = { bytes.add(it) })
-            
-            bytes.forEach { arr ->
-                arr.forEach { codec.processInputByte(it) }
-            }
-            
+
+            bytes.forEach { arr -> arr.forEach { codec.processInputByte(it) } }
+
             received.shouldNotBeNull()
             received.shouldBe(payload)
         }

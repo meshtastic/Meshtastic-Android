@@ -12,16 +12,11 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.node.detail
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import app.cash.turbine.test
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -60,10 +55,10 @@ class NodeDetailViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         every { getNodeDetailsUseCase(any()) } returns emptyFlow()
         every { nodeRequestActions.effects } returns kotlinx.coroutines.flow.MutableSharedFlow()
-        
+
         viewModel = createViewModel(1234)
     }
 
@@ -95,7 +90,7 @@ class NodeDetailViewModelTest {
         vm.uiState.test {
             // Initial empty state from stateIn
             assertEquals(null, awaitItem().node)
-            
+
             // State from useCase
             val state = awaitItem()
             assertEquals(1234, state.node?.num)

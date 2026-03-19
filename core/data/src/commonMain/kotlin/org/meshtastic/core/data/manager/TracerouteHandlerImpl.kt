@@ -24,7 +24,6 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
@@ -34,6 +33,7 @@ import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.TracerouteHandler
+import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.proto.MeshPacket
 
 @Single

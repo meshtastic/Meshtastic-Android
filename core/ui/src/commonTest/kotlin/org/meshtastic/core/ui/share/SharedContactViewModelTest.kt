@@ -71,7 +71,7 @@ class SharedContactViewModelTest {
     fun `unfilteredNodes reflects repository updates`() = runTest {
         val nodesFlow = MutableStateFlow<List<Node>>(emptyList())
         every { nodeRepository.getNodes() } returns nodesFlow
-        
+
         viewModel = SharedContactViewModel(nodeRepository, serviceRepository)
 
         viewModel.unfilteredNodes.test {

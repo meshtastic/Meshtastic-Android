@@ -67,7 +67,7 @@ class QuickChatViewModelTest {
     fun `quickChatActions reflects repository updates`() = runTest {
         val actionsFlow = MutableStateFlow<List<QuickChatAction>>(emptyList())
         every { quickChatActionRepository.getAllActions() } returns actionsFlow
-        
+
         // Re-init
         viewModel = QuickChatViewModel(quickChatActionRepository)
 

@@ -12,15 +12,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  See
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.ui.viewmodel
 
-import app.cash.turbine.test
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -32,7 +27,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.RadioConfigRepository
@@ -58,19 +52,21 @@ class ConnectionsViewModelTest {
     @BeforeTest
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
+
         every { radioConfigRepository.localConfigFlow } returns MutableStateFlow(LocalConfig())
-        every { serviceRepository.connectionState } returns MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
+        every { serviceRepository.connectionState } returns
+            MutableStateFlow(org.meshtastic.core.model.ConnectionState.Disconnected)
         every { nodeRepository.myNodeInfo } returns MutableStateFlow(null)
         every { nodeRepository.ourNodeInfo } returns MutableStateFlow(null)
         every { uiPrefs.hasShownNotPairedWarning } returns MutableStateFlow(false)
 
-        viewModel = ConnectionsViewModel(
-            radioConfigRepository = radioConfigRepository,
-            serviceRepository = serviceRepository,
-            nodeRepository = nodeRepository,
-            uiPrefs = uiPrefs,
-        )
+        viewModel =
+            ConnectionsViewModel(
+                radioConfigRepository = radioConfigRepository,
+                serviceRepository = serviceRepository,
+                nodeRepository = nodeRepository,
+                uiPrefs = uiPrefs,
+            )
     }
 
     @AfterTest
@@ -86,9 +82,9 @@ class ConnectionsViewModelTest {
     @Test
     fun `suppressNoPairedWarning updates state and prefs`() {
         every { uiPrefs.setHasShownNotPairedWarning(any()) } returns Unit
-        
+
         viewModel.suppressNoPairedWarning()
-        
+
         assertEquals(true, viewModel.hasShownNotPairedWarning.value)
         verify { uiPrefs.setHasShownNotPairedWarning(true) }
     }

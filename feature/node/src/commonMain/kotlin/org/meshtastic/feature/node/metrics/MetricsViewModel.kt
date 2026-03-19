@@ -44,7 +44,6 @@ import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.common.util.nowSeconds
-import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.Node
@@ -55,6 +54,7 @@ import org.meshtastic.core.repository.FileService
 import org.meshtastic.core.repository.MeshLogRepository
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.okay
 import org.meshtastic.core.resources.traceroute

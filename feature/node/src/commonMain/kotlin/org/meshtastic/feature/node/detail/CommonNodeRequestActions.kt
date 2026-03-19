@@ -85,12 +85,7 @@ class CommonNodeRequestActions constructor(private val radioController: RadioCon
         }
     }
 
-    override fun requestPosition(
-        scope: CoroutineScope,
-        destNum: Int,
-        longName: String,
-        position: Position,
-    ) {
+    override fun requestPosition(scope: CoroutineScope, destNum: Int, longName: String, position: Position) {
         scope.launch(Dispatchers.IO) {
             Logger.i { "Requesting position for '$destNum'" }
             radioController.requestPosition(destNum, position)
