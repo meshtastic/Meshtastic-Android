@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,82 +12,115 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
+ * along with this program.  See
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.feature.map
 
-/**
- * Bootstrap tests for BaseMapViewModel.
- *
- * Tests map functionality using FakeNodeRepository and test data.
- */
+import app.cash.turbine.test
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.repository.MapPrefs
+import org.meshtastic.core.repository.PacketRepository
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.FakeRadioController
+import org.meshtastic.core.testing.TestDataFactory
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class BaseMapViewModelTest {
-    /*
 
-
+    private val testDispatcher = StandardTestDispatcher()
     private lateinit var viewModel: BaseMapViewModel
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var radioController: FakeRadioController
-    private lateinit var mapPrefs: MapPrefs
-    private lateinit var packetRepository: PacketRepository
+    private val mapPrefs: MapPrefs = mock()
+    private val packetRepository: PacketRepository = mock()
 
     @BeforeTest
     fun setUp() {
+        Dispatchers.setMain(testDispatcher)
         nodeRepository = FakeNodeRepository()
         radioController = FakeRadioController()
 
-        mapPrefs =
-                every { showOnlyFavorites } returns MutableStateFlow(false)
-                every { showWaypointsOnMap } returns MutableStateFlow(false)
-                every { showPrecisionCircleOnMap } returns MutableStateFlow(false)
-                every { lastHeardFilter } returns MutableStateFlow(0L)
-                every { lastHeardTrackFilter } returns MutableStateFlow(0L)
-            }
+        every { mapPrefs.showOnlyFavorites } returns MutableStateFlow(false)
+        every { mapPrefs.showWaypointsOnMap } returns MutableStateFlow(false)
+        every { mapPrefs.showPrecisionCircleOnMap } returns MutableStateFlow(false)
+        every { mapPrefs.lastHeardFilter } returns MutableStateFlow(0L)
+        every { mapPrefs.lastHeardTrackFilter } returns MutableStateFlow(0L)
 
-        viewModel =
-            BaseMapViewModel(
-                mapPrefs = mapPrefs,
-                nodeRepository = nodeRepository,
-                packetRepository = packetRepository,
-                radioController = radioController,
-            )
+        every { packetRepository.getWaypoints() } returns MutableStateFlow(emptyList())
+
+        viewModel = BaseMapViewModel(
+            mapPrefs = mapPrefs,
+            nodeRepository = nodeRepository,
+            packetRepository = packetRepository,
+            radioController = radioController,
+        )
+    }
+
+    @AfterTest
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test
-    fun testInitialization() = runTest {
-        setUp()
-        assertTrue(true, "BaseMapViewModel initialized successfully")
+    fun testInitialization() {
+        assertNotNull(viewModel)
     }
 
     @Test
     fun testMyNodeInfoFlow() = runTest {
-        setUp()
-        val myNodeInfo = viewModel.myNodeInfo.value
-        assertTrue(myNodeInfo == null, "myNodeInfo starts as null")
+        viewModel.myNodeInfo.test {
+            assertEquals(null, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun testNodesWithPositionStartsEmpty() = runTest {
-        setUp()
-        "nodesWithPosition should start empty" shouldBe emptyList<Any>(), viewModel.nodesWithPosition.value
+        viewModel.nodesWithPosition.test {
+            assertEquals(emptyList(), awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun testConnectionStateFlow() = runTest {
-        setUp()
-        radioController.setConnectionState(org.meshtastic.core.model.ConnectionState.Disconnected)
-        // isConnected should reflect radioController state
-        assertTrue(true, "Connection state flow is reactive")
+        viewModel.isConnected.test {
+            // Initially reflects radioController state (which is Disconnected in FakeRadioController default)
+            assertEquals(false, awaitItem())
+            
+            radioController.setConnectionState(ConnectionState.Connected)
+            assertEquals(true, awaitItem())
+            
+            radioController.setConnectionState(ConnectionState.Disconnected)
+            assertEquals(false, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
     fun testNodeRepositoryIntegration() = runTest {
-        setUp()
         val testNodes = TestDataFactory.createTestNodes(3)
         nodeRepository.setNodes(testNodes)
 
-        "Nodes added to repository" shouldBe 3, nodeRepository.nodeDBbyNum.value.size
+        assertEquals(3, nodeRepository.nodeDBbyNum.value.size)
     }
-
-     */
 }
