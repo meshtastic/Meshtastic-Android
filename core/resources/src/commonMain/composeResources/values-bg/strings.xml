@@ -320,6 +320,8 @@
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
     <string name="battery">Батерия</string>
+    <string name="channel_utilization">Използване на канала</string>
+    <string name="air_utilization">Използване на ефира</string>
     <string name="device_metrics_percent_value">%1$s: %2$.1f%%</string>
     <string name="device_metrics_voltage_value">%1$s: %2$.1f V</string>
     <string name="device_metrics_numeric_value">%1$.1f</string>
@@ -938,6 +940,9 @@
     <!-- Network Map Layers -->
     <string name="add_network_layer">Добавяне на мрежов слой</string>
     <string name="refresh_layer">Опресняване на слоя</string>
+    <string name="local_mbtiles_file">Локален MBTiles файл</string>
+    <string name="add_local_mbtiles_file">Добавяне на локален MBTiles файл</string>
+    <string name="error_copy_mbtiles_failed">Копирането на MBTiles файла във вътрешната памет не е успешно.</string>
     <string name="tak">TAK (ATAK)</string>
     <string name="tak_config">Конфигурация на TAK</string>
     <string name="tak_team">Цвят на екипа</string>

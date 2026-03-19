@@ -42,6 +42,7 @@
     <string name="internal">Внутренний</string>
     <string name="node_sort_via_favorite">по избранным</string>
     <string name="node_filter_show_ignored">Показать только игнорируемые ноды</string>
+    <string name="node_filter_exclude_mqtt">Исключить MQTT</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="message_status_enroute">Ожидание подтверждения</string>
     <string name="message_status_queued">В очереди на отправку</string>
