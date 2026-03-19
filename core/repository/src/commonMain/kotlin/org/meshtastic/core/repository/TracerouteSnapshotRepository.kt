@@ -14,12 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.node.domain.usecase
+package org.meshtastic.core.repository
 
 import kotlinx.coroutines.flow.Flow
-import org.meshtastic.feature.node.detail.NodeDetailUiState
+import org.meshtastic.proto.Position
 
-/** Use case for retrieving comprehensive details for a specific node. */
-interface GetNodeDetailsUseCase {
-    operator fun invoke(nodeId: Int): Flow<NodeDetailUiState>
+/** Repository interface for managing snapshots of traceroute results. */
+interface TracerouteSnapshotRepository {
+    /** Returns a reactive flow of positions associated with a specific traceroute log. */
+    fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>>
+
+    /** Persists a set of positions for a traceroute log. */
+    suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>)
 }

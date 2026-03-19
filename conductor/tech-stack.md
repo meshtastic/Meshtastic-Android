@@ -33,4 +33,4 @@
 - **Coroutines Testing:** Use `kotlinx-coroutines-test` for virtual time management in asynchronous flows.
 - **Mocking Strategy:** Avoid JVM-specific mocking libraries. Prefer `Mokkery` or `Mockative` for multiplatform-compatible mocking interfaces, alongside handwritten fakes in `core:testing`.
 - **Flow Assertions:** Use `Turbine` for testing multiplatform `Flow` emissions and state updates.
-- **Property-Based Testing:** Consider evaluating `Kotest` for multiplatform data-driven and property-based testing scenarios if standard `kotlin.test` becomes insufficient.
+- **Property-Based Testing:** Use `Kotest` for multiplatform data-driven and property-based testing scenarios.

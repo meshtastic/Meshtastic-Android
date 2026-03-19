@@ -16,6 +16,14 @@
  */
 package org.meshtastic.core.network.transport
 
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.byte
+import io.kotest.property.arbitrary.byteArray
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -54,6 +62,31 @@ class StreamFrameCodecTest {
 
         assertEquals(1, receivedPackets.size)
         assertEquals(listOf(0x55.toByte()), receivedPackets[0].toList())
+    }
+
+    @Test
+    fun `frameAndSend and processInputByte are inverse`() = runTest {
+        checkAll(Arb.byteArray(Arb.int(0, 512), Arb.byte())) { payload ->
+            var received: ByteArray? = null
+            val codec = StreamFrameCodec(onPacketReceived = { received = it })
+
+            val bytes = mutableListOf<ByteArray>()
+            codec.frameAndSend(payload, sendBytes = { bytes.add(it) })
+
+            bytes.forEach { arr -> arr.forEach { codec.processInputByte(it) } }
+
+            received.shouldNotBeNull()
+            received.shouldBe(payload)
+        }
+    }
+
+    @Test
+    fun `processInputByte is robust against random noise`() = runTest {
+        checkAll(Arb.byteArray(Arb.int(0, 1000), Arb.byte())) { noise ->
+            val codec = StreamFrameCodec(onPacketReceived = { /* ignore */ })
+            noise.forEach { codec.processInputByte(it) }
+            // Should not crash
+        }
     }
 
     @Test

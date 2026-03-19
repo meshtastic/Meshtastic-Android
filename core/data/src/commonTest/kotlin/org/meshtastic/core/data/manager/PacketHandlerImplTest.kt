@@ -22,6 +22,9 @@ import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import dev.mokkery.verifySuspend
+import io.kotest.property.Arb
+import io.kotest.property.arbitrary.int
+import io.kotest.property.checkAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -39,6 +42,7 @@ import org.meshtastic.proto.QueueStatus
 import org.meshtastic.proto.ToRadio
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertNotNull
 
 class PacketHandlerImplTest {
 
@@ -71,12 +75,15 @@ class PacketHandlerImplTest {
     }
 
     @Test
+    fun testInitialization() {
+        assertNotNull(handler)
+    }
+
+    @Test
     fun `sendToRadio with ToRadio sends immediately`() {
         val toRadio = ToRadio(packet = MeshPacket(id = 123))
 
         handler.sendToRadio(toRadio)
-
-        // No explicit assertion here in original test, but we could verify call
     }
 
     @Test
@@ -105,6 +112,17 @@ class PacketHandlerImplTest {
 
         handler.handleQueueStatus(status)
         testScheduler.runCurrent()
+    }
+
+    @Test
+    fun `handleQueueStatus property test`() = runTest(testDispatcher) {
+        checkAll(Arb.int(0, 10), Arb.int(0, 32), Arb.int(0, 100000)) { res, free, packetId ->
+            val status = QueueStatus(res = res, free = free, mesh_packet_id = packetId)
+
+            // Ensure it doesn't crash on any input
+            handler.handleQueueStatus(status)
+            testScheduler.runCurrent()
+        }
     }
 
     @Test

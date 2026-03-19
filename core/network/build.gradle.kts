@@ -67,6 +67,10 @@ kotlin {
             implementation(libs.okhttp3.logging.interceptor)
         }
 
-        commonTest.dependencies { implementation(libs.kotlinx.coroutines.test) }
+        commonTest.dependencies {
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.kotest.assertions)
+            implementation(libs.kotest.property)
+        }
     }
 }

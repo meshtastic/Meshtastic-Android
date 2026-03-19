@@ -33,6 +33,8 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.meshtastic.core.model.ConnectionState
+import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.service.ServiceAction
 import org.meshtastic.core.repository.CustomEmojiPrefs
 import org.meshtastic.core.repository.HomoglyphPrefs
@@ -71,14 +73,10 @@ class MessageViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
 
-    private val connectionStateFlow =
-        MutableStateFlow<org.meshtastic.core.model.ConnectionState>(
-            org.meshtastic.core.model.ConnectionState.Disconnected,
-        )
+    private val connectionStateFlow = MutableStateFlow<ConnectionState>(ConnectionState.Disconnected)
     private val showQuickChatFlow = MutableStateFlow(false)
     private val customEmojiFrequencyFlow = MutableStateFlow<String?>(null)
-    private val contactSettingsFlow =
-        MutableStateFlow<Map<String, org.meshtastic.core.model.ContactSettings>>(emptyMap())
+    private val contactSettingsFlow = MutableStateFlow<Map<String, ContactSettings>>(emptyMap())
 
     @BeforeTest
     fun setUp() {
@@ -86,7 +84,7 @@ class MessageViewModelTest {
         savedStateHandle = SavedStateHandle(mapOf("contactKey" to "0!12345678"))
         nodeRepository = FakeNodeRepository()
 
-        connectionStateFlow.value = org.meshtastic.core.model.ConnectionState.Disconnected
+        connectionStateFlow.value = ConnectionState.Disconnected
         showQuickChatFlow.value = false
         customEmojiFrequencyFlow.value = null
         contactSettingsFlow.value = emptyMap()
@@ -149,9 +147,9 @@ class MessageViewModelTest {
     @Test
     fun testConnectionState() = runTest {
         viewModel.connectionState.test {
-            assertEquals(org.meshtastic.core.model.ConnectionState.Disconnected, awaitItem())
-            connectionStateFlow.value = org.meshtastic.core.model.ConnectionState.Connected
-            assertEquals(org.meshtastic.core.model.ConnectionState.Connected, awaitItem())
+            assertEquals(ConnectionState.Disconnected, awaitItem())
+            connectionStateFlow.value = ConnectionState.Connected
+            assertEquals(ConnectionState.Connected, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

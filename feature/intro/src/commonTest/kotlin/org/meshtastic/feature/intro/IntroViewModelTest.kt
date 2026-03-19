@@ -16,39 +16,47 @@
  */
 package org.meshtastic.feature.intro
 
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
+
 /**
  * Bootstrap tests for IntroViewModel.
  *
  * Tests the intro navigation flow logic.
  */
 class IntroViewModelTest {
-    /*
 
+    private lateinit var viewModel: IntroViewModel
 
-    private val viewModel = IntroViewModel()
+    @BeforeTest
+    fun setUp() {
+        viewModel = IntroViewModel()
+    }
 
     @Test
     fun testWelcomeNavigatesNextToBluetooth() {
         val next = viewModel.getNextKey(Welcome, allPermissionsGranted = false)
-        "Welcome should navigate to Bluetooth" shouldBe Bluetooth, next
+        assertEquals(Bluetooth, next)
     }
 
     @Test
     fun testBluetoothNavigatesToLocation() {
         val next = viewModel.getNextKey(Bluetooth, allPermissionsGranted = false)
-        "Bluetooth should navigate to Location" shouldBe Location, next
+        assertEquals(Location, next)
     }
 
     @Test
     fun testLocationNavigatesToNotifications() {
         val next = viewModel.getNextKey(Location, allPermissionsGranted = false)
-        "Location should navigate to Notifications" shouldBe Notifications, next
+        assertEquals(Notifications, next)
     }
 
     @Test
     fun testNotificationsWithPermissionNavigatesToCriticalAlerts() {
         val next = viewModel.getNextKey(Notifications, allPermissionsGranted = true)
-        "Notifications should navigate to CriticalAlerts when permissions granted" shouldBe CriticalAlerts, next
+        assertEquals(CriticalAlerts, next)
     }
 
     @Test
@@ -62,6 +70,4 @@ class IntroViewModelTest {
         val next = viewModel.getNextKey(CriticalAlerts, allPermissionsGranted = true)
         assertNull(next, "CriticalAlerts should not navigate further")
     }
-
-     */
 }

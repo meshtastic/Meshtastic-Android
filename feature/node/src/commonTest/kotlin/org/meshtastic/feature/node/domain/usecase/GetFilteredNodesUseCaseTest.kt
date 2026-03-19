@@ -16,28 +16,29 @@
  */
 package org.meshtastic.feature.node.domain.usecase
 
+import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
-import org.junit.Before
-import org.junit.Test
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.NodeSortOption
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.feature.node.list.NodeFilterState
 import org.meshtastic.proto.Config
 import org.meshtastic.proto.User
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class GetFilteredNodesUseCaseTest {
 
     private lateinit var nodeRepository: NodeRepository
     private lateinit var useCase: GetFilteredNodesUseCase
 
-    @Before
+    @BeforeTest
     fun setUp() {
         nodeRepository = mock()
         useCase = GetFilteredNodesUseCase(nodeRepository)

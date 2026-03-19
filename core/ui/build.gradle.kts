@@ -63,6 +63,8 @@ kotlin {
             implementation(libs.junit)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.turbine)
+            implementation(libs.kotest.assertions)
+            implementation(libs.kotest.property)
         }
 
         androidUnitTest.dependencies { implementation(libs.androidx.test.runner) }
