@@ -1,8 +1,8 @@
 # Implementation Plan: Expand Testing Coverage
 
-## Phase 1: Baseline Measurement
+## Phase 1: Baseline Measurement [checkpoint: 6d9ad46]
 - [x] Task: Execute `./gradlew koverLog` and record current project test coverage. 8bdd673a1
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Baseline Measurement' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Baseline Measurement' (Protocol in workflow.md) 6d9ad468c
 
 ## Phase 2: Feature ViewModel Migration to Turbine
 - [ ] Task: Refactor `MetricsViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
