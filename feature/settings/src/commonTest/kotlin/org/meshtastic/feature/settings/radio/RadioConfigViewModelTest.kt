@@ -31,7 +31,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.meshtastic.core.domain.usecase.settings.AdminActionsUseCase
@@ -56,6 +58,7 @@ import org.meshtastic.core.repository.PacketRepository
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.repository.UiPrefs
+import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.ChannelSettings
 import org.meshtastic.proto.Config
@@ -69,6 +72,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class RadioConfigViewModelTest {
@@ -348,8 +352,8 @@ class RadioConfigViewModelTest {
         assertTrue(viewModel.radioConfigState.value.responseState is ResponseState.Loading)
 
         // advance time past 30 seconds
-        kotlinx.coroutines.test.advanceTimeBy(31_000)
-        kotlinx.coroutines.test.runCurrent()
+        advanceTimeBy(31_000)
+        runCurrent()
 
         // after timeout, the request ID should be removed, and if empty, sendError is called.
         // It's hard to assert sendError directly without a mock on a channel, but we can verify it doesn't stay loading
