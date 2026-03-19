@@ -68,7 +68,7 @@ dependency-guard = "0.5.0"
 kable = "0.42.0"
 nordic-dfu = "2.11.0"
 kmqtt = "1.0.0"
-jmdns = "3.5.9"
+jmdns = "3.6.3"
 
 [libraries]
 # AndroidX
