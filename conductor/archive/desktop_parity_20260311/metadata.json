@@ -1,7 +1,7 @@
 {
   "track_id": "desktop_parity_20260311",
   "type": "feature",
-  "status": "new",
+  "status": "completed",
   "created_at": "2026-03-11T12:00:00Z",
   "updated_at": "2026-03-11T12:00:00Z",
   "description": "continue bringing desktop up to parity with android"
