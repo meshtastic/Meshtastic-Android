@@ -234,6 +234,7 @@ dependencies {
     implementation(projects.feature.node)
     implementation(projects.feature.settings)
     implementation(projects.feature.firmware)
+    implementation(projects.feature.widget)
 
     implementation(libs.jetbrains.compose.material3.adaptive)
     implementation(libs.jetbrains.compose.material3.adaptive.layout)

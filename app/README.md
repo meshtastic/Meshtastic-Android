@@ -9,7 +9,7 @@ The `:app` module is the entry point for the Meshtastic Android application. It 
 The single Activity of the application. It hosts the `NavHost` and manages the root UI structure (Navigation Bar, Rail, etc.).
 
 ### 2. `MeshService`
-The core background service that manages long-running communication with the mesh radio. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
+The core background service that manages long-running communication with the mesh radio. While it is declared in the `:app` manifest for system visibility, its implementation resides in the `:core:service` module. It runs as a **Foreground Service** to ensure reliable communication even when the app is in the background.
 
 ### 3. Koin Application
 `MeshUtilApplication` is the Koin entry point, providing the global dependency injection container.

@@ -12,12 +12,16 @@ This is the public android API for talking to meshtastic radios.
 
 To connect to meshtastic you should bind to it per https://developer.android.com/guide/components/bound-services
 
-The intent you use to reach the service should look like this:
+The intent you use to reach the service should ideally use the action string:
+
+        val intent = Intent("com.geeksville.mesh.Service")
+
+Or if using an explicit intent:
 
         val intent = Intent().apply {
             setClassName(
                 "com.geeksville.mesh",
-                "com.geeksville.mesh.service.MeshService"
+                "org.meshtastic.core.service.MeshService"
             )
         }
 

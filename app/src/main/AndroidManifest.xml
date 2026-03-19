@@ -257,7 +257,7 @@
         <receiver android:name="org.meshtastic.core.service.ReactionReceiver" android:exported="false" />
 
         <receiver
-            android:name="org.meshtastic.app.widget.LocalStatsWidgetReceiver"
+            android:name="org.meshtastic.feature.widget.LocalStatsWidgetReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />

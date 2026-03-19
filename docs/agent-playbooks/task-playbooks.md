@@ -19,14 +19,12 @@ Reference examples:
 1. Implement or extend base ViewModel logic in `feature/<name>/src/commonMain/...`.
 2. Keep shared class free of Android framework dependencies.
 3. Keep Android framework dependencies out of shared logic; if the module already uses Koin annotations in `commonMain`, keep patterns consistent and ensure app root inclusion.
-4. Add/update Android wrapper in `app/src/main/kotlin/org/meshtastic/app/...` with `@KoinViewModel` when Android instantiation is needed.
-5. Update navigation entry points in `app/src/main/kotlin/org/meshtastic/app/navigation/...` to resolve wrapper ViewModels with `koinViewModel()`.
+4. Update navigation entry points in `feature/*/src/androidMain/kotlin/org/meshtastic/feature/*/navigation/...` to resolve ViewModels with `koinViewModel()`.
 
 Reference examples:
 - Shared base: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt`
-- Android wrapper (remaining): `app/src/main/kotlin/org/meshtastic/app/node/AndroidMetricsViewModel.kt`
 - Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/BaseUIViewModel.kt`
-- Navigation usage: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`
+- Navigation usage: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
 - Desktop navigation usage: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
 
 ## Playbook C: Add a new dependency or service binding
@@ -45,12 +43,12 @@ Reference examples:
 
 1. Define/extend route keys in `core:navigation`.
 2. Implement feature entry/content using Navigation 3 types (`NavKey`, `NavBackStack`, `EntryProviderScope`).
-3. Add graph entries under `app/src/main/kotlin/org/meshtastic/app/navigation`.
+3. Add graph entries under the relevant feature module's `navigation` package (e.g., `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation`).
 4. Use backstack mutation (`add`, `removeLastOrNull`) instead of introducing controller-coupled APIs.
 5. Verify deep-link behavior if route is externally reachable.
 
 Reference examples:
-- App graph wiring: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`
+- App graph wiring: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
 - Feature intro graph pattern: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt`
 - Desktop nav shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
 - Desktop nav graph entries: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`

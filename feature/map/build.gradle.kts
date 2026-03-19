@@ -31,6 +31,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigation3.ui)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)

@@ -72,7 +72,7 @@ Working Compose Desktop application with:
 |---|---|---|
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
 | Shared feature/UI logic | **8.5/10** | All 7 KMP; feature:connections unified with dynamic transport detection |
-| Android decoupling | **8/10** | No known `java.*` calls in `commonMain`; app module extraction in progress |
+| Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
 | Multi-target readiness | **8/10** | Full JVM; release-ready desktop; iOS not declared |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
@@ -84,9 +84,9 @@ Working Compose Desktop application with:
 
 | Lens | % |
 |---|---:|
-| Android-first structural KMP | ~98% |
-| Shared business logic | ~95% |
-| Shared feature/UI | ~90% |
+| Android-first structural KMP | ~100% |
+| Shared business logic | ~98% |
+| Shared feature/UI | ~95% |
 | True multi-target readiness | ~75% |
 | "Add iOS without surprises" | ~65% |
 
@@ -118,6 +118,7 @@ Based on the latest codebase investigation, the following steps are proposed to 
 - Both shells iterate `TopLevelDestination.entries` with shared icon mapping from `core:ui` (`TopLevelDestinationExt.icon`).
 - Desktop locale changes now trigger a full subtree recomposition from `Main.kt` without resetting the shared Navigation 3 backstack, so translated labels update in place.
 - Firmware remains available as an in-flow route instead of a top-level destination, matching Android information architecture.
+- Android navigation graphs are decoupled and extracted into their respective feature modules, aligning with the Desktop architecture.
 - Parity tests exist in `core:navigation/commonTest` (`NavigationParityTest`) and `desktop/test` (`DesktopTopLevelDestinationParityTest`).
 - Remaining parity work is documented in [`decisions/navigation3-parity-2026-03.md`](./decisions/navigation3-parity-2026-03.md): serializer registration validation and platform exception tracking.
 
@@ -132,19 +133,16 @@ Extracted to shared `commonMain` (no longer app-only):
 - `MetricsViewModel` → `feature:node/commonMain`
 - `UIViewModel` → `core:ui/commonMain`
 - `ChannelViewModel` → `feature:settings/commonMain`
-- `NodeMapViewModel` → `feature:map/commonMain`
+- `NodeMapViewModel` → `feature:map/commonMain` (Shared logic for node-specific maps)
+- `BaseMapViewModel` → `feature:map/commonMain` (Core contract for all maps)
 
 Extracted to core KMP modules (Android-specific implementations):
 - Android Services, WorkManager Workers, and BroadcastReceivers → `core:service/androidMain`
 - BLE, USB/Serial, TCP radio connections, and NsdManager → `core:network/androidMain`
 
-Remaining to be extracted from `:app` to achieve a true thin-shell module:
-- Navigation routes (`ChannelsNavigation.kt`, `SettingsNavigation.kt`, etc.)
-- Android App Widgets (`LocalStatsWidget.kt`, `AndroidAppWidgetUpdater.kt`)
-- Message Queue implementation (`WorkManagerMessageQueue.kt`)
-- Location provider bindings (`AndroidMeshLocationManager.kt`)
-- Top-level UI composition (`ui/Main.kt`, `ui/node/AdaptiveNodeListScreen.kt`)
-- Root Activity and Koin bootstrapping (`MainActivity.kt`, `MeshUtilApplication.kt`, `MeshServiceClient.kt`)
+Remaining to be extracted from `:app` or unified in `commonMain`:
+- `MapViewModel` (Unify Google/F-Droid flavors into a single `commonMain` class consuming a `MapConfigProvider` interface)
+- Top-level UI composition (`ui/Main.kt`)
 
 ## Prerelease Dependencies
 

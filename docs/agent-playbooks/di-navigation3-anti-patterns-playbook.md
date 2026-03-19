@@ -22,7 +22,6 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 
 - App-level module scanning: `app/src/main/kotlin/org/meshtastic/app/MainKoinModule.kt`
 - App startup + Koin init: `app/src/main/kotlin/org/meshtastic/app/MeshUtilApplication.kt`
-- Android wrapper ViewModel pattern: `app/src/main/kotlin/org/meshtastic/app/node/AndroidMetricsViewModel.kt`
 - Shared ViewModel base: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt`
 - Shared base UI ViewModel: `core/ui/src/commonMain/kotlin/org/meshtastic/core/ui/viewmodel/BaseUIViewModel.kt`
 
@@ -39,7 +38,7 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 
 - Typed routes: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
 - App root backstack + `NavDisplay`: `app/src/main/kotlin/org/meshtastic/app/ui/Main.kt`
-- Graph entry provider pattern: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`
+- Graph entry provider pattern: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
 - Feature-level Navigation 3 usage: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/AppIntroductionScreen.kt`
 - Desktop Navigation 3 shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
 - Desktop nav graph entries: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`

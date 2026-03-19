@@ -44,6 +44,7 @@ include(
     ":feature:node",
     ":feature:settings",
     ":feature:firmware",
+    ":feature:widget",
     ":mesh_service_example",
     ":desktop",
 )

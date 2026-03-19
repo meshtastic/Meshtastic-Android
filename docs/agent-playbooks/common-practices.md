@@ -6,8 +6,7 @@ This document captures discoverable patterns that are already used in the reposi
 
 - Keep domain logic in KMP modules (`commonMain`) and keep Android framework wiring in `app` or `androidMain`.
 - Use `core:*` for shared logic, `feature:*` for user-facing flows, and `app` for Android entrypoints and integration wiring.
-- Example: `feature/messaging/src/commonMain/kotlin/org/meshtastic/feature/messaging/MessageViewModel.kt` contains shared ViewModel logic, while `app/src/main/kotlin/org/meshtastic/app/node/AndroidMetricsViewModel.kt` provides an Android/Koin wrapper for platform-specific functionality (CSV export via `android.net.Uri`).
-- Note: Many former passthrough wrappers have been eliminated. Only ViewModels with genuine Android-specific logic (file I/O, permissions, `Locale`-aware formatting) retain wrappers in `app/`.
+- Note: Former passthrough Android ViewModel wrappers have been eliminated. ViewModels are now shared KMP components. Platform-specific dependencies (file I/O, permissions) are isolated behind injected `core:repository` interfaces.
 
 ## 2) Dependency injection conventions (Koin)
 
@@ -20,7 +19,7 @@ This document captures discoverable patterns that are already used in the reposi
 ## 3) Navigation conventions (Navigation 3)
 
 - Use Navigation 3 types (`NavKey`, `NavBackStack`, entry providers) instead of legacy controller-first patterns.
-- Example graph using `EntryProviderScope<NavKey>` and `backStack.add/removeLastOrNull`: `app/src/main/kotlin/org/meshtastic/app/navigation/SettingsNavigation.kt`.
+- Example graph using `EntryProviderScope<NavKey>` and `backStack.add/removeLastOrNull`: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`.
 - Example feature flow using `rememberNavBackStack` and `NavDisplay<NavKey>`: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/AppIntroductionScreen.kt`.
 
 ## 4) UI and resources

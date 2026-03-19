@@ -52,6 +52,7 @@ import org.meshtastic.feature.map.di.FeatureMapModule
 import org.meshtastic.feature.messaging.di.FeatureMessagingModule
 import org.meshtastic.feature.node.di.FeatureNodeModule
 import org.meshtastic.feature.settings.di.FeatureSettingsModule
+import org.meshtastic.feature.widget.di.FeatureWidgetModule
 
 @Module(
     includes =
@@ -82,6 +83,7 @@ import org.meshtastic.feature.settings.di.FeatureSettingsModule
         FeatureSettingsModule::class,
         FeatureFirmwareModule::class,
         FeatureIntroModule::class,
+        FeatureWidgetModule::class,
         NetworkModule::class,
         FlavorModule::class,
     ],
