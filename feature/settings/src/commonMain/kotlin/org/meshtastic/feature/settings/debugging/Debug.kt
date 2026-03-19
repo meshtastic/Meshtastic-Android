@@ -66,15 +66,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -87,8 +82,6 @@ import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
 import org.meshtastic.core.resources.debug_default_search
-import org.meshtastic.core.resources.debug_export_failed
-import org.meshtastic.core.resources.debug_export_success
 import org.meshtastic.core.resources.debug_filters
 import org.meshtastic.core.resources.debug_logs_export
 import org.meshtastic.core.resources.debug_panel
@@ -105,9 +98,7 @@ import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.theme.AnnotationColor
 import org.meshtastic.core.ui.theme.AppTheme
-
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
@@ -418,7 +409,6 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-
 @Composable
 private fun DecodedPayloadBlock(
     decodedPayload: String,
@@ -483,7 +473,6 @@ private fun rememberAnnotatedDecodedPayload(
     }
 }
 
-
 @Composable
 private fun DebugPacketPreview() {
     AppTheme {
@@ -513,7 +502,6 @@ private fun DebugPacketPreview() {
     }
 }
 
-
 @Composable
 private fun DebugItemWithSearchHighlightPreview() {
     AppTheme {
@@ -529,7 +517,6 @@ private fun DebugItemWithSearchHighlightPreview() {
     }
 }
 
-
 @Composable
 private fun DebugItemPositionPreview() {
     AppTheme {
@@ -543,7 +530,6 @@ private fun DebugItemPositionPreview() {
         )
     }
 }
-
 
 @Composable
 private fun DebugItemErrorPreview() {
@@ -561,7 +547,6 @@ private fun DebugItemErrorPreview() {
         )
     }
 }
-
 
 @Composable
 private fun DebugItemLongMessagePreview() {
@@ -586,7 +571,6 @@ private fun DebugItemLongMessagePreview() {
     }
 }
 
-
 @Composable
 private fun DebugItemSelectedPreview() {
     AppTheme {
@@ -601,7 +585,6 @@ private fun DebugItemSelectedPreview() {
         )
     }
 }
-
 
 @Composable
 private fun DebugMenuActionsPreview() {
@@ -619,7 +602,6 @@ private fun DebugMenuActionsPreview() {
         }
     }
 }
-
 
 @Composable
 @Suppress("detekt:LongMethod") // big preview
@@ -681,7 +663,6 @@ private fun DebugScreenEmptyPreview() {
         }
     }
 }
-
 
 @Composable
 @Suppress("detekt:LongMethod") // big preview
