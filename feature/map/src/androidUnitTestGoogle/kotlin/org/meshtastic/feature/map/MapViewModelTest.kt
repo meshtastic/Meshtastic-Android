@@ -147,4 +147,15 @@ class MapViewModelTest {
         val layer = viewModel.mapLayers.value.find { it.name == "Test KML" }
         assertEquals(LayerType.KML, layer?.layerType)
     }
+
+    @Test
+    fun `setWaypointId updates value correctly including null`() = runTest(testDispatcher) {
+        // Set to a valid ID
+        viewModel.setWaypointId(123)
+        assertEquals(123, viewModel.selectedWaypointId.value)
+
+        // Set to null should clear the selection
+        viewModel.setWaypointId(null)
+        assertEquals(null, viewModel.selectedWaypointId.value)
+    }
 }

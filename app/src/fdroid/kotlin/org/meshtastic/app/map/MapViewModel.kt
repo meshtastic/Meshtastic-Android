@@ -47,7 +47,7 @@ class MapViewModel(
     val selectedWaypointId: StateFlow<Int?> = _selectedWaypointId.asStateFlow()
 
     fun setWaypointId(id: Int?) {
-        if (id != null) {
+        if (_selectedWaypointId.value != id) {
             _selectedWaypointId.value = id
         }
     }

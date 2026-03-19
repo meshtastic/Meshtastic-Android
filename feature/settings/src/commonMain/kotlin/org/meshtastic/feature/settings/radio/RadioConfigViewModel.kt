@@ -20,6 +20,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -59,6 +60,7 @@ import org.meshtastic.core.repository.ServiceRepository
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.UiText
 import org.meshtastic.core.resources.cant_shutdown
+import org.meshtastic.core.resources.timeout
 import org.meshtastic.core.ui.util.getChannelList
 import org.meshtastic.feature.settings.navigation.ConfigRoute
 import org.meshtastic.feature.settings.navigation.ModuleRoute
@@ -75,6 +77,7 @@ import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.MeshPacket
 import org.meshtastic.proto.ModuleConfig
 import org.meshtastic.proto.User
+import kotlin.time.Duration.Companion.seconds
 
 /** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
@@ -134,7 +137,7 @@ open class RadioConfigViewModel(
     private val destNumFlow = MutableStateFlow(savedStateHandle.get<Int>("destNum"))
 
     fun initDestNum(id: Int?) {
-        if (id != null && destNumFlow.value != id) {
+        if (destNumFlow.value != id) {
             destNumFlow.value = id
         }
     }
@@ -549,6 +552,17 @@ open class RadioConfigViewModel(
                     route = "", // setter (response is PortNum.ROUTING_APP)
                     responseState = ResponseState.Loading(),
                 )
+            }
+        }
+
+        val requestTimeout = 30.seconds
+        viewModelScope.launch {
+            delay(requestTimeout)
+            if (requestIds.value.contains(packetId)) {
+                requestIds.update { it.apply { remove(packetId) } }
+                if (requestIds.value.isEmpty()) {
+                    sendError(Res.string.timeout)
+                }
             }
         }
     }
