@@ -25,7 +25,7 @@
 ## Phase 5: Final Measurement & Verification
 - [x] Task: Execute full test suite (`./gradlew test`) to ensure stability. 02fa96f37
 - [x] Task: Execute `./gradlew koverLog` to generate and document the final coverage metrics. e3fe4ba1e
-- [ ] Task: Conductor - User Manual Verification 'Phase 5: Final Measurement & Verification' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'Phase 5: Final Measurement & Verification' (Protocol in workflow.md)
 
 ## Phase 6: Documentation and Wrap-up
 - [ ] Task: Review previous steps and update project documentation (e.g., `README.md`, testing guides).
