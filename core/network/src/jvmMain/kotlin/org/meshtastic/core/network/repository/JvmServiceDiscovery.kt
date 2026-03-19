@@ -32,62 +32,65 @@ import javax.jmdns.ServiceListener
 @Single
 class JvmServiceDiscovery : ServiceDiscovery {
     @Suppress("TooGenericExceptionCaught")
-    override val resolvedServices: Flow<List<DiscoveredService>> = callbackFlow {
-        val jmdns = try {
-            JmDNS.create(InetAddress.getLocalHost())
-        } catch (e: IOException) {
-            Logger.e(e) { "Failed to create JmDNS" }
-            null
-        } catch (e: kotlinx.coroutines.CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Logger.e(e) { "Unexpected error creating JmDNS" }
-            null
-        }
+    override val resolvedServices: Flow<List<DiscoveredService>> =
+        callbackFlow {
+            val jmdns =
+                try {
+                    JmDNS.create(InetAddress.getLocalHost())
+                } catch (e: IOException) {
+                    Logger.e(e) { "Failed to create JmDNS" }
+                    null
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Logger.e(e) { "Unexpected error creating JmDNS" }
+                    null
+                }
 
-        val services = mutableMapOf<String, DiscoveredService>()
+            val services = mutableMapOf<String, DiscoveredService>()
 
-        val listener = object : ServiceListener {
-            override fun serviceAdded(event: ServiceEvent) {
-                jmdns?.requestServiceInfo(event.type, event.name)
-            }
+            val listener =
+                object : ServiceListener {
+                    override fun serviceAdded(event: ServiceEvent) {
+                        jmdns?.requestServiceInfo(event.type, event.name)
+                    }
 
-            override fun serviceRemoved(event: ServiceEvent) {
-                services.remove(event.name)
-                trySend(services.values.toList())
-            }
+                    override fun serviceRemoved(event: ServiceEvent) {
+                        services.remove(event.name)
+                        trySend(services.values.toList())
+                    }
 
-            override fun serviceResolved(event: ServiceEvent) {
-                val info = event.info
-                val txtMap = mutableMapOf<String, ByteArray>()
-                info.propertyNames.toList().forEach { key ->
-                    info.getPropertyBytes(key)?.let { value ->
-                        txtMap[key] = value
+                    override fun serviceResolved(event: ServiceEvent) {
+                        val info = event.info
+                        val txtMap = mutableMapOf<String, ByteArray>()
+                        info.propertyNames.toList().forEach { key ->
+                            info.getPropertyBytes(key)?.let { value -> txtMap[key] = value }
+                        }
+                        val discovered =
+                            DiscoveredService(
+                                name = info.name,
+                                hostAddress = info.hostAddresses.firstOrNull() ?: "",
+                                port = info.port,
+                                txt = txtMap,
+                            )
+                        services[info.name] = discovered
+                        trySend(services.values.toList())
                     }
                 }
-                val discovered = DiscoveredService(
-                    name = info.name,
-                    hostAddress = info.hostAddresses.firstOrNull() ?: "",
-                    port = info.port,
-                    txt = txtMap,
-                )
-                services[info.name] = discovered
-                trySend(services.values.toList())
+
+            val type = "${NetworkConstants.SERVICE_TYPE}.local."
+            jmdns?.addServiceListener(type, listener)
+
+            awaitClose {
+                jmdns?.removeServiceListener(type, listener)
+                try {
+                    jmdns?.close()
+                } catch (e: IOException) {
+                    Logger.e(e) { "Failed to close JmDNS" }
+                } catch (e: Exception) {
+                    Logger.e(e) { "Unexpected error closing JmDNS" }
+                }
             }
         }
-
-        val type = "${NetworkConstants.SERVICE_TYPE}.local."
-        jmdns?.addServiceListener(type, listener)
-
-        awaitClose {
-            jmdns?.removeServiceListener(type, listener)
-            try {
-                jmdns?.close()
-            } catch (e: IOException) {
-                Logger.e(e) { "Failed to close JmDNS" }
-            } catch (e: Exception) {
-                Logger.e(e) { "Unexpected error closing JmDNS" }
-            }
-        }
-    }.flowOn(Dispatchers.IO)
+            .flowOn(Dispatchers.IO)
 }
