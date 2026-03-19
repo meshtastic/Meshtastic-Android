@@ -13,7 +13,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Feature ViewModel Migration to Turbine' (Protocol in workflow.md) 61b959506
 
 ## Phase 3: Property-Based Parsing Tests (Kotest)
-- [ ] Task: Add `Kotest` property-based tests for `StreamFrameCodec` in `core:network`.
+- [x] Task: Add `Kotest` property-based tests for `StreamFrameCodec` in `core:network`. 2c8fd6a8f
 - [ ] Task: Add `Kotest` property-based tests for `PacketHandler` implementations in `core:data`.
 - [ ] Task: Add `Kotest` property-based tests for `TcpTransport` and/or `SerialTransport` in `core:network`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Property-Based Parsing Tests (Kotest)' (Protocol in workflow.md)
