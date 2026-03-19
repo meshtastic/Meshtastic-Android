@@ -1,7 +1,7 @@
 {
   "id": "desktop_ux_enhancements_20260316",
   "name": "Desktop UX Enhancements",
-  "status": "in-progress",
+  "status": "completed",
   "priority": "medium",
   "tags": ["desktop", "ux", "compose"]
 }

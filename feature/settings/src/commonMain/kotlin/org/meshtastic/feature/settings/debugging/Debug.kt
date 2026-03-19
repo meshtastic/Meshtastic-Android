@@ -16,16 +16,11 @@
  */
 package org.meshtastic.feature.settings.debugging
 
-import android.content.Context
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,34 +31,26 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -71,15 +58,10 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import co.touchlab.kermit.Logger
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -91,11 +73,6 @@ import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.debug_clear
 import org.meshtastic.core.resources.debug_decoded_payload
-import org.meshtastic.core.resources.debug_default_search
-import org.meshtastic.core.resources.debug_export_failed
-import org.meshtastic.core.resources.debug_export_success
-import org.meshtastic.core.resources.debug_filters
-import org.meshtastic.core.resources.debug_logs_export
 import org.meshtastic.core.resources.debug_panel
 import org.meshtastic.core.resources.debug_store_logs_summary
 import org.meshtastic.core.resources.debug_store_logs_title
@@ -109,18 +86,10 @@ import org.meshtastic.core.ui.component.DropDownPreference
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.theme.AnnotationColor
-import org.meshtastic.core.ui.theme.AppTheme
-import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
-import java.io.IOException
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
 import kotlin.time.Instant.Companion.fromEpochMilliseconds
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
-
-// list of dict keys to redact when exporting logs. These are evaluated as line.contains, so partials are fine.
-private var redactedKeys: List<String> = listOf("session_passkey", "private_key", "admin_key")
 
 @Suppress("LongMethod")
 @Composable
@@ -130,8 +99,6 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
@@ -157,13 +124,8 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
             listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
         }
     }
-    // Prepare a document creator for exporting logs via SAF
-    val exportLogsLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
-            if (createdUri != null) {
-                scope.launch { exportAllLogsToUri(context, createdUri, viewModel.loadLogsForExport()) }
-            }
-        }
+    // Prepare a document creator for exporting logs
+    val exportLogsLauncher = rememberLogExporter { viewModel.loadLogsForExport() }
 
     var showSettings by remember { mutableStateOf(false) }
 
@@ -216,7 +178,7 @@ fun DebugScreen(onNavigateUp: () -> Unit, viewModel: DebugViewModel) {
                             val timestamp =
                                 fromEpochMilliseconds(nowMillis).toLocalDateTime(TimeZone.UTC).format(format)
                             val fileName = "meshtastic_debug_$timestamp.txt"
-                            exportLogsLauncher.launch(fileName)
+                            exportLogsLauncher(fileName)
                         },
                     )
                     if (showSettings) {
@@ -431,53 +393,6 @@ fun DebugMenuActions(deleteLogs: () -> Unit, modifier: Modifier = Modifier) {
     }
 }
 
-private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<UiMeshLog>) =
-    withContext(Dispatchers.IO) {
-        try {
-            if (logs.isEmpty()) {
-                withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, "No logs to export") }
-                Logger.w { "MeshLog export aborted: no logs available" }
-                return@withContext
-            }
-
-            context.contentResolver.openOutputStream(targetUri)?.use { os ->
-                OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer ->
-                    logs.forEach { log ->
-                        writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-                        writer.write(log.logMessage)
-                        log.decodedPayload?.let { decodedPayload ->
-                            if (decodedPayload.isNotBlank()) {
-                                writer.write("\n\nDecoded Payload:\n{")
-                                writer.write("\n")
-                                // Redact Decoded keys.
-                                decodedPayload.lineSequence().forEach { line ->
-                                    var outputLine = line
-                                    val redacted = redactedKeys.firstOrNull { line.contains(it) }
-                                    if (redacted != null) {
-                                        val idx = line.indexOf(':')
-                                        if (idx != -1) {
-                                            outputLine = line.take(idx + 1)
-                                            outputLine += "<redacted>"
-                                        }
-                                    }
-                                    writer.write(outputLine)
-                                    writer.write("\n")
-                                }
-                                writer.write("\n}")
-                            }
-                        }
-                        writer.write("\n\n")
-                    }
-                }
-            } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
-
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_success, logs.size) }
-        } catch (e: IOException) {
-            withContext(Dispatchers.Main) { context.showToast(Res.string.debug_export_failed, e.message ?: "") }
-            Logger.w(e) { "MeshLog export failed" }
-        }
-    }
-
 @Composable
 private fun DecodedPayloadBlock(
     decodedPayload: String,
@@ -537,284 +452,6 @@ private fun rememberAnnotatedDecodedPayload(
                         addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
                     }
                 }
-            }
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugPacketPreview() {
-    AppTheme {
-        DebugItem(
-            UiMeshLog(
-                uuid = "",
-                messageType = "NodeInfo",
-                formattedReceivedDate = "9/27/20, 8:00:58 PM",
-                logMessage =
-                "from: 2885173132\n" +
-                    "decoded {\n" +
-                    "   position {\n" +
-                    "       altitude: 60\n" +
-                    "       battery_level: 81\n" +
-                    "       latitude_i: 411111136\n" +
-                    "       longitude_i: -711111805\n" +
-                    "       time: 1600390966\n" +
-                    "   }\n" +
-                    "}\n" +
-                    "hop_limit: 3\n" +
-                    "id: 1737414295\n" +
-                    "rx_snr: 9.5\n" +
-                    "rx_time: 316400569\n" +
-                    "to: -1409790708",
-            ),
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugItemWithSearchHighlightPreview() {
-    AppTheme {
-        DebugItem(
-            UiMeshLog(
-                uuid = "1",
-                messageType = "TextMessage",
-                formattedReceivedDate = "9/27/20, 8:00:58 PM",
-                logMessage = "Hello world! This is a test message with some keywords to search for.",
-            ),
-            searchText = "test message",
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugItemPositionPreview() {
-    AppTheme {
-        DebugItem(
-            UiMeshLog(
-                uuid = "2",
-                messageType = "Position",
-                formattedReceivedDate = "9/27/20, 8:01:15 PM",
-                logMessage = "Position update from node (!a1b2c3d4) at coordinates 40.7128, -74.0060",
-            ),
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugItemErrorPreview() {
-    AppTheme {
-        DebugItem(
-            UiMeshLog(
-                uuid = "3",
-                messageType = "Error",
-                formattedReceivedDate = "9/27/20, 8:02:30 PM",
-                logMessage =
-                "Connection failed: timeout after 30 seconds\n" +
-                    "Retry attempt: 3/5\n" +
-                    "Last known position: 40.7128, -74.0060",
-            ),
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugItemLongMessagePreview() {
-    AppTheme {
-        DebugItem(
-            UiMeshLog(
-                uuid = "4",
-                messageType = "Waypoint",
-                formattedReceivedDate = "9/27/20, 8:03:45 PM",
-                logMessage =
-                "Waypoint created:\n" +
-                    "  Name: Home Base\n" +
-                    "  Description: Primary meeting location\n" +
-                    "  Latitude: 40.7128\n" +
-                    "  Longitude: -74.0060\n" +
-                    "  Altitude: 100m\n" +
-                    "  Icon: 🏠\n" +
-                    "  Created by: (!a1b2c3d4)\n" +
-                    "  Expires: 2025-12-31 23:59:59",
-            ),
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugItemSelectedPreview() {
-    AppTheme {
-        DebugItem(
-            UiMeshLog(
-                uuid = "5",
-                messageType = "TextMessage",
-                formattedReceivedDate = "9/27/20, 8:04:20 PM",
-                logMessage = "This is a selected log item with larger font sizes for better readability.",
-            ),
-            isSelected = true,
-        )
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugMenuActionsPreview() {
-    AppTheme {
-        Row(modifier = Modifier.padding(16.dp)) {
-            IconButton(onClick = { /* Preview only */ }, modifier = Modifier.padding(4.dp)) {
-                Icon(
-                    imageVector = Icons.Outlined.FileDownload,
-                    contentDescription = stringResource(Res.string.debug_logs_export),
-                )
-            }
-            IconButton(onClick = { /* Preview only */ }, modifier = Modifier.padding(4.dp)) {
-                Icon(imageVector = Icons.Rounded.Delete, contentDescription = stringResource(Res.string.debug_clear))
-            }
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-@Suppress("detekt:LongMethod") // big preview
-private fun DebugScreenEmptyPreview() {
-    AppTheme {
-        Surface {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                stickyHeader {
-                    Surface(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Row(
-                                    modifier = Modifier.weight(1f),
-                                    horizontalArrangement = Arrangement.Start,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    OutlinedTextField(
-                                        value = "",
-                                        onValueChange = {},
-                                        modifier = Modifier.weight(1f).padding(end = 8.dp),
-                                        placeholder = { Text(stringResource(Res.string.debug_default_search)) },
-                                        singleLine = true,
-                                    )
-                                    TextButton(onClick = {}) {
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Text(text = "Filters", style = TextStyle(fontWeight = FontWeight.Bold))
-                                            Icon(
-                                                imageVector = Icons.TwoTone.FilterAltOff,
-                                                contentDescription = stringResource(Res.string.debug_filters),
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                // Empty state
-                item {
-                    Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = "No Debug Logs",
-                                style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold),
-                            )
-                            Text(
-                                text = "Debug logs will appear here when available",
-                                style = TextStyle(fontSize = 14.sp, color = Color.Gray),
-                                modifier = Modifier.padding(top = 8.dp),
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-@Suppress("detekt:LongMethod") // big preview
-private fun DebugScreenWithSampleDataPreview() {
-    AppTheme {
-        val sampleLogs =
-            listOf(
-                UiMeshLog(
-                    uuid = "1",
-                    messageType = "NodeInfo",
-                    formattedReceivedDate = "9/27/20, 8:00:58 PM",
-                    logMessage =
-                    "from: 2885173132\n" +
-                        "decoded {\n" +
-                        "   position {\n" +
-                        "       altitude: 60\n" +
-                        "       battery_level: 81\n" +
-                        "       latitude_i: 411111136\n" +
-                        "       longitude_i: -711111805\n" +
-                        "       time: 1600390966\n" +
-                        "   }\n" +
-                        "}\n" +
-                        "hop_limit: 3\n" +
-                        "id: 1737414295\n" +
-                        "rx_snr: 9.5\n" +
-                        "rx_time: 316400569\n" +
-                        "to: -1409790708",
-                ),
-                UiMeshLog(
-                    uuid = "2",
-                    messageType = "TextMessage",
-                    formattedReceivedDate = "9/27/20, 8:01:15 PM",
-                    logMessage = "Hello from node (!a1b2c3d4)! How's the weather today?",
-                ),
-                UiMeshLog(
-                    uuid = "3",
-                    messageType = "Position",
-                    formattedReceivedDate = "9/27/20, 8:02:30 PM",
-                    logMessage = "Position update: 40.7128, -74.0060, altitude: 100m, battery: 85%",
-                ),
-                UiMeshLog(
-                    uuid = "4",
-                    messageType = "Waypoint",
-                    formattedReceivedDate = "9/27/20, 8:03:45 PM",
-                    logMessage = "New waypoint created: 'Meeting Point' at 40.7589, -73.9851",
-                ),
-                UiMeshLog(
-                    uuid = "5",
-                    messageType = "Error",
-                    formattedReceivedDate = "9/27/20, 8:04:20 PM",
-                    logMessage = "Connection timeout - retrying in 5 seconds...",
-                ),
-            )
-
-        // Note: This preview shows the UI structure but won't have actual data
-        // since the ViewModel isn't injected in previews
-        Surface {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                stickyHeader {
-                    Surface(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-                        Column(modifier = Modifier.padding(8.dp)) {
-                            Text(
-                                text = "Debug Screen Preview",
-                                style = TextStyle(fontWeight = FontWeight.Bold),
-                                modifier = Modifier.padding(bottom = 8.dp),
-                            )
-                            Text(
-                                text = "Search and filter controls would appear here",
-                                style = TextStyle(fontSize = 12.sp, color = Color.Gray),
-                            )
-                        }
-                    }
-                }
-                items(sampleLogs) { log -> DebugItem(log = log) }
             }
         }
     }

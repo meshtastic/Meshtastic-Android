@@ -63,7 +63,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 
 | Feature | Status |
 |---|---|
-| Settings | ✅ ~35 real screens (7 desktop-specific) + desktop locale picker with in-place recomposition |
+| Settings | ✅ ~35 real screens (6 desktop-specific) + desktop locale picker with in-place recomposition |
 | Node list | ✅ Adaptive list-detail with real `NodeDetailContent` |
 | Messaging | ✅ Adaptive contacts with real message view + send |
 | Connections | ✅ Unified shared UI with dynamic transport detection |

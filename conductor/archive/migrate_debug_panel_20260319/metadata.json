@@ -1,0 +1,8 @@
+{
+  "track_id": "migrate_debug_panel_20260319",
+  "type": "feature",
+  "status": "completed",
+  "created_at": "2026-03-19T00:00:00Z",
+  "updated_at": "2026-03-19T10:00:00Z",
+  "description": "migrate the fully featured debug panel to common source for use in other targets, wire it up in desktop"
+}

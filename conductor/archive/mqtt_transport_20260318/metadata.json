@@ -1,7 +1,7 @@
 {
   "track_id": "mqtt_transport_20260318",
   "type": "feature",
-  "status": "new",
+  "status": "completed",
   "created_at": "2026-03-18T00:00:00Z",
   "updated_at": "2026-03-18T00:00:00Z",
   "description": "MQTT transport"

@@ -76,6 +76,17 @@ kotlin {
             implementation(project(":core:datastore"))
         }
 
-        val androidHostTest by getting { dependencies { implementation(project(":core:datastore")) } }
+        val androidHostTest by getting {
+            dependencies {
+                implementation(project(":core:datastore"))
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.turbine)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.androidx.compose.ui.test.junit4)
+                implementation(libs.androidx.compose.ui.test.manifest)
+                implementation(libs.androidx.test.ext.junit)
+            }
+        }
     }
 }

@@ -1,7 +1,7 @@
 {
   "track_id": "fix_android_animations_20260313",
   "type": "bug",
-  "status": "new",
+  "status": "completed",
   "created_at": "2026-03-13T12:00:00Z",
   "updated_at": "2026-03-13T12:00:00Z",
   "description": "Android animations broken - mainly noticeable on Connections screen, the indescriminate circular and linear progress bars don't move, and the MeshActivity animation is not firing, investigate recomposition and threading strangely enough they're working on Desktop"

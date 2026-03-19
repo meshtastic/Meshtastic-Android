@@ -1,7 +1,7 @@
 {
   "track_id": "desktop_serial_transport_20260317",
   "type": "feature",
-  "status": "new",
+  "status": "completed",
   "created_at": "2026-03-17T12:00:00Z",
   "updated_at": "2026-03-17T12:00:00Z",
   "description": "Implement Serial/USB transport for the Desktop target using jSerialComm. This fulfills the medium-term priority for direct radio connections on JVM and uses the shared RadioTransport interface."
