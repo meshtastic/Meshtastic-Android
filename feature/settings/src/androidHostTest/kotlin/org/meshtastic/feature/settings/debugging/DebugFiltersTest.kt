@@ -40,8 +40,10 @@ import org.meshtastic.core.resources.debug_active_filters
 import org.meshtastic.core.resources.debug_filters
 import org.meshtastic.core.resources.getString
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
+import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
 class DebugFiltersTest {
 
     @get:Rule val composeTestRule = createComposeRule()

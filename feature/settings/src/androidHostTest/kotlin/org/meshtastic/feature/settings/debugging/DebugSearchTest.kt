@@ -42,8 +42,10 @@ import org.meshtastic.core.resources.getString
 import org.meshtastic.feature.settings.debugging.DebugViewModel.UiMeshLog
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchMatch
 import org.meshtastic.feature.settings.debugging.LogSearchManager.SearchState
+import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
+@Config(sdk = [34])
 class DebugSearchTest {
 
     @get:Rule val composeTestRule = createComposeRule()
