@@ -17,7 +17,6 @@
 package org.meshtastic.feature.connections.domain.usecase
 
 import android.hardware.usb.UsbManager
-import android.net.nsd.NsdServiceInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -28,6 +27,7 @@ import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.Node
+import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
 import org.meshtastic.core.network.repository.UsbRepository
@@ -72,7 +72,7 @@ class AndroidGetDiscoveredDevicesUseCase(
                 tcpServices
                     .map { service ->
                         val address = "t${service.toAddressString()}"
-                        val txtRecords = service.attributes
+                        val txtRecords = service.txt
                         val shortNameBytes = txtRecords["shortname"]
                         val idBytes = txtRecords["id"]
 
@@ -125,7 +125,7 @@ class AndroidGetDiscoveredDevicesUseCase(
             val usbDevices = args[3] as List<DeviceListEntry.Usb>
 
             @Suppress("UNCHECKED_CAST", "MagicNumber")
-            val resolved = args[4] as List<NsdServiceInfo>
+            val resolved = args[4] as List<DiscoveredService>
 
             @Suppress("UNCHECKED_CAST", "MagicNumber")
             val recentList = args[5] as List<RecentAddress>
@@ -171,7 +171,7 @@ class AndroidGetDiscoveredDevicesUseCase(
                     val matchingNode =
                         if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
                             val resolvedService = resolved.find { "t${it.toAddressString()}" == entry.fullAddress }
-                            val deviceId = resolvedService?.attributes?.get("id")?.let { String(it, Charsets.UTF_8) }
+                            val deviceId = resolvedService?.txt?.get("id")?.let { String(it, Charsets.UTF_8) }
                             db.values.find { node ->
                                 node.user.id == deviceId || (deviceId != null && node.user.id == "!$deviceId")
                             }
