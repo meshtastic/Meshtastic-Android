@@ -4,13 +4,13 @@
 - [x] Task: Execute `./gradlew koverLog` and record current project test coverage. 8bdd673a1
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Baseline Measurement' (Protocol in workflow.md) 6d9ad468c
 
-## Phase 2: Feature ViewModel Migration to Turbine
+## Phase 2: Feature ViewModel Migration to Turbine [checkpoint: 61b9595]
 - [x] Task: Refactor `MetricsViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. 79e059286
 - [x] Task: Refactor `MessageViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. b45697b53
-- [ ] Task: Refactor `RadioConfigViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
-- [ ] Task: Refactor `NodeListViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`.
-- [ ] Task: Refactor remaining `feature` ViewModels to use `Turbine` and `Mokkery`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 2: Feature ViewModel Migration to Turbine' (Protocol in workflow.md)
+- [x] Task: Refactor `RadioConfigViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. 33e10fc6c
+- [x] Task: Refactor `NodeListViewModelTest` to use `Turbine` and `Mokkery` in `commonTest`. 33e10fc6c
+- [x] Task: Refactor remaining `feature` ViewModels to use `Turbine` and `Mokkery`. 33e10fc6c
+- [x] Task: Conductor - User Manual Verification 'Phase 2: Feature ViewModel Migration to Turbine' (Protocol in workflow.md) 61b959506
 
 ## Phase 3: Property-Based Parsing Tests (Kotest)
 - [ ] Task: Add `Kotest` property-based tests for `StreamFrameCodec` in `core:network`.
