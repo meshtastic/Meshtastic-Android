@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "9951",
+      "title": "fix: big-endian byte ordering for radio packet header fields",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9951",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9949",
+      "title": "fix: preserve higher-quality RTC time on system-time refresh",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9949",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9939",
       "title": "Fix intermittent busyRx on Portduino SX1262 (stale preamble IRQ)",
       "page_url": "https://github.com/meshtastic/firmware/pull/9939",
@@ -204,12 +216,6 @@
       "id": "9931",
       "title": "fix: apply LoRa config changes live without rebooting",
       "page_url": "https://github.com/meshtastic/firmware/pull/9931",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9916",
-      "title": "Fix for preserving pki_encrypted and public_key when relaying UDP multicast packets to radio.",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9916",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
