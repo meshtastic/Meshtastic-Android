@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Meshtastic LLC
+ * Copyright (c) 2026 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,10 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.ImageBitmap
 
-/** JVM stub — QR code generation not yet implemented on Desktop. */
-actual fun generateQrCode(text: String, size: Int): ImageBitmap? = null
-
-/** JVM no-op — screen brightness control is not available on Desktop. */
-@Composable
-actual fun SetScreenBrightness(brightness: Float) {
-    // No-op on JVM/Desktop
-}
+/**
+ * A Composable that sets the screen brightness while it is in the composition.
+ *
+ * @param brightness The brightness value (0.0 to 1.0).
+ */
+@Composable expect fun SetScreenBrightness(brightness: Float)

@@ -69,6 +69,7 @@ kable = "0.42.0"
 nordic-dfu = "2.11.0"
 kmqtt = "1.0.0"
 jmdns = "3.6.3"
+qrcode-kotlin = "4.2.0"
 
 [libraries]
 # AndroidX
@@ -165,6 +166,7 @@ mlkit-barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version = "20.0.0" }
 wire-runtime = { module = "com.squareup.wire:wire-runtime", version.ref = "wire" }
 zxing-core = { module = "com.google.zxing:core", version = "3.5.4" }
+qrcode-kotlin = { module = "io.github.g0dkar:qrcode-kotlin", version.ref = "qrcode-kotlin" }
 
 # Jetbrains
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }

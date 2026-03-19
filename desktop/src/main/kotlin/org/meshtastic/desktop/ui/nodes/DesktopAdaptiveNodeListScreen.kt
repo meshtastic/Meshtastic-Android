@@ -56,6 +56,7 @@ import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
 import org.meshtastic.core.ui.component.MainAppBar
 import org.meshtastic.core.ui.component.MeshtasticImportFAB
+import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -80,7 +81,7 @@ import org.meshtastic.feature.node.model.NodeDetailAction
  * bottom sheets) are no-ops on desktop.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun DesktopAdaptiveNodeListScreen(
     viewModel: NodeListViewModel,
@@ -101,6 +102,11 @@ fun DesktopAdaptiveNodeListScreen(
     val listState = rememberLazyListState()
 
     val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    var shareNode by remember { mutableStateOf<org.meshtastic.core.model.Node?>(null) }
+
+    if (shareNode != null) {
+        SharedContactDialog(contact = shareNode, onDismiss = { shareNode = null })
+    }
 
     LaunchedEffect(initialNodeId) {
         initialNodeId?.let { nodeId -> navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, nodeId) }
@@ -249,6 +255,7 @@ fun DesktopAdaptiveNodeListScreen(
                                     is NodeDetailAction.Navigate -> onNavigate(action.route)
                                     is NodeDetailAction.TriggerServiceAction ->
                                         detailViewModel.onServiceAction(action.action)
+                                    is NodeDetailAction.ShareContact -> shareNode = detailUiState.node
                                     is NodeDetailAction.HandleNodeMenuAction -> {
                                         val menuAction = action.action
                                         if (

@@ -66,7 +66,11 @@ import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 @Composable
-fun DesktopAdaptiveContactsScreen(viewModel: ContactsViewModel, uiViewModel: UIViewModel = koinViewModel()) {
+fun DesktopAdaptiveContactsScreen(
+    viewModel: ContactsViewModel,
+    onNavigateToShareChannels: () -> Unit = {},
+    uiViewModel: UIViewModel = koinViewModel(),
+) {
     val contacts by viewModel.contactList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val unreadTotal by viewModel.unreadCountTotal.collectAsStateWithLifecycle()
@@ -118,6 +122,7 @@ fun DesktopAdaptiveContactsScreen(viewModel: ContactsViewModel, uiViewModel: UIV
                                         // OnInvalid
                                     }
                                 },
+                                onShareChannels = onNavigateToShareChannels,
                                 sharedContact = sharedContactRequested,
                                 onDismissSharedContact = { uiViewModel.clearSharedContactRequested() },
                                 isContactContext = true,

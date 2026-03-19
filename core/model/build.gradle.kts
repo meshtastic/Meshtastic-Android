@@ -51,7 +51,6 @@ kotlin {
         androidMain.dependencies {
             api(libs.androidx.annotation)
             api(libs.androidx.core.ktx)
-            implementation(libs.zxing.core)
         }
         val androidHostTest by getting {
             dependencies {

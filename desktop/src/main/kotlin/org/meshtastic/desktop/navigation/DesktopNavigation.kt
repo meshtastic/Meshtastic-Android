@@ -60,8 +60,14 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>) 
     desktopSettingsGraph(backStack)
 
     // Channels
-    entry<ChannelsRoutes.ChannelsGraph> { PlaceholderScreen("Channels") }
-    entry<ChannelsRoutes.Channels> { PlaceholderScreen("Channels") }
+    entry<ChannelsRoutes.ChannelsGraph> {
+        val viewModel: org.meshtastic.feature.settings.radio.RadioConfigViewModel = org.koin.compose.viewmodel.koinViewModel()
+        org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
+    }
+    entry<ChannelsRoutes.Channels> {
+        val viewModel: org.meshtastic.feature.settings.radio.RadioConfigViewModel = org.koin.compose.viewmodel.koinViewModel()
+        org.meshtastic.feature.settings.radio.channel.ChannelConfigScreen(viewModel = viewModel, onBack = { backStack.removeLastOrNull() })
+    }
 
     // Connections — shared screen
     entry<ConnectionsRoutes.ConnectionsGraph> {

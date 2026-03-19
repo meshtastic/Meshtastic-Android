@@ -34,8 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.style.TextOverflow
@@ -53,7 +52,7 @@ import org.meshtastic.core.ui.util.createClipEntry
 private const val QR_IMAGE_SIZE = 320
 
 @Composable
-fun QrDialog(title: String, uriString: String, qrCode: ImageBitmap?, onDismiss: () -> Unit) {
+fun QrDialog(title: String, uriString: String, qrPainter: Painter?, onDismiss: () -> Unit) {
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
     val label = stringResource(Res.string.url)
@@ -67,9 +66,9 @@ fun QrDialog(title: String, uriString: String, qrCode: ImageBitmap?, onDismiss: 
         onConfirm = onDismiss,
         text = {
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                if (qrCode != null) {
+                if (qrPainter != null) {
                     Image(
-                        painter = BitmapPainter(qrCode),
+                        painter = qrPainter,
                         contentDescription = stringResource(Res.string.qr_code),
                         modifier = Modifier.size(QR_IMAGE_SIZE.dp),
                         contentScale = ContentScale.Fit,

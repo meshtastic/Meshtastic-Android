@@ -19,13 +19,12 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.getSharedContactUrl
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.share_contact
-import org.meshtastic.core.ui.util.generateQrCode
+import org.meshtastic.core.ui.util.rememberQrCodePainter
 import org.meshtastic.proto.SharedContact
 
 /**
@@ -40,11 +39,11 @@ fun SharedContactDialog(contact: Node?, onDismiss: () -> Unit) {
     val contactToShare = SharedContact(user = contact.user, node_num = contact.num)
     val commonUri = contactToShare.getSharedContactUrl()
     val uriString = commonUri.toString()
-    val qrCode = remember(uriString) { generateQrCode(uriString, 960) }
+    val qrPainter = rememberQrCodePainter(uriString, 960)
     QrDialog(
         title = stringResource(Res.string.share_contact),
         uriString = uriString,
-        qrCode = qrCode,
+        qrPainter = qrPainter,
         onDismiss = onDismiss,
     )
 }
