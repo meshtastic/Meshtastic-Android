@@ -19,8 +19,8 @@ package org.meshtastic.feature.connections.domain.usecase
 import app.cash.turbine.test
 import dev.mokkery.answering.returns
 import dev.mokkery.every
-import dev.mokkery.mock
 import dev.mokkery.matcher.any
+import dev.mokkery.mock
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -49,12 +49,8 @@ class CommonGetDiscoveredDevicesUseCaseTest {
 
     private fun setUp() {
         nodeRepository = FakeNodeRepository()
-        recentAddressesDataSource = mock {
-            every { recentAddresses } returns recentAddressesFlow
-        }
-        databaseManager = mock {
-            every { hasDatabaseFor(any()) } returns false
-        }
+        recentAddressesDataSource = mock { every { recentAddresses } returns recentAddressesFlow }
+        databaseManager = mock { every { hasDatabaseFor(any()) } returns false }
         networkRepository = mock {
             every { resolvedList } returns resolvedServicesFlow
             every { networkAvailable } returns flowOf(true)
@@ -122,9 +118,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         val testNode = TestDataFactory.createTestNode(num = 1, userId = "!test1234", longName = "Test Node")
         nodeRepository.setNodes(listOf(testNode))
 
-        databaseManager = mock {
-            every { hasDatabaseFor("tMeshtastic_1234") } returns true
-        }
+        databaseManager = mock { every { hasDatabaseFor("tMeshtastic_1234") } returns true }
         useCase =
             CommonGetDiscoveredDevicesUseCase(
                 recentAddressesDataSource = recentAddressesDataSource,
@@ -180,24 +174,22 @@ class CommonGetDiscoveredDevicesUseCaseTest {
     @Test
     fun testDiscoveredTcpDevices() = runTest {
         setUp()
-        resolvedServicesFlow.value = listOf(
-            DiscoveredService(
-                name = "Meshtastic_1234",
-                hostAddress = "192.168.1.50",
-                port = 4403,
-                txt = mapOf(
-                    "id" to "!1234".encodeToByteArray(),
-                    "shortname" to "Mesh".encodeToByteArray()
-                )
+        resolvedServicesFlow.value =
+            listOf(
+                DiscoveredService(
+                    name = "Meshtastic_1234",
+                    hostAddress = "192.168.1.50",
+                    port = 4403,
+                    txt = mapOf("id" to "!1234".encodeToByteArray(), "shortname" to "Mesh".encodeToByteArray()),
+                ),
             )
-        )
 
         useCase.invoke(showMock = false).test {
             val result = awaitItem()
             result.discoveredTcpDevices.size shouldBe 1
             result.discoveredTcpDevices[0].name shouldBe "Mesh_1234"
             result.discoveredTcpDevices[0].fullAddress shouldBe "t192.168.1.50"
-            
+
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -208,9 +200,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         val testNode = TestDataFactory.createTestNode(num = 1, userId = "!1234", longName = "Mesh")
         nodeRepository.setNodes(listOf(testNode))
 
-        databaseManager = mock {
-            every { hasDatabaseFor("t192.168.1.50") } returns true
-        }
+        databaseManager = mock { every { hasDatabaseFor("t192.168.1.50") } returns true }
         useCase =
             CommonGetDiscoveredDevicesUseCase(
                 recentAddressesDataSource = recentAddressesDataSource,
@@ -219,24 +209,22 @@ class CommonGetDiscoveredDevicesUseCaseTest {
                 networkRepository = networkRepository,
             )
 
-        resolvedServicesFlow.value = listOf(
-            DiscoveredService(
-                name = "Meshtastic_1234",
-                hostAddress = "192.168.1.50",
-                port = 4403,
-                txt = mapOf(
-                    "id" to "!1234".encodeToByteArray(),
-                    "shortname" to "Mesh".encodeToByteArray()
-                )
+        resolvedServicesFlow.value =
+            listOf(
+                DiscoveredService(
+                    name = "Meshtastic_1234",
+                    hostAddress = "192.168.1.50",
+                    port = 4403,
+                    txt = mapOf("id" to "!1234".encodeToByteArray(), "shortname" to "Mesh".encodeToByteArray()),
+                ),
             )
-        )
 
         useCase.invoke(showMock = false).test {
             val result = awaitItem()
             result.discoveredTcpDevices.size shouldBe 1
             assertNotNull(result.discoveredTcpDevices[0].node)
             result.discoveredTcpDevices[0].node?.user?.id shouldBe "!1234"
-            
+
             cancelAndIgnoreRemainingEvents()
         }
     }

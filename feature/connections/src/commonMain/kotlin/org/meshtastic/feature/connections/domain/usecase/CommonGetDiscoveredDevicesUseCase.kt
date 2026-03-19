@@ -22,7 +22,6 @@ import org.jetbrains.compose.resources.getString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.datastore.RecentAddressesDataSource
-import org.meshtastic.core.network.repository.DiscoveredService
 import org.meshtastic.core.network.repository.NetworkRepository
 import org.meshtastic.core.network.repository.NetworkRepository.Companion.toAddressString
 import org.meshtastic.core.repository.NodeRepository
