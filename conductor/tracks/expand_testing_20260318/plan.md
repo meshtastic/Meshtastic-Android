@@ -12,11 +12,11 @@
 - [x] Task: Refactor remaining `feature` ViewModels to use `Turbine` and `Mokkery`. 33e10fc6c
 - [x] Task: Conductor - User Manual Verification 'Phase 2: Feature ViewModel Migration to Turbine' (Protocol in workflow.md) 61b959506
 
-## Phase 3: Property-Based Parsing Tests (Kotest)
+## Phase 3: Property-Based Parsing Tests (Kotest) [checkpoint: cb71c85]
 - [x] Task: Add `Kotest` property-based tests for `StreamFrameCodec` in `core:network`. 2c8fd6a8f
 - [x] Task: Add `Kotest` property-based tests for `PacketHandler` implementations in `core:data`. 7d56c3fef
 - [x] Task: Add `Kotest` property-based tests for `TcpTransport` and/or `SerialTransport` in `core:network`. 2fd68d67e
-- [ ] Task: Conductor - User Manual Verification 'Phase 3: Property-Based Parsing Tests (Kotest)' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 3: Property-Based Parsing Tests (Kotest)' (Protocol in workflow.md) cb71c8588
 
 ## Phase 4: Domain Logic Gap Fill
 - [ ] Task: Identify and fill testing gaps in `core:domain` use cases not fully covered during the initial Mokkery migration.
