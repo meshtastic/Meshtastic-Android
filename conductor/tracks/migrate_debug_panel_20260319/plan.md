@@ -1,9 +1,9 @@
 # Implementation Plan: Debug Panel KMP Migration
 
-## Phase 1: Analysis and Relocation
-- [ ] Task: Locate all source files for the Android Debug Panel (UI, ViewModels, States).
-- [ ] Task: Move these files from the Android-specific source sets (e.g., `feature/settings/src/androidMain`) into `feature/settings/src/commonMain`.
-- [ ] Task: Conductor - User Manual Verification 'Phase 1: Analysis and Relocation' (Protocol in workflow.md)
+## Phase 1: Analysis and Relocation [checkpoint: a2e83eb]
+- [x] Task: Locate all source files for the Android Debug Panel (UI, ViewModels, States).
+- [x] Task: Move these files from the Android-specific source sets (e.g., `feature/settings/src/androidMain`) into `feature/settings/src/commonMain`.
+- [x] Task: Conductor - User Manual Verification 'Phase 1: Analysis and Relocation' (Protocol in workflow.md)
 
 ## Phase 2: Adaptation to KMP
 - [ ] Task: Resolve compilation errors by removing Android-specific imports (`android.*`, `java.*`).
