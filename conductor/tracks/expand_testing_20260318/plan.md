@@ -14,7 +14,7 @@
 
 ## Phase 3: Property-Based Parsing Tests (Kotest)
 - [x] Task: Add `Kotest` property-based tests for `StreamFrameCodec` in `core:network`. 2c8fd6a8f
-- [ ] Task: Add `Kotest` property-based tests for `PacketHandler` implementations in `core:data`.
+- [x] Task: Add `Kotest` property-based tests for `PacketHandler` implementations in `core:data`. 7d56c3fef
 - [ ] Task: Add `Kotest` property-based tests for `TcpTransport` and/or `SerialTransport` in `core:network`.
 - [ ] Task: Conductor - User Manual Verification 'Phase 3: Property-Based Parsing Tests (Kotest)' (Protocol in workflow.md)
 
