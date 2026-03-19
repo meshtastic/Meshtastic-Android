@@ -52,9 +52,9 @@ open class AlertManager {
     )
 
     private val _currentAlert = MutableStateFlow<AlertData?>(null)
-    val currentAlert = _currentAlert.asStateFlow()
+    open val currentAlert = _currentAlert.asStateFlow()
 
-    fun showAlert(
+    open fun showAlert(
         title: String? = null,
         titleRes: StringResource? = null,
         message: String? = null,
@@ -97,7 +97,7 @@ open class AlertManager {
             )
     }
 
-    fun dismissAlert() {
+    open fun dismissAlert() {
         _currentAlert.value = null
     }
 }

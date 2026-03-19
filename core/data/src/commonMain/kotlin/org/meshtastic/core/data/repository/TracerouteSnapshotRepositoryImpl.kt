@@ -27,22 +27,23 @@ import org.koin.core.annotation.Single
 import org.meshtastic.core.database.DatabaseProvider
 import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
 import org.meshtastic.core.di.CoroutineDispatchers
+import org.meshtastic.core.repository.TracerouteSnapshotRepository
 import org.meshtastic.proto.Position
 
 @Single
-class TracerouteSnapshotRepository(
+class TracerouteSnapshotRepositoryImpl(
     private val dbManager: DatabaseProvider,
     private val dispatchers: CoroutineDispatchers,
-) {
+) : TracerouteSnapshotRepository {
 
-    fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager.currentDb
+    override fun getSnapshotPositions(logUuid: String): Flow<Map<Int, Position>> = dbManager.currentDb
         .flatMapLatest { it.tracerouteNodePositionDao().getByLogUuid(logUuid) }
         .distinctUntilChanged()
         .mapLatest { list -> list.associate { it.nodeNum to it.position } }
         .flowOn(dispatchers.io)
         .conflate()
 
-    suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) =
+    override suspend fun upsertSnapshotPositions(logUuid: String, requestId: Int, positions: Map<Int, Position>) =
         withContext(dispatchers.io) {
             val dao = dbManager.currentDb.value.tracerouteNodePositionDao()
             dao.deleteByLogUuid(logUuid)
