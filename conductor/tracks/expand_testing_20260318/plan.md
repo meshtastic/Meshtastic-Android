@@ -22,10 +22,10 @@
 - [x] Task: Identify and fill testing gaps in `core:domain` use cases not fully covered during the initial Mokkery migration. 7b815130f
 - [x] Task: Conductor - User Manual Verification 'Phase 4: Domain Logic Gap Fill' (Protocol in workflow.md) 5735aa148
 
-## Phase 5: Final Measurement & Verification
+## Phase 5: Final Measurement & Verification [checkpoint: e321cf0]
 - [x] Task: Execute full test suite (`./gradlew test`) to ensure stability. 02fa96f37
 - [x] Task: Execute `./gradlew koverLog` to generate and document the final coverage metrics. e3fe4ba1e
-- [~] Task: Conductor - User Manual Verification 'Phase 5: Final Measurement & Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 5: Final Measurement & Verification' (Protocol in workflow.md) e321cf0
 
 ## Phase 6: Documentation and Wrap-up
 - [ ] Task: Review previous steps and update project documentation (e.g., `README.md`, testing guides).
