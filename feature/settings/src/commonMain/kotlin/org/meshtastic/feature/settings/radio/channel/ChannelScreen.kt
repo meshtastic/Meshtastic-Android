@@ -14,9 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package org.meshtastic.feature.settings.navigation
+package org.meshtastic.feature.settings.radio.channel
 
-import android.os.RemoteException
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -57,10 +56,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -93,9 +89,11 @@ import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.PreferenceFooter
 import org.meshtastic.core.ui.component.QrDialog
 import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
-import org.meshtastic.core.ui.util.generateQrCode
-import org.meshtastic.core.ui.util.showToast
+import org.meshtastic.core.ui.util.rememberQrCodePainter
+import org.meshtastic.core.ui.util.rememberShowToastResource
 import org.meshtastic.feature.settings.channel.ChannelViewModel
+import org.meshtastic.feature.settings.navigation.ConfigRoute
+import org.meshtastic.feature.settings.navigation.getNavRouteFrom
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.feature.settings.radio.component.PacketResponseStateDialog
 import org.meshtastic.proto.ChannelSet
@@ -167,21 +165,22 @@ fun ChannelScreen(
         channelSet.copy(settings = channelSet.settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true })
 
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val showToast = rememberShowToastResource()
 
     // Send new channel settings to the device
+    @Suppress("TooGenericExceptionCaught")
     fun installSettings(newChannelSet: ChannelSet) {
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             viewModel.setChannels(newChannelSet)
             // Since we are writing to DeviceConfig, that will trigger the rest of the GUI update (QR code etc)
-        } catch (ex: RemoteException) {
+        } catch (ex: Exception) {
             Logger.e(ex) { "ignoring channel problem" }
 
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            scope.launch { context.showToast(Res.string.cant_change_no_radio) }
+            scope.launch { showToast(Res.string.cant_change_no_radio) }
         }
     }
 
@@ -302,11 +301,11 @@ private const val QR_CODE_SIZE = 960
 private fun ChannelShareDialog(channelSet: ChannelSet, shouldAddChannel: Boolean, onDismiss: () -> Unit) {
     val commonUri = channelSet.getChannelUrl(false, shouldAddChannel)
     val uriString = commonUri.toString()
-    val qrCode = remember(uriString) { generateQrCode(uriString, QR_CODE_SIZE) }
+    val qrPainter = rememberQrCodePainter(uriString, QR_CODE_SIZE)
     QrDialog(
         title = stringResource(Res.string.share_channels_qr),
         uriString = uriString,
-        qrCode = qrCode,
+        qrPainter = qrPainter,
         onDismiss = onDismiss,
     )
 }
@@ -384,21 +383,4 @@ private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
             modifier = Modifier.padding(end = 16.dp),
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ModemPresetInfoPreview() {
-    ModemPresetInfo(modemPresetName = "Long Fast", onClick = {})
-}
-
-@PreviewScreenSizes
-@Composable
-private fun ChannelScreenPreview() {
-    ChannelListView(
-        enabled = true,
-        channelSet = ChannelSet(settings = listOf(Channel.default.settings), lora_config = Channel.default.loraConfig),
-        modemPresetName = Channel.default.name,
-        channelSelections = listOf(true).toMutableStateList(),
-    )
 }

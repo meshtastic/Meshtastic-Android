@@ -46,16 +46,19 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.first
 import org.koin.core.context.startKoin
+import org.meshtastic.core.common.util.MeshtasticUri
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.service.MeshServiceOrchestrator
 import org.meshtastic.core.ui.theme.AppTheme
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.data.DesktopPreferencesDataSource
 import org.meshtastic.desktop.di.desktopModule
 import org.meshtastic.desktop.di.desktopPlatformModule
 import org.meshtastic.desktop.ui.DesktopMainScreen
 import org.meshtastic.desktop.ui.navSavedStateConfig
+import java.awt.Desktop
 import java.util.Locale
 
 /**
@@ -75,11 +78,35 @@ import java.util.Locale
 private val LocalAppLocale = staticCompositionLocalOf { "" }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-fun main() = application(exitProcessOnExit = false) {
+fun main(args: Array<String>) = application(exitProcessOnExit = false) {
     Logger.i { "Meshtastic Desktop — Starting" }
 
     val koinApp = remember { startKoin { modules(desktopPlatformModule(), desktopModule()) } }
     val systemLocale = remember { Locale.getDefault() }
+    val uiViewModel = remember { koinApp.koin.get<UIViewModel>() }
+
+    LaunchedEffect(args) {
+        args.forEach { arg ->
+            if (
+                arg.startsWith("meshtastic://") ||
+                arg.startsWith("http://meshtastic.org") ||
+                arg.startsWith("https://meshtastic.org")
+            ) {
+                uiViewModel.handleScannedUri(MeshtasticUri(arg)) {
+                    Logger.e { "Invalid Meshtastic URI passed via args: $arg" }
+                }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.APP_OPEN_URI)) {
+            Desktop.getDesktop().setOpenURIHandler { event ->
+                val uriStr = event.uri.toString()
+                uiViewModel.handleScannedUri(MeshtasticUri(uriStr)) { Logger.e { "Invalid URI from OS: $uriStr" } }
+            }
+        }
+    }
 
     // Start the mesh service processing chain (desktop equivalent of Android's MeshService)
     val meshServiceController = remember { koinApp.koin.get<MeshServiceOrchestrator>() }

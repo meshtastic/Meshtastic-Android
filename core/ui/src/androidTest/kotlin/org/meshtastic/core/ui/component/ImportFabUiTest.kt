@@ -17,6 +17,8 @@
 package org.meshtastic.core.ui.component
 
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.test.assertDoesNotExist
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -24,6 +26,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import org.junit.Rule
 import org.junit.Test
+import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
+import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.proto.SharedContact
 import org.meshtastic.proto.User
 
@@ -32,9 +36,16 @@ class ImportFabUiTest {
     @get:Rule val composeTestRule = createComposeRule()
 
     @Test
-    fun importFab_expands_onButtonClick() {
+    fun importFab_expands_onButtonClick_whenSupported() {
         val testTag = "import_fab"
-        composeTestRule.setContent { MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag) }
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalBarcodeScannerSupported provides true,
+                LocalNfcScannerSupported provides true,
+            ) {
+                MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag)
+            }
+        }
 
         // Expand the FAB
         composeTestRule.onNodeWithTag(testTag).performClick()
@@ -42,6 +53,27 @@ class ImportFabUiTest {
         // Verify menu items are visible using their tags
         composeTestRule.onNodeWithTag("nfc_import").assertIsDisplayed()
         composeTestRule.onNodeWithTag("qr_import").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("url_import").assertIsDisplayed()
+    }
+
+    @Test
+    fun importFab_hidesNfcAndQr_whenNotSupported() {
+        val testTag = "import_fab"
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalBarcodeScannerSupported provides false,
+                LocalNfcScannerSupported provides false,
+            ) {
+                MeshtasticImportFAB(onImport = {}, isContactContext = true, testTag = testTag)
+            }
+        }
+
+        // Expand the FAB
+        composeTestRule.onNodeWithTag(testTag).performClick()
+
+        // Verify menu items are visible using their tags
+        composeTestRule.onNodeWithTag("nfc_import").assertDoesNotExist()
+        composeTestRule.onNodeWithTag("qr_import").assertDoesNotExist()
         composeTestRule.onNodeWithTag("url_import").assertIsDisplayed()
     }
 

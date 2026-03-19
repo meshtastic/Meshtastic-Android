@@ -20,6 +20,7 @@ import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.desktop.ui.messaging.DesktopAdaptiveContactsScreen
 import org.meshtastic.desktop.ui.messaging.DesktopMessageContent
@@ -39,12 +40,18 @@ import org.meshtastic.feature.messaging.ui.sharing.ShareScreen
 fun EntryProviderScope<NavKey>.desktopMessagingGraph(backStack: NavBackStack<NavKey>) {
     entry<ContactsRoutes.ContactsGraph> {
         val viewModel: ContactsViewModel = koinViewModel()
-        DesktopAdaptiveContactsScreen(viewModel = viewModel)
+        DesktopAdaptiveContactsScreen(
+            viewModel = viewModel,
+            onNavigateToShareChannels = { backStack.add(ChannelsRoutes.ChannelsGraph) },
+        )
     }
 
     entry<ContactsRoutes.Contacts> {
         val viewModel: ContactsViewModel = koinViewModel()
-        DesktopAdaptiveContactsScreen(viewModel = viewModel)
+        DesktopAdaptiveContactsScreen(
+            viewModel = viewModel,
+            onNavigateToShareChannels = { backStack.add(ChannelsRoutes.ChannelsGraph) },
+        )
     }
 
     entry<ContactsRoutes.Messages> { route ->

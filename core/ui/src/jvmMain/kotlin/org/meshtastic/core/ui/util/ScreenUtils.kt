@@ -17,9 +17,9 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.compositionLocalOf
 
-val LocalNfcScannerProvider =
-    compositionLocalOf<@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _ -> } }
-
-val LocalNfcScannerSupported = compositionLocalOf { false }
+/** JVM no-op — screen brightness control is not available on Desktop. */
+@Composable
+actual fun SetScreenBrightness(brightness: Float) {
+    // No-op on JVM/Desktop
+}

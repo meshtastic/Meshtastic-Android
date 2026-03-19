@@ -29,3 +29,5 @@ val LocalBarcodeScannerProvider =
             }
         }
     }
+
+val LocalBarcodeScannerSupported = compositionLocalOf { false }

@@ -52,12 +52,10 @@ kotlin {
 
             implementation(libs.kermit)
             implementation(libs.koin.compose.viewmodel)
+            implementation(libs.qrcode.kotlin)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.zxing.core)
-        }
+        androidMain.dependencies { implementation(libs.androidx.activity.compose) }
 
         commonTest.dependencies {
             implementation(libs.junit)

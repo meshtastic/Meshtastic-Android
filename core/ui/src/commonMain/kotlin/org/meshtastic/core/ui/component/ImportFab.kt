@@ -56,7 +56,9 @@ import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.QrCode2
 import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
+import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
+import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.rememberOpenNfcSettings
 import org.meshtastic.proto.SharedContact
 
@@ -97,6 +99,8 @@ fun MeshtasticImportFAB(
 
     val barcodeScanner = LocalBarcodeScannerProvider.current { contents -> contents?.let { onImport(it) } }
     val nfcScanner = LocalNfcScannerProvider.current
+    val isNfcSupported = LocalNfcScannerSupported.current
+    val isBarcodeSupported = LocalBarcodeScannerSupported.current
 
     if (isNfcScanning) {
         nfcScanner(
@@ -142,8 +146,10 @@ fun MeshtasticImportFAB(
         )
     }
 
-    val items =
-        mutableListOf(
+    val items = mutableListOf<MenuFABItem>()
+
+    if (isNfcSupported) {
+        items.add(
             MenuFABItem(
                 label =
                 stringResource(
@@ -153,6 +159,11 @@ fun MeshtasticImportFAB(
                 onClick = { isNfcScanning = true },
                 testTag = "nfc_import",
             ),
+        )
+    }
+
+    if (isBarcodeSupported) {
+        items.add(
             MenuFABItem(
                 label =
                 stringResource(
@@ -162,16 +173,20 @@ fun MeshtasticImportFAB(
                 onClick = { barcodeScanner.startScan() },
                 testTag = "qr_import",
             ),
-            MenuFABItem(
-                label =
-                stringResource(
-                    if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
-                ),
-                icon = Icons.Rounded.Link,
-                onClick = { showUrlDialog = true },
-                testTag = "url_import",
-            ),
         )
+    }
+
+    items.add(
+        MenuFABItem(
+            label =
+            stringResource(
+                if (isContactContext) Res.string.input_shared_contact_url else Res.string.input_channel_url,
+            ),
+            icon = Icons.Rounded.Link,
+            onClick = { showUrlDialog = true },
+            testTag = "url_import",
+        ),
+    )
 
     onShareChannels?.let {
         items.add(

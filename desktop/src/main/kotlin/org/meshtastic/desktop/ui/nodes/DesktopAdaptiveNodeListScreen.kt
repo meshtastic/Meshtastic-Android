@@ -48,14 +48,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.node_count_template
 import org.meshtastic.core.resources.nodes
 import org.meshtastic.core.ui.component.EmptyDetailPlaceholder
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
+import org.meshtastic.core.ui.component.SharedContactDialog
 import org.meshtastic.core.ui.icon.MeshtasticIcons
 import org.meshtastic.core.ui.icon.Nodes
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.node.component.NodeContextMenu
 import org.meshtastic.feature.node.component.NodeFilterTextField
 import org.meshtastic.feature.node.component.NodeItem
@@ -77,12 +81,13 @@ import org.meshtastic.feature.node.model.NodeDetailAction
  * bottom sheets) are no-ops on desktop.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun DesktopAdaptiveNodeListScreen(
     viewModel: NodeListViewModel,
     initialNodeId: Int? = null,
     onNavigate: (Route) -> Unit = {},
+    uiViewModel: UIViewModel = koinViewModel(),
 ) {
     val state by viewModel.nodesUiState.collectAsStateWithLifecycle()
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
@@ -95,6 +100,13 @@ fun DesktopAdaptiveNodeListScreen(
     val navigator = rememberListDetailPaneScaffoldNavigator<Int>()
     val scope = rememberCoroutineScope()
     val listState = rememberLazyListState()
+
+    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    var shareNode by remember { mutableStateOf<org.meshtastic.core.model.Node?>(null) }
+
+    if (shareNode != null) {
+        SharedContactDialog(contact = shareNode, onDismiss = { shareNode = null })
+    }
 
     LaunchedEffect(initialNodeId) {
         initialNodeId?.let { nodeId -> navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, nodeId) }
@@ -123,6 +135,22 @@ fun DesktopAdaptiveNodeListScreen(
                             actions = {},
                             onClickChip = {},
                         )
+                    },
+                    floatingActionButton = {
+                        if (connectionState == ConnectionState.Connected) {
+                            MeshtasticImportFAB(
+                                onImport = { uriString ->
+                                    uiViewModel.handleScannedUri(
+                                        org.meshtastic.core.common.util.MeshtasticUri(uriString),
+                                    ) {
+                                        // OnInvalid
+                                    }
+                                },
+                                sharedContact = sharedContactRequested,
+                                onDismissSharedContact = { uiViewModel.clearSharedContactRequested() },
+                                isContactContext = true,
+                            )
+                        }
                     },
                 ) { contentPadding ->
                     Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
@@ -227,6 +255,7 @@ fun DesktopAdaptiveNodeListScreen(
                                     is NodeDetailAction.Navigate -> onNavigate(action.route)
                                     is NodeDetailAction.TriggerServiceAction ->
                                         detailViewModel.onServiceAction(action.action)
+                                    is NodeDetailAction.ShareContact -> shareNode = detailUiState.node
                                     is NodeDetailAction.HandleNodeMenuAction -> {
                                         val menuAction = action.action
                                         if (

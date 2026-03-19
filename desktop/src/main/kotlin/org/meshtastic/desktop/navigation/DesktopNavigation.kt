@@ -26,13 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ConnectionsRoutes
 import org.meshtastic.core.navigation.FirmwareRoutes
 import org.meshtastic.core.navigation.MapRoutes
 import org.meshtastic.desktop.ui.firmware.DesktopFirmwareScreen
 import org.meshtastic.desktop.ui.map.KmpMapPlaceholder
 import org.meshtastic.feature.connections.ui.ConnectionsScreen
+import org.meshtastic.feature.settings.radio.channel.channelsGraph
 
 /**
  * Registers entry providers for all top-level desktop destinations.
@@ -60,8 +60,7 @@ fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>) 
     desktopSettingsGraph(backStack)
 
     // Channels
-    entry<ChannelsRoutes.ChannelsGraph> { PlaceholderScreen("Channels") }
-    entry<ChannelsRoutes.Channels> { PlaceholderScreen("Channels") }
+    channelsGraph(backStack)
 
     // Connections — shared screen
     entry<ConnectionsRoutes.ConnectionsGraph> {

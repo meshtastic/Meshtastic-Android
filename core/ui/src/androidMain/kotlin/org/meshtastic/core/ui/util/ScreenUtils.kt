@@ -16,10 +16,24 @@
  */
 package org.meshtastic.core.ui.util
 
+import android.app.Activity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
 
-val LocalNfcScannerProvider =
-    compositionLocalOf<@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _ -> } }
+@Composable
+actual fun SetScreenBrightness(brightness: Float) {
+    val context = LocalContext.current
+    DisposableEffect(Unit) {
+        val window = (context as? Activity)?.window
+        val layoutParams = window?.attributes
+        val originalBrightness = layoutParams?.screenBrightness
+        layoutParams?.screenBrightness = brightness
+        window?.attributes = layoutParams
 
-val LocalNfcScannerSupported = compositionLocalOf { false }
+        onDispose {
+            layoutParams?.screenBrightness = originalBrightness ?: -1f
+            window?.attributes = layoutParams
+        }
+    }
+}

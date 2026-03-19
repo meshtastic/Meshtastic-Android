@@ -39,13 +39,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.conversations
 import org.meshtastic.core.resources.mark_as_read
 import org.meshtastic.core.resources.unread_count
 import org.meshtastic.core.ui.component.MainAppBar
+import org.meshtastic.core.ui.component.MeshtasticImportFAB
 import org.meshtastic.core.ui.icon.MarkChatRead
 import org.meshtastic.core.ui.icon.MeshtasticIcons
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.feature.messaging.MessageViewModel
 import org.meshtastic.feature.messaging.component.EmptyConversationsPlaceholder
 import org.meshtastic.feature.messaging.ui.contact.ContactItem
@@ -63,12 +66,19 @@ import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Suppress("LongMethod")
 @Composable
-fun DesktopAdaptiveContactsScreen(viewModel: ContactsViewModel) {
+fun DesktopAdaptiveContactsScreen(
+    viewModel: ContactsViewModel,
+    onNavigateToShareChannels: () -> Unit = {},
+    uiViewModel: UIViewModel = koinViewModel(),
+) {
     val contacts by viewModel.contactList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val unreadTotal by viewModel.unreadCountTotal.collectAsStateWithLifecycle()
     val navigator = rememberListDetailPaneScaffoldNavigator<String>()
     val scope = rememberCoroutineScope()
+
+    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
 
     ListDetailPaneScaffold(
         directive = navigator.scaffoldDirective,
@@ -101,6 +111,23 @@ fun DesktopAdaptiveContactsScreen(viewModel: ContactsViewModel) {
                             },
                             onClickChip = {},
                         )
+                    },
+                    floatingActionButton = {
+                        if (connectionState == ConnectionState.Connected) {
+                            MeshtasticImportFAB(
+                                onImport = { uriString ->
+                                    uiViewModel.handleScannedUri(
+                                        org.meshtastic.core.common.util.MeshtasticUri(uriString),
+                                    ) {
+                                        // OnInvalid
+                                    }
+                                },
+                                onShareChannels = onNavigateToShareChannels,
+                                sharedContact = sharedContactRequested,
+                                onDismissSharedContact = { uiViewModel.clearSharedContactRequested() },
+                                isContactContext = true,
+                            )
+                        }
                     },
                 ) { contentPadding ->
                     if (contacts.isEmpty()) {
