@@ -19,7 +19,7 @@
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Property-Based Parsing Tests (Kotest)' (Protocol in workflow.md) cb71c8588
 
 ## Phase 4: Domain Logic Gap Fill
-- [ ] Task: Identify and fill testing gaps in `core:domain` use cases not fully covered during the initial Mokkery migration.
+- [x] Task: Identify and fill testing gaps in `core:domain` use cases not fully covered during the initial Mokkery migration. 7b815130f
 - [ ] Task: Conductor - User Manual Verification 'Phase 4: Domain Logic Gap Fill' (Protocol in workflow.md)
 
 ## Phase 5: Final Measurement & Verification
