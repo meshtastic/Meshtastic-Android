@@ -189,6 +189,18 @@
   },
   "pullRequests": [
     {
+      "id": "9954",
+      "title": "fix:[RTC] update time on rp2040",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9954",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
+      "id": "9953",
+      "title": "Fix: Enable touch-to-backlight on T-Echo (not just T-Echo Plus)",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9953",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9951",
       "title": "fix: big-endian byte ordering for radio packet header fields",
       "page_url": "https://github.com/meshtastic/firmware/pull/9951",
@@ -204,12 +216,6 @@
       "id": "9939",
       "title": "Fix intermittent busyRx on Portduino SX1262 (stale preamble IRQ)",
       "page_url": "https://github.com/meshtastic/firmware/pull/9939",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
-      "id": "9934",
-      "title": "fix: MQTT settings silently fail to persist when broker is unreachable",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9934",
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
