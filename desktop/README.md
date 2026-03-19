@@ -59,7 +59,6 @@ The module depends on the JVM variants of KMP modules:
 | `ui/settings/DesktopNetworkConfigScreen.kt` | Network config without QR/NFC scanning |
 | `ui/settings/DesktopSecurityConfigScreen.kt` | Security config with JVM `SecureRandom` (omits file export) |
 | `ui/settings/DesktopExternalNotificationConfigScreen.kt` | External notification config without MediaPlayer/file import |
-| `ui/settings/DesktopDebugScreen.kt` | Desktop-specific debug info screen |
 | `ui/nodes/DesktopAdaptiveNodeListScreen.kt` | Adaptive node list-detail using JetBrains `ListDetailPaneScaffold` |
 | `ui/messaging/DesktopAdaptiveContactsScreen.kt` | Adaptive contacts list-detail using JetBrains `ListDetailPaneScaffold` |
 | `ui/messaging/DesktopMessageContent.kt` | Desktop message content with send, reactions, and selection |

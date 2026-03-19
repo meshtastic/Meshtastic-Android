@@ -139,10 +139,10 @@ fun EntryProviderScope<NavKey>.desktopSettingsGraph(backStack: NavBackStack<NavK
         CleanNodeDatabaseScreen(viewModel = viewModel)
     }
 
-    // Debug Panel — Desktop-specific basic log viewer
+    // Debug Panel — shared commonMain composable
     entry<SettingsRoutes.DebugPanel> {
         val viewModel: org.meshtastic.feature.settings.debugging.DebugViewModel = koinViewModel()
-        org.meshtastic.desktop.ui.settings.DesktopDebugScreen(
+        org.meshtastic.feature.settings.debugging.DebugScreen(
             viewModel = viewModel,
             onNavigateUp = { backStack.removeLastOrNull() },
         )
