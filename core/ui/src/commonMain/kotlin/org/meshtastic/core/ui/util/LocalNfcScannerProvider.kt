@@ -21,3 +21,5 @@ import androidx.compose.runtime.compositionLocalOf
 
 val LocalNfcScannerProvider =
     compositionLocalOf<@Composable (onResult: (String?) -> Unit, onNfcDisabled: () -> Unit) -> Unit> { { _, _ -> } }
+
+val LocalNfcScannerSupported = compositionLocalOf { false }

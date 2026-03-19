@@ -64,9 +64,11 @@ import org.meshtastic.core.ui.theme.AppTheme
 import org.meshtastic.core.ui.theme.MODE_DYNAMIC
 import org.meshtastic.core.ui.util.LocalAnalyticsIntroProvider
 import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
+import org.meshtastic.core.ui.util.LocalBarcodeScannerSupported
 import org.meshtastic.core.ui.util.LocalInlineMapProvider
 import org.meshtastic.core.ui.util.LocalMapViewProvider
 import org.meshtastic.core.ui.util.LocalNfcScannerProvider
+import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.core.ui.util.LocalTracerouteMapOverlayInsetsProvider
 import org.meshtastic.core.ui.util.showToast
 import org.meshtastic.core.ui.viewmodel.UIViewModel
@@ -124,6 +126,8 @@ class MainActivity : ComponentActivity() {
             CompositionLocalProvider(
                 LocalBarcodeScannerProvider provides { onResult -> rememberBarcodeScanner(onResult) },
                 LocalNfcScannerProvider provides { onResult, onDisabled -> NfcScannerEffect(onResult, onDisabled) },
+                LocalBarcodeScannerSupported provides true,
+                LocalNfcScannerSupported provides true,
                 LocalAnalyticsIntroProvider provides { AnalyticsIntro() },
                 LocalMapViewProvider provides getMapViewProvider(),
                 LocalInlineMapProvider provides { node, modifier -> InlineMap(node, modifier) },
