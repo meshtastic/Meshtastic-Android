@@ -168,6 +168,7 @@ fun ChannelScreen(
     val showToast = rememberShowToastResource()
 
     // Send new channel settings to the device
+    @Suppress("TooGenericExceptionCaught")
     fun installSettings(newChannelSet: ChannelSet) {
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
