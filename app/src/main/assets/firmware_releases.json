@@ -189,6 +189,12 @@
   },
   "pullRequests": [
     {
+      "id": "9955",
+      "title": "Add Env for Seeed XIAO ESP32-C6 + Wio-SX1262",
+      "page_url": "https://github.com/meshtastic/firmware/pull/9955",
+      "zip_url": "https://discord.com/invite/meshtastic"
+    },
+    {
       "id": "9954",
       "title": "fix:[RTC] update time on rp2040",
       "page_url": "https://github.com/meshtastic/firmware/pull/9954",
