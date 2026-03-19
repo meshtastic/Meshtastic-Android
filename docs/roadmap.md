@@ -69,6 +69,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 | Connections | ✅ Unified shared UI with dynamic transport detection |
 | Metrics logs | ✅ TracerouteLog, NeighborInfoLog, HostMetricsLog |
 | Map | ❌ Needs MapLibre or equivalent |
+| QR Generation | ✅ Pure KMP generation via `qrcode-kotlin` |
 | Charts | ✅ Vico KMP charts wired in commonMain (Device, Environment, Signal, Power, Pax) |
 | Debug Panel | ✅ Real screen (mesh log viewer via shared `DebugViewModel`) |
 | Notifications | ✅ Desktop native notifications with system tray icon support |

@@ -32,7 +32,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `core:ble` | ✅ | ✅ | Kable multiplatform BLE abstractions in commonMain |
 | `core:nfc` | ✅ | ✅ | NFC contract in commonMain; hardware in androidMain |
 | `core:service` | ✅ | ✅ | Service layer; Android bindings in androidMain |
-| `core:ui` | ✅ | ✅ | Shared Compose UI, `jvmAndroidMain` + `jvmMain` actuals |
+| `core:ui` | ✅ | ✅ | Shared Compose UI, pure KMP QR generator, `jvmAndroidMain` + `jvmMain` actuals |
 | `core:testing` | ✅ | ✅ | Shared test doubles, fakes, and utilities for `commonTest` |
 | `core:api` | ❌ | — | Android-only (AIDL). Intentional. |
 | `core:barcode` | ❌ | — | Android-only (CameraX). Flavor split minimised to decoder factory only (ML Kit / ZXing). Shared contract in `core:ui`. |
@@ -43,7 +43,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
-| `feature:settings` | ✅ | ✅ ~35 real screens; shared `ChannelViewModel` |
+| `feature:settings` | ✅ | ✅ ~35 real screens; shared `ChannelScreen` & `ViewModel` |
 | `feature:node` | ✅ | ✅ Adaptive list-detail; shared `NodeContextMenu` |
 | `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; 17 shared files in commonMain (ViewModels, MessageBubble, MessageItem, QuickChat, Reactions, DeliveryInfo, actions, events) |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
