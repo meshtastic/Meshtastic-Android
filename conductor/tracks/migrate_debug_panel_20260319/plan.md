@@ -5,7 +5,7 @@
 - [x] Task: Move these files from the Android-specific source sets (e.g., `feature/settings/src/androidMain`) into `feature/settings/src/commonMain`.
 - [x] Task: Conductor - User Manual Verification 'Phase 1: Analysis and Relocation' (Protocol in workflow.md)
 
-## Phase 2: Adaptation to KMP
+## Phase 2: Adaptation to KMP [checkpoint: 834f42c]
 - [x] Task: Resolve compilation errors by removing Android-specific imports (`android.*`, `java.*`).
 - [x] Task: Migrate Android Jetpack Compose imports (`androidx.compose`) to Compose Multiplatform equivalents (`org.jetbrains.compose.*` or ensuring the standard Multiplatform aliases are used).
 - [x] Task: Ensure the Debug Panel ViewModel uses the multiplatform `androidx.lifecycle.ViewModel`.
