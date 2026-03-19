@@ -42,6 +42,7 @@
     <string name="internal">Sisemine</string>
     <string name="node_sort_via_favorite">läbi Lemmikud</string>
     <string name="node_filter_show_ignored">Näita ainult ignoreeritud sõlmi</string>
+    <string name="node_filter_exclude_mqtt">Välista MQTT</string>
     <string name="unrecognized">Tundmatu</string>
     <string name="message_status_enroute">Ootab kinnitamist</string>
     <string name="message_status_queued">Saatmise järjekorras</string>
