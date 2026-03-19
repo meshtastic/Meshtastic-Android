@@ -18,9 +18,9 @@
 - [x] Task: Add `Kotest` property-based tests for `TcpTransport` and/or `SerialTransport` in `core:network`. 2fd68d67e
 - [x] Task: Conductor - User Manual Verification 'Phase 3: Property-Based Parsing Tests (Kotest)' (Protocol in workflow.md) cb71c8588
 
-## Phase 4: Domain Logic Gap Fill
+## Phase 4: Domain Logic Gap Fill [checkpoint: 5735aa1]
 - [x] Task: Identify and fill testing gaps in `core:domain` use cases not fully covered during the initial Mokkery migration. 7b815130f
-- [ ] Task: Conductor - User Manual Verification 'Phase 4: Domain Logic Gap Fill' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Phase 4: Domain Logic Gap Fill' (Protocol in workflow.md) 5735aa148
 
 ## Phase 5: Final Measurement & Verification
 - [ ] Task: Execute full test suite (`./gradlew test`) to ensure stability.
