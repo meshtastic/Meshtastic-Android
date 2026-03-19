@@ -56,6 +56,7 @@ class AndroidGetDiscoveredDevicesUseCase(
     private val usbManagerLazy: Lazy<UsbManager>,
 ) : GetDiscoveredDevicesUseCase {
     private val suffixLength = 4
+    private val macSuffixLength = 8
 
     @Suppress("LongMethod", "CyclomaticComplexMethod")
     override fun invoke(showMock: Boolean): Flow<DiscoveredDevices> {
@@ -136,8 +137,14 @@ class AndroidGetDiscoveredDevicesUseCase(
                         val matchingNode =
                             if (databaseManager.hasDatabaseFor(entry.fullAddress)) {
                                 db.values.find { node ->
-                                    val suffix = entry.device.getMeshtasticShortName()?.lowercase(Locale.ROOT)
-                                    suffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(suffix)
+                                    val macSuffix =
+                                        entry.device.address
+                                            .replace(":", "")
+                                            .takeLast(macSuffixLength)
+                                            .lowercase(Locale.ROOT)
+                                    val nameSuffix = entry.device.getMeshtasticShortName()?.lowercase(Locale.ROOT)
+                                    node.user.id.lowercase(Locale.ROOT).endsWith(macSuffix) ||
+                                        (nameSuffix != null && node.user.id.lowercase(Locale.ROOT).endsWith(nameSuffix))
                                 }
                             } else {
                                 null
