@@ -16,25 +16,56 @@
  */
 package org.meshtastic.feature.connections.domain.usecase
 
+import app.cash.turbine.test
+import dev.mokkery.answering.returns
+import dev.mokkery.every
+import dev.mokkery.mock
+import dev.mokkery.matcher.any
+import io.kotest.matchers.shouldBe
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import org.meshtastic.core.common.database.DatabaseManager
+import org.meshtastic.core.datastore.RecentAddressesDataSource
+import org.meshtastic.core.datastore.model.RecentAddress
+import org.meshtastic.core.network.repository.DiscoveredService
+import org.meshtastic.core.network.repository.NetworkRepository
+import org.meshtastic.core.testing.FakeNodeRepository
+import org.meshtastic.core.testing.TestDataFactory
+import kotlin.test.Test
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+
 /** Tests for [CommonGetDiscoveredDevicesUseCase] covering TCP device discovery and node matching. */
 class CommonGetDiscoveredDevicesUseCaseTest {
-    /*
-
-
     private lateinit var useCase: CommonGetDiscoveredDevicesUseCase
     private lateinit var nodeRepository: FakeNodeRepository
     private lateinit var recentAddressesDataSource: RecentAddressesDataSource
     private lateinit var databaseManager: DatabaseManager
+    private lateinit var networkRepository: NetworkRepository
     private val recentAddressesFlow = MutableStateFlow<List<RecentAddress>>(emptyList())
+    private val resolvedServicesFlow = MutableStateFlow<List<DiscoveredService>>(emptyList())
 
     private fun setUp() {
         nodeRepository = FakeNodeRepository()
+        recentAddressesDataSource = mock {
+            every { recentAddresses } returns recentAddressesFlow
+        }
+        databaseManager = mock {
+            every { hasDatabaseFor(any()) } returns false
+        }
+        networkRepository = mock {
+            every { resolvedList } returns resolvedServicesFlow
+            every { networkAvailable } returns flowOf(true)
+        }
 
         useCase =
             CommonGetDiscoveredDevicesUseCase(
                 recentAddressesDataSource = recentAddressesDataSource,
                 nodeRepository = nodeRepository,
                 databaseManager = databaseManager,
+                networkRepository = networkRepository,
             )
     }
 
@@ -45,7 +76,6 @@ class CommonGetDiscoveredDevicesUseCaseTest {
             val result = awaitItem()
             assertTrue(result.recentTcpDevices.isEmpty(), "No recent TCP devices when empty")
             assertTrue(result.usbDevices.isEmpty(), "No USB devices when showMock=false")
-            assertTrue(result.bleDevices.isEmpty(), "No BLE devices in common use case")
             assertTrue(result.discoveredTcpDevices.isEmpty(), "No discovered TCP in common use case")
             cancelAndIgnoreRemainingEvents()
         }
@@ -71,7 +101,7 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         setUp()
         useCase.invoke(showMock = true).test {
             val result = awaitItem()
-            "Mock device should appear in usbDevices" shouldBe 1, result.usbDevices.size
+            result.usbDevices.size shouldBe 1
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -92,7 +122,16 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         val testNode = TestDataFactory.createTestNode(num = 1, userId = "!test1234", longName = "Test Node")
         nodeRepository.setNodes(listOf(testNode))
 
-        every { databaseManager.hasDatabaseFor("tMeshtastic_1234") } returns true
+        databaseManager = mock {
+            every { hasDatabaseFor("tMeshtastic_1234") } returns true
+        }
+        useCase =
+            CommonGetDiscoveredDevicesUseCase(
+                recentAddressesDataSource = recentAddressesDataSource,
+                nodeRepository = nodeRepository,
+                databaseManager = databaseManager,
+                networkRepository = networkRepository,
+            )
 
         recentAddressesFlow.value = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))
 
@@ -111,32 +150,12 @@ class CommonGetDiscoveredDevicesUseCaseTest {
         val testNode = TestDataFactory.createTestNode(num = 1, userId = "!test1234")
         nodeRepository.setNodes(listOf(testNode))
 
-        every { databaseManager.hasDatabaseFor(any()) } returns false
-
         recentAddressesFlow.value = listOf(RecentAddress("tMeshtastic_1234", "Meshtastic_1234"))
 
         useCase.invoke(showMock = false).test {
             val result = awaitItem()
             result.recentTcpDevices.size shouldBe 1
             assertNull(result.recentTcpDevices[0].node, "Node should not be matched when no database")
-            cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun testSuffixTooShortForMatch() = runTest {
-        setUp()
-        val testNode = TestDataFactory.createTestNode(num = 1, userId = "!test1234")
-        nodeRepository.setNodes(listOf(testNode))
-
-        every { databaseManager.hasDatabaseFor("tShort_ab") } returns true
-
-        recentAddressesFlow.value = listOf(RecentAddress("tShort_ab", "Short_ab"))
-
-        useCase.invoke(showMock = false).test {
-            val result = awaitItem()
-            result.recentTcpDevices.size shouldBe 1
-            assertNull(result.recentTcpDevices[0].node, "Suffix 'ab' is too short (< 4) to match")
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -153,10 +172,72 @@ class CommonGetDiscoveredDevicesUseCaseTest {
             // Add a node to the repository — flow should re-emit
             nodeRepository.setNodes(TestDataFactory.createTestNodes(2))
             val secondResult = awaitItem()
-            "Recent TCP devices count unchanged" shouldBe 1, secondResult.recentTcpDevices.size
+            secondResult.recentTcpDevices.size shouldBe 1
             cancelAndIgnoreRemainingEvents()
         }
     }
 
-     */
+    @Test
+    fun testDiscoveredTcpDevices() = runTest {
+        setUp()
+        resolvedServicesFlow.value = listOf(
+            DiscoveredService(
+                name = "Meshtastic_1234",
+                hostAddress = "192.168.1.50",
+                port = 4403,
+                txt = mapOf(
+                    "id" to "!1234".encodeToByteArray(),
+                    "shortname" to "Mesh".encodeToByteArray()
+                )
+            )
+        )
+
+        useCase.invoke(showMock = false).test {
+            val result = awaitItem()
+            result.discoveredTcpDevices.size shouldBe 1
+            result.discoveredTcpDevices[0].name shouldBe "Mesh_1234"
+            result.discoveredTcpDevices[0].fullAddress shouldBe "t192.168.1.50"
+            
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun testDiscoveredTcpDeviceMatchesNode() = runTest {
+        setUp()
+        val testNode = TestDataFactory.createTestNode(num = 1, userId = "!1234", longName = "Mesh")
+        nodeRepository.setNodes(listOf(testNode))
+
+        databaseManager = mock {
+            every { hasDatabaseFor("t192.168.1.50") } returns true
+        }
+        useCase =
+            CommonGetDiscoveredDevicesUseCase(
+                recentAddressesDataSource = recentAddressesDataSource,
+                nodeRepository = nodeRepository,
+                databaseManager = databaseManager,
+                networkRepository = networkRepository,
+            )
+
+        resolvedServicesFlow.value = listOf(
+            DiscoveredService(
+                name = "Meshtastic_1234",
+                hostAddress = "192.168.1.50",
+                port = 4403,
+                txt = mapOf(
+                    "id" to "!1234".encodeToByteArray(),
+                    "shortname" to "Mesh".encodeToByteArray()
+                )
+            )
+        )
+
+        useCase.invoke(showMock = false).test {
+            val result = awaitItem()
+            result.discoveredTcpDevices.size shouldBe 1
+            assertNotNull(result.discoveredTcpDevices[0].node)
+            result.discoveredTcpDevices[0].node?.user?.id shouldBe "!1234"
+            
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }
