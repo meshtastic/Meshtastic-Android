@@ -37,6 +37,8 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
+import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.navigation.ChannelsRoutes
 import org.meshtastic.core.navigation.ConnectionsRoutes
@@ -49,6 +51,9 @@ import org.meshtastic.core.navigation.SettingsRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
 import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.ui.navigation.icon
+import org.meshtastic.core.ui.qr.ScannedQrCodeDialog
+import org.meshtastic.core.ui.share.SharedContactDialog
+import org.meshtastic.core.ui.viewmodel.UIViewModel
 import org.meshtastic.desktop.navigation.desktopNavGraph
 
 /**
@@ -142,13 +147,30 @@ internal val navSavedStateConfig = SavedStateConfiguration {
  * app, proving the shared backstack architecture works across targets.
  */
 @Composable
-fun DesktopMainScreen(backStack: NavBackStack<NavKey>, radioService: RadioInterfaceService = koinInject()) {
+fun DesktopMainScreen(
+    backStack: NavBackStack<NavKey>,
+    radioService: RadioInterfaceService = koinInject(),
+    uiViewModel: UIViewModel = koinViewModel(),
+) {
     val currentKey = backStack.lastOrNull()
     val selected = TopLevelDestination.fromNavKey(currentKey)
 
     val connectionState by radioService.connectionState.collectAsStateWithLifecycle()
     val selectedDevice by radioService.currentDeviceAddressFlow.collectAsStateWithLifecycle()
     val colorScheme = MaterialTheme.colorScheme
+
+    val requestChannelSet by uiViewModel.requestChannelSet.collectAsStateWithLifecycle()
+    val sharedContactRequested by uiViewModel.sharedContactRequested.collectAsStateWithLifecycle()
+
+    if (connectionState == ConnectionState.Connected) {
+        sharedContactRequested?.let {
+            SharedContactDialog(sharedContact = it, onDismiss = { uiViewModel.clearSharedContactRequested() })
+        }
+
+        requestChannelSet?.let { newChannelSet ->
+            ScannedQrCodeDialog(newChannelSet, onDismiss = { uiViewModel.clearRequestChannelUrl() })
+        }
+    }
 
     Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
         Row(modifier = Modifier.fillMaxSize()) {

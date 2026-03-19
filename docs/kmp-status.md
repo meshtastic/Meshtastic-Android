@@ -39,7 +39,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 **18/20** core modules are KMP with JVM targets. The 2 Android-only modules are intentionally platform-specific, with shared contracts already abstracted into `core:ui/commonMain`.
 
-### Feature Modules (8 total — all KMP with JVM)
+### Feature Modules (8 total — 7 KMP with JVM)
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
@@ -50,7 +50,7 @@ Modules that share JVM-specific code between Android and desktop now standardize
 | `feature:intro` | ✅ | — |
 | `feature:map` | ✅ | Placeholder; shared `NodeMapViewModel` |
 | `feature:firmware` | — | Placeholder; DFU is Android-only |
-| `feature:widget` | ❌ | — | Android-only (App Widgets). Intentional. |
+| `feature:widget` | ❌ | — | Android-only (Glance appwidgets). Intentional. |
 
 ### Desktop Module
 
