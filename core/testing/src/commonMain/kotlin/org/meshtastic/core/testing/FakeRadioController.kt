@@ -51,8 +51,10 @@ class FakeRadioController : RadioController {
     val sentPackets = mutableListOf<DataPacket>()
     val favoritedNodes = mutableListOf<Int>()
     val sentSharedContacts = mutableListOf<Int>()
+    var throwOnSend: Boolean = false
 
     override suspend fun sendMessage(packet: DataPacket) {
+        if (throwOnSend) error("Fake send failure")
         sentPackets.add(packet)
     }
 

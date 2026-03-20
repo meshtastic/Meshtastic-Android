@@ -134,63 +134,63 @@ class MeshServiceNotificationsImpl(
     ) {
         object ServiceState :
             NotificationType(
-                "my_service",
+                NotificationChannels.SERVICE,
                 Res.string.meshtastic_service_notifications,
                 NotificationManager.IMPORTANCE_MIN,
             )
 
         object DirectMessage :
             NotificationType(
-                "my_messages",
+                NotificationChannels.MESSAGES,
                 Res.string.meshtastic_messages_notifications,
                 NotificationManager.IMPORTANCE_HIGH,
             )
 
         object BroadcastMessage :
             NotificationType(
-                "my_broadcasts",
+                NotificationChannels.BROADCASTS,
                 Res.string.meshtastic_broadcast_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object Waypoint :
             NotificationType(
-                "my_waypoints",
+                NotificationChannels.WAYPOINTS,
                 Res.string.meshtastic_waypoints_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object Alert :
             NotificationType(
-                "my_alerts",
+                NotificationChannels.ALERTS,
                 Res.string.meshtastic_alerts_notifications,
                 NotificationManager.IMPORTANCE_HIGH,
             )
 
         object NewNode :
             NotificationType(
-                "new_nodes",
+                NotificationChannels.NEW_NODES,
                 Res.string.meshtastic_new_nodes_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object LowBatteryLocal :
             NotificationType(
-                "low_battery",
+                NotificationChannels.LOW_BATTERY,
                 Res.string.meshtastic_low_battery_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object LowBatteryRemote :
             NotificationType(
-                "low_battery_remote",
+                NotificationChannels.LOW_BATTERY_REMOTE,
                 Res.string.meshtastic_low_battery_temporary_remote_notifications,
                 NotificationManager.IMPORTANCE_DEFAULT,
             )
 
         object Client :
             NotificationType(
-                "client_notifications",
+                NotificationChannels.CLIENT,
                 Res.string.client_notification,
                 NotificationManager.IMPORTANCE_HIGH,
             )
@@ -220,6 +220,7 @@ class MeshServiceNotificationsImpl(
      * when the service is created.
      */
     override fun initChannels() {
+        notificationManager.removeLegacyCategoryChannels()
         NotificationType.allTypes().forEach { type -> createNotificationChannel(type) }
     }
 

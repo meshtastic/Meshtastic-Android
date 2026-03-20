@@ -16,20 +16,21 @@
  */
 package org.meshtastic.core.service
 
-import android.app.Application
-import dev.mokkery.MockMode
-import dev.mokkery.mock
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
-import org.meshtastic.core.repository.LocationRepository
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
-class AndroidLocationServiceTest {
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+class AndroidFileServiceTest {
     @Test
     fun testInitialization() = runTest {
-        val mockContext = mock<Application>(MockMode.autofill)
-        val mockRepo = mock<LocationRepository>(MockMode.autofill)
-        val service = AndroidLocationService(mockContext, mockRepo)
+        val context = RuntimeEnvironment.getApplication()
+        val service = AndroidFileService(context)
         assertNotNull(service)
     }
 }
