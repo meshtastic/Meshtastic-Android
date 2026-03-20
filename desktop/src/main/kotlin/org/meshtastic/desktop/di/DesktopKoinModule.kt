@@ -38,10 +38,10 @@ import org.meshtastic.core.repository.MeshServiceNotifications
 import org.meshtastic.core.repository.MeshWorkerManager
 import org.meshtastic.core.repository.MessageQueue
 import org.meshtastic.core.repository.PlatformAnalytics
-import org.meshtastic.core.repository.RadioInterfaceService
+import org.meshtastic.core.repository.RadioTransportFactory
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
-import org.meshtastic.desktop.radio.DesktopRadioInterfaceService
+import org.meshtastic.desktop.radio.DesktopRadioTransportFactory
 import org.meshtastic.desktop.stub.NoopAppWidgetUpdater
 import org.meshtastic.desktop.stub.NoopCompassHeadingProvider
 import org.meshtastic.desktop.stub.NoopLocationRepository
@@ -112,10 +112,9 @@ fun desktopModule() = module {
 @Suppress("LongMethod")
 private fun desktopPlatformStubsModule() = module {
     single<ServiceRepository> { org.meshtastic.core.service.ServiceRepositoryImpl() }
-    single<RadioInterfaceService> {
-        DesktopRadioInterfaceService(
+    single<RadioTransportFactory> {
+        DesktopRadioTransportFactory(
             dispatchers = get(),
-            radioPrefs = get(),
             scanner = get(),
             bluetoothRepository = get(),
             connectionFactory = get(),

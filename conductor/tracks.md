@@ -10,5 +10,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 - [x] **Track: Extract DatabaseManager to KMP**
 *Link: [./tracks/extract_database_manager_kmp_20260320/](./tracks/extract_database_manager_kmp_20260320/)*
 
-- [ ] **Track: Extract RadioInterfaceService to KMP**
+- [x] **Track: Extract RadioInterfaceService to KMP**
 *Link: [./tracks/extract_radio_interface_kmp_20260320/](./tracks/extract_radio_interface_kmp_20260320/)*

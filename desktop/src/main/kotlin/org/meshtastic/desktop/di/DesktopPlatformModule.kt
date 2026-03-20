@@ -42,7 +42,6 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
-import java.io.File
 
 /**
  * Resolves the desktop data directory for persistent storage (DataStore files, Room database). Defaults to
