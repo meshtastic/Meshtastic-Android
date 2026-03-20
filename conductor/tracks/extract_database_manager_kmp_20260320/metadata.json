@@ -1,0 +1,8 @@
+{
+  "id": "extract_database_manager_kmp_20260320",
+  "name": "Extract DatabaseManager to KMP",
+  "description": "Move core database management logic (per-node databases, LRU) to commonMain for target parity.",
+  "status": "completed",
+  "tags": ["core", "database", "kmp", "desktop"],
+  "created_at": "2026-03-20T12:00:00Z"
+}
