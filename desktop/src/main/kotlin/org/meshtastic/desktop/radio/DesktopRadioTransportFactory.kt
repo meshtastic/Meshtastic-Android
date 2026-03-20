@@ -53,7 +53,7 @@ class DesktopRadioTransportFactory(
         if (address.startsWith(InterfaceId.TCP.id)) {
             TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
         } else if (address.startsWith(InterfaceId.SERIAL.id)) {
-            SerialTransport(address.removePrefix(InterfaceId.SERIAL.id.toString()), service)
+            SerialTransport(portName = address.removePrefix(InterfaceId.SERIAL.id.toString()), service = service)
         } else if (address.startsWith(InterfaceId.BLUETOOTH.id)) {
             DesktopBleInterface(
                 serviceScope = service.serviceScope,

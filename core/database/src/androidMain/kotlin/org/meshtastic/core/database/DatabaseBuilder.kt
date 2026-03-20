@@ -43,7 +43,7 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
 /** Returns the Android directory where database files are stored. */
 actual fun getDatabaseDirectory(): Path {
     val app = ContextServices.app
-    return app.getDatabasePath("").parentFile!!.absolutePath.toPath()
+    return app.getDatabasePath("dummy.db").parentFile!!.absolutePath.toPath()
 }
 
 /** Deletes the Android database using the platform-specific deleteDatabase helper. */
