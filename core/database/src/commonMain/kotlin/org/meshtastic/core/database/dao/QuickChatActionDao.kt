@@ -16,10 +16,10 @@
  */
 package org.meshtastic.core.database.dao
 
-import androidx.room.Dao
-import androidx.room.Query
-import androidx.room.Transaction
-import androidx.room.Upsert
+import androidx.room3.Dao
+import androidx.room3.Query
+import androidx.room3.Transaction
+import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import org.meshtastic.core.database.entity.QuickChatAction
 

@@ -35,6 +35,8 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(libs.androidx.sqlite.bundled)
+            implementation(libs.androidx.datastore.preferences)
+            implementation(libs.okio)
 
             api(projects.core.common)
             implementation(projects.core.di)

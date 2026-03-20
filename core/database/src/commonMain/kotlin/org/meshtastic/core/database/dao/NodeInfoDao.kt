@@ -16,13 +16,13 @@
  */
 package org.meshtastic.core.database.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.MapColumn
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Transaction
-import androidx.room.Upsert
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.MapColumn
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
+import androidx.room3.Transaction
+import androidx.room3.Upsert
 import kotlinx.coroutines.flow.Flow
 import okio.ByteString
 import org.meshtastic.core.database.entity.MetadataEntity

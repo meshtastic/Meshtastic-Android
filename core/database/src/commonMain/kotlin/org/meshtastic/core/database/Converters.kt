@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.database
 
-import androidx.room.TypeConverter
+import androidx.room3.TypeConverter
 import co.touchlab.kermit.Logger
 import kotlinx.serialization.json.Json
 import okio.ByteString

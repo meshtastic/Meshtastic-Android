@@ -26,22 +26,14 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
-import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import okio.FileSystem
 import okio.Path.Companion.toPath
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import org.meshtastic.core.common.BuildConfigProvider
-import org.meshtastic.core.common.database.DatabaseManager
-import org.meshtastic.core.database.DatabaseProvider
-import org.meshtastic.core.database.MeshtasticDatabase
-import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
-import org.meshtastic.core.database.MeshtasticDatabaseConstructor
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.LocalStatsSerializer
@@ -50,6 +42,7 @@ import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
 import org.meshtastic.proto.LocalModuleConfig
 import org.meshtastic.proto.LocalStats
+import java.io.File
 
 /**
  * Resolves the desktop data directory for persistent storage (DataStore files, Room database). Defaults to
@@ -73,52 +66,6 @@ private fun createPreferencesDataStore(name: String, scope: CoroutineScope): Dat
 }
 
 /**
- * Desktop Room KMP database provider. Builds a single file-backed SQLite database using [MeshtasticDatabaseConstructor]
- * and [BundledSQLiteDriver] (both KMP-ready).
- */
-class DesktopDatabaseManager :
-    DatabaseProvider,
-    DatabaseManager {
-    private val dir = desktopDataDir()
-    private val dbName = "$dir/meshtastic.db"
-
-    private val db: MeshtasticDatabase by lazy {
-        FileSystem.SYSTEM.createDirectories(dir.toPath())
-        Room.databaseBuilder<MeshtasticDatabase>(name = dbName) { MeshtasticDatabaseConstructor.initialize() }
-            .configureCommon()
-            .build()
-    }
-
-    override val currentDb: StateFlow<MeshtasticDatabase> by lazy { MutableStateFlow(db) }
-
-    override suspend fun <T> withDb(block: suspend (MeshtasticDatabase) -> T): T? = block(db)
-
-    private val _cacheLimit = MutableStateFlow(DEFAULT_CACHE_LIMIT)
-    override val cacheLimit: StateFlow<Int> = _cacheLimit
-
-    override fun getCurrentCacheLimit(): Int = _cacheLimit.value
-
-    override fun setCacheLimit(limit: Int) {
-        _cacheLimit.value = limit.coerceIn(MIN_LIMIT, MAX_LIMIT)
-    }
-
-    override suspend fun switchActiveDatabase(address: String?) {
-        // Desktop uses a single database — no per-device switching
-    }
-
-    override fun hasDatabaseFor(address: String?): Boolean {
-        // Desktop always has the single database available
-        return !address.isNullOrBlank() && address != "n"
-    }
-
-    companion object {
-        private const val DEFAULT_CACHE_LIMIT = 100
-        private const val MIN_LIMIT = 1
-        private const val MAX_LIMIT = 100
-    }
-}
-
-/**
  * Synthetic [LifecycleOwner] that stays permanently in [Lifecycle.State.RESUMED]. Replaces Android's
  * `ProcessLifecycleOwner` for desktop.
  */
@@ -139,15 +86,12 @@ private class DesktopProcessLifecycleOwner : LifecycleOwner {
  * Provides all platform-specific bindings that the real KMP `commonMain` implementations need:
  * - Named [DataStore]<[Preferences]> instances (12 preference stores + 1 core preferences store)
  * - Proto [DataStore] instances (LocalConfig, ModuleConfig, ChannelSet, LocalStats)
- * - [DatabaseProvider] and [DatabaseManager] via Room KMP
  * - [Lifecycle] (`ProcessLifecycle`)
  * - [BuildConfigProvider]
  */
 @Suppress("InjectDispatcher")
 fun desktopPlatformModule() = module {
     includes(desktopPreferencesDataStoreModule(), desktopProtoDataStoreModule())
-
-    val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // -- Build config --
     single<BuildConfigProvider> {
@@ -163,11 +107,6 @@ fun desktopPlatformModule() = module {
 
     // -- Process Lifecycle (stays RESUMED forever on desktop) --
     single(named("ProcessLifecycle")) { DesktopProcessLifecycleOwner().lifecycle }
-
-    // -- Database (Room KMP with BundledSQLiteDriver) --
-    single { DesktopDatabaseManager() }
-    single<DatabaseProvider> { get<DesktopDatabaseManager>() }
-    single<DatabaseManager> { get<DesktopDatabaseManager>() }
 }
 
 /** Named [DataStore]<[Preferences]> instances for all preference domains. */
