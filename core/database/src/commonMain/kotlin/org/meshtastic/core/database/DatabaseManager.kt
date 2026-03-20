@@ -18,10 +18,10 @@ package org.meshtastic.core.database
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,9 +50,8 @@ import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseMana
 @OptIn(ExperimentalCoroutinesApi::class)
 open class DatabaseManager(
     @Named("DatabaseDataStore") private val datastore: DataStore<Preferences>,
-    private val dispatchers: CoroutineDispatchers
-) :
-    DatabaseProvider,
+    private val dispatchers: CoroutineDispatchers,
+) : DatabaseProvider,
     SharedDatabaseManager {
 
     private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
@@ -60,12 +59,14 @@ open class DatabaseManager(
 
     private val cacheLimitKey = intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)
     private val legacyCleanedKey = booleanPreferencesKey(DatabaseConstants.LEGACY_DB_CLEANED_KEY)
+
     private fun lastUsedKey(dbName: String) = longPreferencesKey("db_last_used:$dbName")
 
     // Expose the DB cache limit as a reactive stream so UI can observe changes.
-    override val cacheLimit: StateFlow<Int> = datastore.data
-        .map { it[cacheLimitKey] ?: DatabaseConstants.DEFAULT_CACHE_LIMIT }
-        .stateIn(managerScope, SharingStarted.Eagerly, DatabaseConstants.DEFAULT_CACHE_LIMIT)
+    override val cacheLimit: StateFlow<Int> =
+        datastore.data
+            .map { it[cacheLimitKey] ?: DatabaseConstants.DEFAULT_CACHE_LIMIT }
+            .stateIn(managerScope, SharingStarted.Eagerly, DatabaseConstants.DEFAULT_CACHE_LIMIT)
 
     override fun getCurrentCacheLimit(): Int = cacheLimit.value
 
@@ -74,19 +75,21 @@ open class DatabaseManager(
         managerScope.launch {
             datastore.edit { it[cacheLimitKey] = clamped }
             // Enforce asynchronously with current active DB protected
-            val active = _currentDb.value?.let { buildDbName(_currentAddress.value) }
-                ?: DatabaseConstants.DEFAULT_DB_NAME
+            val active =
+                _currentDb.value?.let { buildDbName(_currentAddress.value) } ?: DatabaseConstants.DEFAULT_DB_NAME
             enforceCacheLimit(activeDbName = active)
         }
     }
 
     private val _currentDb = MutableStateFlow<MeshtasticDatabase?>(null)
     override val currentDb: StateFlow<MeshtasticDatabase> =
-        _currentDb.filterNotNull().stateIn(
-            managerScope,
-            SharingStarted.Eagerly,
-            getDatabaseBuilder(DatabaseConstants.DEFAULT_DB_NAME).build()
-        )
+        _currentDb
+            .filterNotNull()
+            .stateIn(
+                managerScope,
+                SharingStarted.Eagerly,
+                getDatabaseBuilder(DatabaseConstants.DEFAULT_DB_NAME).build(),
+            )
 
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
@@ -150,9 +153,7 @@ open class DatabaseManager(
     }
 
     private fun markLastUsed(dbName: String) {
-        managerScope.launch {
-            datastore.edit { it[lastUsedKey(dbName)] = nowMillis }
-        }
+        managerScope.launch { datastore.edit { it[lastUsedKey(dbName)] = nowMillis } }
     }
 
     private suspend fun lastUsed(dbName: String): Long {
@@ -171,7 +172,8 @@ open class DatabaseManager(
         val fs = getFileSystem()
         if (!fs.exists(dir)) return emptyList()
 
-        return fs.list(dir).map { it.name }
+        return fs.list(dir)
+            .map { it.name }
             .filter { it.startsWith(DatabaseConstants.DB_PREFIX) }
             .filter { it.endsWith(".db") }
             .map { it.removeSuffix(".db") }
@@ -194,7 +196,8 @@ open class DatabaseManager(
                 dbCache.remove(name)?.close()
                 deleteDatabase(name)
                 datastore.edit { it.remove(lastUsedKey(name)) }
-            }.onFailure { Logger.w(it) { "Failed to evict database $name" } }
+            }
+                .onFailure { Logger.w(it) { "Failed to evict database $name" } }
             Logger.i { "Evicted cached DB ${anonymizeDbName(name)}" }
         }
     }
@@ -217,7 +220,8 @@ open class DatabaseManager(
             runCatching {
                 dbCache.remove(legacy)?.close()
                 deleteDatabase(legacy)
-            }.onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }
+            }
+                .onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }
             Logger.i { "Deleted legacy DB ${anonymizeDbName(legacy)}" }
         }
         datastore.edit { it[legacyCleanedKey] = true }

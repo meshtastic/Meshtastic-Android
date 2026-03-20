@@ -26,9 +26,7 @@ import org.meshtastic.core.repository.RadioInterfaceService
 import org.meshtastic.core.repository.RadioTransport
 import org.meshtastic.core.repository.RadioTransportFactory
 
-/**
- * Android implementation of [RadioTransportFactory] delegating to the legacy [InterfaceFactory].
- */
+/** Android implementation of [RadioTransportFactory] delegating to the legacy [InterfaceFactory]. */
 @Single
 class AndroidRadioTransportFactory(
     private val context: Context,
@@ -36,25 +34,16 @@ class AndroidRadioTransportFactory(
     private val buildConfigProvider: BuildConfigProvider,
 ) : RadioTransportFactory {
 
-    override val supportedDeviceTypes: List<DeviceType> =
-        listOf(
-            DeviceType.BLE,
-            DeviceType.TCP,
-            DeviceType.USB,
-        )
+    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.BLE, DeviceType.TCP, DeviceType.USB)
 
     override fun isMockInterface(): Boolean =
         buildConfigProvider.isDebug || Settings.System.getString(context.contentResolver, "firebase.test.lab") == "true"
 
-    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        return interfaceFactory.value.createInterface(address, service)
-    }
+    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        interfaceFactory.value.createInterface(address, service)
 
-    override fun isAddressValid(address: String?): Boolean {
-        return interfaceFactory.value.addressValid(address)
-    }
+    override fun isAddressValid(address: String?): Boolean = interfaceFactory.value.addressValid(address)
 
-    override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
-        return interfaceFactory.value.toInterfaceAddress(interfaceId, rest)
-    }
+    override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
+        interfaceFactory.value.toInterfaceAddress(interfaceId, rest)
 }

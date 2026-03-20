@@ -35,8 +35,9 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
     return Room.databaseBuilder<MeshtasticDatabase>(
         context = app.applicationContext,
         name = dbFile.absolutePath,
-        factory = { MeshtasticDatabaseConstructor.initialize() }
-    ).configureCommon()
+        factory = { MeshtasticDatabaseConstructor.initialize() },
+    )
+        .configureCommon()
 }
 
 /** Returns the Android directory where database files are stored. */
@@ -54,6 +55,5 @@ actual fun deleteDatabase(dbName: String) {
 actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 
 /** Creates an Android DataStore for database preferences. */
-actual fun createDatabaseDataStore(name: String): DataStore<Preferences> = PreferenceDataStoreFactory.create(
-    produceFile = { ContextServices.app.preferencesDataStoreFile(name) }
-)
+actual fun createDatabaseDataStore(name: String): DataStore<Preferences> =
+    PreferenceDataStoreFactory.create(produceFile = { ContextServices.app.preferencesDataStoreFile(name) })

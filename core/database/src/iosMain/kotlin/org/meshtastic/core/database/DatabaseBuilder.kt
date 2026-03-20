@@ -36,8 +36,9 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
     val dbFilePath = documentDirectory() + "/$dbName.db"
     return Room.databaseBuilder<MeshtasticDatabase>(
         name = dbFilePath,
-        factory = { MeshtasticDatabaseConstructor.initialize() }
-    ).configureCommon()
+        factory = { MeshtasticDatabaseConstructor.initialize() },
+    )
+        .configureCommon()
 }
 
 /** Returns the iOS directory where database files are stored. */
@@ -58,19 +59,18 @@ actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 actual fun createDatabaseDataStore(name: String): DataStore<Preferences> {
     val dir = documentDirectory() + "/datastore"
     NSFileManager.defaultManager.createDirectoryAtPath(dir, true, null, null)
-    return PreferenceDataStoreFactory.create(
-        produceFile = { (dir + "/$name.preferences_pb").toPath().toNioPath() }
-    )
+    return PreferenceDataStoreFactory.create(produceFile = { (dir + "/$name.preferences_pb").toPath().toNioPath() })
 }
 
 @OptIn(ExperimentalForeignApi::class)
 private fun documentDirectory(): String {
-    val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
-        directory = NSDocumentDirectory,
-        inDomain = NSUserDomainMask,
-        appropriateForURL = null,
-        create = false,
-        error = null,
-    )
+    val documentDirectory =
+        NSFileManager.defaultManager.URLForDirectory(
+            directory = NSDocumentDirectory,
+            inDomain = NSUserDomainMask,
+            appropriateForURL = null,
+            create = false,
+            error = null,
+        )
     return requireNotNull(documentDirectory?.path)
 }

@@ -55,9 +55,9 @@ import org.meshtastic.core.repository.RadioTransportFactory
 /**
  * Shared multiplatform connection orchestrator for Meshtastic radios.
  *
- * Manages the connection lifecycle (connect, active, disconnect, reconnect loop), device address state flows,
- * and hardware state observability (BLE/Network toggles). Delegates the actual raw byte transport mapping to
- * a platform-specific [RadioTransportFactory].
+ * Manages the connection lifecycle (connect, active, disconnect, reconnect loop), device address state flows, and
+ * hardware state observability (BLE/Network toggles). Delegates the actual raw byte transport mapping to a
+ * platform-specific [RadioTransportFactory].
  */
 @Suppress("LongParameterList", "TooManyFunctions")
 @Single
@@ -99,6 +99,7 @@ class SharedRadioInterfaceService(
     private var _serviceScope = CoroutineScope(dispatchers.io + SupervisorJob())
     private var radioIf: RadioTransport? = null
     private var isStarted = false
+
     @Volatile private var listenersInitialized = false
     private var heartbeatJob: kotlinx.coroutines.Job? = null
     private var lastHeartbeatMillis = 0L
@@ -188,8 +189,9 @@ class SharedRadioInterfaceService(
     private fun startInterface() {
         if (radioIf != null) return
 
-        val address = getBondedDeviceAddress()
-            ?: if (isMockInterface()) transportFactory.toInterfaceAddress(InterfaceId.MOCK, "") else null
+        val address =
+            getBondedDeviceAddress()
+                ?: if (isMockInterface()) transportFactory.toInterfaceAddress(InterfaceId.MOCK, "") else null
 
         if (address == null) {
             Logger.w { "No valid address to connect to." }
@@ -219,12 +221,13 @@ class SharedRadioInterfaceService(
 
     private fun startHeartbeat() {
         heartbeatJob?.cancel()
-        heartbeatJob = serviceScope.launch {
-            while (true) {
-                delay(HEARTBEAT_INTERVAL_MILLIS)
-                keepAlive()
+        heartbeatJob =
+            serviceScope.launch {
+                while (true) {
+                    delay(HEARTBEAT_INTERVAL_MILLIS)
+                    keepAlive()
+                }
             }
-        }
     }
 
     fun keepAlive(now: Long = nowMillis) {

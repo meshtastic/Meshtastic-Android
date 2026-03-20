@@ -35,11 +35,7 @@ class DesktopRadioTransportFactory(
     private val dispatchers: CoroutineDispatchers,
 ) : RadioTransportFactory {
 
-    override val supportedDeviceTypes: List<DeviceType> = listOf(
-        DeviceType.TCP,
-        DeviceType.BLE,
-        DeviceType.USB,
-    )
+    override val supportedDeviceTypes: List<DeviceType> = listOf(DeviceType.TCP, DeviceType.BLE, DeviceType.USB)
 
     override fun isMockInterface(): Boolean = false
 
@@ -53,8 +49,8 @@ class DesktopRadioTransportFactory(
 
     override fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
-    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport {
-        return if (address.startsWith(InterfaceId.TCP.id)) {
+    override fun createTransport(address: String, service: RadioInterfaceService): RadioTransport =
+        if (address.startsWith(InterfaceId.TCP.id)) {
             TCPInterface(service, dispatchers, address.removePrefix(InterfaceId.TCP.id.toString()))
         } else if (address.startsWith(InterfaceId.SERIAL.id)) {
             SerialTransport(address.removePrefix(InterfaceId.SERIAL.id.toString()), service)
@@ -65,7 +61,7 @@ class DesktopRadioTransportFactory(
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
                 service = service,
-                address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString())
+                address = address.removePrefix(InterfaceId.BLUETOOTH.id.toString()),
             )
         } else {
             val stripped = if (address.startsWith("!")) address.removePrefix("!") else address
@@ -75,8 +71,7 @@ class DesktopRadioTransportFactory(
                 bluetoothRepository = bluetoothRepository,
                 connectionFactory = connectionFactory,
                 service = service,
-                address = stripped
+                address = stripped,
             )
         }
-    }
 }

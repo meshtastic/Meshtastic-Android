@@ -18,5 +18,4 @@ package org.meshtastic.core.database.di
 
 import org.koin.core.annotation.Module
 
-@Module
-class CoreDatabaseAndroidModule
+@Module class CoreDatabaseAndroidModule

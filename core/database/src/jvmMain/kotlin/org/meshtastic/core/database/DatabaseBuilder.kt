@@ -43,8 +43,9 @@ actual fun getDatabaseBuilder(dbName: String): RoomDatabase.Builder<MeshtasticDa
     dbFile.parentFile?.mkdirs()
     return Room.databaseBuilder<MeshtasticDatabase>(
         name = dbFile.absolutePath,
-        factory = { MeshtasticDatabaseConstructor.initialize() }
-    ).configureCommon()
+        factory = { MeshtasticDatabaseConstructor.initialize() },
+    )
+        .configureCommon()
 }
 
 /** Returns the JVM/Desktop directory where database files are stored. */
@@ -65,7 +66,5 @@ actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 actual fun createDatabaseDataStore(name: String): DataStore<Preferences> {
     val dir = desktopDataDir() + "/datastore"
     File(dir).mkdirs()
-    return PreferenceDataStoreFactory.create(
-        produceFile = { File(dir, "$name.preferences_pb") }
-    )
+    return PreferenceDataStoreFactory.create(produceFile = { File(dir, "$name.preferences_pb") })
 }
