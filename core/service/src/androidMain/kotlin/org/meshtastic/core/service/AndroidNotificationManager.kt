@@ -38,6 +38,8 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
 
     private val notificationManager = context.getSystemService<SystemNotificationManager>()!!
 
+    private data class ChannelConfig(val id: String, val importance: Int)
+
     init {
         initChannels()
     }
@@ -46,45 +48,51 @@ class AndroidNotificationManager(private val context: Context) : NotificationMan
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channels =
                 listOf(
-                    createChannel(
-                        Notification.Category.Message,
-                        Res.string.meshtastic_messages_notifications,
-                        SystemNotificationManager.IMPORTANCE_DEFAULT,
-                    ),
-                    createChannel(
-                        Notification.Category.NodeEvent,
-                        Res.string.meshtastic_new_nodes_notifications,
-                        SystemNotificationManager.IMPORTANCE_DEFAULT,
-                    ),
-                    createChannel(
-                        Notification.Category.Battery,
-                        Res.string.meshtastic_low_battery_notifications,
-                        SystemNotificationManager.IMPORTANCE_DEFAULT,
-                    ),
-                    createChannel(
-                        Notification.Category.Alert,
-                        Res.string.meshtastic_alerts_notifications,
-                        SystemNotificationManager.IMPORTANCE_HIGH,
-                    ),
-                    createChannel(
-                        Notification.Category.Service,
-                        Res.string.meshtastic_service_notifications,
-                        SystemNotificationManager.IMPORTANCE_MIN,
-                    ),
+                    createChannel(Notification.Category.Message, Res.string.meshtastic_messages_notifications),
+                    createChannel(Notification.Category.NodeEvent, Res.string.meshtastic_new_nodes_notifications),
+                    createChannel(Notification.Category.Battery, Res.string.meshtastic_low_battery_notifications),
+                    createChannel(Notification.Category.Alert, Res.string.meshtastic_alerts_notifications),
+                    createChannel(Notification.Category.Service, Res.string.meshtastic_service_notifications),
                 )
             notificationManager.createNotificationChannels(channels)
+            notificationManager.removeLegacyCategoryChannels()
         }
     }
 
     private fun createChannel(
         category: Notification.Category,
         nameRes: org.jetbrains.compose.resources.StringResource,
-        importance: Int,
-    ): NotificationChannel = NotificationChannel(category.name, getString(nameRes), importance)
+    ): NotificationChannel {
+        val channelConfig = category.channelConfig()
+        return NotificationChannel(channelConfig.id, getString(nameRes), channelConfig.importance)
+    }
+
+    // Keep category-to-channel mapping aligned with MeshServiceNotificationsImpl.NotificationType IDs.
+    private fun Notification.Category.channelConfig(): ChannelConfig = when (this) {
+        Notification.Category.Message ->
+            ChannelConfig(
+                id = NotificationChannels.MESSAGES,
+                importance = SystemNotificationManager.IMPORTANCE_HIGH,
+            )
+        Notification.Category.NodeEvent ->
+            ChannelConfig(
+                id = NotificationChannels.NEW_NODES,
+                importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
+            )
+        Notification.Category.Battery ->
+            ChannelConfig(
+                id = NotificationChannels.LOW_BATTERY,
+                importance = SystemNotificationManager.IMPORTANCE_DEFAULT,
+            )
+        Notification.Category.Alert ->
+            ChannelConfig(id = NotificationChannels.ALERTS, importance = SystemNotificationManager.IMPORTANCE_HIGH)
+        Notification.Category.Service ->
+            ChannelConfig(id = NotificationChannels.SERVICE, importance = SystemNotificationManager.IMPORTANCE_MIN)
+    }
 
     override fun dispatch(notification: Notification) {
         val builder =
-            NotificationCompat.Builder(context, notification.category.name)
+            NotificationCompat.Builder(context, notification.category.channelConfig().id)
                 .setContentTitle(notification.title)
                 .setContentText(notification.message)
                 .setSmallIcon(android.R.drawable.ic_dialog_info)

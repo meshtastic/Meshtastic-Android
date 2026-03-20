@@ -58,10 +58,15 @@ kotlin {
             implementation(libs.koin.androidx.workmanager)
         }
 
-        androidUnitTest.dependencies {
-            implementation(libs.robolectric)
-            implementation(libs.androidx.test.core)
-            implementation(libs.androidx.work.testing)
+        val androidHostTest by getting {
+            dependencies {
+                implementation(projects.core.testing)
+                implementation(libs.junit)
+                implementation(libs.robolectric)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.androidx.work.testing)
+            }
         }
 
         commonTest.dependencies {

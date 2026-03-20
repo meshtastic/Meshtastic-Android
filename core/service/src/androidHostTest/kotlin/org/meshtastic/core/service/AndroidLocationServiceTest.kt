@@ -16,18 +16,31 @@
  */
 package org.meshtastic.core.service
 
-import android.app.Application
-import dev.mokkery.MockMode
-import dev.mokkery.mock
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNotNull
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.meshtastic.core.repository.Location
+import org.meshtastic.core.repository.LocationRepository
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 
-class AndroidFileServiceTest {
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [34])
+class AndroidLocationServiceTest {
     @Test
     fun testInitialization() = runTest {
-        val mockContext = mock<Application>(MockMode.autofill)
-        val service = AndroidFileService(mockContext)
+        val context = RuntimeEnvironment.getApplication()
+        val service = AndroidLocationService(context, FakeLocationRepository())
         assertNotNull(service)
+    }
+
+    private class FakeLocationRepository : LocationRepository {
+        override val receivingLocationUpdates = MutableStateFlow(false)
+
+        override fun getLocations() = emptyFlow<Location>()
     }
 }
