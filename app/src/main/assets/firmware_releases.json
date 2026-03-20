@@ -225,12 +225,6 @@
       "zip_url": "https://discord.com/invite/meshtastic"
     },
     {
-      "id": "9931",
-      "title": "fix: apply LoRa config changes live without rebooting",
-      "page_url": "https://github.com/meshtastic/firmware/pull/9931",
-      "zip_url": "https://discord.com/invite/meshtastic"
-    },
-    {
       "id": "9903",
       "title": "feat: Support INA219/INA226 as primary battery sensor without ADC pin",
       "page_url": "https://github.com/meshtastic/firmware/pull/9903",
