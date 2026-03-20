@@ -113,7 +113,7 @@ androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref
 androidx-room-paging = { module = "androidx.room3:room3-paging", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room3:room3-runtime", version.ref = "room" }
 androidx-room-testing = { module = "androidx.room3:room3-testing", version.ref = "room" }
-androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.5.0" }
+androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version = "2.6.2" }
 androidx-savedstate-compose = { module = "androidx.savedstate:savedstate-compose", version.ref = "savedstate" }
 androidx-savedstate-ktx = { module = "androidx.savedstate:savedstate-ktx", version.ref = "savedstate" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version = "2.11.1" }
