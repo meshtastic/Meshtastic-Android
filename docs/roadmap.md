@@ -108,7 +108,7 @@ here| **Migrate to JetBrains Compose Multiplatform dependencies** | High | Low |
 3. **UI Interop Strategies.** When a Compose Multiplatform equivalent doesn't exist (e.g., Maps, Camera), use standard interop APIs rather than extracting the entire screen to native code. Use `AndroidView` for Android, `UIKitView` for iOS, `SwingPanel` for JVM/Desktop, and `HtmlView` for Web (`wasmJs`). Always wrap these in a shared `commonMain` interface contract (like `LocalBarcodeScannerProvider`).
 4. **Stubs are a valid first implementation.** Every target starts with no-op stubs, then graduates to real implementations.
 5. **Feature modules stay target-agnostic in `commonMain`.** Platform UI goes in platform source sets. Keep the UI layer dumb and rely on shared ViewModels (Unidirectional Data Flow) to drive state.
-6. **Transport is a pluggable adapter.** BLE, serial, TCP, MQTT all implement `RadioInterfaceService`.
+6. **Transport is a pluggable adapter.** BLE, serial, TCP, MQTT all implement `RadioTransport` and are orchestrated by a shared `RadioInterfaceService`.
 7. **CI validates every target.** If a module declares `jvm()`, CI compiles it. No exceptions. Run tests on appropriate host runners (macOS for iOS, Linux for JVM/Android) to catch platform regressions.
 8. **Test in `commonTest` first.** ViewModel and business logic tests belong in `commonTest` so every target runs them. Use shared `core:testing` utilities to minimize duplication.
 9. **Zero Platform Leaks.** Never import `java.*` or `android.*` inside `commonMain`. Use KMP-native alternatives like `kotlinx-datetime` and `Okio`.

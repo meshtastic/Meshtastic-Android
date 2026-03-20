@@ -18,7 +18,14 @@ package org.meshtastic.core.database.di
 
 import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Module
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
+import org.meshtastic.core.database.createDatabaseDataStore
 
 @Module
 @ComponentScan("org.meshtastic.core.database")
-class CoreDatabaseModule
+class CoreDatabaseModule {
+    @Single
+    @Named("DatabaseDataStore")
+    fun provideDatabaseDataStore() = createDatabaseDataStore("db-manager-prefs")
+}

@@ -26,7 +26,7 @@ import kotlinx.coroutines.sync.withLock
  * Implements the START1/START2 + 2-byte-length + payload framing protocol used for serial and TCP communication with
  * Meshtastic radios.
  *
- * Shared between Android (`StreamInterface`/`TCPInterface`) and Desktop (`DesktopRadioInterfaceService`).
+ * Shared across Android, Desktop, and iOS via `SharedRadioInterfaceService`.
  */
 @Suppress("MagicNumber")
 class StreamFrameCodec(

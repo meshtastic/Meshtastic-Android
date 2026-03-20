@@ -41,7 +41,7 @@ import java.net.SocketTimeoutException
  * Manages the TCP socket lifecycle (connect, read loop, reconnect with backoff, heartbeat) and uses [StreamFrameCodec]
  * for the START1/START2 stream framing protocol.
  *
- * Used by both Android's `TCPInterface` and Desktop's `DesktopRadioInterfaceService`.
+ * Used by Android and Desktop via the shared `SharedRadioInterfaceService`.
  */
 @Suppress("TooManyFunctions", "MagicNumber")
 class TcpTransport(

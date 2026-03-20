@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.database.dao
 
-import androidx.room.Room
+import androidx.room3.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import kotlinx.coroutines.flow.first

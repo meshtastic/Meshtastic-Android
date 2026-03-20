@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.database
 
-import androidx.room.Room
-import androidx.room.testing.MigrationTestHelper
+import androidx.room3.Room
+import androidx.room3.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule

@@ -16,13 +16,13 @@
  */
 package org.meshtastic.core.database
 
-import androidx.room.AutoMigration
-import androidx.room.Database
-import androidx.room.DeleteColumn
-import androidx.room.DeleteTable
-import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-import androidx.room.migration.AutoMigrationSpec
+import androidx.room3.AutoMigration
+import androidx.room3.Database
+import androidx.room3.DeleteColumn
+import androidx.room3.DeleteTable
+import androidx.room3.RoomDatabase
+import androidx.room3.TypeConverters
+import androidx.room3.migration.AutoMigrationSpec
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import org.meshtastic.core.database.dao.DeviceHardwareDao
@@ -99,8 +99,9 @@ import org.meshtastic.core.database.entity.TracerouteNodePositionEntity
     version = 37,
     exportSchema = true,
 )
-@androidx.room.ConstructedBy(MeshtasticDatabaseConstructor::class)
+@androidx.room3.ConstructedBy(MeshtasticDatabaseConstructor::class)
 @TypeConverters(Converters::class)
+@androidx.room3.DaoReturnTypeConverters(androidx.room3.paging.PagingSourceDaoReturnTypeConverter::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao
 

@@ -16,10 +16,10 @@
  */
 package org.meshtastic.core.database.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room3.Dao
+import androidx.room3.Insert
+import androidx.room3.OnConflictStrategy
+import androidx.room3.Query
 import org.meshtastic.core.database.entity.DeviceHardwareEntity
 
 @Dao

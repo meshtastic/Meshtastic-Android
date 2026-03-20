@@ -16,8 +16,8 @@
  */
 package org.meshtastic.core.database.entity
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+import androidx.room3.Entity
+import androidx.room3.PrimaryKey
 import org.meshtastic.core.model.MyNodeInfo
 
 @Entity(tableName = "my_node")

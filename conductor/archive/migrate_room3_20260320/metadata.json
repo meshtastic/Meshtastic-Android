@@ -1,0 +1,8 @@
+{
+  "track_id": "migrate_room3_20260320",
+  "type": "chore",
+  "status": "new",
+  "created_at": "2026-03-20T00:00:00Z",
+  "updated_at": "2026-03-20T00:00:00Z",
+  "description": "Migrate to room3, prepare to support all targets (Android, Desktop, iOS) with bundled SQLite driver and full idiomatic migration."
+}

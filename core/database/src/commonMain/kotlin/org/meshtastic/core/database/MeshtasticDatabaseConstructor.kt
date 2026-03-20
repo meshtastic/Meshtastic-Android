@@ -16,7 +16,7 @@
  */
 package org.meshtastic.core.database
 
-import androidx.room.RoomDatabaseConstructor
+import androidx.room3.RoomDatabaseConstructor
 
 @Suppress("NO_ACTUAL_FOR_EXPECT", "KotlinNoActualForExpect")
 expect object MeshtasticDatabaseConstructor : RoomDatabaseConstructor<MeshtasticDatabase> {

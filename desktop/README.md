@@ -49,7 +49,7 @@ The module depends on the JVM variants of KMP modules:
 | `navigation/DesktopSettingsNavigation.kt` | Real settings feature composables wired into nav graph (~35 screens) |
 | `navigation/DesktopNodeNavigation.kt` | Real adaptive node list-detail + real metrics screens (logs + charts); map routes remain placeholders |
 | `navigation/DesktopMessagingNavigation.kt` | Real adaptive contacts list-detail + real Messages/Share/QuickChat route screens |
-| `radio/DesktopRadioInterfaceService.kt` | TCP, Serial/USB, and BLE transports with auto-reconnect, heartbeat, and backoff retry |
+| `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB, and BLE transports |
 | `radio/DesktopMeshServiceController.kt` | Mesh service lifecycle — orchestrates `want_config` handshake chain |
 | `radio/DesktopMessageQueue.kt` | Message queue for outbound mesh packets |
 | `ui/firmware/DesktopFirmwareScreen.kt` | Placeholder firmware screen (native DFU is Android-only) |
@@ -83,7 +83,7 @@ The module depends on the JVM variants of KMP modules:
 - [x] Wire `feature:node` composables into the nav graph (node list with shared ViewModel + NodeItem)
 - [x] Wire `feature:messaging` composables into the nav graph (contacts list with shared ViewModel)
 - [x] Add JetBrains Material 3 Adaptive `ListDetailPaneScaffold` to node and messaging screens
-- [x] Implement TCP transport (`DesktopRadioInterfaceService`) with auto-reconnect and backoff retry
+- [x] Implement TCP transport (`DesktopRadioTransportFactory`) with auto-reconnect and backoff retry
 - [x] Implement mesh service controller (`DesktopMeshServiceController`) with full `want_config` handshake
 - [x] Create connections screen using shared `feature:connections` with dynamic transport detection
 - [x] Replace 5 placeholder config screens with real desktop implementations (Device, Position, Network, Security, ExtNotification)

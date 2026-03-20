@@ -18,7 +18,7 @@
 - **Koin 4.2:** Leverages Koin Annotations and the K2 Compiler Plugin for pure compile-time DI, completely replacing Hilt.
 
 ## Database & Storage
-- **Room KMP:** Shared local database using multiplatform `DatabaseConstructor`.
+- **Room 3 KMP:** Shared local database using multiplatform `DatabaseConstructor` and the `androidx.sqlite` bundled driver across Android, Desktop, and iOS.
 - **Jetpack DataStore:** Shared preferences.
 
 ## Networking & Transport

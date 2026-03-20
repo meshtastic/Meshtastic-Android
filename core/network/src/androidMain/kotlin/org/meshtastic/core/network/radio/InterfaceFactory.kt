@@ -60,6 +60,7 @@ class InterfaceFactory(
     } ?: false
 
     private fun splitAddress(address: String): Pair<InterfaceSpec<*>?, String> {
+        if (address.isEmpty()) return Pair(null, "")
         val c = address[0].let { InterfaceId.forIdChar(it) }?.let { specMap[it] }
         val rest = address.substring(1)
         return Pair(c, rest)

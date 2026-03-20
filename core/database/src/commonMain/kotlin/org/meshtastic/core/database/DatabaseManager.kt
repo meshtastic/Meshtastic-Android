@@ -16,10 +16,12 @@
  */
 package org.meshtastic.core.database
 
-import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
-import androidx.room.Room
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -29,49 +31,65 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.nowMillis
-import org.meshtastic.core.database.MeshtasticDatabase.Companion.configureCommon
 import org.meshtastic.core.di.CoroutineDispatchers
-import java.io.File
 import org.meshtastic.core.common.database.DatabaseManager as SharedDatabaseManager
 
 /** Manages per-device Room database instances for node data, with LRU eviction. */
 @Single(binds = [DatabaseProvider::class, SharedDatabaseManager::class])
 @Suppress("TooManyFunctions")
 @OptIn(ExperimentalCoroutinesApi::class)
-open class DatabaseManager(private val app: Application, private val dispatchers: CoroutineDispatchers) :
-    DatabaseProvider,
+open class DatabaseManager(
+    @Named("DatabaseDataStore") private val datastore: DataStore<Preferences>,
+    private val dispatchers: CoroutineDispatchers,
+) : DatabaseProvider,
     SharedDatabaseManager {
-    val prefs: SharedPreferences = app.getSharedPreferences("db-manager-prefs", Context.MODE_PRIVATE)
-    private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
 
+    private val managerScope = CoroutineScope(SupervisorJob() + dispatchers.default)
     private val mutex = Mutex()
 
+    private val cacheLimitKey = intPreferencesKey(DatabaseConstants.CACHE_LIMIT_KEY)
+    private val legacyCleanedKey = booleanPreferencesKey(DatabaseConstants.LEGACY_DB_CLEANED_KEY)
+
+    private fun lastUsedKey(dbName: String) = longPreferencesKey("db_last_used:$dbName")
+
     // Expose the DB cache limit as a reactive stream so UI can observe changes.
-    private val _cacheLimit = MutableStateFlow(getCurrentCacheLimit())
-    override val cacheLimit: StateFlow<Int> = _cacheLimit
+    override val cacheLimit: StateFlow<Int> =
+        datastore.data
+            .map { it[cacheLimitKey] ?: DatabaseConstants.DEFAULT_CACHE_LIMIT }
+            .stateIn(managerScope, SharingStarted.Eagerly, DatabaseConstants.DEFAULT_CACHE_LIMIT)
 
-    // Keep cache-limit StateFlow in sync if some other component updates SharedPreferences.
-    private val prefsListener =
-        SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-            if (key == DatabaseConstants.CACHE_LIMIT_KEY) {
-                _cacheLimit.value = getCurrentCacheLimit()
-            }
+    override fun getCurrentCacheLimit(): Int = cacheLimit.value
+
+    override fun setCacheLimit(limit: Int) {
+        val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
+        managerScope.launch {
+            datastore.edit { it[cacheLimitKey] = clamped }
+            // Enforce asynchronously with current active DB protected
+            val active =
+                _currentDb.value?.let { buildDbName(_currentAddress.value) } ?: DatabaseConstants.DEFAULT_DB_NAME
+            enforceCacheLimit(activeDbName = active)
         }
-
-    init {
-        prefs.registerOnSharedPreferenceChangeListener(prefsListener)
     }
 
     private val _currentDb = MutableStateFlow<MeshtasticDatabase?>(null)
     override val currentDb: StateFlow<MeshtasticDatabase> =
-        _currentDb.filterNotNull().stateIn(managerScope, SharingStarted.Eagerly, buildRoomDb(app, defaultDbName()))
+        _currentDb
+            .filterNotNull()
+            .stateIn(
+                managerScope,
+                SharingStarted.Eagerly,
+                getDatabaseBuilder(DatabaseConstants.DEFAULT_DB_NAME).build(),
+            )
 
     private val _currentAddress = MutableStateFlow<String?>(null)
     val currentAddress: StateFlow<String?> = _currentAddress
@@ -99,13 +117,12 @@ open class DatabaseManager(private val app: Application, private val dispatchers
         // Build/open Room DB off the main thread
         val db =
             dbCache[dbName]
-                ?: withContext(dispatchers.io) { buildRoomDb(app, dbName) }.also { dbCache[dbName] = it }
+                ?: withContext(dispatchers.io) { getDatabaseBuilder(dbName).build() }.also { dbCache[dbName] = it }
 
         _currentDb.value = db
         _currentAddress.value = address
         markLastUsed(dbName)
         // Also mark the previous DB as used "just now" so LRU has an accurate, recent timestamp
-        // even on first run after upgrade where no timestamp might exist yet.
         previousDbName?.let { markLastUsed(it) }
 
         // Defer LRU eviction so switch is not blocked by filesystem work
@@ -131,26 +148,35 @@ open class DatabaseManager(private val app: Application, private val dispatchers
     override fun hasDatabaseFor(address: String?): Boolean {
         if (address.isNullOrBlank() || address == "n") return false
         val dbName = buildDbName(address)
-        return getDbFile(app, dbName) != null
+        val path = getDatabaseDirectory().resolve("$dbName.db")
+        return getFileSystem().exists(path)
     }
 
     private fun markLastUsed(dbName: String) {
-        prefs.edit().putLong(lastUsedKey(dbName), nowMillis).apply()
+        managerScope.launch { datastore.edit { it[lastUsedKey(dbName)] = nowMillis } }
     }
 
-    private fun lastUsed(dbName: String): Long {
-        val k = lastUsedKey(dbName)
-        val v = prefs.getLong(k, 0L)
-        return if (v == 0L) getDbFile(app, dbName)?.lastModified() ?: 0L else v
+    private suspend fun lastUsed(dbName: String): Long {
+        val key = lastUsedKey(dbName)
+        val v = datastore.data.first()[key] ?: 0L
+        return if (v == 0L) {
+            val path = getDatabaseDirectory().resolve("$dbName.db")
+            getFileSystem().metadataOrNull(path)?.lastModifiedAtMillis ?: 0L
+        } else {
+            v
+        }
     }
 
     private fun listExistingDbNames(): List<String> {
-        val base = app.getDatabasePath(DatabaseConstants.LEGACY_DB_NAME)
-        val dir = base.parentFile ?: return emptyList()
-        val names = dir.listFiles()?.mapNotNull { f -> f.name } ?: emptyList()
-        return names
+        val dir = getDatabaseDirectory()
+        val fs = getFileSystem()
+        if (!fs.exists(dir)) return emptyList()
+
+        return fs.list(dir)
+            .map { it.name }
             .filter { it.startsWith(DatabaseConstants.DB_PREFIX) }
-            .filterNot { it.endsWith("-wal") || it.endsWith("-shm") }
+            .filter { it.endsWith(".db") }
+            .map { it.removeSuffix(".db") }
             .distinct()
     }
 
@@ -160,65 +186,45 @@ open class DatabaseManager(private val app: Application, private val dispatchers
         // Only enforce the limit over device-specific DBs; exclude legacy and default DBs
         val deviceDbs =
             all.filterNot { it == DatabaseConstants.LEGACY_DB_NAME || it == DatabaseConstants.DEFAULT_DB_NAME }
-        Logger.d {
-            "LRU check: limit=$limit, active=${anonymizeDbName(
-                activeDbName,
-            )}, deviceDbs=${deviceDbs.joinToString(", ") {
-                anonymizeDbName(it)
-            }}"
-        }
+
         if (deviceDbs.size <= limit) return@withLock
         val usageSnapshot = deviceDbs.associateWith { lastUsed(it) }
-        Logger.d {
-            "LRU lastUsed(ms): ${usageSnapshot.entries.joinToString(", ") { (name, ts) ->
-                "${anonymizeDbName(name)}=$ts"
-            }}"
-        }
         val victims = selectEvictionVictims(deviceDbs, activeDbName, limit, usageSnapshot)
-        Logger.i { "LRU victims: ${victims.joinToString(", ") { anonymizeDbName(it) }}" }
+
         victims.forEach { name ->
-            runCatching { dbCache.remove(name)?.close() }
-                .onFailure { Logger.w(it) { "Failed to close database $name" } }
-            app.deleteDatabase(name)
-            prefs.edit().remove(lastUsedKey(name)).apply()
+            runCatching {
+                dbCache.remove(name)?.close()
+                deleteDatabase(name)
+                datastore.edit { it.remove(lastUsedKey(name)) }
+            }
+                .onFailure { Logger.w(it) { "Failed to evict database $name" } }
             Logger.i { "Evicted cached DB ${anonymizeDbName(name)}" }
         }
     }
 
-    override fun getCurrentCacheLimit(): Int = prefs
-        .getInt(DatabaseConstants.CACHE_LIMIT_KEY, DatabaseConstants.DEFAULT_CACHE_LIMIT)
-        .coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
-
-    override fun setCacheLimit(limit: Int) {
-        val clamped = limit.coerceIn(DatabaseConstants.MIN_CACHE_LIMIT, DatabaseConstants.MAX_CACHE_LIMIT)
-        if (clamped == getCurrentCacheLimit()) return
-        prefs.edit().putInt(DatabaseConstants.CACHE_LIMIT_KEY, clamped).apply()
-        _cacheLimit.value = clamped
-        // Enforce asynchronously with current active DB protected
-        val active = _currentDb.value?.let { buildDbName(_currentAddress.value) } ?: defaultDbName()
-        managerScope.launch(dispatchers.io) { enforceCacheLimit(activeDbName = active) }
-    }
-
     private suspend fun cleanupLegacyDbIfNeeded(activeDbName: String) = mutex.withLock {
-        if (prefs.getBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, false)) return@withLock
+        val cleaned = datastore.data.first()[legacyCleanedKey] ?: false
+        if (cleaned) return@withLock
+
         val legacy = DatabaseConstants.LEGACY_DB_NAME
         if (legacy == activeDbName) {
-            // Never delete the active DB; mark as cleaned to avoid repeated checks
-            prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()
+            datastore.edit { it[legacyCleanedKey] = true }
             return@withLock
         }
-        val legacyFile = getDbFile(app, legacy)
-        if (legacyFile != null) {
-            runCatching { dbCache.remove(legacy)?.close() }
-                .onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }
-            val deleted = app.deleteDatabase(legacy)
-            if (deleted) {
-                Logger.i { "Deleted legacy DB ${anonymizeDbName(legacy)}" }
-            } else {
-                Logger.w { "Attempted to delete legacy DB $legacy but deleteDatabase returned false" }
+
+        val dir = getDatabaseDirectory()
+        val fs = getFileSystem()
+        val legacyPath = dir.resolve("$legacy.db")
+
+        if (fs.exists(legacyPath)) {
+            runCatching {
+                dbCache.remove(legacy)?.close()
+                deleteDatabase(legacy)
             }
+                .onFailure { Logger.w(it) { "Failed to close legacy database $legacy before deletion" } }
+            Logger.i { "Deleted legacy DB ${anonymizeDbName(legacy)}" }
         }
-        prefs.edit().putBoolean(DatabaseConstants.LEGACY_DB_CLEANED_KEY, true).apply()
+        datastore.edit { it[legacyCleanedKey] = true }
     }
 
     /** Closes all open databases and cancels background work. */
@@ -229,19 +235,3 @@ open class DatabaseManager(private val app: Application, private val dispatchers
         _currentDb.value = null
     }
 }
-
-// File-private helpers
-private fun defaultDbName(): String = DatabaseConstants.DEFAULT_DB_NAME
-
-private fun lastUsedKey(dbName: String) = "db_last_used:$dbName"
-
-private fun buildRoomDb(app: Application, dbName: String): MeshtasticDatabase =
-    Room.databaseBuilder<MeshtasticDatabase>(
-        context = app.applicationContext,
-        name = app.getDatabasePath(dbName).absolutePath,
-        factory = { MeshtasticDatabaseConstructor.initialize() },
-    )
-        .configureCommon()
-        .build()
-
-private fun getDbFile(app: Application, dbName: String): File? = app.getDatabasePath(dbName).takeIf { it.exists() }

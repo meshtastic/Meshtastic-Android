@@ -32,14 +32,19 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            api(projects.core.repository)
             implementation(projects.core.common)
             implementation(projects.core.data)
             implementation(projects.core.database)
+            implementation(projects.core.di)
             implementation(projects.core.model)
             implementation(projects.core.navigation)
+            implementation(projects.core.network)
+            implementation(projects.core.ble)
             implementation(projects.core.prefs)
             implementation(projects.core.proto)
 
+            implementation(libs.jetbrains.lifecycle.runtime)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
         }

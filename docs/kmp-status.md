@@ -110,7 +110,8 @@ Based on the latest codebase investigation, the following steps are proposed to 
 | JetBrains lifecycle/nav3 alias alignment | ✅ Done | All forked deps use `jetbrains-*` prefix in version catalog; `core:data` commonMain uses JetBrains lifecycle runtime |
 | Expect/actual consolidation | ✅ Done | 7 pairs eliminated; 15+ genuinely platform-specific retained |
 | Transport deduplication | ✅ Done | `StreamFrameCodec`, `TcpTransport`, and `SerialTransport` shared in `core:network` |
-| **Transport UI Unification** | ✅ Done | `RadioInterfaceService` provides dynamic transport capability to shared UI |
+| **Transport Lifecycle Unification** | ✅ Done | `SharedRadioInterfaceService` orchestrates auto-reconnect, connection state, and heartbeat uniformly across Android and Desktop. |
+| **Database Parity** | ✅ Done | `DatabaseManager` is pure KMP, giving iOS and Desktop support for multiple connected nodes with LRU caching. |
 | Emoji picker unification | ✅ Done | Single commonMain implementation replacing 3 platform variants |
 
 ## Navigation Parity Note
