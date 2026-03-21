@@ -86,11 +86,11 @@ These items address structural gaps identified in the March 2026 architecture re
     - Implement a **Web Mercator Projection** helper in `feature:map/commonMain` to translate GPS coordinates to the 2D image plane.
     - Leverage the existing `BaseMapViewModel` contract.
 3. **Unify `MapViewModel`** — Collapse the remaining Google and F-Droid specific `MapViewModel` classes in the `:app` module into a single `commonMain` implementation by isolating platform-specific settings (styles, tile sources) behind a repository interface.
-4. **iOS CI gate** — add `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI (compile-only, no implementations) to ensure `commonMain` remains pure.
+4. **iOS CI gate** — ✅ **Done:** added `iosArm64()`/`iosSimulatorArm64()` to convention plugins and CI. `commonMain` successfully compiles on iOS.
 
 ## Medium-Term Priorities (60 days)
 
-1. **iOS proof target** — Begin stubbing iOS target implementations (`NoopStubs.kt` equivalent) and setup an Xcode skeleton project.
+1. **iOS proof target** — ✅ **Done (Stubbing):** Stubbed iOS target implementations (`NoopStubs.kt` equivalent) to successfully pass compile-time checks. **Next:** Setup an Xcode skeleton project and launch the iOS app.
 2. **`core:api` contract split** — separate transport-neutral service contracts from the Android AIDL packaging to support iOS/Desktop service layers.
 3. **Decouple Firmware DFU** — `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it to allow the core `feature:firmware` module to be utilized on desktop/iOS.
 
