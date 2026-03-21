@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.meshtastic.spotless)
     alias(libs.plugins.meshtastic.koin)
+    alias(libs.plugins.meshtastic.kover)
     alias(libs.plugins.aboutlibraries)
 }
 
