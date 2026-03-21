@@ -86,6 +86,7 @@ import org.meshtastic.proto.Config
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
     MeshtasticDialog(titleRes = Res.string.error, messageRes = Res.string.wifi_qr_code_error, onDismiss = onDismiss)
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NetworkConfigScreen(
     viewModel: RadioConfigViewModel,
