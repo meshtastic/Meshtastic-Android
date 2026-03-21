@@ -17,8 +17,6 @@
 package org.meshtastic.core.common.util
 
 /** Apple (iOS) implementation of string formatting. Stub implementation for compile-only validation. */
-actual fun formatString(pattern: String, vararg args: Any?): String {
-    throw UnsupportedOperationException(
-        "formatString is not supported on iOS at runtime; this target is intended for compile-only validation."
-    )
-}
+actual fun formatString(pattern: String, vararg args: Any?): String = throw UnsupportedOperationException(
+    "formatString is not supported on iOS at runtime; this target is intended for compile-only validation.",
+)
