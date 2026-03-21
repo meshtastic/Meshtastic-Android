@@ -33,6 +33,8 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 - Do keep route definitions in `core:navigation` and use typed route objects.
 - Don't mutate back navigation with custom stacks disconnected from app backstack.
 - Do mutate `NavBackStack<NavKey>` with `add(...)` and `removeLastOrNull()`.
+- Don't use Android's `androidx.activity.compose.BackHandler` or custom `PredictiveBackHandler` in multiplatform UI.
+- Do use the official KMP `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures.
 
 ### Current code anchors (Navigation 3)
 
