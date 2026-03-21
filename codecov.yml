@@ -1,3 +1,71 @@
+# Codecov configuration for Meshtastic Android
+# Ref: https://docs.codecov.com/docs/codecovyml-reference
+
+codecov:
+  branch: main
+
 coverage:
+  precision: 2
+  round: down
+  range: "70...100"
   status:
-    patch: off
+    project:
+      default:
+        target: auto      # Coverage should not decrease from base branch
+        threshold: 1%     # Allow 1% drop to reduce noise
+    patch:
+      default:
+        target: auto      # New code should have coverage similar to project average
+        threshold: 1%
+        base: auto
+
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: false  # Post a comment even if coverage doesn't change
+
+flags:
+  host-unit:
+    paths:
+      - .
+    carryforward: true
+  android-instrumented:
+    paths:
+      - .
+    carryforward: true
+
+component_management:
+  default_rules:
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+  individual_components:
+    - name: Core
+      paths:
+        - core/**
+    - name: Features
+      paths:
+        - feature/**
+    - name: App
+      paths:
+        - app/**
+    - name: Desktop
+      paths:
+        - desktop/**
+    - name: Example
+      paths:
+        - mesh_service_example/**
+
+ignore:
+  - "**/build/**"
+  - "**/*.pb.kt"          # Generated Protobuf code
+  - "**/*.aidl"           # AIDL interface files
+  - "**/aidl/**"           # Generated AIDL code
+  - "core/resources/**"   # Centralized resources
+  - "**/test/**"          # Unit tests
+  - "**/androidTest/**"   # Instrumented tests
+  - "**/*Test.kt"         # Test files
+  - "**/*Mock.kt"         # Fakes/Mocks
+  - "**/*Fake.kt"         # Fakes
+  - "**/testing/**"       # Shared test utilities
