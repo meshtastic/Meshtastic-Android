@@ -16,24 +16,27 @@
  */
 package org.meshtastic.feature.node.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 
 @Composable
 actual fun TracerouteMapScreen(destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit) {
     // Desktop placeholder for now
-    org.meshtastic.feature.node.navigation.PlaceholderScreen(name = "Traceroute Map")
+    PlaceholderScreen(name = "Traceroute Map")
 }
 
 @Composable
 internal fun PlaceholderScreen(name: String) {
-    androidx.compose.foundation.layout.Box(
-        modifier = androidx.compose.ui.Modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center,
-    ) {
-        androidx.compose.material3.Text(
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(
             text = name,
-            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
-            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

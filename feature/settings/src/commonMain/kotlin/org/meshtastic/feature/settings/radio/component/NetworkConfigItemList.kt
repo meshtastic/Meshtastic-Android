@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,11 +36,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
-import org.meshtastic.core.barcode.rememberBarcodeScanner
 import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.extractWifiCredentials
 import org.meshtastic.core.model.util.handleMeshtasticUri
-import org.meshtastic.core.nfc.NfcScannerEffect
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.advanced
 import org.meshtastic.core.resources.cancel
@@ -54,7 +51,6 @@ import org.meshtastic.core.resources.ethernet_config
 import org.meshtastic.core.resources.ethernet_enabled
 import org.meshtastic.core.resources.ethernet_ip
 import org.meshtastic.core.resources.gateway
-import org.meshtastic.core.resources.ip
 import org.meshtastic.core.resources.ipv4_mode
 import org.meshtastic.core.resources.network
 import org.meshtastic.core.resources.nfc_disabled
@@ -79,12 +75,21 @@ import org.meshtastic.core.ui.component.ListItem
 import org.meshtastic.core.ui.component.MeshtasticDialog
 import org.meshtastic.core.ui.component.SwitchPreference
 import org.meshtastic.core.ui.component.TitledCard
+import org.meshtastic.core.ui.util.LocalBarcodeScannerProvider
+import org.meshtastic.core.ui.util.LocalNfcScannerProvider
+import org.meshtastic.core.ui.util.LocalNfcScannerSupported
 import org.meshtastic.feature.settings.radio.RadioConfigViewModel
 import org.meshtastic.proto.Config
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
     MeshtasticDialog(titleRes = Res.string.error, messageRes = Res.string.wifi_qr_code_error, onDismiss = onDismiss)
+
+@Suppress("detekt:MagicNumber")
+private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}." +
+    "${(ipAddress shr 8) and 0xFF}." +
+    "${(ipAddress shr 16) and 0xFF}." +
+    "${(ipAddress shr 24) and 0xFF}"
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -133,8 +138,10 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
         }
     }
 
-    val barcodeScanner = rememberBarcodeScanner(onResult = onResult)
-    NfcScannerEffect(onResult = onResult, onNfcDisabled = { showNfcDisabledDialog = true })
+    val barcodeScanner = LocalBarcodeScannerProvider.current(onResult)
+    if (LocalNfcScannerSupported.current) {
+        LocalNfcScannerProvider.current(onResult) { showNfcDisabledDialog = true }
+    }
 
     val focusManager = LocalFocusManager.current
 
@@ -161,7 +168,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                             if (wifiStatus.is_connected) {
                                 ListItem(
                                     text = stringResource(Res.string.wifi_ip),
-                                    supportingText = formatIpAddress(wifiStatus.ip_address),
+                                    supportingText = formatIpAddress(wifiStatus.ip_address ?: 0),
                                     trailingIcon = null,
                                 )
                             }
@@ -170,7 +177,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                             if (ethernetStatus.is_connected) {
                                 ListItem(
                                     text = stringResource(Res.string.ethernet_ip),
-                                    supportingText = formatIpAddress(ethernetStatus.ip_address),
+                                    supportingText = formatIpAddress(ethernetStatus.ip_address ?: 0),
                                     trailingIcon = null,
                                 )
                             }
@@ -179,17 +186,17 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                 }
             }
         }
-        if (state.metadata?.hasWifi == true) {
-            item {
-                TitledCard(title = stringResource(Res.string.wifi_config)) {
-                    SwitchPreference(
-                        title = stringResource(Res.string.wifi_enabled),
-                        summary = stringResource(Res.string.config_network_wifi_enabled_summary),
-                        checked = formState.value.wifi_enabled,
-                        enabled = state.connected,
-                        onCheckedChange = { formState.value = formState.value.copy(wifi_enabled = it) },
-                        containerColor = CardDefaults.cardColors().containerColor,
-                    )
+
+        item {
+            TitledCard(title = stringResource(Res.string.wifi_config)) {
+                SwitchPreference(
+                    title = stringResource(Res.string.wifi_enabled),
+                    summary = stringResource(Res.string.config_network_wifi_enabled_summary),
+                    checked = formState.value.wifi_enabled,
+                    onCheckedChange = { formState.value = formState.value.copy(wifi_enabled = it) },
+                    enabled = state.connected,
+                )
+                if (formState.value.wifi_enabled) {
                     HorizontalDivider()
                     EditTextPreference(
                         title = stringResource(Res.string.ssid),
@@ -229,31 +236,12 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                         title = stringResource(Res.string.ethernet_enabled),
                         summary = stringResource(Res.string.config_network_eth_enabled_summary),
                         checked = formState.value.eth_enabled,
-                        enabled = state.connected,
                         onCheckedChange = { formState.value = formState.value.copy(eth_enabled = it) },
-                        containerColor = CardDefaults.cardColors().containerColor,
-                    )
-                }
-            }
-        }
-
-        if (state.metadata?.hasEthernet == true || state.metadata?.hasWifi == true) {
-            item {
-                TitledCard(title = stringResource(Res.string.network)) {
-                    SwitchPreference(
-                        title = stringResource(Res.string.udp_enabled),
-                        summary = stringResource(Res.string.config_network_udp_enabled_summary),
-                        checked = formState.value.enabled_protocols == 1,
                         enabled = state.connected,
-                        onCheckedChange = {
-                            formState.value = formState.value.copy(enabled_protocols = if (it) 1 else 0)
-                        },
-                        containerColor = CardDefaults.cardColors().containerColor,
                     )
                 }
             }
         }
-
         item {
             TitledCard(title = stringResource(Res.string.advanced)) {
                 EditTextPreference(
@@ -261,7 +249,7 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     value = formState.value.ntp_server,
                     maxSize = 32, // ntp_server max_size:33
                     enabled = state.connected,
-                    isError = formState.value.ntp_server.isEmpty(),
+                    isError = false,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -280,57 +268,63 @@ fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onO
                     onValueChanged = { formState.value = formState.value.copy(rsyslog_server = it) },
                 )
                 HorizontalDivider()
-                DropDownPreference(
-                    title = stringResource(Res.string.ipv4_mode),
+                SwitchPreference(
+                    title = stringResource(Res.string.udp_enabled),
+                    summary = stringResource(Res.string.config_network_udp_enabled_summary),
+                    checked = formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
+                    onCheckedChange = {
+                        formState.value =
+                            formState.value.copy(
+                                address_mode =
+                                if (it) {
+                                    Config.NetworkConfig.AddressMode.STATIC
+                                } else {
+                                    Config.NetworkConfig.AddressMode.DHCP
+                                },
+                            )
+                    },
                     enabled = state.connected,
-                    items = Config.NetworkConfig.AddressMode.entries.map { it to it.name },
-                    selectedItem = formState.value.address_mode,
-                    onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
                 )
-                HorizontalDivider()
-                val ipv4 = formState.value.ipv4_config ?: Config.NetworkConfig.IpV4Config()
-                EditIPv4Preference(
-                    title = stringResource(Res.string.ip),
-                    value = ipv4.ip,
-                    enabled =
-                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(ip = it)) },
-                )
-                HorizontalDivider()
-                EditIPv4Preference(
-                    title = stringResource(Res.string.gateway),
-                    value = ipv4.gateway,
-                    enabled =
-                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(gateway = it)) },
-                )
-                HorizontalDivider()
-                EditIPv4Preference(
-                    title = stringResource(Res.string.subnet),
-                    value = ipv4.subnet,
-                    enabled =
-                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(subnet = it)) },
-                )
-                HorizontalDivider()
-                EditIPv4Preference(
-                    title = "DNS",
-                    value = ipv4.dns,
-                    enabled =
-                    state.connected && formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(dns = it)) },
-                )
+                if (formState.value.address_mode == Config.NetworkConfig.AddressMode.STATIC) {
+                    HorizontalDivider()
+                    DropDownPreference(
+                        title = stringResource(Res.string.ipv4_mode),
+                        enabled = state.connected,
+                        selectedItem = formState.value.address_mode,
+                        onItemSelected = { formState.value = formState.value.copy(address_mode = it) },
+                        itemLabel = { it.name },
+                    )
+                    HorizontalDivider()
+                    val ipv4 = formState.value.ipv4_config ?: Config.NetworkConfig.IpV4Config()
+                    EditIPv4Preference(
+                        title = stringResource(Res.string.wifi_ip),
+                        value = ipv4.ip,
+                        enabled = state.connected,
+                        onValueChanged = { formState.value = formState.value.copy(ipv4_config = ipv4.copy(ip = it)) },
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    )
+                    HorizontalDivider()
+                    EditIPv4Preference(
+                        title = stringResource(Res.string.gateway),
+                        value = ipv4.gateway,
+                        enabled = state.connected,
+                        onValueChanged = {
+                            formState.value = formState.value.copy(ipv4_config = ipv4.copy(gateway = it))
+                        },
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    )
+                    HorizontalDivider()
+                    EditIPv4Preference(
+                        title = stringResource(Res.string.subnet),
+                        value = ipv4.subnet,
+                        enabled = state.connected,
+                        onValueChanged = {
+                            formState.value = formState.value.copy(ipv4_config = ipv4.copy(subnet = it))
+                        },
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    )
+                }
             }
         }
     }
 }
-
-@Suppress("detekt:MagicNumber")
-private fun formatIpAddress(ipAddress: Int): String = "${(ipAddress) and 0xFF}." +
-    "${(ipAddress shr 8) and 0xFF}." +
-    "${(ipAddress shr 16) and 0xFF}." +
-    "${(ipAddress shr 24) and 0xFF}"
