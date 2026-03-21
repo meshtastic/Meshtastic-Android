@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.Base64Factory
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.util.formatUptime
@@ -261,7 +262,7 @@ private fun SignalRow(node: Node) {
         if (node.snr != Float.MAX_VALUE) {
             InfoItem(
                 label = stringResource(Res.string.snr),
-                value = "%.1f dB".format(node.snr),
+                value = formatString("%.1f dB", node.snr),
                 icon = MeshtasticIcons.ChannelUtilization,
                 modifier = Modifier.weight(1f),
             )
@@ -271,7 +272,7 @@ private fun SignalRow(node: Node) {
         if (node.rssi != Int.MAX_VALUE) {
             InfoItem(
                 label = stringResource(Res.string.rssi),
-                value = "%d dBm".format(node.rssi),
+                value = formatString("%d dBm", node.rssi),
                 icon = MeshtasticIcons.ChannelUtilization,
                 modifier = Modifier.weight(1f),
             )

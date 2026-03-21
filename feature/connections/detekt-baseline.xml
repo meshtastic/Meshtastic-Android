@@ -1,13 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$21972</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$32809</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$6790</ID>
-    <ID>MagicNumber:ProbeTableProvider.kt$ProbeTableProvider$9114</ID>
-    <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
-    <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
-    <ID>SwallowedException:NsdManager.kt$ex: IllegalArgumentException</ID>
-  </CurrentIssues>
+  <CurrentIssues/>
 </SmellBaseline>

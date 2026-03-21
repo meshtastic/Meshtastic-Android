@@ -18,7 +18,6 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.launchIn
@@ -28,6 +27,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.MeshLog
@@ -55,7 +55,7 @@ class MeshMessageProcessorImpl(
     private val router: Lazy<MeshRouter>,
     private val fromRadioDispatcher: FromRadioPacketHandler,
 ) : MeshMessageProcessor {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
     private val mapsMutex = Mutex()
     private val logUuidByPacketId = mutableMapOf<Int, String>()

@@ -67,6 +67,14 @@ internal fun Project.configureKotlinAndroid(
  */
 internal fun Project.configureKotlinMultiplatform() {
     extensions.configure<KotlinMultiplatformExtension> {
+        // Standard KMP targets for Meshtastic
+        jvm()
+
+        // Configure the iOS targets for compile-only validation
+        // We only add these for modules that already have KMP structure
+        iosArm64()
+        iosSimulatorArm64()
+
         // Configure the Android target if the plugin is applied
         pluginManager.withPlugin("com.android.kotlin.multiplatform.library") {
             extensions.findByType<KotlinMultiplatformAndroidLibraryTarget>()?.apply {
@@ -166,6 +174,27 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         // Using Java 17 for better compatibility with consumers (e.g. plugins, older environments)
         // while still supporting modern Kotlin features.
         jvmToolchain(17)
+
+        if (this is KotlinMultiplatformExtension) {
+            targets.configureEach {
+                compilations.configureEach {
+                    compileTaskProvider.configure {
+                        compilerOptions {
+                            freeCompilerArgs.addAll(
+                                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+                                "-opt-in=kotlin.time.ExperimentalTime",
+                                "-opt-in=kotlinx.cinterop.ExperimentalForeignApi",
+                                "-Xexpect-actual-classes",
+                                "-Xcontext-parameters",
+                                "-Xannotation-default-target=param-property",
+                                "-Xskip-prerelease-check"
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     tasks.withType<KotlinCompile>().configureEach {
@@ -177,6 +206,7 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-opt-in=kotlin.uuid.ExperimentalUuidApi",
                 "-opt-in=kotlin.time.ExperimentalTime",
+                "-opt-in=kotlinx.cinterop.ExperimentalForeignApi",
                 "-Xexpect-actual-classes",
                 "-Xcontext-parameters",
                 "-Xannotation-default-target=param-property",

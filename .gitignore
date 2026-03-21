@@ -51,4 +51,4 @@ wireless-install.sh
 
 # Git worktrees
 .worktrees/
-/firebase-debug.log
+/firebase-debug.log.jdk/

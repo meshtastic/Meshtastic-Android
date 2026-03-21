@@ -54,6 +54,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.common.util.DateFormatter
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.MeshLog
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.formatUptime
@@ -120,10 +121,10 @@ private fun PaxMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     when (color.copy(alpha = 1f)) {
-                        bleColor -> "BLE: %.0f".format(value)
-                        wifiColor -> "WiFi: %.0f".format(value)
-                        paxColor -> "PAX: %.0f".format(value)
-                        else -> "%.0f".format(value)
+                        bleColor -> formatString("BLE: %.0f", value)
+                        wifiColor -> formatString("WiFi: %.0f", value)
+                        paxColor -> formatString("PAX: %.0f", value)
+                        else -> formatString("%.0f", value)
                     }
                 },
             )

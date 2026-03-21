@@ -43,6 +43,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.koin.core.annotation.InjectedParam
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.MeshtasticUri
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.di.CoroutineDispatchers
 import org.meshtastic.core.model.MeshLog
@@ -341,9 +342,7 @@ open class MetricsViewModel(
                     val altitude = position.altitude
                     val satsInView = position.sats_in_view
                     val speed = position.ground_speed
-                    // Kotlin string format is available in common code on 1.9.20+ via String.format,
-                    // but we can just do basic string manipulation if needed.
-                    val heading = "%.2f".format((position.ground_track ?: 0) * 1e-5)
+                    val heading = formatString("%.2f", (position.ground_track ?: 0) * 1e-5)
 
                     sink.writeUtf8(
                         "$rxDateTime,\"$latitude\",\"$longitude\",\"$altitude\",\"$satsInView\",\"$speed\",\"$heading\"\n",

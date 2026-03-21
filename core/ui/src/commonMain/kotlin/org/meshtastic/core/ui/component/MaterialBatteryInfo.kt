@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.unknown
 import org.meshtastic.core.ui.icon.BatteryEmpty
@@ -60,7 +61,7 @@ fun MaterialBatteryInfo(
     voltage: Float? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
 ) {
-    val levelString = FORMAT.format(level)
+    val levelString = formatString(FORMAT, level)
 
     Row(
         modifier = modifier,
@@ -130,7 +131,7 @@ fun MaterialBatteryInfo(
             ?.takeIf { it > 0 }
             ?.let {
                 Text(
-                    text = "%.2fV".format(it),
+                    text = formatString("%.2fV", it),
                     color = contentColor.copy(alpha = 0.8f),
                     style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
                 )

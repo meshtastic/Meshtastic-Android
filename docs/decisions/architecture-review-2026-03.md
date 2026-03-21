@@ -185,7 +185,7 @@ Ordered by impact × effort:
 
 | Priority | Extraction | Impact | Effort | Enables |
 |---:|---|---|---|---|
-| 1 | `java.*` purge from `commonMain` (B1, B2) | High | Low | iOS target declaration |
+| 1 | ~~`java.*` purge from `commonMain` (B1, B2)~~ | High | Low | ~~iOS target declaration~~ ✅ Done |
 | 2 | Radio transport interfaces to `core:repository` (A2) | High | Medium | Transport unification |
 | 3 | `core:testing` shared fixtures (D2) | Medium | Low | Feature commonTest |
 | 4 | Feature `commonTest` (D1) | Medium | Medium | KMP test coverage |
@@ -194,7 +194,7 @@ Ordered by impact × effort:
 | 7 | ~~Desktop Koin auto-wiring (C1, C2)~~ | Medium | Low | ✅ Resolved 2026-03-13 |
 | 8 | MQTT KMP (B3) | Medium | High | Desktop/iOS MQTT |
 | 9 | KMP charts (B4) | Medium | High | Desktop metrics |
-| 10 | iOS target declaration | High | Low | CI purity gate |
+| 10 | ~~iOS target declaration~~ | High | Low | ~~CI purity gate~~ ✅ Done |
 
 ---
 
@@ -205,7 +205,7 @@ Ordered by impact × effort:
 | Shared business/data logic | 8.5/10 | **9/10** | RadioTransport interface unified; all core layers shared |
 | Shared feature/UI logic | 9.5/10 | **8.5/10** | All 7 KMP features; connections unified; Vico charts in commonMain |
 | Android decoupling | 8.5/10 | **9/10** | Connections, Navigation, Services, & Widgets extracted; GMS purged; app ~40->target 20 files |
-| Multi-target readiness | 8/10 | **8/10** | Full JVM; release-ready desktop; iOS not declared |
+| Multi-target readiness | 8/10 | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | 8.5/10 | **9/10** | 25 modules validated; feature:connections + desktop in CI; native release installers |
 | DI portability | 7/10 | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
 | Test maturity | — | **8/10** | 131 commonTest + 89 platform-specific = 219 tests across all 7 features; core:testing established |

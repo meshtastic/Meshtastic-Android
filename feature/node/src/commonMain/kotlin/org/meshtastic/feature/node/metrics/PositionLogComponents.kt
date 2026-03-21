@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.util.metersIn
 import org.meshtastic.core.model.util.toString
 import org.meshtastic.core.resources.Res
@@ -86,13 +87,13 @@ fun PositionItem(compactWidth: Boolean, position: Position, system: Config.Displ
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        PositionText("%.5f".format((position.latitude_i ?: 0) * DEG_D), WEIGHT_20)
-        PositionText("%.5f".format((position.longitude_i ?: 0) * DEG_D), WEIGHT_20)
+        PositionText(formatString("%.5f", (position.latitude_i ?: 0) * DEG_D), WEIGHT_20)
+        PositionText(formatString("%.5f", (position.longitude_i ?: 0) * DEG_D), WEIGHT_20)
         PositionText(position.sats_in_view.toString(), WEIGHT_10)
         PositionText((position.altitude ?: 0).metersIn(system).toString(system), WEIGHT_15)
         if (!compactWidth) {
             PositionText("${position.ground_speed ?: 0} Km/h", WEIGHT_15)
-            PositionText("%.0f°".format((position.ground_track ?: 0) * HEADING_DEG), WEIGHT_15)
+            PositionText(formatString("%.0f°", (position.ground_track ?: 0) * HEADING_DEG), WEIGHT_15)
         }
         PositionText(position.formatPositionTime(), WEIGHT_40)
     }

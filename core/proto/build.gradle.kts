@@ -24,9 +24,6 @@ plugins {
 apply(from = rootProject.file("gradle/publishing.gradle.kts"))
 
 kotlin {
-    // Keep jvm() for desktop/server consumers
-    jvm()
-
     // Override minSdk for ATAK compatibility (standard is 26)
     android { minSdk = 21 }
 

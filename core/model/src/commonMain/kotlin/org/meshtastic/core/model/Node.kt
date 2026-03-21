@@ -20,6 +20,7 @@ import okio.ByteString
 import okio.ByteString.Companion.toByteString
 import org.meshtastic.core.common.util.GPSFormat
 import org.meshtastic.core.common.util.bearing
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.onlineTimeThreshold
@@ -143,20 +144,20 @@ data class Node(
         val temp =
             if ((temperature ?: 0f) != 0f) {
                 if (isFahrenheit) {
-                    "%.1f°F".format(celsiusToFahrenheit(temperature ?: 0f))
+                    formatString("%.1f°F", celsiusToFahrenheit(temperature ?: 0f))
                 } else {
-                    "%.1f°C".format(temperature)
+                    formatString("%.1f°C", temperature)
                 }
             } else {
                 null
             }
-        val humidity = if ((relative_humidity ?: 0f) != 0f) "%.0f%%".format(relative_humidity) else null
+        val humidity = if ((relative_humidity ?: 0f) != 0f) formatString("%.0f%%", relative_humidity) else null
         val soilTemperatureStr =
             if ((soil_temperature ?: 0f) != 0f) {
                 if (isFahrenheit) {
-                    "%.1f°F".format(celsiusToFahrenheit(soil_temperature ?: 0f))
+                    formatString("%.1f°F", celsiusToFahrenheit(soil_temperature ?: 0f))
                 } else {
-                    "%.1f°C".format(soil_temperature)
+                    formatString("%.1f°C", soil_temperature)
                 }
             } else {
                 null
@@ -164,12 +165,12 @@ data class Node(
         val soilMoistureRange = 0..100
         val soilMoisture =
             if ((soil_moisture ?: Int.MIN_VALUE) in soilMoistureRange && (soil_temperature ?: 0f) != 0f) {
-                "%d%%".format(soil_moisture)
+                formatString("%d%%", soil_moisture)
             } else {
                 null
             }
-        val voltage = if ((this.voltage ?: 0f) != 0f) "%.2fV".format(this.voltage) else null
-        val current = if ((current ?: 0f) != 0f) "%.1fmA".format(current) else null
+        val voltage = if ((this.voltage ?: 0f) != 0f) formatString("%.2fV", this.voltage) else null
+        val current = if ((current ?: 0f) != 0f) formatString("%.1fmA", current) else null
         val iaq = if ((iaq ?: 0) != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(

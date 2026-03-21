@@ -33,6 +33,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.baro_pressure
 import org.meshtastic.core.resources.humidity
@@ -187,7 +188,7 @@ fun EnvironmentMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     val label = colorToLabel[color.copy(alpha = 1f)] ?: ""
-                    "%s: %.1f".format(label, value)
+                    formatString("%s: %.1f", label, value)
                 },
             )
 
@@ -229,7 +230,7 @@ fun EnvironmentMetricsChart(
                 if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] && pressureData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = Environment.BAROMETRIC_PRESSURE.color),
-                        valueFormatter = { _, value, _ -> "%.0f hPa".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.0f hPa", value) },
                     )
                 } else {
                     null
@@ -237,7 +238,7 @@ fun EnvironmentMetricsChart(
                 endAxis =
                 VerticalAxis.rememberEnd(
                     label = ChartStyling.rememberAxisLabel(color = endAxisColor),
-                    valueFormatter = { _, value, _ -> "%.0f".format(value) },
+                    valueFormatter = { _, value, _ -> formatString("%.0f", value) },
                 ),
                 bottomAxis =
                 HorizontalAxis.rememberBottom(

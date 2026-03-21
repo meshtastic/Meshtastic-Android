@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlin.jvm.JvmName
 
 @Composable
 fun <T : Enum<T>> DropDownPreference(

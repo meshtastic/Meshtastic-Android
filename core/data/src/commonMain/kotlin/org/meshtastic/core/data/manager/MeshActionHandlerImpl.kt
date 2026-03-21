@@ -17,13 +17,13 @@
 package org.meshtastic.core.data.manager
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import okio.ByteString.Companion.toByteString
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.database.DatabaseManager
 import org.meshtastic.core.common.util.handledLaunch
 import org.meshtastic.core.common.util.ignoreException
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
@@ -64,7 +64,7 @@ class MeshActionHandlerImpl(
     private val notificationManager: NotificationManager,
     private val messageProcessor: Lazy<MeshMessageProcessor>,
 ) : MeshActionHandler {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope

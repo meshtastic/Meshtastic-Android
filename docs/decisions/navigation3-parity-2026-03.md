@@ -10,7 +10,7 @@
 # Navigation 3 Parity Strategy (Android + Desktop)
 
 **Date:** 2026-03-11
-**Status:** Active
+**Status:** Implemented (2026-03-21)
 **Scope:** `app` and `desktop` navigation structure using shared `core:navigation` routes
 
 ## Context
@@ -27,13 +27,14 @@ Both modules still define separate graph-builder files (`app/navigation/*.kt`, `
    - Both shells iterate `TopLevelDestination.entries` from `core:navigation/commonMain`.
    - Shared icon mapping lives in `core:ui` (`TopLevelDestinationExt.icon`).
    - Parity tests exist in both `core:navigation/commonTest` (`NavigationParityTest`) and `desktop/test` (`DesktopTopLevelDestinationParityTest`).
-2. **Feature coverage differs by intent and by implementation.**
-   - Desktop intentionally uses placeholders for map and several node/message detail flows.
-   - Android wires real implementations for map, message/share flows, and more node detail paths.
-3. **Saved-state route registration is desktop-only and manual.**
-   - `DesktopMainScreen.kt` maintains a large `SavedStateConfiguration` serializer list that must stay in sync with `Routes.kt` and desktop graph entries.
-4. **Route keys are shared; graph registration is per-platform.**
-   - This is the expected state — platform shells wire entries differently while consuming the same route types.
+2. **Feature coverage is unified via `commonMain` feature graphs.**
+   - The `settingsGraph`, `nodesGraph`, `contactsGraph`, `connectionsGraph`, `firmwareGraph`, and `mapGraph` are now fully shared and exported from their respective feature modules' `commonMain` source sets.
+   - Desktop acts as a thin shell, delegating directly to these shared graphs.
+3. **Saved-state route registration is fully shared.**
+   - `MeshtasticNavSavedStateConfig` in `core:navigation/commonMain` maintains the unified `SavedStateConfiguration` serializer list.
+   - Both Android and Desktop reference this shared config when instantiating `rememberNavBackStack`.
+4. **Predictive back handling is KMP native.**
+   - Custom `PredictiveBackHandler` wrapper was removed in favor of Jetpack's official KMP `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose`.
 
 ## Alpha04 Changelog Impact Check (2026-03-13)
 
@@ -147,9 +148,11 @@ Adopt a **hybrid parity model**:
 ## Source Anchors
 
 - Shared routes: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
+- Shared saved-state config: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/NavigationConfig.kt`
 - Android shell: `app/src/main/kotlin/org/meshtastic/app/ui/Main.kt`
-- Android graph registrations: `feature/*/src/androidMain/kotlin/org/meshtastic/feature/*/navigation/`
+- Shared graph registrations: `feature/*/src/commonMain/kotlin/org/meshtastic/feature/*/navigation/`
+- Platform graph content: `feature/*/src/{androidMain,jvmMain}/kotlin/org/meshtastic/feature/*/navigation/`
 - Desktop shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
-- Desktop graph registrations: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/`
+- Desktop graph assembly: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
 
 

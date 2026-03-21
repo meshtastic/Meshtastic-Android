@@ -33,17 +33,18 @@ Version note: align guidance with repository-pinned versions in `gradle/libs.ver
 - Do keep route definitions in `core:navigation` and use typed route objects.
 - Don't mutate back navigation with custom stacks disconnected from app backstack.
 - Do mutate `NavBackStack<NavKey>` with `add(...)` and `removeLastOrNull()`.
+- Don't use Android's `androidx.activity.compose.BackHandler` or custom `PredictiveBackHandler` in multiplatform UI.
+- Do use the official KMP `NavigationBackHandler` from `androidx.navigationevent:navigationevent-compose` for back gestures.
 
 ### Current code anchors (Navigation 3)
 
 - Typed routes: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
+- Shared saved-state config: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/NavigationConfig.kt`
 - App root backstack + `NavDisplay`: `app/src/main/kotlin/org/meshtastic/app/ui/Main.kt`
-- Graph entry provider pattern: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
-- Feature-level Navigation 3 usage: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/AppIntroductionScreen.kt`
+- Shared graph entry provider pattern: `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
 - Desktop Navigation 3 shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
-- Desktop nav graph entries: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
-- Desktop real feature wiring: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
-- Desktop `SavedStateConfiguration` for polymorphic NavKey serialization: `DesktopMainScreen.kt`
+- Desktop nav graph assembly: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
+
 
 ## Quick pre-PR checks for DI/navigation edits
 

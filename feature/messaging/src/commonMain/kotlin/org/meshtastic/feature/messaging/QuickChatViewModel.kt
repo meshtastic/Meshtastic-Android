@@ -18,9 +18,9 @@ package org.meshtastic.feature.messaging
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.repository.QuickChatActionRepository
 import org.meshtastic.core.ui.viewmodel.stateInWhileSubscribed
@@ -31,7 +31,7 @@ class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionR
         get() = quickChatActionRepository.getAllActions().stateInWhileSubscribed(initialValue = emptyList())
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             for (position in actions.indices) {
                 quickChatActionRepository.setItemPosition(actions[position].uuid, position)
             }
@@ -39,8 +39,8 @@ class QuickChatViewModel(private val quickChatActionRepository: QuickChatActionR
     }
 
     fun addQuickChatAction(action: QuickChatAction) =
-        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
+        viewModelScope.launch(ioDispatcher) { quickChatActionRepository.upsert(action) }
 
     fun deleteQuickChatAction(action: QuickChatAction) =
-        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.delete(action) }
+        viewModelScope.launch(ioDispatcher) { quickChatActionRepository.delete(action) }
 }

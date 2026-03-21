@@ -29,5 +29,10 @@ kotlin {
         androidResources.enable = false
     }
 
-    sourceSets { commonMain.dependencies { implementation(libs.kotlinx.coroutines.core) } }
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.core.common)
+            implementation(libs.kotlinx.coroutines.core)
+        }
+    }
 }

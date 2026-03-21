@@ -202,7 +202,7 @@ internal fun EditQuickChatDialog(
                     label = stringResource(Res.string.message),
                     value = actionInput.message,
                     maxSize = 200,
-                    getSize = { it.toByteArray().size + 1 },
+                    getSize = { it.encodeToByteArray().size + 1 },
                     modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 ) {
                     actionInput = actionInput.copy(message = it)

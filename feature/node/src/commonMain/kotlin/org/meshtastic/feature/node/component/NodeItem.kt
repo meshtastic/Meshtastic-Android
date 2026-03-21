@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.stringResource
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.isUnmessageableRole
@@ -256,14 +257,14 @@ private fun NodeSignalRow(thatNode: Node, isThisNode: Boolean, contentColor: Col
                     icon = MeshtasticIcons.ChannelUtilization,
                     contentDescription = stringResource(Res.string.channel_utilization),
                     label = stringResource(Res.string.channel_utilization),
-                    text = "%.1f%%".format(thatNode.deviceMetrics.channel_utilization),
+                    text = formatString("%.1f%%", thatNode.deviceMetrics.channel_utilization),
                     contentColor = contentColor,
                 )
                 IconInfo(
                     icon = MeshtasticIcons.AirUtilization,
                     contentDescription = stringResource(Res.string.air_utilization),
                     label = stringResource(Res.string.air_utilization),
-                    text = "%.1f%%".format(thatNode.deviceMetrics.air_util_tx),
+                    text = formatString("%.1f%%", thatNode.deviceMetrics.air_util_tx),
                     contentColor = contentColor,
                 )
             }
@@ -318,26 +319,28 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.temperature ?: 0f) != 0f) {
         val temp =
             if (tempInFahrenheit) {
-                "%.1f°F".format(celsiusToFahrenheit(env.temperature ?: 0f))
+                formatString("%.1f°F", celsiusToFahrenheit(env.temperature ?: 0f))
             } else {
-                "%.1f°C".format(env.temperature ?: 0f)
+                formatString("%.1f°C", env.temperature ?: 0f)
             }
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.relative_humidity ?: 0f) != 0f) {
-        items.add { HumidityInfo(humidity = "%.0f%%".format(env.relative_humidity ?: 0f), contentColor = contentColor) }
+        items.add {
+            HumidityInfo(humidity = formatString("%.0f%%", env.relative_humidity ?: 0f), contentColor = contentColor)
+        }
     }
     if ((env.barometric_pressure ?: 0f) != 0f) {
         items.add {
-            PressureInfo(pressure = "%.1fhPa".format(env.barometric_pressure ?: 0f), contentColor = contentColor)
+            PressureInfo(pressure = formatString("%.1fhPa", env.barometric_pressure ?: 0f), contentColor = contentColor)
         }
     }
     if ((env.soil_temperature ?: 0f) != 0f) {
         val temp =
             if (tempInFahrenheit) {
-                "%.1f°F".format(celsiusToFahrenheit(env.soil_temperature ?: 0f))
+                formatString("%.1f°F", celsiusToFahrenheit(env.soil_temperature ?: 0f))
             } else {
-                "%.1f°C".format(env.soil_temperature ?: 0f)
+                formatString("%.1f°C", env.soil_temperature ?: 0f)
             }
         items.add { SoilTemperatureInfo(temp = temp, contentColor = contentColor) }
     }
@@ -347,7 +350,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.voltage ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = "%.2fV".format(env.voltage ?: 0f),
+                value = formatString("%.2fV", env.voltage ?: 0f),
                 label = stringResource(Res.string.voltage),
                 contentColor = contentColor,
             )
@@ -356,7 +359,7 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
     if ((env.current ?: 0f) != 0f) {
         items.add {
             PowerInfo(
-                value = "%.1fmA".format(env.current ?: 0f),
+                value = formatString("%.1fmA", env.current ?: 0f),
                 label = stringResource(Res.string.current),
                 contentColor = contentColor,
             )

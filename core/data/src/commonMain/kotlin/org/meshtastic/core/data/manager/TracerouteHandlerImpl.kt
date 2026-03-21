@@ -18,11 +18,11 @@ package org.meshtastic.core.data.manager
 
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.NumberFormatter
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.fullRouteDiscovery
@@ -44,7 +44,7 @@ class TracerouteHandlerImpl(
     private val nodeRepository: NodeRepository,
     private val commandSender: CommandSender,
 ) : TracerouteHandler {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
     override fun start(scope: CoroutineScope) {
         this.scope = scope

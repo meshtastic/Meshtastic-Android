@@ -19,7 +19,6 @@ package org.meshtastic.core.data.manager
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.util.handledLaunch
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.ConnectionState
@@ -89,7 +89,7 @@ class MeshConnectionManagerImpl(
     private val workerManager: MeshWorkerManager,
     private val appWidgetUpdater: AppWidgetUpdater,
 ) : MeshConnectionManager {
-    private var scope: CoroutineScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
     private var sleepTimeout: Job? = null
     private var locationRequestsJob: Job? = null
     private var handshakeTimeout: Job? = null

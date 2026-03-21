@@ -27,7 +27,8 @@ This document captures discoverable patterns that are already used in the reposi
 - Keep shared dialogs/components in `core:ui` where possible.
 - Put localizable UI strings in Compose Multiplatform resources: `core/resources/src/commonMain/composeResources/values/strings.xml`.
 - Use `stringResource(Res.string.key)` from shared resources in feature screens.
-- Example usage: `feature/node/src/androidMain/kotlin/org/meshtastic/feature/node/list/NodeListScreen.kt`.
+- When retrieving strings in non-composable Coroutines, Managers, or ViewModels, use `getStringSuspend()`. Never use the blocking `getString()` inside a coroutine as it will crash iOS and freeze the UI thread.
+- Example usage: `feature/node/src/commonMain/kotlin/org/meshtastic/feature/node/list/NodeListScreen.kt`.
 
 ## 5) Platform abstraction in shared UI
 

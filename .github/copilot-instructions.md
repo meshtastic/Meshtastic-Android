@@ -14,11 +14,11 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - `fdroid`: Open source only, no tracking/analytics.
   - `google`: Includes Google Play Services (Maps) and DataDog analytics.
 - **Core Architecture:** Modern Android Development (MAD) with KMP core.
-  - **KMP Modules:** Most `core:*` modules. All declare `jvm()` target and compile clean on JVM.
+  - **KMP Modules:** Most `core:*` modules. All declare `jvm()`, `iosArm64()`, and `iosSimulatorArm64()` targets and compile clean across all.
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
-  - **UI:** Jetpack Compose (Material 3).
-  - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app`.
-  - **Navigation:** AndroidX Navigation 3 (JetBrains multiplatform fork) with shared backstack state.
+  - **UI:** Jetpack Compose Multiplatform (Material 3).
+  - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
+  - **Navigation:** JetBrains Navigation 3 (Multiplatform fork) with shared backstack state.
   - **Lifecycle:** JetBrains multiplatform `lifecycle-viewmodel-compose` and `lifecycle-runtime-compose`.
   - **Database:** Room KMP.
 
@@ -38,7 +38,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:repository` | High-level domain interfaces (e.g., `NodeRepository`, `LocationRepository`). |
 | `core:domain` | Pure KMP business logic and UseCases. |
 | `core:data` | Core manager implementations and data orchestration. |
-| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec` in commonMain, `TcpTransport` in jvmAndroidMain). |
+| `core:network` | KMP networking layer using Ktor, MQTT abstractions, and shared transport (`StreamFrameCodec`, `TcpTransport`, `SerialTransport`). |
 | `core:di` | Common DI qualifiers and dispatchers. |
 | `core:navigation` | Shared navigation keys/routes for Navigation 3. |
 | `core:ui` | Shared Compose UI components (`EmptyDetailPlaceholder`, `MainAppBar`, dialogs, preferences) and platform abstractions. |
@@ -47,18 +47,18 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core:prefs` | KMP preferences layer built on DataStore abstractions. |
 | `core:barcode` | Barcode scanning (Android-only). |
 | `core:nfc` | NFC abstractions (KMP). Android NFC hardware implementation in `androidMain`. |
-| `core/ble/` | Bluetooth Low Energy stack using Nordic libraries. |
+| `core/ble/` | Bluetooth Low Energy stack using Kable. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
-| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`). All are KMP with `jvm()` target. Use `meshtastic.kmp.feature` convention plugin. |
-| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP transport with `want_config` handshake. |
+| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `widget`). All are KMP with `jvm()` and `ios()` targets except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
+| `desktop/` | Compose Desktop application — first non-Android KMP target. Thin host shell relying entirely on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
 | `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
 ## 3. Development Guidelines & Coding Standards
 
 ### A. UI Development (Jetpack Compose)
 -   **Material 3:** The app uses Material 3.
--   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). NEVER use hardcoded strings.
+-   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). For ViewModels or non-composable Coroutines, use the asynchronous `getStringSuspend(Res.string.your_key)`. NEVER use hardcoded strings, and NEVER use the blocking `getString()` in a coroutine.
 -   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 
@@ -72,11 +72,13 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 -   **Concurrency:** Use Kotlin Coroutines and Flow.
 -   **Dependency Injection:** Use **Koin Annotations** with the K2 compiler plugin (0.4.0+). Keep root graph assembly in `app`.
 -   **ViewModels:** Follow the MVI/UDF pattern. Use the multiplatform `androidx.lifecycle.ViewModel` in `commonMain`.
--   **BLE:** All Bluetooth communication must route through `core:ble` using Nordic Semiconductor's Android Common Libraries.
+-   **BLE:** All Bluetooth communication must route through `core:ble` using Kable.
 -   **Dependencies:** Check `gradle/libs.versions.toml` before assuming a library is available.
 -   **JetBrains fork aliases:** Version catalog aliases for JetBrains-forked AndroidX artifacts use the `jetbrains-*` prefix (e.g., `jetbrains-lifecycle-runtime-compose`, `jetbrains-navigation3-ui`). Plain `androidx-*` aliases are true Google AndroidX artifacts. Never mix them up in `commonMain`.
+-   **Compose Multiplatform:** Version catalog aliases for Compose Multiplatform artifacts use the `compose-multiplatform-*` prefix (e.g., `compose-multiplatform-material3`, `compose-multiplatform-foundation`). Never use plain `androidx.compose` dependencies in common Main.
 -   **Room KMP:** Always use `factory = { MeshtasticDatabaseConstructor.initialize() }` in `Room.databaseBuilder` and `inMemoryDatabaseBuilder`. DAOs and Entities reside in `commonMain`.
--   **Testing:** Write ViewModel and business logic tests in `commonTest`. Use `core:testing` shared fakes.
+-   **QR Codes:** Use `rememberQrCodePainter` from `core:ui/commonMain` (powered by `qrcode-kotlin`) for generating QR codes. Do not use Android Bitmap or ZXing APIs in common code.
+-   **Testing:** Write ViewModel and business logic tests in `commonTest`. Use `Turbine` for Flow testing, `Kotest` for property-based testing, and `Mokkery` for mocking. Use `core:testing` shared fakes.
 -   **Build-logic conventions:** In `build-logic/convention`, prefer lazy Gradle configuration (`configureEach`, `withPlugin`, provider APIs). Avoid `afterEvaluate` in convention plugins unless there is no viable lazy alternative.
 
 ### C. Namespacing

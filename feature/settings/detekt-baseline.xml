@@ -2,12 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
-    <ID>CyclomaticComplexMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>CyclomaticComplexMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>
     <ID>LongMethod:AudioConfigItemList.kt$@Composable fun AudioConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:DetectionSensorConfigItemList.kt$@Composable fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:LoRaConfigItemList.kt$@Composable fun LoRaConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
-    <ID>LongMethod:NetworkConfigItemList.kt$@Composable fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)</ID>
     <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$fun setResponseStateLoading(route: Enum&lt;*>)</ID>
     <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshPacket)</ID>

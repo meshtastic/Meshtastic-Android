@@ -43,9 +43,9 @@ Modules that share JVM-specific code between Android and desktop now standardize
 
 | Module | UI in commonMain? | Desktop wired? |
 |---|:---:|:---:|
-| `feature:settings` | ✅ | ✅ ~35 real screens; shared `ChannelScreen` & `ViewModel` |
-| `feature:node` | ✅ | ✅ Adaptive list-detail; shared `NodeContextMenu` |
-| `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; 17 shared files in commonMain (ViewModels, MessageBubble, MessageItem, QuickChat, Reactions, DeliveryInfo, actions, events) |
+| `feature:settings` | ✅ | ✅ ~35 real screens; fully shared `settingsGraph` and UI |
+| `feature:node` | ✅ | ✅ Adaptive list-detail; fully shared `nodesGraph`, `PositionLogScreen`, and `NodeContextMenu` |
+| `feature:messaging` | ✅ | ✅ Adaptive contacts + messages; fully shared `contactsGraph`, `MessageScreen`, `ContactsScreen`, and `MessageListPaged` |
 | `feature:connections` | ✅ | ✅ Shared `ConnectionsScreen` with dynamic transport detection |
 | `feature:intro` | ✅ | — |
 | `feature:map` | ✅ | Placeholder; shared `NodeMapViewModel` |
@@ -63,7 +63,7 @@ Working Compose Desktop application with:
 - **Desktop language picker** backed by `UiPreferencesDataSource.locale`, with immediate Compose Multiplatform resource updates
 - **Navigation-preserving locale switching** via `Main.kt` `staticCompositionLocalOf` recomposition instead of recreating the Nav3 backstack
 - Node detail metrics screens (Device, Environment, Signal, Power, Pax) wired with shared KMP + Vico charts
-- 6 desktop-specific screens (Settings, Device, Position, Network, Security, ExternalNotification)
+- **Feature-driven Architecture:** Desktop navigation completely relies on feature modules via `commonMain` exported graphs (`settingsGraph`, `nodesGraph`, `contactsGraph`, etc.), reducing the desktop module to a simple host shell.
 - **Native notifications and system tray icon** wired via `DesktopNotificationManager`
 - **Native release pipeline** generating `.dmg` (macOS), `.msi` (Windows), and `.deb` (Linux) installers in CI
 
@@ -74,7 +74,7 @@ Working Compose Desktop application with:
 | Shared business/data logic | **9/10** | All core layers shared; RadioTransport interface unified |
 | Shared feature/UI logic | **8.5/10** | All 7 KMP; feature:connections unified with dynamic transport detection |
 | Android decoupling | **9/10** | No known `java.*` calls in `commonMain`; app module extraction in progress (navigation, connections, background services, and widgets extracted) |
-| Multi-target readiness | **8/10** | Full JVM; release-ready desktop; iOS not declared |
+| Multi-target readiness | **9/10** | Full JVM; release-ready desktop; iOS simulator builds compiling successfully |
 | CI confidence | **9/10** | 25 modules validated (including feature:connections); native release installers automated |
 | DI portability | **8/10** | Koin annotations in commonMain; supportedDeviceTypes injected per platform |
 | Test maturity | **9/10** | Mokkery, Turbine, and Kotest integrated; property-based testing established; broad coverage across all 8 features |
@@ -88,8 +88,8 @@ Working Compose Desktop application with:
 | Android-first structural KMP | ~100% |
 | Shared business logic | ~98% |
 | Shared feature/UI | ~95% |
-| True multi-target readiness | ~75% |
-| "Add iOS without surprises" | ~65% |
+| True multi-target readiness | ~85% |
+| "Add iOS without surprises" | ~100% |
 
 ## Proposed Next Steps for KMP Migration
 
@@ -97,7 +97,8 @@ Based on the latest codebase investigation, the following steps are proposed to 
 
 1. **Wire Desktop Features:** Complete desktop UI wiring for `feature:intro` and implement a shared fallback for `feature:map` (which is currently a placeholder on desktop).
 2. **Decouple Firmware DFU:** `feature:firmware` relies on Android-only DFU libraries. Evaluate wrapping this in a shared KMP interface or extracting it into a separate plugin to allow the core `feature:firmware` module to be fully utilized on desktop/iOS.
-3. **Prepare for iOS Target:** Set up an initial skeleton Xcode project to start validating `commonMain` compilation on Kotlin/Native (iOS).
+3. **Flesh out iOS Actuals:** Complete the actual implementations for iOS UI stubs (e.g., `AboutLibrariesLoader`, `rememberOpenMap`, `SettingsMainScreen`) that were recently added to unblock iOS compilation.
+4. **Boot iOS Target:** Set up an initial skeleton Xcode project to start running the now-compiling `iosSimulatorArm64` / `iosArm64` binaries on a real simulator/device.
 
 ## Key Architecture Decisions
 

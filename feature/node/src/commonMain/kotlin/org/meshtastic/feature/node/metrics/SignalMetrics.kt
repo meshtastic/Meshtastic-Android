@@ -56,6 +56,7 @@ import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProdu
 import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.resources.Res
 import org.meshtastic.core.resources.rssi
@@ -182,9 +183,9 @@ private fun SignalMetricsChart(
                 valueFormatter =
                 ChartStyling.createColoredMarkerValueFormatter { value, color ->
                     if (color.copy(alpha = 1f) == rssiColor) {
-                        "RSSI: %.0f dBm".format(value)
+                        formatString("RSSI: %.0f dBm", value)
                     } else {
-                        "SNR: %.1f dB".format(value)
+                        formatString("SNR: %.1f dB", value)
                     }
                 },
             )
@@ -226,7 +227,7 @@ private fun SignalMetricsChart(
                 if (rssiData.isNotEmpty()) {
                     VerticalAxis.rememberStart(
                         label = ChartStyling.rememberAxisLabel(color = rssiColor),
-                        valueFormatter = { _, value, _ -> "%.0f dBm".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.0f dBm", value) },
                     )
                 } else {
                     null
@@ -235,7 +236,7 @@ private fun SignalMetricsChart(
                 if (snrData.isNotEmpty()) {
                     VerticalAxis.rememberEnd(
                         label = ChartStyling.rememberAxisLabel(color = snrColor),
-                        valueFormatter = { _, value, _ -> "%.1f dB".format(value) },
+                        valueFormatter = { _, value, _ -> formatString("%.1f dB", value) },
                     )
                 } else {
                     null
@@ -296,14 +297,14 @@ private fun SignalMetricsCard(meshPacket: MeshPacket, isSelected: Boolean, onCli
                                 MetricIndicator(SignalMetric.RSSI.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "%.0f dBm".format(meshPacket.rx_rssi.toFloat()),
+                                    text = formatString("%.0f dBm", meshPacket.rx_rssi.toFloat()),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 MetricIndicator(SignalMetric.SNR.color)
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = "%.1f dB".format(meshPacket.rx_snr),
+                                    text = formatString("%.1f dB", meshPacket.rx_snr),
                                     style = MaterialTheme.typography.labelLarge,
                                 )
                             }

@@ -28,15 +28,15 @@ The module depends on the JVM variants of KMP modules:
 - `core:domain`, `core:data`, `core:database`, `core:datastore`, `core:prefs`
 - `core:network`, `core:resources`, `core:ui`
 
-**Navigation:** Uses JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle (`org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose`, `lifecycle-runtime-compose`). A `SavedStateConfiguration` with polymorphic `SerializersModule` is configured for non-Android NavKey serialization. Desktop shares route keys with Android via `core:navigation`, but graph wiring remains platform-specific; parity policy is tracked in [`docs/decisions/navigation3-parity-2026-03.md`](../docs/decisions/navigation3-parity-2026-03.md).
+**Navigation:** Uses JetBrains multiplatform forks of Navigation 3 (`org.jetbrains.androidx.navigation3:navigation3-ui`) and Lifecycle (`org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose`, `lifecycle-runtime-compose`). A unified `SavedStateConfiguration` with polymorphic `SerializersModule` is provided centrally by `core:navigation` for non-Android NavKey serialization. Desktop utilizes the exact same navigation graph wiring (`settingsGraph`, `nodesGraph`, `contactsGraph`, `connectionsGraph`) directly from the `commonMain` of their respective feature modules, maintaining full UI parity.
 
 **Coroutines:** Requires `kotlinx-coroutines-swing` for `Dispatchers.Main` on JVM/Desktop. Without it, any code using `lifecycle.coroutineScope` or `Dispatchers.Main` (e.g., `NodeRepositoryImpl`, `RadioConfigRepositoryImpl`) will crash at runtime.
 
-**DI:** A Koin DI graph is bootstrapped in `Main.kt` with stub implementations for Android-only services.
+**DI:** A Koin DI graph is bootstrapped in `Main.kt` with platform-specific implementations injected.
 
-**UI:** JetBrains Compose for Desktop with Material 3 theming, sharing Compose components from `core:ui`.
+**UI:** JetBrains Compose for Desktop with Material 3 theming. Desktop acts as a thin host shell, delegating almost entirely to fully shared KMP UI modules.
 
-**Localization:** Desktop exposes a language picker in `ui/settings/DesktopSettingsScreen.kt`, persisting the selected BCP-47 tag in `UiPreferencesDataSource.locale`. `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
+**Localization:** Desktop exposes a language picker, persisting the selected BCP-47 tag in `UiPreferencesDataSource.locale`. `Main.kt` applies the override to the JVM default `Locale` and uses a `staticCompositionLocalOf`-backed recomposition trigger so Compose Multiplatform `stringResource()` calls update immediately without recreating the Navigation 3 backstack.
 
 ## Key Files
 
@@ -44,24 +44,11 @@ The module depends on the JVM variants of KMP modules:
 |---|---|
 | `Main.kt` | App entry point — Koin bootstrap, Compose Desktop window, theme + locale application |
 | `DemoScenario.kt` | Offline demo data for testing without a connected device |
-| `ui/DesktopMainScreen.kt` | Navigation 3 shell — `NavigationRail` + `NavDisplay` + `SavedStateConfiguration` |
-| `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations |
-| `navigation/DesktopSettingsNavigation.kt` | Real settings feature composables wired into nav graph (~35 screens) |
-| `navigation/DesktopNodeNavigation.kt` | Real adaptive node list-detail + real metrics screens (logs + charts); map routes remain placeholders |
-| `navigation/DesktopMessagingNavigation.kt` | Real adaptive contacts list-detail + real Messages/Share/QuickChat route screens |
+| `ui/DesktopMainScreen.kt` | Navigation 3 shell — `NavigationRail` + `NavDisplay` |
+| `navigation/DesktopNavigation.kt` | Nav graph entry registrations for all top-level destinations (delegates to shared feature graphs) |
 | `radio/DesktopRadioTransportFactory.kt` | Provides TCP, Serial/USB, and BLE transports |
 | `radio/DesktopMeshServiceController.kt` | Mesh service lifecycle — orchestrates `want_config` handshake chain |
 | `radio/DesktopMessageQueue.kt` | Message queue for outbound mesh packets |
-| `ui/firmware/DesktopFirmwareScreen.kt` | Placeholder firmware screen (native DFU is Android-only) |
-| `ui/settings/DesktopSettingsScreen.kt` | Desktop-specific top-level settings screen, including theme/language/app-info controls |
-| `ui/settings/DesktopDeviceConfigScreen.kt` | Device config with JVM `ZoneId` timezone (replaces Android BroadcastReceiver) |
-| `ui/settings/DesktopPositionConfigScreen.kt` | Position config without Android Location APIs |
-| `ui/settings/DesktopNetworkConfigScreen.kt` | Network config without QR/NFC scanning |
-| `ui/settings/DesktopSecurityConfigScreen.kt` | Security config with JVM `SecureRandom` (omits file export) |
-| `ui/settings/DesktopExternalNotificationConfigScreen.kt` | External notification config without MediaPlayer/file import |
-| `ui/nodes/DesktopAdaptiveNodeListScreen.kt` | Adaptive node list-detail using JetBrains `ListDetailPaneScaffold` |
-| `ui/messaging/DesktopAdaptiveContactsScreen.kt` | Adaptive contacts list-detail using JetBrains `ListDetailPaneScaffold` |
-| `ui/messaging/DesktopMessageContent.kt` | Desktop message content with send, reactions, and selection |
 | `di/DesktopKoinModule.kt` | Koin module with stub implementations |
 | `di/DesktopPlatformModule.kt` | Platform-specific Koin bindings |
 | `stub/NoopStubs.kt` | No-op implementations for all repository interfaces |

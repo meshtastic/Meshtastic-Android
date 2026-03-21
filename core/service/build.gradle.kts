@@ -21,8 +21,6 @@ plugins {
 }
 
 kotlin {
-    jvm()
-
     @Suppress("UnstableApiUsage")
     android {
         namespace = "org.meshtastic.core.service"
@@ -45,6 +43,7 @@ kotlin {
             implementation(projects.core.proto)
 
             implementation(libs.jetbrains.lifecycle.runtime)
+            implementation(libs.kotlinx.atomicfu)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kermit)
         }

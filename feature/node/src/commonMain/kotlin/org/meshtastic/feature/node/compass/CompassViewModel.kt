@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
 import org.meshtastic.core.common.util.bearing
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.latLongToMeter
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.common.util.nowSeconds
@@ -119,7 +120,7 @@ class CompassViewModel(
         val bearingDegrees = calculateBearing(locationState, target)
         val trueHeading = applyTrueNorthCorrection(headingState.heading, locationState)
         val distanceText = distanceMeters?.toDistanceString(current.displayUnits)
-        val bearingText = bearingDegrees?.let { BEARING_FORMAT.format(it) }
+        val bearingText = bearingDegrees?.let { formatString(BEARING_FORMAT, it) }
         val isAligned = isAligned(trueHeading, bearingDegrees)
         val lastUpdateText = targetPositionTimeSec?.let { formatElapsed(it) }
         val angularErrorDeg = calculateAngularError(positionalAccuracyMeters, distanceMeters)

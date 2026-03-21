@@ -21,7 +21,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -34,6 +33,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Message
@@ -190,7 +190,7 @@ class MessageViewModel(
     }
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
     }
 
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
@@ -218,10 +218,10 @@ class MessageViewModel(
         viewModelScope.launch { serviceRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey)) }
 
     fun deleteMessages(uuidList: List<Long>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.deleteMessages(uuidList) }
 
     fun clearUnreadCount(contact: String, messageUuid: Long, lastReadTimestamp: Long) =
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(ioDispatcher) {
             val existingTimestamp = contactSettings.value[contact]?.lastReadMessageTimestamp ?: Long.MIN_VALUE
             if (lastReadTimestamp <= existingTimestamp) {
                 return@launch

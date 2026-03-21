@@ -313,8 +313,8 @@ class MockInterface(private val service: RadioInterfaceService, val address: Str
                 user =
                 User(
                     id = DataPacket.nodeNumToDefaultId(numIn),
-                    long_name = "Sim " + Integer.toHexString(numIn),
-                    short_name = getInitials("Sim " + Integer.toHexString(numIn)),
+                    long_name = "Sim " + numIn.toString(16),
+                    short_name = getInitials("Sim " + numIn.toString(16)),
                     hw_model = HardwareModel.ANDROID_SIM,
                 ),
                 position =

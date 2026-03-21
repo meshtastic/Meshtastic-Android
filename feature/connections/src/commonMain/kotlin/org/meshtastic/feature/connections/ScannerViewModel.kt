@@ -33,6 +33,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import org.meshtastic.core.model.RadioController
@@ -84,7 +85,7 @@ open class ScannerViewModel(
                             timeout = kotlin.time.Duration.INFINITE,
                             serviceUuid = org.meshtastic.core.ble.MeshtasticBleConstants.SERVICE_UUID,
                         )
-                        .flowOn(kotlinx.coroutines.Dispatchers.IO)
+                        .flowOn(ioDispatcher)
                         .collect { device ->
                             if (!scannedBleDevices.value.containsKey(device.address)) {
                                 scannedBleDevices.update { current -> current + (device.address to device) }

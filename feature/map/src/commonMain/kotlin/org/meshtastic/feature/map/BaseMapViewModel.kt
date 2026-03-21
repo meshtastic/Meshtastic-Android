@@ -18,7 +18,6 @@ package org.meshtastic.feature.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -26,6 +25,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.common.util.nowSeconds
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.Node
@@ -139,7 +139,7 @@ open class BaseMapViewModel(
 
     fun getNodeOrFallback(nodeNum: Int): Node = nodeRepository.nodeDBbyNum.value[nodeNum] ?: Node(num = nodeNum)
 
-    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
+    fun deleteWaypoint(id: Int) = viewModelScope.launch(ioDispatcher) { packetRepository.deleteWaypoint(id) }
 
     fun sendWaypoint(wpt: Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
@@ -151,7 +151,7 @@ open class BaseMapViewModel(
     }
 
     private fun sendDataPacket(p: DataPacket) {
-        viewModelScope.launch(Dispatchers.IO) { radioController.sendMessage(p) }
+        viewModelScope.launch(ioDispatcher) { radioController.sendMessage(p) }
     }
 
     fun generatePacketId(): Int = radioController.getPacketId()

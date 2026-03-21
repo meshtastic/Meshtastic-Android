@@ -19,6 +19,7 @@ package org.meshtastic.feature.messaging.component
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.tooling.preview.NodePreviewParameterProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +27,6 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.common.util.nowMillis
 import org.meshtastic.core.model.Message
 import org.meshtastic.core.model.MessageStatus
-import org.meshtastic.core.ui.component.preview.NodePreviewParameterProvider
 
 @RunWith(AndroidJUnit4::class)
 class MessageItemTest {

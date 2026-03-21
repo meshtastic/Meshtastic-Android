@@ -23,7 +23,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +32,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 import org.meshtastic.core.common.UiPreferences
+import org.meshtastic.core.common.util.ioDispatcher
 
 const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 const val KEY_THEME = "theme"
@@ -52,7 +52,7 @@ const val KEY_EXCLUDE_MQTT = "exclude-mqtt"
 open class UiPreferencesDataSource(@Named("CorePreferencesDataStore") private val dataStore: DataStore<Preferences>) :
     UiPreferences {
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val scope = CoroutineScope(SupervisorJob() + ioDispatcher)
 
     // Start this flow eagerly, so app intro doesn't flash (when disabled) on cold app start.
     override val appIntroCompleted: StateFlow<Boolean> =

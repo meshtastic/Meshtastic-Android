@@ -19,12 +19,8 @@ package org.meshtastic.core.model.util
 import org.meshtastic.core.common.util.nowInstant
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
-import org.meshtastic.core.model.util.TimeConstants.HOURS_PER_DAY
 import java.text.DateFormat
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.DurationUnit
 
 private val DAY_DURATION = 24.hours
 
@@ -53,9 +49,3 @@ fun getShortDate(time: Long): String? {
  * @param remainingMillis The remaining time in milliseconds
  * @return Pair of (days, hours), where days is Int and hours is Double
  */
-fun formatMuteRemainingTime(remainingMillis: Long): Pair<Int, Double> {
-    val duration = remainingMillis.milliseconds
-    if (duration <= Duration.ZERO) return 0 to 0.0
-    val totalHours = duration.toDouble(DurationUnit.HOURS)
-    return (totalHours / HOURS_PER_DAY).toInt() to (totalHours % HOURS_PER_DAY)
-}

@@ -14,7 +14,7 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
   - `fdroid`: Open source only, no tracking/analytics.
   - `google`: Includes Google Play Services (Maps) and DataDog analytics.
 - **Core Architecture:** Modern Android Development (MAD) with KMP core.
-  - **KMP Modules:** Most `core:*` modules. All declare `jvm()` target and compile clean on JVM.
+  - **KMP Modules:** Most `core:*` modules. All declare `jvm()`, `iosArm64()`, and `iosSimulatorArm64()` targets and compile clean across all.
   - **Android-only Modules:** `core:api` (AIDL), `core:barcode` (CameraX + flavor-specific decoder). Shared contracts abstracted into `core:ui/commonMain`.
   - **UI:** Jetpack Compose Multiplatform (Material 3).
   - **DI:** Koin Annotations with K2 compiler plugin. Root graph assembly is centralized in `app` and `desktop`.
@@ -50,15 +50,15 @@ Meshtastic-Android is a Kotlin Multiplatform (KMP) application for off-grid, dec
 | `core/ble/` | Bluetooth Low Energy stack using Kable. |
 | `core/resources/` | Centralized string and image resources (Compose Multiplatform). |
 | `core/testing/` | **Shared test doubles, fakes, and utilities for `commonTest` across all KMP modules.** |
-| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `widget`). All are KMP with `jvm()` target except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
-| `desktop/` | Compose Desktop application — first non-Android KMP target. Nav 3 shell, full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
+| `feature/` | Feature modules (e.g., `settings`, `map`, `messaging`, `node`, `intro`, `connections`, `firmware`, `widget`). All are KMP with `jvm()` and `ios()` targets except `widget`. Use `meshtastic.kmp.feature` convention plugin. |
+| `desktop/` | Compose Desktop application — first non-Android KMP target. Thin host shell relying entirely on feature modules for shared UI. Full Koin DI graph, TCP, Serial/USB, and BLE transports with `want_config` handshake. |
 | `mesh_service_example/` | Sample app showing `core:api` service integration. |
 
 ## 3. Development Guidelines & Coding Standards
 
 ### A. UI Development (Jetpack Compose)
 -   **Material 3:** The app uses Material 3.
--   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). NEVER use hardcoded strings.
+-   **Strings:** MUST use the **Compose Multiplatform Resource** library in `core:resources` (`stringResource(Res.string.your_key)`). For ViewModels or non-composable Coroutines, use the asynchronous `getStringSuspend(Res.string.your_key)`. NEVER use hardcoded strings, and NEVER use the blocking `getString()` in a coroutine.
 -   **Dialogs:** Use centralized components in `core:ui` (e.g., `MeshtasticResourceDialog`).
 -   **Platform/Flavor UI:** Inject platform-specific behavior (e.g., map providers) via `CompositionLocal` from `app`.
 

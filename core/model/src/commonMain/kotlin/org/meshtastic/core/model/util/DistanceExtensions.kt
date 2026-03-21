@@ -19,6 +19,7 @@
 package org.meshtastic.core.model.util
 
 import org.meshtastic.core.common.util.MeasurementSystem
+import org.meshtastic.core.common.util.formatString
 import org.meshtastic.core.common.util.getSystemMeasurementSystem
 import org.meshtastic.proto.Config.DisplayConfig.DisplayUnits
 
@@ -49,12 +50,15 @@ fun Int.metersIn(system: DisplayUnits): Float {
     return this.metersIn(unit)
 }
 
-fun Float.toString(unit: DistanceUnit): String = if (unit in setOf(DistanceUnit.METER, DistanceUnit.FOOT)) {
-    "%.0f %s"
-} else {
-    "%.1f %s"
+fun Float.toString(unit: DistanceUnit): String {
+    val pattern =
+        if (unit in setOf(DistanceUnit.METER, DistanceUnit.FOOT)) {
+            "%.0f %s"
+        } else {
+            "%.1f %s"
+        }
+    return formatString(pattern, this, unit.symbol)
 }
-    .format(this, unit.symbol)
 
 fun Float.toString(system: DisplayUnits): String {
     val unit =
@@ -81,14 +85,14 @@ fun Int.toDistanceString(system: DisplayUnits): String {
 
 @Suppress("MagicNumber")
 fun Float.toSpeedString(system: DisplayUnits): String = if (system == DisplayUnits.METRIC) {
-    "%.0f km/h".format(this * 3.6)
+    formatString("%.0f km/h", this * 3.6)
 } else {
-    "%.0f mph".format(this * 2.23694f)
+    formatString("%.0f mph", this * 2.23694f)
 }
 
 @Suppress("MagicNumber")
 fun Float.toSmallDistanceString(system: DisplayUnits): String = if (system == DisplayUnits.IMPERIAL) {
-    "%.2f in".format(this / 25.4f)
+    formatString("%.2f in", this / 25.4f)
 } else {
-    "%.0f mm".format(this)
+    formatString("%.0f mm", this)
 }

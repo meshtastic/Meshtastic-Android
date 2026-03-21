@@ -27,6 +27,7 @@ Version catalog aliases split cleanly by fork provenance. **Use the right prefix
 |---|---|---|
 | `jetbrains-lifecycle-*` | `org.jetbrains.androidx.lifecycle:*` | `commonMain`, `androidMain` |
 | `jetbrains-navigation3-*` | `org.jetbrains.androidx.navigation3:*` | `commonMain`, `androidMain` |
+| `jetbrains-navigationevent-*` | `org.jetbrains.androidx.navigationevent:*` | `commonMain`, `androidMain` |
 | `jetbrains-compose-material3-adaptive-*` | `org.jetbrains.compose.material3.adaptive:*` | `commonMain`, `androidMain` |
 | `androidx-lifecycle-process` | `androidx.lifecycle:lifecycle-process` | `androidMain` only — `ProcessLifecycleOwner` |
 | `androidx-lifecycle-runtime-ktx` | `androidx.lifecycle:lifecycle-runtime-ktx` | `androidMain` only |

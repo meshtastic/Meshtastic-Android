@@ -24,7 +24,7 @@ import androidx.room3.RoomDatabase
 import androidx.room3.TypeConverters
 import androidx.room3.migration.AutoMigrationSpec
 import androidx.sqlite.driver.bundled.BundledSQLiteDriver
-import kotlinx.coroutines.Dispatchers
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.database.dao.DeviceHardwareDao
 import org.meshtastic.core.database.dao.FirmwareReleaseDao
 import org.meshtastic.core.database.dao.MeshLogDao
@@ -122,14 +122,15 @@ abstract class MeshtasticDatabase : RoomDatabase() {
         fun <T : RoomDatabase> RoomDatabase.Builder<T>.configureCommon(): RoomDatabase.Builder<T> =
             this.fallbackToDestructiveMigration(dropAllTables = false)
                 .setDriver(BundledSQLiteDriver())
-                .setQueryCoroutineContext(Dispatchers.IO)
+                .setQueryCoroutineContext(ioDispatcher)
     }
 }
 
-@DeleteTable.Entries(DeleteTable(tableName = "NodeInfo"), DeleteTable(tableName = "MyNodeInfo"))
+@DeleteTable(tableName = "NodeInfo")
+@DeleteTable(tableName = "MyNodeInfo")
 class AutoMigration12to13 : AutoMigrationSpec
 
-@DeleteColumn.Entries(DeleteColumn(tableName = "packet", columnName = "reply_id"))
+@DeleteColumn(tableName = "packet", columnName = "reply_id")
 class AutoMigration29to30 : AutoMigrationSpec
 
 @DeleteColumn(tableName = "packet", columnName = "retry_count")

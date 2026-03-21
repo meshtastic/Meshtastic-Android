@@ -217,7 +217,7 @@ fun EditTextPreference(
             isError = isError,
             onValueChange = {
                 if (maxSize > 0) {
-                    if (it.toByteArray().size <= maxSize) {
+                    if (it.encodeToByteArray().size <= maxSize) {
                         onValueChanged(it)
                     }
                 } else {
@@ -255,7 +255,7 @@ fun EditTextPreference(
         if (maxSize > 0 && isFocused) {
             Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "${value.toByteArray().size}/$maxSize",
+                    text = "${value.encodeToByteArray().size}/$maxSize",
                     style = MaterialTheme.typography.bodySmall,
                     color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),

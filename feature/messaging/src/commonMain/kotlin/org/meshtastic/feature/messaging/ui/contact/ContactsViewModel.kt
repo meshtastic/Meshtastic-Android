@@ -21,13 +21,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.map
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.KoinViewModel
+import org.meshtastic.core.common.util.ioDispatcher
 import org.meshtastic.core.model.Contact
 import org.meshtastic.core.model.ContactSettings
 import org.meshtastic.core.model.DataPacket
@@ -189,17 +189,17 @@ class ContactsViewModel(
     fun getNode(userId: String?) = nodeRepository.getNode(userId ?: DataPacket.ID_BROADCAST)
 
     fun deleteContacts(contacts: List<String>) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.deleteContacts(contacts) }
 
-    fun markAllAsRead() = viewModelScope.launch(Dispatchers.IO) { packetRepository.clearAllUnreadCounts() }
+    fun markAllAsRead() = viewModelScope.launch(ioDispatcher) { packetRepository.clearAllUnreadCounts() }
 
     fun setMuteUntil(contacts: List<String>, until: Long) =
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.setMuteUntil(contacts, until) }
 
     fun getContactSettings() = packetRepository.getContactSettings()
 
     fun setContactFilteringDisabled(contactKey: String, disabled: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
+        viewModelScope.launch(ioDispatcher) { packetRepository.setContactFilteringDisabled(contactKey, disabled) }
     }
 
     /**
