@@ -35,10 +35,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.common.util.CommonUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.jetbrains.compose.resources.stringResource
 import org.meshtastic.core.barcode.rememberBarcodeScanner
+import org.meshtastic.core.common.util.CommonUri
 import org.meshtastic.core.common.util.extractWifiCredentials
 import org.meshtastic.core.model.util.handleMeshtasticUri
 import org.meshtastic.core.nfc.NfcScannerEffect
@@ -88,11 +88,7 @@ private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun NetworkConfigScreen(
-    viewModel: RadioConfigViewModel,
-    onBack: () -> Unit,
-    onOpenNfcSettings: () -> Unit = {},
-) {
+fun NetworkConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit, onOpenNfcSettings: () -> Unit = {}) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val networkConfig = state.radioConfig.network ?: Config.NetworkConfig()
     val formState = rememberConfigState(initialValue = networkConfig)

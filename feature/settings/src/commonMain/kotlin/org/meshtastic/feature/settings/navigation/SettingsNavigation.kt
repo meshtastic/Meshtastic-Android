@@ -205,7 +205,9 @@ expect fun SettingsMainScreen(
 
 /** Expect declarations for platform-specific config screens. */
 @Composable expect fun DeviceConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
+
 @Composable expect fun PositionConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
+
 @Composable expect fun SecurityConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)
 
 @Composable expect fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel, onBack: () -> Unit)

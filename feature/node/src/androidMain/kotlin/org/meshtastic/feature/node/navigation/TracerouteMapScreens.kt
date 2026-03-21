@@ -23,12 +23,7 @@ import org.meshtastic.feature.node.metrics.MetricsViewModel
 import org.meshtastic.feature.node.metrics.TracerouteMapScreen as AndroidTracerouteMapScreen
 
 @Composable
-actual fun TracerouteMapScreen(
-    destNum: Int,
-    requestId: Int,
-    logUuid: String?,
-    onNavigateUp: () -> Unit,
-) {
+actual fun TracerouteMapScreen(destNum: Int, requestId: Int, logUuid: String?, onNavigateUp: () -> Unit) {
     val metricsViewModel = koinViewModel<MetricsViewModel>(key = "metrics-$destNum") { parametersOf(destNum) }
     metricsViewModel.setNodeId(destNum)
 

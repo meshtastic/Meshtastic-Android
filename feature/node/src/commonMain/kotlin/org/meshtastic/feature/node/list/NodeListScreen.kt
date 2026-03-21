@@ -124,9 +124,7 @@ fun NodeListScreen(
                 MeshtasticImportFAB(
                     sharedContact = sharedContact,
                     onImport = { uriString ->
-                        viewModel.handleScannedUri(uriString) {
-                            scope.launch { showToast(Res.string.channel_invalid) }
-                        }
+                        viewModel.handleScannedUri(uriString) { scope.launch { showToast(Res.string.channel_invalid) } }
                     },
                     onDismissSharedContact = { viewModel.setSharedContactRequested(null) },
                     isContactContext = true,

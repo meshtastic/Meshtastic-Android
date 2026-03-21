@@ -16,9 +16,6 @@
  */
 package org.meshtastic.feature.node.navigation
 
-import androidx.navigationevent.compose.NavigationBackHandler
-import androidx.navigationevent.compose.rememberNavigationEventState
-import androidx.navigationevent.NavigationEventInfo
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
@@ -32,6 +29,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
@@ -86,8 +86,8 @@ fun AdaptiveNodeListScreen(
     NavigationBackHandler(
         state = navState,
         isBackEnabled = navigator.currentDestination?.pane == ListDetailPaneScaffoldRole.Detail,
-        onBackCancelled = { },
-        onBackCompleted = { handleBack() }
+        onBackCancelled = {},
+        onBackCompleted = { handleBack() },
     )
 
     LaunchedEffect(initialNodeId) {
