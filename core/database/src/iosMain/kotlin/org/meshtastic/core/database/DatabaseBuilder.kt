@@ -64,9 +64,14 @@ private object PreferencesSerializer : OkioSerializer<Preferences> {
     override val defaultValue: Preferences
         get() = emptyPreferences()
 
-    override suspend fun readFrom(source: BufferedSource): Preferences = error("Not implemented")
+    override suspend fun readFrom(source: BufferedSource): Preferences {
+        // iOS stub: return an empty Preferences instance instead of crashing.
+        return emptyPreferences()
+    }
 
-    override suspend fun writeTo(t: Preferences, sink: BufferedSink) = error("Not implemented")
+    override suspend fun writeTo(t: Preferences, sink: BufferedSink) {
+        // iOS stub: no-op to avoid crashing on write.
+    }
 }
 
 /** Creates an iOS DataStore for database preferences. */

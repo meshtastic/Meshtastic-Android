@@ -178,17 +178,19 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
         if (this is KotlinMultiplatformExtension) {
             targets.configureEach {
                 compilations.configureEach {
-                    compileTaskProvider.get().compilerOptions {
-                        freeCompilerArgs.addAll(
-                            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                            "-opt-in=kotlin.uuid.ExperimentalUuidApi",
-                            "-opt-in=kotlin.time.ExperimentalTime",
-                            "-opt-in=kotlinx.cinterop.ExperimentalForeignApi",
-                            "-Xexpect-actual-classes",
-                            "-Xcontext-parameters",
-                            "-Xannotation-default-target=param-property",
-                            "-Xskip-prerelease-check"
-                        )
+                    compileTaskProvider.configure {
+                        compilerOptions {
+                            freeCompilerArgs.addAll(
+                                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                                "-opt-in=kotlin.uuid.ExperimentalUuidApi",
+                                "-opt-in=kotlin.time.ExperimentalTime",
+                                "-opt-in=kotlinx.cinterop.ExperimentalForeignApi",
+                                "-Xexpect-actual-classes",
+                                "-Xcontext-parameters",
+                                "-Xannotation-default-target=param-property",
+                                "-Xskip-prerelease-check"
+                            )
+                        }
                     }
                 }
             }
