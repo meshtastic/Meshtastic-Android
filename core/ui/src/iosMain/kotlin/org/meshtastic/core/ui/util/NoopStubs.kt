@@ -17,32 +17,24 @@
 package org.meshtastic.core.ui.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.platform.ClipEntry
 import org.jetbrains.compose.resources.StringResource
 
-actual fun createClipEntry(text: String, label: String): ClipEntry {
+actual fun createClipEntry(text: String, label: String): ClipEntry =
     throw UnsupportedOperationException("ClipEntry instantiation not supported on iOS stub")
-}
 
-actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): AnnotatedString = 
-    AnnotatedString(html)
+actual fun annotatedStringFromHtml(html: String, linkStyles: TextLinkStyles?): AnnotatedString = AnnotatedString(html)
 
-@Composable
-actual fun rememberOpenNfcSettings(): () -> Unit = {}
+@Composable actual fun rememberOpenNfcSettings(): () -> Unit = {}
 
-@Composable
-actual fun rememberShowToast(): suspend (String) -> Unit = { _ -> }
+@Composable actual fun rememberShowToast(): suspend (String) -> Unit = { _ -> }
 
-@Composable
-actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -> }
+@Composable actual fun rememberShowToastResource(): suspend (StringResource) -> Unit = { _ -> }
 
-@Composable
-actual fun rememberOpenMap(): (Double, Double, String) -> Unit = { _, _, _ -> }
+@Composable actual fun rememberOpenMap(): (Double, Double, String) -> Unit = { _, _, _ -> }
 
-@Composable
-actual fun rememberOpenUrl(): (String) -> Unit = { _ -> }
+@Composable actual fun rememberOpenUrl(): (String) -> Unit = { _ -> }
 
-@Composable
-actual fun SetScreenBrightness(brightness: Float) {}
+@Composable actual fun SetScreenBrightness(brightness: Float) {}

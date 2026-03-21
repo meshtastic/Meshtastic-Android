@@ -102,7 +102,7 @@ private fun ActionButtons(
 
 @Suppress("LongMethod")
 @Composable
-fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
+actual fun PositionLogScreen(viewModel: MetricsViewModel, onNavigateUp: () -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 

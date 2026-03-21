@@ -16,7 +16,5 @@
  */
 package org.meshtastic.core.common.util
 
-/**
- * JVM/Android implementation of string formatting.
- */
+/** JVM/Android implementation of string formatting. */
 actual fun formatString(pattern: String, vararg args: Any?): String = String.format(pattern, *args)

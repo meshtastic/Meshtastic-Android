@@ -147,9 +147,11 @@ Adopt a **hybrid parity model**:
 ## Source Anchors
 
 - Shared routes: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/Routes.kt`
+- Shared saved-state config: `core/navigation/src/commonMain/kotlin/org/meshtastic/core/navigation/NavigationConfig.kt`
 - Android shell: `app/src/main/kotlin/org/meshtastic/app/ui/Main.kt`
-- Android graph registrations: `feature/*/src/androidMain/kotlin/org/meshtastic/feature/*/navigation/`
+- Shared graph registrations: `feature/*/src/commonMain/kotlin/org/meshtastic/feature/*/navigation/`
+- Platform graph content: `feature/*/src/{androidMain,jvmMain}/kotlin/org/meshtastic/feature/*/navigation/`
 - Desktop shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
-- Desktop graph registrations: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/`
+- Desktop graph assembly: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
 
 

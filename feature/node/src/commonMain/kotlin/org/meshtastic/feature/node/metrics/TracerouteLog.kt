@@ -164,7 +164,8 @@ fun TracerouteLogScreen(
                                     statusYellow = statusYellow,
                                     statusOrange = statusOrange,
                                 )
-                            val durationText = stringResource(Res.string.traceroute_duration, formatString("%.1f", seconds))
+                            val durationText =
+                                stringResource(Res.string.traceroute_duration, formatString("%.1f", seconds))
                             buildAnnotatedString {
                                 append(annotatedBase)
                                 append("\n\n$durationText")

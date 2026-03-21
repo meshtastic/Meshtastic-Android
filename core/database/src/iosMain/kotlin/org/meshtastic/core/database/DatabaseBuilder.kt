@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 package org.meshtastic.core.database
-import androidx.datastore.core.DataStore
 
+import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.okio.OkioSerializer
 import androidx.datastore.core.okio.OkioStorage
@@ -61,8 +61,11 @@ actual fun deleteDatabase(dbName: String) {
 actual fun getFileSystem(): FileSystem = FileSystem.SYSTEM
 
 private object PreferencesSerializer : OkioSerializer<Preferences> {
-    override val defaultValue: Preferences get() = emptyPreferences()
+    override val defaultValue: Preferences
+        get() = emptyPreferences()
+
     override suspend fun readFrom(source: BufferedSource): Preferences = error("Not implemented")
+
     override suspend fun writeTo(t: Preferences, sink: BufferedSink) = error("Not implemented")
 }
 
@@ -71,11 +74,12 @@ actual fun createDatabaseDataStore(name: String): DataStore<Preferences> {
     val dir = documentDirectory() + "/datastore"
     NSFileManager.defaultManager.createDirectoryAtPath(dir, true, null, null)
     return DataStoreFactory.create(
-        storage = OkioStorage(
+        storage =
+        OkioStorage(
             fileSystem = FileSystem.SYSTEM,
             serializer = PreferencesSerializer,
-            producePath = { (dir + "/$name.preferences_pb").toPath() }
-        )
+            producePath = { (dir + "/$name.preferences_pb").toPath() },
+        ),
     )
 }
 

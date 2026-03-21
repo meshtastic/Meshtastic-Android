@@ -43,7 +43,9 @@ kotlin {
             implementation(projects.core.ui)
 
             implementation(libs.jetbrains.navigation3.runtime)
+            implementation(libs.jetbrains.navigationevent.compose)
             implementation(libs.androidx.paging.common)
+            implementation(libs.androidx.paging.compose)
 
             // JetBrains Material 3 Adaptive (multiplatform ListDetailPaneScaffold)
             implementation(libs.jetbrains.compose.material3.adaptive)
@@ -51,10 +53,7 @@ kotlin {
             implementation(libs.jetbrains.compose.material3.adaptive.navigation)
         }
 
-        androidMain.dependencies {
-            implementation(libs.androidx.paging.compose)
-            implementation(libs.androidx.work.runtime.ktx)
-        }
+        androidMain.dependencies { implementation(libs.androidx.work.runtime.ktx) }
 
         androidUnitTest.dependencies {
             implementation(libs.androidx.work.testing)

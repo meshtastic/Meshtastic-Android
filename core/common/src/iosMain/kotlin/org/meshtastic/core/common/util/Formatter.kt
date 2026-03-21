@@ -16,10 +16,5 @@
  */
 package org.meshtastic.core.common.util
 
-/**
- * Apple (iOS) implementation of string formatting.
- * Stub implementation for compile-only validation.
- */
-actual fun formatString(pattern: String, vararg args: Any?): String {
-    return pattern
-}
+/** Apple (iOS) implementation of string formatting. Stub implementation for compile-only validation. */
+actual fun formatString(pattern: String, vararg args: Any?): String = pattern

@@ -12,6 +12,7 @@ lifecycle = "2.10.0"
 jetbrains-lifecycle = "2.10.0"
 navigation = "2.9.7"
 navigation3 = "1.1.0-alpha04"
+navigationevent = "1.0.1"
 paging = "3.4.2"
 room = "3.0.0-alpha01"
 savedstate = "1.4.0"
@@ -107,6 +108,7 @@ androidx-navigation-common = { module = "androidx.navigation:navigation-common",
 # Both `jetbrains-navigation3-runtime` and `jetbrains-navigation3-ui` resolve to the same coordinate.
 jetbrains-navigation3-runtime = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 jetbrains-navigation3-ui = { module = "org.jetbrains.androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
+jetbrains-navigationevent-compose = { module = "org.jetbrains.androidx.navigationevent:navigationevent-compose", version.ref = "navigationevent" }
 androidx-paging-common = { module = "androidx.paging:paging-common", version.ref = "paging" }
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "paging" }
 androidx-room-compiler = { module = "androidx.room3:room3-compiler", version.ref = "room" }
@@ -138,6 +140,7 @@ compose-multiplatform-runtime = { module = "org.jetbrains.compose.runtime:runtim
 compose-multiplatform-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
 compose-multiplatform-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 compose-multiplatform-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
+compose-multiplatform-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
 compose-multiplatform-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 compose-multiplatform-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform" }
 compose-multiplatform-materialIconsExtended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" }

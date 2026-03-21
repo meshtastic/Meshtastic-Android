@@ -16,10 +16,9 @@
  */
 package org.meshtastic.core.resources
 
-import org.meshtastic.core.common.util.formatString
-
 import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.StringResource
+import org.meshtastic.core.common.util.formatString
 import org.jetbrains.compose.resources.getString as composeGetString
 
 /** Retrieves a string from the [StringResource] in a blocking manner. Use primarily in non-composable code. */

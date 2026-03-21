@@ -51,7 +51,7 @@ import org.meshtastic.feature.node.list.NodeListViewModel
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun AdaptiveNodeListScreen(
+fun AndroidAdaptiveNodeListScreen(
     backStack: NavBackStack<NavKey>,
     scrollToTopEvents: Flow<ScrollToTopEvent>,
     initialNodeId: Int? = null,

@@ -16,7 +16,5 @@
  */
 package org.meshtastic.core.common.util
 
-/**
- * Multiplatform string formatting helper.
- */
+/** Multiplatform string formatting helper. */
 expect fun formatString(pattern: String, vararg args: Any?): String

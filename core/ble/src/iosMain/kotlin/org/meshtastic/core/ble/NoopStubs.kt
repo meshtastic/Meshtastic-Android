@@ -19,14 +19,10 @@ package org.meshtastic.core.ble
 import com.juul.kable.Peripheral
 import com.juul.kable.PeripheralBuilder
 
-/**
- * No-op stubs for iOS target in core:ble.
- */
-
+/** No-op stubs for iOS target in core:ble. */
 internal actual fun PeripheralBuilder.platformConfig(device: BleDevice, autoConnect: () -> Boolean) {
     // No-op for stubs
 }
 
-internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral {
+internal actual fun createPeripheral(address: String, builderAction: PeripheralBuilder.() -> Unit): Peripheral =
     throw UnsupportedOperationException("iOS Peripheral not yet implemented")
-}

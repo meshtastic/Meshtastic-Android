@@ -26,57 +26,47 @@ import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import org.meshtastic.core.navigation.ConnectionsRoutes
-import org.meshtastic.core.navigation.FirmwareRoutes
-import org.meshtastic.core.navigation.MapRoutes
-import org.meshtastic.desktop.ui.firmware.DesktopFirmwareScreen
 import org.meshtastic.desktop.ui.map.KmpMapPlaceholder
-import org.meshtastic.feature.connections.ui.ConnectionsScreen
+import org.meshtastic.feature.connections.navigation.connectionsGraph
+import org.meshtastic.feature.firmware.navigation.firmwareGraph
+import org.meshtastic.feature.map.navigation.mapGraph
+import org.meshtastic.feature.messaging.navigation.contactsGraph
+import org.meshtastic.feature.node.navigation.nodesGraph
+import org.meshtastic.feature.settings.navigation.settingsGraph
 import org.meshtastic.feature.settings.radio.channel.channelsGraph
 
 /**
  * Registers entry providers for all top-level desktop destinations.
  *
- * Nodes uses real composables from `feature:node` via [desktopNodeGraph]. Conversations uses real composables from
+ * Nodes uses real composables from `feature:node` via [nodesGraph]. Conversations uses real composables from
  * `feature:messaging` via [desktopMessagingGraph]. Settings uses real composables from `feature:settings` via
- * [desktopSettingsGraph]. Connections uses the shared [ConnectionsScreen]. Other features use placeholder screens until
- * their shared composables are wired.
+ * [settingsGraph]. Connections uses the shared [ConnectionsScreen]. Other features use placeholder screens until their
+ * shared composables are wired.
  */
 fun EntryProviderScope<NavKey>.desktopNavGraph(backStack: NavBackStack<NavKey>) {
     // Nodes — real composables from feature:node
-    desktopNodeGraph(backStack)
+    nodesGraph(
+        backStack = backStack,
+        nodeMapScreen = { destNum, _ -> KmpMapPlaceholder(title = "Node Map ($destNum)") },
+    )
 
     // Conversations — real composables from feature:messaging
-    desktopMessagingGraph(backStack)
+    contactsGraph(backStack)
 
     // Map — placeholder for now, will be replaced with feature:map real implementation
-    entry<MapRoutes.Map> { KmpMapPlaceholder() }
+    mapGraph(backStack)
 
     // Firmware — in-flow destination (for example from Settings), not a top-level rail tab
-    entry<FirmwareRoutes.FirmwareGraph> { DesktopFirmwareScreen() }
-    entry<FirmwareRoutes.FirmwareUpdate> { DesktopFirmwareScreen() }
+    firmwareGraph(backStack)
 
     // Settings — real composables from feature:settings
-    desktopSettingsGraph(backStack)
+    settingsGraph(backStack)
 
     // Channels
     channelsGraph(backStack)
 
     // Connections — shared screen
-    entry<ConnectionsRoutes.ConnectionsGraph> {
-        ConnectionsScreen(
-            onClickNodeChip = { backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it)) },
-            onNavigateToNodeDetails = { backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it)) },
-            onConfigNavigate = { route -> backStack.add(route) },
-        )
-    }
-    entry<ConnectionsRoutes.Connections> {
-        ConnectionsScreen(
-            onClickNodeChip = { backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it)) },
-            onNavigateToNodeDetails = { backStack.add(org.meshtastic.core.navigation.NodesRoutes.NodeDetailGraph(it)) },
-            onConfigNavigate = { route -> backStack.add(route) },
-        )
-    }
+    connectionsGraph(backStack)
 }
 
 @Composable

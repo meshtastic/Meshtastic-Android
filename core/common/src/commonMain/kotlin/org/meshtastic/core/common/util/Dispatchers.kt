@@ -18,7 +18,5 @@ package org.meshtastic.core.common.util
 
 import kotlinx.coroutines.CoroutineDispatcher
 
-/**
- * Access to the IO dispatcher in a multiplatform-safe way.
- */
+/** Access to the IO dispatcher in a multiplatform-safe way. */
 expect val ioDispatcher: CoroutineDispatcher

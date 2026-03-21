@@ -71,6 +71,7 @@ import org.meshtastic.core.model.ConnectionState
 import org.meshtastic.core.model.DeviceType
 import org.meshtastic.core.model.DeviceVersion
 import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.MeshtasticNavSavedStateConfig
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.TopLevelDestination
@@ -113,7 +114,7 @@ import org.meshtastic.feature.settings.radio.channel.channelsGraph
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(uIViewModel: UIViewModel = koinViewModel(), scanModel: ScannerViewModel = koinViewModel()) {
-    val backStack = rememberNavBackStack(NodesRoutes.NodesGraph as NavKey)
+    val backStack = rememberNavBackStack(MeshtasticNavSavedStateConfig, NodesRoutes.NodesGraph as NavKey)
     // LaunchedEffect(uIViewModel) { uIViewModel.navigationDeepLink.collectLatest { uri -> navController.navigate(uri) }
     // }
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()

@@ -43,16 +43,19 @@ Reference examples:
 
 1. Define/extend route keys in `core:navigation`.
 2. Implement feature entry/content using Navigation 3 types (`NavKey`, `NavBackStack`, `EntryProviderScope`).
-3. Add graph entries under the relevant feature module's `navigation` package (e.g., `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation`).
-4. Use backstack mutation (`add`, `removeLastOrNull`) instead of introducing controller-coupled APIs.
-5. Verify deep-link behavior if route is externally reachable.
+L46- 3. Add graph entries under the relevant feature module's `navigation` package (e.g., `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation`).
+L47- 4. If the entry content depends on platform-specific UI (e.g. Activity context or specific desktop wrappers), use `expect`/`actual` declarations for the content composables.
+L48- 5. Use backstack mutation (`add`, `removeLastOrNull`) instead of introducing controller-coupled APIs.
+L49- 6. Verify deep-link behavior if route is externally reachable.
+L50- 
+L51- Reference examples:
+L52- - Shared graph wiring: `feature/settings/src/commonMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
+L53- - Android specific content: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
+L54- - Desktop specific content: `feature/settings/src/jvmMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
+L55- - Feature intro graph pattern: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt`
+L56- - Desktop nav shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
+L57- - Desktop nav graph assembly: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
 
-Reference examples:
-- App graph wiring: `feature/settings/src/androidMain/kotlin/org/meshtastic/feature/settings/navigation/SettingsNavigation.kt`
-- Feature intro graph pattern: `feature/intro/src/androidMain/kotlin/org/meshtastic/feature/intro/IntroNavGraph.kt`
-- Desktop nav shell: `desktop/src/main/kotlin/org/meshtastic/desktop/ui/DesktopMainScreen.kt`
-- Desktop nav graph entries: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopNavigation.kt`
-- Desktop feature wiring: `desktop/src/main/kotlin/org/meshtastic/desktop/navigation/DesktopSettingsNavigation.kt`
 
 ## Playbook E: Add flavor/platform-specific UI implementation
 

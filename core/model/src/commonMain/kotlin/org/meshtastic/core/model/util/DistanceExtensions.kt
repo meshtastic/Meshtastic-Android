@@ -51,11 +51,12 @@ fun Int.metersIn(system: DisplayUnits): Float {
 }
 
 fun Float.toString(unit: DistanceUnit): String {
-    val pattern = if (unit in setOf(DistanceUnit.METER, DistanceUnit.FOOT)) {
-        "%.0f %s"
-    } else {
-        "%.1f %s"
-    }
+    val pattern =
+        if (unit in setOf(DistanceUnit.METER, DistanceUnit.FOOT)) {
+            "%.0f %s"
+        } else {
+            "%.1f %s"
+        }
     return formatString(pattern, this, unit.symbol)
 }
 

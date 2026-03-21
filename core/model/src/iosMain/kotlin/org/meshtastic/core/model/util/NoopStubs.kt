@@ -17,7 +17,6 @@
 package org.meshtastic.core.model.util
 
 /** No-op stubs for core:model on iOS. */
-
 actual fun getShortDateTime(time: Long): String = ""
 
 actual fun platformRandomBytes(size: Int): ByteArray = ByteArray(size)

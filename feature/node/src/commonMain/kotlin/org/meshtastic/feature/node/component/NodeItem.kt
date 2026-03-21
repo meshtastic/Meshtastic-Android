@@ -326,7 +326,9 @@ private fun gatherSensors(node: Node, tempInFahrenheit: Boolean, contentColor: C
         items.add { TemperatureInfo(temp = temp, contentColor = contentColor) }
     }
     if ((env.relative_humidity ?: 0f) != 0f) {
-        items.add { HumidityInfo(humidity = formatString("%.0f%%", env.relative_humidity ?: 0f), contentColor = contentColor) }
+        items.add {
+            HumidityInfo(humidity = formatString("%.0f%%", env.relative_humidity ?: 0f), contentColor = contentColor)
+        }
     }
     if ((env.barometric_pressure ?: 0f) != 0f) {
         items.add {

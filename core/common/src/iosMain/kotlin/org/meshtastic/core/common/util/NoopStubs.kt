@@ -17,20 +17,18 @@
 package org.meshtastic.core.common.util
 
 /** No-op stubs for iOS target in core:common. */
-
 actual object BuildUtils {
     actual val isEmulator: Boolean = false
     actual val sdkInt: Int = 0
 }
 
-actual class CommonUri(
-    actual val host: String?,
-    actual val fragment: String?,
-    actual val pathSegments: List<String>
-) {
+actual class CommonUri(actual val host: String?, actual val fragment: String?, actual val pathSegments: List<String>) {
     actual fun getQueryParameter(key: String): String? = null
+
     actual fun getBooleanQueryParameter(key: String, defaultValue: Boolean): Boolean = defaultValue
+
     actual override fun toString(): String = ""
+
     actual companion object {
         actual fun parse(uriString: String): CommonUri = CommonUri(null, null, emptyList())
     }
@@ -40,11 +38,17 @@ actual fun CommonUri.toPlatformUri(): Any = Any()
 
 actual object DateFormatter {
     actual fun formatRelativeTime(timestampMillis: Long): String = ""
+
     actual fun formatDateTime(timestampMillis: Long): String = ""
+
     actual fun formatShortDate(timestampMillis: Long): String = ""
+
     actual fun formatTime(timestampMillis: Long): String = ""
+
     actual fun formatTimeWithSeconds(timestampMillis: Long): String = ""
+
     actual fun formatDate(timestampMillis: Long): String = ""
+
     actual fun formatDateTimeShort(timestampMillis: Long): String = ""
 }
 
@@ -64,6 +68,7 @@ actual annotation class CommonIgnoredOnParcel actual constructor()
 
 actual interface CommonParceler<T> {
     actual fun create(parcel: CommonParcel): T
+
     actual fun T.write(parcel: CommonParcel, flags: Int)
 }
 
@@ -74,9 +79,14 @@ actual annotation class CommonTypeParceler<T, P : CommonParceler<in T>> actual c
 
 actual class CommonParcel {
     actual fun readString(): String? = null
+
     actual fun readInt(): Int = 0
+
     actual fun readLong(): Long = 0L
+
     actual fun readFloat(): Float = 0.0f
+
     actual fun createByteArray(): ByteArray? = null
+
     actual fun writeByteArray(b: ByteArray?) {}
 }
