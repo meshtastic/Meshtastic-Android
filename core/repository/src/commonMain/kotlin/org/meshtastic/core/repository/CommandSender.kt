@@ -23,7 +23,6 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.LocalConfig
-import org.meshtastic.proto.NeighborInfo
 
 /** Interface for sending commands and packets to the mesh network. */
 @Suppress("TooManyFunctions")
@@ -42,15 +41,6 @@ interface CommandSender {
 
     /** Generates a new unique packet ID. */
     fun generatePacketId(): Int
-
-    /** The latest neighbor info received from the connected radio. */
-    var lastNeighborInfo: NeighborInfo?
-
-    /** Start times of traceroute requests for duration calculation. */
-    val tracerouteStartTimes: MutableMap<Int, Long>
-
-    /** Start times of neighbor info requests for duration calculation. */
-    val neighborInfoStartTimes: MutableMap<Int, Long>
 
     /** Sets the session passkey for admin messages. */
     fun setSessionPasskey(key: ByteString)

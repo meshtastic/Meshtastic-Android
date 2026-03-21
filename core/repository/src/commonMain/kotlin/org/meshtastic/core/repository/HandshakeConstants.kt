@@ -16,25 +16,18 @@
  */
 package org.meshtastic.core.repository
 
-import kotlinx.coroutines.CoroutineScope
-import org.meshtastic.proto.MeshPacket
-import org.meshtastic.proto.NeighborInfo
+/**
+ * Shared constants for the two-stage mesh handshake protocol.
+ *
+ * Stage 1 (`CONFIG_NONCE`): requests device config, module config, and channels. Stage 2 (`NODE_INFO_NONCE`): requests
+ * the full node database.
+ *
+ * Both [MeshConfigFlowManager] (consumer) and [MeshConnectionManager] (sender) reference these.
+ */
+object HandshakeConstants {
+    /** Nonce sent in `want_config_id` to request config-only (Stage 1). */
+    const val CONFIG_NONCE = 69420
 
-/** Interface for handling neighbor info responses from the mesh. */
-interface NeighborInfoHandler {
-    /** Starts the neighbor info handler with the given coroutine scope. */
-    fun start(scope: CoroutineScope)
-
-    /** Records the start time for a neighbor info request. */
-    fun recordStartTime(requestId: Int)
-
-    /** The latest neighbor info received from the connected radio. */
-    var lastNeighborInfo: NeighborInfo?
-
-    /**
-     * Processes a neighbor info packet.
-     *
-     * @param packet The received mesh packet.
-     */
-    fun handleNeighborInfo(packet: MeshPacket)
+    /** Nonce sent in `want_config_id` to request node info only (Stage 2). */
+    const val NODE_INFO_NONCE = 69421
 }

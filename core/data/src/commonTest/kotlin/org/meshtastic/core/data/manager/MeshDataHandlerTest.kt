@@ -35,6 +35,7 @@ import org.meshtastic.core.repository.PlatformAnalytics
 import org.meshtastic.core.repository.RadioConfigRepository
 import org.meshtastic.core.repository.ServiceBroadcasts
 import org.meshtastic.core.repository.ServiceRepository
+import org.meshtastic.core.repository.StoreForwardPacketHandler
 import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.MeshPacket
 import kotlin.test.BeforeTest
@@ -62,6 +63,7 @@ class MeshDataHandlerTest {
     private val neighborInfoHandler: NeighborInfoHandler = mock(MockMode.autofill)
     private val radioConfigRepository: RadioConfigRepository = mock(MockMode.autofill)
     private val messageFilter: MessageFilter = mock(MockMode.autofill)
+    private val storeForwardHandler: StoreForwardPacketHandler = mock(MockMode.autofill)
 
     @BeforeTest
     fun setUp() {
@@ -85,6 +87,7 @@ class MeshDataHandlerTest {
                 neighborInfoHandler = neighborInfoHandler,
                 radioConfigRepository = radioConfigRepository,
                 messageFilter = messageFilter,
+                storeForwardHandler = storeForwardHandler,
             )
     }
 

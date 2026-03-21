@@ -34,9 +34,11 @@ import org.meshtastic.core.model.Position
 import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.model.util.isWithinSizeLimit
 import org.meshtastic.core.repository.CommandSender
+import org.meshtastic.core.repository.NeighborInfoHandler
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.PacketHandler
 import org.meshtastic.core.repository.RadioConfigRepository
+import org.meshtastic.core.repository.TracerouteHandler
 import org.meshtastic.proto.AdminMessage
 import org.meshtastic.proto.ChannelSet
 import org.meshtastic.proto.Constants
@@ -57,17 +59,15 @@ class CommandSenderImpl(
     private val packetHandler: PacketHandler,
     private val nodeManager: NodeManager,
     private val radioConfigRepository: RadioConfigRepository,
+    private val tracerouteHandler: TracerouteHandler,
+    private val neighborInfoHandler: NeighborInfoHandler,
 ) : CommandSender {
     private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
     private val currentPacketId = atomic(Random(nowMillis).nextLong().absoluteValue)
     private val sessionPasskey = atomic(ByteString.EMPTY)
-    override val tracerouteStartTimes = mutableMapOf<Int, Long>()
-    override val neighborInfoStartTimes = mutableMapOf<Int, Long>()
 
     private val localConfig = MutableStateFlow(LocalConfig())
     private val channelSet = MutableStateFlow(ChannelSet())
-
-    override var lastNeighborInfo: NeighborInfo? = null
 
     // We'll need a way to track connection state in shared code,
     // maybe via ServiceRepository or similar.
@@ -251,7 +251,7 @@ class CommandSenderImpl(
     }
 
     override fun requestTraceroute(requestId: Int, destNum: Int) {
-        tracerouteStartTimes[requestId] = nowMillis
+        tracerouteHandler.recordStartTime(requestId)
         packetHandler.sendToRadio(
             buildMeshPacket(
                 to = destNum,
@@ -302,11 +302,11 @@ class CommandSenderImpl(
     }
 
     override fun requestNeighborInfo(requestId: Int, destNum: Int) {
-        neighborInfoStartTimes[requestId] = nowMillis
+        neighborInfoHandler.recordStartTime(requestId)
         val myNum = nodeManager.myNodeNum ?: 0
         if (destNum == myNum) {
             val neighborInfoToSend =
-                lastNeighborInfo
+                neighborInfoHandler.lastNeighborInfo
                     ?: run {
                         val oneHour = 1.hours.inWholeMinutes.toInt()
                         Logger.d { "No stored neighbor info from connected radio, sending dummy data" }

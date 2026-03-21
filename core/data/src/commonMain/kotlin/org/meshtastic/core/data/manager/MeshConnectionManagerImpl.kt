@@ -37,6 +37,7 @@ import org.meshtastic.core.model.TelemetryType
 import org.meshtastic.core.repository.AppWidgetUpdater
 import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.DataPair
+import org.meshtastic.core.repository.HandshakeConstants
 import org.meshtastic.core.repository.HistoryManager
 import org.meshtastic.core.repository.MeshConnectionManager
 import org.meshtastic.core.repository.MeshLocationManager
@@ -253,13 +254,13 @@ class MeshConnectionManagerImpl(
     }
 
     override fun startConfigOnly() {
-        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = CONFIG_ONLY_NONCE)) }
+        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.CONFIG_NONCE)) }
         startHandshakeStallGuard(1, action)
         action()
     }
 
     override fun startNodeInfoOnly() {
-        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = NODE_INFO_NONCE)) }
+        val action = { packetHandler.sendToRadio(ToRadio(want_config_id = HandshakeConstants.NODE_INFO_NONCE)) }
         startHandshakeStallGuard(2, action)
         action()
     }
@@ -340,8 +341,6 @@ class MeshConnectionManagerImpl(
     }
 
     companion object {
-        private const val CONFIG_ONLY_NONCE = 69420
-        private const val NODE_INFO_NONCE = 69421
         private const val DEVICE_SLEEP_TIMEOUT_SECONDS = 30
         private val HANDSHAKE_TIMEOUT = 30.seconds
 

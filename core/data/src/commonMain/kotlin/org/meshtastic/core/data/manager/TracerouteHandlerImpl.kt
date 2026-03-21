@@ -28,7 +28,6 @@ import org.meshtastic.core.model.Node
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getFullTracerouteResponse
 import org.meshtastic.core.model.service.TracerouteResponse
-import org.meshtastic.core.repository.CommandSender
 import org.meshtastic.core.repository.NodeManager
 import org.meshtastic.core.repository.NodeRepository
 import org.meshtastic.core.repository.ServiceRepository
@@ -42,12 +41,17 @@ class TracerouteHandlerImpl(
     private val serviceRepository: ServiceRepository,
     private val tracerouteSnapshotRepository: TracerouteSnapshotRepository,
     private val nodeRepository: NodeRepository,
-    private val commandSender: CommandSender,
 ) : TracerouteHandler {
     private var scope: CoroutineScope = CoroutineScope(ioDispatcher + SupervisorJob())
 
+    private val startTimes = mutableMapOf<Int, Long>()
+
     override fun start(scope: CoroutineScope) {
         this.scope = scope
+    }
+
+    override fun recordStartTime(requestId: Int) {
+        startTimes[requestId] = nowMillis
     }
 
     override fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: kotlinx.coroutines.Job?) {
@@ -77,7 +81,7 @@ class TracerouteHandlerImpl(
             }
         }
 
-        val start = commandSender.tracerouteStartTimes.remove(requestId)
+        val start = startTimes.remove(requestId)
         val responseText =
             if (start != null) {
                 val elapsedMs = nowMillis - start

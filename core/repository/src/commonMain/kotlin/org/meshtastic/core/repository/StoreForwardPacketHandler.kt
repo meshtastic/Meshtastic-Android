@@ -17,23 +17,27 @@
 package org.meshtastic.core.repository
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+import org.meshtastic.core.model.DataPacket
 import org.meshtastic.proto.MeshPacket
 
-/** Interface for handling traceroute responses from the mesh. */
-interface TracerouteHandler {
-    /** Starts the traceroute handler with the given coroutine scope. */
+/** Interface for handling Store & Forward (legacy) and SF++ packets. */
+interface StoreForwardPacketHandler {
+    /** Starts the handler with the given coroutine scope. */
     fun start(scope: CoroutineScope)
 
-    /** Records the start time for a traceroute request. */
-    fun recordStartTime(requestId: Int)
-
     /**
-     * Processes a traceroute packet.
+     * Handles a legacy Store & Forward packet.
      *
      * @param packet The received mesh packet.
-     * @param logUuid Optional UUID for the associated log entry.
-     * @param logInsertJob Optional job for the log entry insertion, to ensure ordering.
+     * @param dataPacket The decoded data packet.
+     * @param myNodeNum The local node number.
      */
-    fun handleTraceroute(packet: MeshPacket, logUuid: String?, logInsertJob: Job?)
+    fun handleStoreAndForward(packet: MeshPacket, dataPacket: DataPacket, myNodeNum: Int)
+
+    /**
+     * Handles a Store Forward++ packet.
+     *
+     * @param packet The received mesh packet.
+     */
+    fun handleStoreForwardPlusPlus(packet: MeshPacket)
 }
