@@ -57,6 +57,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
@@ -566,7 +567,7 @@ private fun LazyListScope.contactListPlaceholdersItems(
     channels: ChannelSet?,
     haptic: HapticFeedback,
 ) {
-    items(count = placeholders.size, key = { index -> placeholders[index].contactKey }) { index ->
+    items(count = placeholders.size, key = { index -> "${placeholders[index].contactKey}_placeholder" }) { index ->
         val contact = placeholders[index]
         ContactItem(
             contact = contact,
@@ -593,7 +594,7 @@ private fun LazyListScope.contactListPagedItems(
     channels: ChannelSet?,
     haptic: HapticFeedback,
 ) {
-    items(count = contacts.itemCount, key = { index -> contacts[index]?.contactKey ?: index }) { index ->
+    items(count = contacts.itemCount, key = contacts.itemKey { it.contactKey }) { index ->
         contacts[index]?.let { contact ->
             ContactItem(
                 contact = contact,
