@@ -17,10 +17,10 @@
 package org.meshtastic.core.model.util
 
 import org.meshtastic.core.common.util.nowInstant
-import kotlin.time.Duration.Companion.hours
 import org.meshtastic.core.common.util.toDate
 import org.meshtastic.core.common.util.toInstant
 import java.text.DateFormat
+import kotlin.time.Duration.Companion.hours
 
 private val DAY_DURATION = 24.hours
 

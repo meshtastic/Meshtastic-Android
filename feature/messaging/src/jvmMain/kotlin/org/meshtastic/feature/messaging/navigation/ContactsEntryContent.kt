@@ -24,8 +24,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.meshtastic.core.ui.component.ScrollToTopEvent
 import org.meshtastic.feature.messaging.MessageScreen
 import org.meshtastic.feature.messaging.MessageViewModel
-import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 import org.meshtastic.feature.messaging.ui.contact.AdaptiveContactsScreen
+import org.meshtastic.feature.messaging.ui.contact.ContactsViewModel
 
 @Composable
 actual fun ContactsEntryContent(

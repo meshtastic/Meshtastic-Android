@@ -16,11 +16,9 @@
  */
 package org.meshtastic.core.model.util
 
-import kotlin.time.Duration.Companion.seconds
-
-import kotlin.time.Duration.Companion.milliseconds
-
 import org.meshtastic.core.model.util.TimeConstants.HOURS_PER_DAY
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Returns a short string representing the time if it's within the last 24 hours, otherwise returns a combined short

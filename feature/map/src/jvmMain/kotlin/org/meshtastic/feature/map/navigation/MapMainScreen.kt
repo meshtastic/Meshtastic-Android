@@ -16,8 +16,8 @@
  */
 package org.meshtastic.feature.map.navigation
 
-import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
 
 @Composable
 actual fun MapMainScreen(onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit, waypointId: Int?) {
